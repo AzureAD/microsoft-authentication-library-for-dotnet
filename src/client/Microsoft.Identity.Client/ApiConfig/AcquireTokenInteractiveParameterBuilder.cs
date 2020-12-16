@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
-#if NET_CORE || NETSTANDARD || NET5_WIN
+#if NET_CORE || NETSTANDARD 
             if (useEmbeddedWebView)
             {
                 throw new MsalClientException(MsalError.WebviewUnavailable, "An embedded webview is not available on this platform. " +

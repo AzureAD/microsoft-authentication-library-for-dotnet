@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Threading;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
@@ -20,9 +21,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         public IServiceBundle ServiceBundle { get; }
 
-        protected RequestContext CreateRequestContextAndLogVersionInfo(Guid correlationId)
+        protected RequestContext CreateRequestContextAndLogVersionInfo(Guid correlationId, CancellationToken userCancellationToken = default)
         {
-            var requestContext = new RequestContext(ServiceBundle, correlationId);
+            var requestContext = new RequestContext(ServiceBundle, correlationId, userCancellationToken);
 
             requestContext.Logger.Info(
                 string.Format(

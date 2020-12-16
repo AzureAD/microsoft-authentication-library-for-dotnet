@@ -58,8 +58,7 @@ namespace Microsoft.Identity.Test.Unit
 
         private void SetupMocks(MockHttpManager httpManager)
         {
-            httpManager.AddRegionDiscoveryMockHandler(File.ReadAllText(
-                        ResourceHelper.GetTestResourceRelativePath("local-imds-response.json")));
+            httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
         }
 
         [TestMethod]

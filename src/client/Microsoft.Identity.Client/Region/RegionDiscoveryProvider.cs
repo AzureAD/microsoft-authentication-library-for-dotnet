@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -19,16 +20,21 @@ namespace Microsoft.Identity.Client.Region
         private const string RegionName = "REGION_NAME";
 
         // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
-        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute";
+        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute/location";
         private const string DefaultApiVersion = "2020-06-01";
 
         private readonly IHttpManager _httpManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
+        private readonly int _imdsCallTimeoutMs;
 
-        public RegionDiscoveryProvider(IHttpManager httpManager, INetworkCacheMetadataProvider networkCacheMetadataProvider = null)
+        public RegionDiscoveryProvider(
+            IHttpManager httpManager, 
+            INetworkCacheMetadataProvider networkCacheMetadataProvider = null, 
+            int imdsCallTimeout = 2000)
         {
             _httpManager = httpManager;
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
+            _imdsCallTimeoutMs = imdsCallTimeout;
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
@@ -75,45 +81,50 @@ namespace Microsoft.Identity.Client.Region
                 {
                     { "Metadata", "true" }
                 };
-                
-                HttpResponse response = await _httpManager.SendGetAsync(BuildImdsUri(DefaultApiVersion), headers, logger).ConfigureAwait(false);
+
+                HttpResponse response = await _httpManager.SendGetAsync(BuildImdsUri(DefaultApiVersion), headers, logger, retry: false, GetCancellationToken(requestContext.UserCancellationToken)).ConfigureAwait(false);
 
                 // A bad request occurs when the version in the IMDS call is no longer supported.
                 if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
-                    string apiVersion = await GetImdsUriApiVersionAsync(logger, headers).ConfigureAwait(false); // Get the latest version
-                    response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger).ConfigureAwait(false); // Call again with updated version
+                    string apiVersion = await GetImdsUriApiVersionAsync(logger, headers, requestContext.UserCancellationToken).ConfigureAwait(false); // Get the latest version
+                    response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger, retry: false, GetCancellationToken(requestContext.UserCancellationToken)).ConfigureAwait(false); // Call again with updated version
                 }
 
                 if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                 {
-                    LocalImdsResponse localImdsResponse = JsonHelper.DeserializeFromJson<LocalImdsResponse>(response.Body);
-
-                    if (localImdsResponse != null && !localImdsResponse.location.IsNullOrEmpty())
-                    {
-                        logger.Info($"[Region discovery] Call to local IMDS returned region: {localImdsResponse.location}");
-                        LogTelemetryData(localImdsResponse.location, RegionSource.Imds, requestContext);
-
-                        return localImdsResponse.location;
-                    }
+                    return response.Body;
                 }
                     
                 logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
 
                 throw MsalServiceExceptionFactory.FromImdsResponse(
-                MsalError.RegionDiscoveryFailed,
-                MsalErrorMessage.RegionDiscoveryFailed,
-                response);
-            }
-            catch (MsalServiceException)
+                    MsalError.RegionDiscoveryFailed,
+                    MsalErrorMessage.RegionDiscoveryFailed,
+                    response);
+            }  
+            catch (MsalServiceException e)
             {
-                throw;
+                if (MsalError.RequestTimeout.Equals(e.ErrorCode))
+                {
+                    throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailedWithTimeout, e);
+                }
+
+                throw e;
             }
             catch (Exception e)
             {
-                logger.Info("[Region discovery] Call to local imds failed." + e.Message);
-                throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed);
+                logger.Info("[Region discovery] Call to local imds failed. " + e);
+                throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed, e);
             }
+        }
+
+        private CancellationToken GetCancellationToken(CancellationToken userCancellationToken)
+        {
+            CancellationTokenSource tokenSource = new CancellationTokenSource(_imdsCallTimeoutMs);
+            CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(userCancellationToken, tokenSource.Token);
+
+            return linkedTokenSource.Token;
         }
 
         private void LogTelemetryData(string region, RegionSource regionSource, RequestContext requestContext)
@@ -126,11 +137,11 @@ namespace Microsoft.Identity.Client.Region
             }
         }
 
-        private async Task<string> GetImdsUriApiVersionAsync(ICoreLogger logger, Dictionary<string, string> headers)
+        private async Task<string> GetImdsUriApiVersionAsync(ICoreLogger logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
         {
             Uri imdsErrorUri = new Uri(ImdsEndpoint);
 
-            HttpResponse response = await _httpManager.SendGetAsync(imdsErrorUri, headers, logger).ConfigureAwait(false);
+            HttpResponse response = await _httpManager.SendGetAsync(imdsErrorUri, headers, logger, retry: false, GetCancellationToken(userCancellationToken)).ConfigureAwait(false);
 
             // When IMDS endpoint is called without the api version query param, bad request response comes back with latest version.
             if (response.StatusCode == HttpStatusCode.BadRequest)
@@ -158,6 +169,7 @@ namespace Microsoft.Identity.Client.Region
         {
             UriBuilder uriBuilder = new UriBuilder(ImdsEndpoint);
             uriBuilder.AppendQueryParameters($"api-version={apiVersion}");
+            uriBuilder.AppendQueryParameters("format=text");
             return uriBuilder.Uri;
         }
 

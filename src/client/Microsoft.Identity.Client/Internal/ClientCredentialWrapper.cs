@@ -29,19 +29,22 @@ namespace Microsoft.Identity.Client.Internal
 
             switch (AuthenticationType)
             {
-            case ConfidentialClientAuthenticationType.ClientCertificate:
-                Certificate = config.ClientCredentialCertificate;
-                break;
-            case ConfidentialClientAuthenticationType.ClientCertificateWithClaims:
-                Certificate = config.ClientCredentialCertificate;
-                ClaimsToSign = config.ClaimsToSign;
-                break;
-            case ConfidentialClientAuthenticationType.ClientSecret:
-                Secret = config.ClientSecret;
-                break;
-            case ConfidentialClientAuthenticationType.SignedClientAssertion:
-                SignedAssertion = config.SignedClientAssertion;
-                break;
+                case ConfidentialClientAuthenticationType.ClientCertificate:
+                    Certificate = config.ClientCredentialCertificate;
+                    break;
+                case ConfidentialClientAuthenticationType.ClientCertificateWithClaims:
+                    Certificate = config.ClientCredentialCertificate;
+                    ClaimsToSign = config.ClaimsToSign;
+                    break;
+                case ConfidentialClientAuthenticationType.ClientSecret:
+                    Secret = config.ClientSecret;
+                    break;
+                case ConfidentialClientAuthenticationType.SignedClientAssertion:
+                    SignedAssertion = config.SignedClientAssertion;
+                    break;
+                case ConfidentialClientAuthenticationType.SignedClientAssertionDelegate:
+                    SignedAssertionDelegate = config.SignedClientAssertionDelegate;
+                    break;
             }
         }
 
@@ -142,6 +145,11 @@ namespace Microsoft.Identity.Client.Internal
                 AuthenticationType = ConfidentialClientAuthenticationType.SignedClientAssertion;
             }
 
+            if (config.SignedClientAssertionDelegate != null)
+            {
+                AuthenticationType = ConfidentialClientAuthenticationType.SignedClientAssertionDelegate;
+            }
+
             if (AuthenticationType == ConfidentialClientAuthenticationType.None)
             {
                 throw new MsalClientException(
@@ -166,6 +174,7 @@ namespace Microsoft.Identity.Client.Internal
         internal string Secret { get; private set; }
         // The signed assertion passed in by the user
         internal string SignedAssertion { get; private set; }
+        internal Func<string> SignedAssertionDelegate { get; private set; }
         internal bool AppendDefaultClaims { get; private set; }
         internal ConfidentialClientAuthenticationType AuthenticationType { get; private set; }
         internal IDictionary<string, string> ClaimsToSign { get; private set; }
@@ -177,6 +186,7 @@ namespace Microsoft.Identity.Client.Internal
         ClientCertificate,
         ClientCertificateWithClaims,
         ClientSecret,
-        SignedClientAssertion
+        SignedClientAssertion,
+        SignedClientAssertionDelegate
     }
 }

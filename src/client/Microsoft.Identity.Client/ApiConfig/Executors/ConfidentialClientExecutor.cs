@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             var requestParams = _confidentialClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             var requestParams = _confidentialClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenOnBehalfOfParameters onBehalfOfParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             var requestParams = _confidentialClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -103,9 +103,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         public async Task<Uri> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
             GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
-            CancellationToken cancellationToken) // TODO: propagate cancellation token
+            CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             var requestParameters = _confidentialClientApplication.CreateRequestParameters(
                 commonParameters,

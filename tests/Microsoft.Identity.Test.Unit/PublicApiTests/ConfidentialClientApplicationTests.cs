@@ -340,7 +340,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             Certificate,
             CertificateAndClaims,
-            SignedAssertion
+            SignedAssertion,
+            SignedAssertionDelegate
         }
 
         private ConfidentialClientApplication CreateConfidentialClient(
@@ -367,6 +368,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     break;
                 case CredentialType.SignedAssertion:
                     builder = builder.WithClientAssertion(TestConstants.DefaultClientAssertion);
+                    app = builder.BuildConcrete();
+                    Assert.IsNull(app.Certificate);
+                    break;
+                case CredentialType.SignedAssertionDelegate:
+                    builder = builder.WithClientAssertion(() => { return TestConstants.DefaultClientAssertion; });
                     app = builder.BuildConcrete();
                     Assert.IsNull(app.Certificate);
                     break;
@@ -548,7 +554,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // assert client credential
 
                 Assert.IsNotNull(app.ClientCredential.SignedAssertion);
+            }
+        }
 
+        [TestMethod]
+        public async Task ConfidentialClientUsingSignedClientAssertionDelegateTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
+                var app = CreateConfidentialClient(httpManager, null, 1, CredentialType.SignedAssertionDelegate);
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no RTs are returned
+
+                // assert client credential
+                Assert.IsNotNull(app.ClientCredential.SignedAssertionDelegate);
+                Assert.AreEqual(TestConstants.DefaultClientAssertion, app.ClientCredential.SignedAssertionDelegate());
             }
         }
 

@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
@@ -235,7 +236,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     /// </summary>
     internal class ParallelRequestMockHanler : IHttpManager
     {
-        public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ICoreLogger logger)
+        public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ICoreLogger logger, bool retry = true, CancellationToken cancellationToken = default)
         {
             // simulate delay and also add complexity due to thread context switch
             await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
@@ -253,7 +254,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             return null;
         }
 
-        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ICoreLogger logger)
+        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ICoreLogger logger, CancellationToken cancellationToken = default)
         {
             await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
 
@@ -286,12 +287,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             return null;
         }
 
-        public Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ICoreLogger logger)
+        public Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ICoreLogger logger, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, Dictionary<string, string> headers, StringContent body, ICoreLogger logger)
+        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, Dictionary<string, string> headers, StringContent body, ICoreLogger logger, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

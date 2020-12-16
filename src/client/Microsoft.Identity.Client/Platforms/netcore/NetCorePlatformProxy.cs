@@ -217,12 +217,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         }
 
-        public override bool BrokerSupportsWamAccounts => true;
-
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
             return PoPProviderFactory.GetOrCreateProvider();
         }
+        public override bool UseEmbeddedWebViewDefault => false;
+
 
         /// <summary>
         ///  Is this a windows platform

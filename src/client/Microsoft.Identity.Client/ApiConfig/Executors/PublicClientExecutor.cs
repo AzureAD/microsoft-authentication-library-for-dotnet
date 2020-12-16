@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             AuthenticationRequestParameters requestParams = _publicClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenWithDeviceCodeParameters deviceCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             var requestParams = _publicClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             var requestParams = _publicClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             var requestParams = _publicClientApplication.CreateRequestParameters(
                 commonParameters,
