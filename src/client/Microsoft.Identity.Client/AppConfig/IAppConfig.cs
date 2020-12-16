@@ -103,6 +103,10 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         IEnumerable<string> ClientCapabilities { get; }
 
+        /// <summary>
+        /// Indicates whether the ADAL cache operations will be invoked.
+        /// </summary>
+        bool IsAdalCacheEnabled { get; }
 
         /// <summary>
         /// </summary>

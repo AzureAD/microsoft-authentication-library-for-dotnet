@@ -191,6 +191,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Enables or disables ADAL cache.
+        /// </summary>
+        /// <param name="disableAdalCache">Flag that indicates whether the ADAL cache operations will be invoked.</param>
+        /// <returns></returns>
+        public T WithDisabledAdalCache(bool disableAdalCache = true)
+        {
+            Config.IsAdalCacheEnabled = disableAdalCache;
+            return (T)this;
+        }
+
+        /// <summary>
         /// Sets the logging callback. For details see https://aka.ms/msal-net-logging
         /// </summary>
         /// <param name="loggingCallback"></param>
