@@ -7,9 +7,11 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Win32;
 
 namespace Microsoft.Identity.Client.PlatformsCommon
 {
@@ -76,8 +78,20 @@ namespace Microsoft.Identity.Client.PlatformsCommon
         {
             //PKeyAuth can only be performed on operating systems with a major OS version of 6. 
             //This corresponds to windows 7, 8, 8.1 and their server equivilents.
-#if DESKTOP
-            if (Environment.OSVersion.Version.Major == 6)
+            //Environment.OSVersion as it will return incorrect information on some operating systems
+#if NET_CORE
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && !RuntimeInformation.OSDescription.Contains("Windows 10"))
+            {
+                return true;
+            }
+
+#elif DESKTOP
+            var reg = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+
+            string OSInfo = (string)reg.GetValue("ProductName");
+            
+            if (OSInfo.Contains("Windows") && !OSInfo.Contains("Windows 10"))
             {
                 return true;
             }

@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override IDeviceAuthManager CreateDeviceAuthManager()
         {
-            return new UapDeviceAuthManager();
+            return new NullDeviceAuthManager();
         }
     }
 }

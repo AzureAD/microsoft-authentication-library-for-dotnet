@@ -14,6 +14,7 @@ using System.Net;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -157,8 +158,11 @@ namespace Microsoft.Identity.Client.OAuth2
                     _serviceBundle.HttpTelemetryManager.GetLastRequestHeader());
             }
 
-            //Signaling that the client can perform PKey Auth
-            _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
+            //Signaling that the client can perform PKey Auth on supported platforms
+            if (DeviceAuthHelper.CanOSPerformPKeyAuth())
+            {
+                _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
+            }
         }
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
