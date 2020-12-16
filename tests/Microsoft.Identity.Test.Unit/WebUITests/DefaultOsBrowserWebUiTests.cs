@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             Assert.IsFalse(string.IsNullOrEmpty(authorizationResult.Code));
 
             await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
-                TestPort, String.Empty, Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
+                TestPort, "/", Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             CancellationTokenSource cts = new CancellationTokenSource();
             _tcpInterceptor.When(x => x.ListenToSingleRequestAndRespondAsync(
                 TestPort,
-                String.Empty,
+                "/",
                 Arg.Any<Func<Uri, MessageAndHttpCode>>(),
                 cts.Token))
                .Do(x =>
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 TestPort,
-                String.Empty,
+                "/",
                 Arg.Any<Func<Uri, MessageAndHttpCode>>(),
                 CancellationToken.None)
                .Returns(Task.FromResult(responseUri));
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 .ConfigureAwait(false);
 
             await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
-                TestPort, String.Empty, Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
+                TestPort, "/", Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
 
             Assert.IsTrue(customOpenBrowserCalled);
         }
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 TestPort,
-                String.Empty,
+                "/",
                 Arg.Any<Func<Uri, MessageAndHttpCode>>(),
                 CancellationToken.None)
                .Returns(Task.FromResult(responseUri));

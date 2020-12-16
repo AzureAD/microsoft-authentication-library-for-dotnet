@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
                 Task<Uri> listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
                     redirectUri.Port,
-                    string.Empty,
+                    redirectUri.AbsolutePath,
                     (uri) =>
                     {
                         authCodeUri = uri;

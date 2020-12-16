@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             CancellationTokenSource cts = new CancellationTokenSource();
             int port = FindFreeLocalhostPort();
 
-            listenerInterceptor.TestBeforeStart = () => cts.Cancel();
+            listenerInterceptor.TestBeforeStart = (obj) => cts.Cancel();
 
             // Start the listener in the background
             await AssertException.TaskThrowsAsync<OperationCanceledException>(
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             int port = FindFreeLocalhostPort();
 
-            listenerInterceptor.TestListeningUriBeforeStart = (url) => Assert.AreEqual(@"http://localhost:" + port + @"/TestPath/", url);
+            listenerInterceptor.TestBeforeStart = (url) => Assert.AreEqual(@"http://localhost:" + port + @"/TestPath/", url);
 
             // Start the listener in the background
             Task<Uri> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
@@ -152,6 +152,11 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
         private static string GetLocalhostUriWithParams(int port, string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                return "http://localhost:" + port + "/?param1=val1";
+            }
+
             return "http://localhost:" + port + "/" + path + "/?param1=val1";
         }
 

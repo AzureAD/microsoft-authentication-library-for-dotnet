@@ -16,9 +16,8 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 
         #region Test Hooks 
         public Action TestBeforeTopLevelCall { get; set; }
-        public Action TestBeforeStart { get; set; }
+        public Action<string> TestBeforeStart { get; set; }
         public Action TestBeforeGetContext { get; set; }
-        public Action<string> TestListeningUriBeforeStart { get; set; }
         #endregion
 
         public HttpListenerInterceptor(ICoreLogger logger)
@@ -38,7 +37,16 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             HttpListener httpListener = null;
             try
             {
-                string urlToListenTo = "http://localhost:" + port + (path.StartsWith("/")? path : "/" + path);
+                if(string.IsNullOrEmpty(path))
+                {
+                    path = "/";
+                }
+                else
+                {
+                    path = (path.StartsWith("/") ? path : "/" + path);
+                }
+
+                string urlToListenTo = "http://localhost:" + port + path;
 
                 if (!urlToListenTo.EndsWith("/"))
                 {
@@ -48,8 +56,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                 httpListener = new HttpListener();
                 httpListener.Prefixes.Add(urlToListenTo);
 
-                TestBeforeStart?.Invoke();
-                TestListeningUriBeforeStart?.Invoke(urlToListenTo);
+                TestBeforeStart?.Invoke(urlToListenTo);
 
                 httpListener.Start();
                 _logger.Info("Listening for authorization code on " + urlToListenTo);
