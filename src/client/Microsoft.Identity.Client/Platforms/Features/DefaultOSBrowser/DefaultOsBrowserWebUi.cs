@@ -146,6 +146,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             cancellationToken.ThrowIfCancellationRequested();
             return await _uriInterceptor.ListenToSingleRequestAndRespondAsync(
                 redirectUri.Port,
+                redirectUri.AbsolutePath,
                 GetResponseMessage,
                 cancellationToken)
             .ConfigureAwait(false);
