@@ -15,6 +15,6 @@ namespace Microsoft.Identity.Client.Region
     {
         Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext);
 
-        void clearStaticCache();
+        void Clear();
     }
 }

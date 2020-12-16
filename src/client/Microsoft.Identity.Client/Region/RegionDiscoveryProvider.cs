@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Region
         /*
          * To be used only for tests
          */
-        public void clearStaticCache()
+        public void Clear()
         {
             s_region = null;
         }

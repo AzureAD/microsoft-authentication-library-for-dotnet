@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public override void TestCleanup()
         {
             _harness?.Dispose();
-            _regionDiscoveryProvider.clearStaticCache();
+            _regionDiscoveryProvider.Clear();
             base.TestCleanup();
         }
 
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.RegionDiscoveryFailed, ex.ErrorCode);
-            regionDiscoveryProvider.clearStaticCache();
+            regionDiscoveryProvider.Clear();
         }
 
         [TestMethod]
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.RegionDiscoveryFailed, ex.ErrorCode);
-            regionDiscoveryProvider.clearStaticCache();
+            regionDiscoveryProvider.Clear();
         }      
 
         [TestMethod]

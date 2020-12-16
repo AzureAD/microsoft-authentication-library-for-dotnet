@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -52,21 +53,44 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             try
             {
-                var cca = CreateApp();
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-
-                var result = await cca.AcquireTokenForClient(s_keyvaultScope)
-                    .WithAzureRegion(true)
-                    .WithExtraQueryParameters(_dict)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
+                await AcquireTokenForClientAndValidateResponseAsync("centralus.login.microsoft.com", true).ConfigureAwait(false);
             }
             finally
             {
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             }
+        }
+
+        [TestMethod]
+        public async Task VerifyGlobalTokenEndpointIsUsedWhenWithAzureRegionIsFalseAsync()
+        {
+            try
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+                await AcquireTokenForClientAndValidateResponseAsync("centralus.login.microsoft.com", true).ConfigureAwait(false);
+                await AcquireTokenForClientAndValidateResponseAsync("login.microsoftonline.com", false).ConfigureAwait(false);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            }
+        }
+
+        private async Task AcquireTokenForClientAndValidateResponseAsync(string expectedHost, bool autoDetectRegion = true)
+        {
+            var factory = new HttpSnifferClientFactory();
+            var cca = CreateApp(factory);
+
+            var result = await cca.AcquireTokenForClient(s_keyvaultScope)
+                .WithAzureRegion(autoDetectRegion)
+                .WithExtraQueryParameters(_dict)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.Host == expectedHost && x.Item2.StatusCode == HttpStatusCode.OK);
+            Assert.AreEqual(expectedHost, req.RequestUri.Host);
         }
 
         [TestMethod]
@@ -101,7 +125,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        private IConfidentialClientApplication CreateApp()
+        private IConfidentialClientApplication CreateApp(IMsalHttpClientFactory factory)
         {
             var claims = GetClaims();
 
@@ -110,6 +134,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(PublicCloudTestAuthority)
                 .WithTestLogging()
                 .WithExperimentalFeatures(true)
+                .WithHttpClientFactory(factory)
                 .Build();
         }
 
