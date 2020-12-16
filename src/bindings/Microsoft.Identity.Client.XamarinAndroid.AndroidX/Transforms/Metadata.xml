@@ -1,0 +1,1042 @@
+﻿<metadata>
+  <!--
+  This sample removes the class: android.support.v4.content.AsyncTaskLoader.LoadTask:
+  <remove-node path="/api/package[@name='android.support.v4.content']/class[@name='AsyncTaskLoader.LoadTask']" />
+  
+  This sample removes the method: android.support.v4.content.CursorLoader.loadInBackground:
+  <remove-node path="/api/package[@name='android.support.v4.content']/class[@name='CursorLoader']/method[@name='loadInBackground']" />
+  
+  -->
+  <!-- inhibit event generation; don't care! -->
+  <attr path="//interface[substring(@name,string-length(@name) - string-length('Listener') +1) = 'Listener']/method"
+    name="eventName"></attr>
+  <remove-node path="//package[contains(@name, '.internal')]" />
+
+  <!--<remove-node path="//class/implements[contains(@name, '.internal')]" />-->
+  
+  <attr path="/api/package[@name='com.microsoft.identity.client']/class[@name='AcquireTokenParameters.Builder']/method[@name='self' and count(parameter)=0]"
+        name="managedReturn"
+  >Java.Lang.Object</attr>
+  <attr path="/api/package[@name='com.microsoft.identity.client']/class[@name='AcquireTokenSilentParameters.Builder']/method[@name='self' and count(parameter)=0]"
+        name="managedReturn"
+  >Java.Lang.Object</attr>
+  <attr path="/api/package[@name='com.microsoft.identity.client']/class[@name='AcquireTokenParameters.Builder']/method[@name='build' and count(parameter)=0]"
+        name="managedReturn"
+  >Com.Microsoft.Identity.Client.TokenParameters</attr>
+  <attr path="/api/package[@name='com.microsoft.identity.client']/class[@name='AcquireTokenSilentParameters.Builder']/method[@name='build' and count(parameter)=0]"
+        name="managedReturn"
+  >Com.Microsoft.Identity.Client.TokenParameters</attr>
+
+
+  
+  <!--<add-node path="//package[@name='com.microsoft.identity.client']">
+    <class
+      abstract="false"
+      deprecated="not deprecated"
+      jni-extends="Ljava/lang/Object;"
+      extends="java.lang.Object"
+      extends-generic-aware="java.lang.Object"
+      final="false"
+      name="PublicClientApplication"
+      jni-signature="Lcom/microsoft/identity/client/PublicClientApplication;"
+      source-file-name="PublicClientApplication.java"
+      static="false"
+      visibility="public">
+      <implements
+        name="com.microsoft.identity.client.IPublicClientApplication"
+        name-generic-aware="com.microsoft.identity.client.IPublicClientApplication"
+        jni-type="Lcom/microsoft/identity/client/IPublicClientApplication;" />
+      <implements
+        name="com.microsoft.identity.client.ITokenShare"
+        name-generic-aware="com.microsoft.identity.client.ITokenShare"
+        jni-type="Lcom/microsoft/identity/client/ITokenShare;" />
+      <constructor
+        deprecated="not deprecated"
+        final="false"
+        name="PublicClientApplication"
+        static="false"
+        visibility="protected"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Lcom/microsoft/identity/client/PublicClientApplicationConfiguration;)V">
+        <parameter
+          name="configFile"
+          type="com.microsoft.identity.client.PublicClientApplicationConfiguration"
+          jni-type="Lcom/microsoft/identity/client/PublicClientApplicationConfiguration;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalClientException"
+          type="com.microsoft.identity.client.exception.MsalClientException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
+      </constructor>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="acquireToken"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/app/Activity;[Ljava/lang/String;Lcom/microsoft/identity/client/AuthenticationCallback;)V">
+        <parameter
+          name="activity"
+          type="android.app.Activity"
+          jni-type="Landroid/app/Activity;" />
+        <parameter
+          name="scopes"
+          type="java.lang.String[]"
+          jni-type="[Ljava/lang/String;" />
+        <parameter
+          name="callback"
+          type="com.microsoft.identity.client.AuthenticationCallback"
+          jni-type="Lcom/microsoft/identity/client/AuthenticationCallback;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="acquireToken"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Lcom/microsoft/identity/client/AcquireTokenParameters;)V">
+        <parameter
+          name="acquireTokenParameters"
+          type="com.microsoft.identity.client.AcquireTokenParameters"
+          jni-type="Lcom/microsoft/identity/client/AcquireTokenParameters;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="acquireTokenSilent"
+        native="false"
+        return="com.microsoft.identity.client.IAuthenticationResult"
+        jni-return="Lcom/microsoft/identity/client/IAuthenticationResult;"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Lcom/microsoft/identity/client/AcquireTokenSilentParameters;)Lcom/microsoft/identity/client/IAuthenticationResult;">
+        <parameter
+          name="acquireTokenSilentParameters"
+          type="com.microsoft.identity.client.AcquireTokenSilentParameters"
+          jni-type="Lcom/microsoft/identity/client/AcquireTokenSilentParameters;" />
+        <exception
+          name="java/lang/InterruptedException"
+          type="java.lang.InterruptedException"
+          type-generic-aware="java.lang.InterruptedException" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalException"
+          type="com.microsoft.identity.client.exception.MsalException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="acquireTokenSilentAsync"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Lcom/microsoft/identity/client/AcquireTokenSilentParameters;)V">
+        <parameter
+          name="acquireTokenSilentParameters"
+          type="com.microsoft.identity.client.AcquireTokenSilentParameters"
+          jni-type="Lcom/microsoft/identity/client/AcquireTokenSilentParameters;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="acquireTokenWithDeviceCode"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="([Ljava/lang/String;Lcom/microsoft/identity/client/IPublicClientApplication$DeviceCodeFlowCallback;)V">
+        <parameter
+          name="scopes"
+          type="java.lang.String[]"
+          jni-type="[Ljava/lang/String;" />
+        <parameter
+          name="callback"
+          type="com.microsoft.identity.client.IPublicClientApplication.DeviceCodeFlowCallback"
+          jni-type="Lcom/microsoft/identity/client/IPublicClientApplication$DeviceCodeFlowCallback;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="buildAcquireTokenSilentParameters"
+        native="false"
+        return="com.microsoft.identity.client.AcquireTokenSilentParameters"
+        jni-return="Lcom/microsoft/identity/client/AcquireTokenSilentParameters;"
+        static="false"
+        synchronized="false"
+        visibility="protected"
+        bridge="false"
+        synthetic="false"
+        jni-signature="([Ljava/lang/String;Lcom/microsoft/identity/client/IAccount;Ljava/lang/String;ZLcom/microsoft/identity/client/claims/ClaimsRequest;Lcom/microsoft/identity/client/SilentAuthenticationCallback;)Lcom/microsoft/identity/client/AcquireTokenSilentParameters;">
+        <parameter
+          name="scopes"
+          type="java.lang.String[]"
+          jni-type="[Ljava/lang/String;" />
+        <parameter
+          name="account"
+          type="com.microsoft.identity.client.IAccount"
+          jni-type="Lcom/microsoft/identity/client/IAccount;" />
+        <parameter
+          name="authority"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <parameter
+          name="forceRefresh"
+          type="boolean"
+          jni-type="Z" />
+        <parameter
+          name="claimsRequest"
+          type="com.microsoft.identity.client.claims.ClaimsRequest"
+          jni-type="Lcom/microsoft/identity/client/claims/ClaimsRequest;" />
+        <parameter
+          name="callback"
+          type="com.microsoft.identity.client.SilentAuthenticationCallback"
+          jni-type="Lcom/microsoft/identity/client/SilentAuthenticationCallback;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="create"
+        native="false"
+        return="com.microsoft.identity.client.IPublicClientApplication"
+        jni-return="Lcom/microsoft/identity/client/IPublicClientApplication;"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;I)Lcom/microsoft/identity/client/IPublicClientApplication;">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFileResourceId"
+          type="int"
+          jni-type="I" />
+        <exception
+          name="java/lang/InterruptedException"
+          type="java.lang.InterruptedException"
+          type-generic-aware="java.lang.InterruptedException" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalException"
+          type="com.microsoft.identity.client.exception.MsalException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="create"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;ILcom/microsoft/identity/client/IPublicClientApplication$ApplicationCreatedListener;)V">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFileResourceId"
+          type="int"
+          jni-type="I" />
+        <parameter
+          name="listener"
+          type="com.microsoft.identity.client.IPublicClientApplication.ApplicationCreatedListener"
+          jni-type="Lcom/microsoft/identity/client/IPublicClientApplication$ApplicationCreatedListener;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="create"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;Ljava/io/File;Lcom/microsoft/identity/client/IPublicClientApplication$ApplicationCreatedListener;)V">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFile"
+          type="java.io.File"
+          jni-type="Ljava/io/File;" />
+        <parameter
+          name="listener"
+          type="com.microsoft.identity.client.IPublicClientApplication.ApplicationCreatedListener"
+          jni-type="Lcom/microsoft/identity/client/IPublicClientApplication$ApplicationCreatedListener;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="create"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/microsoft/identity/client/IPublicClientApplication$ApplicationCreatedListener;)V">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="clientId"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <parameter
+          name="authority"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <parameter
+          name="redirectUri"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <parameter
+          name="listener"
+          type="com.microsoft.identity.client.IPublicClientApplication.ApplicationCreatedListener"
+          jni-type="Lcom/microsoft/identity/client/IPublicClientApplication$ApplicationCreatedListener;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="createMultipleAccountPublicClientApplication"
+        native="false"
+        return="com.microsoft.identity.client.IMultipleAccountPublicClientApplication"
+        jni-return="Lcom/microsoft/identity/client/IMultipleAccountPublicClientApplication;"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;I)Lcom/microsoft/identity/client/IMultipleAccountPublicClientApplication;">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFileResourceId"
+          type="int"
+          jni-type="I" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalException"
+          type="com.microsoft.identity.client.exception.MsalException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalException" />
+        <exception
+          name="java/lang/InterruptedException"
+          type="java.lang.InterruptedException"
+          type-generic-aware="java.lang.InterruptedException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="createMultipleAccountPublicClientApplication"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;ILcom/microsoft/identity/client/IPublicClientApplication$IMultipleAccountApplicationCreatedListener;)V">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFileResourceId"
+          type="int"
+          jni-type="I" />
+        <parameter
+          name="listener"
+          type="com.microsoft.identity.client.IPublicClientApplication.IMultipleAccountApplicationCreatedListener"
+          jni-type="Lcom/microsoft/identity/client/IPublicClientApplication$IMultipleAccountApplicationCreatedListener;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="createMultipleAccountPublicClientApplication"
+        native="false"
+        return="com.microsoft.identity.client.IMultipleAccountPublicClientApplication"
+        jni-return="Lcom/microsoft/identity/client/IMultipleAccountPublicClientApplication;"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;Ljava/io/File;)Lcom/microsoft/identity/client/IMultipleAccountPublicClientApplication;">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFile"
+          type="java.io.File"
+          jni-type="Ljava/io/File;" />
+        <exception
+          name="java/lang/InterruptedException"
+          type="java.lang.InterruptedException"
+          type-generic-aware="java.lang.InterruptedException" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalException"
+          type="com.microsoft.identity.client.exception.MsalException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="createMultipleAccountPublicClientApplication"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;Ljava/io/File;Lcom/microsoft/identity/client/IPublicClientApplication$IMultipleAccountApplicationCreatedListener;)V">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFile"
+          type="java.io.File"
+          jni-type="Ljava/io/File;" />
+        <parameter
+          name="listener"
+          type="com.microsoft.identity.client.IPublicClientApplication.IMultipleAccountApplicationCreatedListener"
+          jni-type="Lcom/microsoft/identity/client/IPublicClientApplication$IMultipleAccountApplicationCreatedListener;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="createSingleAccountPublicClientApplication"
+        native="false"
+        return="com.microsoft.identity.client.ISingleAccountPublicClientApplication"
+        jni-return="Lcom/microsoft/identity/client/ISingleAccountPublicClientApplication;"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;I)Lcom/microsoft/identity/client/ISingleAccountPublicClientApplication;">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFileResourceId"
+          type="int"
+          jni-type="I" />
+        <exception
+          name="java/lang/InterruptedException"
+          type="java.lang.InterruptedException"
+          type-generic-aware="java.lang.InterruptedException" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalException"
+          type="com.microsoft.identity.client.exception.MsalException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="createSingleAccountPublicClientApplication"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;ILcom/microsoft/identity/client/IPublicClientApplication$ISingleAccountApplicationCreatedListener;)V">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFileResourceId"
+          type="int"
+          jni-type="I" />
+        <parameter
+          name="listener"
+          type="com.microsoft.identity.client.IPublicClientApplication.ISingleAccountApplicationCreatedListener"
+          jni-type="Lcom/microsoft/identity/client/IPublicClientApplication$ISingleAccountApplicationCreatedListener;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="createSingleAccountPublicClientApplication"
+        native="false"
+        return="com.microsoft.identity.client.ISingleAccountPublicClientApplication"
+        jni-return="Lcom/microsoft/identity/client/ISingleAccountPublicClientApplication;"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;Ljava/io/File;)Lcom/microsoft/identity/client/ISingleAccountPublicClientApplication;">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFile"
+          type="java.io.File"
+          jni-type="Ljava/io/File;" />
+        <exception
+          name="java/lang/InterruptedException"
+          type="java.lang.InterruptedException"
+          type-generic-aware="java.lang.InterruptedException" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalException"
+          type="com.microsoft.identity.client.exception.MsalException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="createSingleAccountPublicClientApplication"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/content/Context;Ljava/io/File;Lcom/microsoft/identity/client/IPublicClientApplication$ISingleAccountApplicationCreatedListener;)V">
+        <parameter
+          name="context"
+          type="android.content.Context"
+          jni-type="Landroid/content/Context;" />
+        <parameter
+          name="configFile"
+          type="java.io.File"
+          jni-type="Ljava/io/File;" />
+        <parameter
+          name="listener"
+          type="com.microsoft.identity.client.IPublicClientApplication.ISingleAccountApplicationCreatedListener"
+          jni-type="Lcom/microsoft/identity/client/IPublicClientApplication$ISingleAccountApplicationCreatedListener;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="getCommandCallback"
+        native="false"
+        return="com.microsoft.identity.common.internal.commands.CommandCallback"
+        jni-return="Lcom/microsoft/identity/common/internal/commands/CommandCallback;"
+        static="false"
+        synchronized="false"
+        visibility="protected"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Lcom/microsoft/identity/client/SilentAuthenticationCallback;Lcom/microsoft/identity/client/TokenParameters;)Lcom/microsoft/identity/common/internal/commands/CommandCallback;">
+        <parameter
+          name="authenticationCallback"
+          type="com.microsoft.identity.client.SilentAuthenticationCallback"
+          jni-type="Lcom/microsoft/identity/client/SilentAuthenticationCallback;" />
+        <parameter
+          name="tokenParameters"
+          type="com.microsoft.identity.client.TokenParameters"
+          jni-type="Lcom/microsoft/identity/client/TokenParameters;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="getConfiguration"
+        native="false"
+        return="com.microsoft.identity.client.PublicClientApplicationConfiguration"
+        jni-return="Lcom/microsoft/identity/client/PublicClientApplicationConfiguration;"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="()Lcom/microsoft/identity/client/PublicClientApplicationConfiguration;" />
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="getMsaFamilyRefreshToken"
+        native="false"
+        return="java.lang.String"
+        jni-return="Ljava/lang/String;"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Ljava/lang/String;)Ljava/lang/String;">
+        <parameter
+          name="identifier"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalClientException"
+          type="com.microsoft.identity.client.exception.MsalClientException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="getOrgIdFamilyRefreshToken"
+        native="false"
+        return="java.lang.String"
+        jni-return="Ljava/lang/String;"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Ljava/lang/String;)Ljava/lang/String;">
+        <parameter
+          name="identifier"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalClientException"
+          type="com.microsoft.identity.client.exception.MsalClientException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="getSdkVersion"
+        native="false"
+        return="java.lang.String"
+        jni-return="Ljava/lang/String;"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="()Ljava/lang/String;" />
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="isSharedDevice"
+        native="false"
+        return="boolean"
+        jni-return="Z"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="()Z" />
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="postAuthResult"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="protected"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Lcom/microsoft/identity/common/internal/result/ILocalAuthenticationResult;Lcom/microsoft/identity/client/TokenParameters;Lcom/microsoft/identity/client/SilentAuthenticationCallback;)V">
+        <parameter
+          name="localAuthenticationResult"
+          type="com.microsoft.identity.common.internal.result.ILocalAuthenticationResult"
+          jni-type="Lcom/microsoft/identity/common/internal/result/ILocalAuthenticationResult;" />
+        <parameter
+          name="requestParameters"
+          type="com.microsoft.identity.client.TokenParameters"
+          jni-type="Lcom/microsoft/identity/client/TokenParameters;" />
+        <parameter
+          name="authenticationCallback"
+          type="com.microsoft.identity.client.SilentAuthenticationCallback"
+          jni-type="Lcom/microsoft/identity/client/SilentAuthenticationCallback;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="saveMsaFamilyRefreshToken"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Ljava/lang/String;)V">
+        <parameter
+          name="refreshToken"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalClientException"
+          type="com.microsoft.identity.client.exception.MsalClientException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="saveOrgIdFamilyRefreshToken"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Ljava/lang/String;)V">
+        <parameter
+          name="ssoStateSerializerBlob"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalClientException"
+          type="com.microsoft.identity.client.exception.MsalClientException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="showExpectedMsalRedirectUriInfo"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="true"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Landroid/app/Activity;)V">
+        <parameter
+          name="activity"
+          type="android.app.Activity"
+          jni-type="Landroid/app/Activity;" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="validateAcquireTokenParameters"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="protected"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Lcom/microsoft/identity/client/AcquireTokenParameters;)V">
+        <parameter
+          name="parameters"
+          type="com.microsoft.identity.client.AcquireTokenParameters"
+          jni-type="Lcom/microsoft/identity/client/AcquireTokenParameters;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalArgumentException"
+          type="com.microsoft.identity.client.exception.MsalArgumentException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalArgumentException" />
+      </method>
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="validateAcquireTokenSilentParameters"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="protected"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Lcom/microsoft/identity/client/AcquireTokenSilentParameters;)V">
+        <parameter
+          name="parameters"
+          type="com.microsoft.identity.client.AcquireTokenSilentParameters"
+          jni-type="Lcom/microsoft/identity/client/AcquireTokenSilentParameters;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalArgumentException"
+          type="com.microsoft.identity.client.exception.MsalArgumentException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalArgumentException" />
+      </method>
+      <field
+        deprecated="not deprecated"
+        final="false"
+        name="homeAccountMatcher"
+        static="false"
+        synthetic="false"
+        transient="false"
+        type="com.microsoft.identity.client.PublicClientApplication.AccountMatcher"
+        type-generic-aware="com.microsoft.identity.client.PublicClientApplication.AccountMatcher"
+        jni-signature="Lcom/microsoft/identity/client/PublicClientApplication$AccountMatcher;"
+        visibility="protected"
+        volatile="false" />
+      <field
+        deprecated="not deprecated"
+        final="false"
+        name="localAccountMatcher"
+        static="false"
+        synthetic="false"
+        transient="false"
+        type="com.microsoft.identity.client.PublicClientApplication.AccountMatcher"
+        type-generic-aware="com.microsoft.identity.client.PublicClientApplication.AccountMatcher"
+        jni-signature="Lcom/microsoft/identity/client/PublicClientApplication$AccountMatcher;"
+        visibility="protected"
+        volatile="false" />
+      <field
+        deprecated="not deprecated"
+        final="false"
+        name="mPublicClientConfiguration"
+        static="false"
+        synthetic="false"
+        transient="false"
+        type="com.microsoft.identity.client.PublicClientApplicationConfiguration"
+        type-generic-aware="com.microsoft.identity.client.PublicClientApplicationConfiguration"
+        jni-signature="Lcom/microsoft/identity/client/PublicClientApplicationConfiguration;"
+        visibility="protected"
+        volatile="false" />
+      <field
+        deprecated="not deprecated"
+        final="false"
+        name="mTokenShareUtility"
+        static="false"
+        synthetic="false"
+        transient="false"
+        type="com.microsoft.identity.common.adal.internal.tokensharing.TokenShareUtility"
+        type-generic-aware="com.microsoft.identity.common.adal.internal.tokensharing.TokenShareUtility"
+        jni-signature="Lcom/microsoft/identity/common/adal/internal/tokensharing/TokenShareUtility;"
+        visibility="protected"
+        volatile="false" />
+      <field
+        deprecated="not deprecated"
+        final="false"
+        name="usernameMatcher"
+        static="false"
+        synthetic="false"
+        transient="false"
+        type="com.microsoft.identity.client.PublicClientApplication.AccountMatcher"
+        type-generic-aware="com.microsoft.identity.client.PublicClientApplication.AccountMatcher"
+        jni-signature="Lcom/microsoft/identity/client/PublicClientApplication$AccountMatcher;"
+        visibility="protected"
+        volatile="false" />
+    </class>
+  </add-node>
+
+  <add-node path="//package[@name='com.microsoft.identity.client']">
+    <class
+    abstract="false"
+    deprecated="not deprecated"
+    jni-extends="Lcom/microsoft/identity/common/exception/BaseException;"
+    extends="com.microsoft.identity.common.exception.BaseException"
+    extends-generic-aware="com.microsoft.identity.common.exception.BaseException"
+    final="false"
+    name="MsalException"
+    jni-signature="Lcom/microsoft/identity/client/exception/MsalException;"
+    source-file-name="MsalException.java"
+    static="false"
+    visibility="public">
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="getErrorCode"
+        native="false"
+        return="java.lang.String"
+        jni-return="Ljava/lang/String;"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="()Ljava/lang/String;" />
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="getMessage"
+        native="false"
+        return="java.lang.String"
+        jni-return="Ljava/lang/String;"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="()Ljava/lang/String;" />
+    </class>
+  </add-node>
+  
+  <add-node path="//package[@name='com.microsoft.identity.client']">
+    <interface
+      abstract="true"
+      deprecated="not deprecated"
+      final="false"
+      name="ITokenShare"
+      jni-signature="Lcom/microsoft/identity/client/ITokenShare;"
+      source-file-name="ITokenShare.java"
+      static="false"
+      visibility="public">
+      <implements
+        name="com.microsoft.identity.common.adal.internal.tokensharing.ITokenShareInternal"
+        name-generic-aware="com.microsoft.identity.common.adal.internal.tokensharing.ITokenShareInternal"
+        jni-type="Lcom/microsoft/identity/common/adal/internal/tokensharing/ITokenShareInternal;" />
+      <method
+        abstract="true"
+        deprecated="not deprecated"
+        final="false"
+        name="getMsaFamilyRefreshToken"
+        native="false"
+        return="java.lang.String"
+        jni-return="Ljava/lang/String;"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Ljava/lang/String;)Ljava/lang/String;">
+        <parameter
+          name="p0"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalClientException"
+          type="com.microsoft.identity.client.exception.MsalClientException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
+      </method>
+      <method
+        abstract="true"
+        deprecated="not deprecated"
+        final="false"
+        name="getOrgIdFamilyRefreshToken"
+        native="false"
+        return="java.lang.String"
+        jni-return="Ljava/lang/String;"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Ljava/lang/String;)Ljava/lang/String;">
+        <parameter
+          name="p0"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalClientException"
+          type="com.microsoft.identity.client.exception.MsalClientException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
+      </method>
+      <method
+        abstract="true"
+        deprecated="not deprecated"
+        final="false"
+        name="saveMsaFamilyRefreshToken"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Ljava/lang/String;)V">
+        <parameter
+          name="p0"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalClientException"
+          type="com.microsoft.identity.client.exception.MsalClientException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
+      </method>
+      <method
+        abstract="true"
+        deprecated="not deprecated"
+        final="false"
+        name="saveOrgIdFamilyRefreshToken"
+        native="false"
+        return="void"
+        jni-return="V"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="(Ljava/lang/String;)V">
+        <parameter
+          name="p0"
+          type="java.lang.String"
+          jni-type="Ljava/lang/String;" />
+        <exception
+          name="com/microsoft/identity/client/exception/MsalClientException"
+          type="com.microsoft.identity.client.exception.MsalClientException"
+          type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
+      </method>
+    </interface>
+  </add-node>-->
+
+</metadata>

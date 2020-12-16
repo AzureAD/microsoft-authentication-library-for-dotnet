@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidSupport", "Microsoft.Identity.Client.XamarinAndroid.AndroidSupport\Microsoft.Identity.Client.XamarinAndroid.AndroidSupport.csproj", "{864A0BB1-77AE-4094-8CE5-CE29287CDADD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidX", "Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj", "{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|x64.Build.0 = Debug|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|x86.Build.0 = Debug|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|x64.ActiveCfg = Release|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|x64.Build.0 = Release|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|x86.ActiveCfg = Release|Any CPU
+		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|x86.Build.0 = Release|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Debug|x64.Build.0 = Debug|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Debug|x86.Build.0 = Debug|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Release|x64.ActiveCfg = Release|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Release|x64.Build.0 = Release|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Release|x86.ActiveCfg = Release|Any CPU
+		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
