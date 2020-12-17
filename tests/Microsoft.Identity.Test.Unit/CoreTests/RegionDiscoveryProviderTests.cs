@@ -86,6 +86,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             validateInstanceMetadata(regionalMetadata);
         }
 
+        [TestMethod]
+        public async Task FetchRegionFromLocalImdsThenGetMetadataFromCacheAsync()
+        {
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
+
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            validateInstanceMetadata(regionalMetadata);
+
+            //get metadata from the instance metadata cache
+            regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            validateInstanceMetadata(regionalMetadata);
+        }
+
         private class HttpSnifferClientFactory : IMsalHttpClientFactory
         {
             readonly HttpClient _httpClient;

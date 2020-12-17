@@ -50,11 +50,11 @@ namespace Microsoft.Identity.Client.Region
         {
             ICoreLogger logger = requestContext.Logger;
             string environment = authority.Host;
-            InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
+            Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
+            InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, logger);
 
             if (cachedEntry == null)
             {
-                Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
                 CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
 
                 cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, logger);
@@ -68,7 +68,6 @@ namespace Microsoft.Identity.Client.Region
             
             return cachedEntry;
         }
-
 
         private async Task<string> GetRegionAsync(RequestContext requestContext)
         {

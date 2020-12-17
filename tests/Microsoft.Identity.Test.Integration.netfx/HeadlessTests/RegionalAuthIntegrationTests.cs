@@ -31,6 +31,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ["allowestsrnonmsi"] = "true"
         };
 
+        private const string RegionalHost = "centralus.login.microsoft.com";
+        private const string GlobalHost = "login.microsoftonline.com";
+        private IConfidentialClientApplication _confidentialClientApplication;
+
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
@@ -49,56 +53,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task RegionalAuthGetSuccessfulResponseAsync()
-        {
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-                await AcquireTokenForClientAndValidateResponseAsync("centralus.login.microsoft.com", true).ConfigureAwait(false);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            }
-        }
-
-        [TestMethod]
-        public async Task VerifyGlobalTokenEndpointIsUsedWhenWithAzureRegionIsFalseAsync()
-        {
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-                await AcquireTokenForClientAndValidateResponseAsync("centralus.login.microsoft.com", true).ConfigureAwait(false);
-                await AcquireTokenForClientAndValidateResponseAsync("login.microsoftonline.com", false).ConfigureAwait(false);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            }
-        }
-
-        private async Task AcquireTokenForClientAndValidateResponseAsync(string expectedHost, bool autoDetectRegion = true)
-        {
-            var factory = new HttpSnifferClientFactory();
-            var cca = CreateApp(factory);
-
-            var result = await cca.AcquireTokenForClient(s_keyvaultScope)
-                .WithAzureRegion(autoDetectRegion)
-                .WithExtraQueryParameters(_dict)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.IsNotNull(result);
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.Host == expectedHost && x.Item2.StatusCode == HttpStatusCode.OK);
-            Assert.AreEqual(expectedHost, req.RequestUri.Host);
-        }
-
-        [TestMethod]
         public async Task RegionalAuthWithExperimentalFeaturesFalseAsync()
         {
-            var claims = GetClaims();
             var cca = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
-                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, claims))
+                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, GetClaims()))
                 .WithAuthority(PublicCloudTestAuthority)
                 .WithTestLogging()
                 .Build();
@@ -125,17 +83,140 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        private IConfidentialClientApplication CreateApp(IMsalHttpClientFactory factory)
+        [TestMethod]
+        public async Task AcquireTokenToRegionalEndpointAsync()
         {
-            var claims = GetClaims();
-
-            return ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
-                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, claims))
+            // Arrange
+            var factory = new HttpSnifferClientFactory();
+            _confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
+                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, GetClaims()))
+                //.WithClientSecret(_keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value) //use the client secret in case of cert errors
                 .WithAuthority(PublicCloudTestAuthority)
                 .WithTestLogging()
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(factory)
                 .Build();
+
+            try
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+                AuthenticationResult result = await CreateAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
+                AssertTokenSource_IsIdP(result);
+                AssertValidHost(true, factory);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenToRegionalEndpointThenGlobalEndpoint_UseTokenFromCacheAsync()
+        {
+            // Arrange
+            var factory = new HttpSnifferClientFactory();
+            _confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
+                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, GetClaims()))
+                //.WithClientSecret(_keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value)
+                .WithAuthority(PublicCloudTestAuthority)
+                .WithTestLogging()
+                .WithExperimentalFeatures(true)
+                .WithHttpClientFactory(factory)
+                .Build();
+            try
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+                AuthenticationResult result = await CreateAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
+                AssertTokenSource_IsIdP(result);
+                AssertValidHost(true, factory);
+                result = await CreateAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint, new token
+                AssertValidHost(false, factory, 1);
+                AssertTokenSource_IsIdP(result);
+                result = await CreateAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint, use cached token
+                AssertTokenSource_IsCache(result);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenToGlobalEndpointThenRegionalEndpoint_UseTokenFromCacheAsync()
+        {
+            // Arrange
+            var factory = new HttpSnifferClientFactory();
+            _confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
+                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, GetClaims()))
+                //.WithClientSecret(_keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value)
+                .WithAuthority(PublicCloudTestAuthority)
+                .WithTestLogging()
+                .WithExperimentalFeatures(true)
+                .WithHttpClientFactory(factory)
+                .Build();
+            try
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+                AuthenticationResult result = await CreateAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint
+                AssertValidHost(false, factory);
+                AssertTokenSource_IsIdP(result);
+                result = await CreateAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint, use cached token
+                AssertTokenSource_IsCache(result);
+                result = await CreateAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint, use cached token
+                AssertTokenSource_IsCache(result);
+                result = await CreateAuthenticationResultAsync(withForceRefresh: true).ConfigureAwait(false); // regional endpoint, new token
+                AssertValidHost(true, factory, 1);
+                AssertTokenSource_IsIdP(result);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            }
+        }
+
+        private void AssertValidHost(
+          bool isRegionalHost,
+          HttpSnifferClientFactory factory,
+          int placement = 0)
+        {
+            if (isRegionalHost)
+            {
+                var (req, res) = factory.RequestsAndResponses.Skip(placement).Single(x => x.Item1.RequestUri.Host == RegionalHost && x.Item2.StatusCode == HttpStatusCode.OK);
+                Assert.AreEqual(RegionalHost, req.RequestUri.Host);
+            }
+            else
+            {
+                var (req, res) = factory.RequestsAndResponses.Skip(placement).Single(x => x.Item1.RequestUri.Host == GlobalHost && x.Item2.StatusCode == HttpStatusCode.OK);
+                Assert.AreEqual(GlobalHost, req.RequestUri.Host);
+            }
+        }
+
+        private void AssertTokenSource_IsIdP(
+           AuthenticationResult result)
+        {
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        private void AssertTokenSource_IsCache(
+           AuthenticationResult result)
+        {
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        private async Task<AuthenticationResult> CreateAuthenticationResultAsync(
+            bool autoDetectRegion = true,
+            bool withForceRefresh = false)
+        {
+            var result = await _confidentialClientApplication.AcquireTokenForClient(s_keyvaultScope)
+                            .WithAzureRegion(autoDetectRegion)
+                            .WithExtraQueryParameters(_dict)
+                            .WithForceRefresh(withForceRefresh)
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.AccessToken);
+            return result;
         }
 
         internal static long ConvertToTimeT(DateTime time)
