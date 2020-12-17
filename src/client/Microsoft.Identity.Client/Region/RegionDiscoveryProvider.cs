@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Client.Region
         private static string s_region;
 
         public RegionDiscoveryProvider(
-            IHttpManager httpManager, 
-            INetworkCacheMetadataProvider networkCacheMetadataProvider = null, 
+            IHttpManager httpManager,
+            INetworkCacheMetadataProvider networkCacheMetadataProvider = null,
             int imdsCallTimeout = 2000)
         {
             _httpManager = httpManager;
@@ -50,22 +50,14 @@ namespace Microsoft.Identity.Client.Region
         {
             ICoreLogger logger = requestContext.Logger;
             string environment = authority.Host;
-            InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
 
-            if (cachedEntry == null)
-            {
-                Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
-                CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
+            Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
+            CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
 
-                cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, logger);
-                logger.Verbose($"[Region Discovery] Created metadata for the regional environment {environment} ? {cachedEntry != null}");
-            }
-            else
-            {
-                logger.Verbose($"[Region Discovery] The network provider found an entry for {environment}");
-                LogTelemetryData(cachedEntry.PreferredNetwork.Split('.')[0], RegionSource.Cache, requestContext);
-            }
-            
+            var cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, logger);
+            logger.Verbose($"[Region Discovery] Created metadata for the regional environment {environment} ? {cachedEntry != null}");
+
+
             return cachedEntry;
         }
 
@@ -104,14 +96,14 @@ namespace Microsoft.Identity.Client.Region
                 {
                     return response.Body;
                 }
-                    
+
                 logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
 
                 throw MsalServiceExceptionFactory.FromImdsResponse(
                     MsalError.RegionDiscoveryFailed,
                     MsalErrorMessage.RegionDiscoveryFailed,
                     response);
-            }  
+            }
             catch (MsalServiceException e)
             {
                 if (MsalError.RequestTimeout.Equals(e.ErrorCode))
@@ -142,7 +134,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (requestContext.ApiEvent.RegionSource == 0)
             {
-                requestContext.ApiEvent.RegionSource = (int) regionSource;
+                requestContext.ApiEvent.RegionSource = (int)regionSource;
             }
         }
 
@@ -206,7 +198,7 @@ namespace Microsoft.Identity.Client.Region
             {
                 s_region = await GetRegionAsync(requestContext).ConfigureAwait(false);
             }
-            
+
             var builder = new UriBuilder(canonicalAuthority);
 
             if (KnownMetadataProvider.IsPublicEnvironment(canonicalAuthority.Host))
