@@ -17,6 +17,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon
 {
     internal class DeviceAuthHelper
     {
+        private static bool? s_canOSPerformPKeyAuth;
+
         public static IDictionary<string, string> ParseChallengeData(HttpResponseHeaders responseHeaders)
         {
             IDictionary<string, string> data = new Dictionary<string, string>();
@@ -76,6 +78,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon
 
         public static bool CanOSPerformPKeyAuth()
         {
+            if (s_canOSPerformPKeyAuth != null)
+            {
+                return (bool)s_canOSPerformPKeyAuth;
+            }
+
             //PKeyAuth can only be performed on operating systems with a major OS version of 6. 
             //This corresponds to windows 7, 8, 8.1 and their server equivilents.
             //Environment.OSVersion as it will return incorrect information on some operating systems
@@ -83,6 +90,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 && !RuntimeInformation.OSDescription.Contains("Windows 10"))
             {
+                s_canOSPerformPKeyAuth = true;
                 return true;
             }
 
@@ -93,9 +101,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon
             
             if (OSInfo.Contains("Windows") && !OSInfo.Contains("Windows 10"))
             {
+                s_canOSPerformPKeyAuth = true;
                 return true;
             }
 #endif
+            s_canOSPerformPKeyAuth = false;
             return false;
         }
     }
