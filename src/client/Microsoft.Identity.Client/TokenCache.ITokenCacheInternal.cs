@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client
                     UpdateAppMetadata(requestParams.ClientId, instanceDiscoveryMetadata.PreferredCache, response.FamilyId);
 
                     // Do not save RT in ADAL cache for client credentials flow or B2C                        
-                    if (ServiceBundle.Config.IsAdalCacheEnabled &&
+                    if (ServiceBundle.Config.AdalCacheCompatibilityEnabled &&
                         !requestParams.IsClientCredentialRequest &&
                         requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
                     {
@@ -561,7 +561,7 @@ namespace Microsoft.Identity.Client
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
 
             // ADAL legacy cache does not store FRTs
-            if (ServiceBundle.Config.IsAdalCacheEnabled &&
+            if (ServiceBundle.Config.AdalCacheCompatibilityEnabled &&
                 requestParams.Account != null &&
                 string.IsNullOrEmpty(familyId))
             {
@@ -641,7 +641,7 @@ namespace Microsoft.Identity.Client
 
             AdalUsersForMsal adalUsersResult = null;
 
-            if (ServiceBundle.Config.IsAdalCacheEnabled)
+            if (ServiceBundle.Config.AdalCacheCompatibilityEnabled)
             {
                 adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
                     Logger,
@@ -678,7 +678,7 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            if (ServiceBundle.Config.IsAdalCacheEnabled)
+            if (ServiceBundle.Config.AdalCacheCompatibilityEnabled)
             {
                 UpdateMapWithAdalAccountsWithClientInfo(
                     environment,
@@ -802,7 +802,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     tokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
-                    if (ServiceBundle.Config.IsAdalCacheEnabled)
+                    if (ServiceBundle.Config.AdalCacheCompatibilityEnabled)
                     {
                         RemoveAdalUser(account);
                     }

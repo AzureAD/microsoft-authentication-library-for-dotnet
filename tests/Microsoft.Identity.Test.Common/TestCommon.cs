@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Common
                 EnablePiiLogging = enablePiiLogging,
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled,
                 AuthorityInfo = AuthorityInfo.FromAuthorityUri(authority, validateAuthority),
-                IsAdalCacheEnabled = isAdalCacheEnabled
+                AdalCacheCompatibilityEnabled = isAdalCacheEnabled
             };            
             return new ServiceBundle(appConfig, clearCaches);
         }

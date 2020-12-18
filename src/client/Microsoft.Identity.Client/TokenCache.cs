@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client
             var accounts = new List<IAccount>();
             accounts.AddRange(clientInfoToAccountMap.Values);
 
-            if (ServiceBundle.Config.IsAdalCacheEnabled)
+            if (ServiceBundle.Config.AdalCacheCompatibilityEnabled)
             {
                 var uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
 
