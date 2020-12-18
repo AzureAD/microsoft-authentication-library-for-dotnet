@@ -43,7 +43,7 @@ stages:
     dependsOn: 'BuildAndTest'
     pool:
         name: DevEx Win8 Automation
-        demands: agent.name -equals MSIDWIN803
+        demands: VisualStudio2019
 
     steps:
 
