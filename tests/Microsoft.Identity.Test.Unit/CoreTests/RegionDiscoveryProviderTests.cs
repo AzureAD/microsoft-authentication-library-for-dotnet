@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +16,6 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         private RequestContext _testRequestContext;
         private ApiEvent _apiEvent;
         private CancellationTokenSource _userCancellationTokenSource;
+        private IRegionDiscoveryProvider _regionDiscoveryProvider;
 
         [TestInitialize]
         public override void TestInitialize()
@@ -47,12 +48,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 _harness.ServiceBundle.PlatformProxy.CryptographyManager,
                 Guid.NewGuid().AsMatsCorrelationId());
             _testRequestContext.ApiEvent = _apiEvent;
+            _regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager);
         }
 
         [TestCleanup]
         public override void TestCleanup()
         {
             _harness?.Dispose();
+            _regionDiscoveryProvider.Clear();
             base.TestCleanup();
         }
 
@@ -63,11 +66,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             {
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+                InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-                Assert.IsNotNull(regionalMetadata);
-                Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+                validateInstanceMetadata(regionalMetadata);
             }
             finally
             {
@@ -80,11 +81,24 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
 
-            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-            InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-            Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+            validateInstanceMetadata(regionalMetadata);
+        }
+
+        [TestMethod]
+        public async Task FetchRegionFromLocalImdsThenGetMetadataFromCacheAsync()
+        {
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
+
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            validateInstanceMetadata(regionalMetadata);
+
+            //get metadata from the instance metadata cache
+            regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            validateInstanceMetadata(regionalMetadata);
         }
 
         [TestMethod]
@@ -158,6 +172,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.RegionDiscoveryFailed, ex.ErrorCode);
+            regionDiscoveryProvider.Clear();
         }
 
         [TestMethod]
@@ -176,6 +191,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.RegionDiscoveryFailed, ex.ErrorCode);
+            regionDiscoveryProvider.Clear();
         }      
 
         [TestMethod]
@@ -185,8 +201,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             {
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.someenv.com/common/"), _testRequestContext).ConfigureAwait(false);
+                InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.someenv.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                 Assert.IsNotNull(regionalMetadata);
                 Assert.AreEqual("centralus.login.someenv.com", regionalMetadata.PreferredNetwork);
@@ -204,8 +219,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             try
             {
-                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+                InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                 Assert.Fail("Exception should be thrown.");
             }
@@ -224,8 +238,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             try
             {
-                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+                InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                 Assert.Fail("Exception should be thrown.");
             }
@@ -245,11 +258,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                         ResourceHelper.GetTestResourceRelativePath("local-imds-error-response.json"))), expectedParams: false);
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region), apiVersion: "2020-10-01");
 
-            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-            InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-            Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+            validateInstanceMetadata(regionalMetadata);
         }
 
         [TestMethod]
@@ -260,8 +271,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             try
             {
-                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+                InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                 Assert.Fail("The call should fail with MsalServiceException as the updated version for imds was not returned.");
             }
@@ -282,8 +292,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             try
             {
-                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+                InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                 Assert.Fail("The call should fail with MsalServiceException as the newest versions were missing in the response.");
             }
@@ -331,6 +340,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                         ResponseMessage = responseMessage
                     });
             }
+        }
+
+        private void validateInstanceMetadata(InstanceDiscoveryMetadataEntry entry)
+        {
+            InstanceDiscoveryMetadataEntry expectedEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "centralus.login.microsoft.com" },
+                PreferredCache = "login.microsoftonline.com",
+                PreferredNetwork = "centralus.login.microsoft.com"
+            };
+
+            Assert.IsNotNull(entry, "The instance metadata should not be empty.");
+            Assert.AreEqual(expectedEntry.Aliases.Single(), entry.Aliases.Single());
+            Assert.AreEqual(expectedEntry.PreferredCache, entry.PreferredCache);
+            Assert.AreEqual(expectedEntry.PreferredNetwork, entry.PreferredNetwork);
         }
     }
 }

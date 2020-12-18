@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -35,18 +36,19 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Start the listener in the background
             Task<Uri> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                 port,
+                string.Empty,
                 (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "ok"); },
                 CancellationToken.None);
 
             // Issue an http request on the main thread
-            await SendMessageToPortAsync(port).ConfigureAwait(false);
+            await SendMessageToPortAsync(port, string.Empty).ConfigureAwait(false);
 
             // Wait for the listner to do its stuff
             listenTask.Wait(1000 /* 1s timeout */);
 
             // Assert
             Assert.IsTrue(listenTask.IsCompleted);
-            Assert.AreEqual(GetLocalhostUriWithParams(port), listenTask.Result.ToString());
+            Assert.AreEqual(GetLocalhostUriWithParams(port, string.Empty), listenTask.Result.ToString());
         }
 
         [TestMethod]
@@ -64,6 +66,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             await AssertException.TaskThrowsAsync<OperationCanceledException>(
                 () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                     port,
+                    string.Empty,
                     (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "ok"); },
                     cts.Token))
                 .ConfigureAwait(false);
@@ -78,15 +81,44 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             CancellationTokenSource cts = new CancellationTokenSource();
             int port = FindFreeLocalhostPort();
 
-            listenerInterceptor.TestBeforeStart = () => cts.Cancel();
+            listenerInterceptor.TestBeforeStart = (obj) => cts.Cancel();
 
             // Start the listener in the background
             await AssertException.TaskThrowsAsync<OperationCanceledException>(
                 () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                     port,
+                    string.Empty,
                     (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "ok"); },
                     cts.Token))
                 .ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ValidateHttpListenerRedirectUriAsync()
+        {
+            HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
+                Substitute.For<ICoreLogger>());
+
+            int port = FindFreeLocalhostPort();
+
+            listenerInterceptor.TestBeforeStart = (url) => Assert.AreEqual(@"http://localhost:" + port + @"/TestPath/", url);
+
+            // Start the listener in the background
+            Task<Uri> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
+                port,
+                "/TestPath/",
+                (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "ok"); },
+                CancellationToken.None);
+
+            // Issue an http request on the main thread
+            await SendMessageToPortAsync(port, "TestPath").ConfigureAwait(false);
+
+            // Wait for the listner to do its stuff
+            listenTask.Wait(1000 /* 1s timeout */);
+
+            // Assert
+            Assert.IsTrue(listenTask.IsCompleted);
+            Assert.AreEqual(GetLocalhostUriWithParams(port, "TestPath"), listenTask.Result.ToString());
         }
 
         [TestMethod]
@@ -104,22 +136,28 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             await AssertException.TaskThrowsAsync<OperationCanceledException>(
                 () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                     port,
+                    string.Empty,
                     (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "ok"); },
                     cts.Token))
                 .ConfigureAwait(false);
         }
 
-        private async Task SendMessageToPortAsync(int port)
+        private async Task SendMessageToPortAsync(int port, string path)
         {
             using (HttpClient httpClient = new HttpClient())
             {
-                await httpClient.GetAsync(GetLocalhostUriWithParams(port)).ConfigureAwait(false);
+                await httpClient.GetAsync(GetLocalhostUriWithParams(port, path)).ConfigureAwait(false);
             }
         }
 
-        private static string GetLocalhostUriWithParams(int port)
+        private static string GetLocalhostUriWithParams(int port, string path)
         {
-            return "http://localhost:" + port + "/?param1=val1";
+            if (string.IsNullOrEmpty(path))
+            {
+                return "http://localhost:" + port + "/?param1=val1";
+            }
+
+            return "http://localhost:" + port + "/" + path + "/?param1=val1";
         }
 
         private static int FindFreeLocalhostPort()

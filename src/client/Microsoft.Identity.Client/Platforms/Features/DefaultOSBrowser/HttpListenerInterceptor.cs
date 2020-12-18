@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 
         #region Test Hooks 
         public Action TestBeforeTopLevelCall { get; set; }
-        public Action TestBeforeStart { get; set; }
+        public Action<string> TestBeforeStart { get; set; }
         public Action TestBeforeGetContext { get; set; }
         #endregion
 
@@ -27,6 +27,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 
         public async Task<Uri> ListenToSingleRequestAndRespondAsync(
             int port,
+            string path,
             Func<Uri, MessageAndHttpCode> responseProducer,
             CancellationToken cancellationToken)
         {
@@ -36,12 +37,26 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             HttpListener httpListener = null;
             try
             {
-                string urlToListenTo = "http://localhost:" + port + "/";
+                if(string.IsNullOrEmpty(path))
+                {
+                    path = "/";
+                }
+                else
+                {
+                    path = (path.StartsWith("/") ? path : "/" + path);
+                }
+
+                string urlToListenTo = "http://localhost:" + port + path;
+
+                if (!urlToListenTo.EndsWith("/"))
+                {
+                    urlToListenTo += "/";
+                }
 
                 httpListener = new HttpListener();
                 httpListener.Prefixes.Add(urlToListenTo);
 
-                TestBeforeStart?.Invoke();
+                TestBeforeStart?.Invoke(urlToListenTo);
 
                 httpListener.Start();
                 _logger.Info("Listening for authorization code on " + urlToListenTo);
