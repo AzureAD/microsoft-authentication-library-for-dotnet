@@ -64,10 +64,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 throw new MsalClientException(MsalError.RegionDiscoveryNotEnabled, MsalErrorMessage.RegionDiscoveryNotAvailable);
             }
 
-                requestParams.SendX5C = clientParameters.SendX5C;
+            requestParams.SendX5C = clientParameters.SendX5C;
             requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion = clientParameters.AutoDetectRegion;
-
-            
+            requestContext.ServiceBundle.Config.AuthorityInfo.UseRegion = clientParameters.UseRegion;
 
             var handler = new ClientCredentialRequest(
                 ServiceBundle,

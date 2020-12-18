@@ -70,6 +70,21 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        public async Task RegionalAuthGetSuccessfulResponseWithUseRegionAsync()
+        {
+            var cca = CreateApp();
+
+            var result = await cca.AcquireTokenForClient(s_keyvaultScope)
+                .WithAzureRegion(true, TestConstants.Region)
+                .WithExtraQueryParameters(_dict)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.AccessToken);
+        }
+
+        [TestMethod]
         public async Task RegionalAuthWithExperimentalFeaturesFalseAsync()
         {
             var claims = GetClaims();

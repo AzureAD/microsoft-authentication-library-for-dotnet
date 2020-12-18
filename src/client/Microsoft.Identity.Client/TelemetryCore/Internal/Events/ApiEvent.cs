@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string RegionDiscoveredKey = EventNamePrefix + "region_discovered";
         public const string RegionSourceKey = EventNamePrefix + "region_source";
         public const string IsTokenCacheSerializedKey = EventNamePrefix + "is_token_cache_serialized";
+        public const string ValidateUseRegionKey = EventNamePrefix + "validate_use_region";
 
         public enum ApiIds
         {
@@ -167,6 +168,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             get => this.ContainsKey(RegionSourceKey) ? 
                 (int)Enum.Parse(typeof(RegionSource), this[RegionSourceKey]) : 0;
             set => this[RegionSourceKey] = (value).ToString(CultureInfo.InvariantCulture);
+        }
+
+        public string ValidateUseRegion
+        {
+            get => this.ContainsKey(ValidateUseRegionKey) ? this[ValidateUseRegionKey] : null;
+            set => this[ValidateUseRegionKey] = value;
         }
 
         public bool IsTokenCacheSerialized

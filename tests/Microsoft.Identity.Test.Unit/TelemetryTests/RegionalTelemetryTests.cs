@@ -15,7 +15,6 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
-using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
@@ -71,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
                 var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: false, isFirstRequest: true);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: false, "1");
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
 
                 Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
@@ -79,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Guid step2CorrelationId = result.Correlationid;
 
                 // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, isFirstRequest: false);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, "3");
                 AssertPreviousTelemetry(
                     result.HttpRequest,
                     expectedSilentCount: 0);
@@ -91,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 3. Acquire Token For Client -> Success");
                 result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
 
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, isFirstRequest: false);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, "3");
                 AssertPreviousTelemetry(
                     result.HttpRequest,
                     expectedSilentCount: 0,
@@ -128,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 AssertCurrentTelemetry(result.HttpRequest,
                     ApiIds.AcquireTokenForClient,
                     forceRefresh: false,
-                    isFirstRequest: true,
+                    "1",
                     isCacheSerialized: true); 
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); 
             }
@@ -138,9 +137,31 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
+        /// <summary>
+        ///    Acquire token for client with region provided by user and region detection fails.
+        ///    Current_request = 2 | ATC_ID, 0 | centralus, 4, 1
+        ///    Last_request = 2 | 0 | | |
+        /// </summary>
+        [TestMethod]
+        public async Task TelemetryUserProvidedRegionWhenRegionDetectionFailsTestAsync()
+        {
+            var inMemoryTokenCache = new InMemoryTokenCache();
+            inMemoryTokenCache.Bind(_app.AppTokenCache);
+
+            Trace.WriteLine("Acquire token for client with region provided by user and region detection fails.");
+            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
+            AssertCurrentTelemetry(result.HttpRequest,
+                ApiIds.AcquireTokenForClient,
+                forceRefresh: false,
+                "4",
+                isCacheSerialized: true);
+            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
+        }
+
         private enum AcquireTokenForClientOutcome
         {
             Success,
+            UserProvidedRegion,
             AADUnavailableError
         }
 
@@ -163,7 +184,20 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                         .ConfigureAwait(false);
                     correlationId = authResult.CorrelationId;
                     break;
-                
+
+                case AcquireTokenForClientOutcome.UserProvidedRegion:
+
+                    _harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get, TestConstants.ImdsUrl);
+                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
+                    var authResultUserProvided = await _app
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .WithAzureRegion(true, TestConstants.Region)
+                        .WithForceRefresh(forceRefresh)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+                    correlationId = authResultUserProvided.CorrelationId;
+                    break;
+
                 case AcquireTokenForClientOutcome.AADUnavailableError:
                     correlationId = Guid.NewGuid();
 
@@ -208,7 +242,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             HttpRequestMessage requestMessage, 
             ApiIds apiId, 
             bool forceRefresh,
-            bool isFirstRequest,
+            string regionSource,
             bool isCacheSerialized = false)
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(
@@ -227,15 +261,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Assert.AreEqual(isCacheSerialized ? "1" : "0", actualTelemetryParts[2].Split(',')[2]);
             Assert.AreEqual(TestConstants.Region, actualTelemetryParts[2].Split(',')[0]);
-
-            if (isFirstRequest)
-            {
-                Assert.AreEqual("1", actualTelemetryParts[2].Split(',')[1]);
-            }
-            else
-            {
-                Assert.AreEqual("3", actualTelemetryParts[2].Split(',')[1]);
-            }
+            Assert.AreEqual(regionSource, actualTelemetryParts[2].Split(',')[1]);
         }
 
         private static void AssertPreviousTelemetry(

@@ -93,7 +93,9 @@ namespace Microsoft.Identity.Client.Region
 
                 if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                 {
-                    return response.Body;
+                    region = response.Body;
+                    LogTelemetryData(region, RegionSource.Imds, requestContext);
+                    return region;
                 }
                     
                 logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
@@ -193,7 +195,29 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<Uri> BuildAuthorityWithRegionAsync(Uri canonicalAuthority, RequestContext requestContext)
         {
-            string region = await GetRegionAsync(requestContext).ConfigureAwait(false);
+            string useRegion = requestContext.ServiceBundle.Config.AuthorityInfo.UseRegion;
+            string region;
+
+            try
+            {
+                region = await GetRegionAsync(requestContext).ConfigureAwait(false);
+
+                if (!useRegion.IsNullOrEmpty())
+                {
+                    requestContext.ApiEvent.ValidateUseRegion = region.Equals(useRegion) ? "1" : "0";
+                }
+            }
+            catch (MsalServiceException e)
+            {
+                if (useRegion.IsNullOrEmpty())
+                {
+                    throw e;
+                }
+
+                region = useRegion;
+                LogTelemetryData(region, RegionSource.Userprovided, requestContext);
+            } 
+
             var builder = new UriBuilder(canonicalAuthority);
 
             if (KnownMetadataProvider.IsPublicEnvironment(canonicalAuthority.Host))

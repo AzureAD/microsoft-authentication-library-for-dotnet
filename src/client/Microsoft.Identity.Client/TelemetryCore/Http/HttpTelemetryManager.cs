@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
         /// <summary>
         /// Expected format: 2|api_id,force_refresh|platform_config
-        /// platform_config: region,region_source,is_token_cache_serialized
+        /// platform_config: region,region_source,is_token_cache_serialized,validate_use_region
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
         {
@@ -120,16 +120,18 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionDiscovered, out string regionDiscovered);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionSource, out string regionSource);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsTokenCacheSerializedKey, out string isTokenCacheSerialized);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.ValidateUseRegionKey, out string validateUseRegion);
 
             // Since regional fields will only be logged in case it is opted.
-            var regionalFields = new StringBuilder();
-            regionalFields.Append(regionDiscovered);
-            regionalFields.Append(",");
-            regionalFields.Append((regionSource));
+            var platformConfig = new StringBuilder();
+            platformConfig.Append(regionDiscovered + ",");
+            platformConfig.Append(regionSource + ",");
+            platformConfig.Append(ConvertFromStringToBitwise(isTokenCacheSerialized) + ",");
+            platformConfig.Append(ConvertFromStringToBitwise(validateUseRegion));
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
                 $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
-                $"|{regionalFields},{ConvertFromStringToBitwise(isTokenCacheSerialized)}";
+                $"|{platformConfig}";
         }
 
         private string ConvertFromStringToBitwise(string value)
