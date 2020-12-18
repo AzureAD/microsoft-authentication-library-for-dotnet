@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     userProvidedInstanceDiscoveryUri);
 
             _regionDiscoveryProvider = regionDiscovery ??
-                new RegionDiscoveryProvider(_httpManager, _networkCacheMetadataProvider);
+                new RegionDiscoveryProvider(_httpManager, _networkCacheMetadataProvider, shouldClearCaches: shouldClearCaches);
 
             if (shouldClearCaches)
             {
