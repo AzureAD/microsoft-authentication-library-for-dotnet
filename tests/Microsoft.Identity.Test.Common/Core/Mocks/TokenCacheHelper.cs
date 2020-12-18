@@ -190,6 +190,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             accessor.SaveRefreshToken(rtItem);
         }
 
+        public static void AddRefreshTokensToCache(ITokenCacheAccessor cacheAccessor, int tokensQuantity = 1)
+        {
+            for (int i = 1; i <= tokensQuantity; i++)
+            {
+                AddRefreshTokenToCache(cacheAccessor, Guid.NewGuid().ToString(), TestConstants.Utid);
+            }
+        }
+
         public static void AddAccountToCache(
             ITokenCacheAccessor accessor, 
             string uid, 
