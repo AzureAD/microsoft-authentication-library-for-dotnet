@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             platformConfig.Append(regionDiscovered + ",");
             platformConfig.Append(regionSource + ",");
             platformConfig.Append(ConvertFromStringToBitwise(isTokenCacheSerialized) + ",");
-            platformConfig.Append(validateUseRegion);
+            platformConfig.Append(validateUseRegion); //The value for this will be 1 if the region provided is valid, 0 if invalid and "" in case it could not be validated.
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
                 $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +

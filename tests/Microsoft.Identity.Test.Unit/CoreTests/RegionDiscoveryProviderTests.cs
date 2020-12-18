@@ -55,7 +55,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public override void TestCleanup()
         {
             _harness?.Dispose();
-            _regionDiscoveryProvider.Clear();
             base.TestCleanup();
         }
 
@@ -112,6 +111,46 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             Assert.IsNotNull(regionalMetadata);
             Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+        }
+
+        [TestMethod]
+        public async Task ResponseFromUserProvidedRegionSameAsRegionDetectedAsync()
+        {
+            try
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+                _testRequestContext.ServiceBundle.Config.AuthorityInfo.UseRegion = TestConstants.Region;
+
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+                Assert.IsNotNull(regionalMetadata);
+                Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
+            }
+        }
+
+        [TestMethod]
+        public async Task ResponseFromUserProvidedRegionDifferentFromRegionDetectedAsync()
+        {
+            try
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, "eastus");
+                _testRequestContext.ServiceBundle.Config.AuthorityInfo.UseRegion = TestConstants.Region;
+
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+                Assert.IsNotNull(regionalMetadata);
+                Assert.AreEqual("eastus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
+            }
         }
 
         private class HttpSnifferClientFactory : IMsalHttpClientFactory
