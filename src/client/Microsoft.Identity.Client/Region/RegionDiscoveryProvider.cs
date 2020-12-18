@@ -31,11 +31,17 @@ namespace Microsoft.Identity.Client.Region
         public RegionDiscoveryProvider(
             IHttpManager httpManager, 
             INetworkCacheMetadataProvider networkCacheMetadataProvider = null, 
-            int imdsCallTimeout = 2000)
+            int imdsCallTimeout = 2000,
+            /* for tests only */ bool shouldClearCaches = false)
         {
             _httpManager = httpManager;
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
             _imdsCallTimeoutMs = imdsCallTimeout;
+
+            if (shouldClearCaches)
+            {
+                Clear();
+            }
         }
 
         /*
