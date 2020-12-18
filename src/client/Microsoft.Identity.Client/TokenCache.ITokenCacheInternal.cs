@@ -639,9 +639,11 @@ namespace Microsoft.Identity.Client
                 StringComparer.OrdinalIgnoreCase);
             allEnvironmentsInCache.UnionWith(rtCacheItems.Select(rt => rt.Environment));
 
+            AdalUsersForMsal adalUsersResult = null;
+
             if (ServiceBundle.Config.IsAdalCacheEnabled)
             {
-                AdalUsersForMsal adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
+                adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
                     Logger,
                     LegacyCachePersistence,
                     ClientId);
@@ -676,11 +678,14 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            UpdateMapWithAdalAccountsWithClientInfo(
-                environment,
-                instanceMetadata.Aliases,
-                adalUsersResult,
-                clientInfoToAccountMap);
+            if (ServiceBundle.Config.IsAdalCacheEnabled)
+            {
+                UpdateMapWithAdalAccountsWithClientInfo(
+                    environment,
+                    instanceMetadata.Aliases,
+                    adalUsersResult,
+                    clientInfoToAccountMap);
+            }
 
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
             if (requestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)

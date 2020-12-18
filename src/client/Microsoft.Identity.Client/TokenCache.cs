@@ -206,23 +206,26 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private static List<IAccount> UpdateWithAdalAccountsWithoutClientInfo(
+        private List<IAccount> UpdateWithAdalAccountsWithoutClientInfo(
             string envFromRequest,
             IEnumerable<string> envAliases,
             AdalUsersForMsal adalUsers,
             IDictionary<string, Account> clientInfoToAccountMap)
         {
             var accounts = new List<IAccount>();
-
             accounts.AddRange(clientInfoToAccountMap.Values);
-            var uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
 
-            foreach (AdalUserInfo user in adalUsers.GetUsersWithoutClientInfo(envAliases))
+            if (ServiceBundle.Config.IsAdalCacheEnabled)
             {
-                if (!string.IsNullOrEmpty(user.DisplayableId) && !uniqueUserNames.Contains(user.DisplayableId))
+                var uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
+
+                foreach (AdalUserInfo user in adalUsers.GetUsersWithoutClientInfo(envAliases))
                 {
-                    accounts.Add(new Account(null, user.DisplayableId, envFromRequest));
-                    uniqueUserNames.Add(user.DisplayableId);
+                    if (!string.IsNullOrEmpty(user.DisplayableId) && !uniqueUserNames.Contains(user.DisplayableId))
+                    {
+                        accounts.Add(new Account(null, user.DisplayableId, envFromRequest));
+                        uniqueUserNames.Add(user.DisplayableId);
+                    }
                 }
             }
 

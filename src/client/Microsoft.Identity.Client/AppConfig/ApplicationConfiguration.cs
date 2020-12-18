@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client
         public bool MergeWithDefaultClaims { get; internal set; }
         internal int ConfidentialClientCredentialCount;
 
-        public bool IsAdalCacheEnabled { get; internal set; }
+        public bool IsAdalCacheEnabled { get; internal set; } = true;
 
         #region Authority
 
