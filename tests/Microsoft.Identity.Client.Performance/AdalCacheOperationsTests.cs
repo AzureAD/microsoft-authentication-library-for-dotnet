@@ -53,9 +53,11 @@ namespace Microsoft.Identity.Test.Performance
             _requestParams.TenantUpdatedCanonicalAuthority = Authority.CreateAuthorityWithTenant(
                 _requestParams.AuthorityInfo,
                 TestConstants.Utid);
+            _requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
 
             AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefNetworkEnvironment);
 
+            LegacyTokenCacheHelper.PopulateLegacyCache(serviceBundle.DefaultLogger, _cache.LegacyPersistence, TokenCacheSize);
             TokenCacheHelper.AddRefreshTokensToCache(_cache.Accessor, TokenCacheSize);
         }
 
@@ -83,19 +85,19 @@ namespace Microsoft.Identity.Test.Performance
         [BenchmarkCategory("GetRefreshToken"), Benchmark(Baseline = true)]
         public async Task<string> FindRefreshToken_EnabledAdalCache_TestAsync()
         {
-            return await FindRefreshToken_TestAsync().ConfigureAwait(true);
+            return await FindRefreshTokenAsync().ConfigureAwait(true);
         }
 
         [BenchmarkCategory("GetRefreshToken"), Benchmark]
         public async Task<string> FindRefreshToken_DisabledAdalCache_TestAsync()
         {
-            return await FindRefreshToken_TestAsync().ConfigureAwait(true);
+            return await FindRefreshTokenAsync().ConfigureAwait(true);
         }
 
-        private async Task<string> FindRefreshToken_TestAsync()
+        private async Task<string> FindRefreshTokenAsync()
         {
             var result = await _cache.FindRefreshTokenAsync(_requestParams).ConfigureAwait(true);
-            return result.ClientId;
+            return result?.ClientId;
         }
         #endregion
 

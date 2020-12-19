@@ -15,9 +15,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static long ValidExpiresIn = 28800;
         public static long ValidExtendedExpiresIn = 57600;
 
-        internal void PopulateCacheForClientCredential(ITokenCacheAccessor accessor, int tokensQuantity = 1)
+        internal void PopulateCacheForClientCredential(ITokenCacheAccessor accessor, int tokenQuantity = 1)
         {
-            for (int i = 1; i <= tokensQuantity; i++)
+            for (int i = 1; i <= tokenQuantity; i++)
             {
                 var atItem = CreateAccessTokenItem(string.Format(System.Globalization.CultureInfo.InvariantCulture, TestConstants.ScopeStrFormat, i));
                 accessor.SaveAccessToken(atItem);
