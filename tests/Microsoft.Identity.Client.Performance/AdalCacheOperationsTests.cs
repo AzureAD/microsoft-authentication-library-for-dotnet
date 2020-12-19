@@ -16,7 +16,7 @@ using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Performance
 {
-    [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+    [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByMethod)]
     public class AdalCacheOperationsTests
     {
         private ITokenCacheInternal _cache;
@@ -26,25 +26,13 @@ namespace Microsoft.Identity.Test.Performance
         [Params(1, 100, 1000)]
         public int TokenCacheSize { get; set; }
 
-        [GlobalSetup(Targets = new[] { 
-            nameof(SaveTokenResponse_EnabledAdalCache_TestAsync), 
-            nameof(FindRefreshToken_EnabledAdalCache_TestAsync) })]
-        public void GlobalSetup_EnabledAdalCache()
-        {
-            GlobalSetup(true);
-        }
+        [Params(true, false)]
+        public bool EnableAdalCache { get; set; }
 
-        [GlobalSetup(Targets = new[] { 
-            nameof(SaveTokenResponse_DisabledAdalCache_TestAsync), 
-            nameof(FindRefreshToken_DisabledAdalCache_TestAsync) })]
-        public void GlobalSetup_DisabledAdalCache()
+        [GlobalSetup]
+        public void GlobalSetup()
         {
-            GlobalSetup(false);
-        }
-
-        private void GlobalSetup(bool enableAdalCache)
-        {
-            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isAdalCacheEnabled: enableAdalCache);
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isAdalCacheEnabled: EnableAdalCache);
 
             _cache = new TokenCache(serviceBundle, false);
             _response = TestConstants.CreateMsalTokenResponse();
@@ -61,45 +49,19 @@ namespace Microsoft.Identity.Test.Performance
             TokenCacheHelper.AddRefreshTokensToCache(_cache.Accessor, TokenCacheSize);
         }
 
-        #region SaveToken
-        [BenchmarkCategory("SaveTokenResponse"), Benchmark(Baseline = true)]
-        public async Task<string> SaveTokenResponse_EnabledAdalCache_TestAsync()
-        {
-            return await SaveTokenResponse_TestAsync().ConfigureAwait(true);
-        }
-
-        [BenchmarkCategory("SaveTokenResponse"), Benchmark]
-        public async Task<string> SaveTokenResponse_DisabledAdalCache_TestAsync()
-        {
-            return await SaveTokenResponse_TestAsync().ConfigureAwait(true);
-        }
-
-        private async Task<string> SaveTokenResponse_TestAsync()
+        [Benchmark(Description = "SaveToken")]
+        public async Task<string> SaveTokenResponseTestAsync()
         {
             var result = await _cache.SaveTokenResponseAsync(_requestParams, _response).ConfigureAwait(true);
             return result.Item1.ClientId;
         }
-        #endregion
 
-        #region GetRefreshToken
-        [BenchmarkCategory("GetRefreshToken"), Benchmark(Baseline = true)]
-        public async Task<string> FindRefreshToken_EnabledAdalCache_TestAsync()
-        {
-            return await FindRefreshTokenAsync().ConfigureAwait(true);
-        }
-
-        [BenchmarkCategory("GetRefreshToken"), Benchmark]
-        public async Task<string> FindRefreshToken_DisabledAdalCache_TestAsync()
-        {
-            return await FindRefreshTokenAsync().ConfigureAwait(true);
-        }
-
-        private async Task<string> FindRefreshTokenAsync()
+        [Benchmark(Description = "FindToken")]
+        public async Task<string> FindRefreshTokenTestAsync()
         {
             var result = await _cache.FindRefreshTokenAsync(_requestParams).ConfigureAwait(true);
             return result?.ClientId;
         }
-        #endregion
 
         private void AddHostToInstanceCache(IServiceBundle serviceBundle, string host)
         {
