@@ -43,7 +43,7 @@ stages:
     dependsOn: 'BuildAndTest'
     pool:
         name: DevEx Win8 Automation
-        demands: VisualStudio2019
+        demands: VisualStudio2019 -equals 2019
 
     steps:
 
