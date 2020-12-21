@@ -137,7 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MSAL.XamarinForms\MSAL.XamarinForms.csproj">
-      <Project>{1D28849F-8B6B-4F66-9CF9-4B1AE757C400}</Project>
+      <Project>{2FEC2439-F941-4882-BE7F-833F782F4778}</Project>
       <Name>MSAL.XamarinForms</Name>
     </ProjectReference>
   </ItemGroup>
