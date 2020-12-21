@@ -251,18 +251,17 @@
     <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.Xamarin.Android\Microsoft.Identity.Client.Xamarin.Android.csproj" />
     -->
   </ItemGroup>
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid10')) ">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid10)' Or '$(TargetFramework)' == '$(TargetFrameworkAndroid11)'">
     <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj" />
     <!--
     old bindings
     <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.Xamarin.Android\Microsoft.Identity.Client.Xamarin.Android.csproj" />
     -->
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid9)' ">
     <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="28.0.0.3" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid10)' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid10)' Or '$(TargetFramework)' == '$(TargetFrameworkAndroid11)'">
     <PackageReference Include="Xamarin.AndroidX.Browser" Version="1.0.0" />
   </ItemGroup>
 

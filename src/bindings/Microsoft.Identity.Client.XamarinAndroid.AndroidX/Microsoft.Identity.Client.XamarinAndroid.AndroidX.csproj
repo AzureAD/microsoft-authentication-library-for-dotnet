@@ -1,6 +1,8 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
   <PropertyGroup>
-    <TargetFrameworks>monoandroid10.0</TargetFrameworks>
+    <TargetFrameworks>monoandroid9.0;monoandroid10.0;monoandroid11.0</TargetFrameworks>
+    <WarningLevel>0</WarningLevel>
+    <LangVersion>latest</LangVersion>
     <IsBindingProject>True</IsBindingProject>
     <RootNamespace>Microsoft.Identity.Client.Xamarin.Android</RootNamespace>
     <AssemblyName>Microsoft.Identity.Client.Xamarin.Android</AssemblyName>
@@ -26,13 +28,6 @@
     -->
   </PropertyGroup>
   
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <LangVersion>latest</LangVersion>
-    <WarningLevel>0</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Properties\**" />
     <EmbeddedResource Remove="Properties\**" />
