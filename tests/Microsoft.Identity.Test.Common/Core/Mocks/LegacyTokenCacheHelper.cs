@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     logger,
                     legacyCachePersistence,
                     TestConstants.ClientId,
-                    TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.ProductionPrefCacheEnvironment,
                     TestConstants.Uid,
                     TestConstants.Utid,
                     $"{i}{TestConstants.DisplayableId}");

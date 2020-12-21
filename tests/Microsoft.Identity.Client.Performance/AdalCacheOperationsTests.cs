@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Engines;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -22,11 +24,13 @@ namespace Microsoft.Identity.Test.Performance
         private ITokenCacheInternal _cache;
         private MsalTokenResponse _response;
         private AuthenticationRequestParameters _requestParams;
+        private RequestContext _requestContext;
+        private readonly Consumer _consumer = new Consumer();
 
         [Params(1, 100, 1000)]
         public int TokenCacheSize { get; set; }
 
-        [Params(true, false)]
+        [ParamsAllValues]
         public bool EnableAdalCache { get; set; }
 
         [GlobalSetup]
@@ -34,6 +38,7 @@ namespace Microsoft.Identity.Test.Performance
         {
             var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isAdalCacheEnabled: EnableAdalCache);
 
+            _requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
             _cache = new TokenCache(serviceBundle, false);
             _response = TestConstants.CreateMsalTokenResponse();
 
@@ -43,7 +48,7 @@ namespace Microsoft.Identity.Test.Performance
                 TestConstants.Utid);
             _requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
 
-            AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefNetworkEnvironment);
+            AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefCacheEnvironment);
 
             LegacyTokenCacheHelper.PopulateLegacyCache(serviceBundle.DefaultLogger, _cache.LegacyPersistence, TokenCacheSize);
             TokenCacheHelper.AddRefreshTokensToCache(_cache.Accessor, TokenCacheSize);
@@ -61,6 +66,19 @@ namespace Microsoft.Identity.Test.Performance
         {
             var result = await _cache.FindRefreshTokenAsync(_requestParams).ConfigureAwait(true);
             return result?.ClientId;
+        }
+
+        [Benchmark(Description = "GetAllUsers")]
+        public async Task GetAllAdalUsersTestAsync()
+        {
+            var result = await _cache.GetAccountsAsync(_requestParams).ConfigureAwait(true);
+            result.Consume(_consumer);
+        }
+
+        [Benchmark(Description = "RemoveUser")]
+        public async Task RemoveAdalUserTestAsync()
+        {
+            await _cache.RemoveAccountAsync(_requestParams.Account, _requestContext).ConfigureAwait(true);
         }
 
         private void AddHostToInstanceCache(IServiceBundle serviceBundle, string host)
