@@ -3,7 +3,7 @@
     <TargetFrameworks>monoandroid10.0</TargetFrameworks>
     <IsBindingProject>True</IsBindingProject>
     <RootNamespace>Microsoft.Identity.Client.Xamarin.Android.AndroidSupport</RootNamespace>
-    <AssemblyName>Microsoft.Identity.Client.Xamarin.Android.AndroidSupport</AssemblyName>
+    <AssemblyName>Microsoft.Identity.Client.Xamarin.Android</AssemblyName>
     <AndroidClassParser>class-parse</AndroidClassParser>
     <AndroidCodegenTarget>XAJavaInterop1</AndroidCodegenTarget>
   </PropertyGroup>

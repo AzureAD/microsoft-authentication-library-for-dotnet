@@ -239,11 +239,24 @@
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+    <!--
+    old bindings
     <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.Xamarin.Android\Microsoft.Identity.Client.Xamarin.Android.csproj" />
+    -->
   </ItemGroup>
-    <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid10')) ">
-    <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj" />
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid9')) ">
+    <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidSupport.csproj" />
+    <!--
+    old bindings
     <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.Xamarin.Android\Microsoft.Identity.Client.Xamarin.Android.csproj" />
+    -->
+  </ItemGroup>
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid10')) ">
+    <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj" />
+    <!--
+    old bindings
+    <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.Xamarin.Android\Microsoft.Identity.Client.Xamarin.Android.csproj" />
+    -->
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid9)' ">
