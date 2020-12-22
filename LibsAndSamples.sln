@@ -90,15 +90,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.X
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSAL.XamarinForms", "MSAL.XamarinForms", "{E3284230-BD8E-413B-A188-8FFE79753E8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSAL.XamarinForms", "tests\devapps\MSAL.XamarinForms\MSAL.XamarinForms\MSAL.XamarinForms.csproj", "{2FEC2439-F941-4882-BE7F-833F782F4778}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSAL.XamarinForms", "tests\devapps\MSAL.XamarinForms\MSAL.XamarinForms\MSAL.XamarinForms.csproj", "{2FEC2439-F941-4882-BE7F-833F782F4778}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSAL.XamarinForms.iOS", "tests\devapps\MSAL.XamarinForms\MSAL.XamarinForms.iOS\MSAL.XamarinForms.iOS.csproj", "{7657878D-D715-450C-9DF3-5732B021A092}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSAL.XamarinForms.Android", "tests\devapps\MSAL.XamarinForms\MSAL.XamarinForms.Android\MSAL.XamarinForms.Android.csproj", "{43D71339-2856-40F7-92B6-FAE265303FF7}"
 EndProject
-Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "Microsoft.Identity.Client.Ref", "src\client\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{A3260853-2283-49B1-8B48-B8D856C04F08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Ref", "src\client\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{A3260853-2283-49B1-8B48-B8D856C04F08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidSupport", "src\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidSupport\Microsoft.Identity.Client.XamarinAndroid.AndroidSupport.csproj", "{5F7E8E89-5487-44FA-8BF9-AB65126102B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidSupport", "src\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidSupport\Microsoft.Identity.Client.XamarinAndroid.AndroidSupport.csproj", "{5F7E8E89-5487-44FA-8BF9-AB65126102B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
