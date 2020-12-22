@@ -245,7 +245,7 @@
     -->
   </ItemGroup>
   <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid9')) ">
-    <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidSupport.csproj" />
+    <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidSupport\Microsoft.Identity.Client.XamarinAndroid.AndroidSupport.csproj" />
     <!--
     old bindings
     <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.Xamarin.Android\Microsoft.Identity.Client.Xamarin.Android.csproj" />
