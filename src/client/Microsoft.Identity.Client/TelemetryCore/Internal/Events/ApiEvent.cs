@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string RegionSourceKey = EventNamePrefix + "region_source";
         public const string IsTokenCacheSerializedKey = EventNamePrefix + "is_token_cache_serialized";
         public const string ValidateUseRegionKey = EventNamePrefix + "validate_use_region";
+        public const string FallbackToGlobal = EventNamePrefix + "fallback_to_global";
 
         public enum ApiIds
         {
@@ -174,6 +175,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         {
             get => this.ContainsKey(ValidateUseRegionKey) ? this[ValidateUseRegionKey] : null;
             set => this[ValidateUseRegionKey] = value;
+        }
+
+        public string FallBackToGlobal
+        {
+            get => this.ContainsKey(FallbackToGlobal) ? this[FallbackToGlobal] : null;
+            set => this[FallbackToGlobal] = value;
         }
 
         public bool IsTokenCacheSerialized

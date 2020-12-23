@@ -230,6 +230,7 @@ namespace Microsoft.Identity.Client.Region
                     if (requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
                     {
                         requestContext.Logger.Info($"Attempting to fall back to global region");
+                        requestContext.ApiEvent.FallBackToGlobal = "1";
                         return null;
                     }
 
