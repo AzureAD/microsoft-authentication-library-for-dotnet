@@ -100,6 +100,37 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Specifies if the token request should be sent to regional ESTS.
+        /// If set, MSAL tries to auto-detect and use a regional Azure authority. This helps keep the authentication traffic inside the Azure region. 
+        /// If the region cannot be determined (e.g. not running on Azure), MSALClientException is thrown with error code region_discovery_failed.
+        /// This feature requires configuration at tenant level.
+        /// By default the value for this variable is false.
+        /// See https://aka.ms/msal-net-region-discovery for more details.
+        /// </summary>
+        /// <param name="autoDetectRegion"><c>true</c> if the token request should be sent to regional ESTS. The default is <c>false</c>.
+        /// </param>
+        /// <param name="fallbackToGlobal"></param>
+        /// <param name="useRegion"> optional parameter to provide region to MSAL. This parameter will be used along with auto detection of region.
+        /// If the region is auto detected, the provided region will be compared with the detected region and used in telemetry to do analysis on correctness of the region provided.
+        /// If auto region detection fails, the provided region will be used for instance metadata.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenForClientParameterBuilder WithAzureRegion(bool autoDetectRegion, bool fallbackToGlobal, string useRegion = "")
+        {
+            if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithAzureRegion)));
+            }
+
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAzureRegion, autoDetectRegion);
+            Parameters.AutoDetectRegion = autoDetectRegion;
+            Parameters.UseRegion = useRegion;
+            Parameters.FallbackToGlobal = fallbackToGlobal;
+            return this;
+        }
+
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

@@ -55,6 +55,12 @@ namespace Microsoft.Identity.Client.Region
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
+
+            if (regionalizedAuthority == null && requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
+            {
+                return null;
+            }
+
             InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, requestContext.Logger);
 
             if (cachedEntry == null)
@@ -221,6 +227,12 @@ namespace Microsoft.Identity.Client.Region
                 }
                 catch (MsalServiceException e)
                 {
+                    if (requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
+                    {
+                        requestContext.Logger.Info($"Attempting to fall back to global region");
+                        return null;
+                    }
+
                     if (useRegion.IsNullOrEmpty())
                     {
                         throw e;

@@ -126,7 +126,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             if (autoDetectRegion)
             {
-                return await _regionDiscoveryProvider.GetMetadataAsync(new Uri(authority), requestContext).ConfigureAwait(false);
+                var autoDetectedRegion =  await _regionDiscoveryProvider.GetMetadataAsync(new Uri(authority), requestContext).ConfigureAwait(false);
+
+                //If the auto detected region is null, this indicates that the FallbackToGlobal parameter was set and the GetMetadataAsync failed to get the region.
+                //This will now fallback to using the metadata acquitition from global
+                if (autoDetectedRegion != null)
+                    return autoDetectedRegion;
             }
 
             AuthorityType type = Authority.GetAuthorityType(authority);

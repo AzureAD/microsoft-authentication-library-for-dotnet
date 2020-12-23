@@ -66,6 +66,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             requestParams.SendX5C = clientParameters.SendX5C;
             requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion = clientParameters.AutoDetectRegion;
+            requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal = clientParameters.FallbackToGlobal;
             requestContext.ServiceBundle.Config.AuthorityInfo.UseRegion = clientParameters.UseRegion;
 
             var handler = new ClientCredentialRequest(
