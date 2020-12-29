@@ -111,6 +111,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             Assert.IsNotNull(regionalMetadata);
             Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+            regionDiscoveryProvider.Clear();
         }
 
         [TestMethod]
@@ -126,6 +127,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
                 Assert.IsNotNull(regionalMetadata);
                 Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+                regionDiscoveryProvider.Clear();
             }
             finally
             {
@@ -146,6 +148,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
                 Assert.IsNotNull(regionalMetadata);
                 Assert.AreEqual("eastus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+                regionDiscoveryProvider.Clear();
             }
             finally
             {
