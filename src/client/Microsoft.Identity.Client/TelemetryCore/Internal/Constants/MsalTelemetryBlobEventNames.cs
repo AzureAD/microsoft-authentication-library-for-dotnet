@@ -27,6 +27,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Constants
         public const string RegionDiscovered = "msal.region_discovered";
         public const string RegionSource = "msal.region_source";
         public const string IsTokenCacheSerializedKey = "msal.is_token_cache_serialized";
-        public const string ValidateUseRegionKey = "msal.validate_use_region";
+        public const string IsValidUserProvidedRegion = "msal.is_valid_user_provided_region";
     }
 }

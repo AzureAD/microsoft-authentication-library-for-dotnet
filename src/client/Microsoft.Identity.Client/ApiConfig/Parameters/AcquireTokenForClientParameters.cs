@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         /// <summary>
         /// </summary>
-        public string UseRegion { get; set; }
+        public string RegionToUse { get; set; }
 
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)
@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             builder.AppendLine("=== AcquireTokenForClientParameters ===");
             builder.AppendLine("SendX5C: " + SendX5C);
             builder.AppendLine("WithAzureRegion: " + AutoDetectRegion);
-            builder.AppendLine("UseRegion: " + UseRegion);
+            builder.AppendLine("RegionToUse: " + RegionToUse);
             builder.AppendLine("ForceRefresh: " + ForceRefresh);
             logger.Info(builder.ToString());
         }

@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string RegionDiscoveredKey = EventNamePrefix + "region_discovered";
         public const string RegionSourceKey = EventNamePrefix + "region_source";
         public const string IsTokenCacheSerializedKey = EventNamePrefix + "is_token_cache_serialized";
-        public const string ValidateUseRegionKey = EventNamePrefix + "validate_use_region";
+        public const string IsValidUserProvidedRegionKey = EventNamePrefix + "is_valid_user_provided_region";
 
         public enum ApiIds
         {
@@ -170,10 +170,22 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             set => this[RegionSourceKey] = (value).ToString(CultureInfo.InvariantCulture);
         }
 
-        public string ValidateUseRegion
+        public bool? IsValidUserProvidedRegion
         {
-            get => this.ContainsKey(ValidateUseRegionKey) ? this[ValidateUseRegionKey] : null;
-            set => this[ValidateUseRegionKey] = value;
+#pragma warning disable CA1305 // .net standard does not have an overload for ToString() with Culture
+            set { this[IsValidUserProvidedRegionKey] = value.ToString().ToLowerInvariant(); }
+            get 
+            {
+                if (this.ContainsKey(IsValidUserProvidedRegionKey))
+                {
+                    return this[IsValidUserProvidedRegionKey] == true.ToString().ToLowerInvariant();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
 
         public bool IsTokenCacheSerialized

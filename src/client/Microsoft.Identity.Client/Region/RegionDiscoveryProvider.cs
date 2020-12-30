@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<Uri> BuildAuthorityWithRegionAsync(Uri canonicalAuthority, RequestContext requestContext)
         {
-            string useRegion = requestContext.ServiceBundle.Config.AuthorityInfo.UseRegion;
+            string regionToUse = requestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse;
 
             if (s_region.IsNullOrEmpty())
             {
@@ -214,20 +214,20 @@ namespace Microsoft.Identity.Client.Region
                 {
                     s_region = await GetRegionAsync(requestContext).ConfigureAwait(false);
 
-                    if (!useRegion.IsNullOrEmpty())
+                    if (!regionToUse.IsNullOrEmpty())
                     {
-                        requestContext.ApiEvent.ValidateUseRegion = s_region.Equals(useRegion) ? "1" : "0";
+                        requestContext.ApiEvent.IsValidUserProvidedRegion = s_region.Equals(regionToUse);
                     }
                 }
                 catch (MsalServiceException e)
                 {
-                    if (useRegion.IsNullOrEmpty())
+                    if (regionToUse.IsNullOrEmpty())
                     {
                         throw e;
                     }
 
-                    s_region = useRegion;
-                    LogTelemetryData(s_region, RegionSource.Userprovided, requestContext);
+                    s_region = regionToUse;
+                    LogTelemetryData(s_region, RegionSource.UserProvided, requestContext);
                 }
             }
 

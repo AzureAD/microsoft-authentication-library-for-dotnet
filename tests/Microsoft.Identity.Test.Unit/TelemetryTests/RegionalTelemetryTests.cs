@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         /// <summary>
-        /// Acquire token for client with useRegion when auto region discovery fails
+        /// Acquire token for client with regionToUse when auto region discovery fails
         ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1,
         ///    Last_request = 2 | 0 | | |
         /// </summary>
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         /// <summary>
-        /// Acquire token for client with useRegion when auto region discovery passes with region same as useRegion
+        /// Acquire token for client with regionToUse when auto region discovery passes with region same as regionToUse
         ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, 1
         ///    Last_request = 2 | 0 | | |
         /// </summary>
@@ -168,14 +168,14 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             {
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                Trace.WriteLine("Acquire token for client with region provided by user and region detected is same as useRegion.");
+                Trace.WriteLine("Acquire token for client with region provided by user and region detected is same as regionToUse.");
                 var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest,
                     ApiIds.AcquireTokenForClient,
                     forceRefresh: false,
                     "1",
                     isCacheSerialized: false,
-                    validateUseRegion: "1");
+                    isvalidUserProvidedRegion: "1");
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
             }
             finally
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         /// <summary>
-        /// Acquire token for client with useRegion when auto region discovery passes with region different from useRegion
+        /// Acquire token for client with regionToUse when auto region discovery passes with region different from regionToUse
         ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, 0
         ///    Last_request = 2 | 0 | | |
         /// </summary>
@@ -196,14 +196,14 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             {
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                Trace.WriteLine("Acquire token for client with region provided by user and region detected is different from useRegion.");
+                Trace.WriteLine("Acquire token for client with region provided by user and region detected is different from regionToUse.");
                 var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedInvalidRegion).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest,
                     ApiIds.AcquireTokenForClient,
                     forceRefresh: false,
                     "1",
                     isCacheSerialized: false,
-                    validateUseRegion: "0");
+                    isvalidUserProvidedRegion: "0");
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
             }
             finally
@@ -310,7 +310,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             bool forceRefresh,
             string regionSource,
             bool isCacheSerialized = false,
-            string validateUseRegion = "")
+            string isvalidUserProvidedRegion = "")
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single();
@@ -330,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(isCacheSerialized ? "1" : "0", platformConfig[2]);
             Assert.AreEqual(TestConstants.Region, platformConfig[0]);
             Assert.AreEqual(regionSource, platformConfig[1]);
-            Assert.AreEqual(validateUseRegion, platformConfig[3]);
+            Assert.AreEqual(isvalidUserProvidedRegion, platformConfig[3]);
         }
 
         private static void AssertPreviousTelemetry(
