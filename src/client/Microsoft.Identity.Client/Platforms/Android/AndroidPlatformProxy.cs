@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 return OverloadBrokerForTest;
             }
 
-            return new AndroidBroker(uIParent, Logger);
+            return new AndroidContentProviderBroker(uIParent, Logger);
         }
 
         public override bool CanBrokerSupportSilentAuth()

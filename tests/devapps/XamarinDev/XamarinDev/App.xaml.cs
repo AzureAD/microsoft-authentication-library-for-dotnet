@@ -14,7 +14,7 @@ namespace XamarinDev
 
         public static object RootViewController { get; set; }
 #if !IS_APPCENTER_BUILD
-        public const string DefaultClientId = "4a1aa1d5-c567-49d0-ad0b-cd957a47f842"; // in msidentity-samples-testing tenant -> PublicClientSample
+        public const string DefaultClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8"; // in msidentity-samples-testing tenant -> PublicClientSample
 #else
         public const string DefaultClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8"; // UI Automation Test App ID
 #endif
@@ -31,7 +31,7 @@ namespace XamarinDev
                     case Device.Android:
 #if !IS_APPCENTER_BUILD
                         //This value needs to be calculated from the certificate used to sign the package. See https://aka.ms/MSAL_NET_Broker_Redirect_URI
-                        return "Broker Redirect URI";
+                        return "msauth://com.companyname.xamarindev/Fy2zjTiLYs5sXM3sGy+PGcv8MaQ=";
 #else
                         return "msauth://com.companyname.xamarindev/Fy2zjTiLYs5sXM3sGy+PGcv8MaQ=";
 #endif

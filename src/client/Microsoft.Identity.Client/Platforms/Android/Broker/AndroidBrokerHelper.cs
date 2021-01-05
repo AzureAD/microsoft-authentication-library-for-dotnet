@@ -19,8 +19,10 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.OAuth2;
 using OperationCanceledException = Android.Accounts.OperationCanceledException;
+using AndroidUri = Android.Net.Uri;
+using Android.Database;
+using Microsoft.Identity.Client.Platforms.Android.Broker.Requests;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -387,6 +389,35 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
                 }
             }
+        }
+
+        public async Task InitiateCRBrokerHandshakeAsync(Activity callerActivity)
+        {
+            //var loader = new CursorLoader(callerActivity,
+            //    AndroidUri.Parse(GetContentProviderURI(Application.Context, "/hello")),
+            //    null,
+            //    null,
+            //    null,
+            //    null);
+
+            //var cursor = (ICursor)loader.LoadInBackground();
+
+            var temp1 = BrokerHandshakeRequest.AsJsonString();
+
+            var cursor = callerActivity.ContentResolver.Query(AndroidUri.Parse(GetContentProviderURI(Application.Context, "/hello")),
+                null,
+                "",
+                null,
+                null);
+
+            var temp = cursor.Extras;
+            var temp2 = temp;
+            return;
+        }
+
+        private string GetContentProviderURI(Context context, string path)
+        {
+            return "content://com.microsoft.windowsintune.companyportal.microsoft.identity.broker/hello";
         }
 
         private Handler GetPreferredLooper(Activity callerActivity)
