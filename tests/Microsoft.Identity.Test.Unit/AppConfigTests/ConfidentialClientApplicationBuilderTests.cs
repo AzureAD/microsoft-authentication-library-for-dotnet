@@ -338,5 +338,17 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
         }
+
+        [TestMethod]
+        public void TestConstructor_WithAdalCacheCompatibility()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithClientSecret(TestConstants.ClientSecret)
+                      .WithAdalCacheCompatibility(true)
+                      .Build();
+
+            Assert.AreEqual(true, cca.AppConfig.AdalCacheCompatibilityEnabled);
+        }
     }
 }

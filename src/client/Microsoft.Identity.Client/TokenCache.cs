@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         private ICoreLogger Logger => ServiceBundle.DefaultLogger;
 
         internal IServiceBundle ServiceBundle { get; }
-        internal ILegacyCachePersistence LegacyCachePersistence { get; }
+        internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
         internal string ClientId => ServiceBundle.Config.ClientId;
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
