@@ -191,14 +191,16 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Enables ADAL cache serialialization and deserialization.
+        /// Enables ADAL cache serialization and deserialization.
         /// </summary>
         /// <param name="enableAdalCacheCompatibility">Enable ADAL cache compatibility.</param>
         /// <returns>The builder to chain the .With methods.</returns>
         /// <remarks>
-        /// ADAL is a previous generation of this authentication library. This flag is only needed for 
-        /// specific migration scenarios from ADAL.NET to MSAL.NET when both library versions are running side-by-side.
-        /// Enabling this flag has a performance impact on token cache access.
+        /// ADAL is a previous legacy generation of MSAL.NET authentication library. 
+        /// If you don't use <c>.WithAdalCacheCompatiblity(false)</c>, then by default, the ADAL cache is used
+        /// (along with MSAL cache). <c>true</c> flag is only needed for specific migration scenarios 
+        /// from ADAL.NET to MSAL.NET when both library versions are running side-by-side.
+        /// To improve performance add <c>.WithAdalCacheCompatiblity(false)</c> unless you care about migration scenarios.
         /// </remarks>
         public T WithAdalCacheCompatibility(bool enableAdalCacheCompatibility = true)
         {
