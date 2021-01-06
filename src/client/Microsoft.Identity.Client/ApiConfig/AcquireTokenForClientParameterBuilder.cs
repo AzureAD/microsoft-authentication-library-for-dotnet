@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="autoDetectRegion"><c>true</c> if the token request should be sent to regional ESTS. The default is <c>false</c>.
         /// </param>
-        /// <param name="fallbackToGlobal"></param>
+        /// <param name="fallbackToGlobal"><c>true</c> to fallback to global ESTS endpoint when calls to regional ESTS fail.</param>
         /// <param name="useRegion"> optional parameter to provide region to MSAL. This parameter will be used along with auto detection of region.
         /// If the region is auto detected, the provided region will be compared with the detected region and used in telemetry to do analysis on correctness of the region provided.
         /// If auto region detection fails, the provided region will be used for instance metadata.</param>
