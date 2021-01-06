@@ -103,15 +103,22 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task SuccessfulResponseFromUserProvidedRegionAsync()
         {
-            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
-            _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = TestConstants.Region;
+            try
+            {
+                AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+                _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = TestConstants.Region;
 
-            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-            InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-            Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
-            regionDiscoveryProvider.Clear();
+                Assert.IsNotNull(regionalMetadata);
+                Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+                regionDiscoveryProvider.Clear();
+            }
+            finally
+            {
+                _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = "";
+            }
         }
 
         [TestMethod]
@@ -132,6 +139,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             finally
             {
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
+                _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = "";
             }
         }
 
@@ -153,6 +161,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             finally
             {
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
+                _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = "";
             }
         }
 
