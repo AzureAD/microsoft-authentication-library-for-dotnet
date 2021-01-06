@@ -143,11 +143,8 @@ namespace Microsoft.Identity.Client.Region
         private void LogTelemetryData(string region, RegionSource regionSource, RequestContext requestContext)
         {
             requestContext.ApiEvent.RegionDiscovered = region;
-
-            if (requestContext.ApiEvent.RegionSource == 0)
-            {
-                requestContext.ApiEvent.RegionSource = (int) regionSource;
-            }
+            requestContext.ApiEvent.RegionSource = (int) regionSource;
+            requestContext.ApiEvent.UserProvidedRegion = requestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse;
         }
 
         private async Task<string> GetImdsUriApiVersionAsync(ICoreLogger logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
@@ -217,6 +214,15 @@ namespace Microsoft.Identity.Client.Region
                     if (!regionToUse.IsNullOrEmpty())
                     {
                         requestContext.ApiEvent.IsValidUserProvidedRegion = s_region.Equals(regionToUse);
+                        requestContext.Logger.Info($"The auto detected region is {s_region}.");
+                        if (s_region.Equals(regionToUse))
+                        {
+                            requestContext.Logger.Info("The region provided by the user is valid and equal to the auto detected region.");
+                        }
+                        else
+                        {
+                            requestContext.Logger.Info($"The region provided by the user is invalid. Region detected: {s_region} Region provided: {regionToUse}");
+                        }
                     }
                 }
                 catch (MsalServiceException e)

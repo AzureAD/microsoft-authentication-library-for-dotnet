@@ -120,6 +120,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionDiscovered, out string regionDiscovered);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionSource, out string regionSource);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsTokenCacheSerializedKey, out string isTokenCacheSerialized);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.UserProvidedRegion, out string userProvidedRegion);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsValidUserProvidedRegion, out string isValidUserProvidedRegion);
 
             // Since regional fields will only be logged in case it is opted.
@@ -127,6 +128,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             platformConfig.Append(regionDiscovered + ",");
             platformConfig.Append(regionSource + ",");
             platformConfig.Append(ConvertFromStringToBitwise(isTokenCacheSerialized) + ",");
+            platformConfig.Append(userProvidedRegion + ",");
             platformConfig.Append(string.IsNullOrEmpty(isValidUserProvidedRegion) ? isValidUserProvidedRegion : ConvertFromStringToBitwise(isValidUserProvidedRegion)); //The value for this will be 1 if the region provided is valid, 0 if invalid and "" in case it could not be validated.
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +

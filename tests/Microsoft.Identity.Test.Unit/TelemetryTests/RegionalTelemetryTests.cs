@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// Acquire token for client with regionToUse when auto region discovery fails
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1,
+        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, centralus,
         ///    Last_request = 2 | 0 | | |
         /// </summary>
         [TestMethod]
@@ -152,13 +152,14 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 ApiIds.AcquireTokenForClient,
                 forceRefresh: false,
                 "4",
-                isCacheSerialized: false);
+                isCacheSerialized: false,
+                userProvidedRegion: TestConstants.Region);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
         }
 
         /// <summary>
         /// Acquire token for client with regionToUse when auto region discovery passes with region same as regionToUse
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, 1
+        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, centralus, 1
         ///    Last_request = 2 | 0 | | |
         /// </summary>
         [TestMethod]
@@ -175,6 +176,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     forceRefresh: false,
                     "1",
                     isCacheSerialized: false,
+                    userProvidedRegion: TestConstants.Region,
                     isvalidUserProvidedRegion: "1");
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
             }
@@ -186,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// Acquire token for client with regionToUse when auto region discovery passes with region different from regionToUse
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, 0
+        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, invalid, 0
         ///    Last_request = 2 | 0 | | |
         /// </summary>
         [TestMethod]
@@ -203,6 +205,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     forceRefresh: false,
                     "1",
                     isCacheSerialized: false,
+                    userProvidedRegion: "invalid",
                     isvalidUserProvidedRegion: "0");
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
             }
@@ -310,6 +313,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             bool forceRefresh,
             string regionSource,
             bool isCacheSerialized = false,
+            string userProvidedRegion = "",
             string isvalidUserProvidedRegion = "")
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(
@@ -330,7 +334,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(isCacheSerialized ? "1" : "0", platformConfig[2]);
             Assert.AreEqual(TestConstants.Region, platformConfig[0]);
             Assert.AreEqual(regionSource, platformConfig[1]);
-            Assert.AreEqual(isvalidUserProvidedRegion, platformConfig[3]);
+            Assert.AreEqual(userProvidedRegion, platformConfig[3]);
+            Assert.AreEqual(isvalidUserProvidedRegion, platformConfig[4]);
         }
 
         private static void AssertPreviousTelemetry(
