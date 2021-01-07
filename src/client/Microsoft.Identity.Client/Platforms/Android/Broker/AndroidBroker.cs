@@ -25,10 +25,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
     [AndroidNative.Runtime.Preserve(AllMembers = true)]
     internal class AndroidBroker : IBroker
     {
-        // When the broker responds, we cannot correlate back to a started task. 
-        // So we make a simplifying assumption - only one broker open session can exist at a time
-        // This semaphore is static to enforce this
-        private static SemaphoreSlim s_readyForResponse = new SemaphoreSlim(0);
 
         private static MsalTokenResponse s_androidBrokerTokenResponse = null;
         //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and re-injected into the response at the end.
@@ -36,9 +32,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private readonly AndroidBrokerHelper _brokerHelper;
         private readonly ICoreLogger _logger;
         private readonly Activity _parentActivity;
+        private AndroidContentProviderBroker broker2;
 
         public AndroidBroker(CoreUIParent uiParent, ICoreLogger logger)
         {
+            broker2 = new AndroidContentProviderBroker(uiParent, logger);
             _parentActivity = uiParent?.Activity;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             AuthenticationContinuationHelper.LastRequestLogger = _logger;
@@ -81,32 +79,34 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            CheckPowerOptimizationStatus();
+            return await broker2.AcquireTokenInteractiveAsync(authenticationRequestParameters, acquireTokenInteractiveParameters).ConfigureAwait(false);
 
-            s_androidBrokerTokenResponse = null;
+            //CheckPowerOptimizationStatus();
 
-            BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(
-                authenticationRequestParameters, acquireTokenInteractiveParameters);
+            //s_androidBrokerTokenResponse = null;
 
-            // There can only be 1 broker request at a time so keep track of the correlation id
-            s_correlationId = brokerRequest.CorrelationId;
+            //BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(
+            //    authenticationRequestParameters, acquireTokenInteractiveParameters);
 
-            try
-            {
-                await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
-                await AcquireTokenInteractiveViaBrokerAsync(brokerRequest).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger.ErrorPiiWithPrefix(ex, "Android broker interactive invocation failed. ");
-                HandleBrokerOperationError(ex);
-            }
+            //// There can only be 1 broker request at a time so keep track of the correlation id
+            //s_correlationId = brokerRequest.CorrelationId;
 
-            using (_logger.LogBlockDuration("Waiting for Android broker response. "))
-            {
-                await s_readyForResponse.WaitAsync().ConfigureAwait(false);
-                return s_androidBrokerTokenResponse;
-            }
+            //try
+            //{
+            //    await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+            //    await AcquireTokenInteractiveViaBrokerAsync(brokerRequest).ConfigureAwait(false);
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.ErrorPiiWithPrefix(ex, "Android broker interactive invocation failed. ");
+            //    HandleBrokerOperationError(ex);
+            //}
+
+            //using (_logger.LogBlockDuration("Waiting for Android broker response. "))
+            //{
+            //    await AndroidBrokerHelper.ReadyForResponse.WaitAsync().ConfigureAwait(false);
+            //    return s_androidBrokerTokenResponse;
+            //}
         }
 
         public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
             finally
             {
-                s_readyForResponse.Release();
+                AndroidBrokerHelper.ReadyForResponse.Release();
             }
         }
 

@@ -27,11 +27,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
     [AndroidNative.Runtime.Preserve(AllMembers = true)]
     internal class AndroidContentProviderBroker : IBroker
     {
-        // When the broker responds, we cannot correlate back to a started task. 
-        // So we make a simplifying assumption - only one broker open session can exist at a time
-        // This semaphore is static to enforce this
-        private static SemaphoreSlim s_readyForResponse = new SemaphoreSlim(0);
-
         private static MsalTokenResponse s_androidBrokerTokenResponse = null;
         //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and re-injected into the response at the end.
         private static string s_correlationId;
@@ -96,7 +91,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             try
             {
                 _brokerHelper.InitiateCRBrokerHandshakeAsync(_parentActivity);
-                await AcquireTokenInteractiveViaBrokerAsync(brokerRequest).ConfigureAwait(false);
+                await Task.Run(() => AcquireTokenInteractiveViaBrokerAsync(brokerRequest)).ConfigureAwait(false);
+                
             }
             catch (Exception ex)
             {
@@ -106,7 +102,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             using (_logger.LogBlockDuration("Waiting for Android broker response. "))
             {
-                await s_readyForResponse.WaitAsync().ConfigureAwait(false);
+                await AndroidBrokerHelper.ReadyForResponse.WaitAsync().ConfigureAwait(false);
                 return s_androidBrokerTokenResponse;
             }
         }
@@ -134,7 +130,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        private async Task AcquireTokenInteractiveViaBrokerAsync(BrokerRequest brokerRequest)
+        private void AcquireTokenInteractiveViaBrokerAsync(BrokerRequest brokerRequest)
         {
             using (_logger.LogMethodDuration())
             {
@@ -171,10 +167,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                 var interactiveIntent = brokerIntent.PutExtras(_brokerHelper.GetInteractiveBrokerBundle(brokerRequest));
                 interactiveIntent.PutExtra(BrokerConstants.CallerInfoUID, Binder.CallingUid);
-                var test = AndroidNative.OS.Process.MyUid();
 
                 Bundle requestbundle = new Bundle();
-                //_negotiatedBrokerProtocalKey
 
                 if (interactiveIntent != null)
                 {
@@ -303,7 +297,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
             finally
             {
-                s_readyForResponse.Release();
+                AndroidBrokerHelper.ReadyForResponse.Release();
             }
         }
 

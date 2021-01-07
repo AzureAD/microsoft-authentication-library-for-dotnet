@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
                 //The BrokerRequestId is an ID that is attached to the activity launch during brokered authentication
                 // that indicates that the response returned to this class is for the broker.
                 LastRequestLogger?.Info("Processing result from broker.");
-                AndroidBroker.SetBrokerResult(data, (int)resultCode, LastRequestLogger);
+                AndroidContentProviderBroker.SetBrokerResult(data, (int)resultCode, LastRequestLogger);
                 return;
             }
 

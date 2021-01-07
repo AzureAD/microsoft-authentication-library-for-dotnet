@@ -24,6 +24,7 @@ using AndroidUri = Android.Net.Uri;
 using Android.Database;
 using Microsoft.Identity.Client.Platforms.Android.Broker.Requests;
 using Microsoft.Identity.Json.Utilities;
+using System.Threading;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -35,6 +36,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public const string WorkAccount = "com.microsoft.workaccount.user.info";
 
         private readonly Context _androidContext;
+
+        // When the broker responds, we cannot correlate back to a started task. 
+        // So we make a simplifying assumption - only one broker open session can exist at a time
+        // This semaphore is static to enforce this
+        public static SemaphoreSlim ReadyForResponse { get; set; } = new SemaphoreSlim(0);
 
         // Important: this object MUST be accessed on a background thread. Android will check this and throw otherwise.
         private readonly AccountManager _androidAccountManager;
@@ -439,8 +445,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                     _logger.Error(errorDescription);
                     throw new MsalClientException(errorCode, errorDescription);
-
-                    return;
                 }
                 catch
                 {
