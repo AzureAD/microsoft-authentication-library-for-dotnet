@@ -223,6 +223,7 @@ namespace Microsoft.Identity.Client.Region
                     if (!useRegion.IsNullOrEmpty())
                     {
                         requestContext.ApiEvent.ValidateUseRegion = s_region.Equals(useRegion) ? "1" : "0";
+                        requestContext.ApiEvent.FallBackToGlobal = "0";
                     }
                 }
                 catch (MsalServiceException e)
