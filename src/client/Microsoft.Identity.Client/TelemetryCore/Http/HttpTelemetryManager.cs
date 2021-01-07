@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
         /// <summary>
         /// Expected format: 2|api_id,force_refresh|platform_config
-        /// platform_config: region,region_source,is_token_cache_serialized,validate_use_region
+        /// platform_config: region,region_source,is_token_cache_serialized,user_provided_region,validate_use_region
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
         {
