@@ -19,6 +19,8 @@ using Microsoft.Identity.Client.Http;
 using System.Net;
 using Android.OS;
 using System.Linq;
+using AndroidUri = Android.Net.Uri;
+using Android.Accounts;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -93,7 +95,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             try
             {
-                await _brokerHelper.InitiateCRBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+                _brokerHelper.InitiateCRBrokerHandshakeAsync(_parentActivity);
                 await AcquireTokenInteractiveViaBrokerAsync(brokerRequest).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -140,11 +142,41 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 // Launching this activity will switch to the broker app.
 
                 _logger.Verbose("Starting Android Broker interactive authentication. ");
-                Intent brokerIntent = await _brokerHelper
-                    .GetIntentForInteractiveBrokerRequestAsync(brokerRequest, _parentActivity)
-                    .ConfigureAwait(false);
 
-                if (brokerIntent != null)
+                var cursor = _parentActivity.ContentResolver.Query(AndroidUri.Parse(_brokerHelper.GetContentProviderURI(Application.Context, "/acquireTokenInteractive")),
+                                                                    null,
+                                                                    null,
+                                                                    null,
+                                                                    null);
+
+                if (cursor == null)
+                {
+                    throw new MsalClientException("broker_error", "Cursor is null.");
+                }
+
+                Bundle bundleResult = cursor.Extras;
+                string packageName = bundleResult.GetString("broker.package.name");
+                string className = bundleResult.GetString("broker.activity.name");
+                string uid = bundleResult.GetString("caller.info.uid");
+
+                Intent brokerIntent = new Intent();
+                brokerIntent.SetPackage(packageName);
+                brokerIntent.SetClassName(
+                        packageName,
+                        className
+                );
+
+                brokerIntent.PutExtras(bundleResult);
+                brokerIntent.PutExtra(BrokerConstants.NegotiatedBPVersionKey, _brokerHelper.NegotiatedBrokerProtocalKey);
+
+                var interactiveIntent = brokerIntent.PutExtras(_brokerHelper.GetInteractiveBrokerBundle(brokerRequest));
+                interactiveIntent.PutExtra(BrokerConstants.CallerInfoUID, Binder.CallingUid);
+                var test = AndroidNative.OS.Process.MyUid();
+
+                Bundle requestbundle = new Bundle();
+                //_negotiatedBrokerProtocalKey
+
+                if (interactiveIntent != null)
                 {
                     try
                     {
@@ -153,7 +185,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             + " tid:" + AndroidNative.OS.Process.MyTid() + "uid:"
                             + AndroidNative.OS.Process.MyUid());
 
-                        _parentActivity.StartActivityForResult(brokerIntent, 1001);
+                        _parentActivity.StartActivityForResult(interactiveIntent, 1001);
                     }
                     catch (ActivityNotFoundException e)
                     {

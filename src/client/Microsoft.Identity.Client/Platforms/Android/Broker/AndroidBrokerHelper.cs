@@ -23,6 +23,7 @@ using OperationCanceledException = Android.Accounts.OperationCanceledException;
 using AndroidUri = Android.Net.Uri;
 using Android.Database;
 using Microsoft.Identity.Client.Platforms.Android.Broker.Requests;
+using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -40,6 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private readonly ICoreLogger _logger;
 
         private const long AccountManagerTimeoutSeconds = 5 * 60;
+        public string NegotiatedBrokerProtocalKey { get; set; }
 
         public AndroidBrokerHelper(Context androidContext, ICoreLogger logger)
         {
@@ -391,33 +393,66 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        public async Task InitiateCRBrokerHandshakeAsync(Activity callerActivity)
+        public void InitiateCRBrokerHandshakeAsync(Activity callerActivity)
         {
-            //var loader = new CursorLoader(callerActivity,
-            //    AndroidUri.Parse(GetContentProviderURI(Application.Context, "/hello")),
-            //    null,
-            //    null,
-            //    null,
-            //    null);
+            using (_logger.LogMethodDuration())
+            {
+                try
+                {
+                    var RequestString = BrokerHandshakeHelper.AsJsonString();
 
-            //var cursor = (ICursor)loader.LoadInBackground();
+                    var cursor = callerActivity.ContentResolver.Query(AndroidUri.Parse(GetContentProviderURI(Application.Context, "/hello")),
+                        null,
+                        RequestString,
+                        null,
+                        null);
 
-            var temp1 = BrokerHandshakeRequest.AsJsonString();
+                    if (cursor == null)
+                    {
+                        throw new MsalClientException("broker_error", "Cursor is null.");
+                    }
 
-            var cursor = callerActivity.ContentResolver.Query(AndroidUri.Parse(GetContentProviderURI(Application.Context, "/hello")),
-                null,
-                "",
-                null,
-                null);
+                    Bundle bundleResult = cursor.Extras;
+                    NegotiatedBrokerProtocalKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
 
-            var temp = cursor.Extras;
-            var temp2 = temp;
-            return;
+                    if (!string.IsNullOrEmpty(NegotiatedBrokerProtocalKey))
+                    {
+                        _logger.Info("Using broker protocol version: " + NegotiatedBrokerProtocalKey);
+                        return;
+                    }
+
+                    dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
+                    string errorCode = null;
+                    string errorDescription = null;
+
+                    if (!string.IsNullOrEmpty(errorResult))
+                    {
+                        errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+                        string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                        errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
+                    }
+                    else
+                    {
+                        errorCode = BrokerConstants.BrokerUnknownErrorCode;
+                        errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned. ";
+                    }
+
+                    _logger.Error(errorDescription);
+                    throw new MsalClientException(errorCode, errorDescription);
+
+                    return;
+                }
+                catch
+                {
+
+                }
+            }
+
         }
 
-        private string GetContentProviderURI(Context context, string path)
+        public string GetContentProviderURI(Context context, string path)
         {
-            return "content://com.microsoft.windowsintune.companyportal.microsoft.identity.broker/hello";
+            return "content://com.microsoft.windowsintune.companyportal.microsoft.identity.broker" + path;
         }
 
         private Handler GetPreferredLooper(Activity callerActivity)
@@ -505,6 +540,18 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, brokerRequestJson);
 
             return brokerIntent;
+        }
+
+        public Bundle GetInteractiveBrokerBundle(BrokerRequest brokerRequest)
+        {
+            ValidateBrokerRedirectURI(brokerRequest);
+
+            Bundle bundle = new Bundle();
+            string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
+            bundle.PutString(BrokerConstants.BrokerRequestV2, brokerRequestJson);
+            bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
+            _logger.InfoPii("GetInteractiveBrokerBundle: " + brokerRequestJson, "Enable PII to see the broker request. ");
+            return bundle;
         }
 
         private Bundle CreateSilentBrokerBundle(BrokerRequest brokerRequest)
