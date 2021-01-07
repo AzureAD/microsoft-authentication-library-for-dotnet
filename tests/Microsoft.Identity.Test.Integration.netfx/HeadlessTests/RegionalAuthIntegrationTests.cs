@@ -52,6 +52,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+        }
+
         [TestMethod]
         public async Task RegionalAuthWithExperimentalFeaturesFalseAsync()
         {
@@ -77,10 +83,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 Assert.AreEqual(MsalError.ExperimentalFeature, e.ErrorCode);
             }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            }
         }
 
         [TestMethod]
@@ -97,17 +99,66 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithHttpClientFactory(factory)
                 .Build();
 
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-                AuthenticationResult result = await CreateAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
-                AssertTokenSource_IsIdP(result);
-                AssertValidHost(true, factory);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            }
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
+            AssertTokenSource_IsIdP(result);
+            AssertValidHost(true, factory);
+            AssertTelemetry(factory, "2|1004,0|centralus,1,0,,");
+
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenUserProvidedRegionSameAsRegionDetectedAsync()
+        {
+            // Arrange
+            var factory = new HttpSnifferClientFactory();
+            _confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
+                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, GetClaims()))
+                //.WithClientSecret(_keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value) //use the client secret in case of cert errors
+                .WithAuthority(PublicCloudTestAuthority)
+                .WithTestLogging()
+                .WithExperimentalFeatures(true)
+                .WithHttpClientFactory(factory)
+                .Build();
+
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            AuthenticationResult result = await GetAuthenticationResultAsync(userProvidedRegion: TestConstants.Region).ConfigureAwait(false); // regional endpoint
+            AssertTokenSource_IsIdP(result);
+            AssertValidHost(true, factory);
+            AssertTelemetry(factory, "2|1004,0|centralus,1,0,centralus,1");
+
+            result = await GetAuthenticationResultAsync(userProvidedRegion: TestConstants.Region, withForceRefresh: true).ConfigureAwait(false); // regional endpoint
+            AssertTokenSource_IsIdP(result);
+            AssertValidHost(true, factory, 1);
+            AssertTelemetry(factory, "2|1004,1|centralus,3,0,centralus,", 1);
+
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenUserProvidedRegionDifferentFromRegionDetectedAsync()
+        {
+            // Arrange
+            var factory = new HttpSnifferClientFactory();
+            _confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
+                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, GetClaims()))
+                //.WithClientSecret(_keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value) //use the client secret in case of cert errors
+                .WithAuthority(PublicCloudTestAuthority)
+                .WithTestLogging()
+                .WithExperimentalFeatures(true)
+                .WithHttpClientFactory(factory)
+                .Build();
+
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            AuthenticationResult result = await GetAuthenticationResultAsync(userProvidedRegion: "invalid").ConfigureAwait(false); // regional endpoint
+            AssertTokenSource_IsIdP(result);
+            AssertValidHost(true, factory);
+            AssertTelemetry(factory, "2|1004,0|centralus,1,0,invalid,0");
+
+            result = await GetAuthenticationResultAsync(userProvidedRegion: TestConstants.Region, withForceRefresh: true).ConfigureAwait(false); // regional endpoint
+            AssertTokenSource_IsIdP(result);
+            AssertValidHost(true, factory, 1);
+            AssertTelemetry(factory, "2|1004,1|centralus,3,0,centralus,", 1);
+           
         }
 
         [TestMethod]
@@ -123,22 +174,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(factory)
                 .Build();
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-                AuthenticationResult result = await CreateAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
-                AssertTokenSource_IsIdP(result);
-                AssertValidHost(true, factory);
-                result = await CreateAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint, new token
-                AssertValidHost(false, factory, 1);
-                AssertTokenSource_IsIdP(result);
-                result = await CreateAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint, use cached token
-                AssertTokenSource_IsCache(result);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            }
+           
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
+            AssertTokenSource_IsIdP(result);
+            AssertValidHost(true, factory);
+            result = await GetAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint, new token
+            AssertValidHost(false, factory, 1);
+            AssertTokenSource_IsIdP(result);
+            result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint, use cached token
+            AssertTokenSource_IsCache(result);
         }
 
         [TestMethod]
@@ -154,24 +199,24 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(factory)
                 .Build();
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-                AuthenticationResult result = await CreateAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint
-                AssertValidHost(false, factory);
-                AssertTokenSource_IsIdP(result);
-                result = await CreateAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint, use cached token
-                AssertTokenSource_IsCache(result);
-                result = await CreateAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint, use cached token
-                AssertTokenSource_IsCache(result);
-                result = await CreateAuthenticationResultAsync(withForceRefresh: true).ConfigureAwait(false); // regional endpoint, new token
-                AssertValidHost(true, factory, 1);
-                AssertTokenSource_IsIdP(result);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            }
+         
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            AuthenticationResult result = await GetAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint
+            AssertValidHost(false, factory);
+            AssertTokenSource_IsIdP(result);
+            result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint, use cached token
+            AssertTokenSource_IsCache(result);
+            result = await GetAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint, use cached token
+            AssertTokenSource_IsCache(result);
+            result = await GetAuthenticationResultAsync(withForceRefresh: true).ConfigureAwait(false); // regional endpoint, new token
+            AssertValidHost(true, factory, 1);
+            AssertTokenSource_IsIdP(result);
+        }
+
+        private void AssertTelemetry(HttpSnifferClientFactory factory, string currentTelemetryHeader, int placement = 0)
+        {
+            var (req, res) = factory.RequestsAndResponses.Skip(placement).Single();
+            Assert.AreEqual(currentTelemetryHeader, req.Headers.GetValues("x-client-current-telemetry").First());
         }
 
         private void AssertValidHost(
@@ -203,12 +248,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
         }
 
-        private async Task<AuthenticationResult> CreateAuthenticationResultAsync(
+        private async Task<AuthenticationResult> GetAuthenticationResultAsync(
             bool autoDetectRegion = true,
-            bool withForceRefresh = false)
+            bool withForceRefresh = false,
+            string userProvidedRegion = "")
         {
             var result = await _confidentialClientApplication.AcquireTokenForClient(s_keyvaultScope)
-                            .WithAzureRegion(autoDetectRegion)
+                            .WithAzureRegion(autoDetectRegion, userProvidedRegion)
                             .WithExtraQueryParameters(_dict)
                             .WithForceRefresh(withForceRefresh)
                             .ExecuteAsync()

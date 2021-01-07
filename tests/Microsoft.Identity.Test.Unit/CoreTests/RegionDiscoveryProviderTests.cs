@@ -54,26 +54,20 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestCleanup]
         public override void TestCleanup()
         {
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = "";
             _harness?.Dispose();
-            _regionDiscoveryProvider.Clear();
             base.TestCleanup();
         }
 
         [TestMethod]
         public async Task SuccessfulResponseFromEnvironmentVariableAsync()
         {
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-                validateInstanceMetadata(regionalMetadata);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            }
+            validateInstanceMetadata(regionalMetadata);
         }
 
         [TestMethod]
@@ -99,6 +93,48 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
             validateInstanceMetadata(regionalMetadata);
+        }
+
+        [TestMethod]
+        public async Task SuccessfulResponseFromUserProvidedRegionAsync()
+        {
+            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = TestConstants.Region;
+
+            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+            InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            Assert.IsNotNull(regionalMetadata);
+            Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+            regionDiscoveryProvider.Clear();
+        }
+
+        [TestMethod]
+        public async Task ResponseFromUserProvidedRegionSameAsRegionDetectedAsync()
+        {
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = TestConstants.Region;
+
+            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+            InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            Assert.IsNotNull(regionalMetadata);
+            Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+            regionDiscoveryProvider.Clear();
+        }
+
+        [TestMethod]
+        public async Task ResponseFromUserProvidedRegionDifferentFromRegionDetectedAsync()
+        {
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, "eastus");
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = TestConstants.Region;
+
+            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+            InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            Assert.IsNotNull(regionalMetadata);
+            Assert.AreEqual("eastus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+            regionDiscoveryProvider.Clear();
         }
 
         private class HttpSnifferClientFactory : IMsalHttpClientFactory
@@ -170,7 +206,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(
                 httpManager,
                 new NetworkCacheMetadataProvider(),
-                imdsCallTimeout: 1);
+                imdsCallTimeout: 0);
 
             var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => regionDiscoveryProvider.GetMetadataAsync(
                 new Uri("https://login.microsoftonline.com/common/"),
@@ -184,19 +220,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task NonPublicCloudTestAsync()
         {
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.someenv.com/common/"), _testRequestContext).ConfigureAwait(false);
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.someenv.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-                Assert.IsNotNull(regionalMetadata);
-                Assert.AreEqual("centralus.login.someenv.com", regionalMetadata.PreferredNetwork);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            }
+            Assert.IsNotNull(regionalMetadata);
+            Assert.AreEqual("centralus.login.someenv.com", regionalMetadata.PreferredNetwork);
         }
 
         [TestMethod]

@@ -79,10 +79,13 @@ namespace Microsoft.Identity.Client
         /// By default the value for this variable is false.
         /// See https://aka.ms/msal-net-region-discovery for more details.
         /// </summary>
-        /// <param name="autoDetectRegion"><c>true</c> if the token request should be sent to regional ESTS. Otherwise <c>false</c>.
-        /// The default is <c>false</c></param>
+        /// <param name="autoDetectRegion"><c>true</c> if the token request should be sent to regional ESTS. The default is <c>false</c>.
+        /// </param>
+        /// <param name="regionToUse"> optional parameter to provide region to MSAL. This parameter will be used along with auto detection of region.
+        /// If the region is auto detected, the provided region will be compared with the detected region and used in telemetry to do analysis on correctness of the region provided.
+        /// If auto region detection fails, the provided region will be used for instance metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenForClientParameterBuilder WithAzureRegion(bool autoDetectRegion)
+        public AcquireTokenForClientParameterBuilder WithAzureRegion(bool autoDetectRegion, string regionToUse = null)
         {
             if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
             {
@@ -93,6 +96,7 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAzureRegion, autoDetectRegion);
             Parameters.AutoDetectRegion = autoDetectRegion;
+            Parameters.RegionToUse = regionToUse;
             return this;
         }
 
