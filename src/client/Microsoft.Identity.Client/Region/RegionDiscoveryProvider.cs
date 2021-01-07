@@ -233,6 +233,7 @@ namespace Microsoft.Identity.Client.Region
                     }
 
                     s_region = regionToUse;
+                    requestContext.Logger.Info($"Region auto detection failed. Region provided by the user will be used: ${regionToUse}.");
                     LogTelemetryData(s_region, RegionSource.UserProvided, requestContext);
                 }
             }
