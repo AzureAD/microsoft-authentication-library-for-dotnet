@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(
                 httpManager,
                 new NetworkCacheMetadataProvider(),
-                imdsCallTimeout: 1);
+                imdsCallTimeout: 0);
 
             var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => regionDiscoveryProvider.GetMetadataAsync(
                 new Uri("https://login.microsoftonline.com/common/"),
