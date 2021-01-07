@@ -17,10 +17,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool SendX5C { get; set; }
 
         /// <summary>
+        /// When set to true, the request is sent to regional endpoint.
         /// </summary>
         public bool AutoDetectRegion { get; set; }
 
         /// <summary>
+        /// This field wil contain the region provided by user and will be used along with region auto detection.
         /// </summary>
         public string RegionToUse { get; set; }
 

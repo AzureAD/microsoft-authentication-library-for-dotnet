@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client
         /// If the region is auto detected, the provided region will be compared with the detected region and used in telemetry to do analysis on correctness of the region provided.
         /// If auto region detection fails, the provided region will be used for instance metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenForClientParameterBuilder WithAzureRegion(bool autoDetectRegion, string regionToUse = "")
+        public AcquireTokenForClientParameterBuilder WithAzureRegion(bool autoDetectRegion, string regionToUse = null)
         {
             if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
             {
