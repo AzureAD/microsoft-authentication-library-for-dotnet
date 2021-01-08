@@ -132,6 +132,32 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        [Description("Test when the region could not be fetched and the user wants to fall back to global.")]
+        public async Task RegionFallbackToGlobalAsync()
+        {
+            _httpManager.AddRegionDiscoveryMockHandlerNotFound();
+            _httpManager.AddInstanceDiscoveryMockHandler();
+            _httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+
+            var app = CreateApp();
+
+            try
+            {
+                AuthenticationResult result = await app
+                .AcquireTokenForClient(TestConstants.s_scope)
+                .WithAzureRegion(true, true)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+            }
+            catch (MsalServiceException e)
+            {
+                Assert.Fail("Fallback to global failed.");
+            }
+        }
+
         private IConfidentialClientApplication CreateApp()
         {
             var app = ConfidentialClientApplicationBuilder

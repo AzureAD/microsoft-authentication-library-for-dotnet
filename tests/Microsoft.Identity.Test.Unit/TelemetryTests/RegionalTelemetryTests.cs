@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestCleanup]
         public override void TestCleanup()
         {
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             _harness?.Dispose();
             base.TestCleanup();
         }
@@ -64,47 +65,39 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestMethod]
         public async Task TelemetryAcceptanceTestAsync()
         {
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
-                var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: false, "1");
-                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
+            Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
+            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
+            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: false, "1");
+            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
 
-                Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
-                result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.AADUnavailableError).ConfigureAwait(false);
-                Guid step2CorrelationId = result.Correlationid;
+            Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
+            result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.AADUnavailableError).ConfigureAwait(false);
+            Guid step2CorrelationId = result.Correlationid;
 
-                // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, "3");
-                AssertPreviousTelemetry(
-                    result.HttpRequest,
-                    expectedSilentCount: 0);
+            // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
+            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, "3");
+            AssertPreviousTelemetry(
+                result.HttpRequest,
+                expectedSilentCount: 0);
 
-                // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
-                _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
-                    HttpStatusProvider.s_throttleDuration.Add(TimeSpan.FromSeconds(1)));
+            // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
+            _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
+                HttpStatusProvider.s_throttleDuration.Add(TimeSpan.FromSeconds(1)));
 
-                Trace.WriteLine("Step 3. Acquire Token For Client -> Success");
-                result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
+            Trace.WriteLine("Step 3. Acquire Token For Client -> Success");
+            result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
 
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, "3");
-                AssertPreviousTelemetry(
-                    result.HttpRequest,
-                    expectedSilentCount: 0,
-                    expectedFailedApiIds: new[] { ApiIds.AcquireTokenForClient },
-                    expectedCorrelationIds: new[] { step2CorrelationId },
-                    expectedErrors: new[] { "service_not_available" },
-                    expectedRegions: new[] { "centralus" },
-                    expectedRegionSources: new[] { "3" });
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            }
-            
+            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, "3");
+            AssertPreviousTelemetry(
+                result.HttpRequest,
+                expectedSilentCount: 0,
+                expectedFailedApiIds: new[] { ApiIds.AcquireTokenForClient },
+                expectedCorrelationIds: new[] { step2CorrelationId },
+                expectedErrors: new[] { "service_not_available" },
+                expectedRegions: new[] { "centralus" },
+                expectedRegionSources: new[] { "3" });
         }
 
         /// <summary>
@@ -115,26 +108,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestMethod]
         public async Task TelemetrySerializedTokenCacheTestAsync()
         {
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                var inMemoryTokenCache = new InMemoryTokenCache();
-                inMemoryTokenCache.Bind(_app.AppTokenCache);
-
-                Trace.WriteLine("Acquire token for client with token serialization.");
-                var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest,
-                    ApiIds.AcquireTokenForClient,
-                    forceRefresh: false,
-                    "1",
-                    isCacheSerialized: true); 
-                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); 
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            }
         }
 
         /// <summary>
@@ -157,59 +132,47 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         /// <summary>
-        /// Acquire token for client with useRegion when auto region discovery passes with region same as useRegion
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, 1
+        /// Acquire token for client with regionToUse when auto region discovery passes with region same as regionToUse
+        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, centralus, 1
         ///    Last_request = 2 | 0 | | |
         /// </summary>
         [TestMethod]
         public async Task TelemetryUserProvidedRegionAutoDiscoverRegionSameTestsAsync()
         {
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                Trace.WriteLine("Acquire token for client with region provided by user and region detected is same as useRegion.");
-                var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest,
-                    ApiIds.AcquireTokenForClient,
-                    forceRefresh: false,
-                    "1",
-                    isCacheSerialized: false,
-                    validateUseRegion: "1");
-                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
-            }
+            Trace.WriteLine("Acquire token for client with region provided by user and region detected is same as regionToUse.");
+            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
+            AssertCurrentTelemetry(result.HttpRequest,
+                ApiIds.AcquireTokenForClient,
+                forceRefresh: false,
+                "1",
+                isCacheSerialized: false,
+                userProvidedRegion: TestConstants.Region,
+                isvalidUserProvidedRegion: "1");
+            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
         }
 
         /// <summary>
-        /// Acquire token for client with useRegion when auto region discovery passes with region different from useRegion
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, 0
+        /// Acquire token for client with regionToUse when auto region discovery passes with region different from regionToUse
+        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, invalid, 0
         ///    Last_request = 2 | 0 | | |
         /// </summary>
         [TestMethod]
         public async Task TelemetryUserProvidedRegionAutoDiscoverRegionDifferentTestsAsync()
         {
-            try
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                Trace.WriteLine("Acquire token for client with region provided by user and region detected is different from useRegion.");
-                var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedInvalidRegion).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest,
-                    ApiIds.AcquireTokenForClient,
-                    forceRefresh: false,
-                    "1",
-                    isCacheSerialized: false,
-                    validateUseRegion: "0");
-                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
-            }
+            Trace.WriteLine("Acquire token for client with region provided by user and region detected is different from regionToUse.");
+            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedInvalidRegion).ConfigureAwait(false);
+            AssertCurrentTelemetry(result.HttpRequest,
+                ApiIds.AcquireTokenForClient,
+                forceRefresh: false,
+                "1",
+                isCacheSerialized: false,
+                userProvidedRegion: "invalid",
+                isvalidUserProvidedRegion: "0");
+            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
         }
 
         private enum AcquireTokenForClientOutcome
@@ -310,7 +273,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             bool forceRefresh,
             string regionSource,
             bool isCacheSerialized = false,
-            string validateUseRegion = "")
+            string userProvidedRegion = "",
+            string isvalidUserProvidedRegion = "")
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single();
@@ -330,7 +294,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(isCacheSerialized ? "1" : "0", platformConfig[2]);
             Assert.AreEqual(TestConstants.Region, platformConfig[0]);
             Assert.AreEqual(regionSource, platformConfig[1]);
-            Assert.AreEqual(validateUseRegion, platformConfig[3]);
+            Assert.AreEqual(userProvidedRegion, platformConfig[3]);
+            Assert.AreEqual(isvalidUserProvidedRegion, platformConfig[4]);
         }
 
         private static void AssertPreviousTelemetry(

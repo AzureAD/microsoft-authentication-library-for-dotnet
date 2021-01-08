@@ -577,7 +577,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     }
                 }
             }
-
         }
 
         private List<X509Certificate2> ReadCertDataForBrokerApp(string brokerPackageName)

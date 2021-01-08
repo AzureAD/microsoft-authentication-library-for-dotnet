@@ -101,7 +101,7 @@ namespace TestApp
             Console.WriteLine("CCA created");
 
             AuthenticationResult result = await cca.AcquireTokenForClient(scopes)
-            .WithAzureRegion(withAzureRegion)
+            .WithAzureRegion(withAzureRegion, regionToUse: "centralus")
             .WithExtraQueryParameters(dict)
             .ExecuteAsync()
             .ConfigureAwait(false);
