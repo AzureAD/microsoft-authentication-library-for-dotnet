@@ -110,11 +110,22 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         {
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
+            var inMemoryTokenCache = new InMemoryTokenCache();
+            inMemoryTokenCache.Bind(_app.AppTokenCache);
+
+            Trace.WriteLine("Acquire token for client with token serialization.");
+            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
+            AssertCurrentTelemetry(result.HttpRequest,
+                ApiIds.AcquireTokenForClient,
+                forceRefresh: false,
+                "1",
+                isCacheSerialized: true);
+            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
         }
 
         /// <summary>
-        /// Acquire token for client with useRegion when auto region discovery fails
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1,
+        /// Acquire token for client with regionToUse when auto region discovery fails
+        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, centralus,
         ///    Last_request = 2 | 0 | | |
         /// </summary>
         [TestMethod]
@@ -127,7 +138,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 ApiIds.AcquireTokenForClient,
                 forceRefresh: false,
                 "4",
-                isCacheSerialized: false);
+                isCacheSerialized: false,
+                userProvidedRegion: TestConstants.Region);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
         }
 
@@ -192,7 +204,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             switch (outcome)
             {
                 case AcquireTokenForClientOutcome.Success:
-                    
+
                     tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
                     var authResult = await _app
                         .AcquireTokenForClient(TestConstants.s_scope)
@@ -268,8 +280,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         private static void AssertCurrentTelemetry(
-            HttpRequestMessage requestMessage, 
-            ApiIds apiId, 
+            HttpRequestMessage requestMessage,
+            ApiIds apiId,
             bool forceRefresh,
             string regionSource,
             bool isCacheSerialized = false,
@@ -313,8 +325,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             expectedRegions = expectedRegions ?? new string[0];
             expectedRegionSources = expectedRegionSources ?? new string[0];
 
-            var actualHeader = ParseLastRequestHeader(requestMessage);   
-            
+            var actualHeader = ParseLastRequestHeader(requestMessage);
+
             Assert.AreEqual(expectedSilentCount, actualHeader.SilentCount);
             CoreAssert.AreEqual(actualHeader.FailedApis.Length, actualHeader.CorrelationIds.Length, actualHeader.Errors.Length);
 
@@ -327,7 +339,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 actualHeader.CorrelationIds);
 
             CollectionAssert.AreEqual(
-                expectedErrors, 
+                expectedErrors,
                 actualHeader.Errors);
 
             CollectionAssert.AreEqual(
@@ -345,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             // where a failed_request is "api_id, correlation_id"
             string lastTelemetryHeader = requestMessage.Headers.GetValues(
                TelemetryConstants.XClientLastTelemetry).Single();
-            var lastRequestParts =  lastTelemetryHeader.Split('|');
+            var lastRequestParts = lastTelemetryHeader.Split('|');
 
             Assert.AreEqual(5, lastRequestParts.Length); //  2 | 1 | | |
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion2, lastRequestParts[0]); // version
