@@ -84,10 +84,13 @@ namespace Microsoft.Identity.Client.Platforms.net45
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
 
 #if NET45
-            var rsa = GetCryptoProviderForSha256_Net45(certificate);
+            var rsaCryptoProvider = GetCryptoProviderForSha256_Net45(certificate);
             using (var sha = new SHA256Cng())
             {
-                return rsa.SignData(messageBytes, sha);
+                var signedData = rsaCryptoProvider.SignData(messageBytes, sha);
+                // Cache only valid RSA crypto providers
+                s_certificateToRsaCspMap[certificate.Thumbprint] = rsaCryptoProvider;
+                return signedData;
             }
 #else
             if (!s_certificateToRsaMap.TryGetValue(certificate.Thumbprint, out RSA rsa))
@@ -159,8 +162,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 if (s_certificateToRsaCspMap.Count >= s_maximumMapSize)
                     s_certificateToRsaCspMap.Clear();
 
-                s_certificateToRsaCspMap[certificate.Thumbprint] = new RSACryptoServiceProvider(csp);
-                return s_certificateToRsaCspMap[certificate.Thumbprint];
+                return new RSACryptoServiceProvider(csp);
             }
 
             return rsaProvider;
