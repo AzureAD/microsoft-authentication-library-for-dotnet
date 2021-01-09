@@ -104,9 +104,9 @@ namespace Microsoft.Identity.Client
         IEnumerable<string> ClientCapabilities { get; }
 
         /// <summary>
-        /// Enables ADAL cache serialialization and deserialization.
+        /// Enables legacy ADAL cache serialization and deserialization.
         /// </summary>
-        bool AdalCacheCompatibilityEnabled { get; }
+        bool LegacyCacheCompatibilityEnabled { get; }
 
         /// <summary>
         /// </summary>

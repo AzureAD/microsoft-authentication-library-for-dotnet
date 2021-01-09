@@ -340,15 +340,15 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestConstructor_WithAdalCacheCompatibility()
+        public void TestConstructor_WithLegacyCacheCompatibility()
         {
             var cca = ConfidentialClientApplicationBuilder
                       .Create(TestConstants.ClientId)
                       .WithClientSecret(TestConstants.ClientSecret)
-                      .WithAdalCacheCompatibility(true)
+                      .WithLegacyCacheCompatibility(true)
                       .Build();
 
-            Assert.AreEqual(true, cca.AppConfig.AdalCacheCompatibilityEnabled);
+            Assert.AreEqual(true, cca.AppConfig.LegacyCacheCompatibilityEnabled);
         }
     }
 }

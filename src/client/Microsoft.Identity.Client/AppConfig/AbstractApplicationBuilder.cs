@@ -191,20 +191,20 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Enables ADAL cache serialization and deserialization.
+        /// Enables legacy ADAL cache serialization and deserialization.
         /// </summary>
-        /// <param name="enableAdalCacheCompatibility">Enable ADAL cache compatibility.</param>
+        /// <param name="enableLegacyCacheCompatibility">Enable legacy ADAL cache compatibility.</param>
         /// <returns>The builder to chain the .With methods.</returns>
         /// <remarks>
         /// ADAL is a previous legacy generation of MSAL.NET authentication library. 
-        /// If you don't use <c>.WithAdalCacheCompatiblity(false)</c>, then by default, the ADAL cache is used
+        /// If you don't use <c>.WithLegacyCacheCompatibility(false)</c>, then by default, the ADAL cache is used
         /// (along with MSAL cache). <c>true</c> flag is only needed for specific migration scenarios 
         /// from ADAL.NET to MSAL.NET when both library versions are running side-by-side.
-        /// To improve performance add <c>.WithAdalCacheCompatiblity(false)</c> unless you care about migration scenarios.
+        /// To improve performance add <c>.WithLegacyCacheCompatibility(false)</c> unless you care about migration scenarios.
         /// </remarks>
-        public T WithAdalCacheCompatibility(bool enableAdalCacheCompatibility = true)
+        public T WithLegacyCacheCompatibility(bool enableLegacyCacheCompatibility = true)
         {
-            Config.AdalCacheCompatibilityEnabled = enableAdalCacheCompatibility;
+            Config.LegacyCacheCompatibilityEnabled = enableLegacyCacheCompatibility;
             return (T)this;
         }
 
@@ -374,7 +374,7 @@ namespace Microsoft.Identity.Client
             WithClientName(applicationOptions.ClientName);
             WithClientVersion(applicationOptions.ClientVersion);
             WithClientCapabilities(applicationOptions.ClientCapabilities);
-            WithAdalCacheCompatibility(applicationOptions.AdalCacheCompatibilityEnabled);
+            WithLegacyCacheCompatibility(applicationOptions.LegacyCacheCompatibilityEnabled);
 
             WithLogging(
                 null,

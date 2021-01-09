@@ -19,7 +19,7 @@ using Microsoft.Identity.Test.Unit;
 namespace Microsoft.Identity.Test.Performance
 {
     [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByMethod)]
-    public class AdalCacheOperationsTests
+    public class LegacyCacheOperationsTests
     {
         private ITokenCacheInternal _cache;
         private MsalTokenResponse _response;
@@ -31,12 +31,12 @@ namespace Microsoft.Identity.Test.Performance
         public int TokenCacheSize { get; set; }
 
         [ParamsAllValues]
-        public bool EnableAdalCache { get; set; }
+        public bool EnableLegacyCache { get; set; }
 
         [GlobalSetup]
         public void GlobalSetup()
         {
-            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isAdalCacheEnabled: EnableAdalCache);
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isLegacyCacheEnabled: EnableLegacyCache);
 
             _requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
             _cache = new TokenCache(serviceBundle, false);

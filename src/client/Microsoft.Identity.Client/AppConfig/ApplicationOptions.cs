@@ -123,8 +123,8 @@ namespace Microsoft.Identity.Client
         public IEnumerable<string> ClientCapabilities { get; set; }
 
         /// <summary>
-        /// Enables ADAL cache serialialization and deserialization.
+        /// Enables legacy ADAL cache serialization and deserialization.
         /// </summary>
-        public bool AdalCacheCompatibilityEnabled { get; set; }
+        public bool LegacyCacheCompatibilityEnabled { get; set; }
     }
 }

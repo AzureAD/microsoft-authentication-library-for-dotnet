@@ -47,11 +47,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        public async Task WithAdalCacheCompatibilityTest_Async(bool enableAdalCacheCompatibility)
+        public async Task WithLegacyCacheCompatibilityTest_Async(bool enableLegacyCacheCompatibility)
         {
             // Arrange
             var legacyCachePersistence = Substitute.For<ILegacyCachePersistence>();
-            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isAdalCacheEnabled: enableAdalCacheCompatibility);
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isLegacyCacheEnabled: enableLegacyCacheCompatibility);
             var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
             var response = TestConstants.CreateMsalTokenResponse();
 
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await cache.RemoveAccountAsync(requestParams.Account, requestContext).ConfigureAwait(true);
 
             // Assert
-            if (enableAdalCacheCompatibility)
+            if (enableLegacyCacheCompatibility)
             {
                 legacyCachePersistence.ReceivedWithAnyArgs().LoadCache();
                 legacyCachePersistence.ReceivedWithAnyArgs().WriteCache(Arg.Any<byte[]>());
