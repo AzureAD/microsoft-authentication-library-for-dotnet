@@ -338,5 +338,17 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
         }
+
+        [TestMethod]
+        public void TestConstructor_WithLegacyCacheCompatibility()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithClientSecret(TestConstants.ClientSecret)
+                      .WithLegacyCacheCompatibility(true)
+                      .Build();
+
+            Assert.AreEqual(true, cca.AppConfig.LegacyCacheCompatibilityEnabled);
+        }
     }
 }

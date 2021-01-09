@@ -81,6 +81,8 @@ namespace Microsoft.Identity.Client
         public bool MergeWithDefaultClaims { get; internal set; }
         internal int ConfidentialClientCredentialCount;
 
+        public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
+
         #region Authority
 
         public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }

@@ -191,6 +191,24 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Enables legacy ADAL cache serialization and deserialization.
+        /// </summary>
+        /// <param name="enableLegacyCacheCompatibility">Enable legacy ADAL cache compatibility.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <remarks>
+        /// ADAL is a previous legacy generation of MSAL.NET authentication library. 
+        /// If you don't use <c>.WithLegacyCacheCompatibility(false)</c>, then by default, the ADAL cache is used
+        /// (along with MSAL cache). <c>true</c> flag is only needed for specific migration scenarios 
+        /// from ADAL.NET to MSAL.NET when both library versions are running side-by-side.
+        /// To improve performance add <c>.WithLegacyCacheCompatibility(false)</c> unless you care about migration scenarios.
+        /// </remarks>
+        public T WithLegacyCacheCompatibility(bool enableLegacyCacheCompatibility = true)
+        {
+            Config.LegacyCacheCompatibilityEnabled = enableLegacyCacheCompatibility;
+            return (T)this;
+        }
+
+        /// <summary>
         /// Sets the logging callback. For details see https://aka.ms/msal-net-logging
         /// </summary>
         /// <param name="loggingCallback"></param>
@@ -356,6 +374,7 @@ namespace Microsoft.Identity.Client
             WithClientName(applicationOptions.ClientName);
             WithClientVersion(applicationOptions.ClientVersion);
             WithClientCapabilities(applicationOptions.ClientCapabilities);
+            WithLegacyCacheCompatibility(applicationOptions.LegacyCacheCompatibilityEnabled);
 
             WithLogging(
                 null,

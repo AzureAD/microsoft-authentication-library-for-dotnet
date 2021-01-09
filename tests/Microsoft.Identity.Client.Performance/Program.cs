@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Test.Performance
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<AcquireTokenForClientLargeCacheTests>(
+            BenchmarkRunner.Run<LegacyCacheOperationsTests>(
                 DefaultConfig.Instance
                     .WithOptions(ConfigOptions.DontOverwriteResults)
                     .AddJob(

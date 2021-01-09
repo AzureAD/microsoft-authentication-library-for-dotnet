@@ -177,8 +177,9 @@ namespace Microsoft.Identity.Client
 
                     UpdateAppMetadata(requestParams.ClientId, instanceDiscoveryMetadata.PreferredCache, response.FamilyId);
 
-                    // Do not save RT in ADAL cache for confidential client or B2C                        
-                    if (!requestParams.IsClientCredentialRequest &&
+                    // Do not save RT in ADAL cache for client credentials flow or B2C                        
+                    if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled &&
+                        !requestParams.IsClientCredentialRequest &&
                         requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
                     {
                         var authorityWithPreferredCache = Authority.CreateAuthorityWithEnvironment(
@@ -560,9 +561,10 @@ namespace Microsoft.Identity.Client
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
 
             // ADAL legacy cache does not store FRTs
-            if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
+            if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled &&
+                requestParams.Account != null &&
+                string.IsNullOrEmpty(familyId))
             {
-
                 return CacheFallbackOperations.GetRefreshToken(
                     Logger,
                     LegacyCachePersistence,
@@ -631,17 +633,22 @@ namespace Microsoft.Identity.Client
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache. ");
 
-            AdalUsersForMsal adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
-                Logger,
-                LegacyCachePersistence,
-                ClientId);
-
             // Multi-cloud support - must filter by env.
             ISet<string> allEnvironmentsInCache = new HashSet<string>(
                 accountCacheItems.Select(aci => aci.Environment),
                 StringComparer.OrdinalIgnoreCase);
             allEnvironmentsInCache.UnionWith(rtCacheItems.Select(rt => rt.Environment));
-            allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnviroments());
+
+            AdalUsersForMsal adalUsersResult = null;
+
+            if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled)
+            {
+                adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
+                    Logger,
+                    LegacyCachePersistence,
+                    ClientId);
+                allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnviroments());
+            }
 
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                 requestParameters.AuthorityInfo.CanonicalAuthority,
@@ -671,11 +678,14 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            UpdateMapWithAdalAccountsWithClientInfo(
-                environment,
-                instanceMetadata.Aliases,
-                adalUsersResult,
-                clientInfoToAccountMap);
+            if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled)
+            {
+                UpdateMapWithAdalAccountsWithClientInfo(
+                    environment,
+                    instanceMetadata.Aliases,
+                    adalUsersResult,
+                    clientInfoToAccountMap);
+            }
 
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
             if (requestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
@@ -792,7 +802,10 @@ namespace Microsoft.Identity.Client
                     }
 
                     tokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
-                    RemoveAdalUser(account);
+                    if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled)
+                    {
+                        RemoveAdalUser(account);
+                    }
                 }
                 finally
                 {
