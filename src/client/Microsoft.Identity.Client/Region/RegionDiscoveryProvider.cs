@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Region
             s_region = null;
         }
 
-        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
+        public async Task<InstanceDiscoveryMetadataEntry> TryGetMetadataAsync(Uri authority, RequestContext requestContext, )
         {
             Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
 
@@ -233,7 +233,7 @@ namespace Microsoft.Identity.Client.Region
                         }
                     }
                 }
-                catch (MsalServiceException e)
+                catch 
                 {
 
                     if (requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Client.Region
 
                     if (regionToUse.IsNullOrEmpty())
                     {
-                        throw e;
+                        throw;
                     }
 
                     s_region = regionToUse;

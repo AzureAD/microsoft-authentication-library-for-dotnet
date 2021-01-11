@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Region
 {
     internal interface IRegionDiscoveryProvider
     {
-        Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext);
+        Task<InstanceDiscoveryMetadataEntry> TryGetMetadataAsync(Uri authority, RequestContext requestContext);
 
         void Clear();
     }
