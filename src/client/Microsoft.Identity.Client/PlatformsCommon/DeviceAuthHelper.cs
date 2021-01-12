@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon
 {
     internal class DeviceAuthHelper
     {
-        private static bool? s_canOSPerformPKeyAuth;
+        private static Lazy<bool> s_canOSPerformPKeyAuth;
 
         public static IDictionary<string, string> ParseChallengeData(HttpResponseHeaders responseHeaders)
         {
@@ -80,32 +80,34 @@ namespace Microsoft.Identity.Client.PlatformsCommon
         {
             if (s_canOSPerformPKeyAuth != null)
             {
-                return (bool)s_canOSPerformPKeyAuth;
+                return (bool)s_canOSPerformPKeyAuth.Value;
             }
 
-            //PKeyAuth can only be performed on operating systems with a major OS version of 6. 
+            //PKeyAuth can only be performed on operating systems with a major OS version of 6.
             //This corresponds to windows 7, 8, 8.1 and their server equivilents.
             //Environment.OSVersion as it will return incorrect information on some operating systems
-#if NET_CORE
+            //For more information on how to acquire the current OS version from the registry
+            //See (https://stackoverflow.com/a/61914068)
+#if NET_CORE || NET5_WIN
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                && !RuntimeInformation.OSDescription.Contains("Windows 10"))
+                && !RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.InvariantCultureIgnoreCase))
             {
-                s_canOSPerformPKeyAuth = true;
+                s_canOSPerformPKeyAuth = new Lazy<bool>(() => true);
                 return true;
             }
-
 #elif DESKTOP
             var reg = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
 
             string OSInfo = (string)reg.GetValue("ProductName");
             
-            if (OSInfo.Contains("Windows") && !OSInfo.Contains("Windows 10"))
+            if (OSInfo.IndexOf("Windows", StringComparison.InvariantCultureIgnoreCase) >= 0 &&
+                OSInfo.IndexOf("Windows 10", StringComparison.InvariantCultureIgnoreCase) < 0)
             {
-                s_canOSPerformPKeyAuth = true;
+                s_canOSPerformPKeyAuth = new Lazy<bool>(() => true);
                 return true;
             }
 #endif
-            s_canOSPerformPKeyAuth = false;
+            s_canOSPerformPKeyAuth = new Lazy<bool>(() => false);
             return false;
         }
     }
