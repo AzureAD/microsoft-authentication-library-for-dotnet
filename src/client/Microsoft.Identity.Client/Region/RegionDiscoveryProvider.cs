@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (regionalizedAuthority == null && requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
             {
+                requestContext.Logger.Verbose($"[Region Discovery] Unable to determine region. Falling back to global.");
                 return null;
             }
 
