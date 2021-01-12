@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
                     var authResult = await _app
                         .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithAzureRegion(true)
+                        .WithPreferedAzureRegion(true)
                         .WithForceRefresh(forceRefresh)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
                     authResult = await _app
                         .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithAzureRegion(true, TestConstants.Region)
+                        .WithPreferedAzureRegion(true, TestConstants.Region)
                         .WithForceRefresh(forceRefresh)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
                     authResult = await _app
                         .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithAzureRegion(true, "invalid")
+                        .WithPreferedAzureRegion(true, "invalid")
                         .WithForceRefresh(forceRefresh)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     var serviceEx = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
                         _app
                         .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithAzureRegion(true)
+                        .WithPreferedAzureRegion(true)
                         .WithForceRefresh(true)
                         .WithCorrelationId(correlationId)
                         .ExecuteAsync())

@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit
 
             AuthenticationResult result = await app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithAzureRegion(true)
+                .WithPreferedAzureRegion(true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAzureRegion(true)
+                    .WithPreferedAzureRegion(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 AuthenticationResult result = await app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithAzureRegion(true)
+                .WithPreferedAzureRegion(true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 AuthenticationResult result = await app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithAzureRegion(true, true)
+                .WithPreferedAzureRegion(true, string.Empty, true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 

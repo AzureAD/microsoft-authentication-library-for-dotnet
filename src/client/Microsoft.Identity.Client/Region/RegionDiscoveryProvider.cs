@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Region
             s_region = null;
         }
 
-        public async Task<InstanceDiscoveryMetadataEntry> TryGetMetadataAsync(Uri authority, RequestContext requestContext, )
+        public async Task<InstanceDiscoveryMetadataEntry> TryGetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
 
@@ -235,14 +235,6 @@ namespace Microsoft.Identity.Client.Region
                 }
                 catch 
                 {
-
-                    if (requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
-                    {
-                        requestContext.Logger.Info($"Attempting to fall back to global endpoint");
-                        requestContext.ApiEvent.FallBackToGlobal = "1";
-                        return null;
-                    }
-
                     if (regionToUse.IsNullOrEmpty())
                     {
                         throw;
