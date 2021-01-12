@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
 
-        public string FallBackToGlobal
+        public string FallbackToGlobal
         {
             get => this.ContainsKey(FallbackToGlobal) ? this[FallbackToGlobal] : null;
             set => this[FallbackToGlobal] = value;
