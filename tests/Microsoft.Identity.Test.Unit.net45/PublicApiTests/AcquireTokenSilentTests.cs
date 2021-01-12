@@ -15,10 +15,6 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -45,57 +41,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(MsalError.UserNullError, ex.ErrorCode);
             Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification);
 
-        }
-
-        [TestMethod]
-        public async Task BadTokenError_RemoveAccountFromCacheAsync()
-        {
-            // Arrange
-            using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
-            {
-                Trace.WriteLine("1. Create PCA");
-
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithHttpManager(harness.HttpManager)
-                                                                            .BuildConcrete();
-
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false);
-
-                Trace.WriteLine("2. Configure AAD to respond with the typical Invalid Grant error and Bad Token sub error");
-                AddHttpMocks_BadTokenError(harness.HttpManager);
-                var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
-
-                // Act
-                var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app
-                    .AcquireTokenSilent(
-                        TestConstants.s_scope.ToArray(),
-                        account)
-                    .WithForceRefresh(true)
-                    .ExecuteAsync())
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.BadToken, exception.SubError);
-
-                var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
-                Assert.IsFalse(accounts.Any());
-
-                var refreshTokens = app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
-                Assert.IsFalse(refreshTokens.Any());
-            }
-        }
-
-        private static void AddHttpMocks_BadTokenError(MockHttpManager httpManager)
-        {
-            httpManager.AddInstanceDiscoveryMockHandler();
-
-            var handler = new MockHttpMessageHandler()
-            {
-                ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(MsalError.BadToken)
-            };
-
-            httpManager.AddMockHandler(handler);
         }
 
         [TestMethod]
