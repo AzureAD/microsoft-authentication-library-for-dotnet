@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Client.Region
                     {
                         requestContext.ApiEvent.IsValidUserProvidedRegion = s_region.Equals(regionToUse);
                         requestContext.Logger.Info($"The auto detected region is {s_region}.");
-                        requestContext.ApiEvent.FallBackToGlobal = "0";
+                        requestContext.ApiEvent.FallbackToGlobal = "0";
 
                         if (s_region.Equals(regionToUse))
                         {
