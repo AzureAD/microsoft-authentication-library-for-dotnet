@@ -30,10 +30,10 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         private readonly bool _onlySendFailureTelemetry;
         private readonly IPlatformProxy _platformProxy;
-        private readonly IApplicationConfiguration _applicationConfiguration;
+        private readonly IAppConfigInternal _applicationConfiguration;
 
         public TelemetryManager(
-            IApplicationConfiguration applicationConfiguration,
+            IAppConfigInternal applicationConfiguration,
             IPlatformProxy platformProxy,
             TelemetryCallback telemetryCallback,
             bool onlySendFailureTelemetry = false)

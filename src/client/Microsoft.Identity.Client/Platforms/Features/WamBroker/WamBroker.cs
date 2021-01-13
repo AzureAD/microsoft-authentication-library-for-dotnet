@@ -14,13 +14,13 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
 #if DESKTOP || NET5_WIN
-using Microsoft.Identity.Client.Platforms.Features.Windows;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 #endif
@@ -303,7 +303,18 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 #if WINDOWS_APP
             // On UWP there is no need for a window handle
             return IntPtr.Zero;
-#else
+#endif
+
+#if DESKTOP || NET5_WIN // net core doesn't reference WinForms
+
+            if (uiParent?.OwnerWindow is IWin32Window window)
+            {
+                _logger.Info("Owner window specified as IWin32Window.");
+                return window.Handle;
+            }
+#endif
+
+#if DESKTOP || NET5_WIN || NET_CORE
 
             if (uiParent?.OwnerWindow is IntPtr ptr)
             {
@@ -311,15 +322,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return ptr;
             }
 
-            if (uiParent?.OwnerWindow is IWin32Window window)
-            {
-                _logger.Info("Owner window specified as IWin32Window.");
-                return window.Handle;
-            }
-
-            return WindowsNativeMethods.GetForegroundWindow();
+            return WindowsNativeMethods.GetForegroundWindow(); 
 #endif
-
         }
 
         private void AddPOPParamsToRequest(WebTokenRequest webTokenRequest)
@@ -527,7 +531,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                    "GetTokenSilentlyAsync");
         }
 
-        public async Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account)
+        public async Task RemoveAccountAsync(IAppConfigInternal appConfig, IAccount account)
         {
             string homeTenantId = account?.HomeAccountId?.TenantId;
             if (!string.IsNullOrEmpty(homeTenantId))

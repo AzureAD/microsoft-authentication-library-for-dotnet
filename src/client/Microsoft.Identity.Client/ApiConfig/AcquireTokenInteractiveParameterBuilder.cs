@@ -233,13 +233,15 @@ namespace Microsoft.Identity.Client
             if (parent is IWin32Window win32Window)
             {
                 Parameters.UiParent.OwnerWindow = win32Window;
+                return this;
             }
-            else if (parent is IntPtr intPtrWindow)
+#endif
+#if DESKTOP || NET5_WIN || NET_CORE
+
+            if (parent is IntPtr intPtrWindow)
             {
                 Parameters.UiParent.OwnerWindow = intPtrWindow;
             }
-            // It's ok on Windows Desktop to not have an owner window, the system will just center on the display
-            // instead of a parent.
 #endif
             return this;
         }
@@ -284,8 +286,7 @@ namespace Microsoft.Identity.Client
 #if DESKTOP || NET5_WIN
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
-        /// Used to center the browser that pop-up onto this window.
-        /// The center of the screen or the foreground app if a value is configured
+        /// Used to center the browser (embedded webview and Windows broker) that pop-up onto this window.        
         /// </summary>
         /// <param name="window">The current window as a IWin32Window</param>
         /// <returns>The builder to chain the .With methods</returns>
@@ -299,6 +300,10 @@ namespace Microsoft.Identity.Client
 
             return WithParentObject((object)window);
         }
+#endif
+
+
+#if DESKTOP || NET5_WIN || NET_CORE
 
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
@@ -334,7 +339,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#endregion
+        #endregion
 
         /// <inheritdoc />
         protected override void Validate()

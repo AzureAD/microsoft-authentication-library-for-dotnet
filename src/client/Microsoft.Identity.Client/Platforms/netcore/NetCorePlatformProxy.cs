@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             if (IsWindowsPlatform())
             {
                 uint userNameSize = 0;
-                Features.Windows.WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
+                WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
                 if (userNameSize == 0)
                 {
                     throw new MsalClientException(
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 }
 
                 var sb = new StringBuilder((int)userNameSize);
-                if (!Features.Windows.WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
+                if (!WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
                 {
                     throw new MsalClientException(
                         MsalError.GetUserNameFailed,
@@ -250,5 +250,13 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
             return Environment.OSVersion.Platform == PlatformID.Unix;
         }
+
+        public override bool CanBrokerSupportSilentAuth()
+        {
+            return true;
+        }
+
+        public override bool BrokerSupportsWamAccounts => true;
+
     }
 }

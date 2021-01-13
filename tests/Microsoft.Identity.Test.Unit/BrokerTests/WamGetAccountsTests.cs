@@ -36,11 +36,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
-                    .WithBroker(true)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
-                pca.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
+                pca.AppConfigInternal.BrokerCreatorFunc = (x, y) => mockBroker;
 
                 // Act
                 await pca.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
@@ -53,10 +53,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId2)
                     .WithExperimentalFeatures(true)
-                    .WithBroker(true)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
-                pca2.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
+                
+                pca2.AppConfigInternal.BrokerCreatorFunc = (app, logger) => mockBroker;
+
                 var accounts2 = await pca2.GetAccountsAsync().ConfigureAwait(false);
                 Assert.IsFalse(accounts2.Any());
             }
@@ -82,21 +84,21 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // 2 apps must share the token cache, like FOCI apps, for this test to be interesting
                 var pca1 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
-                    .WithBroker(true)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
                 var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId2)
                     .WithExperimentalFeatures(true)
-                    .WithBroker(true)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
                 cache.Bind(pca1.UserTokenCache);
                 cache.Bind(pca2.UserTokenCache);
 
-                pca1.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
-                pca2.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
+                pca1.AppConfigInternal.BrokerCreatorFunc = (app, logger) => mockBroker;
+                pca2.AppConfigInternal.BrokerCreatorFunc = (app, logger) => mockBroker;
 
                 // Act 
                 mockBroker.AcquireTokenInteractiveAsync(null, null).ReturnsForAnyArgs(Task.FromResult(msalTokenResponse1));
@@ -148,11 +150,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
-                    .WithBroker(true)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
-
-                pca.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
 
                 // Act
                 await pca.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
@@ -169,6 +169,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 #endif
             }
         }
+
+     
 
         private static MsalTokenResponse CreateMsalTokenResponseFromWam(string wamAccountId)
         {
@@ -187,5 +189,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
     }
 
- 
+    public static class BrokerExt
+    {
+        internal static PublicClientApplicationBuilder WithTestBroker(this PublicClientApplicationBuilder pcaBuilder, IBroker mockBroker)
+        {
+            pcaBuilder.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
+            pcaBuilder.Config.IsBrokerEnabled = true;
+
+            return pcaBuilder;
+        }
+    }
 }

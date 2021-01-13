@@ -11,8 +11,8 @@ using Windows.UI.ApplicationSettings;
 
 #if NET5_WIN
 using Microsoft.Identity.Client.Platforms.net5win;
-#elif DESKTOP
-using Microsoft.Identity.Client.Platforms.netdesktop;
+#elif DESKTOP || NET_CORE
+using Microsoft.Identity.Client.Platforms;
 #endif
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
