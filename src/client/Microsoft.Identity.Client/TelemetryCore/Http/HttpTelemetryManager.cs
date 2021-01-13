@@ -134,7 +134,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             platformConfig.Append((string.IsNullOrEmpty(isValidUserProvidedRegion) ? isValidUserProvidedRegion : ConvertFromStringToBitwise(isValidUserProvidedRegion)) + ",");
             platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled));
 
-
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
                 $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
                 $"|{platformConfig}";
