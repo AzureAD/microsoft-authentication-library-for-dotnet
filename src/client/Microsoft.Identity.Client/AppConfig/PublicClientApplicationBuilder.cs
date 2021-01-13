@@ -125,12 +125,14 @@ namespace Microsoft.Identity.Client
         /// you need to set the WithBroker() parameters to true. See https://aka.ms/msal-net-brokers 
         /// for more information on platform specific settings required to enable the broker.
         /// 
-        /// On iOS and Android, Autheticator and Company Portal serve as brokers.
+        /// On iOS and Android, Authenticator and Company Portal serve as brokers.
         /// On Windows, WAM (Windows Account Manager) serves as broker. See https://aka.ms/msal-net-wam
         /// </summary>
         /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
+        /// <remarks>If your app uses .NET classic or .NET Core 3.x, and you wish to use the Windows broker, 
+        /// please install the nuget package Microsoft.Identity.Client.Desktop and call .WithWindowsBroker(true)</remarks>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
 #if NET45
