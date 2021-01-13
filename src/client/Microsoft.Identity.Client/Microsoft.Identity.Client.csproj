@@ -257,12 +257,7 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Splash.resx</DependentUpon>
-    </None>
-    <None Update="Platforms\Features\WamBroker\win32\Splash.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Splash.resx</DependentUpon>
-    </None>
+    </None>    
   </ItemGroup>
 
 </Project>

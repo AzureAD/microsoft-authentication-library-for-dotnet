@@ -181,8 +181,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 if (retaccountPane != null)
                 {
-                    retaccountPane.AccountCommandsRequested -= Authenticator_AccountCommandsRequested;
-                    // Marshal.ReleaseComObject(retaccountPane); // this is critical.
+                    retaccountPane.AccountCommandsRequested -= Authenticator_AccountCommandsRequested;                    
                     retaccountPane = null;
                 }
             }
@@ -294,14 +293,5 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _provider = command.WebAccountProvider;
 
         }
-
-        //        public bool IsConsoleApp()
-        //        {
-        //#if WINDOWS_APP
-        //            return false;
-        //#else
-        //            return _parentHandle == WindowsNativeMethods.GetConsoleWindow();
-        //#endif
-        //        }
     }
 }
