@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
                 await cca.AcquireTokenForClient(s_keyvaultScope)
-                .WithAzureRegion(true)
+                .WithPreferedAzureRegion(true)
                 .WithExtraQueryParameters(_dict)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -219,12 +219,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(currentTelemetryHeader, req.Headers.GetValues("x-client-current-telemetry").First());
         }
 
-        private void AssertTelemetry(HttpSnifferClientFactory factory, string currentTelemetryHeader, int placement = 0)
-        {
-            var (req, res) = factory.RequestsAndResponses.Skip(placement).Single();
-            Assert.AreEqual(currentTelemetryHeader, req.Headers.GetValues("x-client-current-telemetry").First());
-        }
-
         private void AssertValidHost(
           bool isRegionalHost,
           HttpSnifferClientFactory factory,
@@ -260,7 +254,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string userProvidedRegion = "")
         {
             var result = await _confidentialClientApplication.AcquireTokenForClient(s_keyvaultScope)
-                            .WithAzureRegion(autoDetectRegion, userProvidedRegion)
+                            .WithPreferedAzureRegion(autoDetectRegion, userProvidedRegion)
                             .WithExtraQueryParameters(_dict)
                             .WithForceRefresh(withForceRefresh)
                             .ExecuteAsync()
