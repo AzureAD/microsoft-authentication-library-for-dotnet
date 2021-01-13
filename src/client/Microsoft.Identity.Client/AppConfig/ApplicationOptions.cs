@@ -125,6 +125,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Enables legacy ADAL cache serialization and deserialization.
         /// </summary>
-        public bool LegacyCacheCompatibilityEnabled { get; set; }
+        public bool LegacyCacheCompatibilityEnabled { get; set; } = true;
     }
 }
