@@ -12,12 +12,12 @@ namespace Microsoft.Identity.Test.Performance
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<LegacyCacheOperationsTests>(
+            BenchmarkRunner.Run<CryptoManagerTests>(
                 DefaultConfig.Instance
                     .WithOptions(ConfigOptions.DontOverwriteResults)
                     .AddJob(
                         Job.Default
-                            .WithId("Job-GetAllAccessTokensTests")
+                            .WithId("Job-PerfTests")
                             ));
 
             Console.ReadKey();

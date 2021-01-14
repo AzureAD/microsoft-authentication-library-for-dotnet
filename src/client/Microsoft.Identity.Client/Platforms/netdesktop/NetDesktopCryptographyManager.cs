@@ -13,11 +13,16 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Win32.SafeHandles;
 using Microsoft.Identity.Client.Platforms.net45.Native;
+using System.Collections.Concurrent;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class NetDesktopCryptographyManager : ICryptographyManager
     {
+        private static readonly ConcurrentDictionary<string, RSA> s_certificateToRsaMap = new ConcurrentDictionary<string, RSA>();
+        private static readonly ConcurrentDictionary<string, RSACryptoServiceProvider> s_certificateToRsaCspMap = new ConcurrentDictionary<string, RSACryptoServiceProvider>();
+        private static readonly int s_maximumMapSize = 1000;
+
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             return string.IsNullOrEmpty(input) ? null : Base64UrlHelpers.Encode(CreateSha256HashBytes(input));
@@ -79,16 +84,25 @@ namespace Microsoft.Identity.Client.Platforms.net45
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
 
 #if NET45
-            var rsa = GetCryptoProviderForSha256_Net45(certificate);
+            var rsaCryptoProvider = GetCryptoProviderForSha256_Net45(certificate);
             using (var sha = new SHA256Cng())
             {
-                return rsa.SignData(messageBytes, sha);
+                var signedData = rsaCryptoProvider.SignData(messageBytes, sha);
+                // Cache only valid RSA crypto providers
+                s_certificateToRsaCspMap[certificate.Thumbprint] = rsaCryptoProvider;
+                return signedData;
             }
 #else
-            using (var key = certificate.GetRSAPrivateKey())
+            if (!s_certificateToRsaMap.TryGetValue(certificate.Thumbprint, out RSA rsa))
             {
-                return key.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                if (s_certificateToRsaMap.Count >= s_maximumMapSize)
+                    s_certificateToRsaMap.Clear();
+
+                s_certificateToRsaMap[certificate.Thumbprint] = certificate.GetRSAPrivateKey();
+                rsa = s_certificateToRsaMap[certificate.Thumbprint];
             }
+
+            return rsa.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 #endif
         }
 
@@ -100,11 +114,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
         private static RSACryptoServiceProvider GetCryptoProviderForSha256_Net45(X509Certificate2 certificate)
         {
             RSACryptoServiceProvider rsaProvider;
-
-
             try
             {
-                rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
+                if (!s_certificateToRsaCspMap.TryGetValue(certificate.Thumbprint, out rsaProvider))
+                    rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
             }
             catch (CryptographicException e)
             {
@@ -116,16 +129,19 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             if (rsaProvider == null)
             {
-                throw new MsalClientException("The provided certificate has a key that is not accessable.");
+                throw new MsalClientException("The provided certificate has a key that is not accessible.");
             }
 
-            const int PROV_RSA_AES = 24;    // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures
+            const int PROV_RSA_AES = 24;    // CryptoApi provider type for an RSA provider supporting SHA-256 digital signatures
 
             // ProviderType == 1(PROV_RSA_FULL) and providerType == 12(PROV_RSA_SCHANNEL) are provider types that only support SHA1.
             // Change them to PROV_RSA_AES=24 that supports SHA2 also. Only levels up if the associated key is not a hardware key.
-            // Another provider type related to rsa, PROV_RSA_SIG == 2 that only supports Sha1 is no longer supported
+            // Another provider type related to RSA, PROV_RSA_SIG == 2 that only supports Sha1 is no longer supported
             if ((rsaProvider.CspKeyContainerInfo.ProviderType == 1 || rsaProvider.CspKeyContainerInfo.ProviderType == 12) && !rsaProvider.CspKeyContainerInfo.HardwareDevice)
             {
+                if (s_certificateToRsaCspMap.TryGetValue(certificate.Thumbprint, out RSACryptoServiceProvider rsacsp))
+                    return rsacsp;
+
                 CspParameters csp = new CspParameters
                 {
                     ProviderType = PROV_RSA_AES,
@@ -143,6 +159,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 // With this flag, a CryptographicException is thrown instead.
                 //
                 csp.Flags |= CspProviderFlags.UseExistingKey;
+                if (s_certificateToRsaCspMap.Count >= s_maximumMapSize)
+                    s_certificateToRsaCspMap.Clear();
+
                 return new RSACryptoServiceProvider(csp);
             }
 

@@ -10,6 +10,9 @@ using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Performance
 {
+    /// <summary>
+    /// Used to test the performance of token cache with large amount of items.
+    /// </summary>
     public class AcquireTokenForClientLargeCacheTests
     {
         private AcquireTokenForClientParameterBuilder _acquireTokenForClientBuilder;
@@ -31,7 +34,6 @@ namespace Microsoft.Identity.Test.Performance
             inMemoryTokenCache.Bind(cca.AppTokenCache);
 
             TokenCacheHelper tokenCacheHelper = new TokenCacheHelper();
-
             tokenCacheHelper.PopulateCacheForClientCredential(cca.AppTokenCacheInternal.Accessor, TokenCacheSize);
 
             _acquireTokenForClientBuilder = cca
