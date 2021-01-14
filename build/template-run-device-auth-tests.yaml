@@ -10,5 +10,11 @@ steps:
 - task: VSTest@2
   displayName: 'DeviceAuthTests'
   inputs:
-    testAssemblyVer2: '$(System.ArtifactsDirectory)\drop\*\*'
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '$(System.ArtifactsDirectory)\drop\**\**'
+    searchFolder: '$(System.ArtifactsDirectory)'
+    rerunFailedTests: true
+    rerunMaxAttempts: '3'
+    runInParallel: false
+    codeCoverageEnabled: true
     diagnosticsEnabled: True
