@@ -7,14 +7,18 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Win32;
 
 namespace Microsoft.Identity.Client.PlatformsCommon
 {
     internal class DeviceAuthHelper
     {
+        private static Lazy<bool> s_canOSPerformPKeyAuth;
+
         public static IDictionary<string, string> ParseChallengeData(HttpResponseHeaders responseHeaders)
         {
             IDictionary<string, string> data = new Dictionary<string, string>();
@@ -74,14 +78,40 @@ namespace Microsoft.Identity.Client.PlatformsCommon
 
         public static bool CanOSPerformPKeyAuth()
         {
-            //PKeyAuth can only be performed on operating systems with a major OS version of 6. 
-            //This corresponds to windows 7, 8, 8.1 and their server equivilents.
-#if DESKTOP
-            if (Environment.OSVersion.Version.Major == 6)
+            if (s_canOSPerformPKeyAuth != null)
             {
+                return s_canOSPerformPKeyAuth.Value;
+            }
+
+            //PKeyAuth can only be performed on operating systems with a major OS version of 6.
+            //This corresponds to windows 7, 8, 8.1 and their server equivilents.
+            //Environment.OSVersion as it will return incorrect information on some operating systems
+            //For more information on how to acquire the current OS version from the registry
+            //See (https://stackoverflow.com/a/61914068)
+#if NET_CORE || NET5_WIN
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && !RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.InvariantCultureIgnoreCase)
+                && !RuntimeInformation.OSDescription.Contains("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase)
+                && !RuntimeInformation.OSDescription.Contains("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase))
+            {
+                s_canOSPerformPKeyAuth = new Lazy<bool>(() => true);
+                return true;
+            }
+#elif DESKTOP
+            var reg = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+
+            string OSInfo = (string)reg.GetValue("ProductName");
+            
+            if (OSInfo.IndexOf("Windows", StringComparison.InvariantCultureIgnoreCase) >= 0 
+                && OSInfo.IndexOf("Windows 10", StringComparison.InvariantCultureIgnoreCase) < 0
+                && OSInfo.IndexOf("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase) < 0
+                && OSInfo.IndexOf("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase) < 0)
+            {
+                s_canOSPerformPKeyAuth = new Lazy<bool>(() => true);
                 return true;
             }
 #endif
+            s_canOSPerformPKeyAuth = new Lazy<bool>(() => false);
             return false;
         }
     }
