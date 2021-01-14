@@ -11,6 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Desktop;
 using Microsoft.Identity.Client.Extensibility;
 using NetCoreTestApp.Experimental;
 
@@ -64,6 +65,8 @@ namespace NetCoreTestApp
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
+                            .WithExperimentalFeatures()
+                            .WithWindowsBroker()
                             .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
                             .Build();
 

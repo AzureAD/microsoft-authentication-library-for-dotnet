@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IntPtr _parentHandle;
         private readonly SynchronizationContext _synchronizationContext;
         private const string WamErrorPrefix = "WAM Error ";
-        private const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
+        internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
 
 
         public WamBroker(
@@ -52,9 +52,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             IAccountPickerFactory accountPickerFactory = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _wamProxy = wamProxy ?? new WamProxy(_logger);
-            _parentHandle = GetParentWindow(uiParent);
             _synchronizationContext = uiParent?.SynchronizationContext;
+
+            _wamProxy = wamProxy ?? new WamProxy(_logger, _synchronizationContext);
+            _parentHandle = GetParentWindow(uiParent);
 
             _webAccountProviderFactory = webAccountProviderFactory ?? new WebAccountProviderFactory();
             _accountPickerFactory = accountPickerFactory ?? new AccountPickerFactory();
@@ -83,21 +84,24 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            if (_synchronizationContext == null)
+#if WINDOWS_APP
+            if (_synchronizationContext == null )
             {
                 throw new MsalClientException(
                     MsalError.WamUiThread,
-                    "AcquireTokenInteractive with broker must be called from the UI thread when using WAM. " +
-                    "Note that console applications are not currently supported in conjuction with WAM." + ErrorMessageSuffix);
+                    "AcquireTokenInteractive with broker must be called from the UI thread when using WAM." +
+                     ErrorMessageSuffix);
             }
+#endif
 
             if (authenticationRequestParameters.Account != null ||
                 !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
             {
+                bool isMsaPassthrough = IsMsaPassthrough(authenticationRequestParameters);
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     authenticationRequestParameters?.Account?.HomeAccountId?.TenantId, // TODO: we could furher optimize here by searching for an account based on UPN
-                    IsMsaPassthrough(authenticationRequestParameters)).ConfigureAwait(false);
+                    isMsaPassthrough).ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
                 WebAccountProvider provider;
@@ -179,10 +183,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             try
             {
-#if WINDOWS_APP
-                // UWP requires being on the UI thread
-                await _synchronizationContext;
-#endif
                 IWebTokenRequestResultWrapper wamResult;
                 if (wamAccount != null)
                 {
@@ -230,9 +230,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private async Task<MsalTokenResponse> AcquireInteractiveWithPickerAsync(
             AuthenticationRequestParameters authenticationRequestParameters)
         {            
-            // assume AAD only
-
-
 
             bool isMsaPassthrough = IsMsaPassthrough(authenticationRequestParameters);
             var accountPicker = _accountPickerFactory.Create(
@@ -257,11 +254,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 // WAM returns the tenant here, not the full authority
                 bool isConsumerTenant = string.Equals(accountProvider.Authority, "consumers", StringComparison.OrdinalIgnoreCase);
                 wamPlugin = (isConsumerTenant && !isMsaPassthrough) ? _msaPlugin : _aadPlugin;
-
-#if WINDOWS_APP
-                // UWP requires being on the UI thread
-                await _synchronizationContext;
-#endif
 
                 webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                      accountProvider,
@@ -322,7 +314,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return ptr;
             }
 
-            return WindowsNativeMethods.GetForegroundWindow(); 
+            IntPtr foregroundWindow = WindowsNativeMethods.GetForegroundWindow();
+            return foregroundWindow;
 #endif
         }
 
@@ -663,7 +656,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 }
             }
         }
-
+      
         internal /* for test only */ async Task<bool> IsMsaRequestAsync(
             Authority authority,
             string homeTenantId,

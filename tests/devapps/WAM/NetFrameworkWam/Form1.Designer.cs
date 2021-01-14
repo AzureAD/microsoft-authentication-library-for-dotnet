@@ -53,6 +53,7 @@
             this.cbxMsaPt = new System.Windows.Forms.CheckBox();
             this.btnExpire = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.cbxBackgroundThread = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // resultTbx
@@ -290,11 +291,22 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.remoteAcc_click);
             // 
+            // cbxBackgroundThread
+            // 
+            this.cbxBackgroundThread.AutoSize = true;
+            this.cbxBackgroundThread.Location = new System.Drawing.Point(212, 101);
+            this.cbxBackgroundThread.Name = "cbxBackgroundThread";
+            this.cbxBackgroundThread.Size = new System.Drawing.Size(146, 17);
+            this.cbxBackgroundThread.TabIndex = 26;
+            this.cbxBackgroundThread.Text = "Force background thread";
+            this.cbxBackgroundThread.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(639, 613);
+            this.Controls.Add(this.cbxBackgroundThread);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnExpire);
             this.Controls.Add(this.cbxMsaPt);
@@ -352,6 +364,7 @@
         private System.Windows.Forms.CheckBox cbxMsaPt;
         private System.Windows.Forms.Button btnExpire;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.CheckBox cbxBackgroundThread;
     }
 }
 

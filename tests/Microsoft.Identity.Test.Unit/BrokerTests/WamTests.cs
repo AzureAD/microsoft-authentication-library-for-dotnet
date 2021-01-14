@@ -410,31 +410,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public async Task ATI_RequiresSyncContext_Async()
-        {
-            var wamBroker = new WamBroker(
-            new CoreUIParent(), // no sync context here
-                _logger,
-                _aadPlugin,
-                _msaPlugin,
-                _wamProxy,
-                _webAccountProviderFactory,
-                _accountPickerFactory);
-            using (var harness = CreateTestHarness())
-            {
-                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant); // AAD
-                var atiParams = new AcquireTokenInteractiveParameters();
-
-                // Act
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                    () => wamBroker.AcquireTokenInteractiveAsync(requestParams, atiParams)).ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MsalError.WamUiThread, ex.ErrorCode);
-            }
-        }
-
-        [TestMethod]
         public async Task ATI_WithoutPicker_Async()
         {
             string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
