@@ -339,16 +339,51 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
         }
 
-        [TestMethod]
-        public void TestConstructor_WithLegacyCacheCompatibility()
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataRow(null)] // Not specified, default is true
+        public void TestConstructor_WithLegacyCacheCompatibility(bool? isLegacyCacheCompatibilityEnabled)
         {
-            var cca = ConfidentialClientApplicationBuilder
+            var builder = ConfidentialClientApplicationBuilder
                       .Create(TestConstants.ClientId)
-                      .WithClientSecret(TestConstants.ClientSecret)
-                      .WithLegacyCacheCompatibility(true)
+                      .WithClientSecret(TestConstants.ClientSecret);
+
+            if (isLegacyCacheCompatibilityEnabled.HasValue)
+            {
+                builder.WithLegacyCacheCompatibility(isLegacyCacheCompatibilityEnabled.Value);
+            } else
+            {
+                isLegacyCacheCompatibilityEnabled = true;
+            }
+                      
+            var cca = builder.Build();
+
+            Assert.AreEqual(isLegacyCacheCompatibilityEnabled, cca.AppConfig.LegacyCacheCompatibilityEnabled);
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataRow(null)] // Not specified, default is true
+        public void TestConstructor_WithLegacyCacheCompatibility_WithOptions(bool? isLegacyCacheCompatibilityEnabled)
+        {
+            var options = CreateConfidentialClientApplicationOptions();
+            
+            if (isLegacyCacheCompatibilityEnabled.HasValue)
+            {
+                options.LegacyCacheCompatibilityEnabled = isLegacyCacheCompatibilityEnabled.Value;
+            }
+            else
+            {
+                isLegacyCacheCompatibilityEnabled = true;
+            }
+
+            var cca = ConfidentialClientApplicationBuilder
+                      .CreateWithApplicationOptions(options)
                       .Build();
 
-            Assert.AreEqual(true, cca.AppConfig.LegacyCacheCompatibilityEnabled);
+            Assert.AreEqual(isLegacyCacheCompatibilityEnabled, cca.AppConfig.LegacyCacheCompatibilityEnabled);
         }
     }
 }

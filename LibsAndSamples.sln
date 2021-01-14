@@ -157,7 +157,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Int
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RegionalTestApp", "tests\devapps\RegionalTestApp\RegionalTestApp.csproj", "{C0EAF1E1-CDF0-48E7-BE2B-22797A49291B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Performance", "tests\Microsoft.Identity.Client.Performance\Microsoft.Identity.Test.Performance.csproj", "{F7993CD1-91C1-4E22-9BDA-EAD6D4FB1D36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Performance", "tests\Microsoft.Identity.Test.Performance\Microsoft.Identity.Test.Performance.csproj", "{F7993CD1-91C1-4E22-9BDA-EAD6D4FB1D36}"
 	ProjectSection(ProjectDependencies) = postProject
 		{60117A9B-4BB8-472E-BFFF-52CBF67CA95A} = {60117A9B-4BB8-472E-BFFF-52CBF67CA95A}
 	EndProjectSection

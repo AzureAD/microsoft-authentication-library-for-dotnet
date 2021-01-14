@@ -29,5 +29,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Constants
         public const string IsTokenCacheSerializedKey = "msal.is_token_cache_serialized";
         public const string UserProvidedRegion = "msal.user_provided_region";
         public const string IsValidUserProvidedRegion = "msal.is_valid_user_provided_region";
+        public const string IsLegacyCacheEnabledKey = "msal.is_legacy_cache_enabled";
     }
 }
