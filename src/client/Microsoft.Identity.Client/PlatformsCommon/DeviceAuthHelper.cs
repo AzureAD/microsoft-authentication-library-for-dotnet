@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon
         {
             if (s_canOSPerformPKeyAuth != null)
             {
-                return (bool)s_canOSPerformPKeyAuth.Value;
+                return s_canOSPerformPKeyAuth.Value;
             }
 
             //PKeyAuth can only be performed on operating systems with a major OS version of 6.
@@ -90,7 +90,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon
             //See (https://stackoverflow.com/a/61914068)
 #if NET_CORE || NET5_WIN
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                && !RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.InvariantCultureIgnoreCase))
+                && !RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.InvariantCultureIgnoreCase)
+                && !RuntimeInformation.OSDescription.Contains("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase)
+                && !RuntimeInformation.OSDescription.Contains("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase))
             {
                 s_canOSPerformPKeyAuth = new Lazy<bool>(() => true);
                 return true;
@@ -100,8 +102,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon
 
             string OSInfo = (string)reg.GetValue("ProductName");
             
-            if (OSInfo.IndexOf("Windows", StringComparison.InvariantCultureIgnoreCase) >= 0 &&
-                OSInfo.IndexOf("Windows 10", StringComparison.InvariantCultureIgnoreCase) < 0)
+            if (OSInfo.IndexOf("Windows", StringComparison.InvariantCultureIgnoreCase) >= 0 
+                && OSInfo.IndexOf("Windows 10", StringComparison.InvariantCultureIgnoreCase) < 0
+                && OSInfo.IndexOf("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase) < 0
+                && OSInfo.IndexOf("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase) < 0)
             {
                 s_canOSPerformPKeyAuth = new Lazy<bool>(() => true);
                 return true;
