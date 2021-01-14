@@ -52,9 +52,16 @@ namespace Microsoft.Identity.Client.Region
             s_region = null;
         }
 
-        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
+        public async Task<InstanceDiscoveryMetadataEntry> TryGetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
+
+            if (regionalizedAuthority == null && requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
+            {
+                requestContext.Logger.Verbose($"[Region Discovery] Unable to determine region. Falling back to global.");
+                return null;
+            }
+
             InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, requestContext.Logger);
 
             if (cachedEntry == null)
@@ -215,6 +222,8 @@ namespace Microsoft.Identity.Client.Region
                     {
                         requestContext.ApiEvent.IsValidUserProvidedRegion = s_region.Equals(regionToUse);
                         requestContext.Logger.Info($"The auto detected region is {s_region}.");
+                        requestContext.ApiEvent.FallbackToGlobal = "0";
+
                         if (s_region.Equals(regionToUse))
                         {
                             requestContext.Logger.Info("The region provided by the user is valid and equal to the auto detected region.");
@@ -225,11 +234,11 @@ namespace Microsoft.Identity.Client.Region
                         }
                     }
                 }
-                catch (MsalServiceException e)
+                catch 
                 {
                     if (regionToUse.IsNullOrEmpty())
                     {
-                        throw e;
+                        throw;
                     }
 
                     s_region = regionToUse;

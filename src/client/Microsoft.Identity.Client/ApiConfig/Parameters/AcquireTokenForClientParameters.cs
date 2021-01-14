@@ -26,6 +26,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// </summary>
         public string RegionToUse { get; set; }
 
+        /// <summary>
+        /// </summary>
+        public bool FallbackToGlobal { get; set; }
+
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)
         {
