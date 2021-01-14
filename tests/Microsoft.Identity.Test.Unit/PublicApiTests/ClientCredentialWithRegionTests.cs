@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit
 
             AuthenticationResult result = await app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithPreferedAzureRegion(true)
+                .WithPreferredAzureRegion(true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithPreferedAzureRegion(true)
+                    .WithPreferredAzureRegion(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -107,8 +107,8 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [Description("Test when the region could not be fetched")]
-        public async Task RegionNotFoundAsync()
+        [Description("Test when the region could not be fetched and fallback to global is set to false.")]
+        public async Task RegionNotFoundAndFallbackToGlobalIsFalseAsync()
         {
             _httpManager.AddRegionDiscoveryMockHandlerNotFound();
 
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 AuthenticationResult result = await app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithPreferedAzureRegion(true)
+                .WithPreferredAzureRegion(true, fallbackToGlobal: false)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 AuthenticationResult result = await app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithPreferedAzureRegion(true, string.Empty, true)
+                .WithPreferredAzureRegion(true, string.Empty, true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 

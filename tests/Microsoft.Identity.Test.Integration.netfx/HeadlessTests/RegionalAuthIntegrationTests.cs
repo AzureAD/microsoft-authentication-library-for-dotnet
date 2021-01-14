@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
                 await cca.AcquireTokenForClient(s_keyvaultScope)
-                .WithPreferedAzureRegion(true)
+                .WithPreferredAzureRegion(true)
                 .WithExtraQueryParameters(_dict)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string userProvidedRegion = "")
         {
             var result = await _confidentialClientApplication.AcquireTokenForClient(s_keyvaultScope)
-                            .WithPreferedAzureRegion(autoDetectRegion, userProvidedRegion)
+                            .WithPreferredAzureRegion(autoDetectRegion, userProvidedRegion)
                             .WithExtraQueryParameters(_dict)
                             .WithForceRefresh(withForceRefresh)
                             .ExecuteAsync()

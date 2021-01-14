@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
         /// <param name="fallbackToGlobal"><c>true</c> to fallback to global ESTS endpoint when calls to regional ESTS fail.
         /// This will only happen when MSAL is not able to detect a region or if there is no provided region in <param name="regionToUse"></param>
         /// <returns>The builder to chain the .With methods</returns>
-        [Obsolete("This method name has been changed to a more relevant name, please use WithPreferedAzureRegion instead which also includes added features.", true)]
+        [Obsolete("This method name has been changed to a more relevant name, please use WithPreferredAzureRegion instead which also includes added features.", true)]
         public AcquireTokenForClientParameterBuilder WithAzureRegion(bool useAzureRegion)
         {
             ValidateUseOfExpirementalFeature();
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Client
         /// <param name="fallbackToGlobal"><c>true</c> to fallback to global ESTS endpoint when calls to regional ESTS fail.
         /// This will only happen when MSAL is not able to detect a region or if there is no provided region in <param name="regionToUse"></param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenForClientParameterBuilder WithPreferedAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = false)
+        public AcquireTokenForClientParameterBuilder WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true)
         {
             ValidateUseOfExpirementalFeature();
 
