@@ -26,49 +26,67 @@ namespace Microsoft.Identity.Client.Region
         private readonly IHttpManager _httpManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
         private readonly int _imdsCallTimeoutMs;
+        private static string s_region;
 
         public RegionDiscoveryProvider(
             IHttpManager httpManager, 
             INetworkCacheMetadataProvider networkCacheMetadataProvider = null, 
-            int imdsCallTimeout = 2000)
+            int imdsCallTimeout = 2000,
+            /* for tests only */ bool shouldClearCaches = false)
         {
             _httpManager = httpManager;
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
             _imdsCallTimeoutMs = imdsCallTimeout;
+
+            if (shouldClearCaches)
+            {
+                Clear();
+            }
         }
 
-        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
+        /*
+         * To be used only for tests
+         */
+        public void Clear()
         {
-            ICoreLogger logger = requestContext.Logger;
-            string environment = authority.Host;
-            InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
+            s_region = null;
+        }
+
+        public async Task<InstanceDiscoveryMetadataEntry> TryGetMetadataAsync(Uri authority, RequestContext requestContext)
+        {
+            Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
+
+            if (regionalizedAuthority == null && requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
+            {
+                requestContext.Logger.Verbose($"[Region Discovery] Unable to determine region. Falling back to global.");
+                return null;
+            }
+
+            InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, requestContext.Logger);
 
             if (cachedEntry == null)
             {
-                Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
                 CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
 
-                cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
-                logger.Verbose($"[Region Discovery] Created metadata for the regional environment {environment} ? {cachedEntry != null}");
+                cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, requestContext.Logger);
+                requestContext.Logger.Verbose($"[Region Discovery] Created metadata for the regional environment {regionalizedAuthority.Host} ? {cachedEntry != null}");
             }
             else
             {
-                logger.Verbose($"[Region Discovery] The network provider found an entry for {environment}");
+                requestContext.Logger.Verbose($"[Region Discovery] The network provider found an entry for {regionalizedAuthority.Host}");
                 LogTelemetryData(cachedEntry.PreferredNetwork.Split('.')[0], RegionSource.Cache, requestContext);
             }
             
             return cachedEntry;
         }
 
-
         private async Task<string> GetRegionAsync(RequestContext requestContext)
         {
-            ICoreLogger logger = requestContext.Logger;
             string region = Environment.GetEnvironmentVariable(RegionName);
 
             if (!string.IsNullOrEmpty(region))
             {
-                logger.Info($"[Region discovery] Region found in environment variable: {region}.");
+                requestContext.Logger.Info($"[Region discovery] Region found in environment variable: {region}.");
 
                 LogTelemetryData(region, RegionSource.EnvVariable, requestContext);
 
@@ -82,21 +100,23 @@ namespace Microsoft.Identity.Client.Region
                     { "Metadata", "true" }
                 };
 
-                HttpResponse response = await _httpManager.SendGetAsync(BuildImdsUri(DefaultApiVersion), headers, logger, retry: false, GetCancellationToken(requestContext.UserCancellationToken)).ConfigureAwait(false);
+                HttpResponse response = await _httpManager.SendGetAsync(BuildImdsUri(DefaultApiVersion), headers, requestContext.Logger, retry: false, GetCancellationToken(requestContext.UserCancellationToken)).ConfigureAwait(false);
 
                 // A bad request occurs when the version in the IMDS call is no longer supported.
                 if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
-                    string apiVersion = await GetImdsUriApiVersionAsync(logger, headers, requestContext.UserCancellationToken).ConfigureAwait(false); // Get the latest version
-                    response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger, retry: false, GetCancellationToken(requestContext.UserCancellationToken)).ConfigureAwait(false); // Call again with updated version
+                    string apiVersion = await GetImdsUriApiVersionAsync(requestContext.Logger, headers, requestContext.UserCancellationToken).ConfigureAwait(false); // Get the latest version
+                    response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, requestContext.Logger, retry: false, GetCancellationToken(requestContext.UserCancellationToken)).ConfigureAwait(false); // Call again with updated version
                 }
 
                 if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                 {
-                    return response.Body;
+                    region = response.Body;
+                    LogTelemetryData(region, RegionSource.Imds, requestContext);
+                    return region;
                 }
-                    
-                logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
+
+                requestContext.Logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
 
                 throw MsalServiceExceptionFactory.FromImdsResponse(
                     MsalError.RegionDiscoveryFailed,
@@ -114,7 +134,7 @@ namespace Microsoft.Identity.Client.Region
             }
             catch (Exception e)
             {
-                logger.Info("[Region discovery] Call to local imds failed. " + e);
+                requestContext.Logger.Info("[Region discovery] Call to local imds failed. " + e);
                 throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed, e);
             }
         }
@@ -130,11 +150,8 @@ namespace Microsoft.Identity.Client.Region
         private void LogTelemetryData(string region, RegionSource regionSource, RequestContext requestContext)
         {
             requestContext.ApiEvent.RegionDiscovered = region;
-
-            if (requestContext.ApiEvent.RegionSource == 0)
-            {
-                requestContext.ApiEvent.RegionSource = (int) regionSource;
-            }
+            requestContext.ApiEvent.RegionSource = (int) regionSource;
+            requestContext.ApiEvent.UserProvidedRegion = requestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse;
         }
 
         private async Task<string> GetImdsUriApiVersionAsync(ICoreLogger logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
@@ -177,7 +194,7 @@ namespace Microsoft.Identity.Client.Region
         {
             return new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { orginalAuthority.Host, regionalizedAuthority.Host },
+                Aliases = new[] { regionalizedAuthority.Host },
                 PreferredCache = orginalAuthority.Host,
                 PreferredNetwork = regionalizedAuthority.Host
             };
@@ -193,16 +210,52 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<Uri> BuildAuthorityWithRegionAsync(Uri canonicalAuthority, RequestContext requestContext)
         {
-            string region = await GetRegionAsync(requestContext).ConfigureAwait(false);
+            string regionToUse = requestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse;
+
+            if (s_region.IsNullOrEmpty())
+            {
+                try
+                {
+                    s_region = await GetRegionAsync(requestContext).ConfigureAwait(false);
+
+                    if (!regionToUse.IsNullOrEmpty())
+                    {
+                        requestContext.ApiEvent.IsValidUserProvidedRegion = s_region.Equals(regionToUse);
+                        requestContext.Logger.Info($"The auto detected region is {s_region}.");
+                        requestContext.ApiEvent.FallbackToGlobal = "0";
+
+                        if (s_region.Equals(regionToUse))
+                        {
+                            requestContext.Logger.Info("The region provided by the user is valid and equal to the auto detected region.");
+                        }
+                        else
+                        {
+                            requestContext.Logger.Info($"The region provided by the user is invalid. Region detected: {s_region} Region provided: {regionToUse}");
+                        }
+                    }
+                }
+                catch 
+                {
+                    if (regionToUse.IsNullOrEmpty())
+                    {
+                        throw;
+                    }
+
+                    s_region = regionToUse;
+                    requestContext.Logger.Info($"Region auto detection failed. Region provided by the user will be used: ${regionToUse}.");
+                    LogTelemetryData(s_region, RegionSource.UserProvided, requestContext);
+                }
+            }
+
             var builder = new UriBuilder(canonicalAuthority);
 
             if (KnownMetadataProvider.IsPublicEnvironment(canonicalAuthority.Host))
             {
-                builder.Host = $"{region}.login.microsoft.com";
+                builder.Host = $"{s_region}.login.microsoft.com";
             }
             else
             {
-                builder.Host = $"{region}.{builder.Host}";
+                builder.Host = $"{s_region}.{builder.Host}";
             }
 
             return builder.Uri;

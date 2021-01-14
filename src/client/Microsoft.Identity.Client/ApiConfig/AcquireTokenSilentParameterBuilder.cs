@@ -135,13 +135,7 @@ namespace Microsoft.Identity.Client
         public AcquireTokenSilentParameterBuilder WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
-
-            if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
-            {
-                throw new MsalClientException(
-                    MsalError.ExperimentalFeature,
-                    MsalErrorMessage.ExperimentalFeature(nameof(WithProofOfPossession)));
-            }
+            ValidateUseOfExpirementalFeature();
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 

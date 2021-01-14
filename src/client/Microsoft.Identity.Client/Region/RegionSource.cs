@@ -9,6 +9,7 @@ namespace Microsoft.Identity.Client.Region
         None = 0,
         EnvVariable = 1,
         Imds = 2,
-        Cache = 3
+        Cache = 3,
+        UserProvided = 4
     }
 }

@@ -24,7 +24,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string IsAccessTokenCacheHitKey = EventNamePrefix + "at_cache_hit";
         public const string RegionDiscoveredKey = EventNamePrefix + "region_discovered";
         public const string RegionSourceKey = EventNamePrefix + "region_source";
+        public const string UserProvidedRegionKey = EventNamePrefix + "user_provided_region";
         public const string IsTokenCacheSerializedKey = EventNamePrefix + "is_token_cache_serialized";
+        public const string IsValidUserProvidedRegionKey = EventNamePrefix + "is_valid_user_provided_region";
+        public const string FallbackToGlobalKey = EventNamePrefix + "fallback_to_global";
+        public const string IsLegacyCacheEnabledKey = EventNamePrefix + "is_legacy_cache_enabled";
 
         public enum ApiIds
         {
@@ -35,7 +39,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             // the TelemetryFeature bits to avoid geometric permutations of ID values and allow more robust filtering
             // on the server side.
 
-            // If these arrive, then the permutuations of "with behavior/hint/scope/refresh/etc" are all
+            // If these arrive, then the permutations of "with behavior/hint/scope/refresh/etc" are all
             // bits sent as separate fields via ApiTelemetryFeature values.
             AcquireTokenByAuthorizationCode = 1000,
             AcquireTokenByRefreshToken = 1001,
@@ -169,13 +173,50 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             set => this[RegionSourceKey] = (value).ToString(CultureInfo.InvariantCulture);
         }
 
+        public string UserProvidedRegion
+        {
+            get => this.ContainsKey(UserProvidedRegionKey) ? this[UserProvidedRegionKey] : null;
+            set => this[UserProvidedRegionKey] = value;
+        }
+
+        public bool? IsValidUserProvidedRegion
+        {
+#pragma warning disable CA1305 // .net standard does not have an overload for ToString() with Culture
+            set { this[IsValidUserProvidedRegionKey] = value.ToString().ToLowerInvariant(); }
+            get 
+            {
+                if (this.ContainsKey(IsValidUserProvidedRegionKey))
+                {
+                    return this[IsValidUserProvidedRegionKey] == true.ToString().ToLowerInvariant();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+#pragma warning restore CA1305 // Specify IFormatProvider
+        }
+
+        public string FallbackToGlobal
+        {
+            get => this.ContainsKey(FallbackToGlobalKey) ? this[FallbackToGlobalKey] : null;
+            set => this[FallbackToGlobalKey] = value;
+        }
+
         public bool IsTokenCacheSerialized
         {
 #pragma warning disable CA1305 // .net standard does not have an overload for ToString() with Culture
             set { this[IsTokenCacheSerializedKey] = value.ToString().ToLowerInvariant(); }
             get { return this[IsTokenCacheSerializedKey] == true.ToString().ToLowerInvariant(); }
 #pragma warning restore CA1305 // Specify IFormatProvider
+        }
 
+        public bool IsLegacyCacheEnabled
+        {
+#pragma warning disable CA1305 // .NET Standard does not have an overload for ToString() with culture
+            set { this[IsLegacyCacheEnabledKey] = value.ToString().ToLowerInvariant(); }
+            get { return this[IsLegacyCacheEnabledKey] == true.ToString().ToLowerInvariant(); }
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
     }
 }

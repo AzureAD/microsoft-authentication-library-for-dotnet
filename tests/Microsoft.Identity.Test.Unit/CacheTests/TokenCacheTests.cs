@@ -44,6 +44,45 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             base.TestInitialize();
         }
 
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task WithLegacyCacheCompatibilityTest_Async(bool enableLegacyCacheCompatibility)
+        {
+            // Arrange
+            var legacyCachePersistence = Substitute.For<ILegacyCachePersistence>();
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isLegacyCacheEnabled: enableLegacyCacheCompatibility);
+            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            var response = TestConstants.CreateMsalTokenResponse();
+
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+            ((TokenCache)cache).LegacyCachePersistence = legacyCachePersistence;      
+            
+            var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
+            requestParams.TenantUpdatedCanonicalAuthority = Authority.CreateAuthorityWithTenant(
+                requestParams.AuthorityInfo,
+                TestConstants.Utid);
+            requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
+
+            // Act
+            await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
+            await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
+            await cache.RemoveAccountAsync(requestParams.Account, requestContext).ConfigureAwait(true);
+
+            // Assert
+            if (enableLegacyCacheCompatibility)
+            {
+                legacyCachePersistence.ReceivedWithAnyArgs().LoadCache();
+                legacyCachePersistence.ReceivedWithAnyArgs().WriteCache(Arg.Any<byte[]>());
+            }
+            else
+            {
+                legacyCachePersistence.DidNotReceiveWithAnyArgs().LoadCache();
+                legacyCachePersistence.DidNotReceiveWithAnyArgs().WriteCache(Arg.Any<byte[]>());
+            }
+        }
+
         [TestMethod]
         public void GetExactScopesMatchedAccessTokenTest()
         {

@@ -121,5 +121,10 @@ namespace Microsoft.Identity.Client
         /// For more details see https://aka.ms/msal-net-claims-request
         /// </remarks>
         public IEnumerable<string> ClientCapabilities { get; set; }
+
+        /// <summary>
+        /// Enables legacy ADAL cache serialization and deserialization.
+        /// </summary>
+        public bool LegacyCacheCompatibilityEnabled { get; set; } = true;
     }
 }

@@ -92,11 +92,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         Task StartDefaultOsBrowserAsync(string url);
 
-        IBroker CreateBroker(CoreUIParent uiParent);
+        IBroker CreateBroker(IAppConfigInternal appConfig, CoreUIParent uiParent);
 
         IDeviceAuthManager CreateDeviceAuthManager();
-
-        void /* for test */ SetBrokerForTest(IBroker broker);
 
         /// <summary>
         /// Most brokers take care of both silent auth and interactive auth, however some (iOS) 

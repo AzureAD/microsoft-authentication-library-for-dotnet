@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
         }
 
         /// <summary>
-        /// Csv expected format:
+        /// CSV expected format:
         ///      2|silent_successful_count|failed_requests|errors|platform_fields
         ///      failed_request is: api_id_1,correlation_id_1,api_id_2,correlation_id_2|error_1,error_2
         ///      platform_fields: region_1,region_source_1,region_2,region_source_2
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
         /// <summary>
         /// Expected format: 2|api_id,force_refresh|platform_config
-        /// platform_config: region,region_source,is_token_cache_serialized
+        /// platform_config: region,region_source,is_token_cache_serialized,user_provided_region,validate_use_region,is_legacy_cache_enabled
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
         {
@@ -120,16 +120,23 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionDiscovered, out string regionDiscovered);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionSource, out string regionSource);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsTokenCacheSerializedKey, out string isTokenCacheSerialized);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.UserProvidedRegion, out string userProvidedRegion);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsValidUserProvidedRegion, out string isValidUserProvidedRegion);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsLegacyCacheEnabledKey, out string isLegacyCacheEnabled);
 
             // Since regional fields will only be logged in case it is opted.
-            var regionalFields = new StringBuilder();
-            regionalFields.Append(regionDiscovered);
-            regionalFields.Append(",");
-            regionalFields.Append((regionSource));
+            var platformConfig = new StringBuilder();
+            platformConfig.Append(regionDiscovered + ",");
+            platformConfig.Append(regionSource + ",");
+            platformConfig.Append(ConvertFromStringToBitwise(isTokenCacheSerialized) + ",");
+            platformConfig.Append(userProvidedRegion + ",");
+            // The value for this will be 1 if the region provided is valid, 0 if invalid and "" in case it could not be validated.
+            platformConfig.Append((string.IsNullOrEmpty(isValidUserProvidedRegion) ? isValidUserProvidedRegion : ConvertFromStringToBitwise(isValidUserProvidedRegion)) + ",");
+            platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled));
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
                 $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
-                $"|{regionalFields},{ConvertFromStringToBitwise(isTokenCacheSerialized)}";
+                $"|{platformConfig}";
         }
 
         private string ConvertFromStringToBitwise(string value)

@@ -50,6 +50,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <DisableExtraReferences>true</DisableExtraReferences>
     <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -76,6 +77,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <!-- These are for MSAL json/* build infra -->
     <DefineConstants>$(DefineConstants);PORTABLE;DOTNET;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_OBSOLETE_FORMATTER_ASSEMBLY_STYLE;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;$(AdditionalConstants)</DefineConstants>
+    <TargetPlatformMinVersion>10.0.0.0</TargetPlatformMinVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
     <!-- These are for MSAL json/* build infra -->
@@ -125,7 +127,6 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
 
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -145,14 +146,12 @@
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet5Win)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Platforms\net5win\**\*.cs" LinkBase="Platforms\net5win" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsWebUi\**\*.cs" />
 
@@ -163,13 +162,10 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
-    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.17763.1000" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsWebUi\**\*.cs" />
 
     <Reference Include="System" />
@@ -187,7 +183,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" Exclude="$(PathToMsalSources)\Platforms\Features\WamBroker\win32\**\*.cs" />
 
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
@@ -255,5 +251,12 @@
 
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Platforms\Features\WamBroker\win32\Splash.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Splash.resx</DependentUpon>
+    </None>    
   </ItemGroup>
 </Project>

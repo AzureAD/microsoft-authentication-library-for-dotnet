@@ -1,8 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !NET45
-
+#if !NETSTANDARD
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -11,7 +10,7 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 
-namespace Microsoft.Identity.Client.Platforms.netdesktop
+namespace Microsoft.Identity.Client.Platforms
 {
     internal static class WebAuthenticationCoreManagerInterop
     {
@@ -54,10 +53,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
     [System.Runtime.InteropServices.InterfaceType(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIInspectable)]
     internal interface IWebAuthenticationCoreManagerInterop
     {
-        IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(
-            IntPtr appWindow, 
-            WebTokenRequest request, 
-            [System.Runtime.InteropServices.In] ref Guid riid);
+        IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr appWindow, WebTokenRequest request, [System.Runtime.InteropServices.In] ref Guid riid);
         IAsyncOperation<WebTokenRequestResult> RequestTokenWithWebAccountForWindowAsync(IntPtr appWindow, WebTokenRequest request, WebAccount webAccount, [System.Runtime.InteropServices.In] ref Guid riid);
     }
 
@@ -154,4 +150,3 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
     }
 }
 #endif
-

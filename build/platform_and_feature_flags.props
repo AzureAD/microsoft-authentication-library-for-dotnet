@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
-    <DefineConstants>$(DefineConstants);NET_CORE;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_OS_SYSTEM_BROWSER</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET_CORE;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_OS_SYSTEM_BROWSER;SUPPORTS_BROKER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet5Win)' ">
     <DefineConstants>$(DefineConstants);NET5_WIN;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_OS_SYSTEM_BROWSER;SUPPORTS_BROKER</DefineConstants>

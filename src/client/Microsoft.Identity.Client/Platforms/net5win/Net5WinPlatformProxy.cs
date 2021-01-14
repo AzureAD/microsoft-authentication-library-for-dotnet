@@ -21,7 +21,6 @@ using Microsoft.Win32;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Platforms.Features.Windows;
 using Microsoft.Identity.Client.Platforms.netcore;
 
 namespace Microsoft.Identity.Client.Platforms.net5win
@@ -37,9 +36,11 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         {
         }
 
-        public override IBroker CreateBroker(CoreUIParent uiParent)
+        public override IBroker CreateBroker(IAppConfigInternal appConfig, CoreUIParent uiParent)
         {
-            return base.OverloadBrokerForTest ?? new Features.WamBroker.WamBroker(uiParent, Logger);
+            return appConfig.BrokerCreatorFunc != null ?
+                appConfig.BrokerCreatorFunc(uiParent, Logger) :
+                new Features.WamBroker.WamBroker(uiParent, Logger);
         }
 
         public override bool CanBrokerSupportSilentAuth()

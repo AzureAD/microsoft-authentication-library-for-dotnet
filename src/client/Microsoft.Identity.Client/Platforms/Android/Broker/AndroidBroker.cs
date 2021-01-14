@@ -302,7 +302,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        public async Task RemoveAccountAsync(IApplicationConfiguration applicationConfiguration, IAccount account)
+        public async Task RemoveAccountAsync(IAppConfigInternal applicationConfiguration, IAccount account)
         {
             using (_logger.LogMethodDuration())
             {

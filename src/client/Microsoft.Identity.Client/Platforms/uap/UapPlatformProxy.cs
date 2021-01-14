@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return true;
         }
 
-        public override IBroker CreateBroker(CoreUIParent uiParent)
+        public override IBroker CreateBroker(IAppConfigInternal appConfig, CoreUIParent uiParent)
         {
             return new WamBroker(uiParent, Logger);
         }
