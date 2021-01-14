@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static ICoreLogger Create(
             Guid correlationId,
-            IApplicationConfiguration config,
+            IAppConfigInternal config,
             bool isDefaultPlatformLoggingEnabled = false)
         {
             return new MsalLogger(

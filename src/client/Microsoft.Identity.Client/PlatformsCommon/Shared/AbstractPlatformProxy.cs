@@ -133,7 +133,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <inheritdoc />
         public IPlatformLogger PlatformLogger => _platformLogger.Value;
 
-        protected IBroker OverloadBrokerForTest { get; private set; }
 
         protected abstract IWebUIFactory CreateWebUiFactory();
         protected abstract IFeatureFlags CreateFeatureFlags();
@@ -170,19 +169,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             OverloadFeatureFlags = featureFlags;
         }
 
-        public void SetBrokerForTest(IBroker broker)
-        {
-            OverloadBrokerForTest = broker;
-        }
-
         public virtual Task StartDefaultOsBrowserAsync(string url)
         {
             throw new NotImplementedException();
         }
 
-        public virtual IBroker CreateBroker(CoreUIParent uiParent)
+        public virtual IBroker CreateBroker(IAppConfigInternal appConfig, CoreUIParent uiParent)
         {
-            return OverloadBrokerForTest ?? new NullBroker();
+            return appConfig.BrokerCreatorFunc != null ? 
+                appConfig.BrokerCreatorFunc(uiParent, Logger) :
+                new NullBroker();
         }
 
         public virtual bool CanBrokerSupportSilentAuth()

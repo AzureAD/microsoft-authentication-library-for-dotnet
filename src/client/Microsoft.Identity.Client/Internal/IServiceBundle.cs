@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal interface IServiceBundle
     {
-        IApplicationConfiguration Config { get; }
+        IAppConfigInternal Config { get; }
         ICoreLogger DefaultLogger { get; }
         IHttpManager HttpManager { get; }
         IInstanceDiscoveryManager InstanceDiscoveryManager { get; }

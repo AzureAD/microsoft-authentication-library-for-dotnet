@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
 
-        #region CreateMsalTokenResponse
+#region CreateMsalTokenResponse
         [TestMethod]
         public async Task WAMBroker_CreateMsalTokenResponse_AccountSwitch_Async()
         {
@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
 
-        #endregion
+#endregion
 
         [TestMethod]
         public async Task ATS_AccountMatchingInWAM_MatchingHomeAccId_Async()
@@ -709,6 +709,19 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             Assert.IsTrue(WamBroker.IsForceLoginPrompt(Prompt.ForceLogin));
             Assert.IsTrue(WamBroker.IsForceLoginPrompt(Prompt.Consent));
         }
+
+#if DESKTOP
+        [TestMethod]
+        public void NetFwkPlatformNotAvailable()
+        {
+            AssertException.Throws<PlatformNotSupportedException>(() =>
+                PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithBroker()
+                .Build());
+        }
+#endif
 
         private async Task RunPluginSelectionTestAsync(string inputAuthority, bool expectMsaPlugin)
         {
