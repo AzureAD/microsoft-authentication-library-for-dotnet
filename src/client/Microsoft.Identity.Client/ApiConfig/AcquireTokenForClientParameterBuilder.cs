@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
@@ -80,13 +79,8 @@ namespace Microsoft.Identity.Client
         /// By default the value for this variable is false.
         /// See https://aka.ms/msal-net-region-discovery for more details.
         /// </summary>
-        /// <param name="autoDetectRegion"><c>true</c> if the token request should be sent to regional ESTS. The default is <c>false</c>.
+        /// <param name="useAzureRegion"><c>true</c> if the token request should be sent to regional ESTS. The default is <c>false</c>.
         /// </param>
-        /// <param name="regionUsedIfAutoDetectFails"> optional parameter to provide region to MSAL. This parameter will be used along with auto detection of region.
-        /// If the region is auto detected, the provided region will be compared with the detected region and used in telemetry to do analysis on correctness of the region provided.
-        /// If auto region detection fails, the provided region will be used for instance metadata.</param>
-        /// <param name="fallbackToGlobal"><c>true</c> to fallback to global ESTS endpoint when calls to regional ESTS fail.
-        /// This will only happen when MSAL is not able to detect a region or if there is no provided region in <param name="regionToUse"></param>
         /// <returns>The builder to chain the .With methods</returns>
         [Obsolete("This method name has been changed to a more relevant name, please use WithPreferredAzureRegion instead which also includes added features.", true)]
         public AcquireTokenForClientParameterBuilder WithAzureRegion(bool useAzureRegion)
@@ -106,13 +100,13 @@ namespace Microsoft.Identity.Client
         /// By default the value for this variable is false.
         /// See https://aka.ms/msal-net-region-discovery for more details.
         /// </summary>
-        /// <param name="autoDetectRegion"><c>true</c> if the token request should be sent to regional ESTS. The default is <c>false</c>.
+        /// <param name="useAzureRegion"><c>true</c> if the token request should be sent to regional ESTS. The default is <c>false</c>.
         /// </param>
         /// <param name="regionUsedIfAutoDetectFails"> optional parameter to provide region to MSAL. This parameter will be used along with auto detection of region.
         /// If the region is auto detected, the provided region will be compared with the detected region and used in telemetry to do analysis on correctness of the region provided.
         /// If auto region detection fails, the provided region will be used for instance metadata.</param>
         /// <param name="fallbackToGlobal"><c>true</c> to fallback to global ESTS endpoint when calls to regional ESTS fail.
-        /// This will only happen when MSAL is not able to detect a region or if there is no provided region in <param name="regionToUse"></param>
+        /// This will only happen when MSAL is not able to detect a region or if there is no provided region.</param>
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true)
         {
