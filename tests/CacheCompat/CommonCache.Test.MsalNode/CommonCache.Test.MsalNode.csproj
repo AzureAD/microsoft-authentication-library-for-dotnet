@@ -27,9 +27,6 @@
     <None Update="NodeScript\index.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="NodeScript\package-lock.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="NodeScript\package.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
