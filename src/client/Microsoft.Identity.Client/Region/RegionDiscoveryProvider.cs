@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Client.Region
                     {
                         requestContext.ApiEvent.IsValidUserProvidedRegion = s_region.Equals(regionToUse);
                         requestContext.Logger.Info($"The auto detected region is {s_region}.");
-                        requestContext.ApiEvent.FallbackToGlobal = "0";
+                        requestContext.ApiEvent.FallbackToGlobal = false;
 
                         if (s_region.Equals(regionToUse))
                         {
@@ -242,9 +242,14 @@ namespace Microsoft.Identity.Client.Region
                     }
 
                     s_region = regionToUse;
+                    requestContext.ApiEvent.FallbackToGlobal = false;
                     requestContext.Logger.Info($"Region auto detection failed. Region provided by the user will be used: ${regionToUse}.");
                     LogTelemetryData(s_region, RegionSource.UserProvided, requestContext);
                 }
+            }
+            else
+            {
+                requestContext.ApiEvent.FallbackToGlobal = false;
             }
 
             var builder = new UriBuilder(canonicalAuthority);

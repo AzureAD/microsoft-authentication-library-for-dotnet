@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     if (requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
                     {
                         requestContext.Logger.Info($"Attempting to fall back to global endpoint");
-                        requestContext.ApiEvent.FallbackToGlobal = "1";
+                        requestContext.ApiEvent.FallbackToGlobal = true;
                     }
                     else
                     {

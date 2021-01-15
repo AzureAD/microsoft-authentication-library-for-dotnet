@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
         /// <summary>
         /// Expected format: 2|api_id,force_refresh|platform_config
-        /// platform_config: region,region_source,is_token_cache_serialized,user_provided_region,validate_use_region,is_legacy_cache_enabled
+        /// platform_config: region,region_source,is_token_cache_serialized,user_provided_region,validate_use_region,fallback_to_global,is_legacy_cache_enabled
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
         {
@@ -123,6 +123,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.UserProvidedRegion, out string userProvidedRegion);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsValidUserProvidedRegion, out string isValidUserProvidedRegion);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsLegacyCacheEnabledKey, out string isLegacyCacheEnabled);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.FallbackToGlobal, out string fallbackToGlobal);
 
             // Since regional fields will only be logged in case it is opted.
             var platformConfig = new StringBuilder();
@@ -132,6 +133,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             platformConfig.Append(userProvidedRegion + ",");
             // The value for this will be 1 if the region provided is valid, 0 if invalid and "" in case it could not be validated.
             platformConfig.Append((string.IsNullOrEmpty(isValidUserProvidedRegion) ? isValidUserProvidedRegion : ConvertFromStringToBitwise(isValidUserProvidedRegion)) + ",");
+            platformConfig.Append((string.IsNullOrEmpty(fallbackToGlobal) ? fallbackToGlobal : ConvertFromStringToBitwise(fallbackToGlobal)) + ",");
             platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled));
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +

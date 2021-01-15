@@ -187,12 +187,34 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
         }
 
+        /// <summary>
+        /// Acquire token for client with regionToUse when auto region discovery fails
+        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, centralus,
+        ///    Last_request = 2 | 0 | | |
+        /// </summary>
+        [TestMethod]
+        public async Task TelemetryUserProvidedRegionAutoDiscoveryFailsFallbackToGlobalTestsAsync()
+        {
+            Trace.WriteLine("Acquire token for client with region provided by user and region detection fails.");
+            _harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get, TestConstants.ImdsUrl);
+            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.FallbackToGlobal).ConfigureAwait(false);
+            AssertCurrentTelemetry(result.HttpRequest,
+                ApiIds.AcquireTokenForClient,
+                forceRefresh: false,
+                "",
+                region: "",
+                isCacheSerialized: false,
+                fallbackToGlobal: "1");
+            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
+        }
+
         private enum AcquireTokenForClientOutcome
         {
             Success,
             UserProvidedRegion,
             UserProvidedInvalidRegion,
-            AADUnavailableError
+            AADUnavailableError,
+            FallbackToGlobal
         }
 
         private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenForClientAsync(
@@ -207,6 +229,18 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                     tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
                     var authResult = await _app
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .WithPreferredAzureRegion(true)
+                        .WithForceRefresh(forceRefresh)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+                    correlationId = authResult.CorrelationId;
+                    break;
+
+                case AcquireTokenForClientOutcome.FallbackToGlobal:
+                    _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityTenant);
+                    authResult = await _app
                         .AcquireTokenForClient(TestConstants.s_scope)
                         .WithPreferredAzureRegion(true)
                         .WithForceRefresh(forceRefresh)
@@ -284,9 +318,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             ApiIds apiId,
             bool forceRefresh,
             string regionSource,
+            string region = TestConstants.Region,
             bool isCacheSerialized = false,
             string userProvidedRegion = "",
-            string isvalidUserProvidedRegion = "")
+            string isvalidUserProvidedRegion = "",
+            string fallbackToGlobal = "0")
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single();
@@ -304,10 +340,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             string[] platformConfig = actualTelemetryParts[2].Split(',');
             Assert.AreEqual(isCacheSerialized ? "1" : "0", platformConfig[2]);
-            Assert.AreEqual(TestConstants.Region, platformConfig[0]);
+            Assert.AreEqual(region, platformConfig[0]);
             Assert.AreEqual(regionSource, platformConfig[1]);
             Assert.AreEqual(userProvidedRegion, platformConfig[3]);
             Assert.AreEqual(isvalidUserProvidedRegion, platformConfig[4]);
+            Assert.AreEqual(fallbackToGlobal, platformConfig[5]);
         }
 
         private static void AssertPreviousTelemetry(
