@@ -428,7 +428,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Assert.AreEqual(isCacheSerialized ? "1" : "0", actualTelemetryParts[2].Split(',')[2]); // is_cache_serialized
 
-            Assert.AreEqual(isLegacyCacheEnabled ? "1" : "0", actualTelemetryParts[2].Split(',')[5]); // is_legacy_cache_enabled
+            Assert.AreEqual(isLegacyCacheEnabled ? "1" : "0", actualTelemetryParts[2].Split(',')[6]); // is_legacy_cache_enabled
         }
 
         private static void AssertPreviousTelemetry(

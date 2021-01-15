@@ -344,7 +344,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(regionSource, platformConfig[1]);
             Assert.AreEqual(userProvidedRegion, platformConfig[3]);
             Assert.AreEqual(isvalidUserProvidedRegion, platformConfig[4]);
-            Assert.AreEqual(fallbackToGlobal, platformConfig[6]);
+            Assert.AreEqual(fallbackToGlobal, platformConfig[5]);
         }
 
         private static void AssertPreviousTelemetry(
