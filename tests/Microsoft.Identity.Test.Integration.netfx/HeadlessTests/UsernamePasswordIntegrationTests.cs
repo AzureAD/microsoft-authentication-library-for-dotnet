@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         // HTTP Telemetry Constants
         private static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
-        private const string XClientCurrentTelemetryROPC = "2|1003,0|,,0,,,1";
-        private const string XClientCurrentTelemetryROPCFailure = "2|1003,0|,,0,,,1";
+        private const string XClientCurrentTelemetryROPC = "2|1003,0|,,0,,,1,";
+        private const string XClientCurrentTelemetryROPCFailure = "2|1003,0|,,0,,,1,";
         private const string XClientLastTelemetryROPC = "2|0|||";
         private const string XClientLastTelemetryROPCFailure =
             "2|0|1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|,";

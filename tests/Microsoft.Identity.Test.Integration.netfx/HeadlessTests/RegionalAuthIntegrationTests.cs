@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, "2|1004,0|centralus,1,0,,,1");
+            AssertTelemetry(factory, "2|1004,0|centralus,1,0,,,1,0");
 
         }
 
@@ -125,12 +125,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync(userProvidedRegion: TestConstants.Region).ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, "2|1004,0|centralus,1,0,centralus,1,1");
+            AssertTelemetry(factory, "2|1004,0|centralus,1,0,centralus,1,1,0");
 
             result = await GetAuthenticationResultAsync(userProvidedRegion: TestConstants.Region, withForceRefresh: true).ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory, 1);
-            AssertTelemetry(factory, "2|1004,1|centralus,3,0,centralus,,1", 1);
+            AssertTelemetry(factory, "2|1004,1|centralus,3,0,centralus,,1,", 1);
 
         }
 
@@ -152,12 +152,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync(userProvidedRegion: "invalid").ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, "2|1004,0|centralus,1,0,invalid,0,1");
+            AssertTelemetry(factory, "2|1004,0|centralus,1,0,invalid,0,1,0");
 
             result = await GetAuthenticationResultAsync(userProvidedRegion: TestConstants.Region, withForceRefresh: true).ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory, 1);
-            AssertTelemetry(factory, "2|1004,1|centralus,3,0,centralus,,1", 1);
+            AssertTelemetry(factory, "2|1004,1|centralus,3,0,centralus,,1,", 1);
            
         }
 

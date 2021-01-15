@@ -197,10 +197,22 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
 
-        public string FallbackToGlobal
+        public bool? FallbackToGlobal
         {
-            get => this.ContainsKey(FallbackToGlobalKey) ? this[FallbackToGlobalKey] : null;
-            set => this[FallbackToGlobalKey] = value;
+#pragma warning disable CA1305 // .net standard does not have an overload for ToString() with Culture
+            set { this[FallbackToGlobalKey] = value.ToString().ToLowerInvariant(); }
+            get
+            {
+                if (this.ContainsKey(FallbackToGlobalKey))
+                {
+                    return this[FallbackToGlobalKey] == true.ToString().ToLowerInvariant();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
 
         public bool IsTokenCacheSerialized
