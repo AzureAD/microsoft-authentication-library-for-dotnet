@@ -91,28 +91,25 @@ namespace Microsoft.Identity.Client.WsTrust
                 IEnumerable<XElement> all = exactlyOnePolicy.Descendants(XmlNamespace.Wsp + "All");
                 foreach (XElement element in all)
                 {
-                    XNamespace securityPolicy = XmlNamespace.Sp;
                     XElement auth = element.Elements(XmlNamespace.Http + "NegotiateAuthentication").FirstOrDefault();
                     if (auth != null)
                     {
                         AddPolicy(policy, UserAuthType.IntegratedAuth);
                     }
 
-                    auth = element.Elements(securityPolicy + "SignedEncryptedSupportingTokens").FirstOrDefault();
-                    if (auth == null && ((auth = element.Elements(XmlNamespace.Sp2005 + "SignedSupportingTokens").FirstOrDefault()) ==
-                                         null))
+                    auth = element.Elements(XmlNamespace.Sp + "SignedEncryptedSupportingTokens").FirstOrDefault() ?? element.Elements(XmlNamespace.Sp2005 + "SignedSupportingTokens").FirstOrDefault();
+                    if (auth == null)
                     {
                         continue;
                     }
 
-                    securityPolicy = XmlNamespace.Sp2005;
                     XElement wspPolicy = auth.Elements(XmlNamespace.Wsp + "Policy").FirstOrDefault();
                     if (wspPolicy == null)
                     {
                         continue;
                     }
 
-                    XElement usernameToken = wspPolicy.Elements(securityPolicy + "UsernameToken").FirstOrDefault();
+                    XElement usernameToken = wspPolicy.Elements(XmlNamespace.Sp + "UsernameToken").FirstOrDefault() ?? wspPolicy.Elements(XmlNamespace.Sp2005 + "UsernameToken").FirstOrDefault();
                     if (usernameToken == null)
                     {
                         continue;
@@ -124,7 +121,7 @@ namespace Microsoft.Identity.Client.WsTrust
                         continue;
                     }
 
-                    XElement wssUsernameToken10 = wspPolicy2.Elements(securityPolicy + "WssUsernameToken10").FirstOrDefault();
+                    XElement wssUsernameToken10 = wspPolicy2.Elements(XmlNamespace.Sp + "WssUsernameToken10").FirstOrDefault() ?? wspPolicy2.Elements(XmlNamespace.Sp2005 + "WssUsernameToken10").FirstOrDefault();
                     if (wssUsernameToken10 != null)
                     {
                         AddPolicy(policy, UserAuthType.UsernamePassword);
