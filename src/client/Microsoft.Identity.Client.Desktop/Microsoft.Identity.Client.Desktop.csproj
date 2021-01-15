@@ -2,9 +2,8 @@
   <PropertyGroup>
 
     <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
-    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
-    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>
 
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
     <UseWindowsForms>true</UseWindowsForms>
@@ -13,7 +12,7 @@
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
     <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.7.1</MsalClientSemVer>
-    <MsalClientSemVer>$(MsalClientSemVer)-preview</MsalClientSemVer>
+    <MsalClientSemVer>$(MsalClientSemVer)</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(MsalClientSemVer)</Version>
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
