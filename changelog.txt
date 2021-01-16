@@ -1,25 +1,29 @@
 4.25.0
 ==========
 ### New Features: 
-**MSAL.NET now advertises PKAuth support only on supported platforms**. See issues [#1849](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1849), [2302](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2302) for details.  
-**`WithPreferredAzureRegion` allows specifying an option to fallback to global endpoint if the region lookup fails**. See issue [#2287](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2287) for details.  
-**`WithPreferredAzureRegion` allows specifying a region to use**. See issue [#2259](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2259) for details.  
-**Optimized IMDS calling logic during regional lookup**. See issue [#2177](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2177) for details.  
-**WAM is enabled on net5.0-windows10.0.17763.0**. See issue [#2274](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2274) for details.  
+**MSAL.NET now advertises PKAuth support only on supported platforms**. See issues [#1849](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1849), [#2302](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2302) for details.  
 **Added support for embedded view  for .NET 5.0 projects**. See issue [#2310](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2310) for details.  
-**Improved handling of broker's power optimization exception in Xamarin**. See issue [#2144](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2144) for details.  
+**Improved handling of broker's power optimization exception in Xamarin Android**. See issue [#2144](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2144) for details.  
 **Added an ability to disable legacy ADAL cache** with `WithLegacyCacheCompatibility(false)`. See issue [#1770](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1770) for details.  
 **`WithClientAssertion` allows specifying a delegate to set the assertions**. See issue [#2184](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2184) for details.  
 
 ### Bug Fixes:
-**Regional lookup now correctly uses a global endpoint when `WithPreferredAzureRegion` is set to `false` after the initial lookup was done with a regional endpoint**. See issue [#2260](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2260) for details.  
-**WAM can now be used in console apps**. See issue [#2196](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2196) for details.  
-**WAM support is moved to a separate package, `Microsoft.Identity.Client.Desktop`**, which fixes dependency issues during build. See issues [#2299](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2299), [#2300](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2300), [2247](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2247) for details.  
-**In WAM, account picker is now correctly not used when `AcquireTokenInteractive` is called with the default OS account**. See issue [#2246](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2246) for details.  
 **Account is not longer deleted from the MSAL cache when a `bad_token` response is received from the authentication server**. See issue [#2294](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2294) for details.  
 **Minimum UWP target supported is now 10.0.0.0**. See issue [#2330](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2330) for details.  
 **Fixed `ArgumentNullException` and improved resiliency when using `RSACryptoServiceProvider`**. See issue [#2189](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2189) for details.  
-**Honoring a provided redirect URI in `WithRedirectUri`**. See issue [#2167](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2167) for details.  
+**Honoring a provided localhost redirect URI in `WithRedirectUri`**. See issue [#2167](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2167) for details.  
+
+### Experimental Features:
+**`WithPreferredAzureRegion` allows specifying an option to fallback to global endpoint if the region lookup fails**. See issue [#2287](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2287) for details.  
+**`WithPreferredAzureRegion` allows specifying a region to use**. See issue [#2259](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2259) for details.  
+**Optimized IMDS calling logic during regional lookup**. See issue [#2177](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2177) for details.  
+**WAM is enabled on net5.0-windows10.0.17763.0**. See issue [#2274](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2274) for details.  
+
+### Experimental Features (Bug Fixes):
+**Regional lookup now correctly uses a global endpoint when `WithPreferredAzureRegion` is set to `false` after the initial lookup was done with a regional endpoint**. See issue [#2260](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2260) for details.  
+**WAM can now be used in console apps**. See issue [#2196](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2196) for details.  
+**WAM support is moved to a separate package, `Microsoft.Identity.Client.Desktop`**, which fixes dependency issues during build. See issues [#2299](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2299), [#2300](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2300), [#2247](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2247) for details.  
+**In WAM, account picker is now correctly not used when `AcquireTokenInteractive` is called with the default OS account**. See issue [#2246](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2246) for details.  
 
 ### Fundamentals:
 **Added cache compatibility tests for MSAL.Node**. See issue [#2158](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2158) for details.  
