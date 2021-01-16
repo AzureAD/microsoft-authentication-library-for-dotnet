@@ -24,9 +24,6 @@ namespace CommonCache.Test.MsalV2
             /// <inheritdoc />
             protected override async Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
-                Debugger.Launch();
-                Debugger.Break();
-
                 string resource = TestInputData.MsGraph;
                 string[] scopes = new[]
                 {
