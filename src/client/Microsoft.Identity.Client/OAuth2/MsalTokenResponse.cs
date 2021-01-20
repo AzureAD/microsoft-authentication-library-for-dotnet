@@ -9,6 +9,8 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Core;
+using System.Text;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -180,6 +182,44 @@ namespace Microsoft.Identity.Client.OAuth2
             };
 
             return msalTokenResponse;
+        }
+
+        public void Log(ICoreLogger logger, LogLevel logLevel)
+        {
+            if (logger.IsLoggingEnabled(logLevel))
+            {
+                StringBuilder withPii = new StringBuilder();
+                StringBuilder withoutPii = new StringBuilder();
+
+                withPii.AppendLine("==MsalTokenResponse==");
+                withoutPii.AppendLine("==MsalTokenResponse==");
+
+                withPii.AppendLine($"Error: {Error} ErrorDescription: {ErrorDescription}");
+                withoutPii.AppendLine($"Error: {Error} ErrorDescription: {ErrorDescription}");
+                withPii.AppendLine($"Scopes: {Scope} ");
+                withoutPii.AppendLine($"Scopes: {Scope} ");
+                withPii.AppendLine($"ExpiresIn: {ExpiresIn} RefreshIn {RefreshIn}");
+                withoutPii.AppendLine($"ExpiresIn: {ExpiresIn} RefreshIn {RefreshIn}");
+
+                withoutPii.AppendLine(
+                    $"AccessToken {!String.IsNullOrEmpty(AccessToken)} " +
+                    $"AccessToken Type {TokenType} " +
+                    $"RefreshToken {!String.IsNullOrEmpty(RefreshToken)} " +
+                    $"IdToken {!String.IsNullOrEmpty(IdToken)} " +
+                    $"ClientInfo {!String.IsNullOrEmpty(ClientInfo)} ");
+
+                withPii.AppendLine(
+                    $"AccessToken {!String.IsNullOrEmpty(AccessToken)} " +
+                    $"AccessToken Type {TokenType} " +
+                    $"RefreshToken {!String.IsNullOrEmpty(RefreshToken)} " +
+                    $"IdToken {!String.IsNullOrEmpty(IdToken)} " +
+                    $"ClientInfo {ClientInfo} ");
+
+                withPii.AppendLine($"FamilyId: {FamilyId} WamAccountId {!string.IsNullOrEmpty(WamAccountId)}");
+                withoutPii.AppendLine($"FamilyId: {FamilyId} WamAccountId {!string.IsNullOrEmpty(WamAccountId)}");
+
+                logger.Log(logLevel, withPii.ToString(), withoutPii.ToString());
+            }
         }
     }    
 }

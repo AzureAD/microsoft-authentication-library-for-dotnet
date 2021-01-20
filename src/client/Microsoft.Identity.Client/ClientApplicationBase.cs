@@ -150,10 +150,10 @@ namespace Microsoft.Identity.Client
             var accountsFromCache = await GetAccountsFromCacheAsync(apiId, homeAccountIdFilter).ConfigureAwait(false);
             var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter).ConfigureAwait(false);
 
-            ServiceBundle.DefaultLogger.Info($"Found {accountsFromCache.Count()} cache accounts and {accountsFromCache.Count()} broker accounts");
+            ServiceBundle.DefaultLogger.Info($"Found {accountsFromCache.Count()} cache accounts and {accountsFromBroker.Count()} broker accounts");
             IEnumerable<IAccount> cacheAndBrokerAccounts = MergeAccounts(accountsFromCache, accountsFromBroker);
 
-            ServiceBundle.DefaultLogger.Verbose($"Returning {cacheAndBrokerAccounts.Count()} accounts");
+            ServiceBundle.DefaultLogger.Info($"Returning {cacheAndBrokerAccounts.Count()} accounts");
             return cacheAndBrokerAccounts;
         }
 
@@ -213,6 +213,12 @@ namespace Microsoft.Identity.Client
                 if (!cacheAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId)))
                 {
                     allAccounts.Add(account);
+                }
+                else
+                {
+                    ServiceBundle.DefaultLogger.InfoPii(
+                        "Account merge eliminated broker account with id: " + account.HomeAccountId,
+                        "Account merge eliminated an account");
                 }
             }
 
