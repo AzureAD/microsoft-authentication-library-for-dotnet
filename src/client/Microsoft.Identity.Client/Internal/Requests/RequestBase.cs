@@ -284,13 +284,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogReturnedToken(AuthenticationResult result)
         {
-            if (result.AccessToken != null)
+            if (result.AccessToken != null && 
+                AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} ===",
-                        result.ExpiresOn));
+                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} and Scopes {1}",
+                        result.ExpiresOn, 
+                        string.Join(" ", result.Scopes)));
             }
         }
     }

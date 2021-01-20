@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
+            response.Log(requestParams.RequestContext.Logger, LogLevel.Verbose);
+
             MsalAccessTokenCacheItem msalAccessTokenCacheItem = null;
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
             MsalIdTokenCacheItem msalIdTokenCacheItem = null;
@@ -297,14 +299,13 @@ namespace Microsoft.Identity.Client
             // no authority passed
             if (requestParams.AuthorityInfo?.CanonicalAuthority == null)
             {
-                logger.Warning("No authority provided. Skipping cache lookup ");
+                logger.Warning("FindAccessToken: No authority provided. Skipping cache lookup ");
                 return null;
             }
 
-            logger.Verbose("Looking up access token in the cache.");
             // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
             // as this method is NOT locked by the semaphore
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true).ToList();
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true).ToList();            
 
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
@@ -331,12 +332,22 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
         {
+            var logger = requestParams.RequestContext.Logger;
             var requestScopes = requestParams.Scope.Where(s =>
                 !OAuth2Value.ReservedScopes.Contains(s));
 
             tokenCacheItems = tokenCacheItems.FilterWithLogging(
-                item => ScopeHelper.ScopeContains(item.ScopeSet, requestScopes),
-                requestParams.RequestContext.Logger,
+                item => {
+                    bool accepted = ScopeHelper.ScopeContains(item.ScopeSet, requestScopes);
+                    
+                    if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                    {
+                        logger.Verbose($"Access token with scopes {string.Join(" ", item.ScopeSet)} " +
+                            $"passes scope filter? {accepted} ");
+                    }
+                    return accepted;
+                    },
+                logger,
                 "Filtering by scopes");
 
             return tokenCacheItems;
