@@ -1,0 +1,21 @@
+{
+  "client_id" : "e5737214-6372-472c-a85a-68e8fbe6cf3c",
+  "redirect_uri" : "msauth://com.azuresamples.msalandroidapp/1wIqXSqBj7w%2Bh11ZifsnqwgyKrY%3D",
+  "account_mode" : "MULTIPLE",
+  "broker_redirect_uri_registered": false,
+  "authorities": [
+    {
+      "type": "B2C",
+      "authority_url": "https://fabrikamb2c.b2clogin.com/tfp/fabrikamb2c.onmicrosoft.com/b2c_1_susi/",
+      "default": true
+    },
+    {
+      "type": "B2C",
+      "authority_url": "https://fabrikamb2c.b2clogin.com/tfp/fabrikamb2c.onmicrosoft.com/b2c_1_edit_profile/"
+    },
+    {
+      "type": "B2C",
+      "authority_url": "https://fabrikamb2c.b2clogin.com/tfp/fabrikamb2c.onmicrosoft.com/b2c_1_reset/"
+    }
+  ]
+}
