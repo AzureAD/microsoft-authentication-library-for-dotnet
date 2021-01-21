@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private static string s_correlationId;
         private readonly AndroidBrokerHelper _brokerHelper;
         private readonly ICoreLogger _logger;
-        private readonly Activity _parentActivity;
+        private Activity _parentActivity;
 
         public AndroidContentProviderBroker(CoreUIParent uiParent, ICoreLogger logger)
         {
@@ -118,7 +118,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             try
             {
-                await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+                //_parentActivity = (Activity)Application.Context;
+                _brokerHelper.InitiateCRBrokerHandshakeAsync(_parentActivity);
                 var androidBrokerTokenResponse = await AcquireTokenSilentViaBrokerAsync(brokerRequest).ConfigureAwait(false);
                 return androidBrokerTokenResponse;
             }
@@ -197,7 +198,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             using (_logger.LogMethodDuration())
             {
                 _logger.Verbose("User is specified for silent token request. Starting silent Android broker request. ");
-                string silentResult = await _brokerHelper.GetBrokerAuthTokenSilentlyAsync(brokerRequest, _parentActivity).ConfigureAwait(false);
+                string silentResult = await _brokerHelper.GetBrokerCRAuthTokenSilentlyAsync(brokerRequest, _parentActivity).ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(silentResult))
                 {
                     return MsalTokenResponse.CreateFromAndroidBrokerResponse(silentResult, brokerRequest.CorrelationId);

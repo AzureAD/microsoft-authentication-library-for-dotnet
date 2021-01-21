@@ -200,6 +200,77 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return null;
         }
 
+        //TODO: Duplicate
+        public static byte[] marshall(Bundle parcelable)
+        {
+            Parcel parcel = Parcel.Obtain();
+            parcel.WriteBundle(parcelable);
+
+            return parcel.Marshall();
+        }
+
+        public async Task<string> GetBrokerCRAuthTokenSilentlyAsync(BrokerRequest brokerRequest, Activity callerActivity)
+        {
+            CheckForCRBrokerAccountInfoInAccountManager(brokerRequest, callerActivity);
+            Bundle silentOperationBundle = CreateSilentBrokerBundle(brokerRequest);
+            //silentOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.AcquireTokenSilent);
+            ICursor cursor = null;
+
+            ContentResolver resolver;
+            if (callerActivity == null)
+            {
+                resolver = Application.Context.ContentResolver;
+            }
+            else
+            {
+                resolver = callerActivity.ContentResolver;
+            }
+
+            await Task.Run(() => 
+            cursor = resolver.Query(AndroidUri.Parse(GetContentProviderURI(Application.Context, "/acquireTokenSilent")),
+                                                                null,
+                                                                Base64UrlHelpers.Encode(marshall(silentOperationBundle)),
+                                                                null,
+                                                                null)
+            ).ConfigureAwait(false);
+
+            if (cursor != null)
+            {
+                Bundle bundleResult = null;
+
+                try
+                {
+                    bundleResult = cursor.Extras;
+                }
+                catch (OperationCanceledException ex)
+                {
+                    _logger.Error("An error occurred when trying to communicate with the account manager: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
+                }
+
+                string responseJson = bundleResult.GetString(BrokerConstants.BrokerResultV2);
+
+                bool success = bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success);
+                _logger.Info($"Android Broker Silent call result - success? {success}. ");
+
+                if (!success)
+                {
+                    _logger.Warning($"Android Broker Silent call failed. " +
+                        $"This usually means that the RT cannot be refreshed and interaction is required. " +
+                        $"BundleResult: {bundleResult} Result string: {responseJson}");
+                }
+
+                // upstream logic knows how to extract potential errors from this result
+                return responseJson;
+            }
+
+            _logger.Info("Android Broker didn't return any results. ");
+            return null;
+        }
+
         /// <summary>
         /// This method is only used for Silent authentication requests so that we can check to see if an account exists in the account manager before
         /// sending the silent request to the broker. 
@@ -207,6 +278,57 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public void CheckForBrokerAccountInfoInAccountManager(BrokerRequest brokerRequest, Activity callerActivity)
         {
             var accounts = GetBrokerAccounts(brokerRequest, callerActivity);
+
+            if (string.IsNullOrEmpty(accounts))
+            {
+                _logger.Info("Android account manager didn't return any accounts. ");
+                throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
+            }
+
+            string username = brokerRequest.UserName;
+            string homeAccountId = brokerRequest.HomeAccountId;
+            string localAccountId = brokerRequest.LocalAccountId;
+
+            if (!string.IsNullOrEmpty(accounts))
+            {
+                dynamic authResult = JArray.Parse(accounts);
+
+                foreach (JObject account in authResult)
+                {
+                    var accountData = account[BrokerResponseConst.Account];
+
+                    var accountDataHomeAccountID = accountData[BrokerResponseConst.HomeAccountId]?.ToString();
+                    var accountDataLocalAccountID = accountData[BrokerResponseConst.LocalAccountId]?.ToString();
+
+                    if (string.Equals(accountData[BrokerResponseConst.UserName].ToString(), username, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // TODO: broker request should be immutable!
+                        brokerRequest.HomeAccountId = accountDataHomeAccountID;
+                        brokerRequest.LocalAccountId = accountDataLocalAccountID;
+                        _logger.Info("Found broker account in Android account manager using the provided login hint. ");
+                        return;
+                    }
+
+                    if (string.Equals(accountDataHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
+                         string.Equals(accountDataLocalAccountID, localAccountId, StringComparison.Ordinal))
+                    {
+                        _logger.Info("Found broker account in Android account manager Using the provided account. ");
+                        return;
+                    }
+                }
+            }
+
+            _logger.Info("The requested account does not exist in the Android account manager. ");
+            throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
+        }
+
+        /// <summary>
+        /// This method is only used for Silent authentication requests so that we can check to see if an account exists in the account manager before
+        /// sending the silent request to the broker. 
+        /// </summary>
+        public void CheckForCRBrokerAccountInfoInAccountManager(BrokerRequest brokerRequest, Activity callerActivity)
+        {
+            var accounts = GetCRBrokerAccounts(brokerRequest, callerActivity);
 
             if (string.IsNullOrEmpty(accounts))
             {
@@ -267,6 +389,44 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             Bundle bundleResult = (Bundle)result?.Result;
             return bundleResult?.GetString(BrokerConstants.BrokerAccounts);
+        }
+
+        private string GetCRBrokerAccounts(BrokerRequest brokerRequest, Activity callerActivity)
+        {
+            Bundle getAccountsBundle = CreateBrokerAccountBundle(brokerRequest);
+            //getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
+
+            //This operation will acquire all of the accounts in the account manager for the given client ID
+            //var result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+            //    BrokerConstants.AuthtokenType,
+            //    null,
+            //    getAccountsBundle,
+            //    null,
+            //    null,
+            //    GetPreferredLooper(callerActivity));
+
+            ContentResolver resolver;
+            if (callerActivity == null)
+            {
+                resolver = Application.Context.ContentResolver;
+            }
+            else
+            {
+                resolver = callerActivity.ContentResolver;
+            }
+
+            var uri = AndroidUri.Parse(GetContentProviderURI(Application.Context, "/getAccounts"));
+
+            ICursor cursor = resolver.Query(uri,
+                                                            null,
+                                                            Base64UrlHelpers.Encode(marshall(getAccountsBundle)),
+                                                            null,
+                                                            null,
+                                                            null);
+
+            Bundle bundleResult = cursor.Extras;
+            var test = bundleResult?.GetString(BrokerConstants.BrokerAccounts);
+            return test;
         }
 
         /// <summary>
@@ -405,9 +565,19 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 try
                 {
-                    var RequestString = BrokerHandshakeHelper.AsJsonString();
+                    ContentResolver resolver;
+                    if (callerActivity == null)
+                    {
+                        resolver = Application.Context.ContentResolver;
+                    }
+                    else
+                    {
+                        resolver = callerActivity.ContentResolver;
+                    }
 
-                    var cursor = callerActivity.ContentResolver.Query(AndroidUri.Parse(GetContentProviderURI(Application.Context, "/hello")),
+                    var RequestString = BrokerHandshakeHelper.AsJsonString();
+                    
+                    var cursor = resolver.Query(AndroidUri.Parse(GetContentProviderURI(Application.Context, "/hello")),
                         null,
                         RequestString,
                         null,
@@ -446,9 +616,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     _logger.Error(errorDescription);
                     throw new MsalClientException(errorCode, errorDescription);
                 }
-                catch
+                catch (Exception e)
                 {
-
+                    throw e;
                 }
             }
 
