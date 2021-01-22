@@ -168,14 +168,14 @@ namespace Microsoft.Identity.Client.OAuth2
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
         {
             UriBuilder builder = new UriBuilder(tokenEndpoint);
+            builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
+            Uri tokenEndpointWithQueryParams = builder.Uri;
 
             try
             {
-                builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
-
                 MsalTokenResponse msalTokenResponse =
                     await _oAuth2Client
-                        .GetTokenAsync(builder.Uri,
+                        .GetTokenAsync(tokenEndpointWithQueryParams,
                             _requestParams.RequestContext)
                         .ConfigureAwait(false);
 
@@ -197,13 +197,19 @@ namespace Microsoft.Identity.Client.OAuth2
                 if (ex.StatusCode == (int)HttpStatusCode.Unauthorized)
                 {
                     string responseHeader = string.Empty;
-                    var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponseAsync(ex.Headers, builder.Uri, out responseHeader);
+                    var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponseAsync(
+                        ex.Headers, 
+                        new Uri(tokenEndpoint), // do not add query params to PKeyAuth https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2359
+                        out responseHeader);
                     if (isChallenge)
                     {
                         //Injecting PKeyAuth response here and replaying request to attempt device auth
                         _oAuth2Client.AddHeader("Authorization", responseHeader);
 
-                        return await _oAuth2Client.GetTokenAsync(builder.Uri, _requestParams.RequestContext, false).ConfigureAwait(false);
+                        return await _oAuth2Client.GetTokenAsync(
+                            tokenEndpointWithQueryParams, 
+                            _requestParams.RequestContext, 
+                            false).ConfigureAwait(false);
                     }
                 }
 

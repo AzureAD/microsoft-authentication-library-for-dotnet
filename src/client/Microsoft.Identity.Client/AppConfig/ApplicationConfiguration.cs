@@ -67,11 +67,6 @@ namespace Microsoft.Identity.Client
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
         public bool UseRecommendedDefaultRedirectUri { get; internal set; }
 
-        internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
-
-        internal ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
-        internal ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
-
         public bool ExperimentalFeaturesEnabled { get; set; } = false;
 
         public IEnumerable<string> ClientCapabilities { get; set; }
@@ -114,5 +109,15 @@ namespace Microsoft.Identity.Client
         internal bool ValidateAuthority { get; set; }
 
         #endregion
+
+        #region Test Hooks
+        internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
+
+        internal ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
+        internal ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
+
+        internal IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
+        #endregion
+
     }
 }
