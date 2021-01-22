@@ -626,7 +626,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public string GetContentProviderURI(Context context, string path)
         {
-            return "content://com.microsoft.windowsintune.companyportal.microsoft.identity.broker" + path;
+            return "content://com.azure.authenticator.microsoft.identity.broker" + path;
         }
 
         private Handler GetPreferredLooper(Activity callerActivity)
