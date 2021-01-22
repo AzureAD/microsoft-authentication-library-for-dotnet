@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Test.Integration.Win8
     [TestClass]
     public class DeviceAuthenticationTests
     {
-        //private const string _claims = "{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
+        private const string _claims = "{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
         private const string _deviceAuthuser = "idlabca@msidlab8.onmicrosoft.com";
 
         [TestMethod]
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Integration.Win8
                  new[] { "user.read" },
                  labResponse.User.Upn,
                  new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
-             //.WithClaims(JObject.Parse(_claims).ToString())
+             .WithClaims(JObject.Parse(_claims).ToString())
              .ExecuteAsync(CancellationToken.None).Result;
 
             //Assert
