@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Test.Integration.Win8
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
+            Assert.IsTrue(string.Equals(_deviceAuthuser, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
 
             //Assert that the PKeyAuth header is used and the token response is successful
             var (req, res) = factory.RequestsAndResponses
