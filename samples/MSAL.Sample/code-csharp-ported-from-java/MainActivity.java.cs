@@ -43,24 +43,24 @@
 // mc++ import com.google.android.material.navigation.NavigationView;
 // mc++ 
 
+using Android.OS;
 using Android.Views;
+using AndroidX.AppCompat.App;
+using AndroidX.AppCompat.Widget;
 using AndroidX.ConstraintLayout.Widget;
+using AndroidX.Core.View;
 using AndroidX.DrawerLayout.Widget;
+using AndroidX.Fragment.App;
 using Google.Android.Material.Navigation;
 using MSAL.Sample;
 
 namespace MSAL.Samples
 {
     public class MainActivity : AndroidX.AppCompat.App.AppCompatActivity,
-             NavigationView.IOnNavigationItemSelectedListener // ,
-                                                              //IOnFragmentInteractionListener
+             NavigationView.IOnNavigationItemSelectedListener
+             , OnFragmentInteractionListener
     {
-        public bool OnNavigationItemSelected(IMenuItem menuItem)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        enum AppFragment
+        public enum AppFragment
         {
             SingleAccount,
             MultipleAccount,
@@ -72,121 +72,152 @@ namespace MSAL.Samples
         private ConstraintLayout mContentMain;
 
         //     // @Override
-        //     protected override void OnCreate(Bundle savedInstanceState) {
-        //         super.onCreate(savedInstanceState);
-        //         setContentView(R.layout.activity_main);
+        protected override void OnCreate(Bundle savedInstanceState)
+        {
+            base.OnCreate(savedInstanceState);
+            SetContentView(Resource.Layout.activity_main);
 
-        //         mContentMain = findViewById(Resource.Id.content_main);
+            mContentMain = FindViewById<ConstraintLayout>(Resource.Id.content_main);
 
-        //         Toolbar toolbar = findViewById(Resource.Id.toolbar);
-        //         setSupportActionBar(toolbar);
-        //         DrawerLayout drawer = findViewById(Resource.Id.drawer_layout);
-        //         NavigationView navigationView = findViewById(Resource.Id.nav_view);
-        //         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-        //                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        //         drawer.addDrawerListener(toggle);
-        //         toggle.syncState();
-        //         navigationView.setNavigationItemSelectedListener(this);
+            Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
+            SetSupportActionBar(toolbar);
+            DrawerLayout drawer = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
+            NavigationView navigationView = FindViewById<NavigationView>(Resource.Id.nav_view);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, Resource.String.navigation_drawer_open,
+                    Resource.String.navigation_drawer_close);
+            drawer.AddDrawerListener(toggle);
+            toggle.SyncState();
+            navigationView.SetNavigationItemSelectedListener(this);
 
-        //         //Set default fragment
-        //         navigationView.setCheckedItem(Resource.Id.nav_single_account);
-        //         setCurrentFragment(AppFragment.SingleAccount);
-        //     }
+            //Set default fragment
+            navigationView.SetCheckedItem(Resource.Id.nav_single_account);
+            SetCurrentFragment(AppFragment.SingleAccount);
+        }
 
         // @Override
-        //public override bool OnNavigationItemSelected(/* final */ Android.Views.IMenuItem item)
-        //{
-        /* final */
-        //DrawerLayout drawer = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
-        //drawer.AddDrawerListener(new DrawerLayout(this)
-        //{
-        //         // @Override
-        //         public void onDrawerSlide(@NonNull View drawerView, float slideOffset) { }
+        public bool OnNavigationItemSelected(/* final */ Android.Views.IMenuItem item)
+        {
+            /* final */
+            DrawerLayout drawer = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
+            drawer.AddDrawerListener(new DrawerLayoutListener(this, drawer, item));
 
-        //// @Override
-        //public void onDrawerOpened(@NonNull View drawerView) { }
+            drawer.CloseDrawer(GravityCompat.Start);
+
+            return true;
+        }
+
+        public void SetCurrentFragment(/* final */ AppFragment newFragment)
+        {
+            if (newFragment == mCurrentFragment)
+            {
+                return;
+            }
+
+            mCurrentFragment = newFragment;
+            SetHeaderString(mCurrentFragment);
+            DisplayFragment(mCurrentFragment);
+        }
+
+        private void SetHeaderString(/* final */ AppFragment fragment)
+        {
+            switch (fragment)
+            {
+                case AppFragment.SingleAccount:
+                    SupportActionBar.Title = "Single Account Mode";
+                    return;
+                case AppFragment.MultipleAccount:
+                    SupportActionBar.Title = "Multiple Account Mode";
+                    return;
+
+                case AppFragment.B2C:
+                    SupportActionBar.Title = "B2C Mode";
+                    return;
+            }
+        }
+
+        private void DisplayFragment(/* final */ AppFragment fragment)
+        {
+            switch (fragment)
+            {
+                case AppFragment.SingleAccount:
+                    AttachFragment(new SingleAccountModeFragment());
+                    return;
+
+                case AppFragment.MultipleAccount:
+                    AttachFragment(new MultipleAccountModeFragment());
+                    return;
+
+                case AppFragment.B2C:
+                    AttachFragment(new B2CModeFragment());
+                    return;
+            }
+        }
+
+        private void AttachFragment(/* final */ Fragment fragment)
+        {
+            GetSupportFragmentManager()
+                    .BeginTransaction()
+                    .SetTransitionStyle(FragmentTransaction.TransitFragmentFade)
+                    .Replace(mContentMain.Id, fragment)
+                    .Commit();
+        }
+    }
+
+    internal class DrawerLayoutListener : Java.Lang.Object, DrawerLayout.IDrawerListener
+    {
+        private MainActivity _outer_object;
+        private DrawerLayout _drawer;
+        private IMenuItem _item;
+
+        public DrawerLayoutListener(MainActivity outer_object, DrawerLayout drawer, IMenuItem item)
+        {
+            _outer_object = outer_object;
+            _drawer = drawer;
+            _item = item;
+        }
 
         //// @Override
         //public void onDrawerClosed(@NonNull View drawerView)
-        //{
-        //    // Handle navigation view item clicks here.
-        //    int id = item.getItemId();
+        public void OnDrawerClosed(View drawerView)
+        {
+            // Handle navigation view item clicks here.
+            int id = _item.ItemId;
 
-        //    if (id == Resource.Id.nav_single_account)
-        //    {
-        //        SetCurrentFragment(AppFragment.SingleAccount);
-        //    }
+            if (id == Resource.Id.nav_single_account)
+            {
+                _outer_object.SetCurrentFragment(MainActivity.AppFragment.SingleAccount);
+            }
 
-        //    if (id == Resource.Id.nav_multiple_account)
-        //    {
-        //        SetCurrentFragment(AppFragment.MultipleAccount);
-        //    }
+            if (id == Resource.Id.nav_multiple_account)
+            {
+                _outer_object.SetCurrentFragment(MainActivity.AppFragment.MultipleAccount);
+            }
 
-        //    if (id == Resource.Id.nav_b2c)
-        //    {
-        //        SetCurrentFragment(AppFragment.B2C);
-        //    }
+            if (id == Resource.Id.nav_b2c)
+            {
+                _outer_object.SetCurrentFragment(MainActivity.AppFragment.B2C);
+            }
 
-        //    drawer.RemoveDrawerListener(this);
-        //}
+            _item.RemoveDrawerListener(this);
+        }
 
-        //             // @Override
-        //             public void OnDrawerStateChanged(int newState) { }
-        //         });
+        // @Override
+        //public void onDrawerOpened(@NonNull View drawerView) { }
+        public void OnDrawerOpened(View drawerView)
+        {
+        }
 
-        //         drawer.CloseDrawer(GravityCompat.START);
-        //         return true;
-        //     }
+        // @Override
+        //public void onDrawerSlide(@NonNull View drawerView, float slideOffset) { }
+        public void OnDrawerSlide(View drawerView, float slideOffset)
+        {
+        }
 
-        //     private override void SetCurrentFragment(/* final */ AppFragment newFragment){
-        //         if (newFragment == mCurrentFragment) {
-        //             return;
-        //         }
-
-        //         mCurrentFragment = newFragment;
-        //         SetHeaderString(mCurrentFragment);
-        //         DisplayFragment(mCurrentFragment);
-        //     }
-
-        //     private void SetHeaderString(/* final */ AppFragment fragment){
-        //         switch (fragment) {
-        //             case SingleAccount:
-        //                 GetSupportActionBar().SetTitle("Single Account Mode");
-        //                 return;
-
-        //             case MultipleAccount:
-        //                 getSupportActionBar().SetTitle("Multiple Account Mode");
-        //                 return;
-
-        //             case B2C:
-        //                 getSupportActionBar().SetTitle("B2C Mode");
-        //                 return;
-        //         }
-        //     }
-
-        //     private void displayFragment(/* final */ AppFragment fragment){
-        //         switch (fragment) {
-        //             case SingleAccount:
-        //                 AttachFragment(new SingleAccountModeFragment());
-        //                 return;
-
-        //             case MultipleAccount:
-        //                 AttachFragment(new MultipleAccountModeFragment());
-        //                 return;
-
-        //             case B2C:
-        //                 AttachFragment(new B2CModeFragment());
-        //                 return;
-        //         }
-        //     }
-
-        //     private void AttachFragment(/* final */ Fragment fragment) {
-        //         GetSupportFragmentManager()
-        //                 .BeginTransaction()
-        //                 .SetTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-        //                 .Replace(mContentMain.getId(),fragment)
-        //                 .Commit();
-        //     }
+        // @Override
+        // public void OnDrawerStateChanged(int newState) { }
+        public void OnDrawerStateChanged(int newState)
+        {
+        }
     }
-
 }
