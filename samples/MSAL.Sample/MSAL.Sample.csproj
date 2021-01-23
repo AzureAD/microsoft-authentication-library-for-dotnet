@@ -35,6 +35,7 @@
     <BundleAssemblies>false</BundleAssemblies>
     <AndroidLinkTool>r8</AndroidLinkTool>
     <AndroidUseAapt2>true</AndroidUseAapt2>
+<AndroidEnableMultiDex>true</AndroidEnableMultiDex>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -129,7 +130,7 @@
   <ItemGroup>
     <!-- <Compile Include="test.cs" /> -->
     <ProjectReference Include="..\..\src\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj">
-      <Project>{a91b7520-2660-422a-acd8-48701ed24de7}</Project>
+      <Project>{23806B6F-63A2-4340-9651-5E8DEE232F79}</Project>
       <Name>Microsoft.Identity.Client.XamarinAndroid.AndroidX</Name>
     </ProjectReference>
   </ItemGroup>

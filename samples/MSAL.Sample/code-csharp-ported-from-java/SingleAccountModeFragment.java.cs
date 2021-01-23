@@ -67,11 +67,13 @@ using Android.OS;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Fragment.App;
+
+using global::Com.Microsoft.Identity.Client;
 using MSAL.Sample;
 
 namespace MSAL.Samples
 {
-    public class SingleAccountModeFragment : Fragment
+    internal class SingleAccountModeFragment : Fragment
     {
         private static readonly String TAG =
                                             // SingleAccountModeFragment.class.getSimpleName()

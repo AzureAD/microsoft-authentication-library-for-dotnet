@@ -33,6 +33,10 @@
 // mc++  * "http://developer.android.com/training/basics/fragments/communicating.html"
 // mc++  * >Communicating with Other Fragments</a> for more information.
 // mc++  */
-public interface OnFragmentInteractionListener 
+namespace MSAL.Samples
 {
+
+    internal interface OnFragmentInteractionListener
+    {
+    }
 }

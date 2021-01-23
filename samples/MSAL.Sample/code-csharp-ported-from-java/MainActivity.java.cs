@@ -56,11 +56,11 @@ using MSAL.Sample;
 
 namespace MSAL.Samples
 {
-    public class MainActivity : AndroidX.AppCompat.App.AppCompatActivity,
+    internal class MainActivity : AndroidX.AppCompat.App.AppCompatActivity,
              NavigationView.IOnNavigationItemSelectedListener
              , OnFragmentInteractionListener
     {
-        public enum AppFragment
+        internal enum AppFragment
         {
             SingleAccount,
             MultipleAccount,
@@ -145,22 +145,22 @@ namespace MSAL.Samples
                     return;
 
                 case AppFragment.MultipleAccount:
-                    AttachFragment(new MultipleAccountModeFragment());
+                    //AttachFragment(new MultipleAccountModeFragment());
                     return;
 
                 case AppFragment.B2C:
-                    AttachFragment(new B2CModeFragment());
+                    //AttachFragment(new B2CModeFragment());
                     return;
             }
         }
 
         private void AttachFragment(/* final */ Fragment fragment)
         {
-            GetSupportFragmentManager()
-                    .BeginTransaction()
-                    .SetTransitionStyle(FragmentTransaction.TransitFragmentFade)
-                    .Replace(mContentMain.Id, fragment)
-                    .Commit();
+            //GetSupportFragmentManager()
+            //        .BeginTransaction()
+            //        .SetTransitionStyle(FragmentTransaction.TransitFragmentFade)
+            //        .Replace(mContentMain.Id, fragment)
+            //        .Commit();
         }
     }
 
@@ -199,7 +199,7 @@ namespace MSAL.Samples
                 _outer_object.SetCurrentFragment(MainActivity.AppFragment.B2C);
             }
 
-            _item.RemoveDrawerListener(this);
+            _drawer.RemoveDrawerListener(this);
         }
 
         // @Override
