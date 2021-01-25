@@ -130,7 +130,7 @@
   <ItemGroup>
     <!-- <Compile Include="test.cs" /> -->
     <ProjectReference Include="..\..\src\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj">
-      <Project>{23806B6F-63A2-4340-9651-5E8DEE232F79}</Project>
+      <Project>{A91B7520-2660-422A-ACD8-48701ED24DE7}</Project>
       <Name>Microsoft.Identity.Client.XamarinAndroid.AndroidX</Name>
     </ProjectReference>
   </ItemGroup>

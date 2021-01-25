@@ -43,6 +43,7 @@
 // mc++ import com.google.android.material.navigation.NavigationView;
 // mc++ 
 
+using Android.App;
 using Android.OS;
 using Android.Views;
 using AndroidX.AppCompat.App;
@@ -56,6 +57,7 @@ using MSAL.Sample;
 
 namespace MSAL.Samples
 {
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     internal class MainActivity : AndroidX.AppCompat.App.AppCompatActivity,
              NavigationView.IOnNavigationItemSelectedListener
              , OnFragmentInteractionListener
@@ -71,7 +73,7 @@ namespace MSAL.Samples
 
         private ConstraintLayout mContentMain;
 
-        //     // @Override
+        // @Override
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -154,13 +156,13 @@ namespace MSAL.Samples
             }
         }
 
-        private void AttachFragment(/* final */ Fragment fragment)
+        private void AttachFragment(/* final */ AndroidX.Fragment.App.Fragment fragment)
         {
-            //GetSupportFragmentManager()
-            //        .BeginTransaction()
-            //        .SetTransitionStyle(FragmentTransaction.TransitFragmentFade)
-            //        .Replace(mContentMain.Id, fragment)
-            //        .Commit();
+            this.SupportFragmentManager
+                    .BeginTransaction()
+                    .SetTransitionStyle(AndroidX.Fragment.App.FragmentTransaction.TransitFragmentFade)
+                    .Replace(mContentMain.Id, fragment)
+                    .Commit();
         }
     }
 
