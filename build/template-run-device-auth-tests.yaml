@@ -16,5 +16,4 @@ steps:
     rerunFailedTests: true
     rerunMaxAttempts: '3'
     runInParallel: false
-    codeCoverageEnabled: true
     diagnosticsEnabled: True
