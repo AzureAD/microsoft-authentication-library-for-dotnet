@@ -83,6 +83,7 @@
             "https://login.microsoftonline.com/consumers",
             "https://login.microsoftonline.com/49f548d0-12b7-4169-a390-bb5304d24462",
             "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "https://login.microsoftonline.com/61411618-6f67-4fc5-ba6a-4a0fe32d4eec",
             "https://login.windows-ppe.net/organizations",
             "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47"});
             this.authorityCbx.Location = new System.Drawing.Point(74, 15);
@@ -232,7 +233,8 @@
             this.cbxScopes.Items.AddRange(new object[] {
             "User.Read",
             "User.Read User.Read.All",
-            "https://management.core.windows.net//.default"});
+            "https://management.core.windows.net//.default",
+            "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess"});
             this.cbxScopes.Location = new System.Drawing.Point(74, 43);
             this.cbxScopes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cbxScopes.Name = "cbxScopes";

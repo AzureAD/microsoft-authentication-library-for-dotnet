@@ -33,6 +33,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:GetTokenSilentlyAsync:webAccount"))
             {
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    _logger.Verbose(webTokenRequest.ToLogString());
+                    _logger.Verbose(webAccount.ToLogString());
+                }
+
                 var wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest, webAccount);
                 return new WebTokenRequestResultWrapper(wamResult);
             }
@@ -42,6 +48,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:GetTokenSilentlyAsync:"))
             {
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    _logger.Verbose(webTokenRequest.ToLogString());
+                }
+
                 var wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest);
                 return new WebTokenRequestResultWrapper(wamResult);
             }
@@ -51,6 +62,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             IntPtr _parentHandle,
             WebTokenRequest webTokenRequest)
         {
+            using (_logger.LogBlockDuration("WAM:RequestTokenForWindowAsync:"))
+            {
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    _logger.Verbose(webTokenRequest.ToLogString());
+                }
 #if WINDOWS_APP
             // UWP requires being on the UI thread
             await _synchronizationContext;
@@ -58,10 +75,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(webTokenRequest);
 #else
 
-            var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenForWindowAsync(
-                _parentHandle, webTokenRequest);
+                var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenForWindowAsync(
+                    _parentHandle, webTokenRequest);
 #endif
-            return new WebTokenRequestResultWrapper(wamResult);
+                return new WebTokenRequestResultWrapper(wamResult);
+            }
         }
 
         public async Task<IWebTokenRequestResultWrapper> RequestTokenForWindowAsync(
@@ -69,6 +87,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
            WebTokenRequest webTokenRequest,
            WebAccount wamAccount)
         {
+            using (_logger.LogBlockDuration("WAM:RequestTokenForWindowAsync:"))
+            {
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    _logger.Verbose(webTokenRequest.ToLogString());
+                    _logger.Verbose(wamAccount.ToLogString());
+                }
 #if WINDOWS_APP
 
             // UWP requires being on the UI thread
@@ -79,16 +104,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 wamAccount);
 #else
 
-            var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindowAsync(
+                var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindowAsync(
                 _parentHandle, webTokenRequest, wamAccount);
 #endif
-            return new WebTokenRequestResultWrapper(wamResult);
+                return new WebTokenRequestResultWrapper(wamResult);
+            }
         }
 
         public async Task<WebAccount> FindAccountAsync(WebAccountProvider provider, string wamAccountId)
         {
             using (_logger.LogBlockDuration("WAM:FindAccountAsync:"))
             {
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    _logger.Verbose(provider.ToLogString());
+                }
+
                 return await WebAuthenticationCoreManager.FindAccountAsync(provider, wamAccountId);
             }
         }
@@ -97,6 +128,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:FindAllWebAccountsAsync:"))
             {
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    _logger.Verbose(provider.ToLogString());
+                }
+
                 // Win 10 RS3 release and above
                 if (!ApiInformation.IsMethodPresent(
                    "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",

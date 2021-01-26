@@ -129,8 +129,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return Task.FromResult(request);
         }
 
-        public MsalTokenResponse ParseSuccesfullWamResponse(WebTokenResponse webTokenResponse)
+        public Task<WebTokenRequest> CreateWebTokenRequestAsync(WebAccountProvider provider, string clientId, string scopes)
         {
+            throw new NotImplementedException();
+        }
+
+        public MsalTokenResponse ParseSuccesfullWamResponse(
+            WebTokenResponse webTokenResponse, 
+            out Dictionary<string, string> allProperties)
+        {
+            allProperties = new Dictionary<string, string>(8, StringComparer.OrdinalIgnoreCase);
             if (!webTokenResponse.Properties.TryGetValue("TokenExpiresOn", out string expiresOn))
             {
                 _logger.Warning("Result from WAM does not have expiration. Marking access token as expired.");
@@ -168,10 +176,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _logger.InfoPii("Result from WAM scopes: " + scopes,
                 "Result from WAM has scopes? " + hasScopes);
 
-            //foreach (var kvp in webTokenResponse.Properties)
-            //{
-            //    Debug.WriteLine($"Other params {kvp.Key}: {kvp.Value}");
-            //}
+            foreach (var kvp in webTokenResponse.Properties)
+            {
+                allProperties.Add(kvp.Key, kvp.Value);
+            }
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {

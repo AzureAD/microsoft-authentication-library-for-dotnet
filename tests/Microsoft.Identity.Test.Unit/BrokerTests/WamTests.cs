@@ -33,6 +33,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private IWamProxy _wamProxy;
         private IWebAccountProviderFactory _webAccountProviderFactory;
         private IAccountPickerFactory _accountPickerFactory;
+        private IMsaPassthroughHandler _msaPassthroughHandler;
         private WamBroker _wamBroker;
         private SynchronizationContext _synchronizationContext;
 
@@ -62,6 +63,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _wamProxy = Substitute.For<IWamProxy>();
             _webAccountProviderFactory = Substitute.For<IWebAccountProviderFactory>();
             _accountPickerFactory = Substitute.For<IAccountPickerFactory>();
+            _msaPassthroughHandler = Substitute.For<IMsaPassthroughHandler>();
 
             _wamBroker = new WamBroker(
                 _coreUIParent,
@@ -70,7 +72,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _msaPlugin,
                 _wamProxy,
                 _webAccountProviderFactory,
-                _accountPickerFactory);
+                _accountPickerFactory,
+                _msaPassthroughHandler);
         }
 
         [TestMethod]
@@ -138,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _wamProxy.GetTokenSilentlyAsync(webAccount, webTokenRequest).
                     Returns(Task.FromResult(webTokenResponseWrapper));
 
-                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse).Returns(_msalTokenResponse);
+                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
 
                 // Act
                 var result = await _wamBroker.AcquireTokenSilentAsync(requestParams, atsParams).ConfigureAwait(false);
@@ -168,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.AccountSwitch);
                 var webTokenResponse = new WebTokenResponse();
                 webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
-                _aadPlugin.ParseSuccesfullWamResponse(Arg.Any<WebTokenResponse>()).Returns(_msalTokenResponse);
+                _aadPlugin.ParseSuccesfullWamResponse(Arg.Any<WebTokenResponse>(), out _).Returns(_msalTokenResponse);
 
                 // Act
                 var result = await _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters())
@@ -318,7 +321,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 _wamProxy.GetTokenSilentlyAsync(webAccount, webTokenRequest).
                     Returns(Task.FromResult(webTokenResponseWrapper));
-                _msaPlugin.ParseSuccesfullWamResponse(webTokenResponse).Returns(_msalTokenResponse);
+                _msaPlugin.ParseSuccesfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
 
 
                 // Act
@@ -394,7 +397,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _wamProxy.GetTokenSilentlyForDefaultAccountAsync(webTokenRequest).
                     Returns(Task.FromResult(webTokenResponseWrapper));
 
-                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse).Returns(_msalTokenResponse);
+                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
 
                 // Act
                 var result = await _wamBroker.AcquireTokenSilentDefaultUserAsync(requestParams, atsParams).ConfigureAwait(false);
@@ -452,7 +455,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest, webAccount).
                     Returns(Task.FromResult(webTokenResponseWrapper));
-                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse).Returns(_msalTokenResponse);
+                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
 
                 // Act
                 var result = await _wamBroker.AcquireTokenInteractiveAsync(
@@ -496,7 +499,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
                     Returns(Task.FromResult(webTokenResponseWrapper));
-                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse).Returns(_msalTokenResponse);
+                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
 
                 // Act
                 var result = await _wamBroker.AcquireTokenInteractiveAsync(
@@ -545,7 +548,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
                     Returns(Task.FromResult(webTokenResponseWrapper));
-                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse).Returns(_msalTokenResponse);
+                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
 
                 var atiParams = new AcquireTokenInteractiveParameters();
 
@@ -698,6 +701,63 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 #endif
 
+        #region MSA-PT 
+        [TestMethod]
+        public async Task ATI_WithPicker_MsaPt_Async()
+        {
+            string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var requestParams = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityHomeTenant); // AAD authorities for whi
+
+                // msa-pt scenario
+                _msaPassthroughHandler.IsPassthroughEnabled(requestParams).Returns(true);
+                var accountPicker = Substitute.For<IAccountPicker>();
+                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
+                var msaProvider = new WebAccountProvider("msa", "user@contoso.com", null);
+                accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(msaProvider));
+                // AAD plugin + consumer provider = Guest MSA-PT scenario
+                _webAccountProviderFactory.IsConsumerProvider(msaProvider).Returns(true);
+                _msaPassthroughHandler.FetchTransferTokenAsync(requestParams, msaProvider)
+                    .Returns(Task.FromResult("transfer_token"));
+
+                var aadProvider = new WebAccountProvider("aad", "user@contoso.com", null);
+                _webAccountProviderFactory.GetAccountProviderAsync("home").Returns(aadProvider);
+
+                // make sure the final request is done with the AAD provider
+                var webTokenRequest = new WebTokenRequest(aadProvider);
+                _aadPlugin.CreateWebTokenRequestAsync(
+                    aadProvider,
+                    requestParams,
+                    isForceLoginPrompt: false,
+                     isInteractive: true,
+                     isAccountInWam: false)
+                    .Returns(Task.FromResult(webTokenRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
+                    Returns(Task.FromResult(webTokenResponseWrapper));
+                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
+
+                var atiParams = new AcquireTokenInteractiveParameters();
+
+                // Act
+                var result = await _wamBroker.AcquireTokenInteractiveAsync(requestParams, atiParams)
+                    .ConfigureAwait(false);
+
+                // Assert 
+                Assert.AreSame(_msalTokenResponse, result);
+                _msaPassthroughHandler.Received(1).AddTransferTokenToRequest(webTokenRequest, "transfer_token");
+            }
+        }
+        #endregion
+
         private async Task RunPluginSelectionTestAsync(string inputAuthority, bool expectMsaPlugin)
         {
             // Arrange
@@ -734,79 +794,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-    }
-
-    // A simple SynchronizationContext that encapsulates it's own dedicated task queue and processing
-    // thread for servicing Send() & Post() calls.  
-    // Based upon http://blogs.msdn.com/b/pfxteam/archive/2012/01/20/10259049.aspx but uses it's own thread
-    // rather than running on the thread that it's instanciated on
-    public sealed class DedicatedThreadSynchronisationContext : SynchronizationContext, IDisposable
-    {
-        public DedicatedThreadSynchronisationContext()
-        {
-            m_thread = new Thread(ThreadWorkerDelegate);
-            m_thread.Start(this);
-        }
-
-        public void Dispose()
-        {
-            m_queue.CompleteAdding();
-        }
-
-        /// <summary>Dispatches an asynchronous message to the synchronization context.</summary>
-        /// <param name="d">The System.Threading.SendOrPostCallback delegate to call.</param>
-        /// <param name="state">The object passed to the delegate.</param>
-        public override void Post(SendOrPostCallback d, object state)
-        {
-            if (d == null)
-                throw new ArgumentNullException("d");
-            m_queue.Add(new KeyValuePair<SendOrPostCallback, object>(d, state));
-        }
-
-        /// <summary> As 
-        public override void Send(SendOrPostCallback d, object state)
-        {
-            using (var handledEvent = new ManualResetEvent(false))
-            {
-                Post(SendOrPostCallback_BlockingWrapper, Tuple.Create(d, state, handledEvent));
-                handledEvent.WaitOne();
-            }
-        }
-
-        public int WorkerThreadId { get { return m_thread.ManagedThreadId; } }
-        //=========================================================================================
-
-        private static void SendOrPostCallback_BlockingWrapper(object state)
-        {
-            var innerCallback = (state as Tuple<SendOrPostCallback, object, ManualResetEvent>);
-            try
-            {
-                innerCallback.Item1(innerCallback.Item2);
-            }
-            finally
-            {
-                innerCallback.Item3.Set();
-            }
-        }
-
-        /// <summary>The queue of work items.</summary>
-        private readonly BlockingCollection<KeyValuePair<SendOrPostCallback, object>> m_queue =
-            new BlockingCollection<KeyValuePair<SendOrPostCallback, object>>();
-
-        private readonly Thread m_thread = null;
-
-        /// <summary>Runs an loop to process all queued work items.</summary>
-        private void ThreadWorkerDelegate(object obj)
-        {
-            SynchronizationContext.SetSynchronizationContext(obj as SynchronizationContext);
-
-            try
-            {
-                foreach (var workItem in m_queue.GetConsumingEnumerable())
-                    workItem.Key(workItem.Value);
-            }
-            catch (ObjectDisposedException) { }
-        }
     }
 }
 

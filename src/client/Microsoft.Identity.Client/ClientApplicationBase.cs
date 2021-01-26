@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Client
 
             foreach (IAccount account in brokerAccounts)
             {
-                if (!cacheAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId)))
+                if (!cacheAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId))) // AccountId is equatable
                 {
                     allAccounts.Add(account);
                 }
