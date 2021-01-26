@@ -73,7 +73,7 @@ using Com.Microsoft.Identity.Client.Exception;
 using global::Com.Microsoft.Identity.Client;
 using MSAL.Sample;
 
-namespace MSAL.Samples
+namespace MSALSample
 {
     internal class SingleAccountModeFragment : Fragment
     {
@@ -158,7 +158,7 @@ namespace MSAL.Samples
           */
          private String[] GetScopes() 
          {
-             return scopeTextView.getText().ToString().toLowerCase().split(" ");
+             return scopeTextView.Text.ToLower().Split(" ");
          }
      
          /**

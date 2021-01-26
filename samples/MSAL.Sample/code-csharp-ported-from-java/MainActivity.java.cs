@@ -55,7 +55,7 @@ using AndroidX.Fragment.App;
 using Google.Android.Material.Navigation;
 using MSAL.Sample;
 
-namespace MSAL.Samples
+namespace MSALSample
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     internal class MainActivity : AndroidX.AppCompat.App.AppCompatActivity,
