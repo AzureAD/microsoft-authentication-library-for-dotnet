@@ -65,10 +65,11 @@
 
 using System;
 using Android.OS;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Fragment.App;
-
+using Com.Microsoft.Identity.Client.Exception;
 using global::Com.Microsoft.Identity.Client;
 using MSAL.Sample;
 
@@ -129,7 +130,7 @@ namespace MSAL.Samples
             currentUserTextView = view.FindViewById<TextView>(Resource.Id.current_user);
             deviceModeTextView = view.FindViewById<TextView>(Resource.Id.device_mode);
             /* final */ String defaultGraphResourceUrl = MSGraphRequestWrapper.MS_GRAPH_ROOT_ENDPOINT + "v1.0/me";
-            graphResourceTextView.SetText(defaultGraphResourceUrl);
+            graphResourceTextView.Text = defaultGraphResourceUrl;
             signInButton.SetOnClickListener(new SignInButtonOnClickListener());
             signOutButton.SetOnClickListener(new SignOutButtonOnClickListener()); 
             callGraphApiInteractiveButton.SetOnClickListener(new CallGraphApiInteractiveOnClickListener());
@@ -198,9 +199,9 @@ namespace MSAL.Samples
          private void CallGraphAPI(/* final */ IAuthenticationResult authenticationResult)
         {
              MSGraphRequestWrapper.callGraphAPIUsingVolley(
-                     getContext(),
-                     graphResourceTextView.getText().ToString(),
-                     authenticationResult.getAccessToken(),
+                     Context,
+                     graphResourceTextView.Text.ToString(),
+                     authenticationResult.AccessToken,
                      new ResponseListenerJSONObject(),
                      new ResponseErrorListener()
                     );
@@ -219,9 +220,9 @@ namespace MSAL.Samples
          /**
           * Display the graph response
           */
-         private void DisplayGraphResult(/* @NonNull */ /* final */ JSONObject graphResponse) 
+         private void DisplayGraphResult(/* @NonNull */ /* final */ Org.Json.JSONObject graphResponse) 
          {
-             logTextView.SetText(graphResponse.ToString());
+             logTextView.Text = graphResponse.ToString();
          }
 
 
@@ -230,7 +231,7 @@ namespace MSAL.Samples
           */
          private void DisplayError(/* @NonNull */ /* final */ Exception exception) 
          {
-             logTextView.SetText(exception.ToString());
+             logTextView.Text = exception.ToString();
          }
      
          /**
@@ -240,22 +241,22 @@ namespace MSAL.Samples
          {
              if (mAccount != null) 
              {
-                 signInButton.SetEnabled(false);
-                 signOutButton.SetEnabled(true);
-                 callGraphApiInteractiveButton.SetEnabled(true);
-                 callGraphApiSilentButton.SetEnabled(true);
-                 currentUserTextView.SetText(mAccount.getUsername());
+                 signInButton.Enabled = false;
+                 signOutButton.Enabled = true;
+                 callGraphApiInteractiveButton.Enabled = true;
+                 callGraphApiSilentButton.Enabled = true;
+                 currentUserTextView.Text = mAccount.Username;
              } 
              else 
              {
-                 signInButton.SetEnabled(true);
-                 signOutButton.SetEnabled(false);
-                 callGraphApiInteractiveButton.SetEnabled(false);
-                 callGraphApiSilentButton.SetEnabled(false);
-                 currentUserTextView.SetText("None");
+                 signInButton.Enabled = true;
+                 signOutButton.Enabled = false;
+                 callGraphApiInteractiveButton.Enabled = false;
+                 callGraphApiSilentButton.Enabled = false;
+                 currentUserTextView.Text = "None";
              }
      
-             deviceModeTextView.SetText(mSingleAccountApp.isSharedDevice() ? "Shared" : "Non-shared");
+             deviceModeTextView.Text = mSingleAccountApp.IsSharedDevice() ? "Shared" : "Non-shared";
          }
 
          /**
@@ -264,13 +265,13 @@ namespace MSAL.Samples
          private void showToastOnSignOut() 
          {
              /* final */ String signOutText = "Signed Out.";
-             currentUserTextView.SetText("");
-             Toast.MakeText(getContext(), signOutText, Toast.LENGTH_SHORT)
+             currentUserTextView.Text = "";
+             Toast.MakeText(Context, signOutText, ToastLength.Short)
                      .Show();
          }
     }
 
-    internal class SingleAccountApplicationCreatedListener : PublicClientApplication.ISingleAccountApplicationCreatedListener
+    internal class SingleAccountApplicationCreatedListener : Java.Lang.Object, PublicClientApplication.ISingleAccountApplicationCreatedListener
     {
             // @Override
             public override void OnCreated(ISingleAccountPublicClientApplication application)
@@ -291,7 +292,7 @@ namespace MSAL.Samples
 
     }
 
-    internal class SignInButtonOnClickListener : View.IOnClickListener
+    internal class SignInButtonOnClickListener : Java.Lang.Object, View.IOnClickListener
     {
         public void OnClick(View v) 
         {
@@ -300,11 +301,11 @@ namespace MSAL.Samples
                 return;
             }
 
-            mSingleAccountApp.SignIn(getActivity(), null, getScopes(), getAuthInteractiveCallback());
+            mSingleAccountApp.SignIn(GetActivity(), null, GetScopes(), getAuthInteractiveCallback());
         }
     }
 
-    internal class SignOutButtonOnClickListener : View.IOnClickListener
+    internal class SignOutButtonOnClickListener : Java.Lang.Object, View.IOnClickListener
     {
         public void OnClick(View v) 
         {
@@ -319,7 +320,7 @@ namespace MSAL.Samples
         }
     }
 
-    internal class SingleAccountSignOutCallback : ISingleAccountPublicClientApplication.SignOutCallback
+    internal class SingleAccountSignOutCallback : Java.Lang.Object, ISingleAccountPublicClientApplication.SignOutCallback
     {
         //@Override
         public void OnSignOut() 
@@ -336,7 +337,7 @@ namespace MSAL.Samples
         }
     }
 
-    internal class CallGraphApiInteractiveOnClickListener : View.IOnClickListener
+    internal class CallGraphApiInteractiveOnClickListener : Java.Lang.Object, View.IOnClickListener
     {
         public void OnClick(View v) 
         {
@@ -358,7 +359,7 @@ namespace MSAL.Samples
         }
     }
 
-    internal class CallGraphApiSilentOnClickListener : View.IOnClickListener
+    internal class CallGraphApiSilentOnClickListener : Java.Lang.Object, View.IOnClickListener
     {
         //@Override
         public void OnClick(View v) 
@@ -376,7 +377,7 @@ namespace MSAL.Samples
         }
     }
 
-    internal class SingleAccountPublicClientApplicationCurrentAccountCallback : ISingleAccountPublicClientApplication.CurrentAccountCallback 
+    internal class SingleAccountPublicClientApplicationCurrentAccountCallback : Java.Lang.Object, ISingleAccountPublicClientApplication.CurrentAccountCallback 
     {
         //@Override
         public void OnAccountLoaded(/* @Nullable */ IAccount activeAccount) 
@@ -442,10 +443,10 @@ namespace MSAL.Samples
         {
             /* Successfully got a token, use it to call a protected resource - MSGraph */
             Log.Debug(TAG, "Successfully authenticated");
-            Log.Debug(TAG, "ID Token: " + authenticationResult.getAccount().getClaims().get("id_token"));
+            Log.Debug(TAG, "ID Token: " + authenticationResult.Account.Claims.["id_token"]);
 
             /* Update account */
-            mAccount = authenticationResult.GetAccount();
+            mAccount = authenticationResult.Account;
             UpdateUI();
 
             /* call graph */
@@ -477,7 +478,7 @@ namespace MSAL.Samples
         }
     };
 
-    internal class ResponseListenerJSONObject : Response.Listener<JSONObject> 
+    internal class ResponseListenerJSONObject : Java.Lang.Object, Response.Listener<JSONObject> 
     {
         //@Override
         public void OnResponse(JSONObject response) 
@@ -493,7 +494,7 @@ namespace MSAL.Samples
         public void onErrorResponse(VolleyError error) 
         {
             Log.Debug(TAG, "Error: " + error.ToString());
-            displayError(error);
+            DisplayError(error);
         }
     }
 
