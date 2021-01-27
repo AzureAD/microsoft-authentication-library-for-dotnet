@@ -55,6 +55,6 @@
     <EmbeddedReferenceJar Include="Jars\nimbus-jose-jwt-9.1.2.jar" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.AndroidX.CoordinatorLayout" Version="1.1.0.6" />
+    <PackageReference Include="Xamarin.AndroidX.ConstraintLayout" Version="2.0.4.1" />
   </ItemGroup>
 </Project>
