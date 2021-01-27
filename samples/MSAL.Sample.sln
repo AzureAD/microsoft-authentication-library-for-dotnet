@@ -7,6 +7,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSAL.Sample", "MSAL.Sample\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidX", "..\src\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj", "{A91B7520-2660-422A-ACD8-48701ED24DE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App1", "Bogdan.TestApp\App1.csproj", "{89AB7AC4-6F5B-4FD2-8551-2BD0696ED2CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindningTestApp", "Travis.TestApp\BindningTestApp.csproj", "{4CE00BAE-A8E0-4544-B8AF-75229A8D63FD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bogdan.TestApp", "Bogdan.TestApp", "{15E23B85-08FE-4920-847B-3C6FD4F8D477}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Travis.TestApp", "Travis.TestApp", "{96BB07C2-887C-4989-A909-841AE1124E6C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,9 +29,25 @@ Global
 		{A91B7520-2660-422A-ACD8-48701ED24DE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A91B7520-2660-422A-ACD8-48701ED24DE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A91B7520-2660-422A-ACD8-48701ED24DE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89AB7AC4-6F5B-4FD2-8551-2BD0696ED2CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89AB7AC4-6F5B-4FD2-8551-2BD0696ED2CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89AB7AC4-6F5B-4FD2-8551-2BD0696ED2CA}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{89AB7AC4-6F5B-4FD2-8551-2BD0696ED2CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89AB7AC4-6F5B-4FD2-8551-2BD0696ED2CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89AB7AC4-6F5B-4FD2-8551-2BD0696ED2CA}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{4CE00BAE-A8E0-4544-B8AF-75229A8D63FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CE00BAE-A8E0-4544-B8AF-75229A8D63FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CE00BAE-A8E0-4544-B8AF-75229A8D63FD}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{4CE00BAE-A8E0-4544-B8AF-75229A8D63FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CE00BAE-A8E0-4544-B8AF-75229A8D63FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CE00BAE-A8E0-4544-B8AF-75229A8D63FD}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{89AB7AC4-6F5B-4FD2-8551-2BD0696ED2CA} = {15E23B85-08FE-4920-847B-3C6FD4F8D477}
+		{4CE00BAE-A8E0-4544-B8AF-75229A8D63FD} = {96BB07C2-887C-4989-A909-841AE1124E6C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8F6B78A2-90F7-44FF-A18A-BDD966EEBC35}
