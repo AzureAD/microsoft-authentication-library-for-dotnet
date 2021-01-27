@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace Microsoft.Identity.Test.Performance
         private MockHttpManager _httpManager;
         private readonly AcquireTokenForClientParameterBuilder[] _requests;
         private int _requestIdx;
+        private ConfidentialClientApplication _cca;
 
         /// <summary>
         /// Generate a certificate. Create a Confidential Client Application with that certificate and
@@ -31,19 +33,24 @@ namespace Microsoft.Identity.Test.Performance
         public CryptoManagerTests()
         {
             _httpManager = new MockHttpManager();
+            _httpManager.HandlerReturn = () => new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+            };
             _requests = new AcquireTokenForClientParameterBuilder[AppsCount];
             for (int i = 0; i < AppsCount; i++)
             {
                 X509Certificate2 certificate = CreateCertificate("CN=rsa2048", RSA.Create(2048), HashAlgorithmName.SHA256, null);
-                var cca = ConfidentialClientApplicationBuilder
+                _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
                         .WithAuthority(new Uri(TestConstants.AuthorityTestTenant))
                         .WithRedirectUri(TestConstants.RedirectUri)
                         .WithCertificate(certificate)
                         .WithHttpManager(_httpManager)
                         .BuildConcrete();
-                AddHostToInstanceCache(cca.ServiceBundle, TestConstants.ProductionPrefNetworkEnvironment);
-                _requests[_requestIdx] = cca.AcquireTokenForClient(TestConstants.s_scope)
+                AddHostToInstanceCache(_cca.ServiceBundle, TestConstants.ProductionPrefNetworkEnvironment);
+                _requests[_requestIdx] = _cca.AcquireTokenForClient(TestConstants.s_scope)
                     .WithForceRefresh(true);
             }
         }
@@ -56,8 +63,8 @@ namespace Microsoft.Identity.Test.Performance
         [IterationSetup]
         public void IterationSetup()
         {
+            _cca.ClientCredential.CachedAssertion = null;
             _requestIdx = _requestIdx++ % AppsCount;
-            _httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
         }
 
         [Benchmark]

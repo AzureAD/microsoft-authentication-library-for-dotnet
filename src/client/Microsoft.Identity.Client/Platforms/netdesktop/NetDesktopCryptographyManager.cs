@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             using (var sha = new SHA256Cng())
             {
                 var signedData = rsaCryptoProvider.SignData(messageBytes, sha);
-                // Cache only valid RSA crypto providers
+                // Cache only valid RSA crypto providers, which are able to sign data successfully
                 s_certificateToRsaCspMap[certificate.Thumbprint] = rsaCryptoProvider;
                 return signedData;
             }
@@ -98,11 +98,13 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 if (s_certificateToRsaMap.Count >= s_maximumMapSize)
                     s_certificateToRsaMap.Clear();
 
-                s_certificateToRsaMap[certificate.Thumbprint] = certificate.GetRSAPrivateKey();
-                rsa = s_certificateToRsaMap[certificate.Thumbprint];
+                rsa = certificate.GetRSAPrivateKey();
             }
 
-            return rsa.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            var signedData = rsa.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            // Cache only valid RSA crypto providers, which are able to sign data successfully
+            s_certificateToRsaMap[certificate.Thumbprint] = rsa;
+            return signedData;
 #endif
         }
 

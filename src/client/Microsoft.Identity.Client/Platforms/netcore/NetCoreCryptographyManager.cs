@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -14,6 +15,9 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 {
     internal class NetCoreCryptographyManager : ICryptographyManager
     {
+        private static readonly ConcurrentDictionary<string, RSA> s_certificateToRsaMap = new ConcurrentDictionary<string, RSA>();
+        private static readonly int s_maximumMapSize = 1000;
+
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             return string.IsNullOrEmpty(input) ? null : Base64UrlHelpers.Encode(CreateSha256HashBytes(input));
@@ -73,10 +77,18 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                         ClientCredentialWrapper.MinKeySizeInBits));
             }
 
-            using (var key = certificate.GetRSAPrivateKey())
+            if (!s_certificateToRsaMap.TryGetValue(certificate.Thumbprint, out RSA rsa))
             {
-                return key.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                if (s_certificateToRsaMap.Count >= s_maximumMapSize)
+                    s_certificateToRsaMap.Clear();
+
+                rsa = certificate.GetRSAPrivateKey();
             }
+
+            var signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);                
+            // Cache only valid RSA crypto providers, which are able to sign data successfully
+            s_certificateToRsaMap[certificate.Thumbprint] = rsa;
+            return signedData;
         }
     }
 }
