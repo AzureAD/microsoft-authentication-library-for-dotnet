@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Android.App;
 using Android.OS;
 using Android.Runtime;
@@ -6,6 +7,7 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Com.Microsoft.Identity.Client;
 using MsalAndroid = Com.Microsoft.Identity.Client;
 
 namespace BindningTestApp
@@ -17,18 +19,11 @@ namespace BindningTestApp
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            SetContentView(Resource.Layout.activity_main);
-
-            Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
-            SetSupportActionBar(toolbar);
-
-            FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
-            fab.Click += FabOnClick;
 
             tryAuth();
         }
 
-        private void tryAuth()
+        private async void tryAuth()
         {
             //AppListner listner = new AppListner();
 
@@ -39,21 +34,24 @@ namespace BindningTestApp
             //    "msauth://com.companyname.xamarindev/Fy2zjTiLYs5sXM3sGy+PGcv8MaQ=",
             //    listner);
 
-            Java.IO.File config = null;
-            string content;
-            Android.Content.Res.AssetManager assets = this.Assets;
-            using (System.IO.StreamReader sr = new System.IO.StreamReader(assets.Open("config.json")))
-            {
-                System.IO.Stream s = sr.BaseStream;
-                config = new Java.IO.File("config.json");
-            }
-            var _boundApplication = MsalAndroid.PublicClientApplication.CreateSingleAccountPublicClientApplication
-                                                                                (
-                                                                                    Android.App.Application.Context, 
-                                                                                    //config
-                                                                                    Resource.Raw.msal_default_config
-                                                                                );
+            //Java.IO.File config = null;
+            //Android.Content.Res.AssetManager assets = this.Assets;
+            //using (System.IO.StreamReader sr = new System.IO.StreamReader(assets.Open("config.json")))
+            //{
+            //    System.IO.Stream s = sr.BaseStream;
+            //    config = new Java.IO.File("config.json");
+            //}
+            ISingleAccountPublicClientApplication _boundApplication = null;
 
+
+            await Task.Run( () => _boundApplication = MsalAndroid.PublicClientApplication.CreateSingleAccountPublicClientApplication
+                                                                                (
+                                                                                    Android.App.Application.Context,
+                                                                                    //config
+                                                                                    Resource.Raw.config
+                                                                                )
+            ).ConfigureAwait(false);
+            
 
             AndroidAuthCallback callback = new AndroidAuthCallback();
 
