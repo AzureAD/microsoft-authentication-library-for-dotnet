@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Performance
         public CryptoManagerTests()
         {
             _httpManager = new MockHttpManager();
-            _httpManager.HandlerReturn = () => new MockHttpMessageHandler()
+            _httpManager.MessageHandlerFunc = () => new MockHttpMessageHandler()
             {
                 ExpectedMethod = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()

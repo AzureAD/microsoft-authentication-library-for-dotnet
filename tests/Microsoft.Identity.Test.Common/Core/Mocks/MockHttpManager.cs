@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                             IDisposable
     {
         private readonly TestContext _testContext;
-        public Func<MockHttpMessageHandler> HandlerReturn;
+        public Func<MockHttpMessageHandler> MessageHandlerFunc;
 
         public MockHttpManager(TestContext testContext = null) :
             base(new SimpleHttpClientFactory())
@@ -65,9 +65,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             HttpMessageHandler messageHandler;
 
-            if (HandlerReturn != null)
+            if (MessageHandlerFunc != null)
             {
-                messageHandler = HandlerReturn();
+                messageHandler = MessageHandlerFunc();
             }
             else
             {
