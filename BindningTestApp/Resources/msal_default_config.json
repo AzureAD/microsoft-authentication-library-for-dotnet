@@ -1,6 +1,6 @@
 ﻿{
     "client_id": "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0",
-    "redirect_uri": "msauth://com.microsoft.identity.client.sample.local/1wIqXSqBj7w%2Bh11ZifsnqwgyKrY%3D",
+    "redirect_uri": "msauth://com.companyname.bindningtestapp/1wIqXSqBj7w%2Bh11ZifsnqwgyKrY%3D",
     "broker_redirect_uri_registered": false,
     "authorities": [
         {
