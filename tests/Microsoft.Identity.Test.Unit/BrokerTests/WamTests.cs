@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestInitialize]
         public void Init()
         {
-            _synchronizationContext = new DedicatedThreadSynchronisationContext();
+            _synchronizationContext = new DedicatedThreadSynchronizationContext();
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
 
