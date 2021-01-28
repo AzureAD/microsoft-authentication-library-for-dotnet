@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
@@ -110,6 +111,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Assert
                 Assert.AreEqual("actual_transfer_token", transferToken);
             }
-        }
+        }      
     }
 }

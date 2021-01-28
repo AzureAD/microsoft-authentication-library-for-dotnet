@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (authenticationRequestParameters.Account != null ||
                 !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
             {
-                bool isMsaPassthrough = _msaPassthroughHandler.IsPassthroughEnabled(authenticationRequestParameters);
+                bool isMsaPassthrough = authenticationRequestParameters.AppConfig.IsMsaPassthrough;
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     authenticationRequestParameters?.Account?.HomeAccountId?.TenantId, // TODO: we could furher optimize here by searching for an account based on UPN
@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private async Task<MsalTokenResponse> AcquireInteractiveWithPickerAsync(
             AuthenticationRequestParameters authenticationRequestParameters)
         {
-            bool isMsaPassthrough = _msaPassthroughHandler.IsPassthroughEnabled(authenticationRequestParameters);
+            bool isMsaPassthrough = authenticationRequestParameters.AppConfig.IsMsaPassthrough;
             var accountPicker = _accountPickerFactory.Create(
                 _parentHandle,
                 _logger,
@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     null,
-                    _msaPassthroughHandler.IsPassthroughEnabled(authenticationRequestParameters))
+                    authenticationRequestParameters.AppConfig.IsMsaPassthrough)
                     .ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
@@ -405,7 +405,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     null,
-                    _msaPassthroughHandler.IsPassthroughEnabled(authenticationRequestParameters)).ConfigureAwait(false);
+                    authenticationRequestParameters.AppConfig.IsMsaPassthrough).ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
                 WebAccountProvider provider = await GetProviderAsync(

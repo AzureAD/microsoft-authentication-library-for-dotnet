@@ -88,6 +88,12 @@ namespace Microsoft.Identity.Client
 
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
 
+        /// <summary>
+        /// Currently this is only required for WAM
+        /// </summary>
+        public bool IsMsaPassthrough { get; set; } = false;
+
+
         #region Authority
 
         public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }
