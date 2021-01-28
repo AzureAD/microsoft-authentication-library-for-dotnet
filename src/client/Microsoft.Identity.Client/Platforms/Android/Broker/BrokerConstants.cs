@@ -186,6 +186,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         //Content provider operation strings
         public const string ContentProviderHelloOperation = "/hello";
         public const string ContentProviderInteractiveOperation = "/acquireTokenInteractive";
+        public const string ContentProviderSilentOperation = "/acquireTokenSilent";
         public const string ContentProviderGetAccountsOperation = "/getAccounts";
+        public const string ContentProviderRemoveAccountsOperation = "/removeAccounts";
     }
 }

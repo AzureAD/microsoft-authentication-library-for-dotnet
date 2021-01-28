@@ -26,6 +26,8 @@ using Microsoft.Identity.Client.Platforms.Android.Broker.Requests;
 using Microsoft.Identity.Json.Utilities;
 using System.Threading;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Http;
+using AndroidNative = Android;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -46,6 +48,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         // Important: this object MUST be accessed on a background thread. Android will check this and throw otherwise.
         private readonly AccountManager _androidAccountManager;
         private readonly ICoreLogger _logger;
+
+        public static MsalTokenResponse InteractiveBrokerTokenResponse { get; set; } = null;
+        //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and re-injected into the response at the end.
+        public static string CorrelationId { get; set; }
 
         private const long AccountManagerTimeoutSeconds = 5 * 60;
         public string NegotiatedBrokerProtocalKey { get; set; }
@@ -293,9 +299,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
         }
 
-        public BrokerRequest UpdateBrokerRequestWithAccountInformation(string accounts, BrokerRequest brokerRequest)
+        public BrokerRequest UpdateBrokerRequestWithAccountData(string accountData, BrokerRequest brokerRequest)
         {
-            if (string.IsNullOrEmpty(accounts))
+            if (string.IsNullOrEmpty(accountData))
             {
                 _logger.Info("Android account manager didn't return any accounts. ");
                 throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
@@ -305,28 +311,28 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             string homeAccountId = brokerRequest.HomeAccountId;
             string localAccountId = brokerRequest.LocalAccountId;
 
-            if (!string.IsNullOrEmpty(accounts))
+            if (!string.IsNullOrEmpty(accountData))
             {
-                dynamic authResult = JArray.Parse(accounts);
+                dynamic authResult = JArray.Parse(accountData);
 
                 foreach (JObject account in authResult)
                 {
-                    var accountData = account[BrokerResponseConst.Account];
+                    var accountInfo = account[BrokerResponseConst.Account];
 
-                    var accountDataHomeAccountID = accountData[BrokerResponseConst.HomeAccountId]?.ToString();
-                    var accountDataLocalAccountID = accountData[BrokerResponseConst.LocalAccountId]?.ToString();
+                    var accountInfoHomeAccountID = accountInfo[BrokerResponseConst.HomeAccountId]?.ToString();
+                    var accountInfoLocalAccountID = accountInfo[BrokerResponseConst.LocalAccountId]?.ToString();
 
-                    if (string.Equals(accountData[BrokerResponseConst.UserName].ToString(), username, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(accountInfo[BrokerResponseConst.UserName].ToString(), username, StringComparison.OrdinalIgnoreCase))
                     {
                         // TODO: broker request should be immutable!
-                        brokerRequest.HomeAccountId = accountDataHomeAccountID;
-                        brokerRequest.LocalAccountId = accountDataLocalAccountID;
+                        brokerRequest.HomeAccountId = accountInfoHomeAccountID;
+                        brokerRequest.LocalAccountId = accountInfoLocalAccountID;
                         _logger.Info("Found broker account in Android account manager using the provided login hint. ");
                         return brokerRequest;
                     }
 
-                    if (string.Equals(accountDataHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
-                         string.Equals(accountDataLocalAccountID, localAccountId, StringComparison.Ordinal))
+                    if (string.Equals(accountInfoHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
+                         string.Equals(accountInfoLocalAccountID, localAccountId, StringComparison.Ordinal))
                     {
                         _logger.Info("Found broker account in Android account manager Using the provided account. ");
                         return brokerRequest;
@@ -360,27 +366,27 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         /// <summary>
         /// This method will acquire all of the accounts in the account manager that have an access token for the given client ID.
         /// </summary>
-        public IEnumerable<IAccount> GetBrokerAccountsInAccountManager(string accounts)
+        public IEnumerable<IAccount> ExtractBrokerAccountsFromAccountData(string accountData)
         {
-            if (string.IsNullOrEmpty(accounts))
+            if (string.IsNullOrEmpty(accountData))
             {
                 _logger.Info("Android account manager didn't return any accounts. ");
             }
 
             List<IAccount> brokerAccounts = new List<IAccount>();
 
-            if (!string.IsNullOrEmpty(accounts))
+            if (!string.IsNullOrEmpty(accountData))
             {
-                dynamic authResult = JArray.Parse(accounts);
+                dynamic authResult = JArray.Parse(accountData);
 
                 foreach (JObject account in authResult)
                 {
                     if (account.ContainsKey(BrokerResponseConst.Account))
                     {
-                        var accountData = account[BrokerResponseConst.Account];
-                        var homeAccountID = accountData.Value<string>(BrokerResponseConst.HomeAccountId) ?? "";
-                        var userName = accountData.Value<string>(BrokerResponseConst.UserName) ?? "";
-                        var environment = accountData.Value<string>(BrokerResponseConst.Environment) ?? "";
+                        var accountInfo = account[BrokerResponseConst.Account];
+                        var homeAccountID = accountInfo.Value<string>(BrokerResponseConst.HomeAccountId) ?? "";
+                        var userName = accountInfo.Value<string>(BrokerResponseConst.UserName) ?? "";
+                        var environment = accountInfo.Value<string>(BrokerResponseConst.Environment) ?? "";
                         IAccount iAccount = new Account(homeAccountID, userName, environment);
                         brokerAccounts.Add(iAccount);
                     }
@@ -608,7 +614,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return bundle;
         }
 
-        private Bundle CreateRemoveBrokerAccountBundle(string clientId, IAccount account)
+        public Bundle CreateRemoveBrokerAccountBundle(string clientId, IAccount account)
         {
             Bundle bundle = new Bundle();
 
@@ -830,6 +836,96 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 throw ex;
             else
                 throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
+        }
+
+        internal static void SetBrokerResult(Intent data, int resultCode, ICoreLogger unreliableLogger)
+        {
+            try
+            {
+                if (data == null)
+                {
+                    unreliableLogger?.Info("Data is null, stopping. ");
+                    return;
+                }
+
+                switch (resultCode)
+                {
+                    case (int)BrokerResponseCode.ResponseReceived:
+                        unreliableLogger?.Info("Response received, decoding... ");
+
+                        InteractiveBrokerTokenResponse =
+                            MsalTokenResponse.CreateFromAndroidBrokerResponse(
+                                data.GetStringExtra(BrokerConstants.BrokerResultV2),
+                                CorrelationId);
+                        break;
+                    case (int)BrokerResponseCode.UserCancelled:
+                        unreliableLogger?.Info("Response received - user cancelled. ");
+
+                        InteractiveBrokerTokenResponse = new MsalTokenResponse
+                        {
+                            Error = MsalError.AuthenticationCanceledError,
+                            ErrorDescription = MsalErrorMessage.AuthenticationCanceled,
+                        };
+                        break;
+                    case (int)BrokerResponseCode.BrowserCodeError:
+                        unreliableLogger?.Info("Response received - error. ");
+
+                        dynamic errorResult = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                        string error = null;
+                        string errorDescription = null;
+
+                        if (errorResult != null)
+                        {
+                            error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+                            errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+
+                            unreliableLogger?.Error($"error: {error} errorDescription {errorDescription}. ");
+                        }
+                        else
+                        {
+                            error = BrokerConstants.BrokerUnknownErrorCode;
+                            errorDescription = "Error Code received, but no error could be extracted. ";
+                            unreliableLogger?.Error("Error response received, but not error could be extracted. ");
+                        }
+
+                        var httpResponse = new HttpResponse();
+                        //TODO: figure out how to get status code properly deserialized from JObject
+                        httpResponse.Body = errorResult[BrokerResponseConst.BrokerHttpBody]?.ToString();
+
+                        InteractiveBrokerTokenResponse = new MsalTokenResponse
+                        {
+                            Error = error,
+                            ErrorDescription = errorDescription,
+                            SubError = errorResult[BrokerResponseConst.BrokerSubError],
+                            HttpResponse = httpResponse,
+                            CorrelationId = CorrelationId
+                        };
+                        break;
+                    default:
+                        unreliableLogger?.Error("Unknown broker response. ");
+                        InteractiveBrokerTokenResponse = new MsalTokenResponse
+                        {
+                            Error = BrokerConstants.BrokerUnknownErrorCode,
+                            ErrorDescription = "Broker result not returned from android broker. ",
+                            CorrelationId = CorrelationId
+                        };
+                        break;
+                }
+            }
+            finally
+            {
+                ReadyForResponse.Release();
+            }
+        }
+
+        public void HandleInstallUrl(string appLink, Activity activity)
+        {
+            _logger.Info("Android Broker - Starting ActionView activity to " + appLink);
+            activity.StartActivity(new Intent(Intent.ActionView, AndroidNative.Net.Uri.Parse(appLink)));
+
+            throw new MsalClientException(
+                MsalError.BrokerApplicationRequired,
+                MsalErrorMessage.BrokerApplicationRequired);
         }
     }
 }

@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
         private const string ChromePackage = "com.android.chrome";
+        private const AndroidBrokerOrchestrator _androidBrokerOrchestrator = new AndroidBrokerOrchestrator();
         // this is used to check if anything can open custom tabs.
         // Must use the classic support. Leaving the reference androidx intent
         //#if __ANDROID_29__
@@ -214,7 +215,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             {
                 return OverloadBrokerForTest;
             }
-
+            //TODO Usa lazy init
             AndroidBrokerOrchestrator androidBrokerOrchestrator = new AndroidBrokerOrchestrator(uIParent, Logger);
 
             return androidBrokerOrchestrator.GetBroker();
@@ -232,6 +233,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
             {
                 return false;
             }
+        }
+
+        public override bool IsBrokerInstalledAndInvokable()
+        {
+            return base.IsBrokerInstalledAndInvokable();
         }
 
         public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()

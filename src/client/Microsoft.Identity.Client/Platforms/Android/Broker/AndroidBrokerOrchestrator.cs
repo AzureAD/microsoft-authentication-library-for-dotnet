@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Android.App;
+using Android.Content;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -73,6 +74,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                 return canInvoke;
             }
+        }
+
+        internal static void SetBrokerResult(Intent data, int resultCode, ICoreLogger unreliableLogger)
+        {
+            AndroidBrokerHelper.SetBrokerResult(data, resultCode, unreliableLogger);
         }
     }
 }

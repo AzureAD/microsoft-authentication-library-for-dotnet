@@ -258,30 +258,29 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
         {
-            return await broker2.GetAccountsAsync(clientID, redirectUri).ConfigureAwait(false);
-            //using (_logger.LogMethodDuration())
-            //{
-            //    if (!IsBrokerInstalledAndInvokable())
-            //    {
-            //        _logger.Warning("Android broker is either not installed or is not reachable so no accounts will be returned. ");
-            //        return new List<IAccount>();
-            //    }
+            using (_logger.LogMethodDuration())
+            {
+                if (!IsBrokerInstalledAndInvokable())
+                {
+                    _logger.Warning("Android broker is either not installed or is not reachable so no accounts will be returned. ");
+                    return new List<IAccount>();
+                }
 
-            //    BrokerRequest brokerRequest = new BrokerRequest() { ClientId = clientID, RedirectUri = new Uri(redirectUri) };
+                BrokerRequest brokerRequest = new BrokerRequest() { ClientId = clientID, RedirectUri = new Uri(redirectUri) };
 
-            //    try
-            //    {
-            //        await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+                try
+                {
+                    await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
 
-            //        return _brokerHelper.GetBrokerAccountsInAccountManager(brokerRequest);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        _logger.Error("Failed to get Android broker accounts from the broker. ");
-            //        HandleBrokerOperationError(ex);
-            //        throw;
-            //    }
-            //}
+                    return _brokerHelper.GetBrokerAccountsInAccountManager(brokerRequest);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error("Failed to get Android broker accounts from the broker. ");
+                    HandleBrokerOperationError(ex);
+                    throw;
+                }
+            }
         }
 
         public async Task RemoveAccountAsync(IApplicationConfiguration applicationConfiguration, IAccount account)
