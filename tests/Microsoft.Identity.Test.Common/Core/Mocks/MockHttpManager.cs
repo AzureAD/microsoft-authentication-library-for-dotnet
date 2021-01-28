@@ -19,8 +19,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                             IDisposable
     {
         private readonly TestContext _testContext;
-        
-        public MockHttpManager(TestContext testContext = null) : 
+        public Func<MockHttpMessageHandler> MessageHandlerFunc;
+
+        public MockHttpManager(TestContext testContext = null) :
             base(new SimpleHttpClientFactory())
         {
             _testContext = testContext;
@@ -62,12 +63,23 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         protected override HttpClient GetHttpClient()
         {
-            if (_httpMessageHandlerQueue.Count == 0)
+            HttpMessageHandler messageHandler;
+
+            if (MessageHandlerFunc != null)
             {
-                Assert.Fail("The MockHttpManager's queue is empty. Cannot serve another response");
+                messageHandler = MessageHandlerFunc();
+            }
+            else
+            {
+
+                if (_httpMessageHandlerQueue.Count == 0)
+                {
+                    Assert.Fail("The MockHttpManager's queue is empty. Cannot serve another response");
+                }
+
+                messageHandler = _httpMessageHandlerQueue.Dequeue();
             }
 
-            var messageHandler = _httpMessageHandlerQueue.Dequeue();
 
             Trace.WriteLine($"Test {_testContext?.TestName ?? ""} dequeued a mock handler for { GetExpectedUrlFromHandler(messageHandler) }");
 

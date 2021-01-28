@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Security;
 using System.Security.Cryptography;
@@ -9,17 +10,16 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.net45.Native;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Win32.SafeHandles;
-using Microsoft.Identity.Client.Platforms.net45.Native;
-using System.Collections.Concurrent;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class NetDesktopCryptographyManager : ICryptographyManager
     {
-        private static readonly ConcurrentDictionary<string, RSA> s_certificateToRsaMap = new ConcurrentDictionary<string, RSA>();
         private static readonly ConcurrentDictionary<string, RSACryptoServiceProvider> s_certificateToRsaCspMap = new ConcurrentDictionary<string, RSACryptoServiceProvider>();
         private static readonly int s_maximumMapSize = 1000;
 
@@ -81,28 +81,17 @@ namespace Microsoft.Identity.Client.Platforms.net45
                         ClientCredentialWrapper.MinKeySizeInBits));
             }
 
-            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-
 #if NET45
             var rsaCryptoProvider = GetCryptoProviderForSha256_Net45(certificate);
             using (var sha = new SHA256Cng())
             {
-                var signedData = rsaCryptoProvider.SignData(messageBytes, sha);
-                // Cache only valid RSA crypto providers
+                var signedData = rsaCryptoProvider.SignData(Encoding.UTF8.GetBytes(message), sha);
+                // Cache only valid RSA crypto providers, which are able to sign data successfully
                 s_certificateToRsaCspMap[certificate.Thumbprint] = rsaCryptoProvider;
                 return signedData;
             }
 #else
-            if (!s_certificateToRsaMap.TryGetValue(certificate.Thumbprint, out RSA rsa))
-            {
-                if (s_certificateToRsaMap.Count >= s_maximumMapSize)
-                    s_certificateToRsaMap.Clear();
-
-                s_certificateToRsaMap[certificate.Thumbprint] = certificate.GetRSAPrivateKey();
-                rsa = s_certificateToRsaMap[certificate.Thumbprint];
-            }
-
-            return rsa.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            return CryptographyManager.SignWithCertificate(message, certificate);
 #endif
         }
 
