@@ -215,7 +215,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 return OverloadBrokerForTest;
             }
 
-            return new AndroidBroker(uIParent, Logger);
+            AndroidBrokerOrchestrator androidBrokerOrchestrator = new AndroidBrokerOrchestrator(uIParent, Logger);
+
+            return androidBrokerOrchestrator.GetBroker();
         }
 
         public override bool CanBrokerSupportSilentAuth()
