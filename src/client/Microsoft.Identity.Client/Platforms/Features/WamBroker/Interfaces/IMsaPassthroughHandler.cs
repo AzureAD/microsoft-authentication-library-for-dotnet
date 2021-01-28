@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Requests;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
