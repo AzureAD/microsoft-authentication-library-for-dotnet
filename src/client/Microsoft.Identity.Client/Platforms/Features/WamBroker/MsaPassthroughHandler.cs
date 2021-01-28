@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     "Error fetching the MSA-PT transfer token - " + errorResp.ErrorDescription);
             }
 
-            var resp = _msaPlugin.ParseSuccesfullWamResponse(transferResponse.ResponseData[0], out var properties);
+            var resp = _msaPlugin.ParseSuccessfullWamResponse(transferResponse.ResponseData[0], out var properties);
 
             properties.TryGetValue("code", out string code);
             _logger.Info("WAM MSA-PT: Transfer token obtained? " + !string.IsNullOrEmpty(code));

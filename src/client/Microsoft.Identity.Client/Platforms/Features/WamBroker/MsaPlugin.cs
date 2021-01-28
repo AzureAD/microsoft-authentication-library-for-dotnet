@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return MsalError.InteractionRequired;
         }
 
-        public MsalTokenResponse ParseSuccesfullWamResponse(WebTokenResponse webTokenResponse, 
+        public MsalTokenResponse ParseSuccessfullWamResponse(WebTokenResponse webTokenResponse, 
             out Dictionary<string, string> allProperties)
         {
             string msaTokens = webTokenResponse.Token;

@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 //WebAccount accountFromMsaProvider = new WebAccount(msaProvider, "user@outlook.com", WebAccountState.Connected);
                 var transferTokenResponse = new WebTokenResponse("transfer_token");
                 webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { transferTokenResponse });
-                _msaPlugin.ParseSuccesfullWamResponse(Arg.Any<WebTokenResponse>(), out Arg.Any<Dictionary<string, string>>())
+                _msaPlugin.ParseSuccessfullWamResponse(Arg.Any<WebTokenResponse>(), out Arg.Any<Dictionary<string, string>>())
                     .Returns(x =>
                 {
                     x[1] = new Dictionary<string, string>();

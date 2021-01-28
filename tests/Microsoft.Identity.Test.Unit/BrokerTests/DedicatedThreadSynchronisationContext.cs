@@ -10,9 +10,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     // thread for servicing Send() & Post() calls.  
     // Based upon http://blogs.msdn.com/b/pfxteam/archive/2012/01/20/10259049.aspx but uses it's own thread
     // rather than running on the thread that it's instanciated on
-    public sealed class DedicatedThreadSynchronisationContext : SynchronizationContext, IDisposable
+    public sealed class DedicatedThreadSynchronizationContext: SynchronizationContext, IDisposable
     {
-        public DedicatedThreadSynchronisationContext()
+        public DedicatedThreadSynchronizationContext()
         {
             m_thread = new Thread(ThreadWorkerDelegate);
             m_thread.Start(this);

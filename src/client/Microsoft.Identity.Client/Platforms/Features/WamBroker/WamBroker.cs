@@ -588,13 +588,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 case WebTokenRequestStatus.Success:
                     _logger.Info("WAM response status success");
-                    return wamPlugin.ParseSuccesfullWamResponse(wamResponse.ResponseData[0], out _);
+                    return wamPlugin.ParseSuccessfullWamResponse(wamResponse.ResponseData[0], out _);
 
                 // Account Switch occurs when a login hint is passed to WAM but the user chooses a different account for login.
                 // MSAL treats this as a success scenario
                 case WebTokenRequestStatus.AccountSwitch:
                     _logger.Info("WAM response status account switch. Treating as success");
-                    return wamPlugin.ParseSuccesfullWamResponse(wamResponse.ResponseData[0], out _);
+                    return wamPlugin.ParseSuccessfullWamResponse(wamResponse.ResponseData[0], out _);
 
                 case WebTokenRequestStatus.UserInteractionRequired:
                     errorCode =

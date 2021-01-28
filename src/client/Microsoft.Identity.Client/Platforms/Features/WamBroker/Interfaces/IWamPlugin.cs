@@ -25,9 +25,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string clientId,
             string scopes);
 
-        MsalTokenResponse ParseSuccesfullWamResponse(WebTokenResponse webTokenResponse, out Dictionary<string, string> allProperties);
+        MsalTokenResponse ParseSuccessfullWamResponse(
+            WebTokenResponse webTokenResponse, 
+            out Dictionary<string, string> allProperties);
 
-        string MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive);
+        string MapTokenRequestError(
+            WebTokenRequestStatus status, 
+            uint errorCode, 
+            bool isInteractive);
+
         string GetHomeAccountIdOrNull(WebAccount webAccount);
     }
 }

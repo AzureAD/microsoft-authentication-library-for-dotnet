@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             throw new NotImplementedException();
         }
 
-        public MsalTokenResponse ParseSuccesfullWamResponse(
+        public MsalTokenResponse ParseSuccessfullWamResponse(
             WebTokenResponse webTokenResponse, 
             out Dictionary<string, string> allProperties)
         {

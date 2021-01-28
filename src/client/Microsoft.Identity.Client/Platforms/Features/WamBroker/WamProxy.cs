@@ -35,8 +35,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    _logger.Verbose(webTokenRequest.ToLogString());
-                    _logger.Verbose(webAccount.ToLogString());
+                    _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
+                    _logger.VerbosePii(webAccount.ToLogString(true), webAccount.ToLogString(false));
                 }
 
                 var wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest, webAccount);
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    _logger.Verbose(webTokenRequest.ToLogString());
+                    _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
                 }
 
                 var wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest);
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    _logger.Verbose(webTokenRequest.ToLogString());
+                    _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
                 }
 #if WINDOWS_APP
             // UWP requires being on the UI thread
@@ -91,8 +91,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    _logger.Verbose(webTokenRequest.ToLogString());
-                    _logger.Verbose(wamAccount.ToLogString());
+                    _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
+                    _logger.VerbosePii(wamAccount.ToLogString(true), wamAccount.ToLogString(false) );
                 }
 #if WINDOWS_APP
 
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    _logger.Verbose(provider.ToLogString());
+                    _logger.VerbosePii(provider.ToLogString(true), provider.ToLogString(false));
                 }
 
                 return await WebAuthenticationCoreManager.FindAccountAsync(provider, wamAccountId);
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    _logger.Verbose(provider.ToLogString());
+                    _logger.VerbosePii(provider.ToLogString(true), provider.ToLogString(false));
                 }
 
                 // Win 10 RS3 release and above
