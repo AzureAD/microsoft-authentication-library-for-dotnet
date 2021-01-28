@@ -182,5 +182,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public const string BrokerResultV2 = "broker_result_v2";
         public const string BrokerRequestV2Success = "broker_request_v2_success";
         public const string BrokerUnknownErrorCode = "unknown_error";
+
+        //Content provider operation strings
+        public const string ContentProviderHelloOperation = "/hello";
+        public const string ContentProviderInteractiveOperation = "/acquireTokenInteractive";
+        public const string ContentProviderGetAccountsOperation = "/getAccounts";
     }
 }

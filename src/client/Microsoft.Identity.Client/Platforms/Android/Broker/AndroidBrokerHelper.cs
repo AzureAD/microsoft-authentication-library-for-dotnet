@@ -25,6 +25,7 @@ using Android.Database;
 using Microsoft.Identity.Client.Platforms.Android.Broker.Requests;
 using Microsoft.Identity.Json.Utilities;
 using System.Threading;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -73,6 +74,29 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                    && !packageName.Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase)
                    && !packageName
            .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public Bundle GetHandshakeOperationBundle()
+        {
+            Bundle HandshakeOperationBundle = new Bundle();
+            HandshakeOperationBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
+            HandshakeOperationBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
+            HandshakeOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
+
+            return HandshakeOperationBundle;
+        }
+
+        public string SearializeBundleToJSON(Bundle bundle)
+        {
+            return Base64UrlHelpers.Encode(marshall(bundle));
+        }
+
+        public static byte[] marshall(Bundle parcelable)
+        {
+            Parcel parcel = Parcel.Obtain();
+            parcel.WriteBundle(parcelable);
+
+            return parcel.Marshall();
         }
 
         public async Task<Intent> GetIntentForInteractiveBrokerRequestAsync(BrokerRequest brokerRequest, Activity callerActivity)
@@ -200,75 +224,22 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return null;
         }
 
-        //TODO: Duplicate
-        public static byte[] marshall(Bundle parcelable)
+        public string GetSilentResultFromBundle(Bundle bundleResult)
         {
-            Parcel parcel = Parcel.Obtain();
-            parcel.WriteBundle(parcelable);
+            string responseJson = bundleResult.GetString(BrokerConstants.BrokerResultV2);
 
-            return parcel.Marshall();
-        }
+            bool success = bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success);
+            _logger.Info($"Android Broker Silent call result - success? {success}. ");
 
-        public async Task<string> GetBrokerCRAuthTokenSilentlyAsync(BrokerRequest brokerRequest, Activity callerActivity)
-        {
-            CheckForCRBrokerAccountInfoInAccountManager(brokerRequest, callerActivity);
-            Bundle silentOperationBundle = CreateSilentBrokerBundle(brokerRequest);
-            //silentOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.AcquireTokenSilent);
-            ICursor cursor = null;
-
-            ContentResolver resolver;
-            if (callerActivity == null)
+            if (!success)
             {
-                resolver = Application.Context.ContentResolver;
-            }
-            else
-            {
-                resolver = callerActivity.ContentResolver;
+                _logger.Warning($"Android Broker Silent call failed. " +
+                    $"This usually means that the RT cannot be refreshed and interaction is required. " +
+                    $"BundleResult: {bundleResult} Result string: {responseJson}");
             }
 
-            await Task.Run(() => 
-            cursor = resolver.Query(AndroidUri.Parse(GetContentProviderURI(Application.Context, "/acquireTokenSilent")),
-                                                                null,
-                                                                Base64UrlHelpers.Encode(marshall(silentOperationBundle)),
-                                                                null,
-                                                                null)
-            ).ConfigureAwait(false);
-
-            if (cursor != null)
-            {
-                Bundle bundleResult = null;
-
-                try
-                {
-                    bundleResult = cursor.Extras;
-                }
-                catch (OperationCanceledException ex)
-                {
-                    _logger.Error("An error occurred when trying to communicate with the account manager: " + ex.Message);
-                }
-                catch (Exception ex)
-                {
-                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
-                }
-
-                string responseJson = bundleResult.GetString(BrokerConstants.BrokerResultV2);
-
-                bool success = bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success);
-                _logger.Info($"Android Broker Silent call result - success? {success}. ");
-
-                if (!success)
-                {
-                    _logger.Warning($"Android Broker Silent call failed. " +
-                        $"This usually means that the RT cannot be refreshed and interaction is required. " +
-                        $"BundleResult: {bundleResult} Result string: {responseJson}");
-                }
-
-                // upstream logic knows how to extract potential errors from this result
-                return responseJson;
-            }
-
-            _logger.Info("Android Broker didn't return any results. ");
-            return null;
+            // upstream logic knows how to extract potential errors from this result
+            return responseJson;
         }
 
         /// <summary>
@@ -373,6 +344,52 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
         }
 
+        public BrokerRequest UpdateBrokerRequestWithAccountInformation(string accounts, BrokerRequest brokerRequest)
+        {
+            if (string.IsNullOrEmpty(accounts))
+            {
+                _logger.Info("Android account manager didn't return any accounts. ");
+                throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
+            }
+
+            string username = brokerRequest.UserName;
+            string homeAccountId = brokerRequest.HomeAccountId;
+            string localAccountId = brokerRequest.LocalAccountId;
+
+            if (!string.IsNullOrEmpty(accounts))
+            {
+                dynamic authResult = JArray.Parse(accounts);
+
+                foreach (JObject account in authResult)
+                {
+                    var accountData = account[BrokerResponseConst.Account];
+
+                    var accountDataHomeAccountID = accountData[BrokerResponseConst.HomeAccountId]?.ToString();
+                    var accountDataLocalAccountID = accountData[BrokerResponseConst.LocalAccountId]?.ToString();
+
+                    if (string.Equals(accountData[BrokerResponseConst.UserName].ToString(), username, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // TODO: broker request should be immutable!
+                        brokerRequest.HomeAccountId = accountDataHomeAccountID;
+                        brokerRequest.LocalAccountId = accountDataLocalAccountID;
+                        _logger.Info("Found broker account in Android account manager using the provided login hint. ");
+                        return brokerRequest;
+                    }
+
+                    if (string.Equals(accountDataHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
+                         string.Equals(accountDataLocalAccountID, localAccountId, StringComparison.Ordinal))
+                    {
+                        _logger.Info("Found broker account in Android account manager Using the provided account. ");
+                        return brokerRequest;
+                    }
+                }
+            }
+
+            _logger.Info("The requested account does not exist in the Android account manager. ");
+            throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
+        }
+
+
         private string GetBrokerAccounts(BrokerRequest brokerRequest, Activity callerActivity)
         {
             Bundle getAccountsBundle = CreateBrokerAccountBundle(brokerRequest);
@@ -432,7 +449,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         /// <summary>
         /// This method will acquire all of the accounts in the account manager that have an access token for the given client ID.
         /// </summary>
-        public IEnumerable<IAccount> GetBrokerAccountsInAccountManager(BrokerRequest brokerRequest)
+        public IEnumerable<IAccount> GetBrokerAccountsInAccountManager(string accounts)
         {
             var accounts = GetBrokerAccounts(brokerRequest, null);
 
@@ -503,7 +520,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     if (result != null)
                     {
                         Bundle bundleResult = null;
-                        
+
                         try
                         {
                             bundleResult = (Bundle)await result.GetResultAsync(
@@ -532,7 +549,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         {
                             errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
                             string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
-                            errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}"; 
+                            errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
                         }
                         else
                         {
@@ -557,76 +574,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
                 }
             }
-        }
-
-        public void InitiateCRBrokerHandshakeAsync(Activity callerActivity)
-        {
-            using (_logger.LogMethodDuration())
-            {
-                try
-                {
-                    ContentResolver resolver;
-                    if (callerActivity == null)
-                    {
-                        resolver = Application.Context.ContentResolver;
-                    }
-                    else
-                    {
-                        resolver = callerActivity.ContentResolver;
-                    }
-
-                    var RequestString = BrokerHandshakeHelper.AsJsonString();
-                    
-                    var cursor = resolver.Query(AndroidUri.Parse(GetContentProviderURI(Application.Context, "/hello")),
-                        null,
-                        RequestString,
-                        null,
-                        null);
-
-                    if (cursor == null)
-                    {
-                        throw new MsalClientException("broker_error", "Cursor is null.");
-                    }
-
-                    Bundle bundleResult = cursor.Extras;
-                    NegotiatedBrokerProtocalKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
-
-                    if (!string.IsNullOrEmpty(NegotiatedBrokerProtocalKey))
-                    {
-                        _logger.Info("Using broker protocol version: " + NegotiatedBrokerProtocalKey);
-                        return;
-                    }
-
-                    dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
-                    string errorCode = null;
-                    string errorDescription = null;
-
-                    if (!string.IsNullOrEmpty(errorResult))
-                    {
-                        errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
-                        string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
-                        errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
-                    }
-                    else
-                    {
-                        errorCode = BrokerConstants.BrokerUnknownErrorCode;
-                        errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned. ";
-                    }
-
-                    _logger.Error(errorDescription);
-                    throw new MsalClientException(errorCode, errorDescription);
-                }
-                catch (Exception e)
-                {
-                    throw e;
-                }
-            }
-
-        }
-
-        public string GetContentProviderURI(Context context, string path)
-        {
-            return "content://com.azure.authenticator.microsoft.identity.broker" + path;
         }
 
         private Handler GetPreferredLooper(Activity callerActivity)
@@ -728,7 +675,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return bundle;
         }
 
-        private Bundle CreateSilentBrokerBundle(BrokerRequest brokerRequest)
+        public Bundle CreateSilentBrokerBundle(BrokerRequest brokerRequest)
         {
             ValidateBrokerRedirectURI(brokerRequest);
             Bundle bundle = new Bundle();
@@ -740,7 +687,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return bundle;
         }
 
-        private Bundle CreateBrokerAccountBundle(BrokerRequest brokerRequest)
+        public Bundle CreateBrokerAccountBundle(BrokerRequest brokerRequest)
         {
             _logger.InfoPii("CreateBrokerAccountBundle: " + JsonHelper.SerializeToJson(brokerRequest), "Enable PII to see the broker account bundle request. ");
             Bundle bundle = new Bundle();
@@ -901,6 +848,70 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
 
             return string.Empty;
+        }
+
+        public string GetProtocalKeyFromHandshakeResult(Bundle bundleResult)
+        {
+            var negotiatedBrokerProtocalKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
+
+            if (!string.IsNullOrEmpty(negotiatedBrokerProtocalKey))
+            {
+                _logger.Info("Using broker protocol version: " + negotiatedBrokerProtocalKey);
+                return negotiatedBrokerProtocalKey;
+            }
+
+            dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
+            string errorCode = null;
+            string errorDescription = null;
+
+            if (!string.IsNullOrEmpty(errorResult))
+            {
+                errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+                string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
+            }
+            else
+            {
+                errorCode = BrokerConstants.BrokerUnknownErrorCode;
+                errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned. ";
+            }
+
+            _logger.Error(errorDescription);
+            throw new MsalClientException(errorCode, errorDescription);
+        }
+
+        public void LaunchInteractiveActivity(Activity activity, Intent interactiveIntent)
+        {
+            // onActivityResult will receive the response for this activity.
+            // Launching this activity will switch to the broker app.
+            try
+            {
+                _logger.Info(
+                    "Calling activity pid:" + Process.MyPid()
+                    + " tid:" + Process.MyTid() + "uid:"
+                    + Process.MyUid());
+
+                activity.StartActivityForResult(interactiveIntent, 1001);
+            }
+            catch (ActivityNotFoundException e)
+            {
+                _logger.ErrorPiiWithPrefix(e, "Unable to get Android activity during interactive broker request. ");
+                throw;
+            }
+        }
+
+        public MsalTokenResponse HandleSilentAuthenticationResult(string silentResult, string correlationId)
+        {
+            if (!string.IsNullOrEmpty(silentResult))
+            {
+                return MsalTokenResponse.CreateFromAndroidBrokerResponse(silentResult, correlationId);
+            }
+
+            return new MsalTokenResponse
+            {
+                Error = MsalError.BrokerResponseReturnedError,
+                ErrorDescription = "Unknown Android broker error. Failed to acquire token silently from the broker. " + MsalErrorMessage.AndroidBrokerCannotBeInvoked,
+            };
         }
     }
 }
