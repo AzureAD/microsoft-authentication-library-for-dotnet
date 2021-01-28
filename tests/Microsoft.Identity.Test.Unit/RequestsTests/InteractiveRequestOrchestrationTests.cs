@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var interactiveParameters = new AcquireTokenInteractiveParameters();
 
                 // Arrange - important for test
-                requestParams.IsBrokerConfigured = false;
+                requestParams.AppConfig.IsBrokerEnabled = false;
                 var authCodeResult = new Tuple<string, string>("some_auth_code", "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var interactiveParameters = new AcquireTokenInteractiveParameters();
 
                 // Arrange - important for test
-                requestParams.IsBrokerConfigured = true;
+                requestParams.AppConfig.IsBrokerEnabled = true;
                 _brokerExchangeComponentOverride
                     .FetchTokensAsync(default)
                     .Returns(Task.FromResult(_msalTokenResponseWithTokenSource));
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var interactiveParameters = new AcquireTokenInteractiveParameters();
 
                 // Arrange - important for test
-                requestParams.IsBrokerConfigured = true;
+                requestParams.AppConfig.IsBrokerEnabled = true;
 
                 // broker returns null 
                 _brokerExchangeComponentOverride
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var interactiveParameters = new AcquireTokenInteractiveParameters();
 
                 // Arrange - important for test
-                requestParams.IsBrokerConfigured = false;
+                requestParams.AppConfig.IsBrokerEnabled = false;
 
                 // web UI starts the flow, but the auth code shows Evo needs the broker
                 var authCodeResult = new Tuple<string, string>(AuthCodeWithAppLink, "pkce_verifier");

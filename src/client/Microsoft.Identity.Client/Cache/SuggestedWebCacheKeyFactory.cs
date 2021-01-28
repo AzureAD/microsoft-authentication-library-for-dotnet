@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Cache
 
             if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
-                key = requestParameters.ClientId + "_AppTokenCache";
+                key = requestParameters.AppConfig.ClientId + "_AppTokenCache";
                 return true;
             }
 

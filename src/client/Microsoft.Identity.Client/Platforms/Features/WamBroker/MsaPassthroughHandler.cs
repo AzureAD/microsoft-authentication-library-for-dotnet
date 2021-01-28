@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string transferToken = await FetchTransferTokenAsync(
                 accountProvider,
                 msaPtWebAccount,
-                authenticationRequestParameters.ClientId).ConfigureAwait(true);
+                authenticationRequestParameters.AppConfig.ClientId).ConfigureAwait(true);
 
             return transferToken;
         }

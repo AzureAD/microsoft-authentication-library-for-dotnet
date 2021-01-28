@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebTokenRequest request = new WebTokenRequest(
                 provider,
                 scopes,
-                authenticationRequestParameters.ClientId,
+                authenticationRequestParameters.AppConfig.ClientId,
                 promptType);
 
             if (addNewAccount || setLoginHint)

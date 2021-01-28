@@ -548,7 +548,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 extraQueryParameters: TestConstants.ExtraQueryParameters,
                 claims: TestConstants.Claims);
 
-            _parameters.IsBrokerConfigured = true;
+            _parameters.AppConfig.IsBrokerEnabled = true;
 
             AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
             _acquireTokenSilentParameters = new AcquireTokenSilentParameters();

@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.MsaPassthrough
             bool enabled = true)
         {
 
-         //   builder.Config.BrokerMsaPassthrough = true;
+            //builder.Config.BrokerMsaPassthrough = true;
             return builder;
         }
     }

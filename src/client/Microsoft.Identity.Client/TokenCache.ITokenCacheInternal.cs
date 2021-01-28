@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
                 msalAccessTokenCacheItem =
                     new MsalAccessTokenCacheItem(
                         instanceDiscoveryMetadata.PreferredCache,
-                        requestParams.ClientId,
+                        requestParams.AppConfig.ClientId,
                         response,
                         tenantId,
                         homeAccountId,
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client
             {
                 msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
                                     instanceDiscoveryMetadata.PreferredCache,
-                                    requestParams.ClientId,
+                                    requestParams.AppConfig.ClientId,
                                     response,
                                     homeAccountId);
 
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
             {
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem(
                     instanceDiscoveryMetadata.PreferredCache,
-                    requestParams.ClientId,
+                    requestParams.AppConfig.ClientId,
                     response,
                     tenantId,
                     homeAccountId)
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client
                         _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
                     }
 
-                    UpdateAppMetadata(requestParams.ClientId, instanceDiscoveryMetadata.PreferredCache, response.FamilyId);
+                    UpdateAppMetadata(requestParams.AppConfig.ClientId, instanceDiscoveryMetadata.PreferredCache, response.FamilyId);
 
                     // Do not save RT in ADAL cache for client credentials flow or B2C                        
                     if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled &&
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Client
         {
             if (!string.IsNullOrEmpty(response.WamAccountId))
             {
-                return new Dictionary<string, string>() { { requestParams.ClientId, response.WamAccountId } };
+                return new Dictionary<string, string>() { { requestParams.AppConfig.ClientId, response.WamAccountId } };
             }
 
             return new Dictionary<string, string>();
@@ -556,7 +556,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<MsalRefreshTokenCacheKey> candidateRtKeys = aliases.Select(
                     al => new MsalRefreshTokenCacheKey(
                         al,
-                        requestParams.ClientId,
+                        requestParams.AppConfig.ClientId,
                         requestParams.Account?.HomeAccountId?.Identifier,
                         familyId));
 
@@ -580,7 +580,7 @@ namespace Microsoft.Identity.Client
                     Logger,
                     LegacyCachePersistence,
                     aliases,
-                    requestParams.ClientId,
+                    requestParams.AppConfig.ClientId,
                     requestParams.Account);
             }
 
@@ -699,11 +699,11 @@ namespace Microsoft.Identity.Client
             }
 
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
-            if (requestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
+            if (requestParameters.AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
             {
                 foreach (MsalAccountCacheItem wamAccountCache in accountCacheItems.Where(
                     acc => acc.WamAccountIds != null &&
-                    acc.WamAccountIds.ContainsKey(requestParameters.ClientId)))
+                    acc.WamAccountIds.ContainsKey(requestParameters.AppConfig.ClientId)))
                 {
                     var wamAccount = new Account(
                         wamAccountCache.HomeAccountId,

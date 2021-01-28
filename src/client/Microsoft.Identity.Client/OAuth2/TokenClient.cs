@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         private void AddBodyParamsAndHeaders(IDictionary<string, string> additionalBodyParameters, string scopes)
         {
-            _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.ClientId);
+            _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
 
 
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     _requestParams.RequestContext.Logger,
                     _serviceBundle.PlatformProxy.CryptographyManager,
                     _requestParams.ClientCredential,
-                    _requestParams.ClientId,
+                    _requestParams.AppConfig.ClientId,
                     _requestParams.Endpoints,
                     _requestParams.SendX5C);
 

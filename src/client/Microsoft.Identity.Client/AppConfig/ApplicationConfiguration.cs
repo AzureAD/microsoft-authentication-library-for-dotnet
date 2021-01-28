@@ -16,7 +16,7 @@ using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
-    internal sealed class ApplicationConfiguration : IAppConfigInternal
+    internal sealed class ApplicationConfiguration : IAppConfig
     {
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";

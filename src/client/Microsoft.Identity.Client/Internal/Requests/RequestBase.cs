@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t",
                 authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
                 authenticationRequestParameters.Scope.AsSingleString(),
-                authenticationRequestParameters.ClientId,
+                authenticationRequestParameters.AppConfig.ClientId,
                 GetType().Name);
 
             string messageWithoutPii = string.Format(
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void ValidateScopeInput(HashSet<string> scopesToValidate)
         {
-            if (scopesToValidate.Contains(AuthenticationRequestParameters.ClientId))
+            if (scopesToValidate.Contains(AuthenticationRequestParameters.AppConfig.ClientId))
             {
                 throw new ArgumentException("API does not accept client id as a user-provided scope");
             }

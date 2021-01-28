@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             await UpdateRequestWithAccountAsync().ConfigureAwait(false);
             bool isBrokerConfigured =
-              AuthenticationRequestParameters.IsBrokerConfigured &&
+              AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
               ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
 
             try

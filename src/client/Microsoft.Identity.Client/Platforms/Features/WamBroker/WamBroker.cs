@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     wamPlugin,
                     authenticationRequestParameters.Account,
                     authenticationRequestParameters.LoginHint,
-                    authenticationRequestParameters.ClientId).ConfigureAwait(false);
+                    authenticationRequestParameters.AppConfig.ClientId).ConfigureAwait(false);
 
                 if (wamAccount != null)
                 {
@@ -356,7 +356,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     wamPlugin,
                     authenticationRequestParameters.Account,
                     null, // ATS requires an account object, login_hint is not supported on its own
-                    authenticationRequestParameters.ClientId).ConfigureAwait(false);
+                    authenticationRequestParameters.AppConfig.ClientId).ConfigureAwait(false);
 
                 if (webAccount == null)
                 {
@@ -525,7 +525,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                    "GetTokenSilentlyAsync");
         }
 
-        public async Task RemoveAccountAsync(IAppConfigInternal appConfig, IAccount account)
+        public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             string homeTenantId = account?.HomeAccountId?.TenantId;
             if (!string.IsNullOrEmpty(homeTenantId))

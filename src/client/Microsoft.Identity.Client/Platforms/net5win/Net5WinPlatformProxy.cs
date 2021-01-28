@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         {
         }
 
-        public override IBroker CreateBroker(IAppConfigInternal appConfig, CoreUIParent uiParent)
+        public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
             return appConfig.BrokerCreatorFunc != null ?
                 appConfig.BrokerCreatorFunc(uiParent, Logger) :

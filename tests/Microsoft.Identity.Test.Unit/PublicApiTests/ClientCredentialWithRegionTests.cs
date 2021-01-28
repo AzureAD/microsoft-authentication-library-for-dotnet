@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.IsNotNull(result.AccessToken);
             }
-            catch (MsalServiceException e)
+            catch (MsalServiceException)
             {
                 Assert.Fail("Fallback to global failed.");
             }

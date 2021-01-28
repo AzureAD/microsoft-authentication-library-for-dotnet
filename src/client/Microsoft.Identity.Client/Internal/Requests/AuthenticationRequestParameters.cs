@@ -14,6 +14,10 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
+    /// <summary>
+    /// This class is responsible for merging app level and request level params. 
+    /// Not all params need to be merged - app level params can be accessed via AppConfig property
+    /// </summary>
     internal class AuthenticationRequestParameters
     {
         private readonly IServiceBundle _serviceBundle;
@@ -33,12 +37,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Authority = Authority.CreateAuthorityForRequest(serviceBundle.Config.AuthorityInfo, commonParameters.AuthorityOverride);
             UserConfiguredAuthority = Authority;
 
-            ClientId = serviceBundle.Config.ClientId;
             CacheSessionManager = new CacheSessionManager(tokenCache, this);
             Scope = ScopeHelper.CreateScopeSet(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
-            IsBrokerConfigured = serviceBundle.Config.IsBrokerEnabled;
 
             // Set application wide query parameters.
             ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? 
@@ -59,6 +61,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             HomeAccountId = homeAccountId;
         }
+
+        public ApplicationConfiguration AppConfig => _serviceBundle.Config;
 
         public ApiTelemetryId ApiTelemId => _commonParameters.ApiTelemId;
 
@@ -95,8 +99,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public bool HasScopes => Scope != null && Scope.Count > 0;
 
-        public string ClientId { get; }
-
         public Uri RedirectUri { get; set; }
        
         public IDictionary<string, string> ExtraQueryParameters { get; }
@@ -119,7 +121,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
-        internal bool IsBrokerConfigured { get; set; /* set only for test */ }
+       // internal bool IsBrokerConfigured { get; set; /* set only for test */ }
 
         public IAuthenticationScheme AuthenticationScheme => _commonParameters.AuthenticationScheme;
 
@@ -174,7 +176,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var builder = new StringBuilder(
                 Environment.NewLine + "=== Request Data ===" + Environment.NewLine + "Authority Provided? - " +
                 (Authority != null) + Environment.NewLine);
-            builder.AppendLine("Client Id - " + ClientId);
+            builder.AppendLine("Client Id - " + AppConfig.ClientId);
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
@@ -184,7 +186,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
             builder.AppendLine("SendX5C - " + SendX5C);
             builder.AppendLine("LoginHint - " + LoginHint);
-            builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
+            builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
             builder.AppendLine("HomeAccountId - " + HomeAccountId);
             builder.AppendLine("CorrelationId - " + CorrelationId);
 
@@ -201,7 +203,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
             builder.AppendLine("SendX5C - " + SendX5C);
             builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
-            builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
+            builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
             builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));
             builder.AppendLine("CorrelationId - " + CorrelationId);
 
