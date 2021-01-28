@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             catch (Exception ex)
             {
                 _logger.ErrorPiiWithPrefix(ex, "Android broker interactive invocation failed. ");
-                HandleBrokerOperationError(ex);
+                _brokerHelper.HandleBrokerOperationError(ex);
             }
 
             using (_logger.LogBlockDuration("Waiting for Android broker response. "))
@@ -110,8 +110,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private BrokerRequest PrepareInteractiveBrokerRequest(AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            s_androidBrokerTokenResponse = null;
-
             BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(
                 authenticationRequestParameters, acquireTokenInteractiveParameters);
 
@@ -198,7 +196,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             catch (Exception ex)
             {
                 _logger.ErrorPiiWithPrefix(ex, "Android broker silent invocation failed. ");
-                HandleBrokerOperationError(ex);
+                _brokerHelper.HandleBrokerOperationError(ex);
                 throw;
             }
         }
@@ -398,7 +396,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 catch (Exception ex)
                 {
                     _logger.Error("Failed to get Android broker accounts from the broker. ");
-                    HandleBrokerOperationError(ex);
+                    _brokerHelper.HandleBrokerOperationError(ex);
                     throw;
                 }
             }
@@ -422,19 +420,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 catch (Exception ex)
                 {
                     _logger.Error("Failed to remove Android broker account from the broker. ");
-                    HandleBrokerOperationError(ex);
+                    _brokerHelper.HandleBrokerOperationError(ex);
                     throw;
                 }
             }
-        }
-
-        private void HandleBrokerOperationError(Exception ex)
-        {
-            _logger.Error(ex.Message);
-            if (ex is MsalException)
-                throw ex;
-            else
-                throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
         }
 
         /// <summary>

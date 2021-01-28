@@ -293,57 +293,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
         }
 
-        /// <summary>
-        /// This method is only used for Silent authentication requests so that we can check to see if an account exists in the account manager before
-        /// sending the silent request to the broker. 
-        /// </summary>
-        public void CheckForCRBrokerAccountInfoInAccountManager(BrokerRequest brokerRequest, Activity callerActivity)
-        {
-            var accounts = GetCRBrokerAccounts(brokerRequest, callerActivity);
-
-            if (string.IsNullOrEmpty(accounts))
-            {
-                _logger.Info("Android account manager didn't return any accounts. ");
-                throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
-            }
-
-            string username = brokerRequest.UserName;
-            string homeAccountId = brokerRequest.HomeAccountId;
-            string localAccountId = brokerRequest.LocalAccountId;
-
-            if (!string.IsNullOrEmpty(accounts))
-            {
-                dynamic authResult = JArray.Parse(accounts);
-
-                foreach (JObject account in authResult)
-                {
-                    var accountData = account[BrokerResponseConst.Account];
-
-                    var accountDataHomeAccountID = accountData[BrokerResponseConst.HomeAccountId]?.ToString();
-                    var accountDataLocalAccountID = accountData[BrokerResponseConst.LocalAccountId]?.ToString();
-
-                    if (string.Equals(accountData[BrokerResponseConst.UserName].ToString(), username, StringComparison.OrdinalIgnoreCase))
-                    {
-                        // TODO: broker request should be immutable!
-                        brokerRequest.HomeAccountId = accountDataHomeAccountID;
-                        brokerRequest.LocalAccountId = accountDataLocalAccountID;
-                        _logger.Info("Found broker account in Android account manager using the provided login hint. ");
-                        return;
-                    }
-
-                    if (string.Equals(accountDataHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
-                         string.Equals(accountDataLocalAccountID, localAccountId, StringComparison.Ordinal))
-                    {
-                        _logger.Info("Found broker account in Android account manager Using the provided account. ");
-                        return;
-                    }
-                }
-            }
-
-            _logger.Info("The requested account does not exist in the Android account manager. ");
-            throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
-        }
-
         public BrokerRequest UpdateBrokerRequestWithAccountInformation(string accounts, BrokerRequest brokerRequest)
         {
             if (string.IsNullOrEmpty(accounts))
@@ -408,51 +357,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return bundleResult?.GetString(BrokerConstants.BrokerAccounts);
         }
 
-        private string GetCRBrokerAccounts(BrokerRequest brokerRequest, Activity callerActivity)
-        {
-            Bundle getAccountsBundle = CreateBrokerAccountBundle(brokerRequest);
-            //getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
-
-            //This operation will acquire all of the accounts in the account manager for the given client ID
-            //var result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
-            //    BrokerConstants.AuthtokenType,
-            //    null,
-            //    getAccountsBundle,
-            //    null,
-            //    null,
-            //    GetPreferredLooper(callerActivity));
-
-            ContentResolver resolver;
-            if (callerActivity == null)
-            {
-                resolver = Application.Context.ContentResolver;
-            }
-            else
-            {
-                resolver = callerActivity.ContentResolver;
-            }
-
-            var uri = AndroidUri.Parse(GetContentProviderURI(Application.Context, "/getAccounts"));
-
-            ICursor cursor = resolver.Query(uri,
-                                                            null,
-                                                            Base64UrlHelpers.Encode(marshall(getAccountsBundle)),
-                                                            null,
-                                                            null,
-                                                            null);
-
-            Bundle bundleResult = cursor.Extras;
-            var test = bundleResult?.GetString(BrokerConstants.BrokerAccounts);
-            return test;
-        }
-
         /// <summary>
         /// This method will acquire all of the accounts in the account manager that have an access token for the given client ID.
         /// </summary>
         public IEnumerable<IAccount> GetBrokerAccountsInAccountManager(string accounts)
         {
-            var accounts = GetBrokerAccounts(brokerRequest, null);
-
             if (string.IsNullOrEmpty(accounts))
             {
                 _logger.Info("Android account manager didn't return any accounts. ");
@@ -912,6 +821,15 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 Error = MsalError.BrokerResponseReturnedError,
                 ErrorDescription = "Unknown Android broker error. Failed to acquire token silently from the broker. " + MsalErrorMessage.AndroidBrokerCannotBeInvoked,
             };
+        }
+
+        public void HandleBrokerOperationError(Exception ex)
+        {
+            _logger.Error(ex.Message);
+            if (ex is MsalException)
+                throw ex;
+            else
+                throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
         }
     }
 }
