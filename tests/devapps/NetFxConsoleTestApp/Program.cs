@@ -69,7 +69,7 @@ namespace NetFx
             Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET");
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private static readonly IEnumerable<string> s_scopes = new[] { "User.Read",  };
+        private static readonly IEnumerable<string> s_scopes = new[] { "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess",  };
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -78,7 +78,7 @@ namespace NetFx
 
 
         private static readonly string[] s_authorities = new[]  {
-            "https://login.microsoftonline.com/common",
+            "https://login.microsoftonline.com/61411618-6f67-4fc5-ba6a-4a0fe32d4eec",
             "https://login.microsoftonline.com/organizations",
             "https://login.microsoftonline.com/49f548d0-12b7-4169-a390-bb5304d24462",
             "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47" };
@@ -123,9 +123,9 @@ namespace NetFx
             var builder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
-                            .WithLogging(Log, LogLevel.Verbose, true)
+                            .WithLogging(Log, LogLevel.Verbose, true);
                             //.WithClientCapabilities(new[] { "llt" })
-                            .WithRedirectUri("http://localhost"); // required for DefaultOsBrowser
+                            //.WithRedirectUri("http://localhost"); // required for DefaultOsBrowser
 
             if (s_useBroker)
             {

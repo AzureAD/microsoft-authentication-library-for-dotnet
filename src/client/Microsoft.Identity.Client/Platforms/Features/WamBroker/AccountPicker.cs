@@ -41,6 +41,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _synchronizationContext = synchronizationContext;
             _authority = authority;
             _isMsaPassthrough = isMsaPassthrough;
+
+            _logger.Verbose("Is MSA passthrough? " + _isMsaPassthrough);
         }
 
         public async Task<WebAccountProvider> DetermineAccountInteractivelyAsync()
@@ -224,68 +226,66 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         private async void Authenticator_AccountCommandsRequested(
             AccountsSettingsPane sender,
-            AccountsSettingsPaneCommandsRequestedEventArgs e)
+            AccountsSettingsPaneCommandsRequestedEventArgs args)
         {
             AccountsSettingsPaneEventDeferral deferral = null;
             try
             {
-                deferral = e.GetDeferral();
+                deferral = args.GetDeferral();
 
                 if (string.Equals("common", _authority.TenantId))
                 {
                     _logger.Verbose("Displaying selector for common");
-                    e.WebAccountProviderCommands.Add(
-                        new WebAccountProviderCommand(
-                            await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "consumers"),
-                            WebAccountProviderCommandInvoked));
-
-                    e.WebAccountProviderCommands.Add(
-                        new WebAccountProviderCommand(
-                            await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "organizations"),
-                            WebAccountProviderCommandInvoked));
+                    await AddSelectorsAsync(
+                        args, 
+                        addOrgAccounts: true, 
+                        addMsaAccounts: true).ConfigureAwait(true);
                 }
                 else if (string.Equals("organizations", _authority.TenantId))
                 {
                     _logger.Verbose("Displaying selector for organizations");
-
-                    e.WebAccountProviderCommands.Add(
-                       new WebAccountProviderCommand(
-                           await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "organizations"),
-                           WebAccountProviderCommandInvoked));
+                    await AddSelectorsAsync(
+                        args, 
+                        addOrgAccounts: true, 
+                        addMsaAccounts: _isMsaPassthrough).ConfigureAwait(true);
                 }
                 else if (string.Equals("consumers", _authority.TenantId))
                 {
                     _logger.Verbose("Displaying selector for consumers");
-
-                    e.WebAccountProviderCommands.Add(
-                      new WebAccountProviderCommand(
-                          await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "consumers"),
-                          WebAccountProviderCommandInvoked));
-
-                    if (_isMsaPassthrough)
-                    {
-                        e.WebAccountProviderCommands.Add(
-                           new WebAccountProviderCommand(
-                           await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "organizations"),
-                           WebAccountProviderCommandInvoked));
-                    }
+                    await AddSelectorsAsync(
+                        args, 
+                        addOrgAccounts: false, 
+                        addMsaAccounts: true).ConfigureAwait(true);
                 }
                 else
                 {
                     _logger.Verbose("Displaying selector for tenanted authority");
-
-                    e.WebAccountProviderCommands.Add(
-                        new WebAccountProviderCommand(
-                            await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", _authority.AuthorityInfo.CanonicalAuthority),
-                        WebAccountProviderCommandInvoked));
+                    await AddSelectorsAsync(
+                        args, 
+                        addOrgAccounts: true, 
+                        addMsaAccounts: _isMsaPassthrough, 
+                        tenantId: _authority.AuthorityInfo.CanonicalAuthority).ConfigureAwait(true);
                 }
-
-                //e.HeaderText = "Please select an account to log in with"; // TODO: this is English only, try removing it
             }
             finally
             {
                 deferral?.Complete();
             }
+        }
+
+        private async Task AddSelectorsAsync(AccountsSettingsPaneCommandsRequestedEventArgs args, bool addOrgAccounts, bool addMsaAccounts, string tenantId = null)
+        {
+            if (addOrgAccounts)
+                args.WebAccountProviderCommands.Add(
+                    new WebAccountProviderCommand(
+                        await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", tenantId ?? "organizations"),
+                        WebAccountProviderCommandInvoked));
+
+            if (addMsaAccounts)
+                args.WebAccountProviderCommands.Add(
+                    new WebAccountProviderCommand(
+                        await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "consumers"),
+                        WebAccountProviderCommandInvoked));
         }
 
         private void WebAccountProviderCommandInvoked(WebAccountProviderCommand command)
