@@ -46,14 +46,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public static SemaphoreSlim ReadyForResponse { get; set; } = new SemaphoreSlim(0);
 
         // Important: this object MUST be accessed on a background thread. Android will check this and throw otherwise.
-        private readonly AccountManager _androidAccountManager;
+        public AccountManager AndroidAccountManager { get; }
         private readonly ICoreLogger _logger;
 
         public static MsalTokenResponse InteractiveBrokerTokenResponse { get; set; } = null;
         //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and re-injected into the response at the end.
         public static string CorrelationId { get; set; }
 
-        private const long AccountManagerTimeoutSeconds = 5 * 60;
+        public long AccountManagerTimeoutSeconds { get; } = 5 * 60;
         public string NegotiatedBrokerProtocalKey { get; set; }
 
         public AndroidBrokerHelper(Context androidContext, ICoreLogger logger)
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _logger.Verbose("Getting the Android context for broker request. ");
-            _androidAccountManager = AccountManager.Get(_androidContext);
+            AndroidAccountManager = AccountManager.Get(_androidContext);
         }
 
         public bool CanSwitchToBroker()
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 Bundle addAccountOptions = new Bundle();
                 addAccountOptions.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetIntentForInteractiveRequest);
 
-                result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+                result = AndroidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
                     BrokerConstants.AuthtokenType,
                     null,
                     addAccountOptions,
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             Bundle silentOperationBundle = CreateSilentBrokerBundle(brokerRequest);
             silentOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.AcquireTokenSilent);
 
-            IAccountManagerFuture result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+            IAccountManagerFuture result = AndroidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
                 BrokerConstants.AuthtokenType,
                 null,
                 silentOperationBundle,
@@ -351,7 +351,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
 
             //This operation will acquire all of the accounts in the account manager for the given client ID
-            var result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+            var result = AndroidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
                 BrokerConstants.AuthtokenType,
                 null,
                 getAccountsBundle,
@@ -440,7 +440,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             Bundle removeAccountBundle = CreateRemoveBrokerAccountBundle(clientId, account);
             removeAccountBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.RemoveAccount);
 
-            _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+            AndroidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
                 BrokerConstants.AuthtokenType,
                 null,
                 removeAccountBundle,
@@ -449,86 +449,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 GetPreferredLooper(null));
         }
 
-        //In order for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.
-        public async Task InitiateBrokerHandshakeAsync(Activity callerActivity)
-        {
-            using (_logger.LogMethodDuration())
-            {
-                try
-                {
-                    Bundle helloRequestBundle = new Bundle();
-                    helloRequestBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
-                    helloRequestBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
-                    helloRequestBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
+        
 
-                    IAccountManagerFuture result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
-                        BrokerConstants.AuthtokenType,
-                        null,
-                        helloRequestBundle,
-                        null,
-                        null,
-                        GetPreferredLooper(callerActivity));
-
-                    if (result != null)
-                    {
-                        Bundle bundleResult = null;
-
-                        try
-                        {
-                            bundleResult = (Bundle)await result.GetResultAsync(
-                                AccountManagerTimeoutSeconds,
-                                TimeUnit.Seconds)
-                                .ConfigureAwait(false);
-                        }
-                        catch (OperationCanceledException ex)
-                        {
-                            _logger.Error("An error occurred when trying to communicate with the account manager: " + ex.Message);
-                        }
-
-                        var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
-
-                        if (!string.IsNullOrEmpty(bpKey))
-                        {
-                            _logger.Info("Using broker protocol version: " + bpKey);
-                            return;
-                        }
-
-                        dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
-                        string errorCode = null;
-                        string errorDescription = null;
-
-                        if (!string.IsNullOrEmpty(errorResult))
-                        {
-                            errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
-                            string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
-                            errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
-                        }
-                        else
-                        {
-                            errorCode = BrokerConstants.BrokerUnknownErrorCode;
-                            errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned. ";
-                        }
-
-                        _logger.Error(errorDescription);
-                        throw new MsalClientException(errorCode, errorDescription);
-                    }
-
-                    throw new MsalClientException("Could not communicate with broker via account manager. Please ensure power optimization settings are turned off. ");
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error("Error when trying to initiate communication with the broker. ");
-                    if (ex is MsalException)
-                    {
-                        throw;
-                    }
-
-                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
-                }
-            }
-        }
-
-        private Handler GetPreferredLooper(Activity callerActivity)
+        public Handler GetPreferredLooper(Activity callerActivity)
         {
             var myLooper = Looper.MyLooper();
             if (myLooper != null && callerActivity != null && callerActivity.MainLooper != myLooper)
@@ -787,7 +710,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             get
             {
-                return _androidAccountManager.GetAuthenticatorTypes();
+                return AndroidAccountManager.GetAuthenticatorTypes();
             }
         }
 

@@ -32,13 +32,15 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _brokerHelper = new AndroidBrokerHelper(Application.Context, _logger);
         }
 
-        private IBroker GetInstalledBrokerAsync()
+        private async Task<IBroker> GetInstalledBrokerAsync()
         {
             if (IsBrokerInstalledAndInvokable())
             {
                 try
                 {
-                    s_broker = new AndroidContentProviderBroker(_uIParent, _logger);
+                    var broker = new AndroidContentProviderBroker(_uIParent, _logger);
+                    broker.InitiateBrokerHandshakeAsync();
+                    s_broker = broker;
                 }
                 catch
                 {
@@ -46,7 +48,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                     try
                     {
-                        s_broker = new AndroidBroker(_uIParent, _logger);
+                        var broker = new AndroidBroker(_uIParent, _logger);
+                        await broker.InitiateBrokerHandshakeAsync(_uIParent.CallerActivity).ConfigureAwait(false);
+                        s_broker = broker;
                     }
                     catch
                     {
@@ -55,12 +59,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 }
             }
 
-            return s_broker;
+            // Return a default broker in case no broker is installed to handle install url
+            return s_broker ?? new AndroidContentProviderBroker(_uIParent, _logger);
         }
 
         internal IBroker GetBroker()
         {
-            return s_broker ?? GetInstalledBrokerAsync();
+            return s_broker ?? Task.Run(async () => await GetInstalledBrokerAsync().ConfigureAwait(false)).Result;
         }
 
         public bool IsBrokerInstalledAndInvokable()

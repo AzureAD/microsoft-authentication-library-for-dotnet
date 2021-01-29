@@ -19,6 +19,8 @@ using Microsoft.Identity.Client.Http;
 using System.Net;
 using Android.OS;
 using System.Linq;
+using Android.Accounts;
+using Java.Util.Concurrent;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -39,11 +41,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             AuthenticationContinuationHelper.LastRequestLogger = _logger;
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
-
-            Task.Run(async () =>
-            {
-                await _brokerHelper.InitiateBrokerHandshakeAsync(null).ConfigureAwait(false);
-            });
         }
 
         public bool IsBrokerInstalledAndInvokable()
@@ -95,7 +92,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             try
             {
-                await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+                await InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
                 await AcquireTokenInteractiveViaBrokerAsync(brokerRequest).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -122,7 +119,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             try
             {
-                await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+                await InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
                 var androidBrokerTokenResponse = await AcquireTokenSilentViaBrokerAsync(brokerRequest).ConfigureAwait(false);
                 return androidBrokerTokenResponse;
             }
@@ -211,7 +208,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                 try
                 {
-                    await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+                    await InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
 
                     return _brokerHelper.GetBrokerAccountsInAccountManager(brokerRequest);
                 }
@@ -236,7 +233,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                 try
                 {
-                    await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+                    await InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
                     _brokerHelper.RemoveBrokerAccountInAccountManager(applicationConfiguration.ClientId, account);
                 }
                 catch (Exception ex)
@@ -244,6 +241,85 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     _logger.Error("Failed to remove Android broker account from the broker. ");
                     HandleBrokerOperationError(ex);
                     throw;
+                }
+            }
+        }
+
+        //In order for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.
+        public async Task InitiateBrokerHandshakeAsync(Activity callerActivity)
+        {
+            using (_logger.LogMethodDuration())
+            {
+                try
+                {
+                    Bundle helloRequestBundle = new Bundle();
+                    helloRequestBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
+                    helloRequestBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
+                    helloRequestBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
+
+                    IAccountManagerFuture result = _brokerHelper.AndroidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+                        BrokerConstants.AuthtokenType,
+                        null,
+                        helloRequestBundle,
+                        null,
+                        null,
+                        _brokerHelper.GetPreferredLooper(callerActivity));
+
+                    if (result != null)
+                    {
+                        Bundle bundleResult = null;
+
+                        try
+                        {
+                            bundleResult = (Bundle)await result.GetResultAsync(
+                                _brokerHelper.AccountManagerTimeoutSeconds,
+                                TimeUnit.Seconds)
+                                .ConfigureAwait(false);
+                        }
+                        catch (System.OperationCanceledException ex)
+                        {
+                            _logger.Error("An error occurred when trying to communicate with the account manager: " + ex.Message);
+                        }
+
+                        var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
+
+                        if (!string.IsNullOrEmpty(bpKey))
+                        {
+                            _logger.Info("Using broker protocol version: " + bpKey);
+                            return;
+                        }
+
+                        dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
+                        string errorCode = null;
+                        string errorDescription = null;
+
+                        if (!string.IsNullOrEmpty(errorResult))
+                        {
+                            errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+                            string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                            errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
+                        }
+                        else
+                        {
+                            errorCode = BrokerConstants.BrokerUnknownErrorCode;
+                            errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned. ";
+                        }
+
+                        _logger.Error(errorDescription);
+                        throw new MsalClientException(errorCode, errorDescription);
+                    }
+
+                    throw new MsalClientException("Could not communicate with broker via account manager. Please ensure power optimization settings are turned off. ");
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error("Error when trying to initiate communication with the broker. ");
+                    if (ex is MsalException)
+                    {
+                        throw;
+                    }
+
+                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
                 }
             }
         }

@@ -39,8 +39,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             AuthenticationContinuationHelper.LastRequestLogger = _logger;
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
-
-            InitiateBrokerHandshakeAsync();
         }
 
         public bool IsBrokerInstalledAndInvokable()
