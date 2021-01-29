@@ -18,11 +18,18 @@ namespace Microsoft.Identity.Client.MsaPassthrough
         /// <summary>
         /// Declares that the app is MSA-Passthrough enabled (Microsoft internal only). This is a legacy 
         /// feature. Required for the functionality of some brokers, like WAM.
-        /// </summary>
+        /// </summary>        
         public static PublicClientApplicationBuilder WithMsaPassthrough(
             this PublicClientApplicationBuilder builder,
             bool enabled = true)
         {
+            if (!builder.Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithMsaPassthrough)));
+            }
+
             builder.Config.IsMsaPassthrough = true;
             return builder;
         }
