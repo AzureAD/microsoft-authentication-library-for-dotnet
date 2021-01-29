@@ -121,8 +121,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
-       // internal bool IsBrokerConfigured { get; set; /* set only for test */ }
-
         public IAuthenticationScheme AuthenticationScheme => _commonParameters.AuthenticationScheme;
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
