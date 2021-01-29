@@ -18,7 +18,6 @@
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <AndroidResgenClass>Resource</AndroidResgenClass>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <AndroidUseLatestPlatformSdk>false</AndroidUseLatestPlatformSdk>
     <TargetFrameworkVersion>v11.0</TargetFrameworkVersion>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
@@ -112,6 +111,10 @@
     <ProjectReference Include="..\..\src\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj">
       <Project>{a91b7520-2660-422a-acd8-48701ed24de7}</Project>
       <Name>Microsoft.Identity.Client.XamarinAndroid.AndroidX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\bindings\Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj">
+      <Project>{FB514A7D-5FC0-4217-97FE-55F65A2F31C8}</Project>
+      <Name>Microsoft.Identity.Common.XamarinAndroid.AndroidX</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

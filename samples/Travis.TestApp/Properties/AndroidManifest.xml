@@ -3,17 +3,14 @@
 	<uses-sdk android:minSdkVersion="28" android:targetSdkVersion="29" />
 	<application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_round" android:supportsRtl="true" android:theme="@style/AppTheme"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-  <application android:theme="@android:style/Theme.NoTitleBar">
-    <activity android:name="com.microsoft.identity.client.BrowserTabActivity">
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data
-          android:host="com.companyname.bindningtestapp"
-          android:path="/1wIqXSqBj7w+h11ZifsnqwgyKrY="
-          android:scheme="msauth" />
-      </intent-filter>
-    </activity>
-  </application>
+	<application android:theme="@android:style/Theme.NoTitleBar">
+		<activity android:name="com.microsoft.identity.client.BrowserTabActivity">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:host="com.companyname.bindningtestapp" android:path="/1wIqXSqBj7w+h11ZifsnqwgyKrY=" android:scheme="msauth" />
+			</intent-filter>
+		</activity>
+	</application>
 </manifest>
