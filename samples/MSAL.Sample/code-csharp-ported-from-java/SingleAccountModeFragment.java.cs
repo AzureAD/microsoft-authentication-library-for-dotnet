@@ -443,7 +443,7 @@ namespace MSALSample
         {
             /* Successfully got a token, use it to call a protected resource - MSGraph */
             Log.Debug(TAG, "Successfully authenticated");
-            Log.Debug(TAG, "ID Token: " + authenticationResult.Account.Claims.["id_token"]);
+            Log.Debug(TAG, "ID Token: " + authenticationResult.Account.Claims["id_token"]);
 
             /* Update account */
             mAccount = authenticationResult.Account;
