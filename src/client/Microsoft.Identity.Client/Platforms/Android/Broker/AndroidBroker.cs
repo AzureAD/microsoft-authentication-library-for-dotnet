@@ -39,6 +39,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             AuthenticationContinuationHelper.LastRequestLogger = _logger;
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
+
+            Task.Run(async () =>
+            {
+                await _brokerHelper.InitiateBrokerHandshakeAsync(null).ConfigureAwait(false);
+            });
         }
 
         public bool IsBrokerInstalledAndInvokable()
@@ -110,7 +115,23 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            return await broker2.AcquireTokenSilentAsync(authenticationRequestParameters, acquireTokenSilentParameters).ConfigureAwait(false);
+            CheckPowerOptimizationStatus();
+
+            BrokerRequest brokerRequest = BrokerRequest.FromSilentParameters(
+                authenticationRequestParameters, acquireTokenSilentParameters);
+
+            try
+            {
+                await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+                var androidBrokerTokenResponse = await AcquireTokenSilentViaBrokerAsync(brokerRequest).ConfigureAwait(false);
+                return androidBrokerTokenResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.ErrorPiiWithPrefix(ex, "Android broker silent invocation failed. ");
+                HandleBrokerOperationError(ex);
+                throw;
+            }
         }
 
         private async Task AcquireTokenInteractiveViaBrokerAsync(BrokerRequest brokerRequest)

@@ -398,6 +398,43 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return brokerAccounts;
         }
 
+        /// <summary>
+        /// This method will acquire all of the accounts in the account manager that have an access token for the given client ID.
+        /// </summary>
+        public IEnumerable<IAccount> GetBrokerAccountsInAccountManager(BrokerRequest brokerRequest)
+        {
+            var accounts = GetBrokerAccounts(brokerRequest, null);
+
+            if (string.IsNullOrEmpty(accounts))
+            {
+                _logger.Info("Android account manager didn't return any accounts. ");
+            }
+
+            List<IAccount> brokerAccounts = new List<IAccount>();
+
+            if (!string.IsNullOrEmpty(accounts))
+            {
+                dynamic authResult = JArray.Parse(accounts);
+
+                foreach (JObject account in authResult)
+                {
+                    if (account.ContainsKey(BrokerResponseConst.Account))
+                    {
+                        var accountData = account[BrokerResponseConst.Account];
+                        var homeAccountID = accountData.Value<string>(BrokerResponseConst.HomeAccountId) ?? "";
+                        var userName = accountData.Value<string>(BrokerResponseConst.UserName) ?? "";
+                        var environment = accountData.Value<string>(BrokerResponseConst.Environment) ?? "";
+                        IAccount iAccount = new Account(homeAccountID, userName, environment);
+                        brokerAccounts.Add(iAccount);
+                    }
+                }
+            }
+
+            _logger.Info("Found " + brokerAccounts.Count + " accounts in the account manager. ");
+
+            return brokerAccounts;
+        }
+
         public void RemoveBrokerAccountInAccountManager(string clientId, IAccount account)
         {
             Bundle removeAccountBundle = CreateRemoveBrokerAccountBundle(clientId, account);

@@ -32,13 +32,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _brokerHelper = new AndroidBrokerHelper(Application.Context, _logger);
         }
 
-        private async Task<IBroker> GetInstalledBrokerAsync()
+        private IBroker GetInstalledBrokerAsync()
         {
             if (IsBrokerInstalledAndInvokable())
             {
                 try
                 {
-                    _brokerHelper.InitiateCRBrokerHandshakeAsync(_uIParent.Activity);
                     s_broker = new AndroidContentProviderBroker(_uIParent, _logger);
                 }
                 catch
@@ -47,7 +46,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                     try
                     {
-                        await _brokerHelper.InitiateBrokerHandshakeAsync(null).ConfigureAwait(false);
                         s_broker = new AndroidBroker(_uIParent, _logger);
                     }
                     catch
@@ -62,7 +60,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         internal IBroker GetBroker()
         {
-            return s_broker ?? Task.Run(async () => await GetInstalledBrokerAsync().ConfigureAwait(false)).Result;
+            return s_broker ?? GetInstalledBrokerAsync();
         }
 
         public bool IsBrokerInstalledAndInvokable()
