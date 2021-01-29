@@ -7,17 +7,17 @@
     <WarningLevel>0</WarningLevel>
     <LangVersion>latest</LangVersion>
     <IsBindingProject>True</IsBindingProject>
-    <RootNamespace>Microsoft.Identity.Client</RootNamespace>
-    <AssemblyName>Microsoft.Identity.Client</AssemblyName>
+    <RootNamespace>Microsoft.Identity.Common</RootNamespace>
+    <AssemblyName>Microsoft.Identity.Common</AssemblyName>
     <AndroidClassParser>class-parse</AndroidClassParser>
     <AndroidCodegenTarget>XAJavaInterop1</AndroidCodegenTarget>
   </PropertyGroup>
   
   <PropertyGroup>
-    <PackageId>Microsoft.Identity.Client</PackageId>
-    <Title>Microsoft.Identity.Client</Title>
-    <Summary>Microsoft.Identity.Client</Summary>
-    <Description>Microsoft.Identity.Client</Description>
+    <PackageId>Microsoft.Identity.Common</PackageId>
+    <Title>Microsoft.Identity.Common</Title>
+    <Summary>Microsoft.Identity.Common</Summary>
+    <Description>Microsoft.Identity.Common</Description>
     <Authors>Microsoft</Authors>
     <Owners>Microsoft</Owners>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
@@ -47,16 +47,9 @@
   <ItemGroup>
     <None Include="Jars\AboutJars.txt" />
     <None Include="Additions\AboutAdditions.txt" />
-    <LibraryProjectZip Include="Jars\msal-2.0.6.aar" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedReferenceJar Include="Jars\gson-2.8.6.jar" />
-    <EmbeddedReferenceJar Include="Jars\nimbus-jose-jwt-9.1.2.jar" />
+    <LibraryProjectZip Include="Jars\common-3.0.9.aar" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.AndroidX.ConstraintLayout" Version="2.0.4.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj" />
   </ItemGroup>
 </Project>

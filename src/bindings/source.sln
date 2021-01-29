@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Client.X
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidX", "Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj", "{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Common.XamarinAndroid.AndroidX", "Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj", "{5379840F-A1F0-4A91-A479-5216693E0C11}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Release|x64.Build.0 = Release|Any CPU
 		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Release|x86.ActiveCfg = Release|Any CPU
 		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Release|x86.Build.0 = Release|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Debug|x64.Build.0 = Debug|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Debug|x86.Build.0 = Debug|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Release|x64.ActiveCfg = Release|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Release|x64.Build.0 = Release|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Release|x86.ActiveCfg = Release|Any CPU
+		{5379840F-A1F0-4A91-A479-5216693E0C11}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
