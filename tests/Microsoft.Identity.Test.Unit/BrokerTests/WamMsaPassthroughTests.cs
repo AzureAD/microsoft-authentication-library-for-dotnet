@@ -63,13 +63,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 var msaProvider = new WebAccountProvider("id", "user@contoso.com", null);
-
+                
                 Client.Internal.Requests.AuthenticationRequestParameters requestParams =
                     harness.CreateAuthenticationRequestParameters(
                         TestConstants.AuthorityHomeTenant,
                         validateAuthority: true);
                 var msaRequest = new WebTokenRequest(msaProvider);
-
+                requestParams.AppConfig.IsMsaPassthrough = true;
                 // step 1 - msa request
                 _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, true, false)
                     .Returns(Task.FromResult(msaRequest));
