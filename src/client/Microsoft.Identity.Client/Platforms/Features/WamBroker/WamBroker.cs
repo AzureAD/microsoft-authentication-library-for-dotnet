@@ -20,6 +20,8 @@ using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Instance.Discovery;
 
 #if DESKTOP || NET5_WIN
 using System.Runtime.InteropServices;
@@ -441,7 +443,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return null;
             }
 
-            IAccountInternal accountInternal = (msalAccount as IAccountInternal);
+            Account accountInternal = (msalAccount as Account);
             if (accountInternal?.WamAccountIds != null &&
                 accountInternal.WamAccountIds.TryGetValue(clientId, out string wamAccountId))
             {
@@ -487,7 +489,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return matchedAccountByLoginHint;
         }
 
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(                   
+            string clientID,
+            string redirectUri,
+            string authority,
+            ICacheSessionManager cacheSessionManager,
+            IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             using (_logger.LogMethodDuration())
             {
@@ -496,13 +503,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     "FindAllAccountsAsync"))
                 {
                     _logger.Info("WAM::FindAllAccountsAsync method does not exist. Returning 0 broker accounts. ");
-                    return Enumerable.Empty<IAccount>();
+                    return Array.Empty<IAccount>();
                 }
 
-                var aadAccounts = await _aadPlugin.GetAccountsAsync(clientID).ConfigureAwait(false);
-                var msaAccounts = await _msaPlugin.GetAccountsAsync(clientID).ConfigureAwait(false);
+                var aadAccounts = await _aadPlugin.GetAccountsAsync(clientID, authority, cacheSessionManager, instanceDiscoveryManager).ConfigureAwait(false);
+                var msaAccounts = await _msaPlugin.GetAccountsAsync(clientID, authority, cacheSessionManager, instanceDiscoveryManager).ConfigureAwait(false);
 
-                return aadAccounts.Concat(msaAccounts);
+                return (aadAccounts.Concat(msaAccounts)).ToList();
             }
         }
 
@@ -707,6 +714,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             _logger.Info("[WAM Broker] Tenant is not consumers and ATS will try WAM-AAD");
             return false;
-        }
+        }    
     }
 }

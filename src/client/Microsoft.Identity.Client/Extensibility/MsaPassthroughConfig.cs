@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.MsaPassthrough
                     MsalErrorMessage.ExperimentalFeature(nameof(WithMsaPassthrough)));
             }
 
-            builder.Config.IsMsaPassthrough = true;
+            builder.Config.IsMsaPassthrough = enabled;
             return builder;
         }
     }

@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
@@ -137,18 +139,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         /// Normal 1st and 3rd party apps must use AcquireTokenInteractive to login first, and then MSAL will
         /// save the account for later use.
         /// </summary>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+            string clientID,
+            string authority, 
+            ICacheSessionManager cacheSessionManager, 
+            IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             var webAccounProvider = await _webAccountProviderFactory.GetAccountProviderAsync("consumers").ConfigureAwait(false);
 
             var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccounProvider, clientID).ConfigureAwait(false);
-
+             
             var msalAccounts = webAccounts
                 .Select(webAcc => ConvertToMsalAccountOrNull(webAcc))
                 .Where(a => a != null)
                 .ToList();
 
-            _logger.Info($"[WAM MSA Plugin] GetAccountsAsync converted {webAccounts.Count()} MSAL accounts");
+            _logger.Info($"[WAM MSA Plugin] GetAccountsAsync converted {webAccounts.Count} MSAL accounts");
             return msalAccounts;
         }
 

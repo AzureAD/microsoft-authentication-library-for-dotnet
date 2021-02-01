@@ -19,6 +19,8 @@ using Microsoft.Identity.Client.Http;
 using System.Net;
 using Android.OS;
 using System.Linq;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -275,7 +277,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+            string clientID, 
+            string redirectUri, 
+            string authority, 
+            ICacheSessionManager cacheSessionManager, 
+            IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             using (_logger.LogMethodDuration())
             {
@@ -347,6 +354,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                        MsalErrorMessage.MsalUiRequiredMessage,
                        null,
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
-        }
+        }       
     }
 }

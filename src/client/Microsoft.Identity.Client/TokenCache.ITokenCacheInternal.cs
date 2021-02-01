@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed partial class TokenCache : ITokenCacheInternal
     {
-        async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> ITokenCacheInternal.SaveTokenResponseAsync(
+        async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> ITokenCacheInternal.SaveTokenResponseAsync(
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
@@ -42,9 +42,9 @@ namespace Microsoft.Identity.Client
                 requestParams.RequestContext.Logger.Info("ID Token not present in response. ");
             }
 
-            var tenantId = Authority
-                .CreateAuthority(requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo.CanonicalAuthority)
-                .TenantId;
+            //Authority.CreateAuthorityWithTenant(requestParams.Authority.AuthorityInfo, idToken?.TenantId);
+
+            var tenantId = GetTenantId(idToken, requestParams);
 
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
             string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
             // so that the PreferredNetwork environment is up to date.
             var instanceDiscoveryMetadata = await ServiceBundle.InstanceDiscoveryManager
                                 .GetMetadataEntryAsync(
-                                    requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo.CanonicalAuthority,
+                                    requestParams.Authority.AuthorityInfo.CanonicalAuthority,
                                     requestParams.RequestContext)
                                 .ConfigureAwait(false);
 
@@ -91,6 +91,8 @@ namespace Microsoft.Identity.Client
                 }
             }
 
+            Dictionary<string, string> wamAccountIds = GetWamAccountIds(requestParams, response);
+            Account account = null;
             if (idToken != null)
             {
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem(
@@ -103,7 +105,6 @@ namespace Microsoft.Identity.Client
                     IsAdfs = isAdfsAuthority
                 };
 
-                Dictionary<string, string> wamAccountIds = GetWamAccountIds(requestParams, response);
 
                 msalAccountCacheItem = new MsalAccountCacheItem(
                              instanceDiscoveryMetadata.PreferredCache,
@@ -117,10 +118,11 @@ namespace Microsoft.Identity.Client
 
             #endregion
 
-            Account account = new Account(
+            account = new Account(
                     homeAccountId,
                     username,
-                    instanceDiscoveryMetadata.PreferredCache);
+                    instanceDiscoveryMetadata.PreferredNetwork, 
+                    wamAccountIds);
 
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
@@ -184,8 +186,9 @@ namespace Microsoft.Identity.Client
                         !requestParams.IsClientCredentialRequest &&
                         requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
                     {
+                        var tenatedAuthority = Authority.CreateAuthorityWithTenant(requestParams.AuthorityInfo, tenantId);
                         var authorityWithPreferredCache = Authority.CreateAuthorityWithEnvironment(
-                                requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo,
+                                tenatedAuthority.AuthorityInfo,
                                 instanceDiscoveryMetadata.PreferredCache);
 
                         CacheFallbackOperations.WriteAdalRefreshToken(
@@ -219,12 +222,21 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
 
-                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
+                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
             }
             finally
             {
                 _semaphoreSlim.Release();
             }
+        }
+
+        private string GetTenantId(IdToken idToken, AuthenticationRequestParameters requestParams)
+        {
+            // If the input authority was tenanted, use that tenant over the IdToken.Tenant
+            // otherwise, this will result in cache misses
+            return Authority.CreateAuthorityWithTenant(
+                requestParams.Authority.AuthorityInfo, 
+                idToken?.TenantId).TenantId;
         }
 
         private void MergeWamAccountIds(MsalAccountCacheItem msalAccountCacheItem)
@@ -682,7 +694,8 @@ namespace Microsoft.Identity.Client
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
                             account.PreferredUsername,
-                            environment);  // Preserve the env passed in by the user
+                            environment, // Preserve the env passed in by the user
+                            account.WamAccountIds);  
 
                         break;
                     }
@@ -697,7 +710,7 @@ namespace Microsoft.Identity.Client
                     adalUsersResult,
                     clientInfoToAccountMap);
             }
-
+            
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
             if (requestParameters.AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
             {

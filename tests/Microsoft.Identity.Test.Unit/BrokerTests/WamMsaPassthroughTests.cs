@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     harness.CreateAuthenticationRequestParameters(
                         TestConstants.AuthorityHomeTenant,
                         validateAuthority: true);
+                requestParams.AppConfig.IsMsaPassthrough = true;
                 var msaRequest = new WebTokenRequest(msaProvider);
                 requestParams.AppConfig.IsMsaPassthrough = true;
                 // step 1 - msa request

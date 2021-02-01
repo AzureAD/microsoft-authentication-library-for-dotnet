@@ -26,6 +26,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -235,7 +237,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(harness.ServiceBundle.Config, null);
 
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(
-                    () => broker.GetAccountsAsync(TestConstants.ClientId, TestConstants.RedirectUri))
+                    () => broker.GetAccountsAsync(
+                        TestConstants.ClientId, 
+                        TestConstants.RedirectUri, 
+                        null, 
+                        null, 
+                        null))
                     .ConfigureAwait(false);
             }
         }
@@ -259,7 +266,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             var mockBroker = Substitute.For<IBroker>();
             var expectedAccount = new Account("a.b", "user", "login.windows.net");
-            mockBroker.GetAccountsAsync(TestConstants.ClientId, TestConstants.RedirectUri).Returns(new[] { expectedAccount });
+            mockBroker.GetAccountsAsync(
+                TestConstants.ClientId, 
+                TestConstants.RedirectUri,
+                TestConstants.AuthorityCommonTenant,
+                Arg.Any<ICacheSessionManager>(),
+                Arg.Any<IInstanceDiscoveryManager>())
+                .Returns(new[] { expectedAccount });
             mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
@@ -285,7 +298,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             var mockBroker = Substitute.For<IBroker>();
             var expectedAccount = new Account("a.b", "user", "login.windows.net");
-            mockBroker.GetAccountsAsync(TestConstants.ClientId, TestConstants.RedirectUri).Returns(new[] { expectedAccount });
+            mockBroker.GetAccountsAsync(
+                TestConstants.ClientId, 
+                TestConstants.RedirectUri, 
+                TestConstants.AuthorityCommonTenant, 
+                Arg.Any<ICacheSessionManager>(),
+                Arg.Any<IInstanceDiscoveryManager>() ).Returns(new[] { expectedAccount });
             mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
@@ -317,7 +335,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Arrange
                 var mockBroker = Substitute.For<IBroker>();
                 var expectedAccount = Substitute.For<IAccount>();
-                mockBroker.GetAccountsAsync(TestConstants.ClientId, TestConstants.RedirectUri).Returns(new[] { expectedAccount });
+                mockBroker.GetAccountsAsync(
+                    TestConstants.ClientId, 
+                    TestConstants.RedirectUri,
+                    TestConstants.AuthorityCommonTenant,
+                    Arg.Any<ICacheSessionManager>(),
+                    Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount });
                 mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();

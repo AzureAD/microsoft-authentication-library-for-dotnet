@@ -7,8 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.UI;
@@ -159,8 +161,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-
-#region CreateMsalTokenResponse
+        #region CreateMsalTokenResponse
         [TestMethod]
         public async Task WAMBroker_CreateMsalTokenResponse_AccountSwitch_Async()
         {
@@ -713,7 +714,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     TestConstants.AuthorityHomeTenant); // AAD authorities for whi
 
                 // msa-pt scenario
-                harness.ServiceBundle.Config.IsMsaPassthrough = true;
+                requestParams.AppConfig.IsMsaPassthrough = true;
                 var accountPicker = Substitute.For<IAccountPicker>();
                 _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
                 var msaProvider = new WebAccountProvider("msa", "user@contoso.com", null);
