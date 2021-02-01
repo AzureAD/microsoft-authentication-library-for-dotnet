@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             throw new PlatformNotSupportedException();
         }
 
-        public Task RemoveAccountAsync(IAppConfigInternal appConfig, IAccount account)
+        public Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             throw new PlatformNotSupportedException();
         }

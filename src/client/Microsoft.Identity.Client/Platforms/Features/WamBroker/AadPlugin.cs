@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebTokenRequest request = new WebTokenRequest(
                 provider,
                 ScopeHelper.GetMsalScopes(authenticationRequestParameters.Scope).AsSingleString(),
-                authenticationRequestParameters.ClientId,
+                authenticationRequestParameters.AppConfig.ClientId,
                 wamPrompt);
 
             if (setLoginHint)

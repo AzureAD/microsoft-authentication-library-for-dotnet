@@ -16,7 +16,7 @@ using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
-    internal sealed class ApplicationConfiguration : IAppConfigInternal
+    internal sealed class ApplicationConfiguration : IAppConfig
     {
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";
@@ -82,6 +82,12 @@ namespace Microsoft.Identity.Client
         internal int ConfidentialClientCredentialCount;
 
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
+
+        /// <summary>
+        /// Currently this is only required for WAM
+        /// </summary>
+        public bool IsMsaPassthrough { get; set; } = false;
+
 
         #region Authority
 

@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.Cache
                                 {
                                     var args = new TokenCacheNotificationArgs(
                                        TokenCacheInternal,
-                                       _requestParams.ClientId,
+                                       _requestParams.AppConfig.ClientId,
                                        _requestParams.Account,
                                        hasStateChanged: false,
                                        TokenCacheInternal.IsApplicationCache,
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Cache
                                 {
                                     var args = new TokenCacheNotificationArgs(
                                         TokenCacheInternal,
-                                       _requestParams.ClientId,
+                                       _requestParams.AppConfig.ClientId,
                                        _requestParams.Account,
                                        hasStateChanged: false,
                                        TokenCacheInternal.IsApplicationCache,

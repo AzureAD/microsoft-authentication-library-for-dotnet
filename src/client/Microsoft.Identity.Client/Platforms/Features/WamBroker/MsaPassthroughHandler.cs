@@ -31,20 +31,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _msaPlugin = msaPlugin;
             _wamProxy = wamProxy;
             _parentHandle = parentHandle;
-        }
-
-        public bool IsPassthroughEnabled(AuthenticationRequestParameters authenticationRequestParameters)
-        {
-            // TODO: change this to a config object
-            bool enabled = authenticationRequestParameters.ExtraQueryParameters.TryGetValue("msal_msa_pt", out string val) &&
-                string.Equals("1", val);
-            _logger.Info("WAM MSA-PT: PassThrough is enabled? " + enabled);
-
-            return enabled;
-        }
+        }      
 
         public async Task<string> FetchTransferTokenAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider accountProvider)
         {
+            if (!authenticationRequestParameters.AppConfig.IsMsaPassthrough)
+            {
+                throw new InvalidOperationException("Not configured for msa-pt");
+            }
+
             _logger.Verbose("WAM MSA-PT - fetching transfer token");
             string transferToken = await FetchMsaPassthroughTransferTokenAsync(
                 authenticationRequestParameters, accountProvider)
@@ -79,7 +74,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string transferToken = await FetchTransferTokenAsync(
                 accountProvider,
                 msaPtWebAccount,
-                authenticationRequestParameters.ClientId).ConfigureAwait(true);
+                authenticationRequestParameters.AppConfig.ClientId).ConfigureAwait(true);
 
             return transferToken;
         }

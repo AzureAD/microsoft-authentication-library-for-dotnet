@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.ExtraQueryParameters,
                     null,
                     authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, false));
-                parameters.IsBrokerConfigured = brokerConfiguredByUser;
+                parameters.AppConfig.IsBrokerEnabled = brokerConfiguredByUser;
 
                 var silentParameters = new AcquireTokenSilentParameters()
                 {

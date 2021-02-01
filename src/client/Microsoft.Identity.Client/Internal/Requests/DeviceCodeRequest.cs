@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             deviceCodeScopes.Add(OAuth2Value.ScopeProfile);
             deviceCodeScopes.Add(OAuth2Value.ScopeOpenId);
 
-            client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
+            client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.AppConfig.ClientId);
             client.AddBodyParameter(OAuth2Parameter.Scope, deviceCodeScopes.AsSingleString());
             client.AddBodyParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.ClaimsAndClientCapabilities);
 
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                // Normally AAD responds with an error HTTP code, but /devicecode endpoint sends errors on 200OK
                                expectErrorsOn200OK: true).ConfigureAwait(false);
 
-            var deviceCodeResult = response.GetResult(AuthenticationRequestParameters.ClientId, deviceCodeScopes);
+            var deviceCodeResult = response.GetResult(AuthenticationRequestParameters.AppConfig.ClientId, deviceCodeScopes);
             await _deviceCodeParameters.DeviceCodeResultCallback(deviceCodeResult).ConfigureAwait(false);
 
             var msalTokenResponse = await WaitForTokenResponseAsync(deviceCodeResult, cancellationToken).ConfigureAwait(false);

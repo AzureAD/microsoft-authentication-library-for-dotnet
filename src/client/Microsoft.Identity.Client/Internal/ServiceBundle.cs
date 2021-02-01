@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Internal
         public IPlatformProxy PlatformProxy { get; private set; }
 
         /// <inheritdoc />
-        public IAppConfigInternal Config { get; }
+        public ApplicationConfiguration Config { get; }
 
         /// <inheritdoc />
         public ITelemetryClient Mats { get; }

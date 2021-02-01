@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
@@ -62,13 +63,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 var msaProvider = new WebAccountProvider("id", "user@contoso.com", null);
-
+                
                 Client.Internal.Requests.AuthenticationRequestParameters requestParams =
                     harness.CreateAuthenticationRequestParameters(
                         TestConstants.AuthorityHomeTenant,
                         validateAuthority: true);
                 var msaRequest = new WebTokenRequest(msaProvider);
-
+                requestParams.AppConfig.IsMsaPassthrough = true;
                 // step 1 - msa request
                 _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, true, false)
                     .Returns(Task.FromResult(msaRequest));
@@ -110,6 +111,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Assert
                 Assert.AreEqual("actual_transfer_token", transferToken);
             }
-        }
+        }      
     }
 }

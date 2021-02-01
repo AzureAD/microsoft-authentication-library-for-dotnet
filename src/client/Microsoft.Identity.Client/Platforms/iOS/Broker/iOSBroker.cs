@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             brokerRequest.Add(BrokerParameter.Authority, authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
             string scopes = EnumerableExtensions.AsSingleString(authenticationRequestParameters.Scope);
             brokerRequest.Add(BrokerParameter.Scope, scopes);
-            brokerRequest.Add(BrokerParameter.ClientId, authenticationRequestParameters.ClientId);
+            brokerRequest.Add(BrokerParameter.ClientId, authenticationRequestParameters.AppConfig.ClientId);
             brokerRequest.Add(BrokerParameter.CorrelationId, authenticationRequestParameters.RequestContext.CorrelationId.ToString());
             brokerRequest.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
 
@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// <summary>
         /// iOS broker does not handle silent flow
         /// </summary>
-        public Task RemoveAccountAsync(IAppConfigInternal applicationConfiguration, IAccount account)
+        public Task RemoveAccountAsync(ApplicationConfiguration applicationConfiguration, IAccount account)
         {
             throw new NotImplementedException();
         }

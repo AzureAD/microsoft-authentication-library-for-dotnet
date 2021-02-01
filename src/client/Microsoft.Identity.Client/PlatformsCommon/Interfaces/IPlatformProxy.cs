@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         Task StartDefaultOsBrowserAsync(string url);
 
-        IBroker CreateBroker(IAppConfigInternal appConfig, CoreUIParent uiParent);
+        IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent);
 
         IDeviceAuthManager CreateDeviceAuthManager();
 

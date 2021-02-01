@@ -12,6 +12,5 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     {
         void AddTransferTokenToRequest(WebTokenRequest webTokenRequest, string transferToken);
         Task<string> FetchTransferTokenAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider accountProvider);
-        bool IsPassthroughEnabled(AuthenticationRequestParameters authenticationRequestParameters);
     }
 }

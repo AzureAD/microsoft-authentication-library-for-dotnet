@@ -32,9 +32,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Details on the configuration of the ClientApplication for debugging purposes.
         /// </summary>
-        public IAppConfig AppConfig => ServiceBundle.Config;
-
-        internal IAppConfigInternal AppConfigInternal => ServiceBundle.Config;
+        public IAppConfig AppConfig => ServiceBundle.Config;        
 
         /// <Summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
@@ -140,8 +138,8 @@ namespace Microsoft.Identity.Client
 
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(AppConfigInternal, null);
-                await broker.RemoveAccountAsync((AppConfig as IAppConfigInternal), account).ConfigureAwait(false);
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+                await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
             }
         }
 
@@ -161,7 +159,7 @@ namespace Microsoft.Identity.Client
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(AppConfigInternal, null);
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
                 var brokerAccounts =
                     (await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false))
                     ?? Enumerable.Empty<IAccount>();

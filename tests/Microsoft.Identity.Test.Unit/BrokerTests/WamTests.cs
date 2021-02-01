@@ -713,7 +713,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     TestConstants.AuthorityHomeTenant); // AAD authorities for whi
 
                 // msa-pt scenario
-                _msaPassthroughHandler.IsPassthroughEnabled(requestParams).Returns(true);
+                harness.ServiceBundle.Config.IsMsaPassthrough = true;
                 var accountPicker = Substitute.For<IAccountPicker>();
                 _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
                 var msaProvider = new WebAccountProvider("msa", "user@contoso.com", null);

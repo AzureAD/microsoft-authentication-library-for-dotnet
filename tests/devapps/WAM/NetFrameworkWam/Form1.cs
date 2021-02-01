@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Desktop;
+using Microsoft.Identity.Client.MsaPassthrough;
 
 namespace NetDesktopWinForms
 {
@@ -66,12 +67,6 @@ namespace NetDesktopWinForms
         {
             string clientId = GetClientId();
             bool msaPt = IsMsaPassthroughConfigured();
-            string extraQp = null;
-            if (msaPt)
-            {
-                // TODO: better config option, e.g. WithMsaPt(true), 
-                extraQp = "MSAL_MSA_PT=1"; // not an actual QP, MSAL will simply use this to provide good experience for MSA-PT
-            }
 
             var pca = PublicClientApplicationBuilder
                 .Create(clientId)
@@ -85,7 +80,7 @@ namespace NetDesktopWinForms
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
                 .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
-                .WithExtraQueryParameters(extraQp)
+                .WithMsaPassthrough(msaPt)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
@@ -509,10 +504,7 @@ namespace NetDesktopWinForms
 
             DisplayValue = displayValue ?? $"{Account.Username} {env} {homeTenantId}";
         }
-
-
     }
-
 
     public class NullAccount : IAccount
     {
