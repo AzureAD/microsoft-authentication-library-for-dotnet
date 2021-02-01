@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon
             }
 
             //PKeyAuth can only be performed on operating systems with a major OS version of 6.
-            //This corresponds to windows 7, 8, 8.1 and their server equivilents.
+            //This corresponds to windows 7, 8, 8.1 and their server equivalents.
             //Environment.OSVersion as it will return incorrect information on some operating systems
             //For more information on how to acquire the current OS version from the registry
             //See (https://stackoverflow.com/a/61914068)

@@ -4,16 +4,19 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using Windows.Security.Credentials;
 
 namespace Microsoft.Identity.Test.Unit
@@ -126,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit
 
 #if DESKTOP
         [TestMethod]
-        public void PKeyAuthSuccsesResponseTest()
+        public void PKeyAuthSuccessResponseTest()
         {
             using (var harness = CreateTestHarness())
             {
@@ -155,6 +158,57 @@ namespace Microsoft.Identity.Test.Unit
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
+            }
+        }
+
+        [TestMethod]
+        public async Task PKeyAuthSuccsesWithExtraQueryParamsResponseTestAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var builder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithAuthority("https://login.microsoftonline.com/common")                          
+                        .WithHttpManager(harness.HttpManager);
+                builder.Config.DeviceAuthManagerForTest = Substitute.For<IDeviceAuthManager>();
+                Uri actualUri = null;
+                builder.Config.DeviceAuthManagerForTest.TryCreateDeviceAuthChallengeResponseAsync(
+                    Arg.Any<HttpResponseHeaders>(),
+                    Arg.Any<Uri>(),
+                    out Arg.Any<string>())
+                    .Returns(x => {
+                        x[2] = TestConstants.PKeyAuthResponse;
+                        actualUri = (Uri)x[1];
+                        return true;
+                        }); 
+                
+
+                var pca = builder.BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    pca.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
+
+                //Initiates PKeyAuth challenge which will trigger an additional request sent to AAD to satisfy the PKeyAuth challenge
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreatePKeyAuthChallengeResponse()
+                    });
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithPKeyAuthValidation());
+
+                AuthenticationResult result = await pca
+                     .AcquireTokenInteractive(TestConstants.s_scope)
+                     .WithExtraQueryParameters("qp1=v1")
+                     .ExecuteAsync()
+                     .ConfigureAwait(false);
+                // Assert that the endpoint sent to the device auth manager doesn not have query params
+                //await builder.Config.DeviceAuthManagerForTest.Received()
+                //    .TryCreateDeviceAuthChallengeResponseAsync(Arg.Any<HttpResponseHeaders>(), "foo", Arg.Any<string>());
+                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", actualUri.AbsoluteUri);
+                    
             }
         }
 
