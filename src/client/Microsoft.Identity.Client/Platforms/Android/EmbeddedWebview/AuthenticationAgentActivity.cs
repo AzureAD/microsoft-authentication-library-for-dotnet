@@ -11,6 +11,7 @@ using Android.OS;
 using Android.Webkit;
 using Android.Widget;
 using Microsoft.Identity.Client.PlatformsCommon;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
