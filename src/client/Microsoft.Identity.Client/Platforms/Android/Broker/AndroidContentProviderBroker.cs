@@ -21,7 +21,6 @@ using Android.OS;
 using System.Linq;
 using AndroidUri = Android.Net.Uri;
 using Android.Accounts;
-using Microsoft.Identity.Client.Platforms.Android.Broker.Requests;
 using Android.Database;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
@@ -100,7 +99,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             try
             {
-                await Task.Run(() => AcquireTokenInteractiveViaContentProviderAsync(brokerRequest)).ConfigureAwait(false);
+                await AcquireTokenInteractiveViaContentProviderAsync(brokerRequest).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -115,13 +114,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        private void AcquireTokenInteractiveViaContentProviderAsync(BrokerRequest brokerRequest)
+        private async Task AcquireTokenInteractiveViaContentProviderAsync(BrokerRequest brokerRequest)
         {
             using (_logger.LogMethodDuration())
             {
                 _logger.Verbose("Starting Android Broker interactive authentication. ");
 
-                Bundle bundleResult = GetAcquireTokenInteractiveOperationBundle();
+                Bundle bundleResult = await GetAcquireTokenInteractiveOperationBundleAsync().ConfigureAwait(false);
 
                 var interactiveIntent = CreateInteractiveBrokerIntent(brokerRequest, bundleResult);
 
@@ -129,9 +128,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        private Bundle GetAcquireTokenInteractiveOperationBundle()
+        private async Task<Bundle> GetAcquireTokenInteractiveOperationBundleAsync()
         {
-            return PerformContentResolverOperationAsync(ContentResolverOperation.acquireTokenInteractive, null).Result;
+            return await PerformContentResolverOperationAsync(ContentResolverOperation.acquireTokenInteractive, null).ConfigureAwait(false);
         }
 
         private Intent CreateInteractiveBrokerIntent(BrokerRequest brokerRequest, Bundle bundleResult)
