@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
     [JsonObject]
     [Preserve(AllMembers = true)]
-    internal sealed class InstanceDiscoveryMetadataEntry
+    internal sealed class InstanceDiscoveryMetadataEntry : IJsonSerializable<InstanceDiscoveryMetadataEntry>
     {
         [JsonProperty(PropertyName = "preferred_network")]
         public string PreferredNetwork { get; set; }
@@ -17,5 +18,15 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         [JsonProperty(PropertyName = "aliases")]
         public string[] Aliases { get; set; }
+
+        public InstanceDiscoveryMetadataEntry FromJsonString(string json)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public string ToJsonString(InstanceDiscoveryMetadataEntry objectToSerialize)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
