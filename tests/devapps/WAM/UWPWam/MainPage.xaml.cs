@@ -22,7 +22,6 @@ using Windows.Security.Authentication.Web;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
-using Windows.UI.Core;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -57,26 +56,12 @@ namespace UWP_standalone
 
         private IPublicClientApplication CreatePublicClient()
         {
-            var pca = PublicClientApplicationBuilder.Create(s_clientID)
-            .WithAuthority(s_authority)
-            .WithExperimentalFeatures(true)
-            .WithBroker(true)
-            .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
-            .Build();
-
-            return pca;
-            //return DispatcherExtensions.RunOnUiThreadAsync(
-            //() =>
-            //{
-            //    var pca = PublicClientApplicationBuilder.Create(s_clientID)
-            //    .WithAuthority(s_authority)
-            //    .WithExperimentalFeatures(true)
-            //    .WithBroker(true)
-            //    .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
-            //    .Build();
-
-            //    return Task.FromResult(pca);
-            //}).GetAwaiter().GetResult();
+            return PublicClientApplicationBuilder.Create(s_clientID)
+                .WithAuthority(s_authority)
+                .WithExperimentalFeatures(true)
+                .WithBroker(chkUseBroker.IsChecked.Value)
+                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+                .Build();
         }
 
         private async void AcquireTokenIWA_ClickAsync(object sender, RoutedEventArgs e)
@@ -186,37 +171,18 @@ namespace UWP_standalone
 
         private async void ATI_ClickAsync(object sender, RoutedEventArgs e)
         {
-            await Task.Delay(1000).ConfigureAwait(false);
-            var sc = SynchronizationContext.Current; // should be null
-
             var pca = CreatePublicClient();
-            //var upnPrefix = tbxUpn.Text;
+            var upnPrefix = tbxUpn.Text;
 
-            //IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true); // stay on UI thread
-            //var acc = accounts.SingleOrDefault(a => a.Username.StartsWith(upnPrefix));
+            IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true); // stay on UI thread
+            var acc = accounts.SingleOrDefault(a => a.Username.StartsWith(upnPrefix));
 
             try
             {
-                AuthenticationResult result = null;
-                //await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
-                //    Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
-                //    {
-                        //result = await pca.AcquireTokenInteractive(s_scopes)
-                        //    //.WithAccount(acc)
-                        //    .ExecuteAsync(CancellationToken.None)
-                        //    .ConfigureAwait(false);
-                //});
-
-                result = await
-                   DispatcherExtensions.RunOnUiThreadAsync(
-                    async () =>
-                    {
-                        return await pca.AcquireTokenInteractive(s_scopes)
-                          //.WithAccount(acc)
-                          .ExecuteAsync(CancellationToken.None)
-                          .ConfigureAwait(false);
-
-                    }).ConfigureAwait(false);
+                var result = await pca.AcquireTokenInteractive(s_scopes)
+                    .WithAccount(acc)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
                 await DisplayResultAsync(result).ConfigureAwait(false);
 
@@ -229,9 +195,6 @@ namespace UWP_standalone
             }
 
         }
-
-       
-
 
         private async Task DisplayErrorAsync(Exception ex)
         {
