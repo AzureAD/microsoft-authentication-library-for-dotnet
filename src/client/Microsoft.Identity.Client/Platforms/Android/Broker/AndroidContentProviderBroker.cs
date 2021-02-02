@@ -3,25 +3,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
-using AndroidNative = Android;
+using Android.Database;
+using Android.OS;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Json.Linq;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Http;
-using System.Net;
-using Android.OS;
-using System.Linq;
+using AndroidNative = Android;
 using AndroidUri = Android.Net.Uri;
-using Android.Accounts;
-using Android.Database;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -161,12 +155,18 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             _brokerHelper.CheckPowerOptimizationStatus();
 
+            InitiateBrokerHandshakeAsync();
+
             BrokerRequest brokerRequest = BrokerRequest.FromSilentParameters(
                 authenticationRequestParameters, acquireTokenSilentParameters);
 
+            return await PerformAcquireTokenSilentAsync(brokerRequest).ConfigureAwait(false);
+        }
+
+        private async Task<MsalTokenResponse> PerformAcquireTokenSilentAsync(BrokerRequest brokerRequest)
+        {
             try
             {
-                InitiateBrokerHandshakeAsync();
                 return await AcquireTokenSilentViaBrokerAsync(brokerRequest).ConfigureAwait(false);
             }
             catch (Exception ex)
