@@ -22,6 +22,7 @@ using System.Linq;
 using AndroidUri = Android.Net.Uri;
 using Android.Accounts;
 using Microsoft.Identity.Client.Platforms.Android.Broker.Requests;
+using Android.Database;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -43,33 +44,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public bool IsBrokerInstalledAndInvokable()
         {
-            using (_logger.LogMethodDuration())
-            {
-                bool canInvoke = _brokerHelper.CanSwitchToBroker();
-                _logger.Verbose("Can invoke broker? " + canInvoke);
-
-                return canInvoke;
-            }
-        }
-
-        ///Check if the network is available.
-        private void CheckPowerOptimizationStatus()
-        {
-            checkPackageForPowerOptimization(Application.Context.PackageName);
-        }
-
-        private void checkPackageForPowerOptimization(string package)
-        {
-            var powerManager = PowerManager.FromContext(Application.Context);
-
-            //Power optimization checking was added in API 23
-            if ((int)Build.VERSION.SdkInt >= (int)BuildVersionCodes.M &&
-                powerManager.IsDeviceIdleMode &&
-                !powerManager.IsIgnoringBatteryOptimizations(package))
-            {
-                _logger.Error("Power optimization detected for the application: " + package + " and the device is in doze mode or the app is in standby. \n" +
-                    "Please disable power optimizations for this application to authenticate.");
-            }
+            return _brokerHelper.IsBrokerInstalledAndInvokable();
         }
 
         public async void InitiateBrokerHandshakeAsync()
@@ -93,14 +68,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             var bundle = _brokerHelper.GetHandshakeOperationBundle();
             var OperationBundleJSON = _brokerHelper.SearializeBundleToJSON(bundle);
-            return await PerformContentResolverOperationAsync(OperationBundleJSON, BrokerConstants.ContentProviderHelloOperation).ConfigureAwait(false);
+            return await PerformContentResolverOperationAsync(ContentResolverOperation.hello, OperationBundleJSON).ConfigureAwait(false);
         }
 
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            CheckPowerOptimizationStatus();
+            _brokerHelper.CheckPowerOptimizationStatus();
 
             InitiateBrokerHandshakeAsync();
 
@@ -156,7 +131,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private Bundle GetAcquireTokenInteractiveOperationBundle()
         {
-            return PerformContentResolverOperationAsync(BrokerConstants.ContentProviderInteractiveOperation, null).Result;
+            return PerformContentResolverOperationAsync(ContentResolverOperation.acquireTokenInteractive, null).Result;
         }
 
         private Intent CreateInteractiveBrokerIntent(BrokerRequest brokerRequest, Bundle bundleResult)
@@ -185,7 +160,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            CheckPowerOptimizationStatus();
+            _brokerHelper.CheckPowerOptimizationStatus();
 
             BrokerRequest brokerRequest = BrokerRequest.FromSilentParameters(
                 authenticationRequestParameters, acquireTokenSilentParameters);
@@ -231,7 +206,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             Bundle silentOperationBundle = _brokerHelper.CreateSilentBrokerBundle(brokerRequest);
             var OperationBundleJSON = _brokerHelper.SearializeBundleToJSON(silentOperationBundle);
-            var SilentOperationBundle = await PerformContentResolverOperationAsync(OperationBundleJSON, BrokerConstants.ContentProviderSilentOperation).ConfigureAwait(false);
+            var SilentOperationBundle = await PerformContentResolverOperationAsync(ContentResolverOperation.acquireTokenSilent, OperationBundleJSON).ConfigureAwait(false);
             return _brokerHelper.GetSilentResultFromBundle(SilentOperationBundle);
         }
 
@@ -271,7 +246,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             var getAccountsBundle = _brokerHelper.CreateBrokerAccountBundle(brokerRequest);
             var OperationBundleJSON = _brokerHelper.SearializeBundleToJSON(getAccountsBundle);
-            var bundleResult = await PerformContentResolverOperationAsync(OperationBundleJSON, BrokerConstants.ContentProviderGetAccountsOperation).ConfigureAwait(false);
+            var bundleResult = await PerformContentResolverOperationAsync(ContentResolverOperation.getAccounts, OperationBundleJSON).ConfigureAwait(false);
 
             return bundleResult?.GetString(BrokerConstants.BrokerAccounts);
         }
@@ -310,26 +285,30 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             var removeAccountsBundle = _brokerHelper.CreateRemoveBrokerAccountBundle(clientId, account);
             var OperationBundleJSON = _brokerHelper.SearializeBundleToJSON(removeAccountsBundle);
-            await PerformContentResolverOperationAsync(OperationBundleJSON, BrokerConstants.ContentProviderRemoveAccountsOperation).ConfigureAwait(false);
+            await PerformContentResolverOperationAsync(ContentResolverOperation.removeAccounts, OperationBundleJSON).ConfigureAwait(false);
         }
 
-        private async Task<Bundle> PerformContentResolverOperationAsync(string operation, string OperationParameters)
+        private async Task<Bundle> PerformContentResolverOperationAsync(ContentResolverOperation operation, string OperationParameters)
         {
             ContentResolver resolver = GetContentResolver();
 
-            var cursor = await Task.Run(() => resolver.Query(AndroidUri.Parse(GetContentProviderURIForOperation(operation)),
-                                                            new[] { _negotiatedBrokerProtocalKey },
+            ICursor resultCursor = null;
+            await Task.Run(() => resultCursor = resolver.Query(AndroidUri.Parse(GetContentProviderURIForOperation(Enum.GetName(typeof(ContentResolverOperation), operation))),
+                                                            null,
                                                             OperationParameters,
                                                             null,
                                                             null)).ConfigureAwait(false);
 
-            if (cursor == null)
+            if (resultCursor == null)
             {
                 _logger.Error("MSAL is unable to communicate to the broker.");
                 throw new MsalClientException("broker_error");
             }
 
-            return cursor.Extras;
+            var resultBundle = resultCursor.Extras;
+            resultCursor.Close();
+
+            return resultBundle;
         }
 
         private ContentResolver GetContentResolver()
@@ -346,7 +325,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public string GetContentProviderURIForOperation(string operation)
         {
-            return "content://com.azure.authenticator.microsoft.identity.broker" + operation;
+            return "content://com.microsoft.windowsintune.companyportal.microsoft.identity.broker/" + operation;
         }
 
         public void HandleInstallUrl(string appLink)

@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             {
                 return OverloadBrokerForTest;
             }
-            //TODO Usa lazy init
+            
             AndroidBrokerOrchestrator androidBrokerOrchestrator = new AndroidBrokerOrchestrator(uIParent, Logger);
 
             return androidBrokerOrchestrator.GetBroker();

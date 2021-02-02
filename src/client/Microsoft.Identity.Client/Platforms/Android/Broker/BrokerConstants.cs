@@ -190,4 +190,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public const string ContentProviderGetAccountsOperation = "/getAccounts";
         public const string ContentProviderRemoveAccountsOperation = "/removeAccounts";
     }
+
+    //Content provider operation
+    internal enum ContentResolverOperation
+    {
+        hello,
+        acquireTokenInteractive,
+        acquireTokenSilent,
+        getAccounts,
+        removeAccounts
+    }
 }

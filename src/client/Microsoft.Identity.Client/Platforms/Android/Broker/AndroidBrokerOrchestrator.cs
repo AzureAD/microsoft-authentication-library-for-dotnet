@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         CoreUIParent _uIParent;
         ICoreLogger _logger;
         AndroidBrokerHelper _brokerHelper;
-        static IBroker s_broker;
+        static bool s_contentProviderIsAvailable;
 
         public AndroidBrokerOrchestrator(CoreUIParent uiParent, ICoreLogger logger)
         {
@@ -39,8 +39,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 try
                 {
                     var broker = new AndroidContentProviderBroker(_uIParent, _logger);
-                    broker.InitiateBrokerHandshakeAsync();
-                    s_broker = broker;
+
+                    if (!s_contentProviderIsAvailable)
+                    {
+                        broker.InitiateBrokerHandshakeAsync();
+                        s_contentProviderIsAvailable = true;
+                    }
                 }
                 catch
                 {
@@ -50,7 +54,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     {
                         var broker = new AndroidBroker(_uIParent, _logger);
                         await broker.InitiateBrokerHandshakeAsync(_uIParent.CallerActivity).ConfigureAwait(false);
-                        s_broker = broker;
                     }
                     catch
                     {
@@ -60,23 +63,17 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
 
             // Return a default broker in case no broker is installed to handle install url
-            return s_broker ?? new AndroidContentProviderBroker(_uIParent, _logger);
+            return new AndroidContentProviderBroker(_uIParent, _logger);
         }
 
         internal IBroker GetBroker()
         {
-            return s_broker ?? Task.Run(async () => await GetInstalledBrokerAsync().ConfigureAwait(false)).Result;
+            return Task.Run(async () => await GetInstalledBrokerAsync().ConfigureAwait(false)).Result;
         }
 
         public bool IsBrokerInstalledAndInvokable()
         {
-            using (_logger.LogMethodDuration())
-            {
-                bool canInvoke = _brokerHelper.CanSwitchToBroker();
-                _logger.Verbose("Can invoke broker? " + canInvoke);
-
-                return canInvoke;
-            }
+            return _brokerHelper.IsBrokerInstalledAndInvokable();
         }
 
         internal static void SetBrokerResult(Intent data, int resultCode, ICoreLogger unreliableLogger)
