@@ -146,6 +146,7 @@
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\win32\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet5Win)' ">
@@ -154,6 +155,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsWebUi\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\win32\**\*.cs" />
 
     <!-- This package reference is here to fix a bug in the WinRT interop. 
     It should not be required after the December release of .NET 5 SDK -->
@@ -171,6 +173,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsWebUi\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\win32\**\*.cs" />
 
     <Reference Include="System" />
     <Reference Include="System.Core" />
