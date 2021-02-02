@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
@@ -30,7 +31,10 @@ namespace Microsoft.Identity.Client.Cache
         {
             TokenCacheInternal = tokenCacheInternal ?? throw new ArgumentNullException(nameof(tokenCacheInternal));
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
+            RequestContext = _requestParams.RequestContext;
         }
+
+        public RequestContext RequestContext { get; }
 
         #region ICacheSessionManager implementation
         public ITokenCacheInternal TokenCacheInternal { get; }
@@ -41,7 +45,7 @@ namespace Microsoft.Identity.Client.Cache
             return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
-        public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
+        public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
         {
             return await TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse).ConfigureAwait(false);
         }

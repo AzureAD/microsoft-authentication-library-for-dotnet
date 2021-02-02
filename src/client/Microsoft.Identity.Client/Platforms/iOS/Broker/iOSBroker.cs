@@ -21,6 +21,8 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -381,7 +383,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// <summary>
         /// iOS broker does not handle silent flow
         /// </summary>
-        public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
+        public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+                    string clientID,
+                    string redirectUri,
+                    string authority,
+                    ICacheSessionManager cacheSessionManager,
+                    IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             throw new NotImplementedException();
         }

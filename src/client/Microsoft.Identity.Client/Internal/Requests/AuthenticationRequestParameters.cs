@@ -90,10 +90,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
 
-        /// <summary>
-        /// After the /token request MSAL knows the exact tenant id and this gets populated
-        /// </summary>
-        public Authority TenantUpdatedCanonicalAuthority { get; set; }
         public ICacheSessionManager CacheSessionManager { get; }
         public HashSet<string> Scope { get; }
 

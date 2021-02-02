@@ -11,7 +11,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     internal interface IWamPlugin
     {
-        Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID);
+        Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+            string clientID, 
+            string authority, 
+            Cache.ICacheSessionManager cacheSessionManager, 
+            Instance.Discovery.IInstanceDiscoveryManager instanceDiscoveryManager);
 
         Task<WebTokenRequest> CreateWebTokenRequestAsync(
             WebAccountProvider provider,

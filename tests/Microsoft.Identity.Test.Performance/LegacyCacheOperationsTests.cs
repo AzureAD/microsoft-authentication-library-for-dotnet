@@ -40,12 +40,9 @@ namespace Microsoft.Identity.Test.Performance
 
             _requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
             _cache = new TokenCache(serviceBundle, false);
-            _response = TestConstants.CreateMsalTokenResponse();
+            _response = TestConstants.CreateMsalTokenResponse(TestConstants.Utid);
 
-            _requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
-            _requestParams.TenantUpdatedCanonicalAuthority = Authority.CreateAuthorityWithTenant(
-                _requestParams.AuthorityInfo,
-                TestConstants.Utid);
+            _requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);           
             _requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
 
             AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefCacheEnvironment);

@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
                     _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
-                    _logger.VerbosePii(wamAccount.ToLogString(true), wamAccount.ToLogString(false) );
+                    _logger.VerbosePii(wamAccount.ToLogString(true), wamAccount.ToLogString(false));
                 }
 #if WINDOWS_APP
 
@@ -158,6 +158,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 _logger.Info($"[WAM Proxy] FindAllWebAccountsAsync returning {findResult.Accounts.Count()} WAM accounts");
                 return findResult.Accounts;
             }
+        }
+
+        public bool TryGetAccountProperty(WebAccount webAccount, string propertyName, out string propertyValue)
+        {
+            return webAccount.Properties.TryGetValue("Authority", out propertyValue);
         }
     }
 }

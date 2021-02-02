@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
                 // Assert
-                var wamAccountIds = (accounts.Single() as IAccountInternal).WamAccountIds;
+                var wamAccountIds = (accounts.Single() as Account).WamAccountIds;
                 Assert.AreEqual(1, wamAccountIds.Count);
                 Assert.AreEqual("wam1", wamAccountIds[TestConstants.ClientId]);
 
@@ -116,11 +116,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert
 #if SUPPORTS_BROKER
-                var wamAccountIds = (accounts1.Single() as IAccountInternal).WamAccountIds;
+                var wamAccountIds = (accounts1.Single() as Account).WamAccountIds;
                 Assert.AreEqual(2, wamAccountIds.Count);
                 Assert.AreEqual("wam2", wamAccountIds[TestConstants.ClientId]);
                 Assert.AreEqual("wam3", wamAccountIds[TestConstants.ClientId2]);
-                CoreAssert.AssertDictionariesAreEqual(wamAccountIds, (accounts2.Single() as IAccountInternal).WamAccountIds, StringComparer.Ordinal);
+                CoreAssert.AssertDictionariesAreEqual(wamAccountIds, (accounts2.Single() as Account).WamAccountIds, StringComparer.Ordinal);
 #else
                 Assert.IsTrue(accounts1.All(a => (a as IAccountInternal).WamAccountIds == null));
                 Assert.IsTrue(accounts2.All(a => (a as IAccountInternal).WamAccountIds == null));
@@ -138,14 +138,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 string commonAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
                 Account brokerAccount1 = new Account(commonAccId, "commonAccount", "login.windows.net");
                 Account brokerAccount2 = new Account("other.account", "brokerAcc2", "login.windows.net");
-                IEnumerable<IAccount> brokerAccounts = new List<IAccount>() { brokerAccount1, brokerAccount2 };
+                IReadOnlyList<IAccount> brokerAccounts = new List<IAccount>() { brokerAccount1, brokerAccount2 };
 
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
 
                 var msalTokenResponse = CreateMsalTokenResponseFromWam("wam_acc_id");
                 mockBroker.AcquireTokenInteractiveAsync(null, null).ReturnsForAnyArgs(Task.FromResult(msalTokenResponse));
-                mockBroker.GetAccountsAsync(null, null).ReturnsForAnyArgs(
+                mockBroker.GetAccountsAsync(null, null, null, null, null).ReturnsForAnyArgs(
                     Task.FromResult(brokerAccounts));
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Assert
                 Assert.AreEqual(2, accounts.Count());
 #if SUPPORTS_BROKER
-                var wamAccountIds = (accounts.Single(acc => acc.HomeAccountId.Identifier == commonAccId) as IAccountInternal).WamAccountIds;
+                var wamAccountIds = (accounts.Single(acc => acc.HomeAccountId.Identifier == commonAccId) as Account).WamAccountIds;
                 Assert.AreEqual(1, wamAccountIds.Count);
                 Assert.AreEqual("wam_acc_id", wamAccountIds[TestConstants.ClientId]);
 #else

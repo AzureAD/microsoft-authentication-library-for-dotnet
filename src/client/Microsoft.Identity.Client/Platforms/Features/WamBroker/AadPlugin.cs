@@ -4,7 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -27,25 +30,80 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _logger = logger;
         }
 
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
+        /// <summary>
+        /// The algorithm here is much more complex in order to workaround a limitation in the AAD plugin's 
+        /// handling of guest accounts: 
+        /// 
+        /// 1. Read the accounts from WAM.AADPlugin
+        /// 2. For each account, we need to find its home_account_id as the one from WAM may not be correct
+        /// 3. If we can find a cached account with the same LocalAccountId or UPN, use it
+        /// 4. If not, make a simple silent token request and use the client info provided
+        /// </summary>
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+            string clientId,
+            string authority,
+            Cache.ICacheSessionManager cacheSessionManager,
+            Instance.Discovery.IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             var webAccountProvider = await _webAccountProviderFactory.GetAccountProviderAsync("organizations").ConfigureAwait(false);
+            var wamAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccountProvider, clientId).ConfigureAwait(false);
 
-            var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccountProvider, clientID).ConfigureAwait(false);
+            if (wamAccounts.Count > 0)
+            {
+                var webAccountEnvs = wamAccounts
+                    .Select(w =>
+                    {
+                        _wamProxy.TryGetAccountProperty(w, "Authority", out string accountAuthority);
+                        if (accountAuthority != null)
+                        {
+                            return (new Uri(accountAuthority)).Host;
+                        }
+                        else
+                        {
+                            _logger.WarningPii(
+                                $"[WAM AAD Provider] Could not convert the WAM account {w.UserName} (id: {w.Id}) to an MSAL account because the Authority could not be found",
+                                $"[WAM AAD Provider] Could not convert the WAM account {w.Id} to an MSAL account because the Authority could not be found");
 
-            var msalAccounts = webAccounts
-                .Select(webAcc => ConvertToMsalAccountOrNull(webAcc))
-                .Where(a => a != null)
-                .ToList();
+                            return null;
+                        }
+                    })
+                    .Where(a => a != null);
 
-            _logger.Info($"[WAM AAD Provider] GetAccountsAsync converted {webAccounts.Count()} MSAL accounts");
-            return msalAccounts;
+                var instanceMetadata = await instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(authority, webAccountEnvs, cacheSessionManager.RequestContext)
+                    .ConfigureAwait(false);
+                var accountsFromCache = await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
+
+                var msalAccountTasks = wamAccounts
+                    .Select(
+                        async webAcc =>
+                            await ConvertToMsalAccountOrNullAsync(
+                                clientId,
+                                webAcc,
+                                instanceMetadata,
+                                cacheSessionManager,
+                                accountsFromCache).ConfigureAwait(false));
+
+                var msalAccounts = (await Task.WhenAll(msalAccountTasks).ConfigureAwait(false)).Where(a => a != null).ToList();
+
+                _logger.Info($"[WAM AAD Provider] GetAccountsAsync converted {msalAccounts.Count()} accounts from {wamAccounts.Count} WAM accounts");
+                return msalAccounts;
+            }
+
+            return Array.Empty<IAccount>();
         }
 
 
-        private Account ConvertToMsalAccountOrNull(WebAccount webAccount)
+        private async Task<Account> ConvertToMsalAccountOrNullAsync(
+            string clientId,
+            WebAccount webAccount,
+            InstanceDiscoveryMetadataEntry envMetadata,
+            ICacheSessionManager cacheManager,
+            IEnumerable<IAccount> accountsFromCache)
         {
-            if (!webAccount.Properties.TryGetValue("Authority", out string authority))
+
+            webAccount.Properties.TryGetValue("TenantId", out string realm);
+
+            if (!_wamProxy.TryGetAccountProperty(webAccount, "Authority", out string accountAuthority))
             {
                 _logger.WarningPii(
                     $"[WAM AAD Provider] Could not convert the WAM account {webAccount.UserName} (id: {webAccount.Id}) to an MSAL account because the Authority could not be found",
@@ -54,16 +112,101 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return null;
             }
 
-            string environment = (new Uri(authority)).Host;
-            string homeAccountId = GetHomeAccountIdOrNull(webAccount);
-
-            if (homeAccountId != null)
+            string accountEnv = (new Uri(accountAuthority)).Host;
+            if (!envMetadata.Aliases.ContainsOrdinalIgnoreCase(accountEnv))
             {
-                var msalAccount = new Account(homeAccountId, webAccount?.UserName, environment);
-                return msalAccount;
+                _logger.InfoPii(
+                $"[WAM AAD Provider] Account {webAccount.UserName} enviroment {accountEnv} does not match input authority env {envMetadata.PreferredNetwork} or an alias",
+                $"[WAM AAD Provider] Account enviroment {accountEnv} does not match input authority env {envMetadata.PreferredNetwork}");
+
+                return null;
+            }
+
+            if (MatchCacheAccount(webAccount, accountsFromCache, out AccountId homeAccountId))
+            {
+                _logger.VerbosePii(
+                    $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync account {webAccount.UserName} matched a cached account",
+                    $"[WAM AAD Provider] Account matched a cache account");
+
+
+                return new Account(
+                    homeAccountId.Identifier,
+                    webAccount.UserName,
+                    envMetadata.PreferredNetwork,
+                    new Dictionary<string, string>() { { clientId, webAccount.Id } });
+            }
+
+            return await GetIdFromWebResponseAsync(clientId, webAccount, envMetadata, cacheManager).ConfigureAwait(false);
+        }
+
+        private async Task<Account> GetIdFromWebResponseAsync(string clientId, WebAccount webAccount, InstanceDiscoveryMetadataEntry envMetadata, ICacheSessionManager cacheManager)
+        {
+            MsalTokenResponse response = await AcquireBasicTokenSilentAsync(
+                webAccount,
+                clientId).ConfigureAwait(false);
+
+            if (response != null)
+            {
+                var tuple = await cacheManager.SaveTokenResponseAsync(response).ConfigureAwait(false);
+
+                _logger.InfoPii(
+                      $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account {webAccount.UserName} via web call? {tuple?.Item3 != null}",
+                      $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account via web call? {tuple?.Item3 != null}");
+
+                return tuple.Item3; // Account
             }
 
             return null;
+        }
+
+        private async Task<MsalTokenResponse> AcquireBasicTokenSilentAsync(
+            WebAccount webAccount,
+            string clientId)
+        {
+            // we checked that it exists previously
+            _wamProxy.TryGetAccountProperty(webAccount, "Authority", out string accountAuthority);
+            var provider = await _webAccountProviderFactory.GetAccountProviderAsync(accountAuthority).ConfigureAwait(false);
+
+            // We are not requesting any additional scopes beyond "profile" and "openid" (which are added by default)
+            // since we do not want to require any additional claims (and thus be unable to renew the refresh token).
+            var request = await CreateWebTokenRequestAsync(provider, clientId, "profile openid").ConfigureAwait(false);
+
+            // Note that this is never a guest flow, we are always acquiring a token for the home realm,
+            // since we only need the client info.
+
+
+            var wamResult = await _wamProxy.GetTokenSilentlyAsync(webAccount, request).ConfigureAwait(false);
+
+            if (!wamResult.ResponseStatus.IsSuccessStatus())
+            {
+                _logger.Warning($"[WAM AAD Provider] GetIdFromWebResponseAsync failed {wamResult.ResponseStatus} - {wamResult.ResponseError}");
+                return null;
+            }
+
+            return ParseSuccessfullWamResponse(wamResult.ResponseData[0], out _);
+        }
+
+        private bool MatchCacheAccount(
+            WebAccount webAccount,
+            IEnumerable<IAccount> accountsFromCache,
+            out AccountId homeAccountId)
+        {
+
+            // TODO: a match can also be done on local account id
+            // however this would require loading all IdTokens associated with the account
+            // and parsing them
+
+            var match = accountsFromCache.FirstOrDefault(acc =>
+                string.Equals(acc.Username, webAccount.UserName));
+
+            if (match != null)
+            {
+                homeAccountId = match.HomeAccountId;
+                return true;
+            }
+
+            homeAccountId = null;
+            return false;
         }
 
         public string GetHomeAccountIdOrNull(WebAccount webAccount)
@@ -131,12 +274,19 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public Task<WebTokenRequest> CreateWebTokenRequestAsync(WebAccountProvider provider, string clientId, string scopes)
         {
-            throw new NotImplementedException();
+            WebTokenRequest request = new WebTokenRequest(
+              provider,
+              scopes,
+              clientId);
+
+            request.Properties.Add("wam_compat", "2.0");
+
+            return Task.FromResult(request);
         }
 
         public MsalTokenResponse ParseSuccessfullWamResponse(
-            WebTokenResponse webTokenResponse, 
-            out Dictionary<string, string> allProperties)
+                WebTokenResponse webTokenResponse,
+                out Dictionary<string, string> allProperties)
         {
             allProperties = new Dictionary<string, string>(8, StringComparer.OrdinalIgnoreCase);
             if (!webTokenResponse.Properties.TryGetValue("TokenExpiresOn", out string expiresOn))
@@ -191,7 +341,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 ExtendedExpiresIn = CoreHelpers.GetDurationFromWindowsTimestamp(extendedExpiresOn, _logger),
                 ClientInfo = clientInfo,
                 TokenType = "Bearer",
-                WamAccountId = webTokenResponse.WebAccount.Id,
+                WamAccountId = webTokenResponse?.WebAccount?.Id,
                 TokenSource = TokenSource.Broker
             };
 
@@ -229,6 +379,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             return "WAM_unexpected_aad_error";
         }
+
 
     }
 }

@@ -242,6 +242,9 @@ namespace NetCoreTestApp
                 .WithClientSecret(s_confidentialClientSecret)
                 .Build();
 
+            // if you don't add a SetBefore/SetAfter etc. , MSAL doesn't even refresh the caceh
+            cca.AppTokenCache.SetBeforeAccess((t) => { });
+
             //cca.AcquireTokenForClient(new[] "12345-123321-1111/default");
 
             return cca;
