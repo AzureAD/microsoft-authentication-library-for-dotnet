@@ -42,8 +42,6 @@ namespace Microsoft.Identity.Client
                 requestParams.RequestContext.Logger.Info("ID Token not present in response. ");
             }
 
-            //Authority.CreateAuthorityWithTenant(requestParams.Authority.AuthorityInfo, idToken?.TenantId);
-
             var tenantId = GetTenantId(idToken, requestParams);
 
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;

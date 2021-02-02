@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         //These methods are only available to brokers that have the BrokerSupportsSilentFlow flag enabled
         #region Silent Flow Methods
         Task<IReadOnlyList<IAccount>> GetAccountsAsync(
-            string clientID, 
+            string clientId, 
             string redirectUri,
             string authority,
             ICacheSessionManager cacheSessionManager,

@@ -160,7 +160,9 @@ namespace Microsoft.Identity.Client
                 authParameters);
 
             var accountsFromCache = await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
-            var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter, cacheSessionManager, requestContext).ConfigureAwait(false);
+            var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter, cacheSessionManager).ConfigureAwait(false);
+            accountsFromCache = accountsFromCache ?? Enumerable.Empty<IAccount>();
+            accountsFromBroker = accountsFromBroker ?? Enumerable.Empty<IAccount>();
 
             ServiceBundle.DefaultLogger.Info($"Found {accountsFromCache.Count()} cache accounts and {accountsFromBroker.Count()} broker accounts");
             IEnumerable<IAccount> cacheAndBrokerAccounts = MergeAccounts(accountsFromCache, accountsFromBroker);
@@ -171,8 +173,7 @@ namespace Microsoft.Identity.Client
 
         private async Task<IEnumerable<IAccount>> GetAccountsFromBrokerAsync(
             string homeAccountIdFilter,
-            ICacheSessionManager cacheSessionManager,
-            RequestContext requestContext)
+            ICacheSessionManager cacheSessionManager)
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {

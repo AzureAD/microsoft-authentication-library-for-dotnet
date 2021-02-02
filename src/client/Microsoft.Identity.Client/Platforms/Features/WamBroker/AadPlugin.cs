@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 var msalAccounts = (await Task.WhenAll(msalAccountTasks).ConfigureAwait(false)).Where(a => a != null).ToList();
 
-                _logger.Info($"[WAM AAD Provider] GetAccountsAsync converted {wamAccounts.Count()} MSAL accounts");
+                _logger.Info($"[WAM AAD Provider] GetAccountsAsync converted {msalAccounts.Count()} accounts from {wamAccounts.Count} WAM accounts");
                 return msalAccounts;
             }
 
