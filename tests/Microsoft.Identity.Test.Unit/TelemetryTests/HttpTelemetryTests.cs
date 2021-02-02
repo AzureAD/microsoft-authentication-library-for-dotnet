@@ -38,59 +38,59 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// 1.  Acquire Token Interactive successfully
-        ///        Current_request = 2 | ATI_ID, 0 | 0
-        ///        Last_request = 2 | 0 | | |
+        ///        Current_request = 3 | ATI_ID, 0, | 0
+        ///        Last_request = 3 | 0 | | |
         /// 2. Acquire token silent with AT served from cache ... no calls to /token endpoint
         ///        
         /// 3. Acquire token silent with AT not served from cache (AT expired)
-        ///         Current_request = 2 | ATS_ID, 0 | 0
-        ///         Last_request = 2 | 1 | | |
+        ///         Current_request = 3 | ATS_ID, 0, 0 | 0
+        ///         Last_request = 3 | 1 | | |
         ///         
         /// 4. Acquire Token silent with force_refresh = true -> error invalid_client
         /// Sent to server - 
-        ///         Current_request = 2 | ATS_ID, 1 | 0
-        ///         Last_request = 2 | 0 | | |
+        ///         Current_request = 3 | ATS_ID, 1, 3 | 0
+        ///         Last_request = 3 | 0 | | |
         ///         
         /// State of client after error response is returned – (the successful silent request counter was flushed, last_request is reset, and now we add the error from step 4)
-        ///         Last_request = 2 | 0 | ATS_ID, Corr_step_4 | invalid_client |
+        ///         Last_request = 3 | 0 | ATS_ID, Corr_step_4 | invalid_client |
         /// 
         /// 5. Acquire Token silent with force_refresh = true -> error interaction_required
         /// Sent to the server - 
-        ///         Current_request = 2 | ATS_ID, 1 | 0
-        ///         Last_request = 2 | 0 | ATS_ID, corr_step_4 | invalid_client
+        ///         Current_request = 3 | ATS_ID, 1, 3 | 0
+        ///         Last_request = 3 | 0 | ATS_ID, corr_step_4 | invalid_client
         /// State of client after response is returned - 
-        ///         Last_request = 2 | 0 | ATS_ID, corr_step_5 | interaction_required
+        ///         Last_request = 3 | 0 | ATS_ID, corr_step_5 | interaction_required
         ///         
         /// 6. Acquire Token interactive -> error user_cancelled (i.e. no calls to /token endpoint)
         ///       No calls to token endpoint
         /// 
         /// 7. Acquire Token interactive -> HTTP error 503 (Service Unavailable)
         ///
-        ///        Current_request = 2 | ATI_ID, 0 | 0
-        ///        Last_request = 2 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, | interaction_required, 
+        ///        Current_request = 3 | ATI_ID, 0, | 0
+        ///        Last_request = 3 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, | interaction_required, 
         ///       authentication_canceled|
         ///
         /// State of the client: 
         ///
-        ///        Last_request = 2 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, ATI-ID, corr_step-6b | interaction_required, 
+        ///        Last_request = 3 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, ATI-ID, corr_step-6b | interaction_required, 
         ///       authentication_canceled, ServiceUnavailable|
         ///
         /// 8. Acquire Token interactive -> successful
         ///
         /// Sent to the server - 
-        ///        Current_request = 2 | ATI_ID, 0 | 0
-        ///        Last_request = 2 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, ATI-ID, corr_step-6b  | interaction_required, 
+        ///        Current_request = 3 | ATI_ID, 0, | 0
+        ///        Last_request = 3 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, ATI-ID, corr_step-6b  | interaction_required, 
         ///        authentication_canceled, ServiceUnavailable |
         ///
         /// State of the client after response is returned - 
         ///        Last_request = NULL
         ///
-        /// 9. Acquire Token Silent with force-refresh -> successful
+        /// 9. Acquire Token Silent with force-refresh false -> successful
         /// Sent to the server - 
-        ///         Current_request = 2 | ATI_ID, 1 | 0
+        ///         Current_request = 3 | ATI_ID, 0, 0 | 0
         ///         Last_request = NULL
         /// State of the client after response is returned - 
-        ///        Last_request = 2 | 1 | | |
+        ///        Last_request = 3 | 1 | | |
         /// </summary>
         [TestMethod]
         public async Task TelemetryAcceptanceTestAsync()
@@ -116,12 +116,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 Trace.WriteLine("Step 3. Acquire Token Silent successful - via refresh_token flow");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false, cacheRefresh: "0");
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 1); // Previous_request = 2|1|||
 
                 Trace.WriteLine("Step 4. Acquire Token Silent with force_refresh = true and failure = invalid_grant");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInvalidGrant, forceRefresh: true).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true); // Current_request = 2 | ATS_ID, 1 |
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true, cacheRefresh: "3"); // Current_request = 3 | ATS_ID, 1, 3 |
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
 
                 // invalid grant error puts MSAL in a throttled state - simulate some time passing for this
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Guid step4Correlationid = result.Correlationid;
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true and failure = interaction_required");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInteractionRequired, forceRefresh: true).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true);// Current_request = 2 | ATS_ID, 1 |
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true, cacheRefresh: "3");// Current_request = 3 | ATS_ID, 1, 3 |
                 AssertPreviousTelemetry(
                     result.HttpRequest,
                     expectedSilentCount: 0,
@@ -173,9 +173,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     expectedCorrelationIds: new[] { step5CorrelationId, step6CorrelationId, step7CorrelationId },
                     expectedErrors: new[] { "interaction_required", "user_cancelled", "service_not_available" });
 
-                Trace.WriteLine("Step 9. Acquire Token Silent with force-refresh -> successful");
+                Trace.WriteLine("Step 9. Acquire Token Silent with force-refresh false -> successful");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant, false).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false, cacheRefresh: "0");
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
             }
         }
@@ -410,7 +410,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             ApiIds apiId, 
             bool forceRefresh,
             bool isCacheSerialized = false,
-            bool isLegacyCacheEnabled = true)
+            bool isLegacyCacheEnabled = true,
+            string cacheRefresh = "")
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single();
@@ -424,11 +425,13 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 ((int)apiId).ToString(CultureInfo.InvariantCulture),
                 actualTelemetryParts[1].Split(',')[0]); // current_api_id
 
-            Assert.IsTrue(actualTelemetryParts[1].EndsWith(forceRefresh ? "1" : "0")); // force_refresh flag
+            Assert.AreEqual(forceRefresh ? "1" : "0", actualTelemetryParts[1].Split(',')[1]); // force_refresh flag
 
             Assert.AreEqual(isCacheSerialized ? "1" : "0", actualTelemetryParts[2].Split(',')[2]); // is_cache_serialized
 
             Assert.AreEqual(isLegacyCacheEnabled ? "1" : "0", actualTelemetryParts[2].Split(',')[6]); // is_legacy_cache_enabled
+
+            Assert.AreEqual(cacheRefresh, actualTelemetryParts[1].Split(',')[2]); // Cache_refresh
         }
 
         private static void AssertPreviousTelemetry(

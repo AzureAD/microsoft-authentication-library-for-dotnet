@@ -60,6 +60,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         TokenSource.Cache);
                 }
             }
+            else
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = "3";
+            }
 
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);

@@ -462,6 +462,8 @@ namespace Microsoft.Identity.Client
                         "Access token has expired or about to expire. " +
                         GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
                 }
+
+                requestParams.RequestContext.ApiEvent.CacheRefresh = "1";
             }
 
             return null;

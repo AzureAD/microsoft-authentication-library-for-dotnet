@@ -54,10 +54,20 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                     return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 }
+
+                if (cachedAccessTokenItem != null && cachedAccessTokenItem.NeedsRefresh())
+                {
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = "2"; 
+                }
             }
             else
             {
                 logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set. ");
+
+                if (_silentParameters.ForceRefresh)
+                {
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = "3";
+                }
             }
 
             // No AT or AT.RefreshOn > Now --> refresh the RT

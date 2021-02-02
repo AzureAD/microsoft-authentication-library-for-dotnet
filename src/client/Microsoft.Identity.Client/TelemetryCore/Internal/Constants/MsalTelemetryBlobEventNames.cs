@@ -31,5 +31,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Constants
         public const string IsValidUserProvidedRegion = "msal.is_valid_user_provided_region";
         public const string FallbackToGlobal = "msal.fallback_to_global";
         public const string IsLegacyCacheEnabledKey = "msal.is_legacy_cache_enabled";
+        public const string CacheRefreshKey = "msal.cache_refresh";
     }
 }

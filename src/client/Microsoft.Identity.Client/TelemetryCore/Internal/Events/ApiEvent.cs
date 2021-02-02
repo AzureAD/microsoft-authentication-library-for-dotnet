@@ -29,6 +29,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string IsValidUserProvidedRegionKey = EventNamePrefix + "is_valid_user_provided_region";
         public const string FallbackToGlobalKey = EventNamePrefix + "fallback_to_global";
         public const string IsLegacyCacheEnabledKey = EventNamePrefix + "is_legacy_cache_enabled";
+        public const string CacheRefreshKey = EventNamePrefix + "cache_refresh";
 
         public enum ApiIds
         {
@@ -229,6 +230,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             set { this[IsLegacyCacheEnabledKey] = value.ToString().ToLowerInvariant(); }
             get { return this[IsLegacyCacheEnabledKey] == true.ToString().ToLowerInvariant(); }
 #pragma warning restore CA1305 // Specify IFormatProvider
+        }
+
+        public string CacheRefresh
+        {
+            get => this.ContainsKey(CacheRefreshKey) ? this[CacheRefreshKey] : null;
+            set => this[CacheRefreshKey] = value;
         }
     }
 }

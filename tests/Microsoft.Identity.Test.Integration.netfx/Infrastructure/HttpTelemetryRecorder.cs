@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
             string[] splitCsv = telemetryCsv.Split('|');
             string[] splitApiIdAndForceRefresh = splitCsv[1].Split(',');
             ApiId.Add(splitApiIdAndForceRefresh[0]);
-            string forceRefresh = splitApiIdAndForceRefresh[splitApiIdAndForceRefresh.Length - 1];
+            string forceRefresh = splitApiIdAndForceRefresh[splitApiIdAndForceRefresh.Length - 2];
             ForceRefresh = forceRefresh;
         }
 

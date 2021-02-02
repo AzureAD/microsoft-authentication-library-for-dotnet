@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ApiId = apiId
             };
 
-            return new AuthenticationRequestParameters(
+            AuthenticationRequestParameters authenticationRequestParameters = new AuthenticationRequestParameters(
                 ServiceBundle,
                 tokenCache,
                 commonParameters,
@@ -71,6 +71,19 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 Account = account,
                 Authority = Authority.CreateAuthority(authority, validateAuthority)
             };
+
+            authenticationRequestParameters.RequestContext.ApiEvent = new ApiEvent(
+                authenticationRequestParameters.RequestContext.Logger,
+                ServiceBundle.PlatformProxy.CryptographyManager,
+                "")
+            {
+                ApiId = authenticationRequestParameters.ApiId,
+                ApiTelemId = authenticationRequestParameters.ApiTelemId,
+                AccountId = "",
+                WasSuccessful = false
+            };
+
+            return authenticationRequestParameters;
         }
     }
 }
