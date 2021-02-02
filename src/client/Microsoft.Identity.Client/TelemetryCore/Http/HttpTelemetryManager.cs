@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
         /// <summary>
         /// CSV expected format:
-        ///      2|silent_successful_count|failed_requests|errors|platform_fields
+        ///      3|silent_successful_count|failed_requests|errors|platform_fields
         ///      failed_request is: api_id_1,correlation_id_1,api_id_2,correlation_id_2|error_1,error_2
         ///      platform_fields: region_1,region_source_1,region_2,region_source_2
         /// </summary>
