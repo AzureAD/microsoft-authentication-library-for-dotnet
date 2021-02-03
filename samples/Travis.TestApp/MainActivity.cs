@@ -3,10 +3,9 @@ using System.Threading.Tasks;
 using Android.App;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.Design.Widget;
-using Android.Support.V7.App;
 using Android.Views;
-using Android.Widget;
+using AndroidX.AppCompat.App;
+using Google.Android.Material.Snackbar;
 using Com.Microsoft.Identity.Client;
 using MsalAndroid = Com.Microsoft.Identity.Client;
 
@@ -44,7 +43,7 @@ namespace BindningTestApp
             ISingleAccountPublicClientApplication _boundApplication = null;
 
 
-            await Task.Run( () => _boundApplication = MsalAndroid.PublicClientApplication.CreateSingleAccountPublicClientApplication
+            await Task.Run( () => _boundApplication = SingleAccountPublicClientApplication.CreateSingleAccountPublicClientApplication
                                                                                 (
                                                                                     Android.App.Application.Context,
                                                                                     //config
