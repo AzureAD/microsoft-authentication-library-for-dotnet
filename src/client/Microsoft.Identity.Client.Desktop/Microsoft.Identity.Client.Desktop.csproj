@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
 
-    <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
+    <TargetFrameworkNetDesktop>net461</TargetFrameworkNetDesktop>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
     <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>
 
