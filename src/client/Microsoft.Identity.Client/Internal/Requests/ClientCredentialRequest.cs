@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -39,6 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            int cacheRefresh = (int) CacheRefresh.None;
 
             if (!_clientParameters.ForceRefresh && 
                 string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
@@ -56,10 +59,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
                         TokenSource.Cache);
                 }
-
-                if (cachedAccessTokenItem != null && cachedAccessTokenItem.NeedsRefresh())
+                else if (cachedAccessTokenItem == null)
                 {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = "2";
+                    cacheRefresh = (int) CacheRefresh.NoCachedAT;
+                }
+                else
+                {
+                    cacheRefresh = (int) CacheRefresh.RefreshIn;
                 }
             }
             else
@@ -68,9 +74,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (_clientParameters.ForceRefresh)
                 {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = "3";
+                    cacheRefresh = (int) CacheRefresh.ForceRefresh;
                 }
             }
+
+            AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = cacheRefresh;
 
             // No AT in the cache or AT needs to be refreshed
             try

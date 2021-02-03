@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Region;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -232,10 +233,23 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
 
-        public string CacheRefresh
+        public int? CacheRefresh
         {
-            get => this.ContainsKey(CacheRefreshKey) ? this[CacheRefreshKey] : null;
-            set => this[CacheRefreshKey] = value;
+            get
+            {
+                if (this.ContainsKey(CacheRefreshKey))
+                {
+                    int val = (int)Enum.Parse(typeof(CacheRefresh), this[CacheRefreshKey]);
+                    if (val != -1)
+                    {
+                        return val;
+                    }
+                }
+
+                return null;
+            }
+
+            set => this[CacheRefreshKey] = (value)?.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

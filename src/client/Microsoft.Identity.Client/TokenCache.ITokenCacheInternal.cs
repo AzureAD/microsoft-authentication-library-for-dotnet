@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -315,17 +316,28 @@ namespace Microsoft.Identity.Client
             // perf: take a snapshot as calling Count(), Any() etc. on the IEnumerable evaluates it each time
             IReadOnlyList<MsalAccessTokenCacheItem> finalList = tokenCacheItems.ToList();
 
+            CacheRefresh cacheRefresh = CacheRefresh.None;
+
             // no match
             if (finalList.Count == 0)
             {
                 logger.Verbose("No tokens found for matching authority, client_id, user and scopes.");
+                cacheRefresh = CacheRefresh.NoCachedAT;
                 return null;
             }
 
             MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, finalList);
             msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
+            msalAccessTokenCacheItem = FilterByExpiry(msalAccessTokenCacheItem, requestParams);
 
-            return FilterByExpiry(msalAccessTokenCacheItem, requestParams);
+            if (msalAccessTokenCacheItem == null)
+            {
+                cacheRefresh = CacheRefresh.Expired;
+            }
+
+            requestParams.RequestContext.ApiEvent.CacheRefresh = (int) cacheRefresh;
+
+            return msalAccessTokenCacheItem; 
         }
 
         private static IEnumerable<MsalAccessTokenCacheItem> FilterByScopes(
@@ -462,8 +474,6 @@ namespace Microsoft.Identity.Client
                         "Access token has expired or about to expire. " +
                         GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
                 }
-
-                requestParams.RequestContext.ApiEvent.CacheRefresh = "1";
             }
 
             return null;

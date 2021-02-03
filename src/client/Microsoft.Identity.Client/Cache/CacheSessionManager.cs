@@ -38,14 +38,7 @@ namespace Microsoft.Identity.Client.Cache
         public async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync()
         {
             await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.AT).ConfigureAwait(false);
-            MsalAccessTokenCacheItem msalAccessToken = await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
-
-            if (msalAccessToken == null && _requestParams.RequestContext.ApiEvent.CacheRefresh == null)
-            {
-                _requestParams.RequestContext.ApiEvent.CacheRefresh = "0";
-            }
-
-            return msalAccessToken;
+            return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
         public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)

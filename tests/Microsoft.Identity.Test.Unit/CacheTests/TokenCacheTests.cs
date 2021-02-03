@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -1111,6 +1112,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 serviceBundle, 
                 scopes: new HashSet<string>());
             requestParams.Account = TestConstants.s_user;
+            requestParams.RequestContext.ApiEvent = new ApiEvent(
+                serviceBundle.DefaultLogger,
+                serviceBundle.PlatformProxy.CryptographyManager,
+                Guid.NewGuid().AsMatsCorrelationId());
 
             string scopeInCache = TestConstants.s_scope.FirstOrDefault();
 
