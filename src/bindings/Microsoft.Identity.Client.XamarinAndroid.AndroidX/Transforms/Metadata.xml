@@ -10,7 +10,6 @@
   <!-- inhibit event generation; don't care! -->
   <attr path="//interface[substring(@name,string-length(@name) - string-length('Listener') +1) = 'Listener']/method"
     name="eventName"></attr>
-  <remove-node path="//package[contains(@name, '.internal')]" />
 
   <!--<remove-node path="//class/implements[contains(@name, '.internal')]" />-->
   
@@ -27,7 +26,17 @@
         name="managedReturn"
   >Com.Microsoft.Identity.Client.TokenParameters</attr>
 
-
+  <!--
+  <attr
+    path="/api/package[@name='com.microsoft.identity.client']/interface[@name='ITokenShare']/method[@name='getMsaFamilyRefreshTokenWithMetadata' and count(parameter)=1 and parameter[1][@type='java.lang.String']]"
+    name="managedReturn"
+    >
+    Com.Microsoft.Identity.Client.ITokenShareResultInternal
+  </attr>
+  -->
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.client']/interface[@name='ITokenShare']/implements"
+    />
   
   <!--<add-node path="//package[@name='com.microsoft.identity.client']">
     <class

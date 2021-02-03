@@ -1,6 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
   <PropertyGroup>
-    <TargetFramework>monoandroid9.0</TargetFramework>
+    <TargetFramework>monoandroid10.0</TargetFramework>
     <!--
     <TargetFrameworks>monoandroid9.0;monoandroid10.0;monoandroid11.0</TargetFrameworks>
     -->

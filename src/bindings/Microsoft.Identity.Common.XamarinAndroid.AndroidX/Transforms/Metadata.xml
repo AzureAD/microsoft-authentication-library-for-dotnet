@@ -10,6 +10,173 @@
   <!-- inhibit event generation; don't care! -->
   <attr path="//interface[substring(@name,string-length(@name) - string-length('Listener') +1) = 'Listener']/method"
     name="eventName"></attr>
+
+  <!--  
   <remove-node path="//package[contains(@name, '.internal')]" />
 
+  com.microsoft.identity.client.internal
+  -->
+  
+  <attr
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands']/class[@name='DeviceCodeFlowCommand']/method[@name='execute' and count(parameter)=0]"
+    name="managedReturn"
+    >
+    Java.Lang.Object
+  </attr>
+  <attr
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands']/class[@name='GenerateShrCommand']/method[@name='execute' and count(parameter)=0]"
+    name="managedReturn"
+    >
+    Java.Lang.Object
+  </attr>
+  <attr
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands']/class[@name='GetDeviceModeCommand']/method[@name='execute' and count(parameter)=0]"
+    name="managedReturn"
+    >
+    Java.Lang.Object
+  </attr>
+  <attr
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands']/class[@name='InteractiveTokenCommand']/method[@name='execute' and count(parameter)=0]"
+    name="managedReturn"
+    >
+    Java.Lang.Object
+  </attr>
+  
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands']/class[@name='RemoveAccountCommand']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands']/class[@name='RemoveCurrentAccountCommand']"
+    />>
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands']/class[@name='SilentTokenCommand']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands']/class[@name='GetCurrentAccountCommand']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands']/class[@name='LoadAccountCommand']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.telemetry.adapter']/class[@name='TelemetryDefaultAdapter']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.telemetry.adapter']/class[@name='TelemetryAggregationAdapter']"
+    />
+
+  
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.cache']/class[@name='AccountDeletionRecord']/implements"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.broker']/class[@name='BrokerResultFuture']/implements"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.cache']/class[@name='ADALOAuth2TokenCache']/implements"
+    />
+  
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands.parameters']/class[@name='BrokerSilentTokenCommandParameters']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands.parameters']/class[@name='BrokerInteractiveTokenCommandParameters']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands.parameters']/class[@name='DeviceCodeFlowCommandParameters.DeviceCodeFlowCommandParametersBuilder']/method[@name='build' and count(parameter)=0]"  
+    />
+    
+    
+  
+  
+  <remove-node  
+    path="/api/package[@name='com.microsoft.identity.common.internal.cache']/class[contains(@name, 'TokenCache')]"
+    />
+  <remove-node  
+    path="/api/package[@name='com.microsoft.identity.common.internal.commands.parameters']/class[contains(@name, 'CommandParametersBuilder')]"
+    />
+  
+  <!--
+  <attr  
+    path="/api/package[@name='com.microsoft.identity.common.internal.cache']/class[contains(@name, 'TokenCache')]/method[@name='save' and count(parameter)=3]/parameter[1]"
+    name="managedType"
+    >
+    Java.Lang.Object
+  </attr>
+  <attr  
+    path="/api/package[@name='com.microsoft.identity.common.internal.cache']/class[contains(@name, 'TokenCache')]/method[@name='save' and count(parameter)=3]/parameter[2]"
+    name="managedType"
+    >
+    Java.Lang.Object
+  </attr>
+  <attr  
+    path="/api/package[@name='com.microsoft.identity.common.internal.cache']/class[contains(@name, 'TokenCache')]/method[@name='save' and count(parameter)=3]/parameter[3]"
+    name="managedType"
+    >
+    Java.Lang.Object
+  </attr>
+  -->
+  
+  <!--
+  <attr  
+    path="/api/package[@name='com.microsoft.identity.common.internal.cache']/class[contains(@name, 'TokenCache')]/method[@name='saveAndLoadAggregatedAccountData' and count(parameter)=3]/parameter[1]"
+    name="managedType"
+    >
+    Java.Lang.Object
+  </attr>
+  <attr  
+    path="/api/package[@name='com.microsoft.identity.common.internal.cache']/class[contains(@name, 'TokenCache')]/method[@name='saveAndLoadAggregatedAccountData' and count(parameter)=3]/parameter[2]"
+    name="managedType"
+    >
+    Java.Lang.Object
+  </attr>
+  <attr  
+    path="/api/package[@name='com.microsoft.identity.common.internal.cache']/class[contains(@name, 'TokenCache')]/method[@name='saveAndLoadAggregatedAccountData' and count(parameter)=3]/parameter[3]"
+    name="managedType"
+    >
+    Java.Lang.Object
+  </attr>
+  -->
+
+  
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.providers']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.providers.microsoft']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.providers.microsoft.activedirectoryfederationservices']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.providers.microsoft.azureactivedirectoryb2c']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.providers.microsoft.azureactivedirectory']"
+    />
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.providers.microsoft.microsoftsts']"
+    />
+  
+  <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.platform']"
+    />
+      <remove-node
+    path="/api/package[@name='com.microsoft.identity.common.internal.net']"
+    />
+  
+  
+  <attr
+    path="/api/package[@name='com.microsoft.identity.common.internal.providers.oauth2']/class[@name='TokenResult']/method[@name='getErrorResponse' and count(parameter)=0]"
+    name="managedReturn"
+    >
+    Com.Microsoft.Identity.Common.Internal.Providers.Oauth2.IErrorResponse
+  </attr>
+  <attr
+    path="/api/package[@name='com.microsoft.identity.common.internal.providers.oauth2']/class[@name='TokenResult']/method[@name='getSuccessResponse' and count(parameter)=0]"
+    name="managedReturn"
+    >
+    Com.Microsoft.Identity.Common.Internal.Providers.Oauth2.ISuccessResponse
+  </attr>
+  
+        
 </metadata>
