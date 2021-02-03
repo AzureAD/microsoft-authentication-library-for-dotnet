@@ -212,11 +212,13 @@ namespace Microsoft.Identity.Client.Http
                 requestMessage.Method = method;
                 requestMessage.Content = body;
 
-                logger.Verbose($"Sending request from HttpManager. Method: {method}. URI path: {endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}. ");
+                logger.Verbose($"[HttpManager] Sending request. Method: {method}. URI path: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ");
 
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                 {
+                    logger.Verbose($"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
+
                     HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
                     returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();
                     return returnValue;

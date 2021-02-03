@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (regionalizedAuthority == null && requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
             {
-                requestContext.Logger.Verbose($"[Region Discovery] Unable to determine region. Falling back to global.");
+                requestContext.Logger.Verbose($"[Region discovery] Unable to determine region. Falling back to global.");
                 return null;
             }
 
@@ -69,11 +69,11 @@ namespace Microsoft.Identity.Client.Region
                 CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
 
                 cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, requestContext.Logger);
-                requestContext.Logger.Verbose($"[Region Discovery] Created metadata for the regional environment {regionalizedAuthority.Host} ? {cachedEntry != null}");
+                requestContext.Logger.Verbose($"[Region discovery] Created metadata for the regional environment {regionalizedAuthority.Host} ? {cachedEntry != null}");
             }
             else
             {
-                requestContext.Logger.Verbose($"[Region Discovery] The network provider found an entry for {regionalizedAuthority.Host}");
+                requestContext.Logger.Verbose($"[Region discovery] The network provider found an entry for {regionalizedAuthority.Host}");
                 LogTelemetryData(cachedEntry.PreferredNetwork.Split('.')[0], RegionSource.Cache, requestContext);
             }
 
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (!string.IsNullOrEmpty(region))
             {
-                requestContext.Logger.Info($"[Region Discovery] Region found in environment variable: {region}.");
+                requestContext.Logger.Info($"[Region discovery] Region found in environment variable: {region}.");
 
                 LogTelemetryData(region, RegionSource.EnvVariable, requestContext);
 
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Region
                     return region;
                 }
 
-                requestContext.Logger.Info($"[Region Discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
+                requestContext.Logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
 
                 throw MsalServiceExceptionFactory.FromImdsResponse(
                     MsalError.RegionDiscoveryFailed,
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Region
             }
             catch (Exception e)
             {
-                requestContext.Logger.Info("[Region Discovery] Call to local imds failed. " + e);
+                requestContext.Logger.Info("[Region discovery] Call to local imds failed. " + e);
                 throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed, e);
             }
         }
@@ -167,14 +167,14 @@ namespace Microsoft.Identity.Client.Region
 
                 if (errorResponse != null && !errorResponse.NewestVersions.IsNullOrEmpty())
                 {
-                    logger.Info("[Region Discovery] Updated the version for IMDS endpoint to: " + errorResponse.NewestVersions[0]);
+                    logger.Info("[Region discovery] Updated the version for IMDS endpoint to: " + errorResponse.NewestVersions[0]);
                     return errorResponse.NewestVersions[0];
                 }
 
-                logger.Info("[Region Discovery] The response is empty or does not contain the newest versions.");
+                logger.Info("[Region discovery] The response is empty or does not contain the newest versions.");
             }
 
-            logger.Info($"[Region Discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}");
+            logger.Info($"[Region discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}");
 
             throw MsalServiceExceptionFactory.FromImdsResponse(
             MsalError.RegionDiscoveryFailed,
@@ -221,16 +221,16 @@ namespace Microsoft.Identity.Client.Region
                     if (!regionToUse.IsNullOrEmpty())
                     {
                         requestContext.ApiEvent.IsValidUserProvidedRegion = s_region.Equals(regionToUse);
-                        requestContext.Logger.Info($"[Region Discovery] The auto detected region is {s_region}.");
+                        requestContext.Logger.Info($"[Region discovery] The auto detected region is {s_region}.");
                         requestContext.ApiEvent.FallbackToGlobal = false;
 
                         if (s_region.Equals(regionToUse))
                         {
-                            requestContext.Logger.Info($"[Region Discovery] The region ({regionToUse}) provided by the user is valid and equal to the auto detected region.");
+                            requestContext.Logger.Info($"[Region discovery] The region ({regionToUse}) provided by the user is valid and equal to the auto detected region.");
                         }
                         else
                         {
-                            requestContext.Logger.Info($"[Region Discovery] The region provided by the user is invalid. Region detected: {s_region} Region provided: {regionToUse}");
+                            requestContext.Logger.Info($"[Region discovery] The region provided by the user is invalid. Region detected: {s_region} Region provided: {regionToUse}");
                         }
                     }
                 }
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Client.Region
 
                     s_region = regionToUse;
                     requestContext.ApiEvent.FallbackToGlobal = false;
-                    requestContext.Logger.Info($"[Region Discovery] Region auto detection failed. Region provided by the user will be used: ${regionToUse}.");
+                    requestContext.Logger.Info($"[Region discovery] Region auto detection failed. Region provided by the user will be used: ${regionToUse}.");
                     LogTelemetryData(s_region, RegionSource.UserProvided, requestContext);
                 }
             }
