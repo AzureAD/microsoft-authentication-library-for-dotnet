@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -56,7 +57,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
         private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
         private const string AdfsCertName = "IDLABS-APP-Confidential-Client-Cert-OnPrem";
-        private const string AppCacheKey = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8_AppTokenCache";
         private KeyVaultSecretsProvider _keyVault;
         private static string s_publicCloudCcaSecret;
         private static string s_arlingtonCCASecret;
@@ -164,17 +164,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
             X509Certificate2 cert = GetCertificate(true);
-            var confidentialClientAuthority = PublicCloudTestAuthority;
 
             confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(PublicCloudConfidentialClientID)
-                .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithCertificate(cert)
                 .Build();
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
             authResult = await confidentialApp
                 .AcquireTokenForClient(s_keyvaultScope)
+                .WithAuthority(PublicCloudTestAuthority, true) // authority can also be specified at request level
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -182,11 +181,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             appCacheRecorder.AssertAccessCounts(1, 1);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
-            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                GetExpectedCacheKey(PublicCloudConfidentialClientID, Authority.CreateAuthority(PublicCloudTestAuthority, false).TenantId),
+                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
                .AcquireTokenForClient(s_keyvaultScope)
+               .WithAuthority(PublicCloudTestAuthority, true) // authority can also be specified at request level
                .ExecuteAsync(CancellationToken.None)
                .ConfigureAwait(false);
 
@@ -194,7 +196,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
-            Assert.AreEqual(PublicCloudConfidentialClientID + "_AppTokenCache", appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                GetExpectedCacheKey(PublicCloudConfidentialClientID, Authority.CreateAuthority(PublicCloudTestAuthority, false).TenantId),
+                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+        }
+
+        private string GetExpectedCacheKey(string clientId, string tenantId)
+        {
+            return $"{clientId}_{tenantId ?? ""}_AppTokenCache";
         }
 
         [TestMethod]
@@ -214,10 +223,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                            s_arlingtonCCASecret).ConfigureAwait(false);
         }
 
-        public async Task RunTestWithClientSecretAsync(string clientID, string authority, string secret)
+        public async Task RunTestWithClientSecretAsync(string clientID, string confidentialClientAuthority, string secret)
         {
-            var confidentialClientAuthority = authority;
-
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(clientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
@@ -234,7 +241,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             appCacheRecorder.AssertAccessCounts(1, 1);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
-            Assert.AreEqual(clientID + "_AppTokenCache", appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                GetExpectedCacheKey(clientID, Authority.CreateAuthority(confidentialClientAuthority, false).TenantId),
+                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
@@ -244,7 +253,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
-            Assert.AreEqual(clientID + "_AppTokenCache", appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+
+            Assert.AreEqual(
+                GetExpectedCacheKey(clientID, Authority.CreateAuthority(confidentialClientAuthority, false).TenantId),
+                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
         }
 
@@ -324,7 +336,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             appCacheRecorder.AssertAccessCounts(1, 1);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
-            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                GetExpectedCacheKey(PublicCloudConfidentialClientID, Authority.CreateAuthority(confidentialClientAuthority, false).TenantId),
+                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             ValidateClaimsInAssertion(claims, ((ConfidentialClientApplication)confidentialApp).ClientCredential.SignedAssertion);
             MsalAssert.AssertAuthResult(authResult);
@@ -336,7 +350,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
-            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                GetExpectedCacheKey(PublicCloudConfidentialClientID, Authority.CreateAuthority(confidentialClientAuthority, false).TenantId),
+                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
         }
 
@@ -706,14 +722,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             };
 
             string token = Encode(
-                Encoding.UTF8.GetBytes(JObject.FromObject(header).ToString())) + 
-                "." + 
+                Encoding.UTF8.GetBytes(JObject.FromObject(header).ToString())) +
+                "." +
                 Encode(Encoding.UTF8.GetBytes(JObject.FromObject(payload).ToString()));
 
             string signature = Encode(
                 rsa.SignData(
                     Encoding.UTF8.GetBytes(token),
-                    HashAlgorithmName.SHA256, 
+                    HashAlgorithmName.SHA256,
                     System.Security.Cryptography.RSASignaturePadding.Pkcs1));
             return string.Concat(token, ".", signature);
         }
