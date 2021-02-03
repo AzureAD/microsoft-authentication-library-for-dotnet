@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.Cache
@@ -54,6 +55,13 @@ namespace Microsoft.Identity.Client.Cache
 
             if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
+                if (!string.IsNullOrEmpty(requestParameters.Authority.TenantId) &&
+                    Guid.TryParse(requestParameters.Authority.TenantId, out var tenantId))
+                {
+                    key = $"{requestParameters.AppConfig.ClientId}_{tenantId:D}_AppTokenCache";
+                    return true;
+                }
+
                 key = requestParameters.AppConfig.ClientId + "_AppTokenCache";
                 return true;
             }

@@ -70,6 +70,7 @@ namespace Microsoft.Identity.Client
         /// <list type="bullet">
         /// <item>the homeAccountId for AcquireTokenSilent, GetAccount(homeAccountId), RemoveAccount and when writing tokens on confidential client calls</item>
         /// <item>clientID + "_AppTokenCache" for AcquireTokenForClient</item>
+        /// <item>clientID_tenantID + "_AppTokenCache" for AcquireTokenForClient when tenant specific authority</item>
         /// <item>the hash of the original token for AcquireTokenOnBehalfOf</item>
         /// </list>
         /// </summary>
