@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
                     null,
                     (IDictionary<string, string>)null,
-                    null).Result;
+                    Substitute.For<ICoreLogger>()).Result;
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
                     queryParams,
                     bodyParameters,
-                    null).Result;
+                    Substitute.For<ICoreLogger>()).Result;
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 var response = httpManager.SendGetAsync(
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
                     queryParams,
-                    null).Result;
+                    Substitute.For<ICoreLogger>()).Result;
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
