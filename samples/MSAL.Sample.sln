@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.810.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSAL.Sample", "MSAL.Sample\MSAL.Sample.csproj", "{C952B9A5-21EE-4A2F-83FD-E10743F8E94A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidX", "..\src\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj", "{A91B7520-2660-422A-ACD8-48701ED24DE7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidX", "..\src\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj", "{A91B7520-2660-422A-ACD8-48701ED24DE7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App1", "Bogdan.TestApp\App1.csproj", "{89AB7AC4-6F5B-4FD2-8551-2BD0696ED2CA}"
 EndProject

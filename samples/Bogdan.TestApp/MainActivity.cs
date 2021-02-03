@@ -39,8 +39,7 @@ namespace App1
             // Create PCA
 
             int resourceId = Resource.Raw.single_account_config;
-            IPublicClientApplication publicClientApplication = null;
-            /*
+            //IPublicClientApplication publicClientApplication = null;
             PublicClientApplication.CreateSingleAccountPublicClientApplication(
                 this,
                 resourceId,
@@ -51,7 +50,6 @@ namespace App1
                         _pca = pca;
                     },
                     onExceptionAction: (ex) => LogMessage(ex.ToString())));
-            */
 
             LogMessage("Finished OnInit");
 
@@ -60,8 +58,8 @@ namespace App1
         private void HelpBtbn_Click(object sender, EventArgs e)
         {
             LogMessage("HelpBtbn::Click");
-            IPublicClientApplication publicClientApplication = null;
-            // PublicClientApplication.ShowExpectedMsalRedirectUriInfo(this);
+            //IPublicClientApplication publicClientApplication = null;
+            PublicClientApplication.ShowExpectedMsalRedirectUriInfo(this);
         }
 
         private void SignInBtn_Click(object sender, System.EventArgs e)
