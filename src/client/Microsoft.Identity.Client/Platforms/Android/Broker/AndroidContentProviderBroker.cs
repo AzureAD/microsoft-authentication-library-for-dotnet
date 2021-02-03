@@ -50,9 +50,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                     _negotiatedBrokerProtocalKey = _brokerHelper.GetProtocalKeyFromHandshakeResult(HandshakeBundleResult);
                 }
-                catch (Exception e)
+                catch
                 {
-                    throw e;
+                    throw;
                 }
             }
         }
