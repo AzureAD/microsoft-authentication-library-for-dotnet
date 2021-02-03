@@ -71,7 +71,7 @@ using Android.Widget;
 using AndroidX.Fragment.App;
 using Com.Microsoft.Identity.Client.Exception;
 using global::Com.Microsoft.Identity.Client;
-using MSAL.Sample;
+using MSALSample;
 
 namespace MSALSample
 {
@@ -108,7 +108,7 @@ namespace MSALSample
             InitializeUI(view);
 
             // Creates a PublicClientApplication object with res/raw/auth_config_single_account.json
-            PublicClientApplication.createSingleAccountPublicClientApplication(Context,
+            PublicClientApplication.CreateSingleAccountPublicClientApplication(Context,
                     Resource.Id.Raw.auth_config_single_account,
                     new SingleAccountApplicationCreatedListener()                    
                     );

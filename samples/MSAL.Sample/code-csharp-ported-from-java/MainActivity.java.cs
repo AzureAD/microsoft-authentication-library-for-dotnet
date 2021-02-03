@@ -53,14 +53,14 @@ using AndroidX.Core.View;
 using AndroidX.DrawerLayout.Widget;
 using AndroidX.Fragment.App;
 using Google.Android.Material.Navigation;
-using MSAL.Sample;
+using MSALSample;
 
 namespace MSALSample
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     internal class MainActivity : AndroidX.AppCompat.App.AppCompatActivity,
              NavigationView.IOnNavigationItemSelectedListener
-             , OnFragmentInteractionListener
+             //, OnFragmentInteractionListener
     {
         internal enum AppFragment
         {
