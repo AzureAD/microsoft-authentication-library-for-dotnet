@@ -383,5 +383,15 @@ namespace Microsoft.Identity.Client
             CommonParameters.ApiTelemId = ApiTelemetryId;
             CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
         }
+
+        internal void ValidateUseOfExpirementalFeature([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
+        {
+            if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(memberName));
+            }
+        }
     }
 }

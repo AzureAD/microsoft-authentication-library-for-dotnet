@@ -59,12 +59,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public T WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
-            if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
-            {
-                throw new MsalClientException(
-                    MsalError.ExperimentalFeature,
-                    MsalErrorMessage.ExperimentalFeature(nameof(WithProofOfPossession)));
-            }
+            ValidateUseOfExpirementalFeature();
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 

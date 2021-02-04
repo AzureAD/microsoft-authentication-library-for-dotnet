@@ -7,15 +7,17 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Cache
 {
     internal interface ICacheSessionManager
     {
+        RequestContext RequestContext { get; }
         ITokenCacheInternal TokenCacheInternal { get; }
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync();
-        Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse);
+        Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse);
         Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalIdTokenCacheKey idTokenCacheKey);
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync();
         Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId);

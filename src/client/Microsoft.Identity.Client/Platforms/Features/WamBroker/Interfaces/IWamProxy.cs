@@ -19,5 +19,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebAccount wamAccount);
         Task<IWebTokenRequestResultWrapper> RequestTokenForWindowAsync(IntPtr _parentHandle, WebTokenRequest webTokenRequest);
         Task<WebAccount> FindAccountAsync(WebAccountProvider provider, string wamAccountId);
+        bool TryGetAccountProperty(WebAccount webAccount, string propertyName, out string propertyValue);
+        
     }
 }

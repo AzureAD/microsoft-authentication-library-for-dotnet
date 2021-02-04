@@ -21,6 +21,8 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -122,7 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             brokerRequest.Add(BrokerParameter.Authority, authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
             string scopes = EnumerableExtensions.AsSingleString(authenticationRequestParameters.Scope);
             brokerRequest.Add(BrokerParameter.Scope, scopes);
-            brokerRequest.Add(BrokerParameter.ClientId, authenticationRequestParameters.ClientId);
+            brokerRequest.Add(BrokerParameter.ClientId, authenticationRequestParameters.AppConfig.ClientId);
             brokerRequest.Add(BrokerParameter.CorrelationId, authenticationRequestParameters.RequestContext.CorrelationId.ToString());
             brokerRequest.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
 
@@ -373,7 +375,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// <summary>
         /// iOS broker does not handle silent flow
         /// </summary>
-        public Task RemoveAccountAsync(IApplicationConfiguration applicationConfiguration, IAccount account)
+        public Task RemoveAccountAsync(ApplicationConfiguration applicationConfiguration, IAccount account)
         {
             throw new NotImplementedException();
         }
@@ -381,7 +383,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// <summary>
         /// iOS broker does not handle silent flow
         /// </summary>
-        public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
+        public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+                    string clientID,
+                    string redirectUri,
+                    string authority,
+                    ICacheSessionManager cacheSessionManager,
+                    IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             throw new NotImplementedException();
         }

@@ -6,14 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
-    internal sealed class ApplicationConfiguration : IApplicationConfiguration
+    internal sealed class ApplicationConfiguration : IAppConfig
     {
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";
@@ -41,6 +44,8 @@ namespace Microsoft.Identity.Client
 
         public bool IsBrokerEnabled { get; internal set; }
 
+        public Func<CoreUIParent, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
+
         public ITelemetryConfig TelemetryConfig { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }
@@ -62,11 +67,6 @@ namespace Microsoft.Identity.Client
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
         public bool UseRecommendedDefaultRedirectUri { get; internal set; }
 
-        internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
-
-        internal ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
-        internal ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
-
         public bool ExperimentalFeaturesEnabled { get; set; } = false;
 
         public IEnumerable<string> ClientCapabilities { get; set; }
@@ -80,6 +80,14 @@ namespace Microsoft.Identity.Client
         public IDictionary<string, string> ClaimsToSign { get; internal set; }
         public bool MergeWithDefaultClaims { get; internal set; }
         internal int ConfidentialClientCredentialCount;
+
+        public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
+
+        /// <summary>
+        /// Currently this is only required for WAM
+        /// </summary>
+        public bool IsMsaPassthrough { get; set; } = false;
+
 
         #region Authority
 
@@ -107,5 +115,15 @@ namespace Microsoft.Identity.Client
         internal bool ValidateAuthority { get; set; }
 
         #endregion
+
+        #region Test Hooks
+        internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
+
+        internal ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
+        internal ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
+
+        internal IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
+        #endregion
+
     }
 }

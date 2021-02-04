@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
@@ -34,14 +36,9 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public void HandleInstallUrl(string appLink)
         {
             throw new PlatformNotSupportedException();
-        }
+        }     
 
-        public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
-        {
-            throw new PlatformNotSupportedException();
-        }
-
-        public Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account)
+        public Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             throw new PlatformNotSupportedException();
         }
@@ -49,6 +46,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
             throw new PlatformNotSupportedException();
+        }
+
+        Task<IReadOnlyList<IAccount>> IBroker.GetAccountsAsync(string clientID, string redirectUri, string authority, ICacheSessionManager cacheSessionManager, IInstanceDiscoveryManager instanceDiscoveryManager)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -10,7 +10,9 @@ using Android.Content;
 using Android.Database;
 using Android.OS;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
@@ -227,21 +229,26 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return null;
         }
 
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+            string clientID,
+            string redirectUri,
+            string authority,
+            ICacheSessionManager cacheSessionManager,
+            IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             using (_logger.LogMethodDuration())
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
                     _logger.Warning("Android broker is either not installed or is not reachable so no accounts will be returned. ");
-                    return Enumerable.Empty<IAccount>();
+                    return null;
                 }
 
                 return await GetAccountsInternalAsync(clientID, redirectUri).ConfigureAwait(false);
             }
         }
 
-        private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(string clientID, string redirectUri)
+        private async Task<IReadOnlyList<IAccount>> GetAccountsInternalAsync(string clientID, string redirectUri)
         {
             BrokerRequest brokerRequest = new BrokerRequest() { ClientId = clientID, RedirectUri = new Uri(redirectUri) };
 
@@ -268,7 +275,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return bundleResult?.GetString(BrokerConstants.BrokerAccounts);
         }
 
-        public async Task RemoveAccountAsync(IApplicationConfiguration applicationConfiguration, IAccount account)
+        public async Task RemoveAccountAsync(ApplicationConfiguration applicationConfiguration, IAccount account)
         {
             using (_logger.LogMethodDuration())
             {
@@ -282,7 +289,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        private async Task PerformRemoveAccountsAsync(IApplicationConfiguration applicationConfiguration, IAccount account)
+        private async Task PerformRemoveAccountsAsync(ApplicationConfiguration applicationConfiguration, IAccount account)
         {
             try
             {

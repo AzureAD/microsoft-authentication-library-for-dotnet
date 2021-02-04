@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t",
                 authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
                 authenticationRequestParameters.Scope.AsSingleString(),
-                authenticationRequestParameters.ClientId,
+                authenticationRequestParameters.AppConfig.ClientId,
                 GetType().Name);
 
             string messageWithoutPii = string.Format(
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void ValidateScopeInput(HashSet<string> scopesToValidate)
         {
-            if (scopesToValidate.Contains(AuthenticationRequestParameters.ClientId))
+            if (scopesToValidate.Contains(AuthenticationRequestParameters.AppConfig.ClientId))
             {
                 throw new ArgumentException("API does not accept client id as a user-provided scope");
             }
@@ -165,7 +165,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.AuthorityType = AuthenticationRequestParameters.AuthorityInfo.AuthorityType.ToString();
             }
 
-            apiEvent.IsTokenCacheSerialized = (AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal).IsTokenCacheSerialized();
+            apiEvent.IsTokenCacheSerialized = AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsTokenCacheSerialized();
+            apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);
@@ -189,12 +190,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             ValidateAccountIdentifiers(fromServer);
-
-            IdToken idToken = IdToken.Parse(msalTokenResponse.IdToken);
-
-            AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority =
-                   Authority.CreateAuthorityWithTenant(AuthenticationRequestParameters.Authority.AuthorityInfo, idToken?.TenantId);
-
 
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
@@ -283,13 +278,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogReturnedToken(AuthenticationResult result)
         {
-            if (result.AccessToken != null)
+            if (result.AccessToken != null && 
+                AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} ===",
-                        result.ExpiresOn));
+                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} and Scopes {1}",
+                        result.ExpiresOn, 
+                        string.Join(" ", result.Scopes)));
             }
         }
     }

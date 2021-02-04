@@ -82,6 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<MsalTokenResponse> FetchTokensFromBrokerAsync(string brokerInstallUrl, CancellationToken cancellationToken)
         {
             IBroker broker = _serviceBundle.PlatformProxy.CreateBroker(
+                _serviceBundle.Config,
                 _interactiveParameters.UiParent);
 
             ITokenRequestComponent brokerInteractiveRequest =
@@ -100,7 +101,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (_requestParams.IsBrokerConfigured)
+            if (_requestParams.AppConfig.IsBrokerEnabled)
             {
                 _logger.Info("Broker is configured. Starting broker flow without knowing the broker installation app link. ");
 

@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
@@ -62,7 +64,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebTokenRequest request = new WebTokenRequest(
                 provider,
                 scopes,
-                authenticationRequestParameters.ClientId,
+                authenticationRequestParameters.AppConfig.ClientId,
                 promptType);
 
             if (addNewAccount || setLoginHint)
@@ -75,9 +77,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 }
             }
 
-            request.Properties.Add("api-version", "2.0"); // request V2 tokens over V1
-            request.Properties.Add("oauth2_batch", "1"); // request tokens as OAuth style name/value pairs
-            request.Properties.Add("x-client-info", "1"); // request client_info
+            AddV2Properties(request);
 
             if (ApiInformation.IsPropertyPresent("Windows.Security.Authentication.Web.Core.WebTokenRequest", "CorrelationId"))
             {
@@ -89,6 +89,25 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
 
             return request;
+        }
+
+        public Task<WebTokenRequest> CreateWebTokenRequestAsync(WebAccountProvider provider, string clientId, string scopes)
+        {
+            WebTokenRequest request = new WebTokenRequest(
+               provider,
+               scopes,
+               clientId,
+               WebTokenRequestPromptType.Default);
+
+            AddV2Properties(request);
+
+            return Task.FromResult(request);
+        }
+        private static void AddV2Properties(WebTokenRequest request)
+        {
+            request.Properties.Add("api-version", "2.0"); // request V2 tokens over V1
+            request.Properties.Add("oauth2_batch", "1"); // request tokens as OAuth style name/value pairs
+            request.Properties.Add("x-client-info", "1"); // request client_info
         }
 
         public string GetHomeAccountIdOrNull(WebAccount webAccount)
@@ -120,18 +139,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         /// Normal 1st and 3rd party apps must use AcquireTokenInteractive to login first, and then MSAL will
         /// save the account for later use.
         /// </summary>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+            string clientID,
+            string authority, 
+            ICacheSessionManager cacheSessionManager, 
+            IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             var webAccounProvider = await _webAccountProviderFactory.GetAccountProviderAsync("consumers").ConfigureAwait(false);
 
             var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccounProvider, clientID).ConfigureAwait(false);
-
+             
             var msalAccounts = webAccounts
                 .Select(webAcc => ConvertToMsalAccountOrNull(webAcc))
                 .Where(a => a != null)
                 .ToList();
 
-            _logger.Info($"[WAM MSA Plugin] GetAccountsAsync converted {webAccounts.Count()} MSAL accounts");
+            _logger.Info($"[WAM MSA Plugin] GetAccountsAsync converted {webAccounts.Count} MSAL accounts");
             return msalAccounts;
         }
 
@@ -176,7 +199,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return MsalError.InteractionRequired;
         }
 
-        public MsalTokenResponse ParseSuccesfullWamResponse(WebTokenResponse webTokenResponse)
+        public MsalTokenResponse ParseSuccessfullWamResponse(WebTokenResponse webTokenResponse, 
+            out Dictionary<string, string> allProperties)
         {
             string msaTokens = webTokenResponse.Token;
             if (string.IsNullOrEmpty(msaTokens))
@@ -188,6 +212,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             string accessToken = null, idToken = null, clientInfo = null, tokenType = null, scopes = null, correlationId = null;
             long expiresIn = 0;
+            allProperties = new Dictionary<string, string>(8, StringComparer.OrdinalIgnoreCase);
 
             foreach (string keyValuePairString in msaTokens.Split('&'))
             {
@@ -199,39 +224,36 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         "Internal error - bad token response format, expected '=' separated pair");
                 }
 
-                if (keyValuePair[0] == "access_token")
+                allProperties.Add(keyValuePair[0], keyValuePair[1]);
+
+                if (string.Equals(keyValuePair[0], "access_token", StringComparison.OrdinalIgnoreCase))
                 {
                     accessToken = keyValuePair[1];
                 }
-                else if (keyValuePair[0] == "id_token")
+                else if (string.Equals(keyValuePair[0], "id_token", StringComparison.OrdinalIgnoreCase))
                 {
                     idToken = keyValuePair[1];
                 }
-                else if (keyValuePair[0] == "token_type")
+                else if (string.Equals(keyValuePair[0], "token_type", StringComparison.OrdinalIgnoreCase))
                 {
                     tokenType = keyValuePair[1];
                 }
-                else if (keyValuePair[0] == "scope")
+                else if (string.Equals(keyValuePair[0], "scope", StringComparison.OrdinalIgnoreCase))
                 {
                     scopes = keyValuePair[1];
                 }
-                else if (keyValuePair[0] == "client_info")
+                else if (string.Equals(keyValuePair[0], "client_info", StringComparison.OrdinalIgnoreCase))
                 {
                     clientInfo = keyValuePair[1];
                 }
-                else if (keyValuePair[0] == "expires_in")
+                else if (string.Equals(keyValuePair[0], "expires_in", StringComparison.OrdinalIgnoreCase))
                 {
                     expiresIn = long.Parse(keyValuePair[1], CultureInfo.InvariantCulture);
                 }
-                else if (keyValuePair[0] == "correlation")
+                else if (string.Equals(keyValuePair[0], "correlation", StringComparison.OrdinalIgnoreCase))
                 {
                     correlationId = keyValuePair[1];
-                }
-                //else
-                //{
-                //    // TODO: C++ code saves the remaining properties, but I did not find a reason why                    
-                //    Debug.WriteLine($"{keyValuePair[0]}={keyValuePair[1]}");
-                //}
+                }               
             }
 
             if (string.IsNullOrEmpty(tokenType) || string.Equals("bearer", tokenType, System.StringComparison.OrdinalIgnoreCase))
@@ -239,14 +261,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 tokenType = "Bearer";
             }
 
-            if (string.IsNullOrEmpty(scopes))
-            {
-                throw new MsalClientException(
-                    MsaErrorCode,
-                    "Internal error - bad token response format, no scopes");
-            }
-
-            var responseScopes = scopes.Replace("%20", " ");
+            var responseScopes = scopes?.Replace("%20", " ");
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {
@@ -263,6 +278,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             };
 
             return msalTokenResponse;
-        }      
+        }
     }
 }

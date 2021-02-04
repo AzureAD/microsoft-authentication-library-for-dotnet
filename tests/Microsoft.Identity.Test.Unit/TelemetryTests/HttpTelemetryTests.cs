@@ -208,6 +208,28 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task LegacyCacheEnabledTelemetryTestAsync(bool isLegacyCacheEnabled)
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithHttpManager(_harness.HttpManager)
+                            .WithDefaultRedirectUri()
+                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
+                            .WithLegacyCacheCompatibility(isLegacyCacheEnabled)
+                            .BuildConcrete();
+
+                var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, forceRefresh: false, isLegacyCacheEnabled: isLegacyCacheEnabled);
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
+            }
+        }
+
         private enum AcquireTokenSilentOutcome
         {
             SuccessFromCache,
@@ -222,7 +244,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             /// <summary>
             /// An error occurs at the /authorization endpoint, for example
-            /// the user closes the embedded browser or AAD complains about a bad redirect uri being configured            
+            /// the user closes the embedded browser or AAD complains about a bad redirect URI being configured            
             /// </summary>
             AuthorizationError,
 
@@ -387,7 +409,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             HttpRequestMessage requestMessage, 
             ApiIds apiId, 
             bool forceRefresh,
-            bool isCacheSerialized = false)
+            bool isCacheSerialized = false,
+            bool isLegacyCacheEnabled = true)
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single();
@@ -404,6 +427,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.IsTrue(actualTelemetryParts[1].EndsWith(forceRefresh ? "1" : "0")); // force_refresh flag
 
             Assert.AreEqual(isCacheSerialized ? "1" : "0", actualTelemetryParts[2].Split(',')[2]); // is_cache_serialized
+
+            Assert.AreEqual(isLegacyCacheEnabled ? "1" : "0", actualTelemetryParts[2].Split(',')[6]); // is_legacy_cache_enabled
         }
 
         private static void AssertPreviousTelemetry(

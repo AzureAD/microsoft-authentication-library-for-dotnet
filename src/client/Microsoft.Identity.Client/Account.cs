@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client
     /// Contains information of a single account. A user can be present in multiple directories and thus have multiple accounts.
     /// This information is used for token cache lookup and enforcing the user session on the STS authorize endpoint.
     /// </summary>
-    internal sealed class Account : IAccountInternal
+    internal sealed class Account : IAccount
     {
         /// <summary>
         /// Constructor
@@ -20,12 +20,12 @@ namespace Microsoft.Identity.Client
         /// <param name="username">UPN style , can be null</param>
         /// <param name="environment">Identity provider for this account, e.g. <c>login.microsoftonline.com</c></param>
         /// <param name="wamAccountIds">Map of (client_id, wam_account_id)</param>
-        public Account(string homeAccountId, string username, string environment, IDictionary<string, string> wamAccountIds = null)
+        public Account(string homeAccountId, string username, string environment,IDictionary<string, string> wamAccountIds = null)
         {
             Username = username;
             Environment = environment;
             HomeAccountId = AccountId.ParseFromString(homeAccountId);
-            _wamAccountIds = wamAccountIds;
+            WamAccountIds = wamAccountIds;
         }        
 
         public string Username { get; }
@@ -33,11 +33,12 @@ namespace Microsoft.Identity.Client
         public string Environment { get; }
 
         public AccountId HomeAccountId { get; }
+       
 
-        private readonly IDictionary<string, string> _wamAccountIds;
-
-        IDictionary<string, string> IAccountInternal.WamAccountIds => _wamAccountIds;
-        
+        internal IDictionary<string, string> WamAccountIds
+        {
+            get;
+        }
 
         public override string ToString()
         {

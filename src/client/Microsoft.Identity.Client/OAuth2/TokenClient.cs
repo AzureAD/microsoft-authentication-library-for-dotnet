@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         private void AddBodyParamsAndHeaders(IDictionary<string, string> additionalBodyParameters, string scopes)
         {
-            _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.ClientId);
+            _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
 
 
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     _requestParams.RequestContext.Logger,
                     _serviceBundle.PlatformProxy.CryptographyManager,
                     _requestParams.ClientCredential,
-                    _requestParams.ClientId,
+                    _requestParams.AppConfig.ClientId,
                     _requestParams.Endpoints,
                     _requestParams.SendX5C);
 
@@ -157,21 +157,24 @@ namespace Microsoft.Identity.Client.OAuth2
                     _serviceBundle.HttpTelemetryManager.GetLastRequestHeader());
             }
 
-            //Signaling that the client can perform PKey Auth
-            _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
+            //Signaling that the client can perform PKey Auth on supported platforms
+            if (DeviceAuthHelper.CanOSPerformPKeyAuth())
+            {
+                _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
+            }
         }
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
         {
             UriBuilder builder = new UriBuilder(tokenEndpoint);
+            builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
+            Uri tokenEndpointWithQueryParams = builder.Uri;
 
             try
             {
-                builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
-
                 MsalTokenResponse msalTokenResponse =
                     await _oAuth2Client
-                        .GetTokenAsync(builder.Uri,
+                        .GetTokenAsync(tokenEndpointWithQueryParams,
                             _requestParams.RequestContext)
                         .ConfigureAwait(false);
 
@@ -193,13 +196,19 @@ namespace Microsoft.Identity.Client.OAuth2
                 if (ex.StatusCode == (int)HttpStatusCode.Unauthorized)
                 {
                     string responseHeader = string.Empty;
-                    var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponseAsync(ex.Headers, builder.Uri, out responseHeader);
+                    var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponseAsync(
+                        ex.Headers, 
+                        new Uri(tokenEndpoint), // do not add query params to PKeyAuth https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2359
+                        out responseHeader);
                     if (isChallenge)
                     {
                         //Injecting PKeyAuth response here and replaying request to attempt device auth
                         _oAuth2Client.AddHeader("Authorization", responseHeader);
 
-                        return await _oAuth2Client.GetTokenAsync(builder.Uri, _requestParams.RequestContext, false).ConfigureAwait(false);
+                        return await _oAuth2Client.GetTokenAsync(
+                            tokenEndpointWithQueryParams, 
+                            _requestParams.RequestContext, 
+                            false).ConfigureAwait(false);
                     }
                 }
 

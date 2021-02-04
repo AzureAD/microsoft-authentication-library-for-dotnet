@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit
 
             AuthenticationResult result = await app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithAzureRegion(true)
+                .WithPreferredAzureRegion(true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAzureRegion(true)
+                    .WithPreferredAzureRegion(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -107,8 +107,8 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [Description("Test when the region could not be fetched")]
-        public async Task RegionNotFoundAsync()
+        [Description("Test when the region could not be fetched and fallback to global is set to false.")]
+        public async Task RegionNotFoundAndFallbackToGlobalIsFalseAsync()
         {
             _httpManager.AddRegionDiscoveryMockHandlerNotFound();
 
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 AuthenticationResult result = await app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithAzureRegion(true)
+                .WithPreferredAzureRegion(true, fallbackToGlobal: false)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -129,6 +129,32 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNotNull(e);
                 Assert.AreEqual(MsalError.RegionDiscoveryFailed, e.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.RegionDiscoveryFailed, e.Message);
+            }
+        }
+
+        [TestMethod]
+        [Description("Test when the region could not be fetched and the user wants to fall back to global.")]
+        public async Task RegionFallbackToGlobalAsync()
+        {
+            _httpManager.AddRegionDiscoveryMockHandlerNotFound();
+            _httpManager.AddInstanceDiscoveryMockHandler();
+            _httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+
+            var app = CreateApp();
+
+            try
+            {
+                AuthenticationResult result = await app
+                .AcquireTokenForClient(TestConstants.s_scope)
+                .WithPreferredAzureRegion(true, string.Empty, true)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+            }
+            catch (MsalServiceException)
+            {
+                Assert.Fail("Fallback to global failed.");
             }
         }
 

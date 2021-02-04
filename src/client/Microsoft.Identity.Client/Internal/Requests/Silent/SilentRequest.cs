@@ -35,7 +35,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                                                                                                serviceBundle,
                                                                                                authenticationRequestParameters,
                                                                                                silentParameters,
-                                                                                               serviceBundle.PlatformProxy.CreateBroker(null)));
+                                                                                               serviceBundle.PlatformProxy.CreateBroker(
+                                                                                                   serviceBundle.Config, null)));
             _clientStrategy = clientStrategyOverride ?? new CacheSilentStrategy(this, serviceBundle, authenticationRequestParameters, silentParameters);
 
             _logger = authenticationRequestParameters.RequestContext.Logger;
@@ -45,7 +46,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             await UpdateRequestWithAccountAsync().ConfigureAwait(false);
             bool isBrokerConfigured =
-              AuthenticationRequestParameters.IsBrokerConfigured &&
+              AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
               ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
 
             try

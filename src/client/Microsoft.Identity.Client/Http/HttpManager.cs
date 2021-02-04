@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Http
                     clonedBody = await CloneHttpContentAsync(body).ConfigureAwait(false);
                 }
 
-                response = await ExecuteAsync(endpoint, headers, clonedBody, method, cancellationToken).ConfigureAwait(false);
+                response = await ExecuteAsync(endpoint, headers, clonedBody, method, logger, cancellationToken).ConfigureAwait(false);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -202,6 +202,7 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             HttpContent body,
             HttpMethod method,
+            ICoreLogger logger,
             CancellationToken cancellationToken = default)
         {
             HttpClient client = GetHttpClient();
@@ -211,9 +212,13 @@ namespace Microsoft.Identity.Client.Http
                 requestMessage.Method = method;
                 requestMessage.Content = body;
 
+                logger.Verbose($"[HttpManager] Sending request. Method: {method}. URI path: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ");
+
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                 {
+                    logger.Verbose($"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
+
                     HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
                     returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();
                     return returnValue;

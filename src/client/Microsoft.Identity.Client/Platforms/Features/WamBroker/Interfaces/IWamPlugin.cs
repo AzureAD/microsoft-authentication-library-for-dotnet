@@ -11,7 +11,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     internal interface IWamPlugin
     {
-        Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID);
+        Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+            string clientID, 
+            string authority, 
+            Cache.ICacheSessionManager cacheSessionManager, 
+            Instance.Discovery.IInstanceDiscoveryManager instanceDiscoveryManager);
 
         Task<WebTokenRequest> CreateWebTokenRequestAsync(
             WebAccountProvider provider,
@@ -20,9 +24,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             bool isInteractive,
             bool isAccountInWam);
 
-        MsalTokenResponse ParseSuccesfullWamResponse(WebTokenResponse webTokenResponse);
+        Task<WebTokenRequest> CreateWebTokenRequestAsync(
+            WebAccountProvider provider,
+            string clientId,
+            string scopes);
 
-        string MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive);
+        MsalTokenResponse ParseSuccessfullWamResponse(
+            WebTokenResponse webTokenResponse, 
+            out Dictionary<string, string> allProperties);
+
+        string MapTokenRequestError(
+            WebTokenRequestStatus status, 
+            uint errorCode, 
+            bool isInteractive);
+
         string GetHomeAccountIdOrNull(WebAccount webAccount);
     }
 }

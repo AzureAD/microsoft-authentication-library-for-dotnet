@@ -25,10 +25,12 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed partial class TokenCache : ITokenCacheInternal
     {
-        async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> ITokenCacheInternal.SaveTokenResponseAsync(
+        async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> ITokenCacheInternal.SaveTokenResponseAsync(
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
+            response.Log(requestParams.RequestContext.Logger, LogLevel.Verbose);
+
             MsalAccessTokenCacheItem msalAccessTokenCacheItem = null;
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
             MsalIdTokenCacheItem msalIdTokenCacheItem = null;
@@ -40,9 +42,7 @@ namespace Microsoft.Identity.Client
                 requestParams.RequestContext.Logger.Info("ID Token not present in response. ");
             }
 
-            var tenantId = Authority
-                .CreateAuthority(requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo.CanonicalAuthority)
-                .TenantId;
+            var tenantId = GetTenantId(idToken, requestParams);
 
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
             string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client
             // so that the PreferredNetwork environment is up to date.
             var instanceDiscoveryMetadata = await ServiceBundle.InstanceDiscoveryManager
                                 .GetMetadataEntryAsync(
-                                    requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo.CanonicalAuthority,
+                                    requestParams.Authority.AuthorityInfo.CanonicalAuthority,
                                     requestParams.RequestContext)
                                 .ConfigureAwait(false);
 
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
                 msalAccessTokenCacheItem =
                     new MsalAccessTokenCacheItem(
                         instanceDiscoveryMetadata.PreferredCache,
-                        requestParams.ClientId,
+                        requestParams.AppConfig.ClientId,
                         response,
                         tenantId,
                         homeAccountId,
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
             {
                 msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
                                     instanceDiscoveryMetadata.PreferredCache,
-                                    requestParams.ClientId,
+                                    requestParams.AppConfig.ClientId,
                                     response,
                                     homeAccountId);
 
@@ -89,11 +89,13 @@ namespace Microsoft.Identity.Client
                 }
             }
 
+            Dictionary<string, string> wamAccountIds = GetWamAccountIds(requestParams, response);
+            Account account = null;
             if (idToken != null)
             {
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem(
                     instanceDiscoveryMetadata.PreferredCache,
-                    requestParams.ClientId,
+                    requestParams.AppConfig.ClientId,
                     response,
                     tenantId,
                     homeAccountId)
@@ -101,7 +103,6 @@ namespace Microsoft.Identity.Client
                     IsAdfs = isAdfsAuthority
                 };
 
-                Dictionary<string, string> wamAccountIds = GetWamAccountIds(requestParams, response);
 
                 msalAccountCacheItem = new MsalAccountCacheItem(
                              instanceDiscoveryMetadata.PreferredCache,
@@ -115,10 +116,11 @@ namespace Microsoft.Identity.Client
 
             #endregion
 
-            Account account = new Account(
+            account = new Account(
                     homeAccountId,
                     username,
-                    instanceDiscoveryMetadata.PreferredCache);
+                    instanceDiscoveryMetadata.PreferredNetwork, 
+                    wamAccountIds);
 
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
@@ -175,14 +177,16 @@ namespace Microsoft.Identity.Client
                         _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
                     }
 
-                    UpdateAppMetadata(requestParams.ClientId, instanceDiscoveryMetadata.PreferredCache, response.FamilyId);
+                    UpdateAppMetadata(requestParams.AppConfig.ClientId, instanceDiscoveryMetadata.PreferredCache, response.FamilyId);
 
-                    // Do not save RT in ADAL cache for confidential client or B2C                        
-                    if (!requestParams.IsClientCredentialRequest &&
+                    // Do not save RT in ADAL cache for client credentials flow or B2C                        
+                    if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled &&
+                        !requestParams.IsClientCredentialRequest &&
                         requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
                     {
+                        var tenatedAuthority = Authority.CreateAuthorityWithTenant(requestParams.AuthorityInfo, tenantId);
                         var authorityWithPreferredCache = Authority.CreateAuthorityWithEnvironment(
-                                requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo,
+                                tenatedAuthority.AuthorityInfo,
                                 instanceDiscoveryMetadata.PreferredCache);
 
                         CacheFallbackOperations.WriteAdalRefreshToken(
@@ -216,12 +220,21 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
 
-                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
+                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
             }
             finally
             {
                 _semaphoreSlim.Release();
             }
+        }
+
+        private string GetTenantId(IdToken idToken, AuthenticationRequestParameters requestParams)
+        {
+            // If the input authority was tenanted, use that tenant over the IdToken.Tenant
+            // otherwise, this will result in cache misses
+            return Authority.CreateAuthorityWithTenant(
+                requestParams.Authority.AuthorityInfo, 
+                idToken?.TenantId).TenantId;
         }
 
         private void MergeWamAccountIds(MsalAccountCacheItem msalAccountCacheItem)
@@ -240,7 +253,7 @@ namespace Microsoft.Identity.Client
         {
             if (!string.IsNullOrEmpty(response.WamAccountId))
             {
-                return new Dictionary<string, string>() { { requestParams.ClientId, response.WamAccountId } };
+                return new Dictionary<string, string>() { { requestParams.AppConfig.ClientId, response.WamAccountId } };
             }
 
             return new Dictionary<string, string>();
@@ -296,14 +309,13 @@ namespace Microsoft.Identity.Client
             // no authority passed
             if (requestParams.AuthorityInfo?.CanonicalAuthority == null)
             {
-                logger.Warning("No authority provided. Skipping cache lookup ");
+                logger.Warning("FindAccessToken: No authority provided. Skipping cache lookup ");
                 return null;
             }
 
-            logger.Verbose("Looking up access token in the cache.");
             // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
             // as this method is NOT locked by the semaphore
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true).ToList();
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true).ToList();            
 
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
@@ -330,12 +342,22 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
         {
+            var logger = requestParams.RequestContext.Logger;
             var requestScopes = requestParams.Scope.Where(s =>
                 !OAuth2Value.ReservedScopes.Contains(s));
 
             tokenCacheItems = tokenCacheItems.FilterWithLogging(
-                item => ScopeHelper.ScopeContains(item.ScopeSet, requestScopes),
-                requestParams.RequestContext.Logger,
+                item => {
+                    bool accepted = ScopeHelper.ScopeContains(item.ScopeSet, requestScopes);
+                    
+                    if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                    {
+                        logger.Verbose($"Access token with scopes {string.Join(" ", item.ScopeSet)} " +
+                            $"passes scope filter? {accepted} ");
+                    }
+                    return accepted;
+                    },
+                logger,
                 "Filtering by scopes");
 
             return tokenCacheItems;
@@ -544,7 +566,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<MsalRefreshTokenCacheKey> candidateRtKeys = aliases.Select(
                     al => new MsalRefreshTokenCacheKey(
                         al,
-                        requestParams.ClientId,
+                        requestParams.AppConfig.ClientId,
                         requestParams.Account?.HomeAccountId?.Identifier,
                         familyId));
 
@@ -560,14 +582,15 @@ namespace Microsoft.Identity.Client
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
 
             // ADAL legacy cache does not store FRTs
-            if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
+            if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled &&
+                requestParams.Account != null &&
+                string.IsNullOrEmpty(familyId))
             {
-
                 return CacheFallbackOperations.GetRefreshToken(
                     Logger,
                     LegacyCachePersistence,
                     aliases,
-                    requestParams.ClientId,
+                    requestParams.AppConfig.ClientId,
                     requestParams.Account);
             }
 
@@ -631,17 +654,22 @@ namespace Microsoft.Identity.Client
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache. ");
 
-            AdalUsersForMsal adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
-                Logger,
-                LegacyCachePersistence,
-                ClientId);
-
             // Multi-cloud support - must filter by env.
             ISet<string> allEnvironmentsInCache = new HashSet<string>(
                 accountCacheItems.Select(aci => aci.Environment),
                 StringComparer.OrdinalIgnoreCase);
             allEnvironmentsInCache.UnionWith(rtCacheItems.Select(rt => rt.Environment));
-            allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnviroments());
+
+            AdalUsersForMsal adalUsersResult = null;
+
+            if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled)
+            {
+                adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
+                    Logger,
+                    LegacyCachePersistence,
+                    ClientId);
+                allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnviroments());
+            }
 
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                 requestParameters.AuthorityInfo.CanonicalAuthority,
@@ -664,25 +692,29 @@ namespace Microsoft.Identity.Client
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
                             account.PreferredUsername,
-                            environment);  // Preserve the env passed in by the user
+                            environment, // Preserve the env passed in by the user
+                            account.WamAccountIds);  
 
                         break;
                     }
                 }
             }
 
-            UpdateMapWithAdalAccountsWithClientInfo(
-                environment,
-                instanceMetadata.Aliases,
-                adalUsersResult,
-                clientInfoToAccountMap);
-
+            if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled)
+            {
+                UpdateMapWithAdalAccountsWithClientInfo(
+                    environment,
+                    instanceMetadata.Aliases,
+                    adalUsersResult,
+                    clientInfoToAccountMap);
+            }
+            
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
-            if (requestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
+            if (requestParameters.AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
             {
                 foreach (MsalAccountCacheItem wamAccountCache in accountCacheItems.Where(
                     acc => acc.WamAccountIds != null &&
-                    acc.WamAccountIds.ContainsKey(requestParameters.ClientId)))
+                    acc.WamAccountIds.ContainsKey(requestParameters.AppConfig.ClientId)))
                 {
                     var wamAccount = new Account(
                         wamAccountCache.HomeAccountId,
@@ -792,7 +824,10 @@ namespace Microsoft.Identity.Client
                     }
 
                     tokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
-                    RemoveAdalUser(account);
+                    if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled)
+                    {
+                        RemoveAdalUser(account);
+                    }
                 }
                 finally
                 {

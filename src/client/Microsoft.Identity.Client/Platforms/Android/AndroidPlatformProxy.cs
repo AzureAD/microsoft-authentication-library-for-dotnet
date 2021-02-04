@@ -208,21 +208,16 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public override bool UseEmbeddedWebViewDefault => false;
 
-        public override IBroker CreateBroker(CoreUIParent uIParent)
+        public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
-            if (OverloadBrokerForTest != null)
-            {
-                return OverloadBrokerForTest;
-            }
-            
-            AndroidBrokerOrchestrator androidBrokerOrchestrator = new AndroidBrokerOrchestrator(uIParent, Logger);
+            AndroidBrokerOrchestrator androidBrokerOrchestrator = new AndroidBrokerOrchestrator(uiParent, Logger);
 
             return androidBrokerOrchestrator.GetBroker();
         }
 
         public override bool CanBrokerSupportSilentAuth()
         {
-            IBroker broker = CreateBroker(null);
+            IBroker broker = CreateBroker(null, null);
 
             if (broker.IsBrokerInstalledAndInvokable())
             {

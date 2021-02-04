@@ -53,6 +53,7 @@
             this.cbxMsaPt = new System.Windows.Forms.CheckBox();
             this.btnExpire = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.cbxBackgroundThread = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // resultTbx
@@ -82,6 +83,7 @@
             "https://login.microsoftonline.com/consumers",
             "https://login.microsoftonline.com/49f548d0-12b7-4169-a390-bb5304d24462",
             "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "https://login.microsoftonline.com/61411618-6f67-4fc5-ba6a-4a0fe32d4eec",
             "https://login.windows-ppe.net/organizations",
             "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47"});
             this.authorityCbx.Location = new System.Drawing.Point(63, 13);
@@ -218,7 +220,8 @@
             this.cbxScopes.Items.AddRange(new object[] {
             "User.Read",
             "User.Read User.Read.All",
-            "https://management.core.windows.net//.default"});
+            "https://management.core.windows.net//.default",
+            "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess"});
             this.cbxScopes.Location = new System.Drawing.Point(63, 37);
             this.cbxScopes.Name = "cbxScopes";
             this.cbxScopes.Size = new System.Drawing.Size(545, 21);
@@ -290,11 +293,22 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.remoteAcc_click);
             // 
+            // cbxBackgroundThread
+            // 
+            this.cbxBackgroundThread.AutoSize = true;
+            this.cbxBackgroundThread.Location = new System.Drawing.Point(212, 101);
+            this.cbxBackgroundThread.Name = "cbxBackgroundThread";
+            this.cbxBackgroundThread.Size = new System.Drawing.Size(146, 17);
+            this.cbxBackgroundThread.TabIndex = 26;
+            this.cbxBackgroundThread.Text = "Force background thread";
+            this.cbxBackgroundThread.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(639, 613);
+            this.Controls.Add(this.cbxBackgroundThread);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnExpire);
             this.Controls.Add(this.cbxMsaPt);
@@ -352,6 +366,7 @@
         private System.Windows.Forms.CheckBox cbxMsaPt;
         private System.Windows.Forms.Button btnExpire;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.CheckBox cbxBackgroundThread;
     }
 }
 

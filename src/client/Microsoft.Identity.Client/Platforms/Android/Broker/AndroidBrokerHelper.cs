@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         /// <summary>
         /// This method will acquire all of the accounts in the account manager that have an access token for the given client ID.
         /// </summary>
-        public IEnumerable<IAccount> ExtractBrokerAccountsFromAccountData(string accountData)
+        public IReadOnlyList<IAccount> ExtractBrokerAccountsFromAccountData(string accountData)
         {
             List<IAccount> brokerAccounts = new List<IAccount>();
 
@@ -345,7 +345,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     }
                 }
             }
-
         }
 
         private List<X509Certificate2> ReadCertDataForBrokerApp(string brokerPackageName)

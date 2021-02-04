@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 IBroker mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable().ReturnsForAnyArgs(brokerIsInstalledAndInvokable);
 
-                harness.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
+                harness.ServiceBundle.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
 
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.ExtraQueryParameters,
                     null,
                     authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, false));
-                parameters.IsBrokerConfigured = brokerConfiguredByUser;
+                parameters.AppConfig.IsBrokerEnabled = brokerConfiguredByUser;
 
                 var silentParameters = new AcquireTokenSilentParameters()
                 {

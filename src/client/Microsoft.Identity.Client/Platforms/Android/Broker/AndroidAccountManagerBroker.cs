@@ -23,6 +23,8 @@ using Android.Accounts;
 using Java.Util.Concurrent;
 using OperationCanceledException = Android.Accounts.OperationCanceledException;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -245,7 +247,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _brokerHelper.HandleInstallUrl(appLink, _parentActivity);
         }
 
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+            string clientId,
+            string redirectUri,
+            string authority,
+            ICacheSessionManager cacheSessionManager,
+            IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             using (_logger.LogMethodDuration())
             {
@@ -255,7 +262,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     return new List<IAccount>();
                 }
 
-                BrokerRequest brokerRequest = new BrokerRequest() { ClientId = clientID, RedirectUri = new Uri(redirectUri) };
+                BrokerRequest brokerRequest = new BrokerRequest() { ClientId = clientId, RedirectUri = new Uri(redirectUri) };
 
                 try
                 {
@@ -274,7 +281,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        public async Task RemoveAccountAsync(IApplicationConfiguration applicationConfiguration, IAccount account)
+        public async Task RemoveAccountAsync(ApplicationConfiguration applicationConfiguration, IAccount account)
         {
             using (_logger.LogMethodDuration())
             {

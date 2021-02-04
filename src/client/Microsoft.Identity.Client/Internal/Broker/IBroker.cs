@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using System.Collections.Generic;
@@ -33,9 +35,14 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         //These methods are only available to brokers that have the BrokerSupportsSilentFlow flag enabled
         #region Silent Flow Methods
-        Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri);
+        Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+            string clientId, 
+            string redirectUri,
+            string authority,
+            ICacheSessionManager cacheSessionManager,
+            IInstanceDiscoveryManager instanceDiscoveryManager);
 
-        Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account);
+        Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account);
         #endregion Silent Flow Methods
     }
 }

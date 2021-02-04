@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Details on the configuration of the ClientApplication for debugging purposes.
         /// </summary>
-        public IAppConfig AppConfig => ServiceBundle.Config;
+        public IAppConfig AppConfig => ServiceBundle.Config;        
 
         /// <Summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         public async Task<IAccount> GetAccountAsync(string accountId)
         {
-            var accounts = await GetAccountsFromCacheAsync(ApiIds.GetAccountById, accountId).ConfigureAwait(false);
+            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountById, accountId).ConfigureAwait(false);            
             return accounts.SingleOrDefault();
         }
 
@@ -138,30 +138,53 @@ namespace Microsoft.Identity.Client
 
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                await broker.RemoveAccountAsync((AppConfig as IApplicationConfiguration), account).ConfigureAwait(false);
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+                await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
             }
         }
 
         private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(ApiIds apiId, string homeAccountIdFilter = null)
         {
-            var accountsFromCache = await GetAccountsFromCacheAsync(apiId, homeAccountIdFilter).ConfigureAwait(false);
-            var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter).ConfigureAwait(false);
+            RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
 
-            ServiceBundle.DefaultLogger.Info($"Found {accountsFromCache.Count()} cache accounts and {accountsFromCache.Count()} broker accounts");
+            var authParameters = new AuthenticationRequestParameters(
+                   ServiceBundle,
+                   UserTokenCacheInternal,
+                   new AcquireTokenCommonParameters() { ApiId = apiId },
+                   requestContext,
+                   homeAccountIdFilter);
+
+            // a simple session consisting of a single call
+            var cacheSessionManager = new CacheSessionManager(
+                UserTokenCacheInternal,
+                authParameters);
+
+            var accountsFromCache = await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
+            var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter, cacheSessionManager).ConfigureAwait(false);
+            accountsFromCache = accountsFromCache ?? Enumerable.Empty<IAccount>();
+            accountsFromBroker = accountsFromBroker ?? Enumerable.Empty<IAccount>();
+
+            ServiceBundle.DefaultLogger.Info($"Found {accountsFromCache.Count()} cache accounts and {accountsFromBroker.Count()} broker accounts");
             IEnumerable<IAccount> cacheAndBrokerAccounts = MergeAccounts(accountsFromCache, accountsFromBroker);
 
-            ServiceBundle.DefaultLogger.Verbose($"Returning {cacheAndBrokerAccounts.Count()} accounts");
+            ServiceBundle.DefaultLogger.Info($"Returning {cacheAndBrokerAccounts.Count()} accounts");
             return cacheAndBrokerAccounts;
         }
 
-        private async Task<IEnumerable<IAccount>> GetAccountsFromBrokerAsync(string homeAccountIdFilter)
+        private async Task<IEnumerable<IAccount>> GetAccountsFromBrokerAsync(
+            string homeAccountIdFilter,
+            ICacheSessionManager cacheSessionManager)
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
                 var brokerAccounts =
-                    (await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false))
+                    (await broker.GetAccountsAsync(
+                        AppConfig.ClientId, 
+                        AppConfig.RedirectUri, 
+                        Authority,
+                        cacheSessionManager,
+                        ServiceBundle.InstanceDiscoveryManager).ConfigureAwait(false))
                     ?? Enumerable.Empty<IAccount>();
 
                 if (!string.IsNullOrEmpty(homeAccountIdFilter))
@@ -179,6 +202,7 @@ namespace Microsoft.Identity.Client
             return Enumerable.Empty<IAccount>();
         }
 
+        // Not all brokers return the accounts only for the given env
         private async Task<IEnumerable<IAccount>> FilterBrokerAccountsByEnvAsync(IEnumerable<IAccount> brokerAccounts)
         {
             ServiceBundle.DefaultLogger.Verbose($"Filtering broker accounts by env. Before filtering: " + brokerAccounts.Count());
@@ -208,34 +232,19 @@ namespace Microsoft.Identity.Client
 
             foreach (IAccount account in brokerAccounts)
             {
-                if (!cacheAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId)))
+                if (!cacheAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId))) // AccountId is equatable
                 {
                     allAccounts.Add(account);
+                }
+                else
+                {
+                    ServiceBundle.DefaultLogger.InfoPii(
+                        "Account merge eliminated broker account with id: " + account.HomeAccountId,
+                        "Account merge eliminated an account");
                 }
             }
 
             return allAccounts;
-        }
-
-        private async Task<IEnumerable<IAccount>> GetAccountsFromCacheAsync(
-            ApiIds apiId,
-            string homeAccountIdFilter)
-        {
-            RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
-
-            var authParameters = new AuthenticationRequestParameters(
-                    ServiceBundle,
-                    UserTokenCacheInternal,
-                    new AcquireTokenCommonParameters() { ApiId = apiId },
-                    requestContext,
-                    homeAccountIdFilter);
-
-            // a simple session consisting of a single call
-            CacheSessionManager cacheSessionManager = new CacheSessionManager(
-                UserTokenCacheInternal,
-                authParameters);
-
-            return await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
         }
 
         // This implementation should ONLY be called for cases where we aren't participating in

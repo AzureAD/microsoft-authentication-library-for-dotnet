@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";
         public const string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/common/";
         public const string AuthorityRegional = "https://" + ProductionPrefRegionalEnvironment + "/" + TenantId + "/";
+        public const string AuthorityTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantId + "/";
         public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";
 
         public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
@@ -199,11 +200,11 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", uid, utid);
         }
 
-        public static MsalTokenResponse CreateMsalTokenResponse()
+        public static MsalTokenResponse CreateMsalTokenResponse(string tenantId = null)
         {
             return new MsalTokenResponse
             {
-                IdToken = MockHelpers.CreateIdToken(UniqueId, DisplayableId),
+                IdToken = MockHelpers.CreateIdToken(UniqueId, DisplayableId, tenantId),
                 AccessToken = "access-token",
                 ClientInfo = MockHelpers.CreateClientInfo(),
                 ExpiresIn = 3599,

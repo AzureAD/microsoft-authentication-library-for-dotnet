@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return true;
         }
 
-        public override IBroker CreateBroker(CoreUIParent uiParent)
+        public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
             return new WamBroker(uiParent, Logger);
         }
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override IDeviceAuthManager CreateDeviceAuthManager()
         {
-            return new UapDeviceAuthManager();
+            return new NullDeviceAuthManager();
         }
     }
 }

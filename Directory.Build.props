@@ -3,6 +3,7 @@
     <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
 
     <LangVersion>7.2</LangVersion>
+    <!-- This is strong naming, not signing-->
     <SignAssembly>true</SignAssembly>
     <!-- The MSAL.snk has both private and public keys -->
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/build/MSAL.snk</AssemblyOriginatorKeyFile>
@@ -10,6 +11,7 @@
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <!-- PrivateAssets="All" is on these packages to ensure they're development dependencies

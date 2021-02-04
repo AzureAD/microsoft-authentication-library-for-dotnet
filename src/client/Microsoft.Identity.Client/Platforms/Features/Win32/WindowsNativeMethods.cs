@@ -5,7 +5,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Microsoft.Identity.Client.Platforms.Features.Windows
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal static class WindowsNativeMethods
     {
@@ -16,6 +16,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.Windows
             NetSetupWorkgroupName,
             NetSetupDomainName
         }
+
+
+        [DllImport("kernel32.dll")]
+        public static extern uint GetCurrentProcessId();
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         private const int PROCESSOR_ARCHITECTURE_AMD64 = 9;
         private const int PROCESSOR_ARCHITECTURE_ARM = 5;
@@ -68,6 +75,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.Windows
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
 
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetConsoleWindow();
+
         [StructLayout(LayoutKind.Sequential)]
         private struct SYSTEM_INFO
         {
@@ -82,6 +92,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.Windows
             public readonly int dwAllocationGranularity;
             public readonly short wProcessorLevel;
             public readonly short wProcessorRevision;
-        }       
+        }
     }
 }

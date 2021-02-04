@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.Internal
                 extraScopesToConsent = ScopeHelper.CreateScopeSet(_interactiveParameters.ExtraScopesToConsent);
             }
 
-            if (extraScopesToConsent.Contains(_requestParams.ClientId))
+            if (extraScopesToConsent.Contains(_requestParams.AppConfig.ClientId))
             {
                 throw new ArgumentException("API does not accept client id as a user-provided scope");
             }
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Internal
                 [OAuth2Parameter.Scope] = unionScope.AsSingleString(),
                 [OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code,
 
-                [OAuth2Parameter.ClientId] = _requestParams.ClientId,
+                [OAuth2Parameter.ClientId] = _requestParams.AppConfig.ClientId,
                 [OAuth2Parameter.RedirectUri] = redirectUriOverride?.OriginalString ?? _requestParams.RedirectUri.OriginalString
             };
 

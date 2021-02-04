@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.Cache
@@ -21,7 +22,7 @@ namespace Microsoft.Identity.Client.Cache
 
             if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.GetAccountById)
             {
-                return requestParameters.HomeAccountId; 
+                return requestParameters.HomeAccountId;
             }
 
             return null;
@@ -35,7 +36,7 @@ namespace Microsoft.Identity.Client.Cache
                 return key;
             }
 
-            if (requestParameters.IsConfidentialClient || 
+            if (requestParameters.IsConfidentialClient ||
                 requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent)
             {
                 return homeAccountIdFromResponse;
@@ -54,7 +55,8 @@ namespace Microsoft.Identity.Client.Cache
 
             if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
-                key = requestParameters.ClientId + "_AppTokenCache";
+                string tenantId = requestParameters.Authority.TenantId ?? "";
+                key = $"{requestParameters.AppConfig.ClientId}_{tenantId}_AppTokenCache";
                 return true;
             }
 

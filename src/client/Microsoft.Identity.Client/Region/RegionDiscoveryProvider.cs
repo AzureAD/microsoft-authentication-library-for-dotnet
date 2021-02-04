@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Client.Region
         private static string s_region;
 
         public RegionDiscoveryProvider(
-            IHttpManager httpManager, 
-            INetworkCacheMetadataProvider networkCacheMetadataProvider = null, 
+            IHttpManager httpManager,
+            INetworkCacheMetadataProvider networkCacheMetadataProvider = null,
             int imdsCallTimeout = 2000,
             /* for tests only */ bool shouldClearCaches = false)
         {
@@ -52,9 +52,16 @@ namespace Microsoft.Identity.Client.Region
             s_region = null;
         }
 
-        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
+        public async Task<InstanceDiscoveryMetadataEntry> TryGetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
+
+            if (regionalizedAuthority == null && requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
+            {
+                requestContext.Logger.Verbose($"[Region discovery] Unable to determine region. Falling back to global.");
+                return null;
+            }
+
             InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, requestContext.Logger);
 
             if (cachedEntry == null)
@@ -62,14 +69,14 @@ namespace Microsoft.Identity.Client.Region
                 CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
 
                 cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, requestContext.Logger);
-                requestContext.Logger.Verbose($"[Region Discovery] Created metadata for the regional environment {regionalizedAuthority.Host} ? {cachedEntry != null}");
+                requestContext.Logger.Verbose($"[Region discovery] Created metadata for the regional environment {regionalizedAuthority.Host} ? {cachedEntry != null}");
             }
             else
             {
-                requestContext.Logger.Verbose($"[Region Discovery] The network provider found an entry for {regionalizedAuthority.Host}");
+                requestContext.Logger.Verbose($"[Region discovery] The network provider found an entry for {regionalizedAuthority.Host}");
                 LogTelemetryData(cachedEntry.PreferredNetwork.Split('.')[0], RegionSource.Cache, requestContext);
             }
-            
+
             return cachedEntry;
         }
 
@@ -104,7 +111,9 @@ namespace Microsoft.Identity.Client.Region
 
                 if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                 {
-                    return response.Body;
+                    region = response.Body;
+                    LogTelemetryData(region, RegionSource.Imds, requestContext);
+                    return region;
                 }
 
                 requestContext.Logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
@@ -113,7 +122,7 @@ namespace Microsoft.Identity.Client.Region
                     MsalError.RegionDiscoveryFailed,
                     MsalErrorMessage.RegionDiscoveryFailed,
                     response);
-            }  
+            }
             catch (MsalServiceException e)
             {
                 if (MsalError.RequestTimeout.Equals(e.ErrorCode))
@@ -141,11 +150,8 @@ namespace Microsoft.Identity.Client.Region
         private void LogTelemetryData(string region, RegionSource regionSource, RequestContext requestContext)
         {
             requestContext.ApiEvent.RegionDiscovered = region;
-
-            if (requestContext.ApiEvent.RegionSource == 0)
-            {
-                requestContext.ApiEvent.RegionSource = (int) regionSource;
-            }
+            requestContext.ApiEvent.RegionSource = (int)regionSource;
+            requestContext.ApiEvent.UserProvidedRegion = requestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse;
         }
 
         private async Task<string> GetImdsUriApiVersionAsync(ICoreLogger logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
@@ -165,10 +171,10 @@ namespace Microsoft.Identity.Client.Region
                     return errorResponse.NewestVersions[0];
                 }
 
-                logger.Info("[Region Discovery] The response is empty or does not contain the newest versions.");
+                logger.Info("[Region discovery] The response is empty or does not contain the newest versions.");
             }
 
-            logger.Info($"[Region Discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}");
+            logger.Info($"[Region discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}");
 
             throw MsalServiceExceptionFactory.FromImdsResponse(
             MsalError.RegionDiscoveryFailed,
@@ -204,11 +210,48 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<Uri> BuildAuthorityWithRegionAsync(Uri canonicalAuthority, RequestContext requestContext)
         {
+            string regionToUse = requestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse;
+
             if (s_region.IsNullOrEmpty())
             {
-                s_region = await GetRegionAsync(requestContext).ConfigureAwait(false);
+                try
+                {
+                    s_region = await GetRegionAsync(requestContext).ConfigureAwait(false);
+
+                    if (!regionToUse.IsNullOrEmpty())
+                    {
+                        requestContext.ApiEvent.IsValidUserProvidedRegion = s_region.Equals(regionToUse);
+                        requestContext.Logger.Info($"[Region discovery] The auto detected region is {s_region}.");
+                        requestContext.ApiEvent.FallbackToGlobal = false;
+
+                        if (s_region.Equals(regionToUse))
+                        {
+                            requestContext.Logger.Info($"[Region discovery] The region ({regionToUse}) provided by the user is valid and equal to the auto detected region.");
+                        }
+                        else
+                        {
+                            requestContext.Logger.Info($"[Region discovery] The region provided by the user is invalid. Region detected: {s_region} Region provided: {regionToUse}");
+                        }
+                    }
+                }
+                catch
+                {
+                    if (regionToUse.IsNullOrEmpty())
+                    {
+                        throw;
+                    }
+
+                    s_region = regionToUse;
+                    requestContext.ApiEvent.FallbackToGlobal = false;
+                    requestContext.Logger.Info($"[Region discovery] Region auto detection failed. Region provided by the user will be used: ${regionToUse}.");
+                    LogTelemetryData(s_region, RegionSource.UserProvided, requestContext);
+                }
             }
-            
+            else
+            {
+                requestContext.ApiEvent.FallbackToGlobal = false;
+            }
+
             var builder = new UriBuilder(canonicalAuthority);
 
             if (KnownMetadataProvider.IsPublicEnvironment(canonicalAuthority.Host))

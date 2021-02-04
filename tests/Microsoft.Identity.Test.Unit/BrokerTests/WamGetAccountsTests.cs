@@ -36,27 +36,29 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
-                    .WithBroker(true)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
-                pca.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y) => mockBroker;
 
                 // Act
                 await pca.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
                 // Assert
-                var wamAccountIds = (accounts.Single() as IAccountInternal).WamAccountIds;
+                var wamAccountIds = (accounts.Single() as Account).WamAccountIds;
                 Assert.AreEqual(1, wamAccountIds.Count);
                 Assert.AreEqual("wam1", wamAccountIds[TestConstants.ClientId]);
 
                 var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId2)
                     .WithExperimentalFeatures(true)
-                    .WithBroker(true)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
-                pca2.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
+                
+                pca2.ServiceBundle.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
+
                 var accounts2 = await pca2.GetAccountsAsync().ConfigureAwait(false);
                 Assert.IsFalse(accounts2.Any());
             }
@@ -82,21 +84,21 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // 2 apps must share the token cache, like FOCI apps, for this test to be interesting
                 var pca1 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
-                    .WithBroker(true)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
                 var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId2)
                     .WithExperimentalFeatures(true)
-                    .WithBroker(true)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
                 cache.Bind(pca1.UserTokenCache);
                 cache.Bind(pca2.UserTokenCache);
 
-                pca1.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
-                pca2.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
+                pca1.ServiceBundle.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
+                pca2.ServiceBundle.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
 
                 // Act 
                 mockBroker.AcquireTokenInteractiveAsync(null, null).ReturnsForAnyArgs(Task.FromResult(msalTokenResponse1));
@@ -114,11 +116,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert
 #if SUPPORTS_BROKER
-                var wamAccountIds = (accounts1.Single() as IAccountInternal).WamAccountIds;
+                var wamAccountIds = (accounts1.Single() as Account).WamAccountIds;
                 Assert.AreEqual(2, wamAccountIds.Count);
                 Assert.AreEqual("wam2", wamAccountIds[TestConstants.ClientId]);
                 Assert.AreEqual("wam3", wamAccountIds[TestConstants.ClientId2]);
-                CoreAssert.AssertDictionariesAreEqual(wamAccountIds, (accounts2.Single() as IAccountInternal).WamAccountIds, StringComparer.Ordinal);
+                CoreAssert.AssertDictionariesAreEqual(wamAccountIds, (accounts2.Single() as Account).WamAccountIds, StringComparer.Ordinal);
 #else
                 Assert.IsTrue(accounts1.All(a => (a as IAccountInternal).WamAccountIds == null));
                 Assert.IsTrue(accounts2.All(a => (a as IAccountInternal).WamAccountIds == null));
@@ -136,23 +138,21 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 string commonAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
                 Account brokerAccount1 = new Account(commonAccId, "commonAccount", "login.windows.net");
                 Account brokerAccount2 = new Account("other.account", "brokerAcc2", "login.windows.net");
-                IEnumerable<IAccount> brokerAccounts = new List<IAccount>() { brokerAccount1, brokerAccount2 };
+                IReadOnlyList<IAccount> brokerAccounts = new List<IAccount>() { brokerAccount1, brokerAccount2 };
 
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
 
                 var msalTokenResponse = CreateMsalTokenResponseFromWam("wam_acc_id");
                 mockBroker.AcquireTokenInteractiveAsync(null, null).ReturnsForAnyArgs(Task.FromResult(msalTokenResponse));
-                mockBroker.GetAccountsAsync(null, null).ReturnsForAnyArgs(
+                mockBroker.GetAccountsAsync(null, null, null, null, null).ReturnsForAnyArgs(
                     Task.FromResult(brokerAccounts));
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
-                    .WithBroker(true)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
-
-                pca.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
 
                 // Act
                 await pca.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Assert
                 Assert.AreEqual(2, accounts.Count());
 #if SUPPORTS_BROKER
-                var wamAccountIds = (accounts.Single(acc => acc.HomeAccountId.Identifier == commonAccId) as IAccountInternal).WamAccountIds;
+                var wamAccountIds = (accounts.Single(acc => acc.HomeAccountId.Identifier == commonAccId) as Account).WamAccountIds;
                 Assert.AreEqual(1, wamAccountIds.Count);
                 Assert.AreEqual("wam_acc_id", wamAccountIds[TestConstants.ClientId]);
 #else
@@ -169,6 +169,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 #endif
             }
         }
+
+     
 
         private static MsalTokenResponse CreateMsalTokenResponseFromWam(string wamAccountId)
         {
@@ -187,5 +189,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
     }
 
- 
+    public static class BrokerExt
+    {
+        internal static PublicClientApplicationBuilder WithTestBroker(this PublicClientApplicationBuilder pcaBuilder, IBroker mockBroker)
+        {
+            pcaBuilder.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
+            pcaBuilder.Config.IsBrokerEnabled = true;
+
+            return pcaBuilder;
+        }
+    }
 }

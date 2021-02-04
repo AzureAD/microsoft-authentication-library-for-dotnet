@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             ThrottlingManager = SingletonThrottlingManager.GetInstance();
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
-            DeviceAuthManager = PlatformProxy.CreateDeviceAuthManager();
+            DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Internal
         public IPlatformProxy PlatformProxy { get; private set; }
 
         /// <inheritdoc />
-        public IApplicationConfiguration Config { get; }
+        public ApplicationConfiguration Config { get; }
 
         /// <inheritdoc />
         public ITelemetryClient Mats { get; }

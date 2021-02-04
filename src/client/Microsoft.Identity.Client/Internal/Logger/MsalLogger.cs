@@ -29,7 +29,9 @@ namespace Microsoft.Identity.Client.Internal.Logger
             bool isDefaultPlatformLoggingEnabled,
             LogCallback loggingCallback)
         {
-            _correlationId = correlationId;
+            _correlationId = correlationId.Equals(Guid.Empty)
+                    ? string.Empty
+                    : " - " + _correlationId;
             PiiLoggingEnabled = enablePiiLogging;
             _loggingCallback = loggingCallback;
             _minLogLevel = logLevel;
@@ -56,7 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static ICoreLogger Create(
             Guid correlationId,
-            IApplicationConfiguration config,
+            ApplicationConfiguration config,
             bool isDefaultPlatformLoggingEnabled = false)
         {
             return new MsalLogger(
@@ -71,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static ICoreLogger NullLogger => s_nullLogger.Value;
 
-        private readonly Guid _correlationId;
+        private readonly string _correlationId;
 
         public bool PiiLoggingEnabled { get; }
 
@@ -155,10 +157,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
         {
             if (IsLoggingEnabled(logLevel))
             {
-                string correlationId = _correlationId.Equals(Guid.Empty)
-                    ? string.Empty
-                    : " - " + _correlationId;
-
                 var msalIdParameters = MsalIdHelper.GetMsalIdParameters(this);
                 string os = "N/A";
                 if (msalIdParameters.TryGetValue(MsalIdParameter.OS, out string osValue))
@@ -175,7 +173,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     isLoggingPii ? "(True)" : "(False)",
                     MsalIdHelper.GetMsalVersion(),
                     msalIdParameters[MsalIdParameter.Product],
-                    os, DateTime.UtcNow, correlationId, ClientInformation, messageToLog);
+                    os, DateTime.UtcNow, _correlationId, ClientInformation, messageToLog);
 
                 if (_isDefaultPlatformLoggingEnabled)
                 {
