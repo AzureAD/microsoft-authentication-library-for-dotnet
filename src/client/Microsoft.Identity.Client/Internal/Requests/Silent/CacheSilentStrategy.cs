@@ -71,7 +71,10 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set. ");
             }
 
-            AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int) cacheRefresh;
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh == null)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int)cacheRefresh;
+            }
 
             // No AT or AT.RefreshOn > Now --> refresh the RT
             try

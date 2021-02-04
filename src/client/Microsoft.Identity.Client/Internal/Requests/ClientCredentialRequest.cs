@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
-            int cacheRefresh = (int) CacheRefresh.None;
+            CacheRefresh cacheRefresh = CacheRefresh.None;
 
             if (!_clientParameters.ForceRefresh && 
                 string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
@@ -61,11 +61,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else if (cachedAccessTokenItem == null)
                 {
-                    cacheRefresh = (int) CacheRefresh.NoCachedAT;
+                    cacheRefresh = CacheRefresh.NoCachedAT;
                 }
                 else
                 {
-                    cacheRefresh = (int) CacheRefresh.RefreshIn;
+                    cacheRefresh = CacheRefresh.RefreshIn;
                 }
             }
             else
@@ -74,11 +74,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (_clientParameters.ForceRefresh)
                 {
-                    cacheRefresh = (int) CacheRefresh.ForceRefresh;
+                    cacheRefresh = CacheRefresh.ForceRefresh;
                 }
             }
 
-            AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = cacheRefresh;
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh == null)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int)cacheRefresh;
+            }
 
             // No AT in the cache or AT needs to be refreshed
             try

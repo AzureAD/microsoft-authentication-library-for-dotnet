@@ -71,7 +71,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cacheRefresh = CacheRefresh.ForceRefresh;
             }
 
-            AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int) cacheRefresh;
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh == null)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int)cacheRefresh;
+            }
 
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
