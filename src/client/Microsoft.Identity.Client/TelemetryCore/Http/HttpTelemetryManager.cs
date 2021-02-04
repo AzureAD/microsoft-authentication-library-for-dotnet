@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
         /// <summary>
         /// CSV expected format:
-        ///      2|silent_successful_count|failed_requests|errors|platform_fields
+        ///      3|silent_successful_count|failed_requests|errors|platform_fields
         ///      failed_request is: api_id_1,correlation_id_1,api_id_2,correlation_id_2|error_1,error_2
         ///      platform_fields: region_1,region_source_1,region_2,region_source_2
         /// </summary>
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
         }
 
         /// <summary>
-        /// Expected format: 2|api_id,force_refresh|platform_config
+        /// Expected format: 3|api_id,force_refresh,cache_refresh|platform_config
         /// platform_config: region,region_source,is_token_cache_serialized,user_provided_region,validate_use_region,fallback_to_global,is_legacy_cache_enabled
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
@@ -124,6 +124,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsValidUserProvidedRegion, out string isValidUserProvidedRegion);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsLegacyCacheEnabledKey, out string isLegacyCacheEnabled);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.FallbackToGlobal, out string fallbackToGlobal);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.CacheRefreshKey, out string cacheRefresh);
 
             // Since regional fields will only be logged in case it is opted.
             var platformConfig = new StringBuilder();
@@ -137,7 +138,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled));
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
-                $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
+                $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)},{cacheRefresh}" +
                 $"|{platformConfig}";
         }
 

@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Region;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -29,6 +30,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string IsValidUserProvidedRegionKey = EventNamePrefix + "is_valid_user_provided_region";
         public const string FallbackToGlobalKey = EventNamePrefix + "fallback_to_global";
         public const string IsLegacyCacheEnabledKey = EventNamePrefix + "is_legacy_cache_enabled";
+        public const string CacheRefreshKey = EventNamePrefix + "cache_refresh";
 
         public enum ApiIds
         {
@@ -229,6 +231,25 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             set { this[IsLegacyCacheEnabledKey] = value.ToString().ToLowerInvariant(); }
             get { return this[IsLegacyCacheEnabledKey] == true.ToString().ToLowerInvariant(); }
 #pragma warning restore CA1305 // Specify IFormatProvider
+        }
+
+        public int? CacheRefresh
+        {
+            get
+            {
+                if (this.ContainsKey(CacheRefreshKey))
+                {
+                    int val = (int)Enum.Parse(typeof(CacheRefresh), this[CacheRefreshKey]);
+                    if (val != -1)
+                    {
+                        return val;
+                    }
+                }
+
+                return null;
+            }
+
+            set => this[CacheRefreshKey] = (value)?.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

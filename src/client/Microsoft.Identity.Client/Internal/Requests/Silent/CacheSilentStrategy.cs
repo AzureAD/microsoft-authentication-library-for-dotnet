@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.Internal.Requests.Silent
 {
@@ -39,6 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+            CacheRefresh cacheRefresh = CacheRefresh.None;
 
             ThrowIfNoScopesOnB2C();
             ThrowIfCurrentBrokerAccount();
@@ -54,10 +56,24 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                     return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 }
+                else if (cachedAccessTokenItem == null)
+                {
+                    cacheRefresh = CacheRefresh.NoCachedAT;
+                } 
+                else
+                {
+                    cacheRefresh = CacheRefresh.RefreshIn;
+                }
             }
             else
             {
+                cacheRefresh = CacheRefresh.ForceRefresh;
                 logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set. ");
+            }
+
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh == null)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int)cacheRefresh;
             }
 
             // No AT or AT.RefreshOn > Now --> refresh the RT

@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -62,7 +63,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ApiId = apiId
             };
 
-            return new AuthenticationRequestParameters(
+            AuthenticationRequestParameters authenticationRequestParameters = new AuthenticationRequestParameters(
                 ServiceBundle,
                 tokenCache,
                 commonParameters,
@@ -71,6 +72,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 Account = account,
                 Authority = Authority.CreateAuthority(authority, validateAuthority)
             };
+
+            authenticationRequestParameters.RequestContext.ApiEvent = new ApiEvent(
+                authenticationRequestParameters.RequestContext.Logger,
+                ServiceBundle.PlatformProxy.CryptographyManager,
+                Guid.NewGuid().AsMatsCorrelationId());
+
+            return authenticationRequestParameters;
         }
     }
 }

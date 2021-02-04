@@ -48,19 +48,19 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// 1.  Acquire Token For Client with Region successfully
-        ///        Current_request = 2 | ATC_ID, 0 | centralus, 1, 0,
-        ///        Last_request = 2 | 0 | | |
+        ///        Current_request = 3 | ATC_ID, 0, | centralus, 1, 0,
+        ///        Last_request = 3 | 0 | | |
         /// 
         /// 2. Acquire Token for client with Region -> HTTP error 503 (Service Unavailable)
         ///
-        ///        Current_request = 2 | ATC_ID, 1 | centralus, 3, 0,
-        ///        Last_request = 2 | 0 | | |
+        ///        Current_request = 3 | ATC_ID, 1, | centralus, 3, 0,
+        ///        Last_request = 3 | 0 | | |
         ///
         /// 3. Acquire Token For Client with Region -> successful
         ///
         /// Sent to the server - 
-        ///        Current_request = 2 | ATC_ID, 1 | centralus, 3, 0,
-        ///        Last_request = 2 | 0 |  ATC_ID, corr_step_2  | ServiceUnavailable | centralus, 3
+        ///        Current_request = 3 | ATC_ID, 1, | centralus, 3, 0,
+        ///        Last_request = 3 | 0 |  ATC_ID, corr_step_2  | ServiceUnavailable | centralus, 3
         /// </summary>
         [TestMethod]
         public async Task TelemetryAcceptanceTestAsync()
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: false, "1");
-            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
+            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 3|0|||
 
             Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
             result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.AADUnavailableError).ConfigureAwait(false);
@@ -102,8 +102,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// Acquire token for client with serialized token cache successfully
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1
-        ///    Last_request = 2 | 0 | | |
+        ///    Current_request = 3 | ATC_ID, 0, | centralus, 1, 1
+        ///    Last_request = 3 | 0 | | |
         /// </summary>
         [TestMethod]
         public async Task TelemetrySerializedTokenCacheTestAsync()
@@ -125,8 +125,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// Acquire token for client with regionToUse when auto region discovery fails
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, centralus,
-        ///    Last_request = 2 | 0 | | |
+        ///    Current_request = 3 | ATC_ID, 0, | centralus, 1, 1, centralus,
+        ///    Last_request = 3 | 0 | | |
         /// </summary>
         [TestMethod]
         public async Task TelemetryUserProvidedRegionAutoDiscoveryFailsTestsAsync()
@@ -145,8 +145,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// Acquire token for client with regionToUse when auto region discovery passes with region same as regionToUse
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, centralus, 1
-        ///    Last_request = 2 | 0 | | |
+        ///    Current_request = 3 | ATC_ID, 0, | centralus, 1, 1, centralus, 1
+        ///    Last_request = 3 | 0 | | |
         /// </summary>
         [TestMethod]
         public async Task TelemetryUserProvidedRegionAutoDiscoverRegionSameTestsAsync()
@@ -167,8 +167,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// Acquire token for client with regionToUse when auto region discovery passes with region different from regionToUse
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, invalid, 0
-        ///    Last_request = 2 | 0 | | |
+        ///    Current_request = 3 | ATC_ID, 0, | centralus, 1, 1, invalid, 0
+        ///    Last_request = 3 | 0 | | |
         /// </summary>
         [TestMethod]
         public async Task TelemetryUserProvidedRegionAutoDiscoverRegionDifferentTestsAsync()
@@ -189,8 +189,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// Acquire token for client with regionToUse when auto region discovery fails
-        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1, centralus,
-        ///    Last_request = 2 | 0 | | |
+        ///    Current_request = 3 | ATC_ID, 0, | centralus, 1, 1, centralus,
+        ///    Last_request = 3 | 0 | | |
         /// </summary>
         [TestMethod]
         public async Task TelemetryUserProvidedRegionAutoDiscoveryFailsFallbackToGlobalTestsAsync()
@@ -336,7 +336,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 ((int)apiId).ToString(CultureInfo.InvariantCulture),
                 actualTelemetryParts[1].Split(',')[0]); // current_api_id
 
-            Assert.IsTrue(actualTelemetryParts[1].EndsWith(forceRefresh ? "1" : "0")); // force_refresh flag
+            Assert.AreEqual(forceRefresh ? "1" : "0", actualTelemetryParts[1].Split(',')[1]); // force_refresh flag
 
             string[] platformConfig = actualTelemetryParts[2].Split(',');
             Assert.AreEqual(isCacheSerialized ? "1" : "0", platformConfig[2]);

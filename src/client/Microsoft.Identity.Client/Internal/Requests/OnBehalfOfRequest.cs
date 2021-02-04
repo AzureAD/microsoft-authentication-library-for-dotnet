@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using System.Linq;
+using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -35,6 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
+            CacheRefresh cacheRefresh = CacheRefresh.None;
 
             if (!_onBehalfOfParameters.ForceRefresh)
             {
@@ -59,6 +61,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
                         TokenSource.Cache);
                 }
+                else
+                {
+                    cacheRefresh = CacheRefresh.NoCachedAT;
+                }
+            }
+            else
+            {
+                cacheRefresh = CacheRefresh.ForceRefresh;
+            }
+
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh == null)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int)cacheRefresh;
             }
 
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
