@@ -92,25 +92,9 @@ namespace App1
             }
 
             // Doesn't work, no browser pop-up :(
-            //_pca.SignIn(
-            //    /*activity */ this,
-            //    /*login_hint*/"liu.kang@bogavrilltd.onmicrosoft.com",
-            //    new[] { "User.Read" },
-            //    new InteractiveAuthCallback(
-            //        onCancelAction: () => LogMessage("Auth cancelled"),
-            //        onErrorAction: (ex) => LogMessage(ex.ToString()),
-            //        onSuccessAction: (result) =>
-            //        {
-            //            _account = result.Account;
-            //            LogMessage(
-            //                $"Success!! Token for {result.Account.Username}," +
-            //                $" tenant {result.TenantId} - " +
-            //                $" token {result.AccessToken} ");
-            //        }));
-
-
-            _pca.AcquireToken(
-                this, 
+            _pca.SignIn(
+                /*activity */ this,
+                /*login_hint*/"liu.kang@bogavrilltd.onmicrosoft.com",
                 new[] { "User.Read" },
                 new InteractiveAuthCallback(
                     onCancelAction: () => LogMessage("Auth cancelled"),
@@ -123,6 +107,22 @@ namespace App1
                             $" tenant {result.TenantId} - " +
                             $" token {result.AccessToken} ");
                     }));
+
+
+            //_pca.AcquireToken(
+            //    this, 
+            //    new[] { "User.Read" },
+            //    new InteractiveAuthCallback(
+            //        onCancelAction: () => LogMessage("Auth cancelled"),
+            //        onErrorAction: (ex) => LogMessage(ex.ToString()),
+            //        onSuccessAction: (result) =>
+            //        {
+            //            _account = result.Account;
+            //            LogMessage(
+            //                $"Success!! Token for {result.Account.Username}," +
+            //                $" tenant {result.TenantId} - " +
+            //                $" token {result.AccessToken} ");
+            //        }));
         }
 
         private void SilentBtn_Click(object sender, EventArgs e)
