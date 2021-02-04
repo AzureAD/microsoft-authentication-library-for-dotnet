@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30914.41
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidSupport", "Microsoft.Identity.Client.XamarinAndroid.AndroidSupport\Microsoft.Identity.Client.XamarinAndroid.AndroidSupport.csproj", "{864A0BB1-77AE-4094-8CE5-CE29287CDADD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidX", "Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj", "{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Client.XamarinAndroid.AndroidX", "Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj", "{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Common.XamarinAndroid.AndroidX", "Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj", "{5379840F-A1F0-4A91-A479-5216693E0C11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Common.XamarinAndroid.AndroidX", "Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj", "{5379840F-A1F0-4A91-A479-5216693E0C11}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,22 +16,7 @@ Global
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|x64.Build.0 = Debug|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Debug|x86.Build.0 = Debug|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|x64.ActiveCfg = Release|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|x64.Build.0 = Release|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|x86.ActiveCfg = Release|Any CPU
-		{864A0BB1-77AE-4094-8CE5-CE29287CDADD}.Release|x86.Build.0 = Release|Any CPU
 		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98E82C5A-F2B4-4253-A1C9-6E768F494B1E}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -58,5 +41,11 @@ Global
 		{5379840F-A1F0-4A91-A479-5216693E0C11}.Release|x64.Build.0 = Release|Any CPU
 		{5379840F-A1F0-4A91-A479-5216693E0C11}.Release|x86.ActiveCfg = Release|Any CPU
 		{5379840F-A1F0-4A91-A479-5216693E0C11}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D64A8A9F-7CA8-42E6-8A49-28FCF9586429}
 	EndGlobalSection
 EndGlobal
