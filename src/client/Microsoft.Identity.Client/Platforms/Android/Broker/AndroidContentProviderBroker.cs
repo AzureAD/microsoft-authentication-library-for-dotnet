@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
@@ -14,6 +15,8 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 using AndroidNative = Android;
 using AndroidUri = Android.Net.Uri;
 
@@ -25,7 +28,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private readonly AndroidBrokerHelper _brokerHelper;
         private readonly ICoreLogger _logger;
         private Activity _parentActivity;
-        private string _negotiatedBrokerProtocalKey = String.Empty;
+        private string _negotiatedBrokerProtocolKey = String.Empty;
 
         public AndroidContentProviderBroker(CoreUIParent uiParent, ICoreLogger logger)
         {
@@ -40,56 +43,68 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return _brokerHelper.IsBrokerInstalledAndInvokable();
         }
 
-        public async void InitiateBrokerHandshakeAsync()
+        public async void InitiateBrokerHandShakeAsync()
         {
             using (_logger.LogMethodDuration())
             {
-                try
-                {
-                    Bundle HandshakeBundleResult = await GetHandshakeBundleResultFromBrokerAsync().ConfigureAwait(false);
+                Bundle handShakeBundleResult = await GetHandShakeBundleResultFromBrokerAsync().ConfigureAwait(false);
 
-                    _negotiatedBrokerProtocalKey = _brokerHelper.GetProtocalKeyFromHandshakeResult(HandshakeBundleResult);
-                }
-                catch
-                {
-                    throw;
-                }
+                _negotiatedBrokerProtocolKey = GetProtocolKeyFromHandShakeResult(handShakeBundleResult);
             }
         }
 
-        private async Task<Bundle> GetHandshakeBundleResultFromBrokerAsync()
+        private async Task<Bundle> GetHandShakeBundleResultFromBrokerAsync()
         {
-            var bundle = _brokerHelper.GetHandshakeOperationBundle();
-            var OperationBundleJSON = _brokerHelper.SearializeBundleToJSON(bundle);
-            return await PerformContentResolverOperationAsync(ContentResolverOperation.hello, OperationBundleJSON).ConfigureAwait(false);
+            var bundle = _brokerHelper.CreateHandShakeOperationBundle();
+            var operationBundleJSON = SearializeBundleToJSON(bundle);
+            return await PerformContentResolverOperationAsync(ContentResolverOperation.hello, operationBundleJSON).ConfigureAwait(false);
+        }
+
+        public string GetProtocolKeyFromHandShakeResult(Bundle bundleResult)
+        {
+            var negotiatedBrokerProtocalKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
+
+            if (!string.IsNullOrEmpty(negotiatedBrokerProtocalKey))
+            {
+                _logger.Info("Using broker protocol version: " + negotiatedBrokerProtocalKey);
+                return negotiatedBrokerProtocalKey;
+            }
+
+            dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
+            string errorCode = null;
+            string errorDescription = null;
+
+            if (!string.IsNullOrEmpty(errorResult))
+            {
+                errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+                string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
+            }
+            else
+            {
+                errorCode = BrokerConstants.BrokerUnknownErrorCode;
+                errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned. ";
+            }
+
+            _logger.Error(errorDescription);
+            throw new MsalClientException(errorCode, errorDescription);
         }
 
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            _brokerHelper.CheckPowerOptimizationStatus();
+            InitiateBrokerHandShakeAsync();
 
-            InitiateBrokerHandshakeAsync();
-
-            var brokerRequest = PrepareInteractiveBrokerRequest(authenticationRequestParameters, acquireTokenInteractiveParameters);
-
-            return await PerformAcquireTokenInteractiveAsync(brokerRequest).ConfigureAwait(false);
-        }
-
-        private BrokerRequest PrepareInteractiveBrokerRequest(AuthenticationRequestParameters authenticationRequestParameters,
-                                                              AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
-        {
-            BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(
-                authenticationRequestParameters, acquireTokenInteractiveParameters);
+            BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(authenticationRequestParameters, acquireTokenInteractiveParameters);
 
             // There can only be 1 broker request at a time so keep track of the correlation id
-            AndroidBrokerHelper.CorrelationId = brokerRequest.CorrelationId;
+            AndroidBrokerHelper.InteractiveRequestCorrelationId = brokerRequest.CorrelationId;
 
-            return brokerRequest;
+            return await AcquireTokenInteractiveInternalAsync(brokerRequest).ConfigureAwait(false);
         }
 
-        private async Task<MsalTokenResponse> PerformAcquireTokenInteractiveAsync(BrokerRequest brokerRequest)
+        private async Task<MsalTokenResponse> AcquireTokenInteractiveInternalAsync(BrokerRequest brokerRequest)
         {
             try
             {
@@ -114,17 +129,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 _logger.Verbose("Starting Android Broker interactive authentication. ");
 
-                Bundle bundleResult = await GetAcquireTokenInteractiveOperationBundleAsync().ConfigureAwait(false);
+                Bundle bundleResult = await PerformContentResolverOperationAsync(ContentResolverOperation.acquireTokenInteractive, null).ConfigureAwait(false);
 
                 var interactiveIntent = CreateInteractiveBrokerIntent(brokerRequest, bundleResult);
 
                 _brokerHelper.LaunchInteractiveActivity(_parentActivity, interactiveIntent);
             }
-        }
-
-        private async Task<Bundle> GetAcquireTokenInteractiveOperationBundleAsync()
-        {
-            return await PerformContentResolverOperationAsync(ContentResolverOperation.acquireTokenInteractive, null).ConfigureAwait(false);
         }
 
         private Intent CreateInteractiveBrokerIntent(BrokerRequest brokerRequest, Bundle bundleResult)
@@ -141,29 +151,39 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             );
 
             brokerIntent.PutExtras(bundleResult);
-            brokerIntent.PutExtra(BrokerConstants.NegotiatedBPVersionKey, _brokerHelper.NegotiatedBrokerProtocalKey);
+            brokerIntent.PutExtra(BrokerConstants.NegotiatedBPVersionKey, _negotiatedBrokerProtocolKey);
 
-            var interactiveIntent = brokerIntent.PutExtras(_brokerHelper.GetInteractiveBrokerBundle(brokerRequest));
+            var interactiveIntent = brokerIntent.PutExtras(CreateInteractiveBrokerBundle(brokerRequest));
             interactiveIntent.PutExtra(BrokerConstants.CallerInfoUID, Binder.CallingUid);
 
             return interactiveIntent;
+        }
+
+        private Bundle CreateInteractiveBrokerBundle(BrokerRequest brokerRequest)
+        {
+            _brokerHelper.ValidateBrokerRedirectURI(brokerRequest);
+
+            Bundle bundle = new Bundle();
+            string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
+            bundle.PutString(BrokerConstants.BrokerRequestV2, brokerRequestJson);
+            bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
+            _logger.InfoPii("GetInteractiveBrokerBundle: " + brokerRequestJson, "Enable PII to see the broker request. ");
+            return bundle;
         }
 
         public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            _brokerHelper.CheckPowerOptimizationStatus();
-
-            InitiateBrokerHandshakeAsync();
+            InitiateBrokerHandShakeAsync();
 
             BrokerRequest brokerRequest = BrokerRequest.FromSilentParameters(
                 authenticationRequestParameters, acquireTokenSilentParameters);
 
-            return await PerformAcquireTokenSilentAsync(brokerRequest).ConfigureAwait(false);
+            return await AcquireTokenSilentInternalAsync(brokerRequest).ConfigureAwait(false);
         }
 
-        private async Task<MsalTokenResponse> PerformAcquireTokenSilentAsync(BrokerRequest brokerRequest)
+        private async Task<MsalTokenResponse> AcquireTokenSilentInternalAsync(BrokerRequest brokerRequest)
         {
             try
             {
@@ -183,30 +203,28 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 _logger.Verbose("User is specified for silent token request. Starting silent Android broker request. ");
 
-                brokerRequest = await UpdateRequestWithAccountInfoAsync(brokerRequest).ConfigureAwait(false);
+                var accountData = await GetBrokerAccountDataAsync(brokerRequest).ConfigureAwait(false);
 
-                string silentResult = await PerformAcquireTokenSilentFromBrokerAsync(brokerRequest).ConfigureAwait(false);
+                brokerRequest = _brokerHelper.UpdateBrokerRequestWithAccountData(accountData, brokerRequest);
+
+                string silentResult = await AcquireTokenSilentFromBrokerInternalAsync(brokerRequest).ConfigureAwait(false);
                 return _brokerHelper.HandleSilentAuthenticationResult(silentResult, brokerRequest.CorrelationId);
             }
         }
 
-        /// <summary>
-        /// This method is only used for Silent authentication requests so that we can check to see if an account exists in the account manager before
-        /// sending the silent request to the broker. 
-        /// </summary>
-        public async Task<BrokerRequest> UpdateRequestWithAccountInfoAsync(BrokerRequest brokerRequest)
-        {
-            var accountData = await GetBrokerAccountDataAsync(brokerRequest).ConfigureAwait(false);
-
-            return _brokerHelper.UpdateBrokerRequestWithAccountData(accountData, brokerRequest);
-        }
-
-        public async Task<string> PerformAcquireTokenSilentFromBrokerAsync(BrokerRequest brokerRequest)
+        private async Task<string> AcquireTokenSilentFromBrokerInternalAsync(BrokerRequest brokerRequest)
         {
             Bundle silentOperationBundle = _brokerHelper.CreateSilentBrokerBundle(brokerRequest);
-            var OperationBundleJSON = _brokerHelper.SearializeBundleToJSON(silentOperationBundle);
-            var SilentOperationBundle = await PerformContentResolverOperationAsync(ContentResolverOperation.acquireTokenSilent, OperationBundleJSON).ConfigureAwait(false);
-            return _brokerHelper.GetSilentResultFromBundle(SilentOperationBundle);
+            var operationBundleJSON = SearializeBundleToJSON(silentOperationBundle);
+            var silentOperationBundleResult = await PerformContentResolverOperationAsync(ContentResolverOperation.acquireTokenSilent, operationBundleJSON).ConfigureAwait(false);
+            
+            if (silentOperationBundleResult != null)
+            {
+                return _brokerHelper.GetSilentResultFromBundle(silentOperationBundleResult);
+            }
+
+            _logger.Info("Android Broker didn't return any results. ");
+            return null;
         }
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
@@ -216,20 +234,20 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 if (!IsBrokerInstalledAndInvokable())
                 {
                     _logger.Warning("Android broker is either not installed or is not reachable so no accounts will be returned. ");
-                    return new List<IAccount>();
+                    return Enumerable.Empty<IAccount>();
                 }
 
-                return await PerformGetAccountsAsync(clientID, redirectUri).ConfigureAwait(false);
+                return await GetAccountsInternalAsync(clientID, redirectUri).ConfigureAwait(false);
             }
         }
 
-        private async Task<IEnumerable<IAccount>> PerformGetAccountsAsync(string clientID, string redirectUri)
+        private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(string clientID, string redirectUri)
         {
             BrokerRequest brokerRequest = new BrokerRequest() { ClientId = clientID, RedirectUri = new Uri(redirectUri) };
 
             try
             {
-                InitiateBrokerHandshakeAsync();
+                InitiateBrokerHandShakeAsync();
                 var accountData = await GetBrokerAccountDataAsync(brokerRequest).ConfigureAwait(false);
                 return _brokerHelper.ExtractBrokerAccountsFromAccountData(accountData);
             }
@@ -244,8 +262,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private async Task<string> GetBrokerAccountDataAsync(BrokerRequest brokerRequest)
         {
             var getAccountsBundle = _brokerHelper.CreateBrokerAccountBundle(brokerRequest);
-            var OperationBundleJSON = _brokerHelper.SearializeBundleToJSON(getAccountsBundle);
-            var bundleResult = await PerformContentResolverOperationAsync(ContentResolverOperation.getAccounts, OperationBundleJSON).ConfigureAwait(false);
+            var operationBundleJSON = SearializeBundleToJSON(getAccountsBundle);
+            var bundleResult = await PerformContentResolverOperationAsync(ContentResolverOperation.getAccounts, operationBundleJSON).ConfigureAwait(false);
 
             return bundleResult?.GetString(BrokerConstants.BrokerAccounts);
         }
@@ -268,7 +286,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             try
             {
-                InitiateBrokerHandshakeAsync();
+                InitiateBrokerHandShakeAsync();
 
                 await RemoveBrokerAccountFromBrokersAsync(applicationConfiguration.ClientId, account).ConfigureAwait(false);
             }
@@ -283,8 +301,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private async Task RemoveBrokerAccountFromBrokersAsync(string clientId, IAccount account)
         {
             var removeAccountsBundle = _brokerHelper.CreateRemoveBrokerAccountBundle(clientId, account);
-            var OperationBundleJSON = _brokerHelper.SearializeBundleToJSON(removeAccountsBundle);
-            await PerformContentResolverOperationAsync(ContentResolverOperation.removeAccounts, OperationBundleJSON).ConfigureAwait(false);
+            var operationBundleJSON = SearializeBundleToJSON(removeAccountsBundle);
+            await PerformContentResolverOperationAsync(ContentResolverOperation.removeAccounts, operationBundleJSON).ConfigureAwait(false);
         }
 
         private async Task<Bundle> PerformContentResolverOperationAsync(ContentResolverOperation operation, string OperationParameters)
@@ -293,15 +311,15 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             ICursor resultCursor = null;
             await Task.Run(() => resultCursor = resolver.Query(AndroidUri.Parse(GetContentProviderURIForOperation(Enum.GetName(typeof(ContentResolverOperation), operation))),
-                                                            null,
+                                                            !string.IsNullOrEmpty(_negotiatedBrokerProtocolKey) ? new string[] { _negotiatedBrokerProtocolKey } : null,
                                                             OperationParameters,
                                                             null,
                                                             null)).ConfigureAwait(false);
 
             if (resultCursor == null)
             {
-                _logger.Error("MSAL is unable to communicate to the broker.");
-                throw new MsalClientException("broker_error");
+                _logger.Error("An error occurred during the content provider operation.");
+                throw new MsalClientException(MsalError.CannotInvokeBroker, "Could not communicate with broker via content provider.");
             }
 
             var resultBundle = resultCursor.Extras;
@@ -322,9 +340,28 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        public string GetContentProviderURIForOperation(string operation)
+        private string GetContentProviderURIForOperation(string operation)
         {
-            return "content://com.microsoft.windowsintune.companyportal.microsoft.identity.broker/" + operation;
+            //We need to check which authenticator is currently active so that we can properly construct the content provider Uri
+            if (_brokerHelper.Authenticator.PackageName.Contains(BrokerConstants.CompanyPortalPackageName))
+            {
+                return BrokerConstants.CompanyPortalContentProviderUri + "/" + operation;
+            }
+
+            return BrokerConstants.MsAuthenticatorContentProviderUri + "/" + operation;
+        }
+
+        private string SearializeBundleToJSON(Bundle bundle)
+        {
+            return Base64UrlHelpers.Encode(marshall(bundle));
+        }
+
+        private static byte[] marshall(Bundle parcelable)
+        {
+            Parcel parcel = Parcel.Obtain();
+            parcel.WriteBundle(parcelable);
+
+            return parcel.Marshall();
         }
 
         public void HandleInstallUrl(string appLink)

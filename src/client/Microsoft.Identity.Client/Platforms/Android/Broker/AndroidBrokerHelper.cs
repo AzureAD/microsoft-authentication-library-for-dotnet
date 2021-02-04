@@ -22,7 +22,6 @@ using System.Threading.Tasks;
 using OperationCanceledException = Android.Accounts.OperationCanceledException;
 using AndroidUri = Android.Net.Uri;
 using Android.Database;
-using Microsoft.Identity.Client.Platforms.Android.Broker.Requests;
 using Microsoft.Identity.Json.Utilities;
 using System.Threading;
 using Microsoft.Identity.Client.OAuth2;
@@ -37,7 +36,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
     {
         private const string RedirectUriScheme = "msauth";
         private const string BrokerTag = BrokerConstants.Signature;
-        public const string WorkAccount = "com.microsoft.workaccount.user.info";
 
         private readonly Context _androidContext;
 
@@ -52,9 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public static MsalTokenResponse InteractiveBrokerTokenResponse { get; set; } = null;
         //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and re-injected into the response at the end.
-        public static string CorrelationId { get; set; }
-
-        public string NegotiatedBrokerProtocalKey { get; set; }
+        public static string InteractiveRequestCorrelationId { get; set; }
 
         public AndroidBrokerHelper(Context androidContext, ICoreLogger logger)
         {
@@ -86,14 +82,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             // 3- account exists
 
             //Force this to return true for broker test app
-
-            return VerifyAuthenticator()
+            var authenticator = GetInstalledAuthenticator();
+            return authenticator!= null
                    && !packageName.Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase)
                    && !packageName
            .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase);
         }
 
-        public Bundle GetHandshakeOperationBundle()
+        public Bundle CreateHandShakeOperationBundle()
         {
             Bundle HandshakeOperationBundle = new Bundle();
             HandshakeOperationBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
@@ -101,19 +97,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             HandshakeOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
 
             return HandshakeOperationBundle;
-        }
-
-        public string SearializeBundleToJSON(Bundle bundle)
-        {
-            return Base64UrlHelpers.Encode(marshall(bundle));
-        }
-
-        public static byte[] marshall(Bundle parcelable)
-        {
-            Parcel parcel = Parcel.Obtain();
-            parcel.WriteBundle(parcelable);
-
-            return parcel.Marshall();
         }
 
         public string GetSilentResultFromBundle(Bundle bundleResult)
@@ -153,7 +136,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 foreach (JObject account in authResult)
                 {
                     var accountInfo = account[BrokerResponseConst.Account];
-
                     var accountInfoHomeAccountID = accountInfo[BrokerResponseConst.HomeAccountId]?.ToString();
                     var accountInfoLocalAccountID = accountInfo[BrokerResponseConst.LocalAccountId]?.ToString();
 
@@ -269,18 +251,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
 
             return null;
-        }
-
-        public Bundle GetInteractiveBrokerBundle(BrokerRequest brokerRequest)
-        {
-            ValidateBrokerRedirectURI(brokerRequest);
-
-            Bundle bundle = new Bundle();
-            string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
-            bundle.PutString(BrokerConstants.BrokerRequestV2, brokerRequestJson);
-            bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
-            _logger.InfoPii("GetInteractiveBrokerBundle: " + brokerRequestJson, "Enable PII to see the broker request. ");
-            return bundle;
         }
 
         public Bundle CreateSilentBrokerBundle(BrokerRequest brokerRequest)
@@ -415,22 +385,22 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return certificates;
         }
 
-        private bool VerifyAuthenticator()
+        private AuthenticatorDescription GetInstalledAuthenticator()
         {
             using (_logger.LogMethodDuration())
             {
-                foreach (AuthenticatorDescription authenticator in Authenticators)
+                foreach (AuthenticatorDescription authenticator in AndroidAccountManager.GetAuthenticatorTypes())
                 {
                     if (authenticator.Type.Equals(BrokerConstants.BrokerAccountType, StringComparison.OrdinalIgnoreCase)
                         && VerifySignature(authenticator.PackageName))
                     {
                         _logger.Verbose("Found the Authenticator on the device. ");
-                        return true;
+                        return authenticator;
                     }
                 }
 
                 _logger.Warning("No Authenticator found on the device. ");
-                return false;
+                return null;
             }
         }
 
@@ -439,42 +409,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         // AccountManager.
         // If another app tries to install same authenticator type, it will
         // queue up and will be active after first one is uninstalled.
-        public AuthenticatorDescription[] Authenticators
+        public AuthenticatorDescription Authenticator
         {
             get
             {
-                return AndroidAccountManager.GetAuthenticatorTypes();
+                return GetInstalledAuthenticator();
             }
-        }
-
-        public string GetProtocalKeyFromHandshakeResult(Bundle bundleResult)
-        {
-            var negotiatedBrokerProtocalKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
-
-            if (!string.IsNullOrEmpty(negotiatedBrokerProtocalKey))
-            {
-                _logger.Info("Using broker protocol version: " + negotiatedBrokerProtocalKey);
-                return negotiatedBrokerProtocalKey;
-            }
-
-            dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
-            string errorCode = null;
-            string errorDescription = null;
-
-            if (!string.IsNullOrEmpty(errorResult))
-            {
-                errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
-                string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
-                errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
-            }
-            else
-            {
-                errorCode = BrokerConstants.BrokerUnknownErrorCode;
-                errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned. ";
-            }
-
-            _logger.Error(errorDescription);
-            throw new MsalClientException(errorCode, errorDescription);
         }
 
         public void LaunchInteractiveActivity(Activity activity, Intent interactiveIntent)
@@ -538,7 +478,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         InteractiveBrokerTokenResponse =
                             MsalTokenResponse.CreateFromAndroidBrokerResponse(
                                 data.GetStringExtra(BrokerConstants.BrokerResultV2),
-                                CorrelationId);
+                                InteractiveRequestCorrelationId);
                         break;
                     case (int)BrokerResponseCode.UserCancelled:
                         unreliableLogger?.Info("Response received - user cancelled. ");
@@ -580,7 +520,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             ErrorDescription = errorDescription,
                             SubError = errorResult[BrokerResponseConst.BrokerSubError],
                             HttpResponse = httpResponse,
-                            CorrelationId = CorrelationId
+                            CorrelationId = InteractiveRequestCorrelationId
                         };
                         break;
                     default:
@@ -589,7 +529,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         {
                             Error = BrokerConstants.BrokerUnknownErrorCode,
                             ErrorDescription = "Broker result not returned from android broker. ",
-                            CorrelationId = CorrelationId
+                            CorrelationId = InteractiveRequestCorrelationId
                         };
                         break;
                 }
@@ -608,27 +548,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             throw new MsalClientException(
                 MsalError.BrokerApplicationRequired,
                 MsalErrorMessage.BrokerApplicationRequired);
-        }
-
-        ///Check if the network is available.
-        internal void CheckPowerOptimizationStatus()
-        {
-            checkPackageForPowerOptimization(Application.Context.PackageName);
-            checkPackageForPowerOptimization(Authenticators.FirstOrDefault().PackageName);
-        }
-
-        private void checkPackageForPowerOptimization(string package)
-        {
-            var powerManager = PowerManager.FromContext(Application.Context);
-
-            //Power optimization checking was added in API 23
-            if ((int)Build.VERSION.SdkInt >= (int)BuildVersionCodes.M &&
-                powerManager.IsDeviceIdleMode &&
-                !powerManager.IsIgnoringBatteryOptimizations(package))
-            {
-                _logger.Error("Power optimization detected for the application: " + package + " and the device is in doze mode or the app is in standby. \n" +
-                    "Please disable power optimizations for this application to authenticate.");
-            }
         }
     }
 }

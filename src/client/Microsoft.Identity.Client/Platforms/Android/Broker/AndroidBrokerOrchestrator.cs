@@ -20,10 +20,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
     internal class AndroidBrokerOrchestrator
     {
-        CoreUIParent _uIParent;
-        ICoreLogger _logger;
-        AndroidBrokerHelper _brokerHelper;
-        static bool s_contentProviderIsAvailable;
+        private readonly CoreUIParent _uIParent;
+        private readonly ICoreLogger _logger;
+        private readonly AndroidBrokerHelper _brokerHelper;
+        private static bool s_contentProviderIsAvailable;
 
         public AndroidBrokerOrchestrator(CoreUIParent uiParent, ICoreLogger logger)
         {
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private async Task<IBroker> GetInstalledBrokerAsync()
         {
-            if (IsBrokerInstalledAndInvokable())
+            if (_brokerHelper.IsBrokerInstalledAndInvokable())
             {
                 try
                 {
@@ -42,43 +42,35 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                     if (!s_contentProviderIsAvailable)
                     {
-                        broker.InitiateBrokerHandshakeAsync();
+                        broker.InitiateBrokerHandShakeAsync();
                         s_contentProviderIsAvailable = true;
                     }
                 }
-                catch
+                catch (Exception exContentProvider)
                 {
-                    _logger.Info("Unable to handshake with Content Provider Broker. Attempting handshake with Account Manager Broker.");
+                    _logger.Error("Unable to communicate with the broker via Content Provider. Attempting to fall back to account manager communication.");
+                    _logger.Error(exContentProvider.Message);
 
                     try
                     {
-                        var broker = new AndroidBroker(_uIParent, _logger);
-                        await broker.InitiateBrokerHandshakeAsync(_uIParent.CallerActivity).ConfigureAwait(false);
+                        var broker = new AndroidAccountManagerBroker(_uIParent, _logger);
+                        await broker.InitiateBrokerHandshakeAsync().ConfigureAwait(false);
                     }
-                    catch
+                    catch (Exception exAccountManager)
                     {
-                        _logger.Info("Unable to connect to any of the brokers.");
+                        _logger.Error("Unable to communicate with the broker via the Account manager.");
+                        _logger.Error(exAccountManager.Message);
                     }
                 }
             }
 
-            // Return a default broker in case no broker is installed to handle install url
+            // Return a default broker in case no broker is installed to handle install URL
             return new AndroidContentProviderBroker(_uIParent, _logger);
         }
 
-        internal IBroker GetBroker()
+        public IBroker GetBroker()
         {
             return Task.Run(async () => await GetInstalledBrokerAsync().ConfigureAwait(false)).Result;
-        }
-
-        public bool IsBrokerInstalledAndInvokable()
-        {
-            return _brokerHelper.IsBrokerInstalledAndInvokable();
-        }
-
-        internal static void SetBrokerResult(Intent data, int resultCode, ICoreLogger unreliableLogger)
-        {
-            AndroidBrokerHelper.SetBrokerResult(data, resultCode, unreliableLogger);
         }
     }
 }

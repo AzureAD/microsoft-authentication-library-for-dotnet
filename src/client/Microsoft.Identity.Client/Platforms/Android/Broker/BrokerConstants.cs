@@ -183,12 +183,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public const string BrokerRequestV2Success = "broker_request_v2_success";
         public const string BrokerUnknownErrorCode = "unknown_error";
 
-        //Content provider operation strings
-        public const string ContentProviderHelloOperation = "/hello";
-        public const string ContentProviderInteractiveOperation = "/acquireTokenInteractive";
-        public const string ContentProviderSilentOperation = "/acquireTokenSilent";
-        public const string ContentProviderGetAccountsOperation = "/getAccounts";
-        public const string ContentProviderRemoveAccountsOperation = "/removeAccounts";
+        public const string CompanyPortalPackageName = "com.microsoft.windowsintune.companyportal";
+        public const string CompanyPortalContentProviderUri = "content://com.microsoft.windowsintune.companyportal.microsoft.identity.broker";
+        public const string MsAuthenticatorContentProviderUri = "content://com.azure.authenticator.microsoft.identity.broker";
     }
 
     //Content provider operation
