@@ -45,6 +45,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         broker.InitiateBrokerHandShakeAsync();
                         s_contentProviderIsAvailable = true;
                     }
+                    return broker;
                 }
                 catch (Exception exContentProvider)
                 {
@@ -55,6 +56,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     {
                         var broker = new AndroidAccountManagerBroker(_uIParent, _logger);
                         await broker.InitiateBrokerHandshakeAsync().ConfigureAwait(false);
+                        return broker;
                     }
                     catch (Exception exAccountManager)
                     {

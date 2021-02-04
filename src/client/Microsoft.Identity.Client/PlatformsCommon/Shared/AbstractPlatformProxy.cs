@@ -186,11 +186,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return true;
         }
 
-        public virtual bool IsBrokerInstalledAndInvokable()
-        {
-            return false;
-        }
-
         public virtual bool BrokerSupportsWamAccounts => false;
 
         public virtual IPoPCryptoProvider GetDefaultPoPCryptoProvider()

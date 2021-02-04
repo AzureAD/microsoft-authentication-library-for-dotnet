@@ -229,11 +229,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
         }
 
-        public override bool IsBrokerInstalledAndInvokable()
-        {
-            return base.IsBrokerInstalledAndInvokable();
-        }
-
         public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
         {
             return new AndroidHttpClientFactory();

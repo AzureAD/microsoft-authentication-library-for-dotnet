@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
     {
         private long AccountManagerTimeoutSeconds { get; } = 5 * 60;
         //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and re-injected into the response at the end.
-        private static string s_correlationId;
         private readonly AndroidBrokerHelper _brokerHelper;
         private readonly ICoreLogger _logger;
         private readonly Activity _parentActivity;
@@ -64,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 authenticationRequestParameters, acquireTokenInteractiveParameters);
 
             // There can only be 1 broker request at a time so keep track of the correlation id
-            s_correlationId = brokerRequest.CorrelationId;
+            AndroidBrokerStaticHelper.InteractiveRequestCorrelationId = brokerRequest.CorrelationId;
 
             try
             {
@@ -96,8 +95,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             try
             {
                 await InitiateBrokerHandshakeAsync().ConfigureAwait(false);
-                var androidBrokerTokenResponse = await AcquireTokenSilentViaBrokerAsync(brokerRequest).ConfigureAwait(false);
-                return androidBrokerTokenResponse;
+                return await AcquireTokenSilentViaBrokerAsync(brokerRequest).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -153,14 +151,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 _logger.Info("Android account manager didn't return any results for interactive broker request. ");
             }
 
-            Intent interactiventent = (Intent)bundle?.GetParcelable(AccountManager.KeyIntent);
+            Intent interactiveIntent = (Intent)bundle?.GetParcelable(AccountManager.KeyIntent);
 
             //Validate that the intent was created successfully.
-            if (interactiventent != null)
+            if (interactiveIntent != null)
             {
                 _logger.Info("Intent created from BundleResult is not null. Starting interactive broker request. ");
                 // Need caller info UID for broker communication
-                interactiventent.PutExtra(BrokerConstants.CallerInfoUID, Binder.CallingUid);
+                interactiveIntent.PutExtra(BrokerConstants.CallerInfoUID, Binder.CallingUid);
             }
             else
             {
@@ -168,7 +166,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 throw new MsalClientException(MsalError.NullIntentReturnedFromAndroidBroker, MsalErrorMessage.NullIntentReturnedFromBroker);
             }
 
-            return CreateInteractiveBrokerIntent(brokerRequest, interactiventent);
+            return CreateInteractiveBrokerIntent(brokerRequest, interactiveIntent);
         }
 
         private Intent CreateInteractiveBrokerIntent(BrokerRequest brokerRequest, Intent brokerIntent)
@@ -184,7 +182,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private async Task<MsalTokenResponse> AcquireTokenSilentViaBrokerAsync(BrokerRequest brokerRequest)
         {
             // Don't send silent background request if account information is not provided
-
             using (_logger.LogMethodDuration())
             {
                 _logger.Verbose("User is specified for silent token request. Starting silent Android broker request. ");
