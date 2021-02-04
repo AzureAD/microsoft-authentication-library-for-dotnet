@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(authenticationRequestParameters, acquireTokenInteractiveParameters);
 
             // There can only be 1 broker request at a time so keep track of the correlation id
-            AndroidBrokerHelper.InteractiveRequestCorrelationId = brokerRequest.CorrelationId;
+            AndroidBrokerStaticHelper.InteractiveRequestCorrelationId = brokerRequest.CorrelationId;
 
             return await AcquireTokenInteractiveInternalAsync(brokerRequest).ConfigureAwait(false);
         }
@@ -118,8 +118,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             using (_logger.LogBlockDuration("Waiting for Android broker response. "))
             {
-                await AndroidBrokerHelper.ReadyForResponse.WaitAsync().ConfigureAwait(false);
-                return AndroidBrokerHelper.InteractiveBrokerTokenResponse;
+                await AndroidBrokerStaticHelper.ReadyForResponse.WaitAsync().ConfigureAwait(false);
+                return AndroidBrokerStaticHelper.InteractiveBrokerTokenResponse;
             }
         }
 

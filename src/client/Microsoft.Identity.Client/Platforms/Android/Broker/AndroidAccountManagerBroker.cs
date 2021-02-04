@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             CheckPowerOptimizationStatus();
 
-            AndroidBrokerHelper.InteractiveBrokerTokenResponse = null;
+            AndroidBrokerStaticHelper.InteractiveBrokerTokenResponse = null;
 
             BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(
                 authenticationRequestParameters, acquireTokenInteractiveParameters);
@@ -77,8 +77,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             using (_logger.LogBlockDuration("Waiting for Android broker response. "))
             {
-                await AndroidBrokerHelper.ReadyForResponse.WaitAsync().ConfigureAwait(false);
-                return AndroidBrokerHelper.InteractiveBrokerTokenResponse;
+                await AndroidBrokerStaticHelper.ReadyForResponse.WaitAsync().ConfigureAwait(false);
+                return AndroidBrokerStaticHelper.InteractiveBrokerTokenResponse;
             }
         }
 
