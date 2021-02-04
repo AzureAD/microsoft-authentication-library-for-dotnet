@@ -20,6 +20,27 @@
     android:minWidth="25px"
     android:minHeight="25px"
     android:id="@+id/signInBtn" />
+  <Button
+    android:text="Device Code "
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:minWidth="25px"
+    android:minHeight="25px"
+    android:id="@+id/deviceCodeBtn" />
+  <Button
+    android:text="Silent "
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:minWidth="25px"
+    android:minHeight="25px"
+    android:id="@+id/silentBtn" />
+  <Button
+    android:text="Sign Out "
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:minWidth="25px"
+    android:minHeight="25px"
+    android:id="@+id/singOutBtn" />
   <TextView
     android:text=""
     android:layout_width="match_parent"

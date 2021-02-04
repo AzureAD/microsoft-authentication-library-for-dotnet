@@ -1,9 +1,9 @@
 ﻿{
     "client_id": "fb3a8a4b-05a1-484c-a14e-4ef333ad64c8",
     "authorization_user_agent": "DEFAULT",
-    "redirect_uri": "msauth://com.azuresamples.msalandroidapp/t+Bk/nrTiK6yhmUDgd80TS5ZZT8=",
+    "redirect_uri": "msauth://com.azuresamples.msalandroidapp/t%2BBk%2FnrTiK6yhmUDgd80TS5ZZT8%3D",
     "account_mode": "SINGLE",
-    "broker_redirect_uri_registered": true,
+    "broker_redirect_uri_registered": false,
     "authorities": [
         {
             "type": "AAD",
