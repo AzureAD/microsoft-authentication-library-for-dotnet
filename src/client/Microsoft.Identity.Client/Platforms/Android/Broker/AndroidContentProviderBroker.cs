@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
     {
         private readonly AndroidBrokerHelper _brokerHelper;
         private readonly ICoreLogger _logger;
-        private Activity _parentActivity;
-        private string _negotiatedBrokerProtocolKey = String.Empty;
+        private readonly Activity _parentActivity;
+        private string _negotiatedBrokerProtocolKey = string.Empty;
 
         public AndroidContentProviderBroker(CoreUIParent uiParent, ICoreLogger logger)
         {
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return _brokerHelper.IsBrokerInstalledAndInvokable();
         }
 
-        public async void InitiateBrokerHandShakeAsync()
+        public async Task InitiateBrokerHandShakeAsync()
         {
             using (_logger.LogMethodDuration())
             {
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (!string.IsNullOrEmpty(negotiatedBrokerProtocalKey))
             {
-                _logger.Info("Using broker protocol version: " + negotiatedBrokerProtocalKey);
+                _logger.Info("[Android broker] Using broker protocol version: " + negotiatedBrokerProtocalKey);
                 return negotiatedBrokerProtocalKey;
             }
 
@@ -80,12 +80,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
                 string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
-                errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
+                errorDescription = $"[Android broker] An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
             }
             else
             {
                 errorCode = BrokerConstants.BrokerUnknownErrorCode;
-                errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned. ";
+                errorDescription = "[Android broker] An error occurred during hand shake with the broker, no detailed error information was returned. ";
             }
 
             _logger.Error(errorDescription);
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            InitiateBrokerHandShakeAsync();
+            await InitiateBrokerHandShakeAsync().ConfigureAwait(false);
 
             BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(authenticationRequestParameters, acquireTokenInteractiveParameters);
 
@@ -114,11 +114,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
             catch (Exception ex)
             {
-                _logger.ErrorPiiWithPrefix(ex, "Android broker interactive invocation failed. ");
+                _logger.ErrorPiiWithPrefix(ex, "[Android broker] Interactive invocation failed. ");
                 _brokerHelper.HandleBrokerOperationError(ex);
             }
 
-            using (_logger.LogBlockDuration("Waiting for Android broker response. "))
+            using (_logger.LogBlockDuration("[Android broker] Waiting for broker response. "))
             {
                 await AndroidBrokerStaticHelper.ReadyForResponse.WaitAsync().ConfigureAwait(false);
                 return AndroidBrokerStaticHelper.InteractiveBrokerTokenResponse;
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             using (_logger.LogMethodDuration())
             {
-                _logger.Verbose("Starting Android Broker interactive authentication. ");
+                _logger.Verbose("[Android broker] Starting interactive authentication. ");
 
                 Bundle bundleResult = await PerformContentResolverOperationAsync(ContentResolverOperation.acquireTokenInteractive, null).ConfigureAwait(false);
 
@@ -143,7 +143,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             string packageName = bundleResult.GetString("broker.package.name");
             string className = bundleResult.GetString("broker.activity.name");
-            string uid = bundleResult.GetString("caller.info.uid");
 
             Intent brokerIntent = new Intent();
             brokerIntent.SetPackage(packageName);
@@ -169,7 +168,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
             bundle.PutString(BrokerConstants.BrokerRequestV2, brokerRequestJson);
             bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
-            _logger.InfoPii("GetInteractiveBrokerBundle: " + brokerRequestJson, "Enable PII to see the broker request. ");
+            _logger.InfoPii("[Android broker] GetInteractiveBrokerBundle: " + brokerRequestJson, "Enable PII to see the broker request. ");
             return bundle;
         }
 
@@ -177,7 +176,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            InitiateBrokerHandShakeAsync();
+            await InitiateBrokerHandShakeAsync().ConfigureAwait(false);
 
             BrokerRequest brokerRequest = BrokerRequest.FromSilentParameters(
                 authenticationRequestParameters, acquireTokenSilentParameters);
@@ -193,7 +192,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
             catch (Exception ex)
             {
-                _logger.ErrorPiiWithPrefix(ex, "Android broker silent invocation failed. ");
+                _logger.ErrorPiiWithPrefix(ex, "[Android broker] Silent invocation failed. ");
                 _brokerHelper.HandleBrokerOperationError(ex);
                 throw;
             }
@@ -203,7 +202,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             using (_logger.LogMethodDuration())
             {
-                _logger.Verbose("User is specified for silent token request. Starting silent Android broker request. ");
+                _logger.Verbose("[Android broker] User is specified for silent token request. Starting silent request. ");
 
                 var accountData = await GetBrokerAccountDataAsync(brokerRequest).ConfigureAwait(false);
 
@@ -225,12 +224,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 return _brokerHelper.GetSilentResultFromBundle(silentOperationBundleResult);
             }
 
-            _logger.Info("Android Broker didn't return any results. ");
+            _logger.Info("[Android broker] No results returned. ");
             return null;
         }
 
         public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
-            string clientID,
+            string clientId,
             string redirectUri,
             string authority,
             ICacheSessionManager cacheSessionManager,
@@ -240,11 +239,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
-                    _logger.Warning("Android broker is either not installed or is not reachable so no accounts will be returned. ");
+                    _logger.Warning("[Android broker] Broker is either not installed or is not reachable so no accounts will be returned. ");
                     return null;
                 }
 
-                return await GetAccountsInternalAsync(clientID, redirectUri).ConfigureAwait(false);
+                return await GetAccountsInternalAsync(clientId, redirectUri).ConfigureAwait(false);
             }
         }
 
@@ -254,13 +253,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             try
             {
-                InitiateBrokerHandShakeAsync();
+                await InitiateBrokerHandShakeAsync().ConfigureAwait(false);
                 var accountData = await GetBrokerAccountDataAsync(brokerRequest).ConfigureAwait(false);
                 return _brokerHelper.ExtractBrokerAccountsFromAccountData(accountData);
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to get Android broker accounts from the broker. ");
+                _logger.Error("[Android broker] Failed to get accounts from the broker. ");
                 _brokerHelper.HandleBrokerOperationError(ex);
                 throw;
             }
@@ -275,33 +274,28 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return bundleResult?.GetString(BrokerConstants.BrokerAccounts);
         }
 
-        public async Task RemoveAccountAsync(ApplicationConfiguration applicationConfiguration, IAccount account)
+        public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             using (_logger.LogMethodDuration())
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
-                    _logger.Warning("Android broker is either not installed or not reachable so no accounts will be removed. ");
+                    _logger.Warning("[Android broker] Broker is either not installed or not reachable so no accounts will be removed. ");
                     return;
                 }
 
-                await PerformRemoveAccountsAsync(applicationConfiguration, account).ConfigureAwait(false);
-            }
-        }
+                try
+                {
+                    await InitiateBrokerHandShakeAsync().ConfigureAwait(false);
 
-        private async Task PerformRemoveAccountsAsync(ApplicationConfiguration applicationConfiguration, IAccount account)
-        {
-            try
-            {
-                InitiateBrokerHandShakeAsync();
-
-                await RemoveBrokerAccountFromBrokersAsync(applicationConfiguration.ClientId, account).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed to remove Android broker account from the broker. ");
-                _brokerHelper.HandleBrokerOperationError(ex);
-                throw;
+                    await RemoveBrokerAccountFromBrokersAsync(appConfig.ClientId, account).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error("[Android broker] Failed to remove account from the broker. ");
+                    _brokerHelper.HandleBrokerOperationError(ex);
+                    throw;
+                }
             }
         }
 
@@ -325,8 +319,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (resultCursor == null)
             {
-                _logger.Error("An error occurred during the content provider operation.");
-                throw new MsalClientException(MsalError.CannotInvokeBroker, "Could not communicate with broker via content provider.");
+                _logger.Error("[Android broker] An error occurred during the content provider operation.");
+                throw new MsalClientException(MsalError.CannotInvokeBroker, "[Android broker] Could not communicate with broker via content provider.");
             }
 
             var resultBundle = resultCursor.Extras;

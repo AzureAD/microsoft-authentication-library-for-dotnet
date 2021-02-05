@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 }
                 catch (Exception exContentProvider)
                 {
-                    logger.Error("Unable to communicate with the broker via Content Provider. Attempting to fall back to account manager communication.");
+                    logger.Error("[Android broker] Unable to communicate with the broker via Content Provider. Attempting to fall back to account manager communication.");
                     logger.Error(exContentProvider.Message);
 
                     try
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     }
                     catch (Exception exAccountManager)
                     {
-                        logger.Error("Unable to communicate with the broker via the Account manager.");
+                        logger.Error("[Android broker] Unable to communicate with the broker via the Account manager.");
                         logger.Error(exAccountManager.Message);
                     }
                 }
