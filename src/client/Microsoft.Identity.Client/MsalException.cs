@@ -181,8 +181,8 @@ namespace Microsoft.Identity.Client
 
             if (s_typeNameToType.Value.TryGetValue(type, out Type exceptionType))
             {
-                string errorCode = JsonUtils.GetExistingOrEmptyString(jobj, ErrorCodeKey);
-                string errorMessage = JsonUtils.GetExistingOrEmptyString(jobj, ErrorDescriptionKey);
+                string errorCode = JsonHelper.GetExistingOrEmptyString(jobj, ErrorCodeKey);
+                string errorMessage = JsonHelper.GetExistingOrEmptyString(jobj, ErrorDescriptionKey);
 
                 MsalException ex = Activator.CreateInstance(exceptionType, errorCode, errorMessage) as MsalException;
                 ex.PopulateObjectFromJson(jobj);

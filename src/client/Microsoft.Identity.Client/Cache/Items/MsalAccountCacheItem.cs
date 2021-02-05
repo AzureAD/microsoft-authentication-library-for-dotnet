@@ -145,14 +145,14 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var item = new MsalAccountCacheItem
             {
-                PreferredUsername = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Username),
-                Name = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Name),
-                GivenName = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.GivenName),
-                FamilyName = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyName),
-                LocalAccountId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.LocalAccountId),
-                AuthorityType = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.AuthorityType),
-                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
-                WamAccountIds = JsonUtils.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.WamAccountIds)
+                PreferredUsername = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Username),
+                Name = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Name),
+                GivenName = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.GivenName),
+                FamilyName = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyName),
+                LocalAccountId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.LocalAccountId),
+                AuthorityType = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.AuthorityType),
+                TenantId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
+                WamAccountIds = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.WamAccountIds)
             };
 
             item.PopulateFieldsFromJObject(j);

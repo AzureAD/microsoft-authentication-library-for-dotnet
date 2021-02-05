@@ -146,28 +146,28 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal static MsalAccessTokenCacheItem FromJObject(JObject j)
         {
-            long cachedAt = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.CachedAt);
-            long expiresOn = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.ExpiresOn);
+            long cachedAt = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.CachedAt);
+            long expiresOn = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.ExpiresOn);
 
             // This handles a bug with the name in previous MSAL.  It used "ext_expires_on" instead of
             // "extended_expires_on" per spec, so this works around that.
-            long ext_expires_on = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.ExtendedExpiresOn_MsalCompat);
-            long extendedExpiresOn = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.ExtendedExpiresOn);
+            long ext_expires_on = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.ExtendedExpiresOn_MsalCompat);
+            long extendedExpiresOn = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.ExtendedExpiresOn);
             if (extendedExpiresOn == 0 && ext_expires_on > 0)
             {
                 extendedExpiresOn = ext_expires_on;
             }
 
-            var item = new MsalAccessTokenCacheItem(JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target))
+            var item = new MsalAccessTokenCacheItem(JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target))
             {
-                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),                
+                TenantId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),                
                 CachedAt = cachedAt.ToString(CultureInfo.InvariantCulture),
                 ExpiresOnUnixTimestamp = expiresOn.ToString(CultureInfo.InvariantCulture),
                 ExtendedExpiresOnUnixTimestamp = extendedExpiresOn.ToString(CultureInfo.InvariantCulture),
-                RefreshOnUnixTimestamp = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.RefreshOn),
-                UserAssertionHash = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash),
-                KeyId = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId),
-                TokenType = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer
+                RefreshOnUnixTimestamp = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.RefreshOn),
+                UserAssertionHash = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash),
+                KeyId = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId),
+                TokenType = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer
             };
 
             item.PopulateFieldsFromJObject(j);

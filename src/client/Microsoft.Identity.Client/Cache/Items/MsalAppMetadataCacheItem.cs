@@ -55,9 +55,9 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal static MsalAppMetadataCacheItem FromJObject(JObject j)
         {
-            string clientId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientId);
-            string environment = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
-            string familyId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
+            string clientId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientId);
+            string environment = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
+            string familyId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
 
             var item = new MsalAppMetadataCacheItem(clientId, environment, familyId);
 

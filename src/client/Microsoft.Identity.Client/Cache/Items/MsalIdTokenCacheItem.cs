@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var item = new MsalIdTokenCacheItem
             {
-                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
+                TenantId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
             };
 
             item.PopulateFieldsFromJObject(j);

@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 namespace Microsoft.Identity.Client.Utils
 {
     internal interface IJsonSerializable<T>
     {
-        T FromJsonString(string json);
-        string ToJsonString(T objectToSerialize);
+        string SerializeToJson();
+        T DeserializeFromJson(string json);
     }
 }
