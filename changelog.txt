@@ -8,7 +8,7 @@
 ### Bug Fixes:
 **Fixed `ArgumentNullException` and improved resiliency when using `RSACryptoServiceProvider` on NetCore and NetStandard** See issues [#2342](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2342)
 **Removed "Unresolved P/Invoke" warning from UWP** See issue [#2367](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2367)
-**Fixed issue where PKEY auth would fail if WithExtraQueryParams was used** See Issue [#2359](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2359)
+**Fixed issue where PKEY auth would fail if `WithExtraQueryParams` were used**. See Issue [#2359](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2359).
 
 4.25.0
 ==========
