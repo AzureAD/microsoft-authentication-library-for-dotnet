@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Region
             }
             catch (Exception e)
             {
-                requestContext.Logger.Info("[Region discovery] Call to local imds failed. " + e);
+                requestContext.Logger.Info("[Region discovery] Call to local IMDS failed. " + e);
                 throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed, e);
             }
         }
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client.Region
         {
             return new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { regionalizedAuthority.Host },
+                Aliases = new[] { regionalizedAuthority.Host, orginalAuthority.Host },
                 PreferredCache = orginalAuthority.Host,
                 PreferredNetwork = regionalizedAuthority.Host
             };
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Client.Region
 
                     s_region = regionToUse;
                     requestContext.ApiEvent.FallbackToGlobal = false;
-                    requestContext.Logger.Info($"[Region discovery] Region auto detection failed. Region provided by the user will be used: ${regionToUse}.");
+                    requestContext.Logger.Info($"[Region discovery] Region auto detection failed. Region provided by the user will be used: {regionToUse}.");
                     LogTelemetryData(s_region, RegionSource.UserProvided, requestContext);
                 }
             }
@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Client.Region
             {
                 builder.Host = $"{s_region}.login.microsoft.com";
             }
-            else
+            else if (!builder.Host.Equals($"{s_region}.login.microsoft.com"))
             {
                 builder.Host = $"{s_region}.{builder.Host}";
             }
