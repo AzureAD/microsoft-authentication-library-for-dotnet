@@ -52,23 +52,23 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.cbxMsaPt = new System.Windows.Forms.CheckBox();
             this.btnExpire = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnRemoveAccount = new System.Windows.Forms.Button();
             this.cbxBackgroundThread = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // resultTbx
             // 
-            this.resultTbx.Location = new System.Drawing.Point(12, 191);
+            this.resultTbx.Location = new System.Drawing.Point(10, 222);
             this.resultTbx.Multiline = true;
             this.resultTbx.Name = "resultTbx";
             this.resultTbx.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.resultTbx.Size = new System.Drawing.Size(615, 381);
+            this.resultTbx.Size = new System.Drawing.Size(608, 381);
             this.resultTbx.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 16);
+            this.label1.Location = new System.Drawing.Point(19, 45);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(48, 13);
             this.label1.TabIndex = 2;
@@ -86,18 +86,18 @@
             "https://login.microsoftonline.com/61411618-6f67-4fc5-ba6a-4a0fe32d4eec",
             "https://login.windows-ppe.net/organizations",
             "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47"});
-            this.authorityCbx.Location = new System.Drawing.Point(63, 13);
+            this.authorityCbx.Location = new System.Drawing.Point(73, 42);
             this.authorityCbx.Name = "authorityCbx";
-            this.authorityCbx.Size = new System.Drawing.Size(220, 21);
+            this.authorityCbx.Size = new System.Drawing.Size(418, 21);
             this.authorityCbx.TabIndex = 3;
             this.authorityCbx.Text = "https://login.microsoftonline.com/common";
             // 
             // clientIdCbx
             // 
             this.clientIdCbx.FormattingEnabled = true;
-            this.clientIdCbx.Location = new System.Drawing.Point(356, 13);
+            this.clientIdCbx.Location = new System.Drawing.Point(73, 15);
             this.clientIdCbx.Name = "clientIdCbx";
-            this.clientIdCbx.Size = new System.Drawing.Size(252, 21);
+            this.clientIdCbx.Size = new System.Drawing.Size(418, 21);
             this.clientIdCbx.TabIndex = 4;
             this.clientIdCbx.Text = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
             this.clientIdCbx.SelectedIndexChanged += new System.EventHandler(this.clientIdCbx_SelectedIndexChanged);
@@ -105,7 +105,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(289, 16);
+            this.label2.Location = new System.Drawing.Point(25, 18);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(42, 13);
             this.label2.TabIndex = 5;
@@ -114,7 +114,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 74);
+            this.label3.Location = new System.Drawing.Point(9, 98);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(58, 13);
             this.label3.TabIndex = 7;
@@ -122,7 +122,7 @@
             // 
             // loginHintTxt
             // 
-            this.loginHintTxt.Location = new System.Drawing.Point(63, 71);
+            this.loginHintTxt.Location = new System.Drawing.Point(73, 96);
             this.loginHintTxt.Name = "loginHintTxt";
             this.loginHintTxt.Size = new System.Drawing.Size(220, 20);
             this.loginHintTxt.TabIndex = 8;
@@ -137,14 +137,14 @@
             "no_prompt",
             "consent",
             "never"});
-            this.promptCbx.Location = new System.Drawing.Point(487, 97);
+            this.promptCbx.Location = new System.Drawing.Point(497, 132);
             this.promptCbx.Name = "promptCbx";
             this.promptCbx.Size = new System.Drawing.Size(121, 21);
             this.promptCbx.TabIndex = 10;
             // 
             // atsBtn
             // 
-            this.atsBtn.Location = new System.Drawing.Point(14, 147);
+            this.atsBtn.Location = new System.Drawing.Point(12, 178);
             this.atsBtn.Name = "atsBtn";
             this.atsBtn.Size = new System.Drawing.Size(75, 23);
             this.atsBtn.TabIndex = 11;
@@ -154,7 +154,7 @@
             // 
             // atiBtn
             // 
-            this.atiBtn.Location = new System.Drawing.Point(95, 147);
+            this.atiBtn.Location = new System.Drawing.Point(93, 178);
             this.atiBtn.Name = "atiBtn";
             this.atiBtn.Size = new System.Drawing.Size(75, 23);
             this.atiBtn.TabIndex = 12;
@@ -164,7 +164,7 @@
             // 
             // atsAtiBtn
             // 
-            this.atsAtiBtn.Location = new System.Drawing.Point(176, 147);
+            this.atsAtiBtn.Location = new System.Drawing.Point(174, 178);
             this.atsAtiBtn.Name = "atsAtiBtn";
             this.atsAtiBtn.Size = new System.Drawing.Size(75, 23);
             this.atsAtiBtn.TabIndex = 13;
@@ -177,7 +177,7 @@
             this.useBrokerChk.AutoSize = true;
             this.useBrokerChk.Checked = true;
             this.useBrokerChk.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.useBrokerChk.Location = new System.Drawing.Point(12, 101);
+            this.useBrokerChk.Location = new System.Drawing.Point(12, 134);
             this.useBrokerChk.Name = "useBrokerChk";
             this.useBrokerChk.Size = new System.Drawing.Size(75, 17);
             this.useBrokerChk.TabIndex = 14;
@@ -186,7 +186,7 @@
             // 
             // accBtn
             // 
-            this.accBtn.Location = new System.Drawing.Point(296, 147);
+            this.accBtn.Location = new System.Drawing.Point(315, 178);
             this.accBtn.Name = "accBtn";
             this.accBtn.Size = new System.Drawing.Size(80, 23);
             this.accBtn.TabIndex = 15;
@@ -196,9 +196,9 @@
             // 
             // clearBtn
             // 
-            this.clearBtn.Location = new System.Drawing.Point(552, 578);
+            this.clearBtn.Location = new System.Drawing.Point(550, 609);
             this.clearBtn.Name = "clearBtn";
-            this.clearBtn.Size = new System.Drawing.Size(75, 23);
+            this.clearBtn.Size = new System.Drawing.Size(68, 23);
             this.clearBtn.TabIndex = 16;
             this.clearBtn.Text = "Clear Log";
             this.clearBtn.UseVisualStyleBackColor = true;
@@ -206,9 +206,9 @@
             // 
             // btnClearCache
             // 
-            this.btnClearCache.Location = new System.Drawing.Point(512, 162);
+            this.btnClearCache.Location = new System.Drawing.Point(510, 193);
             this.btnClearCache.Name = "btnClearCache";
-            this.btnClearCache.Size = new System.Drawing.Size(115, 23);
+            this.btnClearCache.Size = new System.Drawing.Size(108, 23);
             this.btnClearCache.TabIndex = 17;
             this.btnClearCache.Text = "Clear MSAL Cache";
             this.btnClearCache.UseVisualStyleBackColor = true;
@@ -222,7 +222,7 @@
             "User.Read User.Read.All",
             "https://management.core.windows.net//.default",
             "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess"});
-            this.cbxScopes.Location = new System.Drawing.Point(63, 37);
+            this.cbxScopes.Location = new System.Drawing.Point(73, 69);
             this.cbxScopes.Name = "cbxScopes";
             this.cbxScopes.Size = new System.Drawing.Size(545, 21);
             this.cbxScopes.TabIndex = 18;
@@ -231,7 +231,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 40);
+            this.label5.Location = new System.Drawing.Point(24, 72);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(43, 13);
             this.label5.TabIndex = 19;
@@ -240,7 +240,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(441, 100);
+            this.label4.Location = new System.Drawing.Point(451, 135);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(40, 13);
             this.label4.TabIndex = 9;
@@ -249,7 +249,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(289, 73);
+            this.label6.Location = new System.Drawing.Point(299, 98);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(61, 13);
             this.label6.TabIndex = 21;
@@ -258,7 +258,7 @@
             // cbxAccount
             // 
             this.cbxAccount.FormattingEnabled = true;
-            this.cbxAccount.Location = new System.Drawing.Point(356, 70);
+            this.cbxAccount.Location = new System.Drawing.Point(366, 95);
             this.cbxAccount.Name = "cbxAccount";
             this.cbxAccount.Size = new System.Drawing.Size(252, 21);
             this.cbxAccount.TabIndex = 22;
@@ -266,7 +266,7 @@
             // cbxMsaPt
             // 
             this.cbxMsaPt.AutoSize = true;
-            this.cbxMsaPt.Location = new System.Drawing.Point(95, 101);
+            this.cbxMsaPt.Location = new System.Drawing.Point(92, 134);
             this.cbxMsaPt.Name = "cbxMsaPt";
             this.cbxMsaPt.Size = new System.Drawing.Size(111, 17);
             this.cbxMsaPt.TabIndex = 23;
@@ -275,28 +275,28 @@
             // 
             // btnExpire
             // 
-            this.btnExpire.Location = new System.Drawing.Point(512, 133);
+            this.btnExpire.Location = new System.Drawing.Point(510, 164);
             this.btnExpire.Name = "btnExpire";
-            this.btnExpire.Size = new System.Drawing.Size(115, 23);
+            this.btnExpire.Size = new System.Drawing.Size(108, 23);
             this.btnExpire.TabIndex = 24;
             this.btnExpire.Text = "Expire ATs";
             this.btnExpire.UseVisualStyleBackColor = true;
             this.btnExpire.Click += new System.EventHandler(this.btnExpire_Click);
             // 
-            // button1
+            // btnRemoveAccount
             // 
-            this.button1.Location = new System.Drawing.Point(382, 147);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(89, 23);
-            this.button1.TabIndex = 25;
-            this.button1.Text = "Remove Acc";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.remoteAcc_click);
+            this.btnRemoveAccount.Location = new System.Drawing.Point(402, 178);
+            this.btnRemoveAccount.Name = "button1";
+            this.btnRemoveAccount.Size = new System.Drawing.Size(89, 23);
+            this.btnRemoveAccount.TabIndex = 25;
+            this.btnRemoveAccount.Text = "Remove Acc";
+            this.btnRemoveAccount.UseVisualStyleBackColor = true;
+            this.btnRemoveAccount.Click += new System.EventHandler(this.btnRemoveAcc_Click);
             // 
             // cbxBackgroundThread
             // 
             this.cbxBackgroundThread.AutoSize = true;
-            this.cbxBackgroundThread.Location = new System.Drawing.Point(212, 101);
+            this.cbxBackgroundThread.Location = new System.Drawing.Point(214, 134);
             this.cbxBackgroundThread.Name = "cbxBackgroundThread";
             this.cbxBackgroundThread.Size = new System.Drawing.Size(146, 17);
             this.cbxBackgroundThread.TabIndex = 26;
@@ -307,9 +307,9 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(639, 613);
+            this.ClientSize = new System.Drawing.Size(634, 642);
             this.Controls.Add(this.cbxBackgroundThread);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnRemoveAccount);
             this.Controls.Add(this.btnExpire);
             this.Controls.Add(this.cbxMsaPt);
             this.Controls.Add(this.cbxAccount);
@@ -365,7 +365,7 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.CheckBox cbxMsaPt;
         private System.Windows.Forms.Button btnExpire;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnRemoveAccount;
         private System.Windows.Forms.CheckBox cbxBackgroundThread;
     }
 }
