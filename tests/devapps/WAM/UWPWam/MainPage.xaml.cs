@@ -1,23 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
-using Windows.Storage;
-using Windows.Storage.Streams;
 using System.Threading;
-using System.Collections.ObjectModel;
 using Windows.Security.Authentication.Web;
 using System.Diagnostics;
 using System.Globalization;
@@ -42,13 +30,13 @@ namespace UWP_standalone
         {
             InitializeComponent();
 
-            // returns smth like s-1-15-2-2601115387-131721061-1180486061-1362788748-631273777-3164314714-2766189824
+            // returns something like s-1-15-2-2601115387-131721061-1180486061-1362788748-631273777-3164314714-2766189824
             string sid = WebAuthenticationBroker.GetCurrentApplicationCallbackUri().Host;
 
             // use uppercase S
             sid = sid.Replace('s', 'S');
 
-            // the redirect uri
+            // the redirect URI
             string redirectUri = $"ms-appx-web://microsoft.aad.brokerplugin/{sid}";
         }
 
@@ -117,6 +105,8 @@ namespace UWP_standalone
 
             var ats = tokenCacheInternal.Accessor.GetAllAccessTokens();
 
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Expiring tokens ...");
 
             // set access tokens as expired
             foreach (var accessItem in ats)
@@ -129,6 +119,9 @@ namespace UWP_standalone
             }
 
             await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+
+            sb.AppendLine("Done expiring tokens.");
+            await DisplayMessageAsync(sb.ToString()).ConfigureAwait(false);
         }
 
         private async void ClearCacheAsync(object sender, RoutedEventArgs e)
@@ -136,12 +129,19 @@ namespace UWP_standalone
             var pca = CreatePublicClient();            
 
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Clearing the cache ...");
+
             foreach (IAccount account in accounts)
             {
                 await pca.RemoveAsync(account).ConfigureAwait(false);
             }
-        }
 
+            sb.AppendLine("Done clearing the cache.");
+            await DisplayMessageAsync(sb.ToString()).ConfigureAwait(false);
+
+        }
 
         private async void ATS_ClickAsync(object sender, RoutedEventArgs e)
         {
@@ -203,7 +203,7 @@ namespace UWP_standalone
 
         private async Task DisplayResultAsync(AuthenticationResult result)
         {
-            await DisplayMessageAsync("Signed in User - " + result.Account.Username + "\nAccessToken: \n" + result.AccessToken).ConfigureAwait(false);
+            await DisplayMessageAsync($"Signed in User - {result.Account.Username}\nAccess token from {result.AuthenticationResultMetadata.TokenSource}: \n{result.AccessToken}").ConfigureAwait(false);
         }
 
 
