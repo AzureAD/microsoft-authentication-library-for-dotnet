@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Region
         {
             requestContext.ApiEvent.RegionDiscovered = region;
 
-            if (requestContext.ApiEvent.RegionSource == 0)
+            if (requestContext.ApiEvent.RegionSource == (int)RegionSource.None)
             {
                 requestContext.ApiEvent.RegionSource = (int)regionSource;
             }
@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Client.Region
         {
             return new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { regionalizedAuthority.Host, orginalAuthority.Host },
+                Aliases = new[] { regionalizedAuthority.Host },
                 PreferredCache = orginalAuthority.Host,
                 PreferredNetwork = regionalizedAuthority.Host
             };

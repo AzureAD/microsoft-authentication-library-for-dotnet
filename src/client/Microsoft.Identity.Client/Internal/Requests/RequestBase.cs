@@ -283,8 +283,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 Uri canonicalAuthority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                    $"Fetching access token from host {canonicalAuthority.Host}. Endpoint {canonicalAuthority}. ",
-                    $"Fetching access token from host {canonicalAuthority.Host}. ");
+                    $"Fetched access token from host {canonicalAuthority.Host}. Endpoint {canonicalAuthority}. ",
+                    $"Fetched access token from host {canonicalAuthority.Host}. ");
 
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
                     string.Format(

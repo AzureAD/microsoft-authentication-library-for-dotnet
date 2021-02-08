@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
             _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = "";
             _harness?.Dispose();
+            _regionDiscoveryProvider.Clear();
             base.TestCleanup();
         }
 
@@ -145,7 +146,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
             
             // In the instance discovery flow, TryGetMetadataAsync is always called with a known authority first, then with regionalized.
-            var t = await _regionDiscoveryProvider.TryGetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+            await _regionDiscoveryProvider.TryGetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.TryGetMetadataAsync(regionalizedAuthority, _testRequestContext).ConfigureAwait(false);
 
             ValidateInstanceMetadata(regionalMetadata);
@@ -376,13 +377,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             InstanceDiscoveryMetadataEntry expectedEntry = new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { "centralus.login.microsoft.com", "login.microsoftonline.com" },
+                Aliases = new[] { "centralus.login.microsoft.com" },
                 PreferredCache = "login.microsoftonline.com",
                 PreferredNetwork = "centralus.login.microsoft.com"
             };
 
             Assert.IsNotNull(entry, "The instance metadata should not be empty.");
-            CollectionAssert.AreEqual(expectedEntry.Aliases, entry.Aliases);
+            Assert.AreEqual(expectedEntry.Aliases.Single(), entry.Aliases.Single());
             Assert.AreEqual(expectedEntry.PreferredCache, entry.PreferredCache);
             Assert.AreEqual(expectedEntry.PreferredNetwork, entry.PreferredNetwork);
         }
