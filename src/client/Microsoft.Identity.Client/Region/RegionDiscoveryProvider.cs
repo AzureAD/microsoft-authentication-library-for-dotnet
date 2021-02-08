@@ -252,13 +252,18 @@ namespace Microsoft.Identity.Client.Region
                 requestContext.ApiEvent.FallbackToGlobal = false;
             }
 
+            if (canonicalAuthority.Host.StartsWith($"{s_region}."))
+            {
+                return canonicalAuthority;
+            }
+
             var builder = new UriBuilder(canonicalAuthority);
 
             if (KnownMetadataProvider.IsPublicEnvironment(canonicalAuthority.Host))
             {
                 builder.Host = $"{s_region}.login.microsoft.com";
             }
-            else if (!builder.Host.Equals($"{s_region}.login.microsoft.com"))
+            else
             {
                 builder.Host = $"{s_region}.{builder.Host}";
             }
