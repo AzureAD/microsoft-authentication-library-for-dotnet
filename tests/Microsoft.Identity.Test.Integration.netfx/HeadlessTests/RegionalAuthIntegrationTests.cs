@@ -179,9 +179,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory);
-            result = await GetAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint, new token
-            AssertValidHost(false, factory, 1);
-            AssertTokenSource_IsIdP(result);
+            result = await GetAuthenticationResultAsync(autoDetectRegion: false).ConfigureAwait(false); // global endpoint, use cached token
+            AssertTokenSource_IsCache(result);
             result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint, use cached token
             AssertTokenSource_IsCache(result);
         }
