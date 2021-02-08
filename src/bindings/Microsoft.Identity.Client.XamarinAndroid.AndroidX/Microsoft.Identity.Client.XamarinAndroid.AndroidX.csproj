@@ -42,6 +42,7 @@
     <EmbeddedJar Include="..\..\externals\*.jar" Link="Jars\%(Filename)%(Extension)" />
     <LibraryProjectZip Include="..\..\externals\*.aar" Link="Jars\%(Filename)%(Extension)" />
     -->
+    <None Remove="Jars\msal-2.0.2-javadoc.jar" />
   </ItemGroup>
   
   <ItemGroup>
@@ -58,5 +59,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <JavaDocJar Include="Jars\msal-2.0.2-javadoc.jar" />
   </ItemGroup>
 </Project>
