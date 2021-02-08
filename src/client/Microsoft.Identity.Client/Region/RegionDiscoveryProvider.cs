@@ -150,7 +150,12 @@ namespace Microsoft.Identity.Client.Region
         private void LogTelemetryData(string region, RegionSource regionSource, RequestContext requestContext)
         {
             requestContext.ApiEvent.RegionDiscovered = region;
-            requestContext.ApiEvent.RegionSource = (int)regionSource;
+
+            if (requestContext.ApiEvent.RegionSource == 0)
+            {
+                requestContext.ApiEvent.RegionSource = (int)regionSource;
+            }
+
             requestContext.ApiEvent.UserProvidedRegion = requestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse;
         }
 
