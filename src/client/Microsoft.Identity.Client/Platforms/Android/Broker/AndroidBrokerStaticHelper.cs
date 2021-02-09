@@ -16,7 +16,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
-    internal class AndroidBrokerStaticHelper
+    internal static class AndroidBrokerStaticHelper
     {
         // When the broker responds, we cannot correlate back to a started task. 
         // So we make a simplifying assumption - only one broker open session can exist at a time
@@ -32,14 +32,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (data == null)
                 {
-                    unreliableLogger?.Info("Data is null, stopping. ");
+                    unreliableLogger?.Info("[Android broker] Data is null, stopping. ");
                     return;
                 }
 
                 switch (resultCode)
                 {
                     case (int)BrokerResponseCode.ResponseReceived:
-                        unreliableLogger?.Info("Response received, decoding... ");
+                        unreliableLogger?.Info("[Android broker] Response received, decoding... ");
 
                         InteractiveBrokerTokenResponse =
                             MsalTokenResponse.CreateFromAndroidBrokerResponse(
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                                 InteractiveRequestCorrelationId);
                         break;
                     case (int)BrokerResponseCode.UserCancelled:
-                        unreliableLogger?.Info("Response received - user cancelled. ");
+                        unreliableLogger?.Info("[Android broker] Response received - user cancelled. ");
 
                         InteractiveBrokerTokenResponse = new MsalTokenResponse
                         {
@@ -56,24 +56,24 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         };
                         break;
                     case (int)BrokerResponseCode.BrowserCodeError:
-                        unreliableLogger?.Info("Response received - error. ");
+                        unreliableLogger?.Info("[Android broker] Response received - error. ");
 
                         dynamic errorResult = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
-                        string error = null;
-                        string errorDescription = null;
 
+                        string error;
+                        string errorDescription;
                         if (errorResult != null)
                         {
                             error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
                             errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
 
-                            unreliableLogger?.Error($"error: {error} errorDescription {errorDescription}. ");
+                            unreliableLogger?.Error($"[Android broker] error: {error} errorDescription {errorDescription}. ");
                         }
                         else
                         {
                             error = BrokerConstants.BrokerUnknownErrorCode;
-                            errorDescription = "Error Code received, but no error could be extracted. ";
-                            unreliableLogger?.Error("Error response received, but not error could be extracted. ");
+                            errorDescription = "[Android broker] Error Code received, but no error could be extracted. ";
+                            unreliableLogger?.Error("[Android broker] Error response received, but not error could be extracted. ");
                         }
 
                         var httpResponse = new HttpResponse();
@@ -90,11 +90,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         };
                         break;
                     default:
-                        unreliableLogger?.Error("Unknown broker response. ");
+                        unreliableLogger?.Error("[Android broker] Unknown broker response. ");
                         InteractiveBrokerTokenResponse = new MsalTokenResponse
                         {
                             Error = BrokerConstants.BrokerUnknownErrorCode,
-                            ErrorDescription = "Broker result not returned from android broker. ",
+                            ErrorDescription = "[Android broker] Broker result not returned. ",
                             CorrelationId = InteractiveRequestCorrelationId
                         };
                         break;
