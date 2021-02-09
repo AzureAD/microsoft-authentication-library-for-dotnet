@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
             _testRequestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = "";
             _harness?.Dispose();
+            _regionDiscoveryProvider.Clear();
             base.TestCleanup();
         }
 
@@ -67,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.TryGetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-            validateInstanceMetadata(regionalMetadata);
+            ValidateInstanceMetadata(regionalMetadata);
         }
 
         [TestMethod]
@@ -77,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.TryGetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-            validateInstanceMetadata(regionalMetadata);
+            ValidateInstanceMetadata(regionalMetadata);
         }
 
         [TestMethod]
@@ -87,12 +88,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.TryGetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-            validateInstanceMetadata(regionalMetadata);
+            ValidateInstanceMetadata(regionalMetadata);
 
             //get metadata from the instance metadata cache
             regionalMetadata = await _regionDiscoveryProvider.TryGetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-            validateInstanceMetadata(regionalMetadata);
+            ValidateInstanceMetadata(regionalMetadata);
         }
 
         [TestMethod]
@@ -135,6 +136,20 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsNotNull(regionalMetadata);
             Assert.AreEqual("eastus.login.microsoft.com", regionalMetadata.PreferredNetwork);
             regionDiscoveryProvider.Clear();
+        }
+
+        [TestMethod]
+        public async Task SuccessfulResponseFromRegionalizedAuthorityAsync()
+        {
+            var regionalizedAuthority = new Uri($"https://{TestConstants.Region}.login.microsoft.com/common/");
+
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            
+            // In the instance discovery flow, TryGetMetadataAsync is always called with a known authority first, then with regionalized.
+            await _regionDiscoveryProvider.TryGetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.TryGetMetadataAsync(regionalizedAuthority, _testRequestContext).ConfigureAwait(false);
+
+            ValidateInstanceMetadata(regionalMetadata);
         }
 
         private class HttpSnifferClientFactory : IMsalHttpClientFactory
@@ -276,7 +291,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.TryGetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-            validateInstanceMetadata(regionalMetadata);
+            ValidateInstanceMetadata(regionalMetadata);
         }
 
         [TestMethod]
@@ -358,7 +373,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             }
         }
 
-        private void validateInstanceMetadata(InstanceDiscoveryMetadataEntry entry)
+        private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry)
         {
             InstanceDiscoveryMetadataEntry expectedEntry = new InstanceDiscoveryMetadataEntry()
             {

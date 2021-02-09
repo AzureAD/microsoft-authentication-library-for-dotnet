@@ -45,7 +45,7 @@ namespace TestApp
 
             Console.WriteLine("=== Acquire token global ===");
             await AcquireTokenAsync(certificate, false).ConfigureAwait(false);
-
+            Console.ReadLine();
         }
 
         private static void Log(LogLevel level, string message, bool containsPii)

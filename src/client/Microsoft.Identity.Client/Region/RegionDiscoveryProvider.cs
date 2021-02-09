@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Region
             }
             catch (Exception e)
             {
-                requestContext.Logger.Info("[Region discovery] Call to local imds failed. " + e);
+                requestContext.Logger.Info("[Region discovery] Call to local IMDS failed. " + e);
                 throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed, e);
             }
         }
@@ -150,7 +150,12 @@ namespace Microsoft.Identity.Client.Region
         private void LogTelemetryData(string region, RegionSource regionSource, RequestContext requestContext)
         {
             requestContext.ApiEvent.RegionDiscovered = region;
-            requestContext.ApiEvent.RegionSource = (int)regionSource;
+
+            if (requestContext.ApiEvent.RegionSource == (int)RegionSource.None)
+            {
+                requestContext.ApiEvent.RegionSource = (int)regionSource;
+            }
+
             requestContext.ApiEvent.UserProvidedRegion = requestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse;
         }
 
@@ -243,13 +248,18 @@ namespace Microsoft.Identity.Client.Region
 
                     s_region = regionToUse;
                     requestContext.ApiEvent.FallbackToGlobal = false;
-                    requestContext.Logger.Info($"[Region discovery] Region auto detection failed. Region provided by the user will be used: ${regionToUse}.");
+                    requestContext.Logger.Info($"[Region discovery] Region auto detection failed. Region provided by the user will be used: {regionToUse}.");
                     LogTelemetryData(s_region, RegionSource.UserProvided, requestContext);
                 }
             }
             else
             {
                 requestContext.ApiEvent.FallbackToGlobal = false;
+            }
+
+            if (canonicalAuthority.Host.StartsWith($"{s_region}."))
+            {
+                return canonicalAuthority;
             }
 
             var builder = new UriBuilder(canonicalAuthority);

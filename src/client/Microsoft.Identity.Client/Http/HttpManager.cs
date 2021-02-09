@@ -212,7 +212,9 @@ namespace Microsoft.Identity.Client.Http
                 requestMessage.Method = method;
                 requestMessage.Content = body;
 
-                logger.Verbose($"[HttpManager] Sending request. Method: {method}. URI path: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ");
+                logger.VerbosePii(
+                    $"[HttpManager] Sending request. Method: {method}. URI: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ",
+                    $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. ");
 
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
