@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Linq;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -17,7 +20,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
     [JsonObject]
     [Preserve(AllMembers = true)]
-    internal class OAuth2ResponseBase
+    internal class OAuth2ResponseBase : IJsonSerializable<OAuth2ResponseBase>
     {
         [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.Error)]
         public string Error { get; set; }
@@ -40,5 +43,32 @@ namespace Microsoft.Identity.Client.OAuth2
 
         [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.Claims)]
         public string Claims { get; set; }
+
+        public OAuth2ResponseBase DeserializeFromJson(string json)
+        {
+            JObject jObject = JObject.Parse(json);
+
+            Error = jObject[OAuth2ResponseBaseClaim.Error]?.ToString();
+            SubError = jObject[OAuth2ResponseBaseClaim.SubError]?.ToString();
+            ErrorDescription = jObject[OAuth2ResponseBaseClaim.ErrorDescription]?.ToString();
+            ErrorCodes = ((JArray)jObject[OAuth2ResponseBaseClaim.ErrorCodes]).Select(c => (string)c).ToArray();
+            CorrelationId = jObject[OAuth2ResponseBaseClaim.CorrelationId]?.ToString();
+            Claims = jObject[OAuth2ResponseBaseClaim.Claims]?.ToString();
+
+            return this;
+        }
+
+        public string SerializeToJson()
+        {
+            JObject jObject = new JObject(
+                new JProperty(OAuth2ResponseBaseClaim.Error, Error),
+                new JProperty(OAuth2ResponseBaseClaim.SubError, SubError),
+                new JProperty(OAuth2ResponseBaseClaim.ErrorDescription, ErrorDescription),
+                new JProperty(OAuth2ResponseBaseClaim.ErrorCodes, new JArray(ErrorCodes)),
+                new JProperty(OAuth2ResponseBaseClaim.CorrelationId, CorrelationId),
+                new JProperty(OAuth2ResponseBaseClaim.Claims, Claims));
+
+            return jObject.ToString(Formatting.None);
+        }
     }
 }

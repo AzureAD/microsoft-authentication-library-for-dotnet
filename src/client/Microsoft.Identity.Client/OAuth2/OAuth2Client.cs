@@ -79,6 +79,7 @@ namespace Microsoft.Identity.Client.OAuth2
         }
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool addCommonHeaders = true)
+            where T : IJsonSerializable<T>, new()
         {
             //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
             if (addCommonHeaders)
@@ -192,6 +193,7 @@ namespace Microsoft.Identity.Client.OAuth2
         }
 
         public static T CreateResponse<T>(HttpResponse response, RequestContext requestContext)
+            where T : IJsonSerializable<T>, new()
         {
             if (response.StatusCode != HttpStatusCode.OK)
             {

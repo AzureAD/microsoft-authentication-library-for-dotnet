@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Client.Internal.JsonWebToken;
@@ -25,7 +21,6 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         public void Deserialize_AdalResultWrapper()
         {
             DateTimeOffset dateTimeOffset = DateTimeOffset.MinValue;
-            string s= JsonHelper.SerializeToJson(dateTimeOffset);
 
             string json = @"{
                            ""RawClientInfo"": ""eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"",
@@ -58,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
                            ""UserAssertionHash"": null
                         }";
 
-            
+
             AdalResultWrapper result = JsonHelper.DeserializeFromJson<AdalResultWrapper>(json);
             Assert.AreEqual("idlab@msidlab4.onmicrosoft.com", result.Result.UserInfo.DisplayableId);
             Assert.AreEqual("rt_secret", result.RefreshToken);
@@ -81,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         [TestMethod]
         public void Serialize_ClientInfo_WithNull()
         {
-            ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid"};
+            ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid" };
 
             string actualJson = JsonHelper.SerializeToJson(clientInfo);
             string expectedJson = @"{
@@ -214,8 +209,152 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             Assert.AreEqual("eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0", response.ClientInfo);
 
         }
+
+        [TestMethod]
+        public void IJsonSerializable_OAuth2ResponseBase_Test()
+        {
+            var expected = new OAuth2ResponseBase()
+            {
+                Error = "OAuth error",
+                SubError = "OAuth suberror",
+                ErrorDescription = "OAuth error description",
+                ErrorCodes = new[] { "error1", "error2", "error3" },
+                CorrelationId = "1234-123-1234",
+                Claims = "claim1 claim2"
+            };
+
+            var jsonSerializedLegacy = JsonHelper.SerializeToJson<OAuth2ResponseBase>(expected);
+            var jsonSerializedNew = JsonHelper.SerializeNew<OAuth2ResponseBase>(expected);
+
+            // Assert serialization
+            Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
+
+            var objectDeserializedNew = JsonHelper.DeserializeNew<OAuth2ResponseBase>(jsonSerializedLegacy);
+
+            // Assert deserialization
+            Assert.AreEqual(expected.Error, objectDeserializedNew.Error);
+            Assert.AreEqual(expected.SubError, objectDeserializedNew.SubError);
+            Assert.AreEqual(expected.ErrorDescription, objectDeserializedNew.ErrorDescription);
+            CollectionAssert.AreEqual(expected.ErrorCodes, objectDeserializedNew.ErrorCodes);
+            Assert.AreEqual(expected.CorrelationId, objectDeserializedNew.CorrelationId);
+            Assert.AreEqual(expected.Claims, objectDeserializedNew.Claims);
+        }
+
+        [TestMethod]
+        public void IJsonSerializable_InstanceDiscoveryMetadataEntry_Test()
+        {
+            var expected = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "login.windows.net", "login.microsoftonline.com" },
+                PreferredCache = "login.windows.net",
+                PreferredNetwork = "login.microsoftonline.com"
+            };
+
+            var jsonSerializedLegacy = JsonHelper.SerializeToJson<InstanceDiscoveryMetadataEntry>(expected);
+            var jsonSerializedNew = JsonHelper.SerializeNew<InstanceDiscoveryMetadataEntry>(expected);
+
+            // Assert serialization
+            Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
+
+            var objectDeserializedNew = JsonHelper.DeserializeNew<InstanceDiscoveryMetadataEntry>(jsonSerializedLegacy);
+
+            // Assert deserialization
+            Assert.AreEqual(expected.PreferredCache, objectDeserializedNew.PreferredCache);
+            Assert.AreEqual(expected.PreferredNetwork, objectDeserializedNew.PreferredNetwork);
+            CollectionAssert.AreEqual(expected.Aliases, objectDeserializedNew.Aliases);
+        }
+
+        [TestMethod]
+        public void IJsonSerializable_InstanceDiscoveryResponse_Test()
+        {
+            var expected = new InstanceDiscoveryResponse()
+            {
+                TenantDiscoveryEndpoint = TestConstants.DiscoveryEndPoint,
+                Metadata = new[]
+                {
+                    new InstanceDiscoveryMetadataEntry()
+                    {
+                        Aliases = new[] { "login.windows.net", "login.microsoftonline.com" },
+                        PreferredCache = "login.windows.net",
+                        PreferredNetwork = "login.microsoftonline.com"
+                    },
+                    new InstanceDiscoveryMetadataEntry()
+                    {
+                        Aliases = new[] { "centralus.login.microsoft.com" },
+                        PreferredCache = "login.microsoftonline.com",
+                        PreferredNetwork = "centralus.login.microsoft.com"
+                    }
+                },
+                Error = "OAuth error",
+                SubError = "OAuth suberror",
+                ErrorDescription = "OAuth error description",
+                ErrorCodes = new[] { "error1", "error2", "error3" },
+                CorrelationId = "1234-123-1234",
+                Claims = "claim1 claim2"
+            };
+
+            var jsonSerializedLegacy = JsonHelper.SerializeToJson<InstanceDiscoveryResponse>(expected);
+            var jsonSerializedNew = JsonHelper.SerializeNew<InstanceDiscoveryResponse>(expected);
+
+            // Assert serialization
+            Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
+
+            var objectDeserializedNew = JsonHelper.DeserializeNew<InstanceDiscoveryResponse>(jsonSerializedLegacy);
+
+            // Assert deserialization
+            Assert.AreEqual(expected.TenantDiscoveryEndpoint, objectDeserializedNew.TenantDiscoveryEndpoint);
+            Assert.AreEqual(expected.Metadata.Length, objectDeserializedNew.Metadata.Length);
+            // AssertCollectionItemsEqualByValue(expected.Metadata, objectDeserializedManually.Metadata);
+            Assert.AreEqual(expected.Error, objectDeserializedNew.Error);
+            Assert.AreEqual(expected.SubError, objectDeserializedNew.SubError);
+            Assert.AreEqual(expected.ErrorDescription, objectDeserializedNew.ErrorDescription);
+            CollectionAssert.AreEqual(expected.ErrorCodes, objectDeserializedNew.ErrorCodes);
+            Assert.AreEqual(expected.CorrelationId, objectDeserializedNew.CorrelationId);
+            Assert.AreEqual(expected.Claims, objectDeserializedNew.Claims);
+        }
+
+        [TestMethod]
+        public void IJsonSerializable_DeviceCodeResponse_Test()
+        {
+            var expected = new DeviceCodeResponse()
+            {
+                UserCode = "user code",
+                DeviceCode = "device code",
+                VerificationUrl = "verification url",
+                VerificationUri = "verification uri",
+                ExpiresIn = 1234,
+                Interval = 12345,
+                Message = "device message",
+                Error = "OAuth error",
+                SubError = "OAuth suberror",
+                ErrorDescription = "OAuth error description",
+                ErrorCodes = new[] { "error1", "error2", "error3" },
+                CorrelationId = "1234-123-1234",
+                Claims = "claim1 claim2"
+            };
+
+            var jsonSerializedLegacy = JsonHelper.SerializeToJson<DeviceCodeResponse>(expected);
+            var jsonSerializedNew = JsonHelper.SerializeNew<DeviceCodeResponse>(expected);
+
+            // Assert serialization
+            Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
+
+            var objectDeserializedNew = JsonHelper.DeserializeNew<DeviceCodeResponse>(jsonSerializedLegacy);
+
+            // Assert deserialization
+            Assert.AreEqual(expected.UserCode, objectDeserializedNew.UserCode);
+            Assert.AreEqual(expected.DeviceCode, objectDeserializedNew.DeviceCode);
+            Assert.AreEqual(expected.VerificationUrl, objectDeserializedNew.VerificationUrl);
+            Assert.AreEqual(expected.VerificationUri, objectDeserializedNew.VerificationUri);
+            Assert.AreEqual(expected.ExpiresIn, objectDeserializedNew.ExpiresIn);
+            Assert.AreEqual(expected.Interval, objectDeserializedNew.Interval);
+            Assert.AreEqual(expected.Message, objectDeserializedNew.Message);
+            Assert.AreEqual(expected.Error, objectDeserializedNew.Error);
+            Assert.AreEqual(expected.SubError, objectDeserializedNew.SubError);
+            Assert.AreEqual(expected.ErrorDescription, objectDeserializedNew.ErrorDescription);
+            CollectionAssert.AreEqual(expected.ErrorCodes, objectDeserializedNew.ErrorCodes);
+            Assert.AreEqual(expected.CorrelationId, objectDeserializedNew.CorrelationId);
+            Assert.AreEqual(expected.Claims, objectDeserializedNew.Claims);
+        }
     }
-
-
-
 }

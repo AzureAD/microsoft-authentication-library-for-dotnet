@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
     [JsonObject]
     [Preserve(AllMembers = true)]
-    internal class MsalTokenResponse : OAuth2ResponseBase
+    internal class MsalTokenResponse : OAuth2ResponseBase, IJsonSerializable<MsalTokenResponse>
     {
         private long _expiresIn;
         private long _extendedExpiresIn;
@@ -107,6 +107,16 @@ namespace Microsoft.Identity.Client.OAuth2
         public TokenSource TokenSource { get; set; }
 
         public HttpResponse HttpResponse { get; set; }
+
+        public new MsalTokenResponse DeserializeFromJson(string json)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public new string SerializeToJson()
+        {
+            throw new System.NotImplementedException();
+        }
 
         internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
         {
