@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public const string MsAuthenticatorContentProviderUri = "content://com.azure.authenticator.microsoft.identity.broker";
     }
 
-    //Content provider operation
+    //Content provider operation for android broker
     internal enum ContentResolverOperation
     {
         hello,

@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private enum BrokerType 
         {
-            None,
+            NoneOrUnknown,
             AccountManager,
             ContentProvider
         }
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 try
                 {
                     var broker = new AndroidContentProviderBroker(uIParent, logger);
-                    broker.InitiateBrokerHandShakeAsync();
+                    await broker.InitiateBrokerHandShakeAsync().ConfigureAwait(false);
                     s_installedBroker = BrokerType.ContentProvider;
                     return broker;
                 }
@@ -68,9 +68,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public static IBroker CreateBroker(CoreUIParent uIParent, ICoreLogger logger)
         {
-            if (s_installedBroker == BrokerType.None)
+            if (s_installedBroker == BrokerType.NoneOrUnknown)
             {
-                return Task.Run(async () => await GetInstalledBrokerAsync(uIParent, logger).ConfigureAwait(false)).Result;
+                return Task.Run(async () => await GetInstalledBrokerAsync(uIParent, logger).ConfigureAwait(false)).GetAwaiter().GetResult();
             }
             
             if (s_installedBroker == BrokerType.AccountManager)

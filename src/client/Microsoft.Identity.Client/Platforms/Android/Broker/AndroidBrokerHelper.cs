@@ -82,12 +82,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public Bundle CreateHandShakeOperationBundle()
         {
-            Bundle HandshakeOperationBundle = new Bundle();
-            HandshakeOperationBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
-            HandshakeOperationBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
-            HandshakeOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
+            Bundle handshakeOperationBundle = new Bundle();
+            handshakeOperationBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
+            handshakeOperationBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
+            handshakeOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
 
-            return HandshakeOperationBundle;
+            return handshakeOperationBundle;
         }
 
         public string GetSilentResultFromBundle(Bundle bundleResult)
@@ -120,9 +120,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             string homeAccountId = brokerRequest.HomeAccountId;
             string localAccountId = brokerRequest.LocalAccountId;
 
-                dynamic authResult = JArray.Parse(accountData);
+                dynamic AccountDataList = JArray.Parse(accountData);
 
-                foreach (JObject account in authResult)
+                foreach (JObject account in AccountDataList)
                 {
                     var accountInfo = account[BrokerResponseConst.Account];
                     var accountInfoHomeAccountID = accountInfo[BrokerResponseConst.HomeAccountId]?.ToString();

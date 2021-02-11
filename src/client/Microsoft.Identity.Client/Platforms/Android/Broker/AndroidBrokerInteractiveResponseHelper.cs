@@ -16,7 +16,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
-    internal static class AndroidBrokerStaticHelper
+    internal static class AndroidBrokerInteractiveResponseHelper
     {
         // When the broker responds, we cannot correlate back to a started task. 
         // So we make a simplifying assumption - only one broker open session can exist at a time
