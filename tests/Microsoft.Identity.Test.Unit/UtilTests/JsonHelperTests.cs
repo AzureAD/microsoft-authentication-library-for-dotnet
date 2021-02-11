@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -210,6 +211,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
 
         }
 
+        #region ISerializable
         [TestMethod]
         public void IJsonSerializable_OAuth2ResponseBase_Test()
         {
@@ -356,5 +358,126 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             Assert.AreEqual(expected.CorrelationId, objectDeserializedNew.CorrelationId);
             Assert.AreEqual(expected.Claims, objectDeserializedNew.Claims);
         }
+
+        [TestMethod]
+        public void IJsonSerializable_MsalTokenResponse_Test()
+        {
+            var expected = new MsalTokenResponse()
+            {
+                TokenType = "token type",
+                AccessToken = "access token",
+                RefreshToken = "refresh token",
+                Scope = "scope scope",
+                ClientInfo = "client info",
+                IdToken = "id token",
+                ExpiresIn = 1234,
+                ExtendedExpiresIn = 12345,
+                RefreshIn = 12333,
+                FamilyId = "family id",
+                HttpResponse = new Client.Http.HttpResponse(),
+                Error = "OAuth error",
+                SubError = "OAuth suberror",
+                ErrorDescription = "OAuth error description",
+                ErrorCodes = new[] { "error1", "error2", "error3" },
+                CorrelationId = "1234-123-1234",
+                Claims = "claim1 claim2"
+            };
+
+            var jsonSerializedLegacy = JsonHelper.SerializeToJson<MsalTokenResponse>(expected);
+            var jsonSerializedNew = JsonHelper.SerializeNew<MsalTokenResponse>(expected);
+
+            // Assert serialization
+            Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
+
+            var objectDeserializedNew = JsonHelper.DeserializeNew<MsalTokenResponse>(jsonSerializedLegacy);
+
+            // Assert deserialization
+            Assert.AreEqual(expected.TokenType, objectDeserializedNew.TokenType);
+            Assert.AreEqual(expected.AccessToken, objectDeserializedNew.AccessToken);
+            Assert.AreEqual(expected.RefreshToken, objectDeserializedNew.RefreshToken);
+            Assert.AreEqual(expected.Scope, objectDeserializedNew.Scope);
+            Assert.AreEqual(expected.ClientInfo, objectDeserializedNew.ClientInfo);
+            Assert.AreEqual(expected.IdToken, objectDeserializedNew.IdToken);
+            Assert.AreEqual(expected.ExpiresIn, objectDeserializedNew.ExpiresIn);
+            Assert.AreEqual(expected.ExtendedExpiresIn, objectDeserializedNew.ExtendedExpiresIn);
+            Assert.AreEqual(expected.RefreshIn, objectDeserializedNew.RefreshIn);
+            Assert.AreEqual(expected.FamilyId, objectDeserializedNew.FamilyId);
+            Assert.AreEqual(expected.Error, objectDeserializedNew.Error);
+            Assert.AreEqual(expected.SubError, objectDeserializedNew.SubError);
+            Assert.AreEqual(expected.ErrorDescription, objectDeserializedNew.ErrorDescription);
+            CollectionAssert.AreEqual(expected.ErrorCodes, objectDeserializedNew.ErrorCodes);
+            Assert.AreEqual(expected.CorrelationId, objectDeserializedNew.CorrelationId);
+            Assert.AreEqual(expected.Claims, objectDeserializedNew.Claims);
+        }
+
+        [TestMethod]
+        public void IJsonSerializable_LinksList_Test()
+        {
+            var expected = new LinksList()
+            {
+                Rel = "rel1",
+                Href = "href1"
+            };
+
+            var jsonSerializedLegacy = JsonHelper.SerializeToJson<LinksList>(expected);
+            var jsonSerializedNew = JsonHelper.SerializeNew<LinksList>(expected);
+
+            // Assert serialization
+            Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
+
+            var objectDeserializedNew = JsonHelper.DeserializeNew<LinksList>(jsonSerializedLegacy);
+
+            // Assert deserialization
+            Assert.AreEqual(expected.Rel, objectDeserializedNew.Rel);
+            Assert.AreEqual(expected.Href, objectDeserializedNew.Href);
+        }
+
+        [TestMethod]
+        public void IJsonSerializable_AdfsWebFingerResponse_Test()
+        {
+            var expected = new AdfsWebFingerResponse()
+            {
+                Subject = "adfs subject",
+                Links = new List<LinksList>
+                {
+                    new LinksList()
+                    {
+                        Rel = "rel1",
+                        Href = "href1"
+                    },
+                    new LinksList()
+                    {
+                        Rel = "rel2",
+                        Href = "href2"
+                    }
+                },
+                Error = "OAuth error",
+                SubError = "OAuth suberror",
+                ErrorDescription = "OAuth error description",
+                ErrorCodes = new[] { "error1", "error2", "error3" },
+                CorrelationId = "1234-123-1234",
+                Claims = "claim1 claim2"
+            };
+
+            var jsonSerializedLegacy = JsonHelper.SerializeToJson<AdfsWebFingerResponse>(expected);
+            var jsonSerializedNew = JsonHelper.SerializeNew<AdfsWebFingerResponse>(expected);
+
+            // Assert serialization
+            Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
+
+            var objectDeserializedNew = JsonHelper.DeserializeNew<AdfsWebFingerResponse>(jsonSerializedLegacy);
+
+            // Assert deserialization
+            Assert.AreEqual(expected.Subject, objectDeserializedNew.Subject);
+            Assert.AreEqual(expected.Links.Count, objectDeserializedNew.Links.Count);
+            // AssertCollectionItemsEqualByValue(expected.Links, objectDeserializedManually.Links);
+            Assert.AreEqual(expected.Error, objectDeserializedNew.Error);
+            Assert.AreEqual(expected.SubError, objectDeserializedNew.SubError);
+            Assert.AreEqual(expected.ErrorDescription, objectDeserializedNew.ErrorDescription);
+            CollectionAssert.AreEqual(expected.ErrorCodes, objectDeserializedNew.ErrorCodes);
+            Assert.AreEqual(expected.CorrelationId, objectDeserializedNew.CorrelationId);
+            Assert.AreEqual(expected.Claims, objectDeserializedNew.Claims);
+        }
+        #endregion
     }
 }

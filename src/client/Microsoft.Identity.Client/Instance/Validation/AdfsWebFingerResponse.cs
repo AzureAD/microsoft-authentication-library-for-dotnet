@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Instance.Validation
 {
@@ -28,12 +30,21 @@ namespace Microsoft.Identity.Client.Instance.Validation
 
         public LinksList DeserializeFromJson(string json)
         {
-            throw new System.NotImplementedException();
+            JObject jObject = JObject.Parse(json);
+
+            Rel = jObject[AdfsWebFingerResponseClaim.Rel]?.ToString();
+            Href = jObject[AdfsWebFingerResponseClaim.Href]?.ToString();
+
+            return this;
         }
 
         public string SerializeToJson()
         {
-            throw new System.NotImplementedException();
+            JObject jObject = new JObject(
+                new JProperty(AdfsWebFingerResponseClaim.Rel, Rel),
+                new JProperty(AdfsWebFingerResponseClaim.Href, Href));
+
+            return jObject.ToString(Formatting.None);
         }
     }
 
@@ -49,12 +60,26 @@ namespace Microsoft.Identity.Client.Instance.Validation
 
         public new AdfsWebFingerResponse DeserializeFromJson(string json)
         {
-            throw new System.NotImplementedException();
+            JObject jObject = JObject.Parse(json);
+
+            Subject = jObject[AdfsWebFingerResponseClaim.Subject]?.ToString();
+            Links = ((JArray)jObject[AdfsWebFingerResponseClaim.Links]).Select(c => new LinksList().DeserializeFromJson(c.ToString())).ToList();
+
+            base.DeserializeFromJson(json);
+
+            return this;
+
         }
 
         public new string SerializeToJson()
         {
-            throw new System.NotImplementedException();
+            JObject jObject = new JObject(
+                new JProperty(AdfsWebFingerResponseClaim.Subject, Subject),
+                new JProperty(AdfsWebFingerResponseClaim.Links, new JArray(Links.Select(i => JObject.Parse(i.SerializeToJson())))),
+                JObject.Parse(base.SerializeToJson()).Properties());
+
+            return jObject.ToString(Formatting.None);
+
         }
     }
 }

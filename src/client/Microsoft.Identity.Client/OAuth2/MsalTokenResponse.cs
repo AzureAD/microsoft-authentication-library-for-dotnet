@@ -110,12 +110,39 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public new MsalTokenResponse DeserializeFromJson(string json)
         {
-            throw new System.NotImplementedException();
+            JObject jObject = JObject.Parse(json);
+
+            TokenType = jObject[TokenResponseClaim.TokenType]?.ToString();
+            AccessToken = jObject[TokenResponseClaim.AccessToken]?.ToString();
+            RefreshToken = jObject[TokenResponseClaim.RefreshToken]?.ToString();
+            Scope = jObject[TokenResponseClaim.Scope]?.ToString();
+            ClientInfo = jObject[TokenResponseClaim.ClientInfo]?.ToString();
+            IdToken = jObject[TokenResponseClaim.IdToken]?.ToString();
+            ExpiresIn = long.Parse(jObject[TokenResponseClaim.ExpiresIn]?.ToString(), CultureInfo.InvariantCulture);
+            ExtendedExpiresIn = long.Parse(jObject[TokenResponseClaim.ExtendedExpiresIn]?.ToString(), CultureInfo.InvariantCulture);
+            RefreshIn = long.Parse(jObject[TokenResponseClaim.RefreshIn]?.ToString(), CultureInfo.InvariantCulture);
+            FamilyId = jObject[TokenResponseClaim.FamilyId]?.ToString();
+            base.DeserializeFromJson(json);
+
+            return this;
         }
 
         public new string SerializeToJson()
         {
-            throw new System.NotImplementedException();
+            JObject jObject = new JObject(
+                new JProperty(TokenResponseClaim.TokenType, TokenType),
+                new JProperty(TokenResponseClaim.AccessToken, AccessToken),
+                new JProperty(TokenResponseClaim.RefreshToken, RefreshToken),
+                new JProperty(TokenResponseClaim.Scope, Scope),
+                new JProperty(TokenResponseClaim.ClientInfo, ClientInfo),
+                new JProperty(TokenResponseClaim.IdToken, IdToken),
+                new JProperty(TokenResponseClaim.ExpiresIn, ExpiresIn),
+                new JProperty(TokenResponseClaim.ExtendedExpiresIn, ExtendedExpiresIn),
+                new JProperty(TokenResponseClaim.RefreshIn, RefreshIn),
+                new JProperty(TokenResponseClaim.FamilyId, FamilyId),
+                JObject.Parse(base.SerializeToJson()).Properties());
+
+            return jObject.ToString(Formatting.None);
         }
 
         internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
