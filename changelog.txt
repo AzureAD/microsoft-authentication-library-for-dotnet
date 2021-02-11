@@ -1,3 +1,15 @@
+4.26.0
+==========
+### New Features: 
+**MSAL.NET now has support for MSA-passthrough with WAM**, See issue [#2126](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2126).
+**MSAL.NET now logs telemetry for the cache refresh status**, See issue [#2356](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2356).
+**MSAL.NET now uses ClientID+tenantID instead of just ClientId in the computation of the `SuggestedCacheKey` for `AcquireTokenForClient` (client credentials). This helps keeping the cache smaller in multi-tenant confidential client applications.**, See issue[#2381](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2381).
+
+### Bug Fixes:
+**Fixed `ArgumentNullException` and improved resiliency when using `RSACryptoServiceProvider` on NetCore and NetStandard** See issues [#2342](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2342).
+**Removed "Unresolved P/Invoke" warning from UWP**, See issue [#2367](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2367).
+**Fixed issue where PKEY auth would fail if `WithExtraQueryParams` were used**, See issue [#2359](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2359).
+
 4.25.0
 ==========
 ### New Features: 
