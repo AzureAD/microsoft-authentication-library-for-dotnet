@@ -64,7 +64,6 @@ namespace Microsoft.Identity.Client.Instance.Validation
 
             Subject = jObject[AdfsWebFingerResponseClaim.Subject]?.ToString();
             Links = ((JArray)jObject[AdfsWebFingerResponseClaim.Links]).Select(c => new LinksList().DeserializeFromJson(c.ToString())).ToList();
-
             base.DeserializeFromJson(json);
 
             return this;

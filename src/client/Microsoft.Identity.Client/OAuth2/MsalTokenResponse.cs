@@ -11,6 +11,7 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Core;
 using System.Text;
+using System.Net;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -36,6 +37,13 @@ namespace Microsoft.Identity.Client.OAuth2
     [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase, IJsonSerializable<MsalTokenResponse>
     {
+        private const string WamAccountIdPropertyName = "WamAccountId";
+        private const string AccessTokenExpiresOnPropertyName = "AccessTokenExpiresOn";
+        private const string AccessTokenExtendedExpiresOnPropertyName = "AccessTokenExtendedExpiresOn";
+        private const string AccessTokenRefreshOnPropertyName = "AccessTokenRefreshOn";
+        private const string TokenSourcePropertyName = "TokenSource";
+        private const string HttpResponsePropertyName = "HttpResponse";
+
         private long _expiresIn;
         private long _extendedExpiresIn;
         private long _refreshIn;
@@ -122,7 +130,29 @@ namespace Microsoft.Identity.Client.OAuth2
             ExtendedExpiresIn = long.Parse(jObject[TokenResponseClaim.ExtendedExpiresIn]?.ToString(), CultureInfo.InvariantCulture);
             RefreshIn = long.Parse(jObject[TokenResponseClaim.RefreshIn]?.ToString(), CultureInfo.InvariantCulture);
             FamilyId = jObject[TokenResponseClaim.FamilyId]?.ToString();
+            WamAccountId = jObject[WamAccountIdPropertyName]?.ToString();
+            AccessTokenExpiresOn = DateTime.Parse(jObject[AccessTokenExpiresOnPropertyName]?.ToString(), CultureInfo.CurrentCulture);
+            AccessTokenExtendedExpiresOn = DateTime.Parse(jObject[AccessTokenExtendedExpiresOnPropertyName]?.ToString(), CultureInfo.CurrentCulture);
+            AccessTokenRefreshOn = DateTime.Parse(jObject[AccessTokenRefreshOnPropertyName]?.ToString(), CultureInfo.CurrentCulture);
+            TokenSource = (TokenSource)Convert.ToInt32(jObject[TokenSourcePropertyName]?.ToString(), CultureInfo.InvariantCulture);
+            HttpResponse = DeserializeHttpResponse(jObject[HttpResponsePropertyName]);
             base.DeserializeFromJson(json);
+
+            HttpResponse DeserializeHttpResponse(JToken httpResponseJson)
+            {
+                if (httpResponseJson != null)
+                {
+                    HttpResponse = new HttpResponse()
+                    {
+                        Headers = null,
+                        StatusCode = (HttpStatusCode)int.Parse(httpResponseJson["StatusCode"]?.ToString(), CultureInfo.InvariantCulture),
+                        UserAgent = jObject["UserAgent"]?.ToString(),
+                        Body = jObject["Body"]?.ToString()
+                    };
+                }
+
+                return HttpResponse;
+            }
 
             return this;
         }
@@ -140,14 +170,31 @@ namespace Microsoft.Identity.Client.OAuth2
                 new JProperty(TokenResponseClaim.ExtendedExpiresIn, ExtendedExpiresIn),
                 new JProperty(TokenResponseClaim.RefreshIn, RefreshIn),
                 new JProperty(TokenResponseClaim.FamilyId, FamilyId),
+                new JProperty(WamAccountIdPropertyName, WamAccountId),
+                new JProperty(AccessTokenExpiresOnPropertyName, AccessTokenExpiresOn),
+                new JProperty(AccessTokenExtendedExpiresOnPropertyName, AccessTokenExtendedExpiresOn),
+                new JProperty(AccessTokenRefreshOnPropertyName, AccessTokenRefreshOn),
+                new JProperty(TokenSourcePropertyName, TokenSource),
+                new JProperty(HttpResponsePropertyName, SerializeHttpResponse()),
                 JObject.Parse(base.SerializeToJson()).Properties());
+
+            JObject SerializeHttpResponse()
+            {
+                return new JObject(
+                    new JProperty("Headers", new JArray()),
+                    new JProperty("HeadersAsDictionary", new JObject()),
+                    new JProperty("StatusCode", (int)HttpResponse.StatusCode),
+                    new JProperty("UserAgent", HttpResponse.UserAgent),
+                    new JProperty("Body", HttpResponse.Body)
+                );
+            }
 
             return jObject.ToString(Formatting.None);
         }
 
         internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
         {
-            if  (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
+            if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
                 return new MsalTokenResponse
                 {
@@ -178,7 +225,7 @@ namespace Microsoft.Identity.Client.OAuth2
             if (responseDictionary.ContainsKey(TokenResponseClaim.RefreshIn))
             {
                 response.RefreshIn = long.Parse(
-                    responseDictionary[TokenResponseClaim.RefreshIn], 
+                    responseDictionary[TokenResponseClaim.RefreshIn],
                     CultureInfo.InvariantCulture);
             }
 
@@ -258,5 +305,5 @@ namespace Microsoft.Identity.Client.OAuth2
                 logger.Log(logLevel, withPii.ToString(), withoutPii.ToString());
             }
         }
-    }    
+    }
 }
