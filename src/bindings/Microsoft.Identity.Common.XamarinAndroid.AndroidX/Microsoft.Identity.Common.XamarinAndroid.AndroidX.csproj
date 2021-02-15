@@ -29,6 +29,11 @@
     <PackageTags>okhttp square square.okhttp xamarin android monodroid</PackageTags>
     <PackageVersion>4.4.1</PackageVersion>
     -->
+    <!--
+    put the package output into a GitHub test folder
+    -->
+    <PackOnBuild>true</PackOnBuild>
+    <PackageOutputPath>../../../output/</PackageOutputPath>
   </PropertyGroup>
   
   <ItemGroup>
