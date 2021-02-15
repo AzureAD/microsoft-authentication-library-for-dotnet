@@ -17,7 +17,8 @@ namespace App1
     {
         private TextView _textView;
 
-        private ISingleAccountPublicClientApplication _pca;
+        private ISingleAccountPublicClientApplication _ipca;
+        private SingleAccountPublicClientApplication _spca;
         private IAccount _account;
 
         SingleAccountApplicationCreatedListener saacl;
@@ -57,7 +58,7 @@ namespace App1
                     onCreatedAction: (pca) =>
                     {
                         LogMessage("PCA created!");
-                        _pca = pca;
+                        _ipca = pca;
                         LoadAccount();
                     },
                     onExceptionAction: (ex) =>
@@ -71,7 +72,7 @@ namespace App1
 
         private void SignOutBtn_Click(object sender, EventArgs e)
         {
-            _pca.SignOut(
+            _ipca.SignOut(
                 new SignOutCallback(
                     onSuccessAction: () => LogMessage("Signed out!"),
                     onErrorAction: (e) => LogMessage(e.ToString()))
@@ -90,8 +91,10 @@ namespace App1
         private void SignInBtn_Click(object sender, System.EventArgs e)
         {
             _textView.Text = "";
-            LogMessage("SignInBtn::Click");
-            if (_pca == null)
+            LogMessage("MainActivity.SignInBtn.Click");
+
+            _spca = (SingleAccountPublicClientApplication)_ipca;
+            if (_spca == null)
             {
                 LogMessage("PCA not yet initialized!");
                 return;
@@ -113,14 +116,14 @@ namespace App1
             // Doesn't work, no browser pop-up :(
 
             //
-            LogMessage("mc++::SignIn::Begin");
-            _pca.SignIn(
+            LogMessage("mc++.MainActivity.SignIn.Begin");
+            _spca.SignIn(
                 /*activity */ this,
                 /*login_hint*/"liu.kang@bogavrilltd.onmicrosoft.com",
                 new[] { "User.Read" },
                 cb
                 );
-            LogMessage("mc++::SignIn::End");
+            LogMessage("mc++.MainActivity.SignIn.End");
 
 
             //_pca.AcquireToken(
@@ -154,7 +157,7 @@ namespace App1
 
             _textView.Text = "";
             // TODO: try out the AcquireTokenSilent version as well, it's supposed to be for background thread
-            _pca.AcquireTokenSilentAsync(
+            _ipca.AcquireTokenSilentAsync(
                 new[] { "User.Read" },
                 _account?.Username,
                 cb
@@ -166,7 +169,7 @@ namespace App1
         private void DeviceCodeBtn_Click(object sender, EventArgs e)
         {
             _textView.Text = "";
-            _pca.AcquireTokenWithDeviceCode(
+            _ipca.AcquireTokenWithDeviceCode(
                new[] { "User.Read" },
                new PublicClientApplicationDeviceCodeFlowCallback(
                    onErrorAction: (ex) => LogMessage(ex.ToString()),
@@ -188,12 +191,12 @@ namespace App1
 
         private void LoadAccount()
         {
-            if (_pca == null)
+            if (_ipca == null)
             {
                 return;
             }
 
-            _pca.GetCurrentAccountAsync(
+            _ipca.GetCurrentAccountAsync(
                 new SingleAccountApplicationCurrentAccountCallback(
                     onAccountChangedAction: (priorAccount, newAccount) =>
                     {
