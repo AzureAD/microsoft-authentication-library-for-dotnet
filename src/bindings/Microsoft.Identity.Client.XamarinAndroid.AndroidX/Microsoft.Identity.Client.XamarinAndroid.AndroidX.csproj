@@ -70,4 +70,12 @@
   <ItemGroup>
     <JavaDocJar Include="Jars\msal-2.0.2-javadoc.jar" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Additions\ISingleAccountPublicClientApplication.cs">
+      <SubType></SubType>
+    </Compile>
+    <Compile Update="Additions\PublicClientApplication.cs">
+      <SubType></SubType>
+    </Compile>
+  </ItemGroup>
 </Project>
