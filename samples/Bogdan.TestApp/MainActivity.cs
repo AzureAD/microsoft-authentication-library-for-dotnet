@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Android.App;
 using Android.OS;
 using Android.Runtime;
@@ -19,6 +20,8 @@ namespace App1
         private ISingleAccountPublicClientApplication _pca;
         private IAccount _account;
 
+        SingleAccountApplicationCreatedListener saacl;
+        InteractiveAuthCallback cb;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -39,7 +42,7 @@ namespace App1
             Button signOutBtn = FindViewById<Button>(Resource.Id.singOutBtn);
             signOutBtn.Click += SignOutBtn_Click;
 
-            _textView = FindViewById<TextView>(Resource.Id.txtView);
+            _textView = FindViewById<EditText>(Resource.Id.txtView);
             LogMessage("MainActivity::Created");
 
 
@@ -50,14 +53,17 @@ namespace App1
             PublicClientApplication.CreateSingleAccountPublicClientApplication(
                 this,
                 resourceId,
-                new SingleAccountApplicationCreatedListener(
+                saacl = new SingleAccountApplicationCreatedListener(
                     onCreatedAction: (pca) =>
                     {
                         LogMessage("PCA created!");
                         _pca = pca;
                         LoadAccount();
                     },
-                    onExceptionAction: (ex) => LogMessage(ex.ToString())));
+                    onExceptionAction: (ex) =>
+                    {
+                        LogMessage(ex.ToString());
+                    }));
 
             LogMessage("Finished OnInit");
 
@@ -91,22 +97,30 @@ namespace App1
                 return;
             }
 
+            cb = new InteractiveAuthCallback(
+                onCancelAction: () => LogMessage("Auth cancelled"),
+                onErrorAction: (ex) => LogMessage(ex.ToString()),
+                onSuccessAction: (result) =>
+                {
+                    _account = result.Account;
+                    LogMessage(
+                        $"Success!! Token for {result.Account.Username}," +
+                        $" tenant {result.TenantId} - " +
+                        $" token {result.AccessToken} ");
+                });
+
+
             // Doesn't work, no browser pop-up :(
+
+            //
+            LogMessage("mc++::SignIn::Begin");
             _pca.SignIn(
                 /*activity */ this,
                 /*login_hint*/"liu.kang@bogavrilltd.onmicrosoft.com",
                 new[] { "User.Read" },
-                new InteractiveAuthCallback(
-                    onCancelAction: () => LogMessage("Auth cancelled"),
-                    onErrorAction: (ex) => LogMessage(ex.ToString()),
-                    onSuccessAction: (result) =>
-                    {
-                        _account = result.Account;
-                        LogMessage(
-                            $"Success!! Token for {result.Account.Username}," +
-                            $" tenant {result.TenantId} - " +
-                            $" token {result.AccessToken} ");
-                    }));
+                cb
+                );
+            LogMessage("mc++::SignIn::End");
 
 
             //_pca.AcquireToken(
@@ -127,12 +141,7 @@ namespace App1
 
         private void SilentBtn_Click(object sender, EventArgs e)
         {
-            _textView.Text = "";
-            // TODO: try out the AcquireTokenSilent version as well, it's supposed to be for background thread
-            _pca.AcquireTokenSilentAsync(
-                new[] { "User.Read" },
-                _account?.Username,
-                new SilentAuthCallback(
+            var cb = new SilentAuthCallback(
                     onErrorAction: (ex) => LogMessage("Error! " + ex.ToString()),
                      onSuccessAction: (result) =>
                      {
@@ -141,7 +150,16 @@ namespace App1
                              $"Success!! Token for {result.Account.Username}," +
                              $" tenant {result.TenantId} - " +
                              $" token {result.AccessToken} ");
-                     }));
+                     });
+
+            _textView.Text = "";
+            // TODO: try out the AcquireTokenSilent version as well, it's supposed to be for background thread
+            _pca.AcquireTokenSilentAsync(
+                new[] { "User.Read" },
+                _account?.Username,
+                cb
+                );
+            Task.WaitAll();
 
         }
 
@@ -294,6 +312,7 @@ namespace App1
                 _onSuccessAction = onSuccessAction;
                 _onErrorAction = onErrorAction;
             }
+
             public void OnCancel()
             {
                 _onCancelAction();
@@ -374,7 +393,10 @@ namespace App1
         {
             this.RunOnUiThread(
                 () =>
-                _textView.Text = (_textView.Text ?? "") + "\n" + message);
+                {
+                    _textView.Text = (_textView.Text ?? "") + "\n" + message;
+                    Android.Util.Log.Info("MSAL",message);
+                });
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
