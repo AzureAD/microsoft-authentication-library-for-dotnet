@@ -22,11 +22,13 @@ variables:
   BuildConfiguration: 'release'
   
 steps:
+# Required for the signing task, but does not need to be used
 - task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 3.x'
+  displayName: 'Use .Net Core SDK 2.x'
   inputs:
-    version: 3.x
+    version: 2.x
     
+# Use the latest .NET SDK
 - task: UseDotNet@2
   displayName: 'Use .Net Core sdk 5.x'
   inputs:
@@ -54,11 +56,7 @@ steps:
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
 
-# For some reason the signing task ask for dotnet core 2
-- task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 2.x'
-  inputs:
-    version: 2.x
+
 
 # Pack and sign all of the nuget packages
 - template: template-pack-and-sign-all-nugets.yaml
