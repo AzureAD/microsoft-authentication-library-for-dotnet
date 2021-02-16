@@ -472,10 +472,10 @@ namespace Microsoft.Identity.Client
             CreateAuthorityInfoFromEnums();
 
             //ADFS does not require client id to be in the form of a GUID.
-            //if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
-            //{
-            //    throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
-            //}
+            if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
+            {
+                throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
+            }
 
             if (Config.CustomInstanceDiscoveryMetadata != null && Config.CustomInstanceDiscoveryMetadataUri != null)
             {
