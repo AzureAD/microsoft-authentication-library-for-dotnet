@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
+
         [TestMethod]
         public void FailedValidationTest()
         {
@@ -109,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 }
             }
         }
-       
+
 
         [TestMethod]
         public void CanonicalAuthorityInitTest()
@@ -194,6 +195,30 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                                          .BuildConcrete();
 
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
+        }
+
+        [TestMethod]
+        public void CheckConsistentAuthorityTypeUriAndString()
+        {
+            ValidateAuthorityType(TestConstants.AadAuthorityWithTestTenantId, AuthorityType.Aad);
+            ValidateAuthorityType(TestConstants.AuthorityCommonTenant, AuthorityType.Aad);
+            ValidateAuthorityType(TestConstants.B2CAuthority, AuthorityType.B2C);
+            ValidateAuthorityType(TestConstants.ADFSAuthority, AuthorityType.Adfs);
+        }
+
+        private static void ValidateAuthorityType(string inputAuthority, AuthorityType expectedAuthorityType)
+        {
+            var pca1 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                     .WithAuthority(new Uri(inputAuthority)).BuildConcrete();
+            var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                   .WithAuthority(inputAuthority).BuildConcrete();
+
+            Assert.AreEqual(
+                expectedAuthorityType,
+                (pca1.AppConfig as ApplicationConfiguration).AuthorityInfo.AuthorityType);
+            Assert.AreEqual(
+                expectedAuthorityType,
+                (pca2.AppConfig as ApplicationConfiguration).AuthorityInfo.AuthorityType);
         }
 
         [TestMethod]
