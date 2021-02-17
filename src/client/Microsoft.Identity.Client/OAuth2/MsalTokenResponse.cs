@@ -37,13 +37,6 @@ namespace Microsoft.Identity.Client.OAuth2
     [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase, IJsonSerializable<MsalTokenResponse>
     {
-        private const string WamAccountIdPropertyName = "WamAccountId";
-        private const string AccessTokenExpiresOnPropertyName = "AccessTokenExpiresOn";
-        private const string AccessTokenExtendedExpiresOnPropertyName = "AccessTokenExtendedExpiresOn";
-        private const string AccessTokenRefreshOnPropertyName = "AccessTokenRefreshOn";
-        private const string TokenSourcePropertyName = "TokenSource";
-        private const string HttpResponsePropertyName = "HttpResponse";
-
         private long _expiresIn;
         private long _extendedExpiresIn;
         private long _refreshIn;
@@ -105,15 +98,22 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonProperty(PropertyName = TokenResponseClaim.FamilyId)]
         public string FamilyId { get; set; }
 
+        [JsonIgnore]
         public string WamAccountId { get; set; }
 
+        [JsonIgnore]
         public DateTimeOffset AccessTokenExpiresOn { get; private set; }
+        
+        [JsonIgnore]
         public DateTimeOffset AccessTokenExtendedExpiresOn { get; private set; }
 
+        [JsonIgnore]
         public DateTimeOffset? AccessTokenRefreshOn { get; private set; }
 
+        [JsonIgnore]
         public TokenSource TokenSource { get; set; }
 
+        [JsonIgnore]
         public HttpResponse HttpResponse { get; set; }
 
         public new MsalTokenResponse DeserializeFromJson(string json)
@@ -130,29 +130,7 @@ namespace Microsoft.Identity.Client.OAuth2
             ExtendedExpiresIn = long.Parse(jObject[TokenResponseClaim.ExtendedExpiresIn]?.ToString(), CultureInfo.InvariantCulture);
             RefreshIn = long.Parse(jObject[TokenResponseClaim.RefreshIn]?.ToString(), CultureInfo.InvariantCulture);
             FamilyId = jObject[TokenResponseClaim.FamilyId]?.ToString();
-            WamAccountId = jObject[WamAccountIdPropertyName]?.ToString();
-            AccessTokenExpiresOn = DateTime.Parse(jObject[AccessTokenExpiresOnPropertyName]?.ToString(), CultureInfo.CurrentCulture);
-            AccessTokenExtendedExpiresOn = DateTime.Parse(jObject[AccessTokenExtendedExpiresOnPropertyName]?.ToString(), CultureInfo.CurrentCulture);
-            AccessTokenRefreshOn = DateTime.Parse(jObject[AccessTokenRefreshOnPropertyName]?.ToString(), CultureInfo.CurrentCulture);
-            TokenSource = (TokenSource)Convert.ToInt32(jObject[TokenSourcePropertyName]?.ToString(), CultureInfo.InvariantCulture);
-            HttpResponse = DeserializeHttpResponse(jObject[HttpResponsePropertyName]);
             base.DeserializeFromJson(json);
-
-            HttpResponse DeserializeHttpResponse(JToken httpResponseJson)
-            {
-                if (httpResponseJson != null)
-                {
-                    HttpResponse = new HttpResponse()
-                    {
-                        Headers = null,
-                        StatusCode = (HttpStatusCode)int.Parse(httpResponseJson["StatusCode"]?.ToString(), CultureInfo.InvariantCulture),
-                        UserAgent = jObject["UserAgent"]?.ToString(),
-                        Body = jObject["Body"]?.ToString()
-                    };
-                }
-
-                return HttpResponse;
-            }
 
             return this;
         }
@@ -170,24 +148,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 new JProperty(TokenResponseClaim.ExtendedExpiresIn, ExtendedExpiresIn),
                 new JProperty(TokenResponseClaim.RefreshIn, RefreshIn),
                 new JProperty(TokenResponseClaim.FamilyId, FamilyId),
-                new JProperty(WamAccountIdPropertyName, WamAccountId),
-                new JProperty(AccessTokenExpiresOnPropertyName, AccessTokenExpiresOn),
-                new JProperty(AccessTokenExtendedExpiresOnPropertyName, AccessTokenExtendedExpiresOn),
-                new JProperty(AccessTokenRefreshOnPropertyName, AccessTokenRefreshOn),
-                new JProperty(TokenSourcePropertyName, TokenSource),
-                new JProperty(HttpResponsePropertyName, SerializeHttpResponse()),
                 JObject.Parse(base.SerializeToJson()).Properties());
-
-            JObject SerializeHttpResponse()
-            {
-                return new JObject(
-                    new JProperty("Headers", new JArray()),
-                    new JProperty("HeadersAsDictionary", new JObject()),
-                    new JProperty("StatusCode", (int)HttpResponse.StatusCode),
-                    new JProperty("UserAgent", HttpResponse.UserAgent),
-                    new JProperty("Body", HttpResponse.Body)
-                );
-            }
 
             return jObject.ToString(Formatting.None);
         }

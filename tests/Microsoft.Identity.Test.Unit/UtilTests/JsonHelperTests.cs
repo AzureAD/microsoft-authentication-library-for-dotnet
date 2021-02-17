@@ -481,15 +481,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             msalTokenResponse.ExtendedExpiresIn = 12345;
             msalTokenResponse.RefreshIn = 12333;
             msalTokenResponse.FamilyId = "family id";
-            msalTokenResponse.WamAccountId = "wam id";
-            msalTokenResponse.TokenSource = Client.TokenSource.Cache;
-            msalTokenResponse.HttpResponse = new Client.Http.HttpResponse()
-            {
-                Headers = new HttpResponseMessage().Headers,
-                StatusCode = HttpStatusCode.OK,
-                Body = "HTTP body",
-                UserAgent = "User Agent"
-            };
+
             SetOAuth2ResponseBaseProperties(msalTokenResponse);
 
             return msalTokenResponse;
