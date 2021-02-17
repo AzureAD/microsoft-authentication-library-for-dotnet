@@ -27,6 +27,12 @@ steps:
   displayName: 'Use .Net Core SDK 2.x'
   inputs:
     version: 2.x
+
+# Unit tests require .NET 3.x
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK 3.x'
+  inputs:
+    version: 3.x
     
 # Use the latest .NET SDK
 - task: UseDotNet@2
