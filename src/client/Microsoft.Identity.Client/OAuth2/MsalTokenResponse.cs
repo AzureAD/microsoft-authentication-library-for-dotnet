@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         [JsonIgnore]
         public DateTimeOffset AccessTokenExpiresOn { get; private set; }
-        
+
         [JsonIgnore]
         public DateTimeOffset AccessTokenExtendedExpiresOn { get; private set; }
 
@@ -125,9 +125,22 @@ namespace Microsoft.Identity.Client.OAuth2
             Scope = jObject[TokenResponseClaim.Scope]?.ToString();
             ClientInfo = jObject[TokenResponseClaim.ClientInfo]?.ToString();
             IdToken = jObject[TokenResponseClaim.IdToken]?.ToString();
-            ExpiresIn = TryParseLong(jObject[TokenResponseClaim.ExpiresIn]?.ToString());
-            ExtendedExpiresIn = TryParseLong(jObject[TokenResponseClaim.ExtendedExpiresIn]?.ToString());
-            RefreshIn = TryParseLong(jObject[TokenResponseClaim.RefreshIn]?.ToString());
+
+            if (jObject[TokenResponseClaim.ExpiresIn] != null)
+            {
+                ExpiresIn = TryParseLong(jObject[TokenResponseClaim.ExpiresIn].ToString());
+            }
+
+            if (jObject[TokenResponseClaim.ExtendedExpiresIn] != null)
+            {
+                ExtendedExpiresIn = TryParseLong(jObject[TokenResponseClaim.ExtendedExpiresIn].ToString());
+            }
+
+            if (jObject[TokenResponseClaim.RefreshIn] != null)
+            {
+                RefreshIn = TryParseLong(jObject[TokenResponseClaim.RefreshIn].ToString());
+            }
+
             FamilyId = jObject[TokenResponseClaim.FamilyId]?.ToString();
             base.DeserializeFromJson(json);
 

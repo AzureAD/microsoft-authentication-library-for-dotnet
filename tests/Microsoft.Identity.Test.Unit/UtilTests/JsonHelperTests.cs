@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -200,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
                                ""client_info"": ""eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0""
                             }";
 
-            MsalTokenResponse response = JsonHelper.DeserializeFromJson<MsalTokenResponse>(json);
+            MsalTokenResponse response = JsonHelper.DeserializeNew<MsalTokenResponse>(json);
 
             Assert.AreEqual("Bearer", response.TokenType);
             Assert.AreEqual("user_impersonation", response.Scope);
@@ -218,168 +216,146 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         public void IJsonSerializable_OAuth2ResponseBase_Test()
         {
             // Arrange
-            OAuth2ResponseBase expected = SetOAuth2ResponseBaseProperties(new OAuth2ResponseBase());
+            OAuth2ResponseBase toSerialize = SetOAuth2ResponseBaseProperties(new OAuth2ResponseBase());
 
             // Act - serialize
-            string jsonSerializedLegacy = JsonHelper.SerializeToJson<OAuth2ResponseBase>(expected);
-            string jsonSerializedNew = JsonHelper.SerializeNew<OAuth2ResponseBase>(expected);
+            string jsonSerializedLegacy = JsonHelper.SerializeToJson<OAuth2ResponseBase>(toSerialize);
+            string jsonSerializedNew = JsonHelper.SerializeNew<OAuth2ResponseBase>(toSerialize);
 
             // Assert serialization
             Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
 
             // Act - deserialize
+            OAuth2ResponseBase objectDeserializedLegacy = JsonHelper.DeserializeFromJson<OAuth2ResponseBase>(jsonSerializedLegacy);
             OAuth2ResponseBase objectDeserializedNew = JsonHelper.DeserializeNew<OAuth2ResponseBase>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertOAuth2ResponseBaseProperties(expected, objectDeserializedNew);
+            AssertOAuth2ResponseBaseProperties(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_InstanceDiscoveryMetadataEntry_Test()
         {
             // Arrange
-            InstanceDiscoveryMetadataEntry expected = SetInstanceDiscoveryMetadataEntryProperties(new InstanceDiscoveryMetadataEntry());
+            InstanceDiscoveryMetadataEntry toSerialize = SetInstanceDiscoveryMetadataEntryProperties(new InstanceDiscoveryMetadataEntry());
 
             // Act - serialize
-            string jsonSerializedLegacy = JsonHelper.SerializeToJson<InstanceDiscoveryMetadataEntry>(expected);
-            string jsonSerializedNew = JsonHelper.SerializeNew<InstanceDiscoveryMetadataEntry>(expected);
+            string jsonSerializedLegacy = JsonHelper.SerializeToJson<InstanceDiscoveryMetadataEntry>(toSerialize);
+            string jsonSerializedNew = JsonHelper.SerializeNew<InstanceDiscoveryMetadataEntry>(toSerialize);
 
             // Assert serialization
             Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
 
             // Act - deserialize
+            InstanceDiscoveryMetadataEntry objectDeserializedLegacy = JsonHelper.DeserializeFromJson<InstanceDiscoveryMetadataEntry>(jsonSerializedLegacy);
             InstanceDiscoveryMetadataEntry objectDeserializedNew = JsonHelper.DeserializeNew<InstanceDiscoveryMetadataEntry>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertInstanceDiscoveryMetadataEntryProperties(expected, objectDeserializedNew);
+            AssertInstanceDiscoveryMetadataEntryProperties(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_InstanceDiscoveryResponse_Test()
         {
             // Arrange
-            InstanceDiscoveryResponse expected = SetInstanceDiscoveryResponseProperties(new InstanceDiscoveryResponse());
+            InstanceDiscoveryResponse toSerialize = SetInstanceDiscoveryResponseProperties(new InstanceDiscoveryResponse());
 
             // Act - serialize
-            string jsonSerializedLegacy = JsonHelper.SerializeToJson<InstanceDiscoveryResponse>(expected);
-            string jsonSerializedNew = JsonHelper.SerializeNew<InstanceDiscoveryResponse>(expected);
+            string jsonSerializedLegacy = JsonHelper.SerializeToJson<InstanceDiscoveryResponse>(toSerialize);
+            string jsonSerializedNew = JsonHelper.SerializeNew<InstanceDiscoveryResponse>(toSerialize);
 
             // Assert serialization
             Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
 
             // Act - deserialize
+            InstanceDiscoveryResponse objectDeserializedLegacy = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(jsonSerializedLegacy);
             InstanceDiscoveryResponse objectDeserializedNew = JsonHelper.DeserializeNew<InstanceDiscoveryResponse>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertInstanceDiscoveryResponseProperties(expected, objectDeserializedNew);
+            AssertInstanceDiscoveryResponseProperties(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_DeviceCodeResponse_Test()
         {
             // Arrange
-            DeviceCodeResponse expected = SetDeviceCodeResponseProperties(new DeviceCodeResponse());
+            DeviceCodeResponse toSerialize = SetDeviceCodeResponseProperties(new DeviceCodeResponse());
 
             // Act - serialize
-            string jsonSerializedLegacy = JsonHelper.SerializeToJson<DeviceCodeResponse>(expected);
-            string jsonSerializedNew = JsonHelper.SerializeNew<DeviceCodeResponse>(expected);
+            string jsonSerializedLegacy = JsonHelper.SerializeToJson<DeviceCodeResponse>(toSerialize);
+            string jsonSerializedNew = JsonHelper.SerializeNew<DeviceCodeResponse>(toSerialize);
 
             // Assert serialization
             Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
 
             // Act - deserialize
+            DeviceCodeResponse objectDeserializedLegacy = JsonHelper.DeserializeFromJson<DeviceCodeResponse>(jsonSerializedLegacy);
             DeviceCodeResponse objectDeserializedNew = JsonHelper.DeserializeNew<DeviceCodeResponse>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertDeviceCodeResponseProperties(expected, objectDeserializedNew);
+            AssertDeviceCodeResponseProperties(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_MsalTokenResponse_Test()
         {
-            MsalTokenResponse expected = SetMsalTokenResponseProperties(new MsalTokenResponse());
+            MsalTokenResponse toSerialize = SetMsalTokenResponseProperties(new MsalTokenResponse());
 
             // Act - serialize
-            string jsonSerializedLegacy = JsonHelper.SerializeToJson<MsalTokenResponse>(expected);
-            string jsonSerializedNew = JsonHelper.SerializeNew<MsalTokenResponse>(expected);
+            string jsonSerializedLegacy = JsonHelper.SerializeToJson<MsalTokenResponse>(toSerialize);
+            string jsonSerializedNew = JsonHelper.SerializeNew<MsalTokenResponse>(toSerialize);
 
             // Assert serialization
             Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
 
             // Act - deserialize
+            MsalTokenResponse objectDeserializedLegacy = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonSerializedLegacy);
             MsalTokenResponse objectDeserializedNew = JsonHelper.DeserializeNew<MsalTokenResponse>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertMsalTokenResponseProperties(expected, objectDeserializedNew);
+            AssertMsalTokenResponseProperties(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_LinksList_Test()
         {
-            var expected = new LinksList()
-            {
-                Rel = "rel1",
-                Href = "href1"
-            };
+            // Arrange
+            LinksList toSerialize = SetLinksListProperties(new LinksList());
 
-            var jsonSerializedLegacy = JsonHelper.SerializeToJson<LinksList>(expected);
-            var jsonSerializedNew = JsonHelper.SerializeNew<LinksList>(expected);
+            // Act - serialize
+            string jsonSerializedLegacy = JsonHelper.SerializeToJson<LinksList>(toSerialize);
+            string jsonSerializedNew = JsonHelper.SerializeNew<LinksList>(toSerialize);
 
             // Assert serialization
             Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
 
-            var objectDeserializedNew = JsonHelper.DeserializeNew<LinksList>(jsonSerializedLegacy);
+            // Act - deserialize
+            LinksList objectDeserializedLegacy = JsonHelper.DeserializeFromJson<LinksList>(jsonSerializedLegacy);
+            LinksList objectDeserializedNew = JsonHelper.DeserializeNew<LinksList>(jsonSerializedLegacy);
 
             // Assert deserialization
-            Assert.AreEqual(expected.Rel, objectDeserializedNew.Rel);
-            Assert.AreEqual(expected.Href, objectDeserializedNew.Href);
+            AssertLinksListProperties(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_AdfsWebFingerResponse_Test()
         {
-            var expected = new AdfsWebFingerResponse()
-            {
-                Subject = "adfs subject",
-                Links = new List<LinksList>
-                {
-                    new LinksList()
-                    {
-                        Rel = "rel1",
-                        Href = "href1"
-                    },
-                    new LinksList()
-                    {
-                        Rel = "rel2",
-                        Href = "href2"
-                    }
-                },
-                Error = "OAuth error",
-                SubError = "OAuth suberror",
-                ErrorDescription = "OAuth error description",
-                ErrorCodes = new[] { "error1", "error2", "error3" },
-                CorrelationId = "1234-123-1234",
-                Claims = "claim1 claim2"
-            };
+            // Arrange
+            AdfsWebFingerResponse toSerialize = SetAdfsWebFingerResponseProperties(new AdfsWebFingerResponse());
 
-            var jsonSerializedLegacy = JsonHelper.SerializeToJson<AdfsWebFingerResponse>(expected);
-            var jsonSerializedNew = JsonHelper.SerializeNew<AdfsWebFingerResponse>(expected);
+            // Act - serialize
+            string jsonSerializedLegacy = JsonHelper.SerializeToJson<AdfsWebFingerResponse>(toSerialize);
+            string jsonSerializedNew = JsonHelper.SerializeNew<AdfsWebFingerResponse>(toSerialize);
 
             // Assert serialization
             Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
 
-            var objectDeserializedNew = JsonHelper.DeserializeNew<AdfsWebFingerResponse>(jsonSerializedLegacy);
+            // Act - deserialize
+            AdfsWebFingerResponse objectDeserializedLegacy = JsonHelper.DeserializeFromJson<AdfsWebFingerResponse>(jsonSerializedLegacy);
+            AdfsWebFingerResponse objectDeserializedNew = JsonHelper.DeserializeNew<AdfsWebFingerResponse>(jsonSerializedLegacy);
 
             // Assert deserialization
-            Assert.AreEqual(expected.Subject, objectDeserializedNew.Subject);
-            Assert.AreEqual(expected.Links.Count, objectDeserializedNew.Links.Count);
-            // AssertCollectionItemsEqualByValue(expected.Links, objectDeserializedManually.Links);
-            Assert.AreEqual(expected.Error, objectDeserializedNew.Error);
-            Assert.AreEqual(expected.SubError, objectDeserializedNew.SubError);
-            Assert.AreEqual(expected.ErrorDescription, objectDeserializedNew.ErrorDescription);
-            CollectionAssert.AreEqual(expected.ErrorCodes, objectDeserializedNew.ErrorCodes);
-            Assert.AreEqual(expected.CorrelationId, objectDeserializedNew.CorrelationId);
-            Assert.AreEqual(expected.Claims, objectDeserializedNew.Claims);
+            AssertAdfsWebFingerResponseProperties(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         private OAuth2ResponseBase SetOAuth2ResponseBaseProperties(OAuth2ResponseBase oAuth2ResponseBase)
@@ -499,6 +475,44 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             Assert.AreEqual(expected.ExtendedExpiresIn, actual.ExtendedExpiresIn);
             Assert.AreEqual(expected.RefreshIn, actual.RefreshIn);
             Assert.AreEqual(expected.FamilyId, actual.FamilyId);
+            AssertOAuth2ResponseBaseProperties(expected, actual);
+        }
+
+        private LinksList SetLinksListProperties(LinksList linksList)
+        {
+            linksList.Rel = "rel1";
+            linksList.Href = "href1";
+
+            return linksList;
+        }
+
+        private void AssertLinksListProperties(LinksList expected, LinksList actual)
+        {
+            Assert.AreEqual(expected.Rel, actual.Rel);
+            Assert.AreEqual(expected.Href, actual.Href);
+        }
+
+        private AdfsWebFingerResponse SetAdfsWebFingerResponseProperties(AdfsWebFingerResponse adfsWebFingerResponse)
+        {
+            adfsWebFingerResponse.Subject = "adfs subject";
+            adfsWebFingerResponse.Links = new List<LinksList>
+            {
+                SetLinksListProperties(new LinksList())
+            };
+
+            SetOAuth2ResponseBaseProperties(adfsWebFingerResponse);
+
+            return adfsWebFingerResponse;
+        }
+
+        private void AssertAdfsWebFingerResponseProperties(AdfsWebFingerResponse expected, AdfsWebFingerResponse actual)
+        {
+            Assert.AreEqual(expected.Subject, actual.Subject);
+            Assert.AreEqual(expected.Links.Count, actual.Links.Count);
+            for (int i = 0; i < expected.Links.Count; i++)
+            {
+                AssertLinksListProperties(expected.Links[i], actual.Links[i]);
+            }
             AssertOAuth2ResponseBaseProperties(expected, actual);
         }
         #endregion

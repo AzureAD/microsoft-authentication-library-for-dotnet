@@ -272,7 +272,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string json = TestConstants.TokenResponseJson;
             json = JsonTestUtils.AddKeyValue(json, "refresh_in", "1800");
 
-            var tokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(json);
+            var tokenResponse = JsonHelper.DeserializeNew<MsalTokenResponse>(json);
             var homeAccountId = ClientInfo.CreateFromJson(tokenResponse.ClientInfo).ToAccountIdentifier();
 
             // Act
@@ -302,7 +302,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string json = TestConstants.TokenResponseJson;
             json = JsonTestUtils.AddKeyValue(json, StorageJsonKeys.TokenType, "pop");
 
-            var tokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(json);
+            var tokenResponse = JsonHelper.DeserializeNew<MsalTokenResponse>(json);
             var homeAccountId = ClientInfo.CreateFromJson(tokenResponse.ClientInfo).ToAccountIdentifier();
 
             // Act
@@ -324,7 +324,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             string json = TestConstants.TokenResponseJson;
-            var tokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(json);
+            var tokenResponse = JsonHelper.DeserializeNew<MsalTokenResponse>(json);
             var homeAccountId = ClientInfo.CreateFromJson(tokenResponse.ClientInfo).ToAccountIdentifier();
 
             // Act

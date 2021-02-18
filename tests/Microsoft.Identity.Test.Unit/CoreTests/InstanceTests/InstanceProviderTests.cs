@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             // Arrange
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
-            InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceMetadataJson);
+            InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeNew<InstanceDiscoveryResponse>(instanceMetadataJson);
 
             UserMetadataProvider userMetadataProvider = new UserMetadataProvider(instanceDiscovery);
 

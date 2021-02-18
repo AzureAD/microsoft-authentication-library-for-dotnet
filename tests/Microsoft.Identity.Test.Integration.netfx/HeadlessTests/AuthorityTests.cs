@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     validDiscoveryUri)).ConfigureAwait(false);
             string discoveryJson = await discoveryResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            InstanceDiscoveryMetadataEntry[] actualMetadata = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(discoveryJson).Metadata;
+            InstanceDiscoveryMetadataEntry[] actualMetadata = JsonHelper.DeserializeNew<InstanceDiscoveryResponse>(discoveryJson).Metadata;
             var processedMetadata = new Dictionary<string, InstanceDiscoveryMetadataEntry>();
             foreach (InstanceDiscoveryMetadataEntry entry in actualMetadata)
             {
