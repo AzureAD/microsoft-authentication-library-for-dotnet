@@ -31,7 +31,7 @@ namespace XamarinDev
                     case Device.Android:
 #if !IS_APPCENTER_BUILD
                         //This value needs to be calculated from the certificate used to sign the package. See https://aka.ms/MSAL_NET_Broker_Redirect_URI
-                        return "Your redirect uri";
+                        return "msauth://com.companyname.xamarindev/Fy2zjTiLYs5sXM3sGy+PGcv8MaQ=";
 #else
                         return "msauth://com.companyname.xamarindev/Fy2zjTiLYs5sXM3sGy+PGcv8MaQ=";
 #endif
