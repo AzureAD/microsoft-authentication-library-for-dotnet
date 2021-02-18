@@ -415,11 +415,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         /// Check if the network is available.
         private void CheckPowerOptimizationStatus()
         {
-            checkPackageForPowerOptimization(Application.Context.PackageName);
-            checkPackageForPowerOptimization(_brokerHelper.Authenticator.PackageName);
+            CheckPackageForPowerOptimization(Application.Context.PackageName);
+            CheckPackageForPowerOptimization(_brokerHelper.Authenticator.PackageName);
         }
 
-        private void checkPackageForPowerOptimization(string package)
+        private void CheckPackageForPowerOptimization(string package)
         {
             var powerManager = PowerManager.FromContext(Application.Context);
 

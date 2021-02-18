@@ -331,14 +331,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private ContentResolver GetContentResolver()
         {
-            if (_parentActivity == null)
-            {
-                return Application.Context.ContentResolver;
-            }
-            else
-            {
-                return _parentActivity.ContentResolver;
-            }
+            return _parentActivity?.ContentResolver ?? Application.Context.ContentResolver;
         }
 
         private string GetContentProviderURIForOperation(string operation)
@@ -354,10 +347,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private string SearializeBundleToJSON(Bundle bundle)
         {
-            return Base64UrlHelpers.Encode(marshall(bundle));
+            return Base64UrlHelpers.Encode(Marshall(bundle));
         }
 
-        private static byte[] marshall(Bundle parcelable)
+        private static byte[] Marshall(Bundle parcelable)
         {
             Parcel parcel = Parcel.Obtain();
             parcel.WriteBundle(parcelable);
