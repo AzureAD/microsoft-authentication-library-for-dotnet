@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
             
             try
             {
-                InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceDiscoveryJson);
+                InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeNew<InstanceDiscoveryResponse>(instanceDiscoveryJson);
                 Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
                 return (T)this;
             }
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client
 
             try
             {
-                InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceDiscoveryJson);
+                InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeNew<InstanceDiscoveryResponse>(instanceDiscoveryJson);
                 Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
                 return (T)this;
             }
