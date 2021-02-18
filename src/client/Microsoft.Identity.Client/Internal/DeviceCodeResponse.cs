@@ -54,10 +54,16 @@ namespace Microsoft.Identity.Client.Internal
             DeviceCode = jObject[DeviceCodePropertyName]?.ToString();
             VerificationUrl = jObject[VerificationUrlPropertyName]?.ToString();
             VerificationUri = jObject[VerificationUriPropertyName]?.ToString();
-            ExpiresIn = long.Parse(jObject[ExpiresInPropertyName]?.ToString(), System.Globalization.CultureInfo.InvariantCulture);
-            Interval = long.Parse(jObject[IntervalPropertyName]?.ToString(), System.Globalization.CultureInfo.InvariantCulture);
+            ExpiresIn = TryParseLong(jObject[ExpiresInPropertyName]?.ToString());
+            Interval = TryParseLong(jObject[IntervalPropertyName]?.ToString());
             Message = jObject[MessagePropertyName]?.ToString();
             base.DeserializeFromJson(json);
+
+            long TryParseLong(string stringVal)
+            {
+                long.TryParse(stringVal, out var val);
+                return val;
+            }
 
             return this;
         }

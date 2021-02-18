@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             PreferredNetwork = jObject[PreferredNetworkPropertyName]?.ToString();
             PreferredCache = jObject[PreferredCachePropertyName]?.ToString();
-            Aliases = ((JArray)jObject[AliasesPropertyName]).Select(c => (string)c).ToArray();
+            Aliases = jObject[AliasesPropertyName] != null ? ((JArray)jObject[AliasesPropertyName]).Select(c => (string)c).ToArray() : null;
 
             return this;
         }

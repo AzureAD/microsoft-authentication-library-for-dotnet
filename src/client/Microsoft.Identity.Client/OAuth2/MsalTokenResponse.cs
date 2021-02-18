@@ -11,7 +11,6 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Core;
 using System.Text;
-using System.Net;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -126,11 +125,17 @@ namespace Microsoft.Identity.Client.OAuth2
             Scope = jObject[TokenResponseClaim.Scope]?.ToString();
             ClientInfo = jObject[TokenResponseClaim.ClientInfo]?.ToString();
             IdToken = jObject[TokenResponseClaim.IdToken]?.ToString();
-            ExpiresIn = long.Parse(jObject[TokenResponseClaim.ExpiresIn]?.ToString(), CultureInfo.InvariantCulture);
-            ExtendedExpiresIn = long.Parse(jObject[TokenResponseClaim.ExtendedExpiresIn]?.ToString(), CultureInfo.InvariantCulture);
-            RefreshIn = long.Parse(jObject[TokenResponseClaim.RefreshIn]?.ToString(), CultureInfo.InvariantCulture);
+            ExpiresIn = TryParseLong(jObject[TokenResponseClaim.ExpiresIn]?.ToString());
+            ExtendedExpiresIn = TryParseLong(jObject[TokenResponseClaim.ExtendedExpiresIn]?.ToString());
+            RefreshIn = TryParseLong(jObject[TokenResponseClaim.RefreshIn]?.ToString());
             FamilyId = jObject[TokenResponseClaim.FamilyId]?.ToString();
             base.DeserializeFromJson(json);
+
+            long TryParseLong(string stringVal)
+            {
+                long.TryParse(stringVal, out var val);
+                return val;
+            }
 
             return this;
         }

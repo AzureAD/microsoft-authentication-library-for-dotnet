@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             JObject jObject = JObject.Parse(json);
 
             TenantDiscoveryEndpoint = jObject[TenantDiscoveryEndpointPropertyName]?.ToString();
-            Metadata = ((JArray)jObject[MetadataPropertyName]).Select(c => new InstanceDiscoveryMetadataEntry().DeserializeFromJson(c.ToString())).ToArray();
+            Metadata = jObject[MetadataPropertyName] != null ? ((JArray)jObject[MetadataPropertyName]).Select(c => new InstanceDiscoveryMetadataEntry().DeserializeFromJson(c.ToString())).ToArray() : null;
             base.DeserializeFromJson(json);
 
             return this;

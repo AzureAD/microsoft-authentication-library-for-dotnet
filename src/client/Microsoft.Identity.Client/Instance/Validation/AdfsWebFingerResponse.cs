@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
             JObject jObject = JObject.Parse(json);
 
             Subject = jObject[AdfsWebFingerResponseClaim.Subject]?.ToString();
-            Links = ((JArray)jObject[AdfsWebFingerResponseClaim.Links]).Select(c => new LinksList().DeserializeFromJson(c.ToString())).ToList();
+            Links = jObject[AdfsWebFingerResponseClaim.Links] != null ? ((JArray)jObject[AdfsWebFingerResponseClaim.Links]).Select(c => new LinksList().DeserializeFromJson(c.ToString())).ToList() : null;
             base.DeserializeFromJson(json);
 
             return this;

@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.OAuth2
             Error = jObject[OAuth2ResponseBaseClaim.Error]?.ToString();
             SubError = jObject[OAuth2ResponseBaseClaim.SubError]?.ToString();
             ErrorDescription = jObject[OAuth2ResponseBaseClaim.ErrorDescription]?.ToString();
-            ErrorCodes = ((JArray)jObject[OAuth2ResponseBaseClaim.ErrorCodes]).Select(c => (string)c).ToArray();
+            ErrorCodes = jObject[OAuth2ResponseBaseClaim.ErrorCodes] != null ? ((JArray)jObject[OAuth2ResponseBaseClaim.ErrorCodes]).Select(c => (string)c).ToArray() : null;
             CorrelationId = jObject[OAuth2ResponseBaseClaim.CorrelationId]?.ToString();
             Claims = jObject[OAuth2ResponseBaseClaim.Claims]?.ToString();
 
