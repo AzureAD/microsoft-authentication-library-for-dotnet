@@ -27,52 +27,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         private readonly ICoreLogger _logger;
         private readonly Uri _startUri;
         private readonly Uri _endUri;
-        //private Panel _webBrowserPanel; // todo: needed as member?
         private WebView2 _webView2;
 
         private AuthorizationResult _result;
 
         private IWin32Window _ownerWindow;
 
-
-        public AuthorizationResult DisplayDialogAndInterceptUri()
-        {
-            _webView2.CoreWebView2InitializationCompleted += WebView2Control_CoreWebView2InitializationCompleted;
-            _webView2.NavigationStarting += WebView2Control_NavigationStarting;
-            _webView2.AcceleratorKeyPressed += _webView2_AcceleratorKeyPressed;
-
-            // Starts the navigation
-            this._webView2.Source = _startUri;
-            DisplayDialog();
-
-            return _result;
-        }
-
-
-        private void DisplayDialog()
-        {
-            DialogResult uiResult = DialogResult.None;
-            InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(_ownerWindow));
-
-            switch (uiResult)
-            {
-                case DialogResult.OK:
-                    break;
-                case DialogResult.Cancel:
-                    _result = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
-                    break;
-                default:
-                    throw new MsalClientException(
-                        "webview2_unexpectedResult",
-                        "WebView2 returned an unexpected result: " + uiResult);
-            }
-        }
-
         public WinFormsPanelWithWebView2(
-            object ownerWindow,
-            ICoreLogger logger,
-            Uri startUri,
-            Uri endUri)
+         object ownerWindow,
+         ICoreLogger logger,
+         Uri startUri,
+         Uri endUri)
         {
             // TODO: title
             _logger = logger;
@@ -98,10 +63,41 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             }
 
             InitializeComponent();
-
-
         }
 
+        public AuthorizationResult DisplayDialogAndInterceptUri()
+        {
+            _webView2.CoreWebView2InitializationCompleted += WebView2Control_CoreWebView2InitializationCompleted;
+            _webView2.NavigationStarting += WebView2Control_NavigationStarting;
+            _webView2.AcceleratorKeyPressed += _webView2_AcceleratorKeyPressed;
+
+            // Starts the navigation
+            this._webView2.Source = _startUri;
+            DisplayDialog();
+
+            return _result;
+        }
+
+        private void DisplayDialog()
+        {
+            DialogResult uiResult = DialogResult.None;
+            InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(_ownerWindow));
+
+            switch (uiResult)
+            {
+                case DialogResult.OK:
+                    break;
+                case DialogResult.Cancel:
+                    _result = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
+                    break;
+                default:
+                    throw new MsalClientException(
+                        "webview2_unexpectedResult",
+                        "WebView2 returned an unexpected result: " + uiResult);
+            }
+        }
+
+     
         private void PlaceOnTop(object sender, EventArgs e)
         {
             // If we don't have an owner we need to make sure that the pop up browser
