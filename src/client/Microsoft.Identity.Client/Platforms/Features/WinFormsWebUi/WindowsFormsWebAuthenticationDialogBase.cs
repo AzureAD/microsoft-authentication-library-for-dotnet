@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.Win32;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
@@ -63,7 +64,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
             else if (ownerWindow is IntPtr)
             {
-                this.ownerWindow = new WindowsFormsWin32Window { Handle = (IntPtr)ownerWindow };
+                this.ownerWindow = new Win32Window((IntPtr)ownerWindow);
             }
             else
             {
@@ -304,7 +305,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     : Screen.PrimaryScreen;
 
                 // Window height is set to 70% of the screen height.
-                int uiHeight = (int)(Math.Max(screen.WorkingArea.Height, 160) * 70.0 / DpiHelper.ZoomPercent);
+                int uiHeight = (int)(Math.Max(screen.WorkingArea.Height, 160) * 70.0 / NativeDpiHelper.ZoomPercent);
                 _webBrowserPanel = new Panel();
                 _webBrowserPanel.SuspendLayout();
                 SuspendLayout();
@@ -380,50 +381,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             string messageUnknown = string.Format(CultureInfo.InvariantCulture, formatUnknown, statusCode);
             return new MsalClientException(MsalError.AuthenticationUiFailedError, messageUnknown);
         }
-
-        private sealed class WindowsFormsWin32Window : IWin32Window
-        {
-            public IntPtr Handle { get; set; }
-        }
-
-        /// <summary>
-        /// </summary>
-        protected static class DpiHelper
-        {
-            static DpiHelper()
-            {
-                const double DefaultDpi = 96.0;
-
-                const int LOGPIXELSX = 88;
-                const int LOGPIXELSY = 90;
-
-                double deviceDpiX;
-                double deviceDpiY;
-
-                IntPtr dC = NativeWrapper.NativeMethods.GetDC(IntPtr.Zero);
-                if (dC != IntPtr.Zero)
-                {
-                    deviceDpiX = NativeWrapper.NativeMethods.GetDeviceCaps(dC, LOGPIXELSX);
-                    deviceDpiY = NativeWrapper.NativeMethods.GetDeviceCaps(dC, LOGPIXELSY);
-                    NativeWrapper.NativeMethods.ReleaseDC(IntPtr.Zero, dC);
-                }
-                else
-                {
-                    deviceDpiX = DefaultDpi;
-                    deviceDpiY = DefaultDpi;
-                }
-
-                int zoomPercentX = (int)(100 * (deviceDpiX / DefaultDpi));
-                int zoomPercentY = (int)(100 * (deviceDpiY / DefaultDpi));
-
-                ZoomPercent = Math.Min(zoomPercentX, zoomPercentY);
-            }
-
-            /// <summary>
-            /// </summary>
-            public static int ZoomPercent { get; }
-        }
-
+     
         /// <summary>
         /// </summary>
         internal static class NativeMethods

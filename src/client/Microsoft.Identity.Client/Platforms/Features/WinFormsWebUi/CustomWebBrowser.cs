@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Platforms.Features.Win32;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -134,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 info.dwDoubleClick = 0;
                 info.dwFlags = DOCHOSTUIFLAG_NO3DOUTERBORDER | DOCHOSTUIFLAG_DISABLE_SCRIPT_INACTIVE;
 
-                if (NativeWrapper.NativeMethods.IsProcessDPIAware())
+                if (NativeDpiHelper.IsProcessDPIAware())
                 {
                     info.dwFlags |= DOCHOSTUIFLAG_DPI_AWARE;
                 }

@@ -406,19 +406,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
             void PrivacyImpactedStateChange([In] bool bImpacted);
         }
 
-        internal static class NativeMethods
-        {
-            [DllImport("User32.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
-            internal static extern IntPtr GetDC(IntPtr hWnd);
-
-            [DllImport("User32.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
-            internal static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
-
-            [DllImport("Gdi32.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
-            internal static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
-
-            [DllImport("User32.dll", CallingConvention = CallingConvention.Winapi, ExactSpelling = true)]
-            internal static extern bool IsProcessDPIAware();
-        }
+        
     }
 }
