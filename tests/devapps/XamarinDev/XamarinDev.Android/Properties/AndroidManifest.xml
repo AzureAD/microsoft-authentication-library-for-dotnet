@@ -10,8 +10,13 @@
 				<category android:name="android.intent.category.DEFAULT" />
 				<category android:name="android.intent.category.BROWSABLE" />
 				<data android:scheme="msal16dab2ba-145d-4b1b-8569-bf4b9aed4dc8" android:host="auth" />
-				<data android:scheme="msauth" android:host="com.companyname.XamarinDev" android:path="yourRedirectUriSignature" />
 			</intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="msauth" android:host="com.companyname.XamarinDev" android:path="/Fc4l/5I4mMvLnF+l+XopDuQ2gEM=" />
+      </intent-filter>
 		</activity>
 	</application>
 	<!-- Required for API Level 30 to make sure we can detect browsers and other apps we want to
