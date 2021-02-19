@@ -1,7 +1,7 @@
 4.27.0
 ==========
 ### New Features: 
-**Updated communication mechanism during brokered authentication on android to improve reliability and avoid power optimization issues** See issue [#2150](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2150)
+**Updated communication mechanism used in brokered authentication on android to improve reliability and avoid power optimization issues** See issue [#2150](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2150)
 
 4.26.0
 ==========
