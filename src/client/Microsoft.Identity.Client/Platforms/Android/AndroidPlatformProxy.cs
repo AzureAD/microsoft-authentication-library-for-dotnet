@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
-            return new AndroidBroker(uiParent, Logger);
+            return AndroidBrokerFactory.CreateBroker(uiParent, Logger);
         }
 
         public override bool CanBrokerSupportSilentAuth()
