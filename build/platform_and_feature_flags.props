@@ -23,7 +23,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkMac)'">
     <DefineConstants>$(DefineConstants);MAC;SUPPORTS_CUSTOM_CACHE;SUPPORTS_OS_SYSTEM_BROWSER;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)' Or '$(TargetFramework)' == '$(TargetFrameworkNetStandardUnityAOT)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;SUPPORTS_OS_SYSTEM_BROWSER;</DefineConstants>
   </PropertyGroup>
 </Project>
