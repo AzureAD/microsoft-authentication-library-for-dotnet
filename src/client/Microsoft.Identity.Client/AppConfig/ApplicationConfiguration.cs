@@ -46,6 +46,9 @@ namespace Microsoft.Identity.Client
 
         public Func<CoreUIParent, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
 
+        /// <inheritdoc/>
+        public string KerberosServicePrincipalName { get; set; } = string.Empty;
+
         public ITelemetryConfig TelemetryConfig { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }

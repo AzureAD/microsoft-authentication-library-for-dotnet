@@ -126,5 +126,10 @@ namespace Microsoft.Identity.Client
         /// Enables legacy ADAL cache serialization and deserialization.
         /// </summary>
         public bool LegacyCacheCompatibilityEnabled { get; set; } = true;
+
+        /// <summary>
+        /// Service principal name for Kerberos Service Ticket.
+        /// </summary>
+        public string KerberosServicePrincipalName { get; set; } = string.Empty;
     }
 }

@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Globalization;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Kerberos;
 
 namespace Microsoft.Identity.Client
 {
@@ -60,6 +61,8 @@ namespace Microsoft.Identity.Client
             CorrelationId = correlationId;
             TokenType = tokenType;
             AuthenticationResultMetadata = authenticationResultMetadata;
+
+            ParseKerberosSupplementalTicket();
         }
 
         /// <summary>
@@ -155,6 +158,8 @@ namespace Microsoft.Identity.Client
             IdToken = msalIdTokenCacheItem?.Secret;
             CorrelationId = correlationID;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
+
+            ParseKerberosSupplementalTicket();
         }
 
         //Default constructor for testing
@@ -257,6 +262,24 @@ namespace Microsoft.Identity.Client
                 "{0} {1}",
                 _authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType,
                 AccessToken);
+        }
+
+        /// <summary>
+        /// Gets the acquired <see cref="MsalKerberosSupplementalTicket"/>.
+        /// </summary>
+        public MsalKerberosSupplementalTicket KerberosSupplementalTicket { get; internal set; }
+
+        /// <summary>
+        /// Parse a <see cref="MsalKerberosSupplementalTicket"/> from received id token.
+        /// </summary>
+        internal void ParseKerberosSupplementalTicket()
+        {
+            this.KerberosSupplementalTicket = MsalKerberosClaim.Parse(this.IdToken);
+
+            if (this.KerberosSupplementalTicket != null)
+            {
+                MsalKerberosSupplementalTicket.SaveToCache(this.KerberosSupplementalTicket);
+            }
         }
     }
 }

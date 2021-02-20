@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
@@ -382,6 +383,8 @@ namespace Microsoft.Identity.Client
                 applicationOptions.EnablePiiLogging,
                 applicationOptions.IsDefaultPlatformLoggingEnabled);
 
+            WithKerberosServicePrincipal(applicationOptions.KerberosServicePrincipalName);
+
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
             Config.AzureCloudInstance = applicationOptions.AzureCloudInstance;
@@ -459,6 +462,17 @@ namespace Microsoft.Identity.Client
         public T WithTelemetry(ITelemetryConfig telemetryConfig)
         {
             Config.TelemetryConfig = telemetryConfig;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Sets the Azure AD Kerberos Service Principal name.
+        /// </summary>
+        /// <param name="servicePrincipalName">Service principal name to get Kerberos Service Ticket.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithKerberosServicePrincipal(string servicePrincipalName)
+        {
+            Config.KerberosServicePrincipalName = servicePrincipalName;
             return (T)this;
         }
 

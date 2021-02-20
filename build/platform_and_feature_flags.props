@@ -26,4 +26,9 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;SUPPORTS_OS_SYSTEM_BROWSER;</DefineConstants>
   </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOsPlatform('Windows'))">
+    <DefineConstants>$(DefineConstants);SUPPORT_KERBEROS</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
 </Project>

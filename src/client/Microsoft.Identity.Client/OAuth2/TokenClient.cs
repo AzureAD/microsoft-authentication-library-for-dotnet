@@ -14,6 +14,7 @@ using System.Net;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Kerberos;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -131,7 +132,11 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
-            _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, _requestParams.ClaimsAndClientCapabilities);
+
+            // Add Kerberos Ticket claims if there's valid service principal name in Configuration.
+            // Kerberos Ticket claim is only allowed at token request due to security issue.
+            // It should not be included for authorize request.
+            MsalKerberosClaim.AddKerberosTicketClaim(_oAuth2Client, _requestParams);
 
             foreach (var kvp in additionalBodyParameters)
             {
