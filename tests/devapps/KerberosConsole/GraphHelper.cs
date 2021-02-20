@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace MsalConsole
+namespace KerberosConsole
 {
     /// <summary>
     /// Helper class to access Microsoft Graph.

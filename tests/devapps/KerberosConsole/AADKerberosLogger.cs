@@ -7,7 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace Microsoft.Identity.Client
+namespace KerberosConsole
 {
     /// <summary>
     /// Helper to provide internal tracking log for debugging.

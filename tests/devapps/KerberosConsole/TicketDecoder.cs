@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
 
-namespace MsalConsole
+namespace KerberosConsole
 {
     /// <summary>
     /// Utility class to check Kerberos Ticket

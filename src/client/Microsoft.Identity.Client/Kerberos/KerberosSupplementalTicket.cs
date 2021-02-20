@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Kerberos
     /// Class for Kerberos tickets that are included as claims and used as a supplemental token in an OAuth/OIDC
     /// protocol response.
     /// </summary>
-    public class MsalKerberosSupplementalTicket
+    public class KerberosSupplementalTicket
     {
         /// <summary>
         /// The client key used to encrypt the client portion of the ticket. This is optional. This will be null if
@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// The client key type.This is optional.This will be null if ClientKey is null.
         /// </summary>
         [JsonProperty("keyType")]
-        public MsalKerberosKeyTypes KeyType { get; set; }
+        public KerberosKeyTypes KeyType { get; set; }
 
         /// <summary>
         /// Base64 encoded KERB_MESSAGE_BUFFER
@@ -57,25 +57,25 @@ namespace Microsoft.Identity.Client.Kerberos
         public string ClientName { get; set; }
 
         /// <summary>
-        /// Creates a new instance of <see cref="MsalKerberosSupplementalTicket"/> class.
+        /// Creates a new instance of <see cref="KerberosSupplementalTicket"/> class.
         /// </summary>
-        public MsalKerberosSupplementalTicket()
+        public KerberosSupplementalTicket()
         {
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="MsalKerberosSupplementalTicket"/> class with error message.
+        /// Creates a new instance of <see cref="KerberosSupplementalTicket"/> class with error message.
         /// </summary>
         /// <param name="errorMessage">Error message to be set.</param>
-        public MsalKerberosSupplementalTicket(string errorMessage)
+        public KerberosSupplementalTicket(string errorMessage)
         {
             this.ErrorMessage = errorMessage;
         }
 
         /// <summary>
-        /// Save current Kerberos Ticket content to cache.
+        /// Save current Kerberos Ticket to current user's Ticket Cache.
         /// </summary>
-        public static void SaveToCache(MsalKerberosSupplementalTicket ticket)
+        public static void SaveToCache(KerberosSupplementalTicket ticket)
         {
             if (ticket == null || ticket.KerberosMessageBuffer == null)
             {
@@ -98,20 +98,22 @@ namespace Microsoft.Identity.Client.Kerberos
         }
 
         /// <summary>
-        /// Instantiate this object from a JSON encoded JSON string.
+        /// Creates a  <see cref="KerberosSupplementalTicket"/> object from Kerberos Ticket Claim response string
+        /// parsed from Id Token.
         /// </summary>
-        /// <param name="json">The JSON encoded JSON string.</param>
-        /// <returns>The instantiated object.</returns>
-        public static MsalKerberosSupplementalTicket FromJson(string json)
+        /// <param name="kerberosAsRep">Kerberos Ticket Claim response string parsed from id token.</param>
+        /// <returns>A <see cref="KerberosSupplementalTicket"/> object created from given Kerberos Ticket Claim response string.
+        /// Null, if error occurs.</returns>
+        public static KerberosSupplementalTicket FromJson(string kerberosAsRep)
         {
-            if (string.IsNullOrEmpty(json))
+            if (string.IsNullOrEmpty(kerberosAsRep))
             {
                 return null;
             }
 
-            return (MsalKerberosSupplementalTicket)JsonConvert.DeserializeObject(
-                        json,
-                        typeof(MsalKerberosSupplementalTicket));
+            return (KerberosSupplementalTicket)JsonConvert.DeserializeObject(
+                        kerberosAsRep,
+                        typeof(KerberosSupplementalTicket));
         }
     }
 }

@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 using System.Collections.Generic;
 
-namespace MsalConsole
+namespace KerberosConsole
 {
     /// <summary>
     /// Represents an one page of results from an AAD Graph query.

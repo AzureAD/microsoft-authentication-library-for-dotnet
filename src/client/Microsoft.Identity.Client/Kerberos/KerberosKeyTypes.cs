@@ -1,16 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Microsoft.Identity.Client.Kerberos
 {
     /// <summary>
     /// The Kerberos key types used in this assembly.
     /// </summary>
-    public enum MsalKerberosKeyTypes
+    public enum KerberosKeyTypes
     {
         /// <summary>
         /// None.

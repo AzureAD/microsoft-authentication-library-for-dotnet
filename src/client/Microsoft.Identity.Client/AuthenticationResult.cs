@@ -265,20 +265,20 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets the acquired <see cref="MsalKerberosSupplementalTicket"/>.
+        /// Gets the <see cref="Kerberos.KerberosSupplementalTicket"/> object.
         /// </summary>
-        public MsalKerberosSupplementalTicket KerberosSupplementalTicket { get; internal set; }
+        public KerberosSupplementalTicket KerberosTicket { get; private set; }
 
         /// <summary>
-        /// Parse a <see cref="MsalKerberosSupplementalTicket"/> from received id token.
+        /// Parse a <see cref="Kerberos.KerberosSupplementalTicket"/> from received id token.
         /// </summary>
         internal void ParseKerberosSupplementalTicket()
         {
-            this.KerberosSupplementalTicket = MsalKerberosClaim.Parse(this.IdToken);
+            KerberosTicket = KerberosClaimManager.Parse(IdToken);
 
-            if (this.KerberosSupplementalTicket != null)
+            if (KerberosTicket != null)
             {
-                MsalKerberosSupplementalTicket.SaveToCache(this.KerberosSupplementalTicket);
+                KerberosSupplementalTicket.SaveToCache(KerberosTicket);
             }
         }
     }

@@ -121,6 +121,10 @@
     <!-- Manually include the cs files -->
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs;$(PathToMsalSources)\Kerberos\**\*.cs;$(PathToMsalSources)\Kerberos\Win32\**\*.*" />
+    <Compile Include="Kerberos\KerberosClaimManager.cs" />
+    <Compile Include="Kerberos\KerberosIdTokenParser.cs" />
+    <Compile Include="Kerberos\KerberosKeyTypes.cs" />
+    <Compile Include="Kerberos\KerberosSupplementalTicket.cs" />
 
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>

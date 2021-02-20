@@ -14,17 +14,17 @@ namespace Microsoft.Identity.Client.Kerberos
     /// <summary>
     /// Utility class to manage Kerberos Claims to get Kerberos Service Ticket.
     /// </summary>
-    internal class MsalKerberosClaim
+    internal class KerberosClaimManager
     {
         internal const string KerberosClaimType = "xms_as_rep";
         internal const string KerberosAsRepTemplate = @"{{""id_token"": {{ ""xms_as_rep"":{{""essential"":{0},""value"":""{1}""}} }} }}";
 
         /// <summary>
-        /// Get <see cref="MsalKerberosSupplementalTicket"/> object from received Json Web Token.
+        /// Get <see cref="KerberosSupplementalTicket"/> object from received Json Web Token.
         /// </summary>
         /// <param name="idToken">ID token with Json Web Token format.</param>
-        /// <returns>A <see cref="MsalKerberosSupplementalTicket"/> object if exists and parsed correctly. Null, otherwise.</returns>
-        internal static MsalKerberosSupplementalTicket Parse(string idToken)
+        /// <returns>A <see cref="KerberosSupplementalTicket"/> object if exists and parsed correctly. Null, otherwise.</returns>
+        internal static KerberosSupplementalTicket Parse(string idToken)
         {
             if (string.IsNullOrEmpty(idToken) || idToken.Length < 128)
             {
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Kerberos
                 return null;
             }
 
-            MsalKerberosJwt jwt = MsalKerberosJwt.Parse(idToken);
+            KerberosIdTokenParser jwt = KerberosIdTokenParser.Parse(idToken);
             if (jwt == null)
             {
                 return null;
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Kerberos
                 return null;
             }
 
-            return MsalKerberosSupplementalTicket.FromJson(kerberosAsRep);
+            return KerberosSupplementalTicket.FromJson(kerberosAsRep);
         }
 
         /// <summary>

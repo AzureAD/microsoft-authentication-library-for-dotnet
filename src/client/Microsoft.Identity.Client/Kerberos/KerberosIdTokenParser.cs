@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Kerberos
     /// <summary>
     /// Utility class to parse JWT token string.
     /// </summary>
-    internal class MsalKerberosJwt
+    internal class KerberosIdTokenParser
     {
         /// <summary>
         /// Parsed JSON object for JWT payload.
@@ -35,11 +35,11 @@ namespace Microsoft.Identity.Client.Kerberos
         }
 
         /// <summary>
-        /// Creates a <see cref="MsalKerberosJwt"/> object from given JWT token string.
+        /// Creates a <see cref="KerberosIdTokenParser"/> object from given JWT token string.
         /// </summary>
         /// <param name="raw">JWT token string to be parsed.</param>
-        /// <returns>A <see cref="MsalKerberosJwt"/> object containing parsed JWT token.</returns>
-        internal static MsalKerberosJwt Parse(string raw)
+        /// <returns>A <see cref="KerberosIdTokenParser"/> object containing parsed JWT token.</returns>
+        internal static KerberosIdTokenParser Parse(string raw)
         {
             if (string.IsNullOrEmpty(raw))
             {
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Kerberos
                 return null;
             }
 
-            MsalKerberosJwt jwt = new MsalKerberosJwt();
+            KerberosIdTokenParser jwt = new KerberosIdTokenParser();
             jwt.PayloadJson = JObject.Parse(payload);
             return jwt;
         }

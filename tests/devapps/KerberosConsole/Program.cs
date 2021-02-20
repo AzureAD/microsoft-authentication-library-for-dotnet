@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Kerberos;
 
 using System;
 
-namespace MsalConsole
+namespace KerberosConsole
 {
     class Program
     {
@@ -46,31 +46,31 @@ namespace MsalConsole
             {
                 if (args[i].Equals("-tenantId", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    this.TenantId = args[++i];
+                    TenantId = args[++i];
                 }
                 else if (args[i].Equals("-clientId", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    this.ClientId = args[++i];
+                    ClientId = args[++i];
                 }
                 else if (args[i].Equals("-spn", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    this.KerberosServicePrincipalName = args[++i];
+                    KerberosServicePrincipalName = args[++i];
                 }
                 else if (args[i].Equals("-redirectUri", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    this.RedirectUrl = args[++i];
+                    RedirectUrl = args[++i];
                 }
                 else if (args[i].Equals("-scopes", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    this.GraphScopes = args[++i].Split(' ');
+                    GraphScopes = args[++i].Split(' ');
                 }
                 else if (args[i].Equals("-cached", StringComparison.OrdinalIgnoreCase))
                 {
-                    this.FromCache = true;
+                    FromCache = true;
                 }
                 else
                 {
-                    Console.WriteLine("MsalConsole {option}");
+                    Console.WriteLine("KerberosConsole {option}");
                     Console.WriteLine("    -tenantId {id} : set tenent Id to use.");
                     Console.WriteLine("    -clientId {id} : set client Id (Application Id) to use.");
                     Console.WriteLine("    -redirectUri {uri} : set redirectUri for OAuth2 authentication.");
@@ -94,13 +94,13 @@ namespace MsalConsole
                 return;
             }
 
-            ShowKerberosSupplementalTicket(result.KerberosSupplementalTicket);
+            ShowKerberosTicketDetails(result.KerberosTicket);
             ShowCachedTicket();
         }
 
         public bool ShowCachedTicket()
         {
-            byte[] ticket = FindCachedTicket(this.KerberosServicePrincipalName);
+            byte[] ticket = FindCachedTicket(KerberosServicePrincipalName);
             if (ticket != null && ticket.Length > 32)
             {
                 var encode = Convert.ToBase64String(ticket);
@@ -116,7 +116,7 @@ namespace MsalConsole
             return false;
         }
 
-        private void ShowKerberosSupplementalTicket(MsalKerberosSupplementalTicket ticket)
+        private void ShowKerberosTicketDetails(KerberosSupplementalTicket ticket)
         {
             AADKerberosLogger.Save("\nKerberosSupplementalTicket {");
             AADKerberosLogger.Save("                Client Key: " + ticket.ClientKey);
@@ -150,16 +150,16 @@ namespace MsalConsole
 
         private AuthenticationResult ReadAccount(bool showTokenInfo)
         {
-            var app = PublicClientApplicationBuilder.Create(this.ClientId)
-                .WithTenantId(this.TenantId)
-                .WithRedirectUri(this.RedirectUrl)
-                .WithKerberosServicePrincipal(this.KerberosServicePrincipalName)
+            var app = PublicClientApplicationBuilder.Create(ClientId)
+                .WithTenantId(TenantId)
+                .WithRedirectUri(RedirectUrl)
+                .WithKerberosServicePrincipal(KerberosServicePrincipalName)
                 .WithLogging(LogDelegate, LogLevel.Verbose, true, true)
                 .Build();
 
             try
             {
-                AuthenticationResult result = app.AcquireTokenInteractive(this.GraphScopes)
+                AuthenticationResult result = app.AcquireTokenInteractive(GraphScopes)
                         .ExecuteAsync()
                         .GetAwaiter()
                         .GetResult();
