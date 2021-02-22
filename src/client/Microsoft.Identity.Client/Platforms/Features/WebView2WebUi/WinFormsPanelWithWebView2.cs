@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             _webView2.AcceleratorKeyPressed += _webView2_AcceleratorKeyPressed;
 
             // Starts the navigation
-            this._webView2.Source = _startUri;
+            _webView2.Source = _startUri;
             DisplayDialog();
 
             return _result;
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 ShowInTaskbar = null == _ownerWindow;
 
                 webBrowserPanel.ResumeLayout(false);
-                ResumeLayout(false);
+                ResumeLayout(false);                
             });
 
             this.Shown += PlaceOnTop;
@@ -253,7 +253,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             _webView2.CoreWebView2.Settings.AreHostObjectsAllowed = false;
             _webView2.CoreWebView2.Settings.IsScriptEnabled = true;
             _webView2.CoreWebView2.Settings.IsZoomControlEnabled = false;
-            _webView2.CoreWebView2.Settings.IsStatusBarEnabled = true;            
+            _webView2.CoreWebView2.Settings.IsStatusBarEnabled = true;
+            _webView2.CoreWebView2.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
+        }
+
+        private void CoreWebView2_DocumentTitleChanged(object sender, object e)
+        {
+            this.Text = _webView2.CoreWebView2.DocumentTitle ?? "";
         }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 using Microsoft.Identity.Client.Platforms.net45;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Web.WebView2.Core;
 
 namespace Microsoft.Identity.Client.Platforms.net5win
 {
@@ -19,20 +20,27 @@ namespace Microsoft.Identity.Client.Platforms.net5win
 
             if (!parent.UseEmbeddedWebview)
             {
+                requestContext.Logger.Info("Using system browser");
                 return new DefaultOsBrowserWebUi(
                     requestContext.ServiceBundle.PlatformProxy,
                     requestContext.Logger,
                     parent.SystemWebViewOptions);
             }
 
-            // TODO: factory logic
-            var legacy =  new 
-                InteractiveWebUI(parent, requestContext);
-            var wv2 = new WebView2WebUi(parent, requestContext);
+            if (IsWebView2Available())
+            {
+                requestContext.Logger.Info("Using WebView2 embedded browser");
+                return new WebView2WebUi(parent, requestContext);
+            }
 
-            IWebUI used = wv2;
+            requestContext.Logger.Info("Using legacy WebBrowser embedded browser");
+            return new InteractiveWebUI(parent, requestContext);
+        }
 
-            return used;
+        private bool IsWebView2Available()
+        {
+            string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString();
+            return !string.IsNullOrEmpty(wv2Version);
         }
     }
 }
