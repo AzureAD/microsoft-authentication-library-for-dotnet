@@ -1,7 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if NET_CORE || NET5_WIN
+#if NET_CORE 
 using System;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
@@ -20,15 +21,43 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         private readonly RequestContext _requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
 
         [TestMethod]
-        public void Net45Factory_DefaultEmbedded()
+        public void NetCoreFactory_DefaultEmbedded()
         {
             // Arrange
 
             // Act
-            var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, _requestContext);
+            var webUi = _webUIFactory.CreateAuthenticationDialog(
+                _parent, 
+                WebViewPreference.NotSpecified, 
+                _requestContext);
 
             // Assert
             Assert.IsTrue(webUi is DefaultOsBrowserWebUi);
+        }
+
+        [TestMethod]
+        public void NetCoreFactory_Embedded()
+        {
+            // Arrange
+
+            // Act
+            var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.Embedded, _requestContext);
+
+            // Assert
+            Assert.IsTrue(webUi is DefaultOsBrowserWebUi);
+        }
+
+        [TestMethod]
+        public void NetCoreFactory_System()
+        {
+            // Arrange
+
+            // Act
+            var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.System, _requestContext);
+
+            // Assert
+            Assert.IsTrue(webUi is DefaultOsBrowserWebUi);
+            Assert.IsTrue(_webUIFactory.IsSystemWebViewAvailable);
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
+using Microsoft.Identity.Client.Platforms.Features.Win32;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
@@ -63,7 +64,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 }
                 else
                 {
-                    using (var staTaskScheduler = new net45.StaTaskScheduler(1)) //TODO: move this to a common location
+                    using (var staTaskScheduler = new StaTaskScheduler(1)) 
                     {
                         try
                         {

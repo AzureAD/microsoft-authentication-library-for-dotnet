@@ -47,7 +47,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
-                MsalMockHelpers.ConfigureMockWebUI(pca);
+                pca.ServiceBundle.ConfigureMockWebUI();
+
                 await RunAfterAccessFailureAsync(pca, () =>
                     pca.AcquireTokenInteractive(new[] { "User.Read" }).ExecuteAsync())
                         .ConfigureAwait(false);
@@ -196,8 +197,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     await Task.Delay(10).ConfigureAwait(false);
                 });
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    pca.ServiceBundle.PlatformProxy,
+
+                pca.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
@@ -238,9 +239,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsFalse(accounts.Any());
 
                 Trace.WriteLine("Step 2 - call AcquireTokenInteractive - it will save new tokens in the cache");
-                MsalMockHelpers.ConfigureMockWebUI(
-                        app.ServiceBundle.PlatformProxy,
-                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI(
+                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
                 var cacheAccessRecorder2 = app.UserTokenCache.RecordAccess();
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var userTokenCacheInternal = Substitute.For<ITokenCacheInternal>();
             var semaphore = new SemaphoreSlim(1, 1);
             userTokenCacheInternal.Semaphore.Returns(semaphore);
-            
+
             var cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithAuthority(new Uri(TestConstants.AuthorityTestTenant))
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 .BuildConcrete();
 
             userTokenCacheInternal.IsTokenCacheSerialized().Returns(false);
-            
+
             // Act
             await cca.GetAccountsAsync().ConfigureAwait(false);
 
@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await cca.UserTokenCacheInternal.Received().OnAfterAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
 
 
-        }    
+        }
 
         [TestMethod]
         public async Task AcquireTokenForClient_DoesNotFireNotifications_WhenTokenCacheIsNotSerialized_Async()

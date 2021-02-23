@@ -12,7 +12,6 @@ using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.Win32;
-using Microsoft.Identity.Client.Platforms.net45;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Web.WebView2.Core;

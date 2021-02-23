@@ -156,19 +156,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsTrue(proxy.BrokerSupportsWamAccounts);
             Assert.IsTrue(proxy.CanBrokerSupportSilentAuth());
 
-            Assert.IsTrue(proxy.IsSystemWebViewAvailable);
+            
             Assert.AreSame(
                 Constants.DefaultRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", false));
 
 #if DESKTOP || NET5_WIN
-            Assert.IsTrue(proxy.UseEmbeddedWebViewDefault);
+            
             Assert.AreSame(
                 Constants.NativeClientRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", true));
 
-#else
-            Assert.IsFalse(proxy.UseEmbeddedWebViewDefault);
+#else            
              Assert.AreSame(
                 Constants.LocalHostRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", true));

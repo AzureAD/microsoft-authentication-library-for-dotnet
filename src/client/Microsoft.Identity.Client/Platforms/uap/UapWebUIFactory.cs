@@ -1,16 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
-    internal class WebUIFactory : IWebUIFactory
+    internal class UapWebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
+        public bool IsSystemWebViewAvailable => false;
+
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference webViewPreference, RequestContext requestContext)
         {
-            if (!parent.UseEmbeddedWebview)
+            if (webViewPreference == WebViewPreference.System)
             {
                 throw new MsalClientException(
                     MsalError.WebviewUnavailable,
@@ -18,7 +21,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
                     "To use the UWP Web Authentication Manager (WAM) see https://aka.ms/msal-net-uwp-wam");
             }
 
-            return new WebUI(parent, requestContext);
+            return new WebUI(coreUIParent, requestContext);
         }
     }
 }

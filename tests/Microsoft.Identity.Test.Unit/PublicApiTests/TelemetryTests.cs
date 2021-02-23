@@ -135,9 +135,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                .WithRedirectUri("http://localhost")
                                .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 

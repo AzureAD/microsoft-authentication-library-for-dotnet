@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
@@ -10,7 +11,9 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
+        public bool IsSystemWebViewAvailable => false;
+
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference webViewPreference, RequestContext requestContext)
         {
             throw new PlatformNotSupportedException("Possible Cause: If you are using an XForms app, or generally a netstandard assembly, " +
                 "make sure you add a reference to Microsoft.Identity.Client.dll from each platform assembly " +

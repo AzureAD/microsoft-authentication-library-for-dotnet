@@ -37,39 +37,18 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             _productName = new Lazy<string>(InternalGetProductName);
             _cryptographyManager = new Lazy<ICryptographyManager>(InternalGetCryptographyManager);
             _platformLogger = new Lazy<IPlatformLogger>(InternalGetPlatformLogger);
-        }
+        }      
 
-        public virtual bool IsSystemWebViewAvailable
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        public virtual bool UseEmbeddedWebViewDefault
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        protected IWebUIFactory OverloadWebUiFactory { get; set; }
         protected IFeatureFlags OverloadFeatureFlags { get; set; }
 
         protected ICoreLogger Logger { get; }
 
         /// <inheritdoc />
-        public IWebUIFactory GetWebUiFactory()
+        public IWebUIFactory GetWebUiFactory(ApplicationConfiguration appConfig)
         {
-            return OverloadWebUiFactory ?? CreateWebUiFactory();
-        }
-
-        /// <inheritdoc />
-        public void SetWebUiFactory(IWebUIFactory webUiFactory)
-        {
-            OverloadWebUiFactory = webUiFactory;
+            return appConfig.WebUiFactoryCreator != null ?
+              appConfig.WebUiFactoryCreator() :
+              CreateWebUiFactory();            
         }
 
         /// <inheritdoc />
@@ -77,7 +56,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return _deviceModel.Value;
         }
-
 
         /// <inheritdoc />
         public string GetOperatingSystem()

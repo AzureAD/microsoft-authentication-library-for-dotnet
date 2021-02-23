@@ -41,17 +41,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                                             new TestLegacyCachePersistance())
                                                         .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                app.ServiceBundle.ConfigureMockWebUI(
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
                 HttpResponseMessage response = MockHelpers.CreateSuccessTokenResponseMessageWithUid(
-                    TestConstants.Uid, 
-                    TestConstants.Utid, 
+                    TestConstants.Uid,
+                    TestConstants.Utid,
                     "testuser@contoso.com");
 
                 httpManager.AddResponseMockHandlerForPost(response);
 
-               AuthenticationResult result = app.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync(CancellationToken.None).Result;
+                AuthenticationResult result = app.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync(CancellationToken.None).Result;
                 Assert.IsNotNull(result);
 
                 // make sure Msal stored RT in Adal cache
@@ -128,8 +129,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
@@ -153,8 +153,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                                              new Uri(ClientApplicationBase.DefaultAuthority),
                                                              true).BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app1.ServiceBundle.PlatformProxy,
+                app1.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 app1.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>

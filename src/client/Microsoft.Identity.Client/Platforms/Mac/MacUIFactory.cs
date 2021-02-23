@@ -1,4 +1,5 @@
-﻿using Microsoft.Identity.Client.Internal;
+﻿using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
 
@@ -6,21 +7,24 @@ namespace Microsoft.Identity.Client.Platforms.Mac
 {
     internal class MacUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
+        public bool IsSystemWebViewAvailable => true;
+
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference webViewPreference, RequestContext requestContext)
         {
-            if (!parent.UseEmbeddedWebview)
+            if (webViewPreference == WebViewPreference.System)
             {
                 return new DefaultOsBrowserWebUi(
                     requestContext.ServiceBundle.PlatformProxy,
                     requestContext.Logger,
-                    parent.SystemWebViewOptions);
+                    coreUIParent.SystemWebViewOptions);
             }
 
             return new MacEmbeddedWebUI()
             {
-                CoreUIParent = parent,
+                CoreUIParent = coreUIParent,
                 RequestContext = requestContext
             };
         }
+
     }
 }

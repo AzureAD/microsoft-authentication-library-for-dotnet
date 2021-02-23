@@ -27,11 +27,13 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public void Net45Factory_DefaultEmbedded()
         {
-            // Arrange
-            _parent.UseEmbeddedWebview = true;
+            
 
             // Act
-            var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, _requestContext);
+            var webUi = _webUIFactory.CreateAuthenticationDialog(
+                _parent, 
+                Client.ApiConfig.Parameters.WebViewPreference.Embedded,
+                _requestContext);
 
             // Assert
             Assert.IsTrue(webUi is InteractiveWebUI);
@@ -44,7 +46,10 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             _parent.UseHiddenBrowser = true;
 
             // Act
-            var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, _requestContext);
+            var webUi = _webUIFactory.CreateAuthenticationDialog(
+                _parent, 
+                Client.ApiConfig.Parameters.WebViewPreference.NotSpecified,
+                _requestContext);
 
             // Assert
             Assert.IsTrue(webUi is SilentWebUI);
@@ -53,14 +58,15 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public void Net45Factory_SystemWebUi()
         {
-            // Arrange
-            _parent.UseEmbeddedWebview = false;
 
             // Act
-            var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, _requestContext);
-
+            var webUi = _webUIFactory.CreateAuthenticationDialog(
+                           _parent,
+                           Client.ApiConfig.Parameters.WebViewPreference.System,
+                           _requestContext);
             // Assert
             Assert.IsTrue(webUi is DefaultOsBrowserWebUi);
+            Assert.IsTrue(_webUIFactory.IsSystemWebViewAvailable);
         }
     }
 }

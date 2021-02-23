@@ -9,61 +9,59 @@ using NSubstitute;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Test.Common.Mocks
 {
     internal static class MsalMockHelpers
     {
-        public static MockWebUI ConfigureMockWebUI(IPlatformProxy platformProxy, AuthorizationResult authorizationResult)
-        {
-            return ConfigureMockWebUI(platformProxy, authorizationResult, new Dictionary<string, string>());
-        }
-
+      
         public static MockWebUI ConfigureMockWebUI(
-            IPlatformProxy platformProxy,
+            this IServiceBundle serviceBundle,
             AuthorizationResult authorizationResult,
-            Dictionary<string, string> queryParamsToValidate)
-        {
-            return ConfigureMockWebUI(platformProxy, authorizationResult, queryParamsToValidate, null);
-        }
-
-        public static MockWebUI ConfigureMockWebUI(
-            IPlatformProxy platformProxy,
-            AuthorizationResult authorizationResult,
-            Dictionary<string, string> queryParamsToValidate,
-            string environment)
+            Dictionary<string, string> queryParamsToValidate = null,
+            string environment = null)
         {
             MockWebUI webUi = new MockWebUI
             {
-                QueryParamsToValidate = queryParamsToValidate,
+                QueryParamsToValidate = queryParamsToValidate ?? new Dictionary<string, string>(),
                 MockResult = authorizationResult,
                 ExpectedEnvironment = environment
             };
 
-            ConfigureMockWebUI(platformProxy, webUi);
+            ConfigureWebUiFactory(serviceBundle, webUi);
 
             return webUi;
-        }
-
-        public static void ConfigureMockWebUI(IPlatformProxy platformProxy, IWebUI webUi = null)
-        {
-            IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
-            mockFactory.CreateAuthenticationDialog(Arg.Any<CoreUIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
-            platformProxy.SetWebUiFactory(mockFactory);
         }
 
         /// <summary>
         /// Configures a web ui that returns a succesfull result
         /// </summary>
-        public static void ConfigureMockWebUI(IPublicClientApplication pca)
+        public static void ConfigureMockWebUI(
+            this IServiceBundle serviceBundle, 
+            IWebUI webUi = null)
         {
-            var app = pca as PublicClientApplication;
-            MockWebUI webUi = new MockWebUI
+            if (webUi == null)
             {
-                MockResult = AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code")
-            };
+                webUi = new MockWebUI
+                {
+                    MockResult = AuthorizationResult.FromUri(serviceBundle.Config.RedirectUri + "?code=some-code")
+                };
+            }
 
-            ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, webUi);
+            ConfigureWebUiFactory(serviceBundle, webUi);
         }
+
+        private static void ConfigureWebUiFactory(IServiceBundle serviceBundle, IWebUI webUi)
+        {
+            IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
+            mockFactory.CreateAuthenticationDialog(
+                Arg.Any<CoreUIParent>(),
+                Arg.Any<WebViewPreference>(),
+                Arg.Any<RequestContext>()).Returns(webUi);
+
+            serviceBundle.Config.WebUiFactoryCreator = () => mockFactory;
+        }
+       
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview;
 using Microsoft.Identity.Client.Platforms.iOS.SystemWebview;
@@ -11,22 +12,27 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 {
     internal class IosWebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
+        public bool IsSystemWebViewAvailable => true;
+
+        public IWebUI CreateAuthenticationDialog(
+            CoreUIParent coreUIParent, 
+            WebViewPreference useEmbeddedWebView, 
+            RequestContext requestContext)
         {
-            if (parent.UseEmbeddedWebview)
+            if (useEmbeddedWebView == WebViewPreference.Embedded)
             {
                 return new EmbeddedWebUI()
                 {
                     RequestContext = requestContext,
-                    CoreUIParent = parent
+                    CoreUIParent = coreUIParent
                 };
             }
-
-            //there is no need to pass UIParent.
+            
             return new SystemWebUI()
             {
                 RequestContext = requestContext
             };
         }
+
     }
 }

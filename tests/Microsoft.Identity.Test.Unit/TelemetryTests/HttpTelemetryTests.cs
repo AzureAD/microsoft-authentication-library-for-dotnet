@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                             .WithHttpManager(_harness.HttpManager)
                             .WithDefaultRedirectUri()
-                            .WithLogging((lvl,msg,pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
+                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
                             .BuildConcrete();
 
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
@@ -332,9 +332,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             switch (outcome)
             {
                 case AcquireTokenInteractiveOutcome.Success:
-                    MsalMockHelpers.ConfigureMockWebUI(
-                        _app.ServiceBundle.PlatformProxy,
-                         AuthorizationResult.FromUri(_app.AppConfig.RedirectUri + "?code=some-code"));
+
+                    _app.ServiceBundle.ConfigureMockWebUI();
+
                     tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
                     var authResult = await _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
@@ -349,8 +349,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     ui.UpdateRedirectUri(Arg.Any<Uri>()).Returns(new Uri("http://localhost:1234"));
                     ui.AcquireAuthorizationAsync(null, null, null, default).ThrowsForAnyArgs(
                         new MsalClientException("user_cancelled"));
-                    MsalMockHelpers.ConfigureMockWebUI(_app.ServiceBundle.PlatformProxy, ui);
-                    
+                    _app.ServiceBundle.ConfigureMockWebUI(ui);
+
                     var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
@@ -362,9 +362,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 case AcquireTokenInteractiveOutcome.AADUnavailableError:
                     correlationId = Guid.NewGuid();
 
-                    MsalMockHelpers.ConfigureMockWebUI(
-                       _app.ServiceBundle.PlatformProxy,
-                        AuthorizationResult.FromUri(_app.AppConfig.RedirectUri + "?code=some-code"));
+                    _app.ServiceBundle.ConfigureMockWebUI();
 
                     tokenRequestHandler = new MockHttpMessageHandler()
                     {
@@ -402,7 +400,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenSilentAsync(
-            AcquireTokenSilentOutcome outcome, 
+            AcquireTokenSilentOutcome outcome,
             bool forceRefresh = false)
         {
             MockHttpMessageHandler tokenRequest = null;
@@ -469,21 +467,21 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 correlationId.ToString());
 
             var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                () => request.WithCorrelationId(correlationId).ExecuteAsync(), 
+                () => request.WithCorrelationId(correlationId).ExecuteAsync(),
                 allowDerived: true)
                 .ConfigureAwait(false);
 
             Assert.AreEqual(
-                correlationId, 
-                Guid.Parse(ex.CorrelationId), 
+                correlationId,
+                Guid.Parse(ex.CorrelationId),
                 "Test error - Exception correlation ID does not match WithCorrelationId value");
 
             return (tokenRequest, correlationId);
         }
 
         private static void AssertCurrentTelemetry(
-            HttpRequestMessage requestMessage, 
-            ApiIds apiId, 
+            HttpRequestMessage requestMessage,
+            ApiIds apiId,
             bool forceRefresh,
             bool isCacheSerialized = false,
             bool isLegacyCacheEnabled = true,
@@ -521,8 +519,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             expectedCorrelationIds = expectedCorrelationIds ?? new Guid[0];
             expectedErrors = expectedErrors ?? new string[0];
 
-            var actualHeader = ParseLastRequestHeader(requestMessage);   
-            
+            var actualHeader = ParseLastRequestHeader(requestMessage);
+
             Assert.AreEqual(expectedSilentCount, actualHeader.SilentCount);
             CoreAssert.AreEqual(actualHeader.FailedApis.Length, actualHeader.CorrelationIds.Length, actualHeader.Errors.Length);
 
@@ -535,8 +533,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 actualHeader.CorrelationIds);
 
             CollectionAssert.AreEqual(
-                expectedErrors, 
-                actualHeader.Errors); 
+                expectedErrors,
+                actualHeader.Errors);
         }
 
         private static (int SilentCount, string[] FailedApis, string[] CorrelationIds, string[] Errors) ParseLastRequestHeader(HttpRequestMessage requestMessage)
@@ -545,7 +543,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             // where a failed_request is "api_id, correlation_id"
             string lastTelemetryHeader = requestMessage.Headers.GetValues(
                TelemetryConstants.XClientLastTelemetry).Single();
-            var lastRequestParts =  lastTelemetryHeader.Split('|');
+            var lastRequestParts = lastTelemetryHeader.Split('|');
 
             Assert.AreEqual(5, lastRequestParts.Length); //  2 | 1 | | |
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion2, lastRequestParts[0]); // version
