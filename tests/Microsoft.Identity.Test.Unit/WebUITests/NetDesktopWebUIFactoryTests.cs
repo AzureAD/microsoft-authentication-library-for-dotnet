@@ -2,12 +2,8 @@
 // Licensed under the MIT License.
 #if DESKTOP
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
 using Microsoft.Identity.Client.Platforms.net45;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
@@ -27,8 +23,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public void Net45Factory_DefaultEmbedded()
         {
-            
-
             // Act
             var webUi = _webUIFactory.CreateAuthenticationDialog(
                 _parent, 
