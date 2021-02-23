@@ -5,13 +5,14 @@ parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
   MsalClientSemVer: '4.0.0-devopsbuild'
+  InternalNugetFeed: 'https://securitytools.pkgs.visualstudio.com/_packaging/SecureDevelopmentTools@Local/nuget/v3/index.json'
 
 steps:
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    msbuildArgs: '/t:restore'
+    msbuildArgs: '/t:restore /p:RestoreAdditionalProjectSources=${{ parameters.InternalNugetFeed }}'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
