@@ -384,6 +384,7 @@ namespace Microsoft.Identity.Client
                 applicationOptions.IsDefaultPlatformLoggingEnabled);
 
             WithKerberosServicePrincipal(applicationOptions.KerberosServicePrincipalName);
+            WithKerberosTicketContainer(applicationOptions.TicketContainer);
 
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
@@ -473,6 +474,12 @@ namespace Microsoft.Identity.Client
         public T WithKerberosServicePrincipal(string servicePrincipalName)
         {
             Config.KerberosServicePrincipalName = servicePrincipalName;
+            return (T)this;
+        }
+
+        public T WithKerberosTicketContainer(KerberosTicketContainer ticketContainer)
+        {
+            Config.TicketContainer = ticketContainer;
             return (T)this;
         }
 

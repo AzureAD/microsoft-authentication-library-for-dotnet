@@ -72,25 +72,6 @@ namespace Microsoft.Identity.Client.Kerberos
             this.ErrorMessage = errorMessage;
         }
 
-        /// <summary>
-        /// Save current Kerberos Ticket to current user's Ticket Cache.
-        /// </summary>
-        public static void SaveToCache(KerberosSupplementalTicket ticket)
-        {
-            if (ticket == null || ticket.KerberosMessageBuffer == null)
-            {
-                return;
-            }
-
-#if SUPPORT_KERBEROS
-            using (var cache = Win32.LsaInterop.Connect())
-            {
-                byte[] krbCred = Convert.FromBase64String(ticket.KerberosMessageBuffer);
-                cache.ImportCredential(krbCred);
-            }
-#endif
-        }
-
         /// <inheritdoc />
         public override string ToString()
         {
@@ -104,7 +85,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// <param name="kerberosAsRep">Kerberos Ticket Claim response string parsed from id token.</param>
         /// <returns>A <see cref="KerberosSupplementalTicket"/> object created from given Kerberos Ticket Claim response string.
         /// Null, if error occurs.</returns>
-        public static KerberosSupplementalTicket FromJson(string kerberosAsRep)
+        internal static KerberosSupplementalTicket FromJson(string kerberosAsRep)
         {
             if (string.IsNullOrEmpty(kerberosAsRep))
             {
@@ -114,6 +95,25 @@ namespace Microsoft.Identity.Client.Kerberos
             return (KerberosSupplementalTicket)JsonConvert.DeserializeObject(
                         kerberosAsRep,
                         typeof(KerberosSupplementalTicket));
+        }
+
+        /// <summary>
+        /// Save current Kerberos Ticket to current user's Ticket Cache.
+        /// </summary>
+        internal static void SaveToCache(KerberosSupplementalTicket ticket)
+        {
+            if (ticket == null || ticket.KerberosMessageBuffer == null)
+            {
+                return;
+            }
+
+#if SUPPORT_KERBEROS
+            using (var cache = Win32.LsaInterop.Connect())
+            {
+                byte[] krbCred = Convert.FromBase64String(ticket.KerberosMessageBuffer);
+                cache.ImportCredential(krbCred);
+            }
+#endif
         }
     }
 }

@@ -15,7 +15,8 @@ namespace KerberosConsole
         private string TenantId = "428881af-9ab1-40b3-8158-3611358fff68";
         private string ClientId = "5221b482-2651-4cb3-9ad8-c09a78e4de9e";
         private string KerberosServicePrincipalName = "HTTP/prod.aadkreberos.msal.com";
-        private string RedirectUrl = "http://localhost:8940/";
+        private KerberosTicketContainer TicketContainer = KerberosTicketContainer.IdToken;
+        private string RedirectUri = "http://localhost:8940/";
         private bool FromCache = false;
 
         private string[] GraphScopes = {
@@ -56,9 +57,23 @@ namespace KerberosConsole
                 {
                     KerberosServicePrincipalName = args[++i];
                 }
+                else if (args[i].Equals("-container", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
+                {
+                    ++i;
+                    if (args[i].Equals("id", StringComparison.OrdinalIgnoreCase))
+                        TicketContainer = KerberosTicketContainer.IdToken;
+                    else if (args[i].Equals("access", StringComparison.OrdinalIgnoreCase))
+                        TicketContainer = KerberosTicketContainer.AccessToken;
+                    else
+                    {
+                        Console.WriteLine("Unknown ticket container type '" + args[i] + "'");
+                        ShowUsages();
+                        return false;
+                    }
+                }
                 else if (args[i].Equals("-redirectUri", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    RedirectUrl = args[++i];
+                    RedirectUri = args[++i];
                 }
                 else if (args[i].Equals("-scopes", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
@@ -70,13 +85,7 @@ namespace KerberosConsole
                 }
                 else
                 {
-                    Console.WriteLine("KerberosConsole {option}");
-                    Console.WriteLine("    -tenantId {id} : set tenent Id to use.");
-                    Console.WriteLine("    -clientId {id} : set client Id (Application Id) to use.");
-                    Console.WriteLine("    -redirectUri {uri} : set redirectUri for OAuth2 authentication.");
-                    Console.WriteLine("    -scopes {scopes} : list of scope separated by space.");
-                    Console.WriteLine("    -cached : check cached ticket first.");
-                    Console.WriteLine("    -h : show help for command options");
+                    ShowUsages();
                     return false;
                 }
             }
@@ -94,7 +103,7 @@ namespace KerberosConsole
                 return;
             }
 
-            ShowKerberosTicketDetails(result.KerberosTicket);
+            ShowKerberosTicketDetails(result);
             ShowCachedTicket();
         }
 
@@ -104,7 +113,7 @@ namespace KerberosConsole
             if (ticket != null && ticket.Length > 32)
             {
                 var encode = Convert.ToBase64String(ticket);
-                AADKerberosLogger.Save("---Find cached Ticket:");
+                AADKerberosLogger.Save("\n---Find cached Ticket:");
                 AADKerberosLogger.Save(encode);
 
                 TicketDecoder decoder = new TicketDecoder();
@@ -116,20 +125,41 @@ namespace KerberosConsole
             return false;
         }
 
-        private void ShowKerberosTicketDetails(KerberosSupplementalTicket ticket)
+        private static void ShowUsages()
         {
-            AADKerberosLogger.Save("\nKerberosSupplementalTicket {");
-            AADKerberosLogger.Save("                Client Key: " + ticket.ClientKey);
-            AADKerberosLogger.Save("                  Key Type: " + ticket.KeyType);
-            AADKerberosLogger.Save("            Errorr Message: " + ticket.ErrorMessage);
-            AADKerberosLogger.Save("                     Realm: " + ticket.Realm);
-            AADKerberosLogger.Save("    Service Principal Name: " + ticket.ServicePrincipalName);
-            AADKerberosLogger.Save("               Client Name: " + ticket.ClientName);
-            AADKerberosLogger.Save("     KerberosMessageBuffer: " + ticket.KerberosMessageBuffer);
-            AADKerberosLogger.Save("}\n");
+            Console.WriteLine("KerberosConsole {option}");
+            Console.WriteLine("    -tenantId {id} : set tenent Id to use.");
+            Console.WriteLine("    -clientId {id} : set client Id (Application Id) to use.");
+            Console.WriteLine("    -spn {spn} : set the service principal name to use.");
+            Console.WriteLine("    -container {id, access} : set the ticket container to use.");
+            Console.WriteLine("    -redirectUri {uri} : set redirectUri for OAuth2 authentication.");
+            Console.WriteLine("    -scopes {scopes} : list of scope separated by space.");
+            Console.WriteLine("    -cached : check cached ticket first.");
+            Console.WriteLine("    -h : show help for command options");
+        }
 
-            TicketDecoder decoder = new TicketDecoder();
-            decoder.ShowKrbCredTicket(ticket.KerberosMessageBuffer);
+        private void ShowKerberosTicketDetails(AuthenticationResult result)
+        {
+            if (result.KerberosTicket == null)
+            {
+                AADKerberosLogger.Save("ERROR: There's no Kerberos Ticket information within the AuthResult.");
+                AADKerberosLogger.Save("Access Token: " + result.AccessToken);
+            }
+            else
+            {
+                AADKerberosLogger.Save("\nKerberosSupplementalTicket {");
+                AADKerberosLogger.Save("                Client Key: " + result.KerberosTicket.ClientKey);
+                AADKerberosLogger.Save("                  Key Type: " + result.KerberosTicket.KeyType);
+                AADKerberosLogger.Save("            Errorr Message: " + result.KerberosTicket.ErrorMessage);
+                AADKerberosLogger.Save("                     Realm: " + result.KerberosTicket.Realm);
+                AADKerberosLogger.Save("    Service Principal Name: " + result.KerberosTicket.ServicePrincipalName);
+                AADKerberosLogger.Save("               Client Name: " + result.KerberosTicket.ClientName);
+                AADKerberosLogger.Save("     KerberosMessageBuffer: " + result.KerberosTicket.KerberosMessageBuffer);
+                AADKerberosLogger.Save("}\n");
+
+                TicketDecoder decoder = new TicketDecoder();
+                decoder.ShowKrbCredTicket(result.KerberosTicket.KerberosMessageBuffer);
+            }
         }
 
         private byte[] FindCachedTicket(string servicePrincipalName)
@@ -152,13 +182,21 @@ namespace KerberosConsole
         {
             var app = PublicClientApplicationBuilder.Create(ClientId)
                 .WithTenantId(TenantId)
-                .WithRedirectUri(RedirectUrl)
+                .WithRedirectUri(RedirectUri)
                 .WithKerberosServicePrincipal(KerberosServicePrincipalName)
+                .WithKerberosTicketContainer(TicketContainer)
                 .WithLogging(LogDelegate, LogLevel.Verbose, true, true)
                 .Build();
 
             try
             {
+                AADKerberosLogger.Save("Calling AcquireTokenInteractive() with:");
+                AADKerberosLogger.Save("         Tenant Id: " + TenantId);
+                AADKerberosLogger.Save("         Client Id: " + ClientId);
+                AADKerberosLogger.Save("      Redirect Uri: " + RedirectUri);
+                AADKerberosLogger.Save("               spn: " + KerberosServicePrincipalName);
+                AADKerberosLogger.Save("  ticket container: " + TicketContainer);
+
                 AuthenticationResult result = app.AcquireTokenInteractive(GraphScopes)
                         .ExecuteAsync()
                         .GetAwaiter()
@@ -167,30 +205,30 @@ namespace KerberosConsole
                 if (showTokenInfo)
                 {
                     ShowAccount(result.Account);
-                    Console.WriteLine("Correlation Id: " + result.CorrelationId);
-                    Console.WriteLine("Unique Id :" + result.UniqueId);
-                    Console.WriteLine("Expres On: " + result.ExpiresOn);
-                    Console.WriteLine("IsExtendedLifeTimeToken: " + result.IsExtendedLifeTimeToken);
-                    Console.WriteLine("Extended Expres On: " + result.ExtendedExpiresOn);
-                    Console.WriteLine("Access Token:\n" + result.AccessToken);
-                    Console.WriteLine("Id Token:\n" + result.IdToken);
+                    AADKerberosLogger.Save("           Correlation Id: " + result.CorrelationId);
+                    AADKerberosLogger.Save("                Unique Id:" + result.UniqueId);
+                    AADKerberosLogger.Save("                Expres On: " + result.ExpiresOn);
+                    AADKerberosLogger.Save("  IsExtendedLifeTimeToken: " + result.IsExtendedLifeTimeToken);
+                    AADKerberosLogger.Save("       Extended Expres On: " + result.ExtendedExpiresOn);
+                    AADKerberosLogger.Save("             Access Token:\n" + result.AccessToken);
+                    AADKerberosLogger.Save("                 Id Token:\n" + result.IdToken);
                 }
                 return result;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception: " + ex);
+                AADKerberosLogger.Save("Exception: " + ex);
                 return null;
             }
         }
 
         private void ShowAccount(IAccount account)
         {
-            Console.WriteLine("Username: " + account.Username);
-            Console.WriteLine("Environment: " + account.Environment);
-            Console.WriteLine("HomeAccount Tenant Id: " + account.HomeAccountId.TenantId);
-            Console.WriteLine("HomeAccount Object Id: " + account.HomeAccountId.ObjectId);
-            Console.WriteLine("Home Account Identifier: " + account.HomeAccountId.Identifier);
+            AADKerberosLogger.Save("                 Username: " + account.Username);
+            AADKerberosLogger.Save("              Environment: " + account.Environment);
+            AADKerberosLogger.Save("    HomeAccount Tenant Id: " + account.HomeAccountId.TenantId);
+            AADKerberosLogger.Save("    HomeAccount Object Id: " + account.HomeAccountId.ObjectId);
+            AADKerberosLogger.Save("  Home Account Identifier: " + account.HomeAccountId.Identifier);
         }
 
         private static void LogDelegate(LogLevel level, string message, bool containsPii)

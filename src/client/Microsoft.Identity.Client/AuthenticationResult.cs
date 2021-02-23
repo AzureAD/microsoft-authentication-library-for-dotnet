@@ -275,11 +275,6 @@ namespace Microsoft.Identity.Client
         internal void ParseKerberosSupplementalTicket()
         {
             KerberosTicket = KerberosClaimManager.Parse(IdToken);
-
-            if (KerberosTicket != null)
-            {
-                KerberosSupplementalTicket.SaveToCache(KerberosTicket);
-            }
         }
     }
 }

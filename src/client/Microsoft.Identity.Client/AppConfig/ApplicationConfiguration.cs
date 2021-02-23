@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
@@ -46,8 +47,15 @@ namespace Microsoft.Identity.Client
 
         public Func<CoreUIParent, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Service principal name for Kerberos Service Ticket.
+        /// </summary>
         public string KerberosServicePrincipalName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Kerberos Service Ticket container to be used.
+        /// </summary>
+        public KerberosTicketContainer TicketContainer { get; set; } = KerberosTicketContainer.IdToken;
 
         public ITelemetryConfig TelemetryConfig { get; internal set; }
 

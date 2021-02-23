@@ -17,7 +17,8 @@ namespace Microsoft.Identity.Client.Kerberos
     internal class KerberosClaimManager
     {
         internal const string KerberosClaimType = "xms_as_rep";
-        internal const string KerberosAsRepTemplate = @"{{""id_token"": {{ ""xms_as_rep"":{{""essential"":{0},""value"":""{1}""}} }} }}";
+        internal const string IdTokenAsRepTemplate = @"{{""id_token"": {{ ""xms_as_rep"":{{""essential"":{0},""value"":""{1}""}} }} }}";
+        internal const string AccessTokenAsRepTemplate = @"{{""access_token"": {{ ""xms_as_rep"":{{""essential"":{0},""value"":""{1}""}} }} }}";
 
         /// <summary>
         /// Get <see cref="KerberosSupplementalTicket"/> object from received Json Web Token.
@@ -44,7 +45,13 @@ namespace Microsoft.Identity.Client.Kerberos
                 return null;
             }
 
-            return KerberosSupplementalTicket.FromJson(kerberosAsRep);
+            KerberosSupplementalTicket ticket = KerberosSupplementalTicket.FromJson(kerberosAsRep);
+            if (ticket != null)
+            {
+                KerberosSupplementalTicket.SaveToCache(ticket);
+            }
+
+            return ticket;
         }
 
         /// <summary>
@@ -58,11 +65,23 @@ namespace Microsoft.Identity.Client.Kerberos
         {
             if (!string.IsNullOrEmpty(requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName))
             {
-                string kerberosClaim = string.Format(
-                    CultureInfo.InvariantCulture,
-                    KerberosAsRepTemplate,
-                    "false",
-                    requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName);
+                string kerberosClaim;
+                if (requestParams.RequestContext.ServiceBundle.Config.TicketContainer == KerberosTicketContainer.IdToken)
+                {
+                    kerberosClaim = string.Format(
+                        CultureInfo.InvariantCulture,
+                        IdTokenAsRepTemplate,
+                        "false",
+                        requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName);
+                }
+                else
+                {
+                    kerberosClaim = string.Format(
+                        CultureInfo.InvariantCulture,
+                        AccessTokenAsRepTemplate,
+                        "false",
+                        requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName);
+                }
 
                 if (string.IsNullOrEmpty(requestParams.ClaimsAndClientCapabilities))
                 {
