@@ -4,7 +4,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace Microsoft.Identity.Client.Platforms.Features.Win32
+namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
 
     internal class Win32Window : IWin32Window
@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.Win32
         {
             Handle = handle;
         }
-        public IntPtr Handle { get; }
 
+        public IntPtr Handle { get; }
     }
 }

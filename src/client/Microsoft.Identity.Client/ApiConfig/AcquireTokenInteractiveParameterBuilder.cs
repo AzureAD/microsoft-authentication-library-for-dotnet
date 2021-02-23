@@ -87,22 +87,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
-#if NET_CORE || NETSTANDARD 
-            if (useEmbeddedWebView)
-            {
-                throw new MsalClientException(MsalError.WebviewUnavailable, "An embedded webview is not available on this platform. " +
-                    "Please use WithUseEmbeddedWebView(false) or leave the default. " +
-                    "See https://aka.ms/msal-net-os-browser for details about the system webview.");
-            }
-#elif WINDOWS_APP
-            if (!useEmbeddedWebView)
-            {
-                throw new MsalClientException(
-                   MsalError.WebviewUnavailable,
-                   "On UWP, MSAL does not offer a system webview out of the box. Please set .WithUseEmbeddedWebview to true or leave the default. " +
-                   "To use the UWP Web Authentication Manager (WAM) see https://aka.ms/msal-net-uwp-wam");
-            }
-#endif
+            // platform WebUI factories will validate this setting
 
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithEmbeddedWebView, useEmbeddedWebView);
             Parameters.UseEmbeddedWebView = useEmbeddedWebView ?

@@ -15,9 +15,11 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference webViewPreference, RequestContext requestContext)
         {
-            throw new PlatformNotSupportedException("Possible Cause: If you are using an XForms app, or generally a netstandard assembly, " +
+            throw new PlatformNotSupportedException(
+                "Possible Cause: If you are using an XForms app, or generally a netstandard assembly, " +
                 "make sure you add a reference to Microsoft.Identity.Client.dll from each platform assembly " +
-                "(e.g. UWP, Android, iOS), not just from the common netstandard assembly");
+                "(e.g. UWP, Android, iOS), not just from the common netstandard assembly. " +
+                "A browser is not avaiable in the box on .NETStandard 1.3");
         }
     }
 }

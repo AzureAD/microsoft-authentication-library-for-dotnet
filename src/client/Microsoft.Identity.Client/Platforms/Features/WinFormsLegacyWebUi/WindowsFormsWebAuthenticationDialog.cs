@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using Microsoft.Identity.Client.Platforms.Features.Win32;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     /// <summary>
     /// The browser dialog used for user authentication

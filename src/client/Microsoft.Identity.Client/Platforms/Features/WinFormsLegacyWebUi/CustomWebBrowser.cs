@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Platforms.Features.Win32;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     internal partial class CustomWebBrowser : WebBrowser
     {

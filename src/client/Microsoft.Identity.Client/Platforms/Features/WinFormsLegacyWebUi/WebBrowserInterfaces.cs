@@ -5,7 +5,7 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     internal class NativeWrapper
     {
@@ -406,6 +406,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
             void PrivacyImpactedStateChange([In] bool bImpacted);
         }
 
-        
+
     }
 }

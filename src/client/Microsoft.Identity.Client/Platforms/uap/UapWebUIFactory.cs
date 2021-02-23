@@ -17,8 +17,8 @@ namespace Microsoft.Identity.Client.Platforms.uap
             {
                 throw new MsalClientException(
                     MsalError.WebviewUnavailable,
-                    "On UWP, MSAL does not offer a system webUI out of the box. Please set .WithUseEmbeddedWebview to false. " +
-                    "To use the UWP Web Authentication Manager (WAM) see https://aka.ms/msal-net-uwp-wam");
+                    "On UWP, MSAL cannot use the system browser. " +
+                    "The preffered auth mechanism is the Web Authentication Manager (WAM) see https://aka.ms/msal-net-uwp-wam");
             }
 
             return new WebUI(coreUIParent, requestContext);

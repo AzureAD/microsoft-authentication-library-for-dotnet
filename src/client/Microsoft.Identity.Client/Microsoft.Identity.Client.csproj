@@ -154,7 +154,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\net5win\**\*.cs" LinkBase="Platforms\net5win" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsWebUi\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\win32\**\*.cs" />
 
@@ -174,7 +174,7 @@
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsWebUi\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\win32\**\*.cs" />
 
     <Reference Include="System" />

@@ -3,7 +3,7 @@
 
 using System.ComponentModel;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     /// <summary>
     /// </summary>
@@ -27,11 +27,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
         // url as a string, as in case of error it could be invalid url
         /// <summary>
         /// </summary>
-        public string Url {get;}
+        public string Url { get; }
 
         /// <summary>
         /// </summary>
-        public object WebBrowserActiveXInstance {get;}
+        public object WebBrowserActiveXInstance { get; }
 
         /// <summary>
         /// </summary>
