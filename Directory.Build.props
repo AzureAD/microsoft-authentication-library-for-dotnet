@@ -1,6 +1,5 @@
 <Project>
   <PropertyGroup>
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
 
     <LangVersion>7.2</LangVersion>
     <!-- This is strong naming, not signing-->
@@ -8,10 +7,15 @@
     <!-- The MSAL.snk has both private and public keys -->
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/build/MSAL.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
-    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsPackable>false</IsPackable>
+    <!-- Configure SDL rulesets to use. https://www.1eswiki.com/wiki/Microsoft.Internal.Analyzers.Rulesets -->
+    <MicrosoftInternalSdlRuleset>Recommended</MicrosoftInternalSdlRuleset>
+    <MicrosoftInternalSdlRulesetAction>Error</MicrosoftInternalSdlRulesetAction>
+    <!--<MicrosoftInternalDisableNonSdlRules>false</MicrosoftInternalDisableNonSdlRules>-->
+    <AdditionalAnalyzerRuleSet>$(MSBuildThisFileDirectory)/build/SolutionWideAnalyzerConfig.ruleset</AdditionalAnalyzerRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <!-- PrivateAssets="All" is on these packages to ensure they're development dependencies
@@ -19,6 +23,9 @@
          For clarity, without PrivateAssets marked here, anyone consuming Microsoft.Identity.Client
          would also be forced to install these dependencies.  PrivateAssets avoids this problem. -->
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" PrivateAssets="All" />    
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Internal.Analyzers" Version="2.6.*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Internal.Analyzers.Rulesets" Version="1.0.*" PrivateAssets="All" />
   </ItemGroup>
 </Project> 
