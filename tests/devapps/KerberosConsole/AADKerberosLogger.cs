@@ -7,6 +7,8 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+
 namespace KerberosConsole
 {
     /// <summary>
@@ -64,6 +66,25 @@ namespace KerberosConsole
         {
             Console.WriteLine("[AADKerberos] " + logText);
             File.AppendAllText(LogFileName, logText + Environment.NewLine);
+        }
+
+        /// <summary>
+        /// Output given enumber of empty lines.
+        /// </summary>
+        /// <param name="numLines">Number of empty lines to display.</param>
+        public static void PrintLines(int numLines = 1)
+        {
+            if (numLines > 0)
+            {
+                string message = "";
+                for (int i = 0; i < numLines; i++)
+                {
+                    message += Environment.NewLine;
+                }
+
+                Console.Write(message);
+                File.AppendAllText(LogFileName, message);
+            }
         }
 
         /// <summary>

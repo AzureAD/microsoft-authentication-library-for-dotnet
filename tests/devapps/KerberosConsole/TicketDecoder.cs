@@ -24,7 +24,8 @@ namespace KerberosConsole
             var credPart = krbCred.Validate();
             Assert.IsNotNull(credPart);
 
-             AADKerberosLogger.Save("\nKRB-CRED Supplemental Ticket -----------------------------");
+            AADKerberosLogger.PrintLines(2);
+             AADKerberosLogger.Save("KRB-CRED Supplemental Ticket -----------------------------");
              AADKerberosLogger.Save("  ProtocolVersionNumber: " + krbCred.ProtocolVersionNumber);
              AADKerberosLogger.Save("  Message Type: " + krbCred.MessageType);
              AADKerberosLogger.Save("  # of Tickets: " + krbCred.Tickets.Length);
@@ -42,7 +43,7 @@ namespace KerberosConsole
                  AADKerberosLogger.Save("  SName: " + ticket.SName.FullyQualifiedName);
                 ShowEncryptedDataPart("EncryptedPart", ticket.EncryptedPart);
 
-                 AADKerberosLogger.Save("\n  Ticket.Flags: " + ticketInfo.Flags);
+                 AADKerberosLogger.Save("  Ticket.Flags: " + ticketInfo.Flags);
                  AADKerberosLogger.Save("  Ticket.Realm: " + ticketInfo.Realm);
                  AADKerberosLogger.Save("  Ticket.PName: " + ticketInfo.PName.FullyQualifiedName);
                  AADKerberosLogger.Save("  Ticket.SRealm: " + ticketInfo.SRealm);
@@ -77,12 +78,14 @@ namespace KerberosConsole
 
             var req = contextToken.KrbApReq;
             Assert.IsNotNull(req.Ticket);
-             AADKerberosLogger.Save("\nAP-REQ Cached Ticket----------------------------------------");
+
+            AADKerberosLogger.PrintLines(2);
+            AADKerberosLogger.Save("AP-REQ Cached Ticket----------------------------------------");
              AADKerberosLogger.Save("  Protocol Version Number: " + req.ProtocolVersionNumber);
              AADKerberosLogger.Save("  MessageType: " + req.MessageType);
              AADKerberosLogger.Save("  ApOptions: " + req.ApOptions);
 
-             AADKerberosLogger.Save("\n  Ticket.TicketNumber: " + req.Ticket.TicketNumber);
+             AADKerberosLogger.Save("  Ticket.TicketNumber: " + req.Ticket.TicketNumber);
              AADKerberosLogger.Save("  Ticket.Realm: " + req.Ticket.Realm);
              AADKerberosLogger.Save("  Ticket.SName: " + req.Ticket.SName.FullyQualifiedName);
             ShowEncryptedDataPart("Ticket.EncryptedPart", req.Ticket.EncryptedPart);

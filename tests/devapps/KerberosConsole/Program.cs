@@ -113,7 +113,9 @@ namespace KerberosConsole
             if (ticket != null && ticket.Length > 32)
             {
                 var encode = Convert.ToBase64String(ticket);
-                AADKerberosLogger.Save("\n---Find cached Ticket:");
+
+                AADKerberosLogger.PrintLines(2);
+                AADKerberosLogger.Save("---Find cached Ticket:");
                 AADKerberosLogger.Save(encode);
 
                 TicketDecoder decoder = new TicketDecoder();
@@ -160,10 +162,12 @@ namespace KerberosConsole
                 // save ticket to cache.
                 if (KerberosTicketManager.SaveToCache(ticket))
                 {
-                    AADKerberosLogger.Save("\n---Kerberos Ticket cached into user's Ticket Cache\n");
+                    AADKerberosLogger.PrintLines(2);
+                    AADKerberosLogger.Save("---Kerberos Ticket cached into user's Ticket Cache\n");
                 }
 
-                AADKerberosLogger.Save("\nKerberosSupplementalTicket {");
+                AADKerberosLogger.PrintLines(2);
+                AADKerberosLogger.Save("KerberosSupplementalTicket {");
                 AADKerberosLogger.Save("                Client Key: " + ticket.ClientKey);
                 AADKerberosLogger.Save("                  Key Type: " + ticket.KeyType);
                 AADKerberosLogger.Save("            Errorr Message: " + ticket.ErrorMessage);
