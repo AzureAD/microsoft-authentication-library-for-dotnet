@@ -10,6 +10,8 @@ using Com.Microsoft.Identity.Client;
 using Com.Microsoft.Identity.Client.Exception;
 using Java.Util;
 
+[assembly: UsesPermission(Android.Manifest.Permission.Internet)]
+
 namespace App1
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
