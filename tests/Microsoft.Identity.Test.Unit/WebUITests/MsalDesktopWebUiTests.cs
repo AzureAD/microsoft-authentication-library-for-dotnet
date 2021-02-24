@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                     _requestContext);
 
             // Assert
-            Assert.IsTrue(webUi is InteractiveWebUI);
+            Assert.IsTrue(webUi is Client.Platforms.Features.WinFormsLegacyWebUi.InteractiveWebUI);
         }
 #endif
 
