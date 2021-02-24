@@ -5,6 +5,7 @@ using Kerberos.NET.Win32;
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Kerberos;
+using Microsoft.VisualBasic.CompilerServices;
 
 using System;
 
@@ -18,6 +19,7 @@ namespace KerberosConsole
         private KerberosTicketContainer TicketContainer = KerberosTicketContainer.IdToken;
         private string RedirectUri = "http://localhost:8940/";
         private bool FromCache = false;
+        private long LogonId = 0;
 
         private string[] GraphScopes = {
             "user.read",
@@ -83,6 +85,27 @@ namespace KerberosConsole
                 {
                     FromCache = true;
                 }
+                else if (args[i].Equals("-luid", StringComparison.OrdinalIgnoreCase))
+                {
+                    ++i;
+                    try
+                    {
+                        LogonId = long.Parse(args[1]);
+                    }
+                    catch (Exception)
+                    {
+                        try
+                        {
+                            LogonId = Convert.ToInt64(args[i], 16);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("-luid should be a long number or HEX format string!");
+                            Console.WriteLine(ex);
+                            return false;
+                        }
+                    }
+                }
                 else
                 {
                     ShowUsages();
@@ -137,6 +160,7 @@ namespace KerberosConsole
             Console.WriteLine("    -redirectUri {uri} : set redirectUri for OAuth2 authentication.");
             Console.WriteLine("    -scopes {scopes} : list of scope separated by space.");
             Console.WriteLine("    -cached : check cached ticket first.");
+            Console.WriteLine("    -luid {loginId} : sets login id of current user.");
             Console.WriteLine("    -h : show help for command options");
         }
 
@@ -160,7 +184,7 @@ namespace KerberosConsole
             else
             {
                 // save ticket to cache.
-                if (KerberosTicketManager.SaveToCache(ticket))
+                if (KerberosTicketManager.SaveToCache(ticket, LogonId))
                 {
                     AADKerberosLogger.PrintLines(2);
                     AADKerberosLogger.Save("---Kerberos Ticket cached into user's Ticket Cache\n");

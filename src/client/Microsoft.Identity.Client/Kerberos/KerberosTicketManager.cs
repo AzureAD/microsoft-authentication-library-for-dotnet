@@ -54,7 +54,10 @@ namespace Microsoft.Identity.Client.Kerberos
         /// <summary>
         /// Save current Kerberos Ticket to current user's Ticket Cache.
         /// </summary>
-        public static bool SaveToCache(KerberosSupplementalTicket ticket)
+        /// <param name="ticket">Kerberos ticket object to save.</param>
+        /// <param name="luid">The Logon Id of the user owning the ticket cache.
+        /// The default of 0 represents the currently logged on user.</param>
+        public static bool SaveToCache(KerberosSupplementalTicket ticket, long luid = 0)
         {
             if (ticket == null || ticket.KerberosMessageBuffer == null)
             {
@@ -65,7 +68,7 @@ namespace Microsoft.Identity.Client.Kerberos
             using (var cache = Win32.LsaInterop.Connect())
             {
                 byte[] krbCred = Convert.FromBase64String(ticket.KerberosMessageBuffer);
-                cache.ImportCredential(krbCred);
+                cache.ImportCredential(krbCred, luid);
                 return true;
             }
 #endif

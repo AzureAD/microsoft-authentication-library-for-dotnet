@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Kerberos
@@ -12,44 +14,45 @@ namespace Microsoft.Identity.Client.Kerberos
     public class KerberosSupplementalTicket
     {
         /// <summary>
-        /// The client key used to encrypt the client portion of the ticket. This is optional. This will be null if
-        /// KeyType is null. This MUST be protected in the protocol response.
+        /// Get or Sets the client key used to encrypt the client portion of the ticket.
+        /// This is optional. This will be null if KeyType is null.
+        /// This MUST be protected in the protocol response.
         /// </summary>
         [JsonProperty("clientKey")]
         public string ClientKey { get; set; }
 
         /// <summary>
-        /// The client key type.This is optional.This will be null if ClientKey is null.
+        /// Get or Sets the client key type.This is optional.This will be null if ClientKey is null.
         /// </summary>
         [JsonProperty("keyType")]
         public KerberosKeyTypes KeyType { get; set; }
 
         /// <summary>
-        /// Base64 encoded KERB_MESSAGE_BUFFER
+        /// Get or Sets the Base64 encoded KERB_MESSAGE_BUFFER
         /// </summary>
         [JsonProperty("messageBuffer", Required = Required.Always)]
         public string KerberosMessageBuffer { get; set; }
 
         /// <summary>
-        /// Contains the errors or failures that server encountered when creating a ticket granting ticket
+        /// Get or Sets the error message that server encountered when creating a ticket granting ticket.
         /// </summary>
         [JsonProperty("error")]
         public string ErrorMessage { get; set; }
 
         /// <summary>
-        /// The Kerberos realm/domain name.
+        /// Get or Sets the Kerberos realm/domain name.
         /// </summary>
         [JsonProperty("realm")]
         public string Realm { get; set; }
 
         /// <summary>
-        /// The target service principal name (SPN).
+        /// Get or Sets the target service principal name (SPN).
         /// </summary>
         [JsonProperty("sn", Required = Required.Always)]
         public string ServicePrincipalName { get; set; }
 
         /// <summary>
-        /// The client name. Depending on the ticket, this can be either a UserPrincipalName or SamAccountName.
+        /// Get or Sets the client name. Depending on the ticket, this can be either a UserPrincipalName or SamAccountName.
         /// </summary>
         [JsonProperty("cn")]
         public string ClientName { get; set; }
@@ -70,10 +73,26 @@ namespace Microsoft.Identity.Client.Kerberos
             this.ErrorMessage = errorMessage;
         }
 
+
+        /// <summary>
+        /// Gets the KRB-CRED Kerberos Ticket as byte stream.
+        /// </summary>
+        /// <returns>Byte stream representaion of KRB-CRED Kerberos Ticket if it contains valid ticket information.
+        /// Null, otherwise.</returns>
+        public byte[] GetKrbCred()
+        {
+            if (!string.IsNullOrEmpty(KerberosMessageBuffer))
+            {
+                return Convert.FromBase64String(KerberosMessageBuffer);
+            }
+
+            return null;
+        }
+
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"[ Realm: {Realm}, ServicePrincipalName: {ServicePrincipalName}, ClientName: {ClientName}, KeyType: {KeyType} ]";
+            return $"[ Realm: {Realm}, sp: {ServicePrincipalName}, cn: {ClientName}, KeyType: {KeyType} ]";
         }
     }
 }
