@@ -140,25 +140,42 @@ namespace KerberosConsole
 
         private void ShowKerberosTicketDetails(AuthenticationResult result)
         {
-            if (result.KerberosTicket == null)
+            KerberosSupplementalTicket ticket;
+            if (TicketContainer == KerberosTicketContainer.IdToken)
+            {
+                ticket = KerberosTicketManager.FromToken(result.IdToken);
+            }
+            else
+            {
+                ticket = KerberosTicketManager.FromToken(result.AccessToken);
+            }
+
+            if (ticket == null)
             {
                 AADKerberosLogger.Save("ERROR: There's no Kerberos Ticket information within the AuthResult.");
                 AADKerberosLogger.Save("Access Token: " + result.AccessToken);
             }
             else
             {
+                // save ticket to cache.
+                if (KerberosTicketManager.SaveToCache(ticket))
+                {
+                    AADKerberosLogger.Save("\n---Kerberos Ticket cached into user's Ticket Cache\n");
+                }
+
                 AADKerberosLogger.Save("\nKerberosSupplementalTicket {");
-                AADKerberosLogger.Save("                Client Key: " + result.KerberosTicket.ClientKey);
-                AADKerberosLogger.Save("                  Key Type: " + result.KerberosTicket.KeyType);
-                AADKerberosLogger.Save("            Errorr Message: " + result.KerberosTicket.ErrorMessage);
-                AADKerberosLogger.Save("                     Realm: " + result.KerberosTicket.Realm);
-                AADKerberosLogger.Save("    Service Principal Name: " + result.KerberosTicket.ServicePrincipalName);
-                AADKerberosLogger.Save("               Client Name: " + result.KerberosTicket.ClientName);
-                AADKerberosLogger.Save("     KerberosMessageBuffer: " + result.KerberosTicket.KerberosMessageBuffer);
+                AADKerberosLogger.Save("                Client Key: " + ticket.ClientKey);
+                AADKerberosLogger.Save("                  Key Type: " + ticket.KeyType);
+                AADKerberosLogger.Save("            Errorr Message: " + ticket.ErrorMessage);
+                AADKerberosLogger.Save("                     Realm: " + ticket.Realm);
+                AADKerberosLogger.Save("    Service Principal Name: " + ticket.ServicePrincipalName);
+                AADKerberosLogger.Save("               Client Name: " + ticket.ClientName);
+                AADKerberosLogger.Save("     KerberosMessageBuffer: " + ticket.KerberosMessageBuffer);
                 AADKerberosLogger.Save("}\n");
 
+                // shows detailed ticket information.
                 TicketDecoder decoder = new TicketDecoder();
-                decoder.ShowKrbCredTicket(result.KerberosTicket.KerberosMessageBuffer);
+                decoder.ShowKrbCredTicket(ticket.KerberosMessageBuffer);
             }
         }
 

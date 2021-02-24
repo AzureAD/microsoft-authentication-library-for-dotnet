@@ -24,10 +24,10 @@ namespace KerberosConsole
             var credPart = krbCred.Validate();
             Assert.IsNotNull(credPart);
 
-            Console.WriteLine("\nKRB-CRED Supplemental Ticket -----------------------------");
-            Console.WriteLine("  ProtocolVersionNumber: " + krbCred.ProtocolVersionNumber);
-            Console.WriteLine("  Message Type: " + krbCred.MessageType);
-            Console.WriteLine("  # of Tickets: " + krbCred.Tickets.Length);
+             AADKerberosLogger.Save("\nKRB-CRED Supplemental Ticket -----------------------------");
+             AADKerberosLogger.Save("  ProtocolVersionNumber: " + krbCred.ProtocolVersionNumber);
+             AADKerberosLogger.Save("  Message Type: " + krbCred.MessageType);
+             AADKerberosLogger.Save("  # of Tickets: " + krbCred.Tickets.Length);
 
             for (int i = 0; i < krbCred.Tickets.Length; i++)
             {
@@ -37,25 +37,25 @@ namespace KerberosConsole
                 var key = new byte[ticketInfo.Key.KeyValue.Length];
                 ticketInfo.Key.KeyValue.CopyTo(key);
 
-                Console.WriteLine("  Number: " + ticket.TicketNumber);
-                Console.WriteLine("  Realm: " + ticket.Realm);
-                Console.WriteLine("  SName: " + ticket.SName.FullyQualifiedName);
+                 AADKerberosLogger.Save("  Number: " + ticket.TicketNumber);
+                 AADKerberosLogger.Save("  Realm: " + ticket.Realm);
+                 AADKerberosLogger.Save("  SName: " + ticket.SName.FullyQualifiedName);
                 ShowEncryptedDataPart("EncryptedPart", ticket.EncryptedPart);
 
-                Console.WriteLine("\n  Ticket.Flags: " + ticketInfo.Flags);
-                Console.WriteLine("  Ticket.Realm: " + ticketInfo.Realm);
-                Console.WriteLine("  Ticket.PName: " + ticketInfo.PName.FullyQualifiedName);
-                Console.WriteLine("  Ticket.SRealm: " + ticketInfo.SRealm);
-                Console.WriteLine("  Ticket.SName: " + ticketInfo.SName.FullyQualifiedName);
-                Console.WriteLine("  Ticket.AuthTime: " + ticketInfo.AuthTime);
-                Console.WriteLine("  Ticket.StartTime: " + ticketInfo.StartTime);
-                Console.WriteLine("  Ticket.EndTime: " + ticketInfo.EndTime);
-                Console.WriteLine("  Ticket.RenewTill: " + ticketInfo.RenewTill);
+                 AADKerberosLogger.Save("\n  Ticket.Flags: " + ticketInfo.Flags);
+                 AADKerberosLogger.Save("  Ticket.Realm: " + ticketInfo.Realm);
+                 AADKerberosLogger.Save("  Ticket.PName: " + ticketInfo.PName.FullyQualifiedName);
+                 AADKerberosLogger.Save("  Ticket.SRealm: " + ticketInfo.SRealm);
+                 AADKerberosLogger.Save("  Ticket.SName: " + ticketInfo.SName.FullyQualifiedName);
+                 AADKerberosLogger.Save("  Ticket.AuthTime: " + ticketInfo.AuthTime);
+                 AADKerberosLogger.Save("  Ticket.StartTime: " + ticketInfo.StartTime);
+                 AADKerberosLogger.Save("  Ticket.EndTime: " + ticketInfo.EndTime);
+                 AADKerberosLogger.Save("  Ticket.RenewTill: " + ticketInfo.RenewTill);
                 ShowEncrytionKey("Ticket.Key", ticketInfo.Key);
 
                 if (ticketInfo.AuthorizationData == null)
                 {
-                    Console.WriteLine("  Ticket.AuthorizationData:");
+                     AADKerberosLogger.Save("  Ticket.AuthorizationData:");
                 }
                 else
                 { 
@@ -64,7 +64,7 @@ namespace KerberosConsole
                         ShowAuthorizationData("Ticket.AuthorizationData", ticketInfo.AuthorizationData[j]);
                     }
                 }
-                Console.WriteLine("");
+                 AADKerberosLogger.Save("");
             }
         }
 
@@ -77,14 +77,14 @@ namespace KerberosConsole
 
             var req = contextToken.KrbApReq;
             Assert.IsNotNull(req.Ticket);
-            Console.WriteLine("\nAP-REQ Cached Ticket----------------------------------------");
-            Console.WriteLine("  Protocol Version Number: " + req.ProtocolVersionNumber);
-            Console.WriteLine("  MessageType: " + req.MessageType);
-            Console.WriteLine("  ApOptions: " + req.ApOptions);
+             AADKerberosLogger.Save("\nAP-REQ Cached Ticket----------------------------------------");
+             AADKerberosLogger.Save("  Protocol Version Number: " + req.ProtocolVersionNumber);
+             AADKerberosLogger.Save("  MessageType: " + req.MessageType);
+             AADKerberosLogger.Save("  ApOptions: " + req.ApOptions);
 
-            Console.WriteLine("\n  Ticket.TicketNumber: " + req.Ticket.TicketNumber);
-            Console.WriteLine("  Ticket.Realm: " + req.Ticket.Realm);
-            Console.WriteLine("  Ticket.SName: " + req.Ticket.SName.FullyQualifiedName);
+             AADKerberosLogger.Save("\n  Ticket.TicketNumber: " + req.Ticket.TicketNumber);
+             AADKerberosLogger.Save("  Ticket.Realm: " + req.Ticket.Realm);
+             AADKerberosLogger.Save("  Ticket.SName: " + req.Ticket.SName.FullyQualifiedName);
             ShowEncryptedDataPart("Ticket.EncryptedPart", req.Ticket.EncryptedPart);
             ShowEncryptedDataPart("Ticket.Authenticator", req.Authenticator);
         }
@@ -93,14 +93,14 @@ namespace KerberosConsole
         {
             if (data == null)
             {
-                Console.WriteLine($"  {title}:");
+                 AADKerberosLogger.Save($"  {title}:");
             }
             else
             {
-                Console.WriteLine($"  {title}.EType: " + data.EType);
-                Console.WriteLine($"  {title}.KeyVersionNumber: " + data.KeyVersionNumber);
-                Console.WriteLine($"  {title}.Cipher.Length: " + data.Cipher.Length);
-                Console.WriteLine($"  {title}.Cipher.Value:\n{BitConverter.ToString(data.Cipher.ToArray())}");
+                 AADKerberosLogger.Save($"  {title}.EType: " + data.EType);
+                 AADKerberosLogger.Save($"  {title}.KeyVersionNumber: " + data.KeyVersionNumber);
+                 AADKerberosLogger.Save($"  {title}.Cipher.Length: " + data.Cipher.Length);
+                 AADKerberosLogger.Save($"  {title}.Cipher.Value:\n{BitConverter.ToString(data.Cipher.ToArray())}");
             }
         }
 
@@ -108,9 +108,9 @@ namespace KerberosConsole
         {
             if (auth != null)
             {
-                Console.WriteLine($"  {title}.Type: {auth.Type}");
-                Console.WriteLine($"  {title}.Data.Length: {auth.Data.Length}");
-                Console.WriteLine($"  {title}.Data.Value:\n{BitConverter.ToString(auth.Data.ToArray())}");
+                 AADKerberosLogger.Save($"  {title}.Type: {auth.Type}");
+                 AADKerberosLogger.Save($"  {title}.Data.Length: {auth.Data.Length}");
+                 AADKerberosLogger.Save($"  {title}.Data.Value:\n{BitConverter.ToString(auth.Data.ToArray())}");
             }
         }
 
@@ -118,14 +118,14 @@ namespace KerberosConsole
         {
             if (key == null)
             {
-                Console.WriteLine($"  {title}:");
+                 AADKerberosLogger.Save($"  {title}:");
             }
             else
             {
-                Console.WriteLine($"  {title}.Usage: {key.Usage}");
-                Console.WriteLine($"  {title}.EType: {key.EType}");
-                Console.WriteLine($"  {title}.KeyValue.Length: {key.KeyValue.Length}");
-                Console.WriteLine($"  {title}.KeyValue.Value:\n{BitConverter.ToString(key.KeyValue.ToArray())}");
+                 AADKerberosLogger.Save($"  {title}.Usage: {key.Usage}");
+                 AADKerberosLogger.Save($"  {title}.EType: {key.EType}");
+                 AADKerberosLogger.Save($"  {title}.KeyValue.Length: {key.KeyValue.Length}");
+                 AADKerberosLogger.Save($"  {title}.KeyValue.Value:\n{BitConverter.ToString(key.KeyValue.ToArray())}");
             }
         }
     }

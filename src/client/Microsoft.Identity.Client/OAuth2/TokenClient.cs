@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.OAuth2
             // Add Kerberos Ticket claims if there's valid service principal name in Configuration.
             // Kerberos Ticket claim is only allowed at token request due to security issue.
             // It should not be included for authorize request.
-            KerberosClaimManager.AddKerberosTicketClaim(_oAuth2Client, _requestParams);
+            KerberosTicketManager.AddKerberosTicketClaim(_oAuth2Client, _requestParams);
 
             foreach (var kvp in additionalBodyParameters)
             {

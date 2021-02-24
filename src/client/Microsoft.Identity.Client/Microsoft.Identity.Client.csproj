@@ -120,11 +120,7 @@
     <None Include="$(PathToMsalSources)\**\*.cs;$(PathToMsalSources)\**\*.xml;$(PathToMsalSources)\**\*.axml" Exclude="$(PathToMsalSources)\obj\**\*.*;$(PathToMsalSources)\bin\**\*.*" />
     <!-- Manually include the cs files -->
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
-    <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs;$(PathToMsalSources)\Kerberos\**\*.cs;$(PathToMsalSources)\Kerberos\Win32\**\*.*" />
-    <Compile Include="Kerberos\KerberosClaimManager.cs" />
-    <Compile Include="Kerberos\KerberosIdTokenParser.cs" />
-    <Compile Include="Kerberos\KerberosKeyTypes.cs" />
-    <Compile Include="Kerberos\KerberosSupplementalTicket.cs" />
+    <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs;$(PathToMsalSources)\Kerberos\*.cs;$(PathToMsalSources)\Kerberos\Win32\*.cs" />
 
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
@@ -273,7 +269,7 @@
 
   <!-- Configurations for Azure AD Kerberos. -->
   <ItemGroup Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-    <Compile Include="$(PathToMsalSources)\Kerberos\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Kerberos\Win32\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Kerberos\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Kerberos\Win32\*.cs" />
   </ItemGroup>
 </Project>

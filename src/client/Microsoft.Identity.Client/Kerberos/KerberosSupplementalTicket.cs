@@ -3,8 +3,6 @@
 
 using Microsoft.Identity.Json;
 
-using System;
-
 namespace Microsoft.Identity.Client.Kerberos
 {
     /// <summary>
@@ -76,44 +74,6 @@ namespace Microsoft.Identity.Client.Kerberos
         public override string ToString()
         {
             return $"[ Realm: {Realm}, ServicePrincipalName: {ServicePrincipalName}, ClientName: {ClientName}, KeyType: {KeyType} ]";
-        }
-
-        /// <summary>
-        /// Creates a  <see cref="KerberosSupplementalTicket"/> object from Kerberos Ticket Claim response string
-        /// parsed from Id Token.
-        /// </summary>
-        /// <param name="kerberosAsRep">Kerberos Ticket Claim response string parsed from id token.</param>
-        /// <returns>A <see cref="KerberosSupplementalTicket"/> object created from given Kerberos Ticket Claim response string.
-        /// Null, if error occurs.</returns>
-        internal static KerberosSupplementalTicket FromJson(string kerberosAsRep)
-        {
-            if (string.IsNullOrEmpty(kerberosAsRep))
-            {
-                return null;
-            }
-
-            return (KerberosSupplementalTicket)JsonConvert.DeserializeObject(
-                        kerberosAsRep,
-                        typeof(KerberosSupplementalTicket));
-        }
-
-        /// <summary>
-        /// Save current Kerberos Ticket to current user's Ticket Cache.
-        /// </summary>
-        internal static void SaveToCache(KerberosSupplementalTicket ticket)
-        {
-            if (ticket == null || ticket.KerberosMessageBuffer == null)
-            {
-                return;
-            }
-
-#if SUPPORT_KERBEROS
-            using (var cache = Win32.LsaInterop.Connect())
-            {
-                byte[] krbCred = Convert.FromBase64String(ticket.KerberosMessageBuffer);
-                cache.ImportCredential(krbCred);
-            }
-#endif
         }
     }
 }

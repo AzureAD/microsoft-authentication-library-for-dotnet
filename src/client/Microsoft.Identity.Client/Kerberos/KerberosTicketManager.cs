@@ -7,33 +7,34 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 
+using System;
 using System.Globalization;
 
 namespace Microsoft.Identity.Client.Kerberos
 {
     /// <summary>
-    /// Utility class to manage Kerberos Claims to get Kerberos Service Ticket.
+    /// Helper class to manage Kerberos Ticket features.
     /// </summary>
-    internal class KerberosClaimManager
+    public class KerberosTicketManager
     {
         internal const string KerberosClaimType = "xms_as_rep";
         internal const string IdTokenAsRepTemplate = @"{{""id_token"": {{ ""xms_as_rep"":{{""essential"":{0},""value"":""{1}""}} }} }}";
         internal const string AccessTokenAsRepTemplate = @"{{""access_token"": {{ ""xms_as_rep"":{{""essential"":{0},""value"":""{1}""}} }} }}";
 
         /// <summary>
-        /// Get <see cref="KerberosSupplementalTicket"/> object from received Json Web Token.
+        /// Creates a <see cref="KerberosSupplementalTicket"/> object from given JWT token string..
         /// </summary>
-        /// <param name="idToken">ID token with Json Web Token format.</param>
+        /// <param name="jwtToken">JWT token string.</param>
         /// <returns>A <see cref="KerberosSupplementalTicket"/> object if exists and parsed correctly. Null, otherwise.</returns>
-        internal static KerberosSupplementalTicket Parse(string idToken)
+        public static KerberosSupplementalTicket FromToken(string jwtToken)
         {
-            if (string.IsNullOrEmpty(idToken) || idToken.Length < 128)
+            if (string.IsNullOrEmpty(jwtToken) || jwtToken.Length < 128)
             {
                 // Token is empty or too short -ignore parsing.
                 return null;
             }
 
-            KerberosIdTokenParser jwt = KerberosIdTokenParser.Parse(idToken);
+            KerberosIdTokenParser jwt = KerberosIdTokenParser.Parse(jwtToken);
             if (jwt == null)
             {
                 return null;
@@ -45,13 +46,30 @@ namespace Microsoft.Identity.Client.Kerberos
                 return null;
             }
 
-            KerberosSupplementalTicket ticket = KerberosSupplementalTicket.FromJson(kerberosAsRep);
-            if (ticket != null)
+            return (KerberosSupplementalTicket)JsonConvert.DeserializeObject(
+                        kerberosAsRep,
+                        typeof(KerberosSupplementalTicket));
+        }
+
+        /// <summary>
+        /// Save current Kerberos Ticket to current user's Ticket Cache.
+        /// </summary>
+        public static bool SaveToCache(KerberosSupplementalTicket ticket)
+        {
+            if (ticket == null || ticket.KerberosMessageBuffer == null)
             {
-                KerberosSupplementalTicket.SaveToCache(ticket);
+                return false;
             }
 
-            return ticket;
+#if SUPPORT_KERBEROS
+            using (var cache = Win32.LsaInterop.Connect())
+            {
+                byte[] krbCred = Convert.FromBase64String(ticket.KerberosMessageBuffer);
+                cache.ImportCredential(krbCred);
+                return true;
+            }
+#endif
+            return false;
         }
 
         /// <summary>
