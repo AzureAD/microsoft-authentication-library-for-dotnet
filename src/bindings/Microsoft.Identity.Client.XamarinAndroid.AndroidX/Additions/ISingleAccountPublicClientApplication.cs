@@ -1,9 +1,10 @@
 ﻿using System;
 using Android.Runtime;
 
+/*
 namespace Com.Microsoft.Identity.Client
 {
-
+	
 	public partial interface ISingleAccountPublicClientApplication
 	{
 		// Metadata.xml XPath method reference: path="/api/package[@name='com.microsoft.identity.client']/interface[@name='ISingleAccountPublicClientApplication']/method[@name='signIn' and count(parameter)=4 and parameter[1][@type='android.app.Activity'] and parameter[2][@type='java.lang.String'] and parameter[3][@type='java.lang.String[]'] and parameter[4][@type='com.microsoft.identity.client.AuthenticationCallback']]"
@@ -110,3 +111,4 @@ namespace Com.Microsoft.Identity.Client
 		}
 	}
 }
+*/

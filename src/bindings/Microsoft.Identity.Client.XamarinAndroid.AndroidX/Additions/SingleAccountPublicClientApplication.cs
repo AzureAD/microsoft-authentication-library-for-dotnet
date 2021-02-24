@@ -2,12 +2,12 @@
 using Android.Runtime;
 using Java.Interop;
 
+/*
 namespace Com.Microsoft.Identity.Client
 {
-
-    // Metadata.xml XPath class reference: path="/api/package[@name='com.microsoft.identity.client']/class[@name='PublicClientApplication']"
-    // [global::Android.Runtime.Register("com/microsoft/identity/client/PublicClientApplication", DoNotGenerateAcw = true)]
-    public partial class SingleAccountPublicClientApplication
+	// Metadata.xml XPath class reference: path="/api/package[@name='com.microsoft.identity.client']/class[@name='PublicClientApplication']"
+	// [global::Android.Runtime.Register("com/microsoft/identity/client/PublicClientApplication", DoNotGenerateAcw = true)]
+	public partial class SingleAccountPublicClientApplication
 	// : global::Java.Lang.Object, global::Com.Microsoft.Identity.Client.IPublicClientApplication, global::Com.Microsoft.Identity.Client.ITokenShare
 	{
 
@@ -126,3 +126,4 @@ namespace Com.Microsoft.Identity.Client
 	}
 
 }
+*/
