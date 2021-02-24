@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Assert
             Assert.IsTrue(webUi is WebView2WebUi);
         }
-
+#if DESKTOP
         [TestMethod]
         public void DefaultEmbedded_Legacy()
         {
@@ -66,8 +66,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                     _requestContext);
 
             // Assert
-            Assert.IsTrue(webUi is WebView2WebUi);
+            Assert.IsTrue(webUi is InteractiveWebUI);
         }
+#endif
 
         [TestMethod]
         public void DefaultEmbedded_WebView2NotAvailable()
