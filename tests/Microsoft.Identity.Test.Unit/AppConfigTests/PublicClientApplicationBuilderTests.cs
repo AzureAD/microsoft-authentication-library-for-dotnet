@@ -500,8 +500,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(ex is InvalidOperationException);
-                Assert.AreEqual(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments, ex.Message);
+                Assert.IsTrue(ex is ArgumentException);
+                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.AuthorityUriInvalidPath));
             }
         }
 

@@ -164,13 +164,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void MalformedAuthorityInitTest()
         {
             PublicClientApplication publicClient = null;
-            var expectedAuthority = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/", TestConstants.TenantId, "/");
+            var expectedAuthority = string.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/", TestConstants.TenantId, "/");
 
             //Check bad URI format
             var host = String.Concat("test", TestConstants.ProductionPrefNetworkEnvironment, "/");
             var fullAuthority = String.Concat(host, TestConstants.TenantId);
 
-            AssertException.Throws<UriFormatException>(() =>
+            AssertException.Throws<ArgumentException>(() =>
             {
                 publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                              .WithAuthority(fullAuthority)
@@ -178,8 +178,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             });
 
             //Check empty path segments
-            host = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/");
-            fullAuthority = String.Concat(host, TestConstants.TenantId, "//");
+            host = string.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/");
+            fullAuthority = string.Concat(host, TestConstants.TenantId, "//");
 
             publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(host, new Guid(TestConstants.TenantId))
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
 
             //Check additional path segments
-            fullAuthority = String.Concat(host, TestConstants.TenantId, "/ABCD!@#$TEST//");
+            fullAuthority = string.Concat(host, TestConstants.TenantId, "/ABCD!@#$TEST//");
 
             publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(new Uri(fullAuthority))
