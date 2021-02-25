@@ -19,6 +19,9 @@ steps:
     msbuildArgs: '/t:restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
+    feedsToUse: 'config'
+    nugetConfigPath: 'NuGet.config'
+    externalFeedCredentials: 'Internal Analyzers'
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
