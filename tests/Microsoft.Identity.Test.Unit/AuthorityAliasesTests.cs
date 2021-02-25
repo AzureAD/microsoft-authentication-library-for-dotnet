@@ -53,10 +53,10 @@ namespace Microsoft.Identity.Test.Unit
                           .WithDebugLoggingCallback()
                           .BuildConcrete();
 
-                // mock webUi authorization
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"), null, TestConstants.ProductionPrefNetworkEnvironment);
+                app.ServiceBundle.ConfigureMockWebUI(
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"),
+                    null, 
+                    TestConstants.ProductionPrefNetworkEnvironment);
 
                 // mock token request
                 httpManager.AddMockHandler(new MockHttpMessageHandler

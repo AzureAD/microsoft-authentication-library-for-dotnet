@@ -141,8 +141,8 @@ namespace Microsoft.Identity.Test.Unit
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                
+                app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 //Initiates PKeyAuth challenge which will trigger an additional request sent to AAD to satisfy the PKeyAuth challenge
@@ -186,8 +186,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 var pca = builder.BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    pca.ServiceBundle.PlatformProxy,
+                pca.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
 
                 //Initiates PKeyAuth challenge which will trigger an additional request sent to AAD to satisfy the PKeyAuth challenge

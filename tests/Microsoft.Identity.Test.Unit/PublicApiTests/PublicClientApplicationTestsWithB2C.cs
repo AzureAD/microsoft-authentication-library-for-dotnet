@@ -35,9 +35,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CLoginAuthority);
 
@@ -64,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                    app.ServiceBundle,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CAuthority);
@@ -92,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                    app.ServiceBundle,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CLoginAuthority);
@@ -120,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                    app.ServiceBundle,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CCustomDomain);
@@ -184,7 +182,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     "?error=access_denied&error_description=AADB2C90091%3a+The+user+has+cancelled+entering+self-asserted+information.")
                 };
 
-                MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
+                MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle, ui);
 
                 try
                 {
@@ -238,7 +236,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                    app.ServiceBundle,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 // Arrange 1 - interactive call with 0 scopes
@@ -289,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 MockResult = AuthorizationResult.FromUri(authority + "?code=some-code")
             };
 
-            MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
+            MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle, ui);
             harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority);
 
             var result = app

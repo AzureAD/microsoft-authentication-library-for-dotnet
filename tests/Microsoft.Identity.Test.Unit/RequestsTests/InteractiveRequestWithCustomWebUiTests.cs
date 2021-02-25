@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 };
 
                 var ui = new CustomWebUiHandler(customWebUi);
-                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, ui);
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle, ui);
 
                 var request = new InteractiveRequest(
                     parameters,

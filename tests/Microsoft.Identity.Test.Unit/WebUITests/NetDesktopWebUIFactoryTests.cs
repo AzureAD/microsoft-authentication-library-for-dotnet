@@ -2,12 +2,8 @@
 // Licensed under the MIT License.
 #if DESKTOP
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
 using Microsoft.Identity.Client.Platforms.net45;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
@@ -27,11 +23,11 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public void Net45Factory_DefaultEmbedded()
         {
-            // Arrange
-            _parent.UseEmbeddedWebview = true;
-
             // Act
-            var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, _requestContext);
+            var webUi = _webUIFactory.CreateAuthenticationDialog(
+                _parent, 
+                Client.ApiConfig.Parameters.WebViewPreference.Embedded,
+                _requestContext);
 
             // Assert
             Assert.IsTrue(webUi is InteractiveWebUI);
@@ -44,7 +40,10 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             _parent.UseHiddenBrowser = true;
 
             // Act
-            var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, _requestContext);
+            var webUi = _webUIFactory.CreateAuthenticationDialog(
+                _parent, 
+                Client.ApiConfig.Parameters.WebViewPreference.NotSpecified,
+                _requestContext);
 
             // Assert
             Assert.IsTrue(webUi is SilentWebUI);
@@ -53,14 +52,15 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public void Net45Factory_SystemWebUi()
         {
-            // Arrange
-            _parent.UseEmbeddedWebview = false;
 
             // Act
-            var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, _requestContext);
-
+            var webUi = _webUIFactory.CreateAuthenticationDialog(
+                           _parent,
+                           Client.ApiConfig.Parameters.WebViewPreference.System,
+                           _requestContext);
             // Assert
             Assert.IsTrue(webUi is DefaultOsBrowserWebUi);
+            Assert.IsTrue(_webUIFactory.IsSystemWebViewAvailable);
         }
     }
 }

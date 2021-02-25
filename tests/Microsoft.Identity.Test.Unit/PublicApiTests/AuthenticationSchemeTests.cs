@@ -47,9 +47,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
@@ -82,7 +81,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // silent call with no key id (i.e. BearerScheme) - the existing AT will not be returned
                 silentResult = await RunSilentCallAsync(
-                    httpManager, 
+                    httpManager,
                     app,
                     scheme: null,
                     expectRtRefresh: true).ConfigureAwait(false);
@@ -108,17 +107,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 // Act
-               var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() => app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .WithAuthenticationScheme(authScheme)
-                    .ExecuteAsync()).ConfigureAwait(false);
+                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() => app
+                     .AcquireTokenInteractive(TestConstants.s_scope)
+                     .WithAuthenticationScheme(authScheme)
+                     .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.TokenTypeMismatch, ex.ErrorCode);
             }
@@ -145,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private static async Task<AuthenticationResult> RunSilentCallAsync(
             MockHttpManager httpManager,
             PublicClientApplication app,
-            IAuthenticationScheme scheme, 
+            IAuthenticationScheme scheme,
             bool expectRtRefresh)
         {
             if (expectRtRefresh)
@@ -164,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             return await builder
                 .ExecuteAsync().ConfigureAwait(false);
 
-           
+
         }
     }
 }

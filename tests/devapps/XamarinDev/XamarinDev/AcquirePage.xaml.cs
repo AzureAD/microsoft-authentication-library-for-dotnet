@@ -139,7 +139,6 @@ namespace XamarinDev
         private async void OnAcquireSilentlyClickedAsync(object sender, EventArgs e)
         {
             acquireResponseLabel.Text = "Starting silent token acquisition";
-            await Task.Delay(700).ConfigureAwait(true);
 
             try
             {

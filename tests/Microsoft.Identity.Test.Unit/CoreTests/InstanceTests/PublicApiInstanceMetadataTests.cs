@@ -36,8 +36,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                
+                app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 // the rest of the communication with AAD happens on the preferred_network alias, not on login.windows.net
@@ -106,8 +106,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                
+                app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 // the rest of the communication with AAD happens on the preferred_network alias, not on login.windows.net

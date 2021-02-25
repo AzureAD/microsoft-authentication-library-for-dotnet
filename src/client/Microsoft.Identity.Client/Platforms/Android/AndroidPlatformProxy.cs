@@ -29,14 +29,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
     internal class AndroidPlatformProxy : AbstractPlatformProxy
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
-        private const string ChromePackage = "com.android.chrome";
-        // this is used to check if anything can open custom tabs.
-        // Must use the classic support. Leaving the reference androidx intent
-        //#if __ANDROID_29__
-        //        private const string CustomTabService = "androidx.browser.customtabs.action.CustomTabsService";
-        //#else
-        private const string CustomTabService = "android.support.customtabs.action.CustomTabsService";
-        //#endif
         public AndroidPlatformProxy(ICoreLogger logger) : base(logger)
         {
         }
@@ -162,55 +154,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
         protected override IFeatureFlags CreateFeatureFlags() => new AndroidFeatureFlags();
 
-        public override bool IsSystemWebViewAvailable
-        {
-            get
-            {
-                bool isBrowserWithCustomTabSupportAvailable = IsBrowserWithCustomTabSupportAvailable();
-                return (isBrowserWithCustomTabSupportAvailable || IsChromeEnabled()) &&
-                       isBrowserWithCustomTabSupportAvailable;
-            }
-        }
-
-        private static bool IsBrowserWithCustomTabSupportAvailable()
-        {
-            Intent customTabServiceIntent = new Intent(CustomTabService);
-
-            IEnumerable<ResolveInfo> resolveInfoListWithCustomTabs =
-                Application.Context.PackageManager.QueryIntentServices(
-                    customTabServiceIntent, PackageInfoFlags.MatchAll);
-
-            // queryIntentServices could return null or an empty list if no matching service existed.
-            if (resolveInfoListWithCustomTabs == null || !resolveInfoListWithCustomTabs.Any())
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool IsChromeEnabled()
-        {
-            try
-            {
-                ApplicationInfo applicationInfo = Application.Context.PackageManager.GetApplicationInfo(ChromePackage, 0);
-
-                // Chrome is difficult to uninstall on an Android device. Most users will disable it, but the package will still
-                // show up, therefore need to check application.Enabled is false
-                return applicationInfo.Enabled;
-            }
-            catch (PackageManager.NameNotFoundException)
-            {
-                // In case Chrome is actually uninstalled, GetApplicationInfo will throw
-                return false;
-            }
-        }
-
-        public override bool UseEmbeddedWebViewDefault => false;
+       
 
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
-            return new AndroidBroker(uiParent, Logger);
+            return AndroidBrokerFactory.CreateBroker(uiParent, Logger);
         }
 
         public override bool CanBrokerSupportSilentAuth()

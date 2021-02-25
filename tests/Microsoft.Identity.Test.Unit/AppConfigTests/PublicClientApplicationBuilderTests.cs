@@ -50,6 +50,30 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        public void ClientIdMustBeAGuid()
+        {
+            var ex = AssertException.Throws<MsalClientException>(
+                () => PublicClientApplicationBuilder.Create("http://my.app")
+                        .WithAuthority(TestConstants.AadAuthorityWithTestTenantId)
+                        .Build());
+
+            Assert.AreEqual(MsalError.ClientIdMustBeAGuid, ex.ErrorCode);
+
+            ex = AssertException.Throws<MsalClientException>(
+              () => PublicClientApplicationBuilder.Create("http://my.app")
+                      .WithAuthority(TestConstants.B2CAuthority)
+                      .Build());
+
+            Assert.AreEqual(MsalError.ClientIdMustBeAGuid, ex.ErrorCode);
+
+            // ADFS does not have this constraint
+            PublicClientApplicationBuilder.Create("http://my.app")
+                        .WithAuthority(new Uri(TestConstants.ADFSAuthority))
+                        .Build();
+
+        }
+
+        [TestMethod]
         public void TestConstructor_ClientIdOverride()
         {
             const string ClientId = "7b94cb0c-3744-4e6e-908b-ae10368b765d";
@@ -500,8 +524,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(ex is InvalidOperationException);
-                Assert.AreEqual(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments, ex.Message);
+                Assert.IsTrue(ex is ArgumentException);
+                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.AuthorityUriInvalidPath));
             }
         }
 

@@ -4,7 +4,7 @@
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     internal class InteractiveWebUI : WebUI
     {
@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             AuthorizationResult result;
 
-            using (_dialog = new WindowsFormsWebAuthenticationDialog(OwnerWindow) {RequestContext = RequestContext})
+            using (_dialog = new WindowsFormsWebAuthenticationDialog(OwnerWindow) { RequestContext = RequestContext })
             {
                 result = _dialog.AuthenticateAAD(RequestUri, CallbackUri);
             }
