@@ -181,8 +181,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                           .WithTelemetry(new TraceTelemetryConfig())
                                           .BuildConcrete();
 
-            MsalMockHelpers.ConfigureMockWebUI(
-                app.ServiceBundle.PlatformProxy,
+            app.ServiceBundle.ConfigureMockWebUI(
                 AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
             harness.HttpManager.AddMockHandler(new MockHttpMessageHandler

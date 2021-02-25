@@ -146,9 +146,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                var mockUi = MsalMockHelpers.ConfigureMockWebUI(
-                     app.ServiceBundle.PlatformProxy,
-                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                var mockUi = 
+                     app.ServiceBundle.ConfigureMockWebUI(
+                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 mockUi.QueryParamsToValidate = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
 
@@ -180,9 +180,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                               .WithClientCapabilities(TestConstants.ClientCapabilities)
                               .BuildConcrete();
 
-                var mockUi = MsalMockHelpers.ConfigureMockWebUI(
-                     app.ServiceBundle.PlatformProxy,
-                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                var mockUi = 
+                     app.ServiceBundle.ConfigureMockWebUI(
+                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 mockUi.QueryParamsToValidate = new Dictionary<string, string> { {
                         OAuth2Parameter.Claims,
@@ -215,9 +215,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                                 .WithTelemetry(new TraceTelemetryConfig())
                                 .BuildConcrete();
 
-                var mockUi = MsalMockHelpers.ConfigureMockWebUI(
-                     app.ServiceBundle.PlatformProxy,
-                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                var mockUi = 
+                     app.ServiceBundle.ConfigureMockWebUI(
+                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 mockUi.QueryParamsToValidate = new Dictionary<string, string> {
                     { OAuth2Parameter.Claims,

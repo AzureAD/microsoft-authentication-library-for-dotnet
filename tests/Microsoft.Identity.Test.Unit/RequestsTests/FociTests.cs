@@ -343,8 +343,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
             }
 
-            MsalMockHelpers.ConfigureMockWebUI(
-                app.ServiceBundle.PlatformProxy,
+            app.ServiceBundle.ConfigureMockWebUI(
                 AuthorizationResult.FromUri(TestConstants.B2CLoginAuthority + "?code=some-code"));
 
             _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(

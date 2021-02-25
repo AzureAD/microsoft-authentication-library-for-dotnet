@@ -45,6 +45,7 @@ namespace Microsoft.Identity.Client
         public bool IsBrokerEnabled { get; internal set; }
 
         public Func<CoreUIParent, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
+        public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }
 
         public ITelemetryConfig TelemetryConfig { get; internal set; }
 

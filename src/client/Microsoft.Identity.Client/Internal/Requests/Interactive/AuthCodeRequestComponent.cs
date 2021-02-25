@@ -262,10 +262,6 @@ namespace Microsoft.Identity.Client.Internal
 
             CoreUIParent coreUiParent = _interactiveParameters.UiParent;
 
-            coreUiParent.UseEmbeddedWebview = GetUseEmbeddedWebview(
-                _interactiveParameters.UseEmbeddedWebView,
-                _serviceBundle.PlatformProxy.UseEmbeddedWebViewDefault);
-
 #if WINDOWS_APP || DESKTOP
             // hidden web view can be used in both WinRT and desktop applications.
             coreUiParent.UseHiddenBrowser = _interactiveParameters.Prompt.Equals(Prompt.Never);
@@ -273,24 +269,11 @@ namespace Microsoft.Identity.Client.Internal
             coreUiParent.UseCorporateNetwork = _serviceBundle.Config.UseCorporateNetwork;
 #endif
 #endif            
-            return _serviceBundle.PlatformProxy.GetWebUiFactory()
-                .CreateAuthenticationDialog(coreUiParent, _requestParams.RequestContext);
+            return _serviceBundle.PlatformProxy.GetWebUiFactory(_requestParams.AppConfig)
+                .CreateAuthenticationDialog(
+                coreUiParent,
+                _interactiveParameters.UseEmbeddedWebView,
+                _requestParams.RequestContext);
         }
-
-        private static bool GetUseEmbeddedWebview(WebViewPreference userPreference, bool defaultValue)
-        {
-            switch (userPreference)
-            {
-                case WebViewPreference.NotSpecified:
-                    return defaultValue;
-                case WebViewPreference.Embedded:
-                    return true;
-                case WebViewPreference.System:
-                    return false;
-                default:
-                    throw new NotImplementedException("Unknown option");
-            }
-        }
-
     }
 }

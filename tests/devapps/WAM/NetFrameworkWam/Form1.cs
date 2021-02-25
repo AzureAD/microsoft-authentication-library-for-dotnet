@@ -72,10 +72,11 @@ namespace NetDesktopWinForms
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
                 .WithExperimentalFeatures(true)
-                .WithWindowsBroker(this.useBrokerChk.Checked)
+                .WithDesktopFeatures()
+                .WithBroker(this.useBrokerChk.Checked)
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
-                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
+                //.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
                 .WithMsaPassthrough(msaPt)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();

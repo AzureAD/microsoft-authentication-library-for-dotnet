@@ -266,8 +266,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 //Ensure that the PublicClientApplication init does not remove the port from the authority
                 Assert.AreEqual(customPortAuthority, app.Authority);
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                
+                app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(customPortAuthority);

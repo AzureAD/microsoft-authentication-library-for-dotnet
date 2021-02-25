@@ -58,7 +58,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool IsSystemWebViewAvailable
         {
-            get => ServiceBundle.PlatformProxy.IsSystemWebViewAvailable;
+            get
+            {
+                return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsSystemWebViewAvailable;
+            }
         }
 
         /// <summary>

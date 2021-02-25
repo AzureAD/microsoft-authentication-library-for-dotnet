@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MockResult = AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code")
                 };
 
-                MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
+                app.ServiceBundle.ConfigureMockWebUI(ui);
 
                 try
                 {
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code&state=mismatched")
                 };
 
-                MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
+                app.ServiceBundle.ConfigureMockWebUI(ui);
 
                 try
                 {
@@ -184,9 +184,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -226,9 +224,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
@@ -252,9 +248,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
 
                 // repeat interactive call and pass in the same user
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.AuthorityCommonTenant,
@@ -316,9 +310,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
@@ -335,9 +327,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.Utid, result.TenantId);
 
                 // repeat interactive call and pass in the same user
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -382,9 +372,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
@@ -408,8 +396,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 };
 
                 // repeat interactive call and pass in the same user
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                
+                app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"),
                     dict);
 
@@ -467,9 +455,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
@@ -486,9 +472,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // TODO: Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
 
                 // repeat interactive call and pass in the same user
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -533,9 +517,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 // add mock response bigger than 1MB for Http Client
                 httpManager.AddFailingRequest(new InvalidOperationException());
@@ -561,15 +543,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 // repeat interactive call and pass in the same user
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    new MockWebUI()
-                    {
-                        ExceptionToThrow = new MsalClientException(
-                            MsalError.AuthenticationUiFailedError,
-                            "Failed to invoke webview",
-                            new InvalidOperationException("some-inner-Exception"))
-                    });
+              
+                    app.ServiceBundle.ConfigureMockWebUI(
+                        new MockWebUI()
+                        {
+                            ExceptionToThrow = new MsalClientException(
+                                MsalError.AuthenticationUiFailedError,
+                                "Failed to invoke webview",
+                                new InvalidOperationException("some-inner-Exception"))
+                        });
 
                 try
                 {
@@ -692,7 +674,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MockResult = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel)
                 };
 
-                MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
+                app.ServiceBundle.ConfigureMockWebUI(ui);
+                ;
 
                 try
                 {
@@ -740,7 +723,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?error=access_denied")
                 };
 
-                MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
+                app.ServiceBundle.ConfigureMockWebUI(ui);
+                ;
 
                 try
                 {
@@ -919,9 +903,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
@@ -980,9 +962,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                                app.ServiceBundle.PlatformProxy,
-                                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 MockHttpManagerExtensions.AddAdfs2019MockHandler(httpManager);
 
@@ -1023,9 +1003,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                                app.ServiceBundle.PlatformProxy,
-                                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 MockHttpManagerExtensions.AddAdfs2019MockHandler(httpManager);
 
@@ -1109,9 +1087,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                app.ServiceBundle.ConfigureMockWebUI();
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 

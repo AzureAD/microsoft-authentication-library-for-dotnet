@@ -199,19 +199,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
 #endif
 
-#if NET_CORE 
-        [TestMethod]
-        public async Task TestAcquireTokenInteractive_EmbeddedNetCore_Async()
-        {
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
-                 AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
-                                                         .WithUseEmbeddedWebView(true)
-                                                         .ExecuteAsync()
-                                                        ).ConfigureAwait(false);
-            Assert.AreEqual(MsalError.WebviewUnavailable, ex.ErrorCode);
-        }
-#endif
-
         [TestMethod]
         public async Task TestAcquireTokenInteractive_Options_Async()
         {

@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     internal class SilentWebUI : WebUI, IDisposable
     {

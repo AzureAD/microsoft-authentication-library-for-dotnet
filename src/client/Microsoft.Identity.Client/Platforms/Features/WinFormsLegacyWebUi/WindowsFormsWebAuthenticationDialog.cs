@@ -5,9 +5,10 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Platforms.Features.Win32;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     /// <summary>
     /// The browser dialog used for user authentication
@@ -85,8 +86,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         private void SetBrowserZoom()
         {
-            int windowsZoomPercent = DpiHelper.ZoomPercent;
-            if (NativeWrapper.NativeMethods.IsProcessDPIAware() && 100 != windowsZoomPercent && !_zoomed)
+            int windowsZoomPercent = NativeDpiHelper.ZoomPercent;
+            if (NativeDpiHelper.IsProcessDPIAware() && 100 != windowsZoomPercent && !_zoomed)
             {
                 // There is a bug in some versions of the IE browser control that causes it to
                 // ignore scaling unless it is changed.

@@ -221,7 +221,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
             return PoPProviderFactory.GetOrCreateProvider();
         }
-        public override bool UseEmbeddedWebViewDefault => false;
 
 
         /// <summary>

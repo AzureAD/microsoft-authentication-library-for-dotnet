@@ -3,7 +3,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     internal partial class CustomWebBrowser
     {

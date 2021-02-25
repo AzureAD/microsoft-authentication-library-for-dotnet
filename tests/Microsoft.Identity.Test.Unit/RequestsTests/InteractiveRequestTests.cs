@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code"),
                     QueryParamsToValidate = TestConstants.ExtraQueryParameters
                 };
-                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, ui);
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle, ui);
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code")
                 };
 
-                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, ui);
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle, ui);
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired),
                 };
-                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, webUi);
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle, webUi);
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     MockResult = AuthorizationResult.FromUri(
                         TestConstants.AuthorityHomeTenant + "?error=invalid_request&error_description=some error description")
                 };
-                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, webUi);
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle, webUi);
 
                 request = new InteractiveRequest(
                     parameters,
@@ -303,7 +303,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     // error code and error description is empty string (not null)
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?error=some_error&error_description= "),
                 };
-                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, webUi);
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle, webUi);
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var request = new InteractiveRequest(
                     parameters,
                     interactiveParameters);
-                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, new MockWebUI());
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle, new MockWebUI());
 
                 try
                 {

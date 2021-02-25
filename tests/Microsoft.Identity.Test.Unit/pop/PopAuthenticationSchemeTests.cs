@@ -118,11 +118,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                                 .WithHttpManager(harness.HttpManager)
                                 .WithExperimentalFeatures()
                                 .WithClientSecret("some-secret")
-                                .BuildConcrete();
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                                .BuildConcrete();             
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.AuthorityCommonTenant,

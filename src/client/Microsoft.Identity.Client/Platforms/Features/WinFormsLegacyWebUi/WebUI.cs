@@ -7,9 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.Win32;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     internal abstract class WebUI : IWebUI
     {
@@ -38,14 +39,14 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 try
                 {
                     authorizationResult = Authenticate(authorizationUri, redirectUri);
-                   ((TaskCompletionSource<object>)tcs).TrySetResult(null);
+                    ((TaskCompletionSource<object>)tcs).TrySetResult(null);
                 }
                 catch (Exception e)
                 {
                     // Need to catch the exception here and put on the TCS which is the task we are waiting on so that
                     // the exception comming out of Authenticate is correctly thrown.
                     ((TaskCompletionSource<object>)tcs).TrySetException(e);
-               }
+                }
             });
 
             // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.

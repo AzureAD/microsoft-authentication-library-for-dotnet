@@ -74,11 +74,11 @@ namespace NetCoreWinFormsWAM
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
                 .WithExperimentalFeatures(true)
-#if NETCOREAPP3_1
-                .WithWindowsBroker(this.useBrokerChk.Checked)
-#else
-                .WithBroker(this.useBrokerChk.Checked)
+#if !NET5_0
+                .WithDesktopFeatures()
 #endif
+                .WithBroker(this.useBrokerChk.Checked)
+
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
                 .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")                
@@ -252,7 +252,7 @@ namespace NetCoreWinFormsWAM
             AuthenticationResult result = null;
             var scopes = GetScopes();
 
-            var builder = pca.AcquireTokenInteractive(scopes)
+            var builder = pca.AcquireTokenInteractive(scopes)                
                 .WithParentActivityOrWindow(this.Handle);
 
 
@@ -280,7 +280,7 @@ namespace NetCoreWinFormsWAM
 
 
             await Task.Delay(500).ConfigureAwait(false);
-            result = await builder.ExecuteAsync().ConfigureAwait(false);
+            result = await builder.ExecuteAsync().ConfigureAwait(false); 
 
 
             return result;
