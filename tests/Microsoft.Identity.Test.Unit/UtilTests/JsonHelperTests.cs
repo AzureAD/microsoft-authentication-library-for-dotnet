@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         {
             ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid", UniqueTenantIdentifier = "some_tid" };
 
-            string actualJson = JsonHelper.SerializeToJson(clientInfo);
+            string actualJson = JsonHelper.SerializeNew(clientInfo);
             string expectedJson = @"{
                                        ""uid"": ""some_uid"",
                                        ""utid"": ""some_tid""
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         {
             ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid" };
 
-            string actualJson = JsonHelper.SerializeToJson(clientInfo);
+            string actualJson = JsonHelper.SerializeNew(clientInfo);
             string expectedJson = @"{
                                        ""uid"": ""some_uid"",
                                        ""utid"": null
@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         public void IJsonSerializable_OAuth2ResponseBase_Test()
         {
             // Arrange
-            OAuth2ResponseBase toSerialize = SetOAuth2ResponseBaseProperties(new OAuth2ResponseBase());
+            OAuth2ResponseBase toSerialize = InitOAuth2ResponseBase(new OAuth2ResponseBase());
 
             // Act - serialize
             string jsonSerializedLegacy = JsonHelper.SerializeToJson<OAuth2ResponseBase>(toSerialize);
@@ -230,14 +230,14 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             OAuth2ResponseBase objectDeserializedNew = JsonHelper.DeserializeNew<OAuth2ResponseBase>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertOAuth2ResponseBaseProperties(objectDeserializedLegacy, objectDeserializedNew);
+            AssertOAuth2ResponseBase(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_InstanceDiscoveryMetadataEntry_Test()
         {
             // Arrange
-            InstanceDiscoveryMetadataEntry toSerialize = SetInstanceDiscoveryMetadataEntryProperties(new InstanceDiscoveryMetadataEntry());
+            InstanceDiscoveryMetadataEntry toSerialize = InitInstanceDiscoveryMetadataEntry(new InstanceDiscoveryMetadataEntry());
 
             // Act - serialize
             string jsonSerializedLegacy = JsonHelper.SerializeToJson<InstanceDiscoveryMetadataEntry>(toSerialize);
@@ -251,14 +251,14 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             InstanceDiscoveryMetadataEntry objectDeserializedNew = JsonHelper.DeserializeNew<InstanceDiscoveryMetadataEntry>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertInstanceDiscoveryMetadataEntryProperties(objectDeserializedLegacy, objectDeserializedNew);
+            AssertInstanceDiscoveryMetadataEntry(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_InstanceDiscoveryResponse_Test()
         {
             // Arrange
-            InstanceDiscoveryResponse toSerialize = SetInstanceDiscoveryResponseProperties(new InstanceDiscoveryResponse());
+            InstanceDiscoveryResponse toSerialize = InitInstanceDiscoveryResponse(new InstanceDiscoveryResponse());
 
             // Act - serialize
             string jsonSerializedLegacy = JsonHelper.SerializeToJson<InstanceDiscoveryResponse>(toSerialize);
@@ -272,14 +272,14 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             InstanceDiscoveryResponse objectDeserializedNew = JsonHelper.DeserializeNew<InstanceDiscoveryResponse>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertInstanceDiscoveryResponseProperties(objectDeserializedLegacy, objectDeserializedNew);
+            AssertInstanceDiscoveryResponse(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_DeviceCodeResponse_Test()
         {
             // Arrange
-            DeviceCodeResponse toSerialize = SetDeviceCodeResponseProperties(new DeviceCodeResponse());
+            DeviceCodeResponse toSerialize = InitDeviceCodeResponse(new DeviceCodeResponse());
 
             // Act - serialize
             string jsonSerializedLegacy = JsonHelper.SerializeToJson<DeviceCodeResponse>(toSerialize);
@@ -293,13 +293,13 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             DeviceCodeResponse objectDeserializedNew = JsonHelper.DeserializeNew<DeviceCodeResponse>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertDeviceCodeResponseProperties(objectDeserializedLegacy, objectDeserializedNew);
+            AssertDeviceCodeResponse(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_MsalTokenResponse_Test()
         {
-            MsalTokenResponse toSerialize = SetMsalTokenResponseProperties(new MsalTokenResponse());
+            MsalTokenResponse toSerialize = InitMsalTokenResponse(new MsalTokenResponse());
 
             // Act - serialize
             string jsonSerializedLegacy = JsonHelper.SerializeToJson<MsalTokenResponse>(toSerialize);
@@ -313,14 +313,14 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             MsalTokenResponse objectDeserializedNew = JsonHelper.DeserializeNew<MsalTokenResponse>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertMsalTokenResponseProperties(objectDeserializedLegacy, objectDeserializedNew);
+            AssertMsalTokenResponse(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_LinksList_Test()
         {
             // Arrange
-            LinksList toSerialize = SetLinksListProperties(new LinksList());
+            LinksList toSerialize = InitLinksList(new LinksList());
 
             // Act - serialize
             string jsonSerializedLegacy = JsonHelper.SerializeToJson<LinksList>(toSerialize);
@@ -334,14 +334,14 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             LinksList objectDeserializedNew = JsonHelper.DeserializeNew<LinksList>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertLinksListProperties(objectDeserializedLegacy, objectDeserializedNew);
+            AssertLinksList(objectDeserializedLegacy, objectDeserializedNew);
         }
 
         [TestMethod]
         public void IJsonSerializable_AdfsWebFingerResponse_Test()
         {
             // Arrange
-            AdfsWebFingerResponse toSerialize = SetAdfsWebFingerResponseProperties(new AdfsWebFingerResponse());
+            AdfsWebFingerResponse toSerialize = InitAdfsWebFingerResponse(new AdfsWebFingerResponse());
 
             // Act - serialize
             string jsonSerializedLegacy = JsonHelper.SerializeToJson<AdfsWebFingerResponse>(toSerialize);
@@ -355,10 +355,31 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             AdfsWebFingerResponse objectDeserializedNew = JsonHelper.DeserializeNew<AdfsWebFingerResponse>(jsonSerializedLegacy);
 
             // Assert deserialization
-            AssertAdfsWebFingerResponseProperties(objectDeserializedLegacy, objectDeserializedNew);
+            AssertAdfsWebFingerResponse(objectDeserializedLegacy, objectDeserializedNew);
         }
 
-        private OAuth2ResponseBase SetOAuth2ResponseBaseProperties(OAuth2ResponseBase oAuth2ResponseBase)
+        [TestMethod]
+        public void IJsonSerializable_ClientInfo_Test()
+        {
+            // Arrange
+            ClientInfo toSerialize = InitClientInfo(new ClientInfo());
+
+            // Act - serialize
+            string jsonSerializedLegacy = JsonHelper.SerializeToJson<ClientInfo>(toSerialize);
+            string jsonSerializedNew = JsonHelper.SerializeNew<ClientInfo>(toSerialize);
+
+            // Assert serialization
+            Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
+
+            // Act - deserialize
+            ClientInfo objectDeserializedLegacy = JsonHelper.DeserializeFromJson<ClientInfo>(jsonSerializedLegacy);
+            ClientInfo objectDeserializedNew = JsonHelper.DeserializeNew<ClientInfo>(jsonSerializedLegacy);
+
+            // Assert deserialization
+            AssertClientInfo(objectDeserializedLegacy, objectDeserializedNew);
+        }
+
+        private OAuth2ResponseBase InitOAuth2ResponseBase(OAuth2ResponseBase oAuth2ResponseBase)
         {
             oAuth2ResponseBase.Error = "OAuth error";
             oAuth2ResponseBase.SubError = "OAuth suberror";
@@ -370,7 +391,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             return oAuth2ResponseBase;
         }
 
-        private void AssertOAuth2ResponseBaseProperties(OAuth2ResponseBase expected, OAuth2ResponseBase actual)
+        private void AssertOAuth2ResponseBase(OAuth2ResponseBase expected, OAuth2ResponseBase actual)
         {
             Assert.AreEqual(expected.Error, actual.Error);
             Assert.AreEqual(expected.SubError, actual.SubError);
@@ -380,7 +401,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             Assert.AreEqual(expected.Claims, actual.Claims);
         }
 
-        private InstanceDiscoveryMetadataEntry SetInstanceDiscoveryMetadataEntryProperties(InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry)
+        private InstanceDiscoveryMetadataEntry InitInstanceDiscoveryMetadataEntry(InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry)
         {
             instanceDiscoveryMetadataEntry.Aliases = new[] { "login.windows.net", "login.microsoftonline.com" };
             instanceDiscoveryMetadataEntry.PreferredCache = "login.windows.net";
@@ -389,37 +410,37 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             return instanceDiscoveryMetadataEntry;
         }
 
-        private void AssertInstanceDiscoveryMetadataEntryProperties(InstanceDiscoveryMetadataEntry expected, InstanceDiscoveryMetadataEntry actual)
+        private void AssertInstanceDiscoveryMetadataEntry(InstanceDiscoveryMetadataEntry expected, InstanceDiscoveryMetadataEntry actual)
         {
             Assert.AreEqual(expected.PreferredCache, actual.PreferredCache);
             Assert.AreEqual(expected.PreferredNetwork, actual.PreferredNetwork);
             CollectionAssert.AreEqual(expected.Aliases, actual.Aliases);
         }
 
-        private InstanceDiscoveryResponse SetInstanceDiscoveryResponseProperties(InstanceDiscoveryResponse instanceDiscoveryResponse)
+        private InstanceDiscoveryResponse InitInstanceDiscoveryResponse(InstanceDiscoveryResponse instanceDiscoveryResponse)
         {
             instanceDiscoveryResponse.TenantDiscoveryEndpoint = TestConstants.DiscoveryEndPoint;
             instanceDiscoveryResponse.Metadata = new[]
             {
-                SetInstanceDiscoveryMetadataEntryProperties(new InstanceDiscoveryMetadataEntry())
+                InitInstanceDiscoveryMetadataEntry(new InstanceDiscoveryMetadataEntry())
             };
-            SetOAuth2ResponseBaseProperties(instanceDiscoveryResponse);
+            InitOAuth2ResponseBase(instanceDiscoveryResponse);
 
             return instanceDiscoveryResponse;
         }
 
-        private void AssertInstanceDiscoveryResponseProperties(InstanceDiscoveryResponse expected, InstanceDiscoveryResponse actual)
+        private void AssertInstanceDiscoveryResponse(InstanceDiscoveryResponse expected, InstanceDiscoveryResponse actual)
         {
             Assert.AreEqual(expected.TenantDiscoveryEndpoint, actual.TenantDiscoveryEndpoint);
             Assert.AreEqual(expected.Metadata.Length, actual.Metadata.Length);
             for (int i = 0; i < expected.Metadata.Length; i++)
             {
-                AssertInstanceDiscoveryMetadataEntryProperties(expected.Metadata[i], actual.Metadata[i]);
+                AssertInstanceDiscoveryMetadataEntry(expected.Metadata[i], actual.Metadata[i]);
             }
-            AssertOAuth2ResponseBaseProperties(expected, actual);
+            AssertOAuth2ResponseBase(expected, actual);
         }
 
-        private DeviceCodeResponse SetDeviceCodeResponseProperties(DeviceCodeResponse deviceCodeResponse)
+        private DeviceCodeResponse InitDeviceCodeResponse(DeviceCodeResponse deviceCodeResponse)
         {
             deviceCodeResponse.UserCode = "user code";
             deviceCodeResponse.DeviceCode = "device code";
@@ -428,12 +449,12 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             deviceCodeResponse.ExpiresIn = 1234;
             deviceCodeResponse.Interval = 12345;
             deviceCodeResponse.Message = "device message";
-            SetOAuth2ResponseBaseProperties(deviceCodeResponse);
+            InitOAuth2ResponseBase(deviceCodeResponse);
 
             return deviceCodeResponse;
         }
 
-        private void AssertDeviceCodeResponseProperties(DeviceCodeResponse expected, DeviceCodeResponse actual)
+        private void AssertDeviceCodeResponse(DeviceCodeResponse expected, DeviceCodeResponse actual)
         {
             Assert.AreEqual(expected.UserCode, actual.UserCode);
             Assert.AreEqual(expected.DeviceCode, actual.DeviceCode);
@@ -442,10 +463,10 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             Assert.AreEqual(expected.ExpiresIn, actual.ExpiresIn);
             Assert.AreEqual(expected.Interval, actual.Interval);
             Assert.AreEqual(expected.Message, actual.Message);
-            AssertOAuth2ResponseBaseProperties(expected, actual);
+            AssertOAuth2ResponseBase(expected, actual);
         }
 
-        private MsalTokenResponse SetMsalTokenResponseProperties(MsalTokenResponse msalTokenResponse)
+        private MsalTokenResponse InitMsalTokenResponse(MsalTokenResponse msalTokenResponse)
         {
             msalTokenResponse.TokenType = "token type";
             msalTokenResponse.AccessToken = "access token";
@@ -458,12 +479,12 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             msalTokenResponse.RefreshIn = 12333;
             msalTokenResponse.FamilyId = "family id";
 
-            SetOAuth2ResponseBaseProperties(msalTokenResponse);
+            InitOAuth2ResponseBase(msalTokenResponse);
 
             return msalTokenResponse;
         }
 
-        private void AssertMsalTokenResponseProperties(MsalTokenResponse expected, MsalTokenResponse actual)
+        private void AssertMsalTokenResponse(MsalTokenResponse expected, MsalTokenResponse actual)
         {
             Assert.AreEqual(expected.TokenType, actual.TokenType);
             Assert.AreEqual(expected.AccessToken, actual.AccessToken);
@@ -475,10 +496,10 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             Assert.AreEqual(expected.ExtendedExpiresIn, actual.ExtendedExpiresIn);
             Assert.AreEqual(expected.RefreshIn, actual.RefreshIn);
             Assert.AreEqual(expected.FamilyId, actual.FamilyId);
-            AssertOAuth2ResponseBaseProperties(expected, actual);
+            AssertOAuth2ResponseBase(expected, actual);
         }
 
-        private LinksList SetLinksListProperties(LinksList linksList)
+        private LinksList InitLinksList(LinksList linksList)
         {
             linksList.Rel = "rel1";
             linksList.Href = "href1";
@@ -486,34 +507,48 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             return linksList;
         }
 
-        private void AssertLinksListProperties(LinksList expected, LinksList actual)
+        private void AssertLinksList(LinksList expected, LinksList actual)
         {
             Assert.AreEqual(expected.Rel, actual.Rel);
             Assert.AreEqual(expected.Href, actual.Href);
         }
 
-        private AdfsWebFingerResponse SetAdfsWebFingerResponseProperties(AdfsWebFingerResponse adfsWebFingerResponse)
+        private AdfsWebFingerResponse InitAdfsWebFingerResponse(AdfsWebFingerResponse adfsWebFingerResponse)
         {
             adfsWebFingerResponse.Subject = "adfs subject";
             adfsWebFingerResponse.Links = new List<LinksList>
             {
-                SetLinksListProperties(new LinksList())
+                InitLinksList(new LinksList())
             };
 
-            SetOAuth2ResponseBaseProperties(adfsWebFingerResponse);
+            InitOAuth2ResponseBase(adfsWebFingerResponse);
 
             return adfsWebFingerResponse;
         }
 
-        private void AssertAdfsWebFingerResponseProperties(AdfsWebFingerResponse expected, AdfsWebFingerResponse actual)
+        private void AssertAdfsWebFingerResponse(AdfsWebFingerResponse expected, AdfsWebFingerResponse actual)
         {
             Assert.AreEqual(expected.Subject, actual.Subject);
             Assert.AreEqual(expected.Links.Count, actual.Links.Count);
             for (int i = 0; i < expected.Links.Count; i++)
             {
-                AssertLinksListProperties(expected.Links[i], actual.Links[i]);
+                AssertLinksList(expected.Links[i], actual.Links[i]);
             }
-            AssertOAuth2ResponseBaseProperties(expected, actual);
+            AssertOAuth2ResponseBase(expected, actual);
+        }
+
+        private ClientInfo InitClientInfo(ClientInfo clientInfo)
+        {
+            clientInfo.UniqueObjectIdentifier = "11111111-1111-1111-1111-111111111112";
+            clientInfo.UniqueTenantIdentifier = "11111111-1111-1111-1111-111111111111";
+
+            return clientInfo;
+        }
+
+        private void AssertClientInfo(ClientInfo expected, ClientInfo actual)
+        {
+            Assert.AreEqual(expected.UniqueObjectIdentifier, actual.UniqueObjectIdentifier);
+            Assert.AreEqual(expected.UniqueTenantIdentifier, actual.UniqueTenantIdentifier);
         }
         #endregion
     }

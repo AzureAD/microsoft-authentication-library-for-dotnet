@@ -5,18 +5,38 @@ using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Internal
 {
     [JsonObject]
     [Preserve(AllMembers = true)]
-    internal class ClientInfo
+    internal class ClientInfo : IJsonSerializable<ClientInfo>
     {
         [JsonProperty(PropertyName = ClientInfoClaim.UniqueIdentifier)]
         public string UniqueObjectIdentifier { get; set; }
 
         [JsonProperty(PropertyName = ClientInfoClaim.UniqueTenantIdentifier)]
         public string UniqueTenantIdentifier { get; set; }
+
+        public ClientInfo DeserializeFromJson(string json) => DeserializeFromJObject(JObject.Parse(json));
+
+        public ClientInfo DeserializeFromJObject(JObject jObject)
+        {
+            UniqueObjectIdentifier = jObject[ClientInfoClaim.UniqueIdentifier]?.ToString();
+            UniqueTenantIdentifier = jObject[ClientInfoClaim.UniqueTenantIdentifier]?.ToString();
+
+            return this;
+        }
+
+        public string SerializeToJson() => SerializeToJObject().ToString(Formatting.None);
+
+        public JObject SerializeToJObject()
+        {
+            return new JObject(
+                new JProperty(ClientInfoClaim.UniqueIdentifier, UniqueObjectIdentifier),
+                new JProperty(ClientInfoClaim.UniqueTenantIdentifier, UniqueTenantIdentifier));
+        }
 
         public static ClientInfo CreateFromJson(string clientInfo)
         {
@@ -29,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal
 
             try
             {
-                return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlHelpers.DecodeToBytes(clientInfo));
+                return JsonHelper.DeserializeNew<ClientInfo>(Base64UrlHelpers.DecodeToString(clientInfo));
             }
             catch (Exception exc)
             {
