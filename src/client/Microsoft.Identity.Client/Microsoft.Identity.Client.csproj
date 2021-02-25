@@ -1,7 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
   <PropertyGroup>
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
-    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
     <TargetFrameworkNetStandardUnityAOT>netstandard1.3</TargetFrameworkNetStandardUnityAOT>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
 
