@@ -25,10 +25,10 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         [JsonProperty(PropertyName = AliasesPropertyName)]
         public string[] Aliases { get; set; }
 
-        public InstanceDiscoveryMetadataEntry DeserializeFromJson(string json)
-        {
-            JObject jObject = JObject.Parse(json);
+        public InstanceDiscoveryMetadataEntry DeserializeFromJson(string json) => DeserializeFromJObject(JObject.Parse(json));
 
+        public InstanceDiscoveryMetadataEntry DeserializeFromJObject(JObject jObject)
+        {
             PreferredNetwork = jObject[PreferredNetworkPropertyName]?.ToString();
             PreferredCache = jObject[PreferredCachePropertyName]?.ToString();
             Aliases = jObject[AliasesPropertyName] != null ? ((JArray)jObject[AliasesPropertyName]).Select(c => (string)c).ToArray() : null;
@@ -36,14 +36,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             return this;
         }
 
-        public string SerializeToJson()
+        public string SerializeToJson() => SerializeToJObject().ToString(Formatting.None);
+
+        public JObject SerializeToJObject()
         {
-            JObject jObject = new JObject(
+            return new JObject(
                 new JProperty(PreferredNetworkPropertyName, PreferredNetwork),
                 new JProperty(PreferredCachePropertyName, PreferredCache),
                 new JProperty(AliasesPropertyName, new JArray(Aliases)));
-
-            return jObject.ToString(Formatting.None);
         }
     }
 }

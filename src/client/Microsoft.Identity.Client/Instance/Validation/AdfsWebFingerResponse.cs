@@ -28,23 +28,23 @@ namespace Microsoft.Identity.Client.Instance.Validation
         [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Href)]
         public string Href { get; set; }
 
-        public LinksList DeserializeFromJson(string json)
-        {
-            JObject jObject = JObject.Parse(json);
+        public LinksList DeserializeFromJson(string json) => DeserializeFromJObject(JObject.Parse(json));
 
+        public LinksList DeserializeFromJObject(JObject jObject)
+        {
             Rel = jObject[AdfsWebFingerResponseClaim.Rel]?.ToString();
             Href = jObject[AdfsWebFingerResponseClaim.Href]?.ToString();
 
             return this;
         }
 
-        public string SerializeToJson()
+        public string SerializeToJson() => SerializeToJObject().ToString(Formatting.None);
+
+        public JObject SerializeToJObject()
         {
-            JObject jObject = new JObject(
+            return new JObject(
                 new JProperty(AdfsWebFingerResponseClaim.Rel, Rel),
                 new JProperty(AdfsWebFingerResponseClaim.Href, Href));
-
-            return jObject.ToString(Formatting.None);
         }
     }
 
@@ -58,27 +58,27 @@ namespace Microsoft.Identity.Client.Instance.Validation
         [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Links)]
         public List<LinksList> Links { get; set; }
 
-        public new AdfsWebFingerResponse DeserializeFromJson(string json)
-        {
-            JObject jObject = JObject.Parse(json);
+        public new AdfsWebFingerResponse DeserializeFromJson(string json) => DeserializeFromJObject(JObject.Parse(json));
 
+
+        public new AdfsWebFingerResponse DeserializeFromJObject(JObject jObject)
+        {
             Subject = jObject[AdfsWebFingerResponseClaim.Subject]?.ToString();
-            Links = jObject[AdfsWebFingerResponseClaim.Links] != null ? ((JArray)jObject[AdfsWebFingerResponseClaim.Links]).Select(c => new LinksList().DeserializeFromJson(c.ToString())).ToList() : null;
-            base.DeserializeFromJson(json);
+            Links = jObject[AdfsWebFingerResponseClaim.Links] != null ? ((JArray)jObject[AdfsWebFingerResponseClaim.Links]).Select(c => new LinksList().DeserializeFromJObject((JObject)c)).ToList() : null;
+            base.DeserializeFromJObject(jObject);
 
             return this;
 
         }
 
-        public new string SerializeToJson()
+        public new string SerializeToJson() => SerializeToJObject().ToString(Formatting.None);
+
+        public new JObject SerializeToJObject()
         {
-            JObject jObject = new JObject(
+            return new JObject(
                 new JProperty(AdfsWebFingerResponseClaim.Subject, Subject),
-                new JProperty(AdfsWebFingerResponseClaim.Links, new JArray(Links.Select(i => JObject.Parse(i.SerializeToJson())))),
-                JObject.Parse(base.SerializeToJson()).Properties());
-
-            return jObject.ToString(Formatting.None);
-
+                new JProperty(AdfsWebFingerResponseClaim.Links, new JArray(Links.Select(i => i.SerializeToJObject()))),
+                base.SerializeToJObject().Properties());
         }
     }
 }

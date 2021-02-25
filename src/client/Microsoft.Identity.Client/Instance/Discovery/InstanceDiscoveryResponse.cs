@@ -22,25 +22,25 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         [JsonProperty(PropertyName = MetadataPropertyName)]
         public InstanceDiscoveryMetadataEntry[] Metadata { get; set; }
 
-        public new InstanceDiscoveryResponse DeserializeFromJson(string json)
-        {
-            JObject jObject = JObject.Parse(json);
+        public new InstanceDiscoveryResponse DeserializeFromJson(string json) => DeserializeFromJObject(JObject.Parse(json));
 
+        public new InstanceDiscoveryResponse DeserializeFromJObject(JObject jObject)
+        {
             TenantDiscoveryEndpoint = jObject[TenantDiscoveryEndpointPropertyName]?.ToString();
-            Metadata = jObject[MetadataPropertyName] != null ? ((JArray)jObject[MetadataPropertyName]).Select(c => new InstanceDiscoveryMetadataEntry().DeserializeFromJson(c.ToString())).ToArray() : null;
-            base.DeserializeFromJson(json);
+            Metadata = jObject[MetadataPropertyName] != null ? ((JArray)jObject[MetadataPropertyName]).Select(c => new InstanceDiscoveryMetadataEntry().DeserializeFromJObject((JObject)c)).ToArray() : null;
+            base.DeserializeFromJObject(jObject);
 
             return this;
         }
 
-        public new string SerializeToJson()
+        public new string SerializeToJson() => SerializeToJObject().ToString(Formatting.None);
+
+        public new JObject SerializeToJObject()
         {
-            JObject jObject = new JObject(
+            return new JObject(
                 new JProperty(TenantDiscoveryEndpointPropertyName, TenantDiscoveryEndpoint),
-                new JProperty(MetadataPropertyName, new JArray(Metadata.Select(i => JObject.Parse(i.SerializeToJson())))),
-                JObject.Parse(base.SerializeToJson()).Properties());
-            
-            return jObject.ToString(Formatting.None);
+                new JProperty(MetadataPropertyName, new JArray(Metadata.Select(i => i.SerializeToJObject()))),
+                base.SerializeToJObject().Properties());
         }
     }
 }

@@ -44,10 +44,10 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.Claims)]
         public string Claims { get; set; }
 
-        public OAuth2ResponseBase DeserializeFromJson(string json)
-        {
-            JObject jObject = JObject.Parse(json);
+        public OAuth2ResponseBase DeserializeFromJson(string json) => DeserializeFromJObject(JObject.Parse(json));
 
+        public OAuth2ResponseBase DeserializeFromJObject(JObject jObject)
+        {
             Error = jObject[OAuth2ResponseBaseClaim.Error]?.ToString();
             SubError = jObject[OAuth2ResponseBaseClaim.SubError]?.ToString();
             ErrorDescription = jObject[OAuth2ResponseBaseClaim.ErrorDescription]?.ToString();
@@ -58,17 +58,17 @@ namespace Microsoft.Identity.Client.OAuth2
             return this;
         }
 
-        public string SerializeToJson()
+        public string SerializeToJson() => SerializeToJObject().ToString(Formatting.None);
+
+        public JObject SerializeToJObject()
         {
-            JObject jObject = new JObject(
+            return new JObject(
                 new JProperty(OAuth2ResponseBaseClaim.Error, Error),
                 new JProperty(OAuth2ResponseBaseClaim.SubError, SubError),
                 new JProperty(OAuth2ResponseBaseClaim.ErrorDescription, ErrorDescription),
                 new JProperty(OAuth2ResponseBaseClaim.ErrorCodes, new JArray(ErrorCodes)),
                 new JProperty(OAuth2ResponseBaseClaim.CorrelationId, CorrelationId),
                 new JProperty(OAuth2ResponseBaseClaim.Claims, Claims));
-
-            return jObject.ToString(Formatting.None);
         }
     }
 }

@@ -46,10 +46,10 @@ namespace Microsoft.Identity.Client.Internal
         [JsonProperty(PropertyName = MessagePropertyName)]
         public string Message { get; internal set; }
 
-        public new DeviceCodeResponse DeserializeFromJson(string json)
-        {
-            JObject jObject = JObject.Parse(json);
+        public new DeviceCodeResponse DeserializeFromJson(string json) => DeserializeFromJObject(JObject.Parse(json));
 
+        public new DeviceCodeResponse DeserializeFromJObject(JObject jObject)
+        {
             UserCode = jObject[UserCodePropertyName]?.ToString();
             DeviceCode = jObject[DeviceCodePropertyName]?.ToString();
             VerificationUrl = jObject[VerificationUrlPropertyName]?.ToString();
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal
             ExpiresIn = TryParseLong(jObject[ExpiresInPropertyName]?.ToString());
             Interval = TryParseLong(jObject[IntervalPropertyName]?.ToString());
             Message = jObject[MessagePropertyName]?.ToString();
-            base.DeserializeFromJson(json);
+            base.DeserializeFromJObject(jObject);
 
             long TryParseLong(string stringVal)
             {
@@ -68,9 +68,11 @@ namespace Microsoft.Identity.Client.Internal
             return this;
         }
 
-        public new string SerializeToJson()
+        public new string SerializeToJson() => SerializeToJObject().ToString(Formatting.None);
+
+        public new JObject SerializeToJObject()
         {
-            JObject jObject = new JObject(
+            return new JObject(
                 new JProperty(UserCodePropertyName, UserCode),
                 new JProperty(DeviceCodePropertyName, DeviceCode),
                 new JProperty(VerificationUrlPropertyName, VerificationUrl),
@@ -78,9 +80,7 @@ namespace Microsoft.Identity.Client.Internal
                 new JProperty(ExpiresInPropertyName, ExpiresIn),
                 new JProperty(IntervalPropertyName, Interval),
                 new JProperty(MessagePropertyName, Message),
-                JObject.Parse(base.SerializeToJson()).Properties());
-
-            return jObject.ToString(Formatting.None);
+                base.SerializeToJObject().Properties());
         }
 
         public DeviceCodeResult GetResult(string clientId, ISet<string> scopes)

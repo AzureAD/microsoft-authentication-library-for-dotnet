@@ -115,10 +115,10 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonIgnore]
         public HttpResponse HttpResponse { get; set; }
 
-        public new MsalTokenResponse DeserializeFromJson(string json)
-        {
-            JObject jObject = JObject.Parse(json);
+        public new MsalTokenResponse DeserializeFromJson(string json) => DeserializeFromJObject(JObject.Parse(json));
 
+        public new MsalTokenResponse DeserializeFromJObject(JObject jObject)
+        {
             TokenType = jObject[TokenResponseClaim.TokenType]?.ToString();
             AccessToken = jObject[TokenResponseClaim.AccessToken]?.ToString();
             RefreshToken = jObject[TokenResponseClaim.RefreshToken]?.ToString();
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             FamilyId = jObject[TokenResponseClaim.FamilyId]?.ToString();
-            base.DeserializeFromJson(json);
+            base.DeserializeFromJObject(jObject);
 
             long TryParseLong(string stringVal)
             {
@@ -153,9 +153,11 @@ namespace Microsoft.Identity.Client.OAuth2
             return this;
         }
 
-        public new string SerializeToJson()
+        public new string SerializeToJson() => SerializeToJObject().ToString(Formatting.None);
+
+        public new JObject SerializeToJObject()
         {
-            JObject jObject = new JObject(
+            return new JObject(
                 new JProperty(TokenResponseClaim.TokenType, TokenType),
                 new JProperty(TokenResponseClaim.AccessToken, AccessToken),
                 new JProperty(TokenResponseClaim.RefreshToken, RefreshToken),
@@ -166,9 +168,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 new JProperty(TokenResponseClaim.ExtendedExpiresIn, ExtendedExpiresIn),
                 new JProperty(TokenResponseClaim.RefreshIn, RefreshIn),
                 new JProperty(TokenResponseClaim.FamilyId, FamilyId),
-                JObject.Parse(base.SerializeToJson()).Properties());
-
-            return jObject.ToString(Formatting.None);
+                base.SerializeToJObject().Properties());
         }
 
         internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)

@@ -3,6 +3,7 @@
 
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnostics.Windows.Configs;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -12,6 +13,7 @@ namespace Microsoft.Identity.Test.Performance
 {
     [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
     [CategoriesColumn]
+    //[EtwProfiler] // Uncomment to enable profiler. Info: https://adamsitnik.com/ETW-Profiler/
     public class JsonTests
     {
         private readonly string _msalTokenResponseJson;
