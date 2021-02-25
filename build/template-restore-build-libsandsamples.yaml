@@ -5,14 +5,18 @@ parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
   MsalClientSemVer: '4.0.0-devopsbuild'
-  InternalNugetFeed: 'azure-feed://securitytools/SecureDevelopmentTools@Local'
 
 steps:
+- task: NuGetAuthenticate@0
+  displayName: 'NuGet Authenticate'
+  inputs:
+    nuGetServiceConnections: 'Internal Analyzers'
+
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    msbuildArgs: '/t:restore /p:RestoreAdditionalProjectSources=${{ parameters.InternalNugetFeed }}'
+    msbuildArgs: '/t:restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 

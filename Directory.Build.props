@@ -1,6 +1,5 @@
 <Project>
   <PropertyGroup>
-
     <LangVersion>7.2</LangVersion>
     <!-- This is strong naming, not signing-->
     <SignAssembly>true</SignAssembly>
@@ -11,6 +10,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsPackable>false</IsPackable>
+    
     <!-- Configure SDL rulesets to use. https://www.1eswiki.com/wiki/Microsoft.Internal.Analyzers.Rulesets -->
     <MicrosoftInternalSdlRuleset>Recommended</MicrosoftInternalSdlRuleset>
     <MicrosoftInternalSdlRulesetAction>Error</MicrosoftInternalSdlRulesetAction>
