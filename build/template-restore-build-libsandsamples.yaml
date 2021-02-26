@@ -21,7 +21,7 @@ steps:
     configuration: ${{ parameters.BuildConfiguration }}
     feedsToUse: 'config'
     nugetConfigPath: 'NuGet.config'
-    externalFeedCredentials: 'Internal Analyzers'
+    externalFeedCredentials: 'nuget.orgFeed'
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
