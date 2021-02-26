@@ -3,6 +3,7 @@
 
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -23,7 +24,7 @@ namespace Microsoft.Identity.Client.Internal
 
     [JsonObject]
     [Preserve(AllMembers = true)]
-    internal class IdToken
+    internal class IdToken : IJsonSerializable<IdToken>
     {
         [JsonProperty(PropertyName = IdTokenClaim.Issuer)]
         public string Issuer { get; set; }
@@ -58,6 +59,43 @@ namespace Microsoft.Identity.Client.Internal
         [JsonProperty(PropertyName = IdTokenClaim.FamilyName)]
         public string FamilyName { get; set; }
 
+        public IdToken DeserializeFromJson(string json) => DeserializeFromJObject(JObject.Parse(json));
+
+        public IdToken DeserializeFromJObject(JObject jObject)
+        {
+            Issuer = jObject[IdTokenClaim.Issuer]?.ToString();
+            ObjectId = jObject[IdTokenClaim.ObjectId]?.ToString();
+            Subject = jObject[IdTokenClaim.Subject]?.ToString();
+            TenantId = jObject[IdTokenClaim.TenantId]?.ToString();
+            Version = jObject[IdTokenClaim.Version]?.ToString();
+            PreferredUsername = jObject[IdTokenClaim.PreferredUsername]?.ToString();
+            Name = jObject[IdTokenClaim.Name]?.ToString();
+            HomeObjectId = jObject[IdTokenClaim.HomeObjectId]?.ToString();
+            Upn = jObject[IdTokenClaim.Upn]?.ToString();
+            GivenName = jObject[IdTokenClaim.GivenName]?.ToString();
+            FamilyName = jObject[IdTokenClaim.FamilyName]?.ToString();
+
+            return this;
+        }
+
+        public string SerializeToJson() => SerializeToJObject().ToString(Formatting.None);
+
+        public JObject SerializeToJObject()
+        {
+            return new JObject(
+                new JProperty(IdTokenClaim.Issuer, Issuer),
+                new JProperty(IdTokenClaim.ObjectId, ObjectId),
+                new JProperty(IdTokenClaim.Subject, Subject),
+                new JProperty(IdTokenClaim.TenantId, TenantId),
+                new JProperty(IdTokenClaim.Version, Version),
+                new JProperty(IdTokenClaim.PreferredUsername, PreferredUsername),
+                new JProperty(IdTokenClaim.Name, Name),
+                new JProperty(IdTokenClaim.HomeObjectId, HomeObjectId),
+                new JProperty(IdTokenClaim.Upn, Upn),
+                new JProperty(IdTokenClaim.GivenName, GivenName),
+                new JProperty(IdTokenClaim.FamilyName, FamilyName));
+        }
+
         public static IdToken Parse(string idToken)
         {
             if (string.IsNullOrEmpty(idToken))
@@ -77,8 +115,7 @@ namespace Microsoft.Identity.Client.Internal
 
             try
             {
-                byte[] idTokenBytes = Base64UrlHelpers.DecodeToBytes(idTokenSegments[1]);
-                idTokenBody = JsonHelper.DeserializeFromJson<IdToken>(idTokenBytes);
+                idTokenBody = JsonHelper.DeserializeNew<IdToken>(Base64UrlHelpers.DecodeToString(idTokenSegments[1]));
             }
             catch (JsonException exc)
             {

@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -379,6 +380,48 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             AssertClientInfo(objectDeserializedLegacy, objectDeserializedNew);
         }
 
+        [TestMethod]
+        public void IJsonSerializable_IdToken_Test()
+        {
+            // Arrange
+            IdToken toSerialize = InitIdToken(new IdToken());
+
+            // Act - serialize
+            string jsonSerializedLegacy = JsonHelper.SerializeToJson<IdToken>(toSerialize);
+            string jsonSerializedNew = JsonHelper.SerializeNew<IdToken>(toSerialize);
+
+            // Assert serialization
+            Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
+
+            // Act - deserialize
+            IdToken objectDeserializedLegacy = JsonHelper.DeserializeFromJson<IdToken>(jsonSerializedLegacy);
+            IdToken objectDeserializedNew = JsonHelper.DeserializeNew<IdToken>(jsonSerializedLegacy);
+
+            // Assert deserialization
+            AssertIdToken(objectDeserializedLegacy, objectDeserializedNew);
+        }
+
+        [TestMethod]
+        public void IJsonSerializable_LocalImdsErrorResponse_Test()
+        {
+            // Arrange
+            LocalImdsErrorResponse toSerialize = InitLocalImdsErrorResponse(new LocalImdsErrorResponse());
+
+            // Act - serialize
+            string jsonSerializedLegacy = JsonHelper.SerializeToJson<LocalImdsErrorResponse>(toSerialize);
+            string jsonSerializedNew = JsonHelper.SerializeNew<LocalImdsErrorResponse>(toSerialize);
+
+            // Assert serialization
+            Assert.AreEqual(jsonSerializedLegacy, jsonSerializedNew);
+
+            // Act - deserialize
+            LocalImdsErrorResponse objectDeserializedLegacy = JsonHelper.DeserializeFromJson<LocalImdsErrorResponse>(jsonSerializedLegacy);
+            LocalImdsErrorResponse objectDeserializedNew = JsonHelper.DeserializeNew<LocalImdsErrorResponse>(jsonSerializedLegacy);
+
+            // Assert deserialization
+            AssertLocalImdsErrorResponse(objectDeserializedLegacy, objectDeserializedNew);
+        }
+
         private OAuth2ResponseBase InitOAuth2ResponseBase(OAuth2ResponseBase oAuth2ResponseBase)
         {
             oAuth2ResponseBase.Error = "OAuth error";
@@ -549,6 +592,52 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         {
             Assert.AreEqual(expected.UniqueObjectIdentifier, actual.UniqueObjectIdentifier);
             Assert.AreEqual(expected.UniqueTenantIdentifier, actual.UniqueTenantIdentifier);
+        }
+
+        private IdToken InitIdToken(IdToken idToken)
+        {
+            idToken.Issuer = "issuer";
+            idToken.ObjectId = "objectid";
+            idToken.Subject = "subject";
+            idToken.TenantId = "tenantid";
+            idToken.Version = "version";
+            idToken.PreferredUsername = "preferredusername";
+            idToken.Name = "name";
+            idToken.HomeObjectId = "homeobjectid";
+            idToken.Upn = "upn";
+            idToken.GivenName = "givenname";
+            idToken.FamilyName = "familyname";
+
+            return idToken;
+        }
+
+        private void AssertIdToken(IdToken expected, IdToken actual)
+        {
+            Assert.AreEqual(expected.Issuer, actual.Issuer);
+            Assert.AreEqual(expected.ObjectId, actual.ObjectId);
+            Assert.AreEqual(expected.Subject, actual.Subject);
+            Assert.AreEqual(expected.TenantId, actual.TenantId);
+            Assert.AreEqual(expected.Version, actual.Version);
+            Assert.AreEqual(expected.PreferredUsername, actual.PreferredUsername);
+            Assert.AreEqual(expected.Name, actual.Name);
+            Assert.AreEqual(expected.HomeObjectId, actual.HomeObjectId);
+            Assert.AreEqual(expected.Upn, actual.Upn);
+            Assert.AreEqual(expected.GivenName, actual.GivenName);
+            Assert.AreEqual(expected.FamilyName, actual.FamilyName);
+        }
+
+        private LocalImdsErrorResponse InitLocalImdsErrorResponse(LocalImdsErrorResponse localImdsErrorResponse)
+        {
+            localImdsErrorResponse.Error = "imds error";
+            localImdsErrorResponse.NewestVersions = new List<string> { "1", "2" };
+
+            return localImdsErrorResponse;
+        }
+
+        private void AssertLocalImdsErrorResponse(LocalImdsErrorResponse expected, LocalImdsErrorResponse actual)
+        {
+            Assert.AreEqual(expected.Error, actual.Error);
+            CollectionAssert.AreEqual(expected.NewestVersions, actual.NewestVersions);
         }
         #endregion
     }

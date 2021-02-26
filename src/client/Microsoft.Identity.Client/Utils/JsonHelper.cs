@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Utils
             return JsonConvert.DeserializeObject<T>(json);
         }
 
-        internal static T TryToDeserializeFromJson<T>(string json, RequestContext requestContext = null)
+        internal static T TryToDeserializeFromJson<T>(string json, RequestContext requestContext = null) where T : IJsonSerializable<T>, new()
         {
             if (string.IsNullOrEmpty(json))
             {
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Utils
             T result = default;
             try
             {
-                result = DeserializeFromJson<T>(json.ToByteArray());
+                result = DeserializeNew<T>(json);
             }
             catch (JsonException ex)
             {

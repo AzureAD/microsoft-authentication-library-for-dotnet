@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.Region
             // When IMDS endpoint is called without the api version query param, bad request response comes back with latest version.
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
-                LocalImdsErrorResponse errorResponse = JsonHelper.DeserializeFromJson<LocalImdsErrorResponse>(response.Body);
+                LocalImdsErrorResponse errorResponse = JsonHelper.DeserializeNew<LocalImdsErrorResponse>(response.Body);
 
                 if (errorResponse != null && !errorResponse.NewestVersions.IsNullOrEmpty())
                 {
