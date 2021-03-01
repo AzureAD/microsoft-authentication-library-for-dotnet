@@ -37,6 +37,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             CacheRefresh cacheRefresh = CacheRefresh.None;
+            MsalAccessTokenCacheItem msalAccessTokenItem = null;
+            var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             if (!_onBehalfOfParameters.ForceRefresh)
             {
@@ -45,8 +47,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // or new assertion has been passed. We should not use Refresh Token
                 // for the user because the new incoming token may have updated claims
                 // like MFA etc.
-                MsalAccessTokenCacheItem msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
-                if (msalAccessTokenItem != null)
+                msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                if (msalAccessTokenItem != null && !msalAccessTokenItem.NeedsRefresh())
                 {
                     var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
                     AuthenticationRequestParameters.RequestContext.Logger.Info(
@@ -61,13 +63,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
                         TokenSource.Cache);
                 }
-                else
+                else if(msalAccessTokenItem != null)
                 {
                     cacheRefresh = CacheRefresh.NoCachedAT;
+                }
+                else
+                {
+                    cacheRefresh = CacheRefresh.RefreshIn;
                 }
             }
             else
             {
+                logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
                 cacheRefresh = CacheRefresh.ForceRefresh;
             }
 
@@ -76,6 +83,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int)cacheRefresh;
             }
 
+            // No AT in the cache or AT needs to be refreshed
+            try
+            {
+                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (MsalServiceException e)
+            {
+                return HandleTokenRefreshError(e, msalAccessTokenItem);
+            }
+        }
+
+        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
+        {
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
