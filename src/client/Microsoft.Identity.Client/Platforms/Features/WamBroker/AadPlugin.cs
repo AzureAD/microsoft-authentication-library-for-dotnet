@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
@@ -328,7 +329,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             foreach (var kvp in webTokenResponse.Properties)
             {
-                allProperties.Add(kvp.Key, kvp.Value);
+                allProperties[kvp.Key] = kvp.Value;
             }
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()

@@ -150,7 +150,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
 
             return await AcquireInteractiveWithPickerAsync(
-                authenticationRequestParameters)
+                authenticationRequestParameters,
+                acquireTokenInteractiveParameters.Prompt)
                 .ConfigureAwait(false);
         }
 
@@ -166,12 +167,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         private async Task<IWebTokenRequestResultWrapper> AcquireInteractiveWithoutPickerAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
-            Prompt prompt,
+            Prompt msalPrompt,
             IWamPlugin wamPlugin,
             WebAccountProvider provider,
             WebAccount wamAccount)
         {
-            bool isForceLoginPrompt = IsForceLoginPrompt(prompt);
+            bool isForceLoginPrompt = IsForceLoginPrompt(msalPrompt);
 
             WebTokenRequest webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                 provider,
@@ -181,12 +182,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 isAccountInWam: true)
            .ConfigureAwait(false);
 
-            if (isForceLoginPrompt &&
-                ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 6))
-            {
-                // this feature works correctly since windows RS4, aka 1803 with the AAD plugin only!
-                webTokenRequest.Properties["prompt"] = prompt.PromptValue;
-            }
+            AddPromptToRequest(msalPrompt, isForceLoginPrompt, webTokenRequest);
 
             WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);
 
@@ -219,9 +215,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
         }
 
+        private static void AddPromptToRequest(Prompt prompt, bool isForceLoginPrompt, WebTokenRequest webTokenRequest)
+        {
+            if (isForceLoginPrompt &&
+                prompt != Prompt.NotSpecified &&
+                prompt != Prompt.NoPrompt &&
+                ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 6))
+            {
+                // this feature works correctly since windows RS4, aka 1803 with the AAD plugin only!
+                webTokenRequest.Properties["prompt"] = prompt.PromptValue;
+            }
+        }
 
         private async Task<MsalTokenResponse> AcquireInteractiveWithPickerAsync(
-            AuthenticationRequestParameters authenticationRequestParameters)
+            AuthenticationRequestParameters authenticationRequestParameters,
+            Prompt msalPrompt)
         {
             bool isMsaPassthrough = authenticationRequestParameters.AppConfig.IsMsaPassthrough;
             var accountPicker = _accountPickerFactory.Create(
@@ -248,13 +256,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 wamPlugin = (isConsumerTenant && !isMsaPassthrough) ? _msaPlugin : _aadPlugin;
 
                 string transferToken = null;
-
+                bool isForceLoginPrompt = false;
                 if (isConsumerTenant && isMsaPassthrough)
                 {
                     // Get a transfer token to avoid prompting the user twice
-                    transferToken = await _msaPassthroughHandler.FetchTransferTokenAsync(
+                    transferToken = await _msaPassthroughHandler.TryFetchTransferTokenAsync(
                        authenticationRequestParameters,
                        accountProvider).ConfigureAwait(false);
+
+                    // If a TT cannot be obtained, force the interactive experience again
+                    isForceLoginPrompt = string.IsNullOrEmpty(transferToken);
 
                     // For MSA-PT, the MSA provider will issue v1 token, which cannot be used.
                     // Only the AAD provider can issue a v2 token
@@ -266,7 +277,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                      accountProvider,
                      authenticationRequestParameters,
-                     isForceLoginPrompt: false,
+                     isForceLoginPrompt: isForceLoginPrompt,
                      isInteractive: true,
                      isAccountInWam: false)
                     .ConfigureAwait(true);
@@ -274,6 +285,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 _msaPassthroughHandler.AddTransferTokenToRequest(webTokenRequest, transferToken);
 
                 WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);
+                AddPromptToRequest(msalPrompt, isForceLoginPrompt, webTokenRequest);
 
             }
             catch (Exception ex) when (!(ex is MsalException))
@@ -327,11 +339,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             IntPtr foregroundWindow = WindowsNativeMethods.GetForegroundWindow();
             return foregroundWindow;
 #endif
-        }
-
-        private void AddPOPParamsToRequest(WebTokenRequest webTokenRequest)
-        {
-            // TODO: add POP support by adding "token_type" = "pop" and "req_cnf" = req_cnf
         }
 
         public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
@@ -708,8 +715,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             // consumers
             if (IsConsumerTenantId(authorityTenant))
             {
-                _logger.Info("[WAM Broker] Authority tenant is consumers. ATS will try WAM-MSA ");
-                return true;
+                _logger.Info($"[WAM Broker] Authority tenant is consumers. " +
+                    $"ATS will try {(msaPassthrough ? "WAM-AAD" : "WAM-MSA")} ");
+
+                return !msaPassthrough; // for silent flow, the authority is MSA-tenant-id 
             }
 
             _logger.Info("[WAM Broker] Tenant is not consumers and ATS will try WAM-AAD");

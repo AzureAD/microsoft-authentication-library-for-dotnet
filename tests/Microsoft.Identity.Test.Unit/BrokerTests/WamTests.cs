@@ -721,7 +721,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(msaProvider));
                 // AAD plugin + consumer provider = Guest MSA-PT scenario
                 _webAccountProviderFactory.IsConsumerProvider(msaProvider).Returns(true);
-                _msaPassthroughHandler.FetchTransferTokenAsync(requestParams, msaProvider)
+                _msaPassthroughHandler.TryFetchTransferTokenAsync(requestParams, msaProvider)
                     .Returns(Task.FromResult("transfer_token"));
 
                 var aadProvider = new WebAccountProvider("aad", "user@contoso.com", null);
@@ -755,6 +755,63 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Assert 
                 Assert.AreSame(_msalTokenResponse, result);
                 _msaPassthroughHandler.Received(1).AddTransferTokenToRequest(webTokenRequest, "transfer_token");
+            }
+        }
+
+        [TestMethod]
+        public async Task ATI_WithPicker_MsaPt_NoTransferToken_Async()
+        {
+            string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var requestParams = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityHomeTenant); 
+
+                // msa-pt scenario
+                requestParams.AppConfig.IsMsaPassthrough = true;
+                var accountPicker = Substitute.For<IAccountPicker>();
+                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
+                var msaProvider = new WebAccountProvider("msa", "user@contoso.com", null);
+                accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(msaProvider));
+                // AAD plugin + consumer provider = Guest MSA-PT scenario
+                _webAccountProviderFactory.IsConsumerProvider(msaProvider).Returns(true);
+                _msaPassthroughHandler.TryFetchTransferTokenAsync(requestParams, msaProvider)
+                    .Returns(Task.FromResult<string>(null));
+
+                var aadProvider = new WebAccountProvider("aad", "user@contoso.com", null);
+                _webAccountProviderFactory.GetAccountProviderAsync("home").Returns(aadProvider);
+
+                // make sure the final request is done with the AAD provider
+                var webTokenRequest = new WebTokenRequest(aadProvider);
+                _aadPlugin.CreateWebTokenRequestAsync(
+                    aadProvider,
+                    requestParams,
+                    isForceLoginPrompt: true, // it is important to force prompt if a transfer token was not obtained
+                     isInteractive: true,
+                     isAccountInWam: false)
+                    .Returns(Task.FromResult(webTokenRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
+                    Returns(Task.FromResult(webTokenResponseWrapper));
+                _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
+
+                var atiParams = new AcquireTokenInteractiveParameters();
+                atiParams.Prompt = Prompt.SelectAccount;
+
+                // Act
+                var result = await _wamBroker.AcquireTokenInteractiveAsync(requestParams, atiParams)
+                    .ConfigureAwait(false);
+
+                // Assert 
+                Assert.AreSame(_msalTokenResponse, result);
+                Assert.AreEqual("select_account", webTokenRequest.Properties["prompt"]);
+                _msaPassthroughHandler.Received(1).AddTransferTokenToRequest(webTokenRequest, null);
             }
         }
         #endregion
