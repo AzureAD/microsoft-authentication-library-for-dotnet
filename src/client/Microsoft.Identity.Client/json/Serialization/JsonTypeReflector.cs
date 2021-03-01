@@ -515,7 +515,7 @@ namespace Microsoft.Identity.Json.Serialization
         {
             get
             {
-#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS || MAC || UNITY_LTS)
+#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS || MAC || UNITY)
                 if (DynamicCodeGeneration)
                 {
                     return DynamicReflectionDelegateFactory.Instance;
@@ -523,7 +523,7 @@ namespace Microsoft.Identity.Json.Serialization
 
                 return LateBoundReflectionDelegateFactory.Instance;
 
-#elif UNITY_LTS
+#elif UNITY
                  return LateBoundReflectionDelegateFactory.Instance;
 #else
                  return ExpressionReflectionDelegateFactory.Instance;
