@@ -5,6 +5,7 @@ using System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 
@@ -76,6 +77,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 extendedAccessTokenExpiresOn,
                 clientInfo, 
                 homeAccId);
+
+            var crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
+            atItem.UserAssertionHash = crypto.CreateBase64UrlEncodedSha256Hash(TestConstants.UserAssertion);
 
             // add access token
             accessor.SaveAccessToken(atItem);
