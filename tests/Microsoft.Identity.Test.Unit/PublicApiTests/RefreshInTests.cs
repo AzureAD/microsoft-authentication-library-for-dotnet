@@ -264,10 +264,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        private static ConfidentialClientApplication SetupCca(MockHttpAndServiceBundle harness, bool UseCommonAuthority = false)
+        private static ConfidentialClientApplication SetupCca(MockHttpAndServiceBundle harness)
         {
             ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                          .WithAuthority("https://login.microsoftonline.com/common/")
+                                                          .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                                                           .WithClientSecret(TestConstants.ClientSecret)
                                                           .WithHttpManager(harness.HttpManager)
                                                           .BuildConcrete();
