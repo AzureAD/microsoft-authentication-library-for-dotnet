@@ -274,7 +274,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var tokenCacheHelper = new TokenCacheHelper();
             tokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
-            tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false);
+            tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false, userAssertion: TestConstants.UserAssertion);
             return app;
         }
 

@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string displayableId = TestConstants.DisplayableId,
             string rtSecret = TestConstants.RTSecret,
             string overridenScopes = null,
-            string userAssertion = TestConstants.UserAssertion,
+            string userAssertion = null,
             bool expiredAccessTokens = false, 
             bool addSecondAt = true)
         {
@@ -79,8 +79,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 clientInfo, 
                 homeAccId);
 
-            var crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
-            atItem.UserAssertionHash = crypto.CreateBase64UrlEncodedSha256Hash(userAssertion);
+            if (userAssertion != null)
+            {
+                var crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
+                atItem.UserAssertionHash = crypto.CreateBase64UrlEncodedSha256Hash(userAssertion);
+            }
 
             // add access token
             accessor.SaveAccessToken(atItem);

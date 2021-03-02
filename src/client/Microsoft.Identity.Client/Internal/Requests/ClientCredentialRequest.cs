@@ -59,14 +59,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
                         TokenSource.Cache);
                 }
-                else if (cachedAccessTokenItem == null)
-                {
-                    cacheRefresh = CacheRefresh.NoCachedAT;
-                }
-                else
-                {
-                    cacheRefresh = CacheRefresh.RefreshIn;
-                }
+
+                cacheRefresh = (cachedAccessTokenItem == null) ? CacheRefresh.NoCachedAT : CacheRefresh.RefreshIn;
             }
             else
             {
