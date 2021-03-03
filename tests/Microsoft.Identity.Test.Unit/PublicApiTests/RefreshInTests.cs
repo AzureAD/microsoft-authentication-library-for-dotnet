@@ -233,6 +233,37 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        [Description("AT in cache, needs refresh. AAD responds well to Refresh.")]
+        public async Task ClientCreds_OnBehalfOf_NonExpired_NeedsRefresh_ValidResponse_Async()
+        {
+            // Arrange
+            using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
+            {
+                Trace.WriteLine("1. Setup an app with a token cache with one AT");
+                ConfidentialClientApplication app = SetupCca(harness);
+
+                Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
+                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
+
+                Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
+
+                // Act
+                Trace.WriteLine("4. ATS - should perform an RT refresh");
+                AuthenticationResult result = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion, "assertiontype"))
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(0, harness.HttpManager.QueueSize,
+                    "MSAL should have refreshed the token because the original AT was marked for refresh");
+                cacheAccess.AssertAccessCounts(1, 1);
+            }
+        }
+
         private static ConfidentialClientApplication SetupCca(MockHttpAndServiceBundle harness)
         {
             ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -243,6 +274,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var tokenCacheHelper = new TokenCacheHelper();
             tokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
+            tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false, userAssertion: TestConstants.UserAssertion);
             return app;
         }
 

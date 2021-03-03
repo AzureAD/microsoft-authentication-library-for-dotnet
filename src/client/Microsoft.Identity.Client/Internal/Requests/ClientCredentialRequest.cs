@@ -59,14 +59,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
                         TokenSource.Cache);
                 }
-                else if (cachedAccessTokenItem == null)
-                {
-                    cacheRefresh = CacheRefresh.NoCachedAT;
-                }
-                else
-                {
-                    cacheRefresh = CacheRefresh.RefreshIn;
-                }
+
+                cacheRefresh = (cachedAccessTokenItem == null) ? CacheRefresh.NoCachedAT : CacheRefresh.RefreshIn;
             }
             else
             {
@@ -90,22 +84,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (MsalServiceException e)
             {
-                bool isAadUnavailable = e.IsAadUnavailable();
-                logger.Warning($"Fetching a new AT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
-
-                if (cachedAccessTokenItem != null && isAadUnavailable)
-                {
-                    logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
-                    return new AuthenticationResult(
-                        cachedAccessTokenItem,
-                        null,
-                        AuthenticationRequestParameters.AuthenticationScheme,
-                        AuthenticationRequestParameters.RequestContext.CorrelationId,
-                        TokenSource.Cache);
-                }
-
-                logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
-                throw;
+                return HandleTokenRefreshError(e, cachedAccessTokenItem);
             }
         }
 

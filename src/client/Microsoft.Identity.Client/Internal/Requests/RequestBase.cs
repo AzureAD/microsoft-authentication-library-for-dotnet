@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -293,6 +294,27 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         result.ExpiresOn, 
                         string.Join(" ", result.Scopes)));
             }
+        }
+
+        internal AuthenticationResult HandleTokenRefreshError(MsalServiceException e, MsalAccessTokenCacheItem cachedAccessTokenItem)
+        {
+            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            bool isAadUnavailable = e.IsAadUnavailable();
+            logger.Warning($"Fetching a new AT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
+
+            if (cachedAccessTokenItem != null && isAadUnavailable)
+            {
+                logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
+                return new AuthenticationResult(
+                    cachedAccessTokenItem,
+                    null,
+                    AuthenticationRequestParameters.AuthenticationScheme,
+                    AuthenticationRequestParameters.RequestContext.CorrelationId,
+                    TokenSource.Cache);
+            }
+
+            logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
+            throw e;
         }
     }
 }
