@@ -73,22 +73,6 @@ namespace Microsoft.Identity.Client.Kerberos
             this.ErrorMessage = errorMessage;
         }
 
-
-        /// <summary>
-        /// Gets the KRB-CRED Kerberos Ticket as byte stream.
-        /// </summary>
-        /// <returns>Byte stream representaion of KRB-CRED Kerberos Ticket if it contains valid ticket information.
-        /// Null, otherwise.</returns>
-        public byte[] GetKrbCred()
-        {
-            if (!string.IsNullOrEmpty(KerberosMessageBuffer))
-            {
-                return Convert.FromBase64String(KerberosMessageBuffer);
-            }
-
-            return null;
-        }
-
         /// <inheritdoc />
         public override string ToString()
         {

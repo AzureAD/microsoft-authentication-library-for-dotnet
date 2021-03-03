@@ -4,6 +4,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
@@ -14,6 +15,52 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         private const string SECUR32 = "secur32.dll";
         private const string ADVAPI32 = "advapi32.dll";
         private const string KERNEL32 = "kernel32.dll";
+
+        [DllImport(
+            SECUR32,
+            EntryPoint = "InitializeSecurityContext",
+            CharSet = (CharSet)4,
+            BestFitMapping = false,
+            ThrowOnUnmappableChar = true,
+            SetLastError = true)]
+        internal static extern SecStatus InitializeSecurityContext_0(
+            ref SECURITY_HANDLE phCredential,
+            IntPtr phContext,
+            string pszTargetName,
+            InitContextFlag fContextReq,
+            int Reserved1,
+            int TargetDataRep,
+            IntPtr pInput,
+            int Reserved2,
+            ref SECURITY_HANDLE phNewContext,
+            ref SecBufferDesc pOutput,
+            out InitContextFlag pfContextAttr,
+            IntPtr ptsExpiry
+        );
+
+        [DllImport(
+            SECUR32,
+            CharSet = (CharSet)4,
+            BestFitMapping = false,
+            ThrowOnUnmappableChar = true,
+            EntryPoint = "AcquireCredentialsHandle")]
+        internal static extern SecStatus AcquireCredentialsHandle(
+            string pszPrincipal,
+            string pszPackage,
+            int fCredentialUse,
+            IntPtr PAuthenticationID,
+            void* pAuthData,
+            IntPtr pGetKeyFn,
+            IntPtr pvGetKeyArgument,
+            ref SECURITY_HANDLE phCredential,
+            IntPtr ptsExpiry
+        );
+
+        [DllImport(SECUR32)]
+        internal static extern uint FreeCredentialsHandle(SECURITY_HANDLE* handle);
+
+        [DllImport(SECUR32)]
+        public static extern SecStatus DeleteSecurityContext(SECURITY_HANDLE* context);
 
         [DllImport(SECUR32)]
         public static extern int LsaDeregisterLogonProcess(
@@ -283,6 +330,136 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         internal struct SecPkgContext_SecString
         {
             public void* sValue;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct SecBuffer
+        {
+            public int cbBuffer;
+            public SecBufferType BufferType;
+            public IntPtr pvBuffer;
+
+            public SecBuffer(int bufferSize)
+            {
+                this.cbBuffer = bufferSize;
+                this.BufferType = SecBufferType.SECBUFFER_TOKEN;
+                this.pvBuffer = Marshal.AllocHGlobal(bufferSize);
+            }
+
+            public SecBuffer(byte[] secBufferBytes)
+                : this(secBufferBytes.Length)
+            {
+                Marshal.Copy(secBufferBytes, 0, this.pvBuffer, this.cbBuffer);
+            }
+
+            public void Dispose()
+            {
+                if (this.pvBuffer != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(this.pvBuffer);
+                    this.pvBuffer = IntPtr.Zero;
+                }
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct SecBufferDesc : IDisposable
+        {
+            private readonly SecBufferType ulVersion;
+            public int cBuffers;
+            public IntPtr pBuffers; // Point to SecBuffer
+
+            public SecBufferDesc(int bufferSize)
+                : this(new SecBuffer(bufferSize))
+            {
+            }
+
+            public SecBufferDesc(byte[] secBufferBytes)
+                : this(new SecBuffer(secBufferBytes))
+            {
+            }
+
+            private SecBufferDesc(SecBuffer secBuffer)
+            {
+                this.ulVersion = SecBufferType.SECBUFFER_VERSION;
+
+                this.cBuffers = 1;
+
+                this.pBuffers = Marshal.AllocHGlobal(Marshal.SizeOf(secBuffer));
+
+                Marshal.StructureToPtr(secBuffer, this.pBuffers, false);
+            }
+
+            public void Dispose()
+            {
+                if (this.pBuffers != IntPtr.Zero)
+                {
+                    this.ForEachBuffer(thisSecBuffer => thisSecBuffer.Dispose());
+
+                    // Freeing pBuffers
+
+                    Marshal.FreeHGlobal(this.pBuffers);
+                    this.pBuffers = IntPtr.Zero;
+                }
+            }
+
+            private void ForEachBuffer(Action<SecBuffer> onBuffer)
+            {
+                for (int Index = 0; Index < this.cBuffers; Index++)
+                {
+                    int CurrentOffset = Index * Marshal.SizeOf(typeof(SecBuffer));
+
+                    SecBuffer thisSecBuffer = (SecBuffer)Marshal.PtrToStructure(
+                        IntPtr.Add(
+                            this.pBuffers,
+                            CurrentOffset
+                        ),
+                        typeof(SecBuffer)
+                    );
+
+                    onBuffer(thisSecBuffer);
+                }
+            }
+
+            public byte[] ReadBytes()
+            {
+                if (this.cBuffers <= 0)
+                {
+                    return new byte[0];
+                }
+
+                int finalLen = 0;
+                var bufferList = new List<byte[]>();
+
+                this.ForEachBuffer(thisSecBuffer =>
+                {
+                    if (thisSecBuffer.cbBuffer <= 0)
+                    {
+                        return;
+                    }
+
+                    var buffer = new byte[thisSecBuffer.cbBuffer];
+
+                    Marshal.Copy(thisSecBuffer.pvBuffer, buffer, 0, thisSecBuffer.cbBuffer);
+
+                    bufferList.Add(buffer);
+
+                    finalLen += thisSecBuffer.cbBuffer;
+                });
+
+                var finalBuffer = new byte[finalLen];
+
+                var position = 0;
+
+                for (var i = 0; i < bufferList.Count; i++)
+                {
+                    bufferList[i].CopyTo(finalBuffer, position);
+
+                    position += bufferList[i].Length - 1;
+                }
+
+                return finalBuffer;
+            }
         }
     }
 }

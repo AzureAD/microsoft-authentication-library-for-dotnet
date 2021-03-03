@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Kerberos.NET.Win32;
-
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Kerberos;
-using Microsoft.VisualBasic.CompilerServices;
 
 using System;
 
@@ -132,7 +129,8 @@ namespace KerberosConsole
 
         public bool ShowCachedTicket()
         {
-            byte[] ticket = FindCachedTicket(KerberosServicePrincipalName);
+            string errorMessage;
+            byte[] ticket = KerberosTicketManager.GetKerberosTicketFromCache(KerberosServicePrincipalName, out errorMessage, LogonId);
             if (ticket != null && ticket.Length > 32)
             {
                 var encode = Convert.ToBase64String(ticket);
@@ -146,7 +144,7 @@ namespace KerberosConsole
                 return true;
             }
 
-            Console.WriteLine("ERROR: can't find token entry for " + KerberosServicePrincipalName);
+            Console.WriteLine($"ERROR while finding Kerberos Ticket for '{KerberosServicePrincipalName}': {errorMessage}");
             return false;
         }
 
@@ -169,57 +167,46 @@ namespace KerberosConsole
             KerberosSupplementalTicket ticket;
             if (TicketContainer == KerberosTicketContainer.IdToken)
             {
-                ticket = KerberosTicketManager.FromToken(result.IdToken);
-            }
-            else
-            {
-                ticket = KerberosTicketManager.FromToken(result.AccessToken);
-            }
-
-            if (ticket == null)
-            {
-                AADKerberosLogger.Save("ERROR: There's no Kerberos Ticket information within the AuthResult.");
-                AADKerberosLogger.Save("Access Token: " + result.AccessToken);
-            }
-            else
-            {
-                // save ticket to cache.
-                if (KerberosTicketManager.SaveToCache(ticket, LogonId))
+                ticket = KerberosTicketManager.FromIdToken(result.IdToken);
+                if (ticket == null)
+                {
+                    AADKerberosLogger.Save("ERROR: There's no Kerberos Ticket information within the AuthResult.");
+                    AADKerberosLogger.Save("Access Token: " + result.AccessToken);
+                }
+                else
                 {
                     AADKerberosLogger.PrintLines(2);
-                    AADKerberosLogger.Save("---Kerberos Ticket cached into user's Ticket Cache\n");
-                }
 
-                AADKerberosLogger.PrintLines(2);
-                AADKerberosLogger.Save("KerberosSupplementalTicket {");
-                AADKerberosLogger.Save("                Client Key: " + ticket.ClientKey);
-                AADKerberosLogger.Save("                  Key Type: " + ticket.KeyType);
-                AADKerberosLogger.Save("            Errorr Message: " + ticket.ErrorMessage);
-                AADKerberosLogger.Save("                     Realm: " + ticket.Realm);
-                AADKerberosLogger.Save("    Service Principal Name: " + ticket.ServicePrincipalName);
-                AADKerberosLogger.Save("               Client Name: " + ticket.ClientName);
-                AADKerberosLogger.Save("     KerberosMessageBuffer: " + ticket.KerberosMessageBuffer);
-                AADKerberosLogger.Save("}\n");
+                    string errorMessage;
+                    if (KerberosTicketManager.SaveToCache(ticket, out errorMessage, LogonId))
+                    {
+                        AADKerberosLogger.Save("---Kerberos Ticket cached into user's Ticket Cache\n");
+                    }
+                    else
+                    {
+                        AADKerberosLogger.Save("---Kerberos Ticket caching failed: " + errorMessage);
+                    }
 
-                // shows detailed ticket information.
-                TicketDecoder decoder = new TicketDecoder();
-                decoder.ShowKrbCredTicket(ticket.KerberosMessageBuffer);
-            }
-        }
+                    AADKerberosLogger.PrintLines(2);
+                    AADKerberosLogger.Save("KerberosSupplementalTicket {");
+                    AADKerberosLogger.Save("                Client Key: " + ticket.ClientKey);
+                    AADKerberosLogger.Save("                  Key Type: " + ticket.KeyType);
+                    AADKerberosLogger.Save("            Errorr Message: " + ticket.ErrorMessage);
+                    AADKerberosLogger.Save("                     Realm: " + ticket.Realm);
+                    AADKerberosLogger.Save("    Service Principal Name: " + ticket.ServicePrincipalName);
+                    AADKerberosLogger.Save("               Client Name: " + ticket.ClientName);
+                    AADKerberosLogger.Save("     KerberosMessageBuffer: " + ticket.KerberosMessageBuffer);
+                    AADKerberosLogger.Save("}\n");
 
-        private byte[] FindCachedTicket(string servicePrincipalName)
-        {
-            try
-            { 
-                using (SspiContext context = new SspiContext(servicePrincipalName))
-                {
-                    return context.RequestToken();
+                    // shows detailed ticket information.
+                    TicketDecoder decoder = new TicketDecoder();
+                    decoder.ShowKrbCredTicket(ticket.KerberosMessageBuffer);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine("Excetion from FindCachedTicket: " + ex.Message + "\n");
-                return null;
+                AADKerberosLogger.PrintLines(2);
+                AADKerberosLogger.Save("Kerberos Ticket handling is not supported for access token.");
             }
         }
 

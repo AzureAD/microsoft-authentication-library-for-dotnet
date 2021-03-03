@@ -5,7 +5,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Text;
 using static Microsoft.Identity.Client.Kerberos.Win32.NativeMethods;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
@@ -13,7 +12,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
     /// <summary>
     /// Provides a layer to interact with the LSA functions used to create logon sessions and manipulate the ticket caches.
     /// </summary>
-    public class LsaInterop : IDisposable
+    public class TicketCacheWriter : IDisposable
     {
         private const string KerberosPackageName = "Kerberos";
         private const string NegotiatePackageName = "Negotiate";
@@ -45,7 +44,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
          * pool of memory to create a working for the current operation. On dispose it zeros the memory and returns it to the pool.
          */
 
-        internal unsafe LsaInterop(LsaSafeHandle lsaHandle, string packageName = KerberosPackageName)
+        internal unsafe TicketCacheWriter(LsaSafeHandle lsaHandle, string packageName = KerberosPackageName)
         {
             this.lsaHandle = lsaHandle;
 
@@ -74,8 +73,8 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// Create a new instance of the interop as a standard unprivileged caller.
         /// </summary>
         /// <param name="package">The name of the LSA authentication package that will be interacted with.</param>
-        /// <returns>Returns an instance of the <see cref="LsaInterop"/> class.</returns>
-        public static LsaInterop Connect(string package = KerberosPackageName)
+        /// <returns>Returns an instance of the <see cref="TicketCacheWriter"/> class.</returns>
+        public static TicketCacheWriter Connect(string package = KerberosPackageName)
         {
             if (string.IsNullOrWhiteSpace(package))
             {
@@ -86,7 +85,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
             LsaThrowIfError(result);
 
-            return new LsaInterop(lsaHandle, package);
+            return new TicketCacheWriter(lsaHandle, package);
         }
 
         /// <summary>
@@ -164,7 +163,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// <summary>
         /// Deletes current object.
         /// </summary>
-        ~LsaInterop()
+        ~TicketCacheWriter()
         {
             this.Dispose(disposing: false);
         }
