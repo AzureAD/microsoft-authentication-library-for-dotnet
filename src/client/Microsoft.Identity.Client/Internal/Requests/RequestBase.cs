@@ -168,6 +168,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             apiEvent.IsTokenCacheSerialized = AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsTokenCacheSerialized();
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
+            apiEvent.CacheInfo = (int)CacheInfoTelemetry.None;
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);

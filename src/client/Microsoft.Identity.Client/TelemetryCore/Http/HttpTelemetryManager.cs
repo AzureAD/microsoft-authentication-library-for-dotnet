@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             }
 
             string data =
-                $"{TelemetryConstants.HttpTelemetrySchemaVersion2}|" +
+                $"{TelemetryConstants.HttpTelemetrySchemaVersion}|" +
                 $"{_successfulSilentCallCount}|" +
                 $"{failedRequests}|" +
                 $"{errors}|" +
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
         }
 
         /// <summary>
-        /// Expected format: 3|api_id,force_refresh,cache_refresh|platform_config
+        /// Expected format: 3|api_id,cache_info|platform_config
         /// platform_config: region,region_source,is_token_cache_serialized,user_provided_region,validate_use_region,fallback_to_global,is_legacy_cache_enabled
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
@@ -116,15 +116,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             }
 
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
-            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.CacheInfoKey, out string cacheInfo);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionDiscovered, out string regionDiscovered);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionSource, out string regionSource);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsTokenCacheSerializedKey, out string isTokenCacheSerialized);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.UserProvidedRegion, out string userProvidedRegion);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsValidUserProvidedRegion, out string isValidUserProvidedRegion);
-            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsLegacyCacheEnabledKey, out string isLegacyCacheEnabled);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.FallbackToGlobal, out string fallbackToGlobal);
-            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.CacheRefreshKey, out string cacheRefresh);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsLegacyCacheEnabledKey, out string isLegacyCacheEnabled);
 
             // Since regional fields will only be logged in case it is opted.
             var platformConfig = new StringBuilder();
@@ -137,8 +136,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             platformConfig.Append((string.IsNullOrEmpty(fallbackToGlobal) ? fallbackToGlobal : ConvertFromStringToBitwise(fallbackToGlobal)) + ",");
             platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled));
 
-            return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
-                $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)},{cacheRefresh}" +
+            return $"{TelemetryConstants.HttpTelemetrySchemaVersion}" +
+                $"|{apiId},{cacheInfo}" +
                 $"|{platformConfig}";
         }
 
