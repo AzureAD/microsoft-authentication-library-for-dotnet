@@ -9,7 +9,9 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -103,7 +105,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, "4|1004,2|centralus,1,0,,,0,1");
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D}|centralus,1,0,,,0,1");
 
         }
 
@@ -125,12 +127,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync(userProvidedRegion: TestConstants.Region).ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, "4|1004,2|centralus,1,0,centralus,1,0,1");
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D}|centralus,1,0,centralus,1,0,1");
 
             result = await GetAuthenticationResultAsync(userProvidedRegion: TestConstants.Region, withForceRefresh: true).ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory, 1);
-            AssertTelemetry(factory, "4|1004,1|centralus,3,0,centralus,,0,1", 1);
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.ForceRefresh:D}|centralus,3,0,centralus,,0,1", 1);
 
         }
 
@@ -152,12 +154,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync(userProvidedRegion: "invalid").ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, "4|1004,2|centralus,1,0,invalid,0,0,1");
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D}|centralus,1,0,invalid,0,0,1");
 
             result = await GetAuthenticationResultAsync(userProvidedRegion: TestConstants.Region, withForceRefresh: true).ConfigureAwait(false); // regional endpoint
             AssertTokenSource_IsIdP(result);
             AssertValidHost(true, factory, 1);
-            AssertTelemetry(factory, "4|1004,1|centralus,3,0,centralus,,0,1", 1);
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.ForceRefresh:D}|centralus,3,0,centralus,,0,1", 1);
            
         }
 
