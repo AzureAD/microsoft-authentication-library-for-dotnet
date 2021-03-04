@@ -111,6 +111,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         {
             using (var form = new WinFormsPanelWithWebView2(
                 _parent.OwnerWindow, 
+                _parent?.WebView2Options,
                 _requestContext.Logger, 
                 startUri, 
                 endUri))

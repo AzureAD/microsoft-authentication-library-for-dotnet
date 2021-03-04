@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
     internal class WinFormsPanelWithWebView2 : Form
     {
         private const int UIWidth = 566;
+        private readonly WebView2Options _webView2Options; // can be null
         private readonly ICoreLogger _logger;
         private readonly Uri _startUri;
         private readonly Uri _endUri;
@@ -34,14 +35,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
 
         public WinFormsPanelWithWebView2(
          object ownerWindow,
+         WebView2Options webView2Options,
          ICoreLogger logger,
          Uri startUri,
          Uri endUri)
         {
-            // TODO: title
-            _logger = logger;
-            _startUri = startUri;
-            _endUri = endUri;
+            _webView2Options = webView2Options; // can be null
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _startUri = startUri ?? throw new ArgumentNullException(nameof(startUri));
+            _endUri = endUri ?? throw new ArgumentNullException(nameof(endUri));
 
             if (ownerWindow == null)
             {
@@ -62,6 +64,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             }
 
             InitializeComponent();
+
+            _webView2.CreationProperties = new CoreWebView2CreationProperties() { 
+                    BrowserExecutableFolder = _webView2Options?.BrowserExecutableFolder 
+            };
+
         }
 
         public AuthorizationResult DisplayDialogAndInterceptUri()
@@ -253,12 +260,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             _webView2.CoreWebView2.Settings.IsScriptEnabled = true;
             _webView2.CoreWebView2.Settings.IsZoomControlEnabled = false;
             _webView2.CoreWebView2.Settings.IsStatusBarEnabled = true;
-            _webView2.CoreWebView2.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
+
+            if (_webView2Options?.Title == null)
+            {
+                _webView2.CoreWebView2.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
+            }
+            else
+            {
+                Text = _webView2Options.Title;
+            }
         }
 
         private void CoreWebView2_DocumentTitleChanged(object sender, object e)
         {
-            this.Text = _webView2.CoreWebView2.DocumentTitle ?? "";
+            Text = _webView2.CoreWebView2.DocumentTitle ?? "";
         }
     }
 }

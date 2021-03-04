@@ -77,6 +77,7 @@ namespace NetDesktopWinForms
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
                 //.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
+                .WithRedirectUri("http://localhost")
                 .WithMsaPassthrough(msaPt)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
@@ -245,6 +246,12 @@ namespace NetDesktopWinForms
             var scopes = GetScopes();
 
             var builder = pca.AcquireTokenInteractive(scopes)
+                .WithUseEmbeddedWebView(true)
+                .WithWebView2Options(
+                new WebView2Options() { 
+                    Title = "Hello world", 
+                    BrowserExecutableFolder = @"C:\Users\bogavril\Downloads\Microsoft.WebView2.FixedVersionRuntime.88.0.705.81.x64\Microsoft.WebView2.FixedVersionRuntime.88.0.705.81.x64"
+                })
                 .WithParentActivityOrWindow(this.Handle);
 
 

@@ -14,11 +14,11 @@ namespace Microsoft.Identity.Client.Desktop
     internal class MsalDesktopWebUiFactory : IWebUIFactory
     {
         private readonly bool _fallbackToLegacyWebBrowser;
-        private readonly Func<bool> _isWebView2AvailableFunc;
+        private readonly Func<string, bool> _isWebView2AvailableFunc;
 
         public MsalDesktopWebUiFactory(
             bool fallbackToLegacyWebBrowser = false,
-            Func<bool> isWebView2AvailableForTest = null)
+            Func<string, bool> isWebView2AvailableForTest = null)
         {
             _fallbackToLegacyWebBrowser = fallbackToLegacyWebBrowser;
             _isWebView2AvailableFunc = isWebView2AvailableForTest ?? IsWebView2Available;
@@ -26,7 +26,10 @@ namespace Microsoft.Identity.Client.Desktop
 
         public bool IsSystemWebViewAvailable => true;
 
-        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference useEmbeddedWebView, RequestContext requestContext)
+        public IWebUI CreateAuthenticationDialog(
+            CoreUIParent coreUIParent, 
+            WebViewPreference useEmbeddedWebView, 
+            RequestContext requestContext)
         {
             if (useEmbeddedWebView == WebViewPreference.System)
             {
@@ -37,7 +40,7 @@ namespace Microsoft.Identity.Client.Desktop
                     coreUIParent.SystemWebViewOptions);
             }
 
-            if (_isWebView2AvailableFunc())
+            if (_isWebView2AvailableFunc(coreUIParent?.WebView2Options?.BrowserExecutableFolder))
             {
                 requestContext.Logger.Info("Using WebView2 embedded browser");
                 return new WebView2WebUi(coreUIParent, requestContext);
@@ -57,9 +60,11 @@ namespace Microsoft.Identity.Client.Desktop
                 " If you are an app developer, please ensure that your app installs the WebView2 runtime https://docs.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution");
         }
 
-        private bool IsWebView2Available()
+
+        private bool IsWebView2Available(string browserExecutableFolder)
         {
-            string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString();
+            // if browserExecutableFolder is null, WebView2 SDK will choose global runtime, otherwise, a local runtime.
+            string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString(browserExecutableFolder);
             return !string.IsNullOrEmpty(wv2Version);
         }
     }
