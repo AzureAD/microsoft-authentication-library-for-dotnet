@@ -1,5 +1,6 @@
 # editorconfig.org
 # Copied from the .NET Core repo https://github.com/dotnet/corefx/blob/master/.editorconfig
+# NOTE: Requires **VS2019 16.3** or later
 
 # top-most EditorConfig file
 root = true
@@ -159,3 +160,234 @@ indent_size = 2
 end_of_line = lf
 [*.{cmd, bat}]
 end_of_line = crlf
+
+# MSAL Rules
+# Description: MSAL rules.
+
+# Code files
+[*.{cs,vb}]
+
+
+dotnet_diagnostic.AvoidAsyncSuffix.severity = none
+
+dotnet_diagnostic.AvoidAsyncVoid.severity = none
+
+dotnet_diagnostic.CA1000.severity = error
+
+dotnet_diagnostic.CA1001.severity = none
+
+dotnet_diagnostic.CA1008.severity = error
+
+dotnet_diagnostic.CA1010.severity = error
+
+dotnet_diagnostic.CA1012.severity = error
+
+dotnet_diagnostic.CA1016.severity = none
+
+dotnet_diagnostic.CA1017.severity = error
+
+dotnet_diagnostic.CA1018.severity = error
+
+dotnet_diagnostic.CA1027.severity = error
+
+dotnet_diagnostic.CA1028.severity = error
+
+dotnet_diagnostic.CA1030.severity = error
+
+dotnet_diagnostic.CA1032.severity = none
+
+dotnet_diagnostic.CA1033.severity = error
+
+dotnet_diagnostic.CA1034.severity = error
+
+dotnet_diagnostic.CA1036.severity = error
+
+dotnet_diagnostic.CA1040.severity = none
+
+dotnet_diagnostic.CA1041.severity = error
+
+dotnet_diagnostic.CA1043.severity = error
+
+dotnet_diagnostic.CA1044.severity = none
+
+dotnet_diagnostic.CA1050.severity = error
+
+dotnet_diagnostic.CA1051.severity = none
+
+dotnet_diagnostic.CA1052.severity = none
+
+dotnet_diagnostic.CA1054.severity = none
+
+dotnet_diagnostic.CA1055.severity = error
+
+dotnet_diagnostic.CA1056.severity = none
+
+dotnet_diagnostic.CA1058.severity = none
+
+dotnet_diagnostic.CA1061.severity = error
+
+dotnet_diagnostic.CA1063.severity = none
+
+dotnet_diagnostic.CA1064.severity = none
+
+dotnet_diagnostic.CA1065.severity = none
+
+dotnet_diagnostic.CA1066.severity = none
+
+dotnet_diagnostic.CA1067.severity = error
+
+dotnet_diagnostic.CA1068.severity = error
+
+dotnet_diagnostic.CA1200.severity = none
+
+dotnet_diagnostic.CA1304.severity = error
+
+dotnet_diagnostic.CA1305.severity = warning
+
+dotnet_diagnostic.CA1307.severity = none
+
+dotnet_diagnostic.CA1308.severity = none
+
+dotnet_diagnostic.CA1401.severity = none
+
+dotnet_diagnostic.CA1505.severity = error
+
+dotnet_diagnostic.CA1507.severity = none
+
+dotnet_diagnostic.CA1707.severity = none
+
+dotnet_diagnostic.CA1710.severity = none
+
+dotnet_diagnostic.CA1714.severity = none
+
+dotnet_diagnostic.CA1715.severity = none
+
+dotnet_diagnostic.CA1716.severity = none
+
+dotnet_diagnostic.CA1717.severity = none
+
+dotnet_diagnostic.CA1720.severity = none
+
+dotnet_diagnostic.CA1721.severity = none
+
+dotnet_diagnostic.CA1724.severity = none
+
+dotnet_diagnostic.CA1801.severity = none
+
+dotnet_diagnostic.CA1802.severity = none
+
+dotnet_diagnostic.CA1806.severity = none
+
+dotnet_diagnostic.CA1810.severity = none
+
+dotnet_diagnostic.CA1812.severity = none
+
+dotnet_diagnostic.CA1814.severity = none
+
+dotnet_diagnostic.CA1815.severity = none
+
+dotnet_diagnostic.CA1816.severity = none
+
+dotnet_diagnostic.CA1819.severity = none
+
+dotnet_diagnostic.CA1820.severity = none
+
+dotnet_diagnostic.CA1821.severity = none
+
+dotnet_diagnostic.CA1822.severity = none
+
+dotnet_diagnostic.CA1823.severity = none
+
+dotnet_diagnostic.CA1824.severity = none
+
+dotnet_diagnostic.CA1825.severity = none
+
+dotnet_diagnostic.CA1826.severity = none
+
+dotnet_diagnostic.CA2002.severity = none
+
+dotnet_diagnostic.CA2007.severity = none
+
+dotnet_diagnostic.CA2008.severity = none
+
+dotnet_diagnostic.CA2009.severity = none
+
+dotnet_diagnostic.CA2010.severity = none
+
+dotnet_diagnostic.CA2101.severity = none
+
+dotnet_diagnostic.CA2119.severity = none
+
+dotnet_diagnostic.CA2153.severity = error
+
+dotnet_diagnostic.CA2200.severity = none
+
+dotnet_diagnostic.CA2201.severity = error
+
+dotnet_diagnostic.CA2207.severity = none
+
+dotnet_diagnostic.CA2208.severity = none
+
+dotnet_diagnostic.CA2211.severity = none
+
+dotnet_diagnostic.CA2214.severity = none
+
+dotnet_diagnostic.CA2216.severity = none
+
+dotnet_diagnostic.CA2219.severity = none
+
+dotnet_diagnostic.CA2225.severity = none
+
+dotnet_diagnostic.CA2226.severity = none
+
+dotnet_diagnostic.CA2227.severity = none
+
+dotnet_diagnostic.CA2229.severity = none
+
+dotnet_diagnostic.CA2231.severity = none
+
+dotnet_diagnostic.CA2234.severity = none
+
+dotnet_diagnostic.CA2235.severity = none
+
+dotnet_diagnostic.CA2237.severity = none
+
+dotnet_diagnostic.CA2241.severity = none
+
+dotnet_diagnostic.CA2242.severity = none
+
+dotnet_diagnostic.CA2243.severity = none
+
+dotnet_diagnostic.CA2244.severity = none
+
+# SDL Required
+dotnet_diagnostic.CA3075.severity = error
+
+# SDL Required
+dotnet_diagnostic.CA3076.severity = error
+
+# Insecure XSLT script processing.
+# SDL Required
+dotnet_diagnostic.CA3077.severity = error
+
+# SDL Required
+dotnet_diagnostic.CA3147.severity = error
+
+# Insecure Processing in API Design, XmlDocument and XmlTextReader
+# SDL Required
+dotnet_diagnostic.CA5350.severity = error
+
+# Do Not Use Weak Cryptographic Algorithms
+# SDL Required
+dotnet_diagnostic.CA5351.severity = error
+
+dotnet_diagnostic.CA9999.severity = none
+
+# Do Not Use Broken Cryptographic Algorithms
+dotnet_diagnostic.SA1101.severity = none
+
+dotnet_diagnostic.SX1101.severity = error
+
+dotnet_diagnostic.UseAsyncSuffix.severity = error
+
+dotnet_diagnostic.UseConfigureAwait.severity = error
