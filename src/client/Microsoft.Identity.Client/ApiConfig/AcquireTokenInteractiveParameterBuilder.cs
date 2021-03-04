@@ -115,6 +115,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+    
         /// <summary>
         /// Specifies options for using the embedded wevbiew for interactive authentication.
         /// </summary>

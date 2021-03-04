@@ -242,7 +242,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             bool isInteractive,
             bool isAccountInWam)
         {
-            bool setLoginHint = isInteractive && !isAccountInWam && !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint);
+            string loginHint = !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint) ?
+                authenticationRequestParameters.LoginHint :
+                authenticationRequestParameters.Account?.Username;
+
+            bool setLoginHint = 
+                isInteractive && 
+                !isAccountInWam && 
+                !string.IsNullOrEmpty(loginHint);
+
             var wamPrompt = setLoginHint || (isInteractive && isForceLoginPrompt) ?
                 WebTokenRequestPromptType.ForceAuthentication :
                 WebTokenRequestPromptType.Default;

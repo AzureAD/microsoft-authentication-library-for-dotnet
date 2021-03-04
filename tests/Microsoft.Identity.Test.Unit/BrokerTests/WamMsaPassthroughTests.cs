@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     harness.CreateAuthenticationRequestParameters(
                         TestConstants.AuthorityHomeTenant,
                         validateAuthority: true);
-                requestParams.AppConfig.IsMsaPassthrough = true;
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
                 var msaRequest = new WebTokenRequest(msaProvider);
                 // step 1 - msa request
                 _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, true, false)
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     harness.CreateAuthenticationRequestParameters(
                         TestConstants.AuthorityHomeTenant,
                         validateAuthority: true);
-                requestParams.AppConfig.IsMsaPassthrough = true;
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
 
                 // step 1 - msa request
                 var msaRequest = new WebTokenRequest(msaProvider);
