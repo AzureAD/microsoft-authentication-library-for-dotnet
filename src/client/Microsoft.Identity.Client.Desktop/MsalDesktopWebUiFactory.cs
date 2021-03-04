@@ -63,9 +63,16 @@ namespace Microsoft.Identity.Client.Desktop
 
         private bool IsWebView2Available(string browserExecutableFolder)
         {
-            // if browserExecutableFolder is null, WebView2 SDK will choose global runtime, otherwise, a local runtime.
-            string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString(browserExecutableFolder);
-            return !string.IsNullOrEmpty(wv2Version);
+            try
+            {
+
+                string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString(browserExecutableFolder);
+                return !string.IsNullOrEmpty(wv2Version);
+            }
+            catch (WebView2RuntimeNotFoundException)
+            {
+                return false;
+            }
         }
     }
 }

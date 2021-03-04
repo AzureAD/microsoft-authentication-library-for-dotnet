@@ -49,8 +49,16 @@ namespace Microsoft.Identity.Client.Platforms.net5win
 
         private bool IsWebView2Available(string browserExecutableFolder)
         {
-            string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString(browserExecutableFolder);
-            return !string.IsNullOrEmpty(wv2Version);
+            try
+            {
+                string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString(browserExecutableFolder);
+                return !string.IsNullOrEmpty(wv2Version);
+            }
+            catch (WebView2RuntimeNotFoundException)
+            {
+                return false;
+            }
         }
     }
 }
+
