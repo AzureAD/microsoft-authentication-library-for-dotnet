@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client
         #if !SUPPORTS_WEBVIEW2 // currently only WebView2 allows customization
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         #endif
-        public AcquireTokenInteractiveParameterBuilder WithEmbeddedWebviewOptions(
+        public AcquireTokenInteractiveParameterBuilder WithEmbeddedWebViewOptions(
             EmbeddedWebViewOptions options)
         {
             EmbeddedWebViewOptions.ValidatePlatformAvailability();

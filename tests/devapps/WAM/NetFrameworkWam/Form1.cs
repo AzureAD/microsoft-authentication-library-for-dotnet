@@ -247,7 +247,7 @@ namespace NetDesktopWinForms
 
             var builder = pca.AcquireTokenInteractive(scopes)
                 .WithUseEmbeddedWebView(true)
-                .WithEmbeddedWebviewOptions(
+                .WithEmbeddedWebViewOptions(
                 new EmbeddedWebViewOptions() { 
                     Title = "Hello world",                     
                 })
