@@ -115,22 +115,21 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        // Remark: Default browser WebUI is not available on mobile (Android, iOS, UWP), but allow it at runtime
-        // to avoid MissingMethodException
         /// <summary>
-        /// Specifies options for using the system OS browser handle interactive authentication.
+        /// Specifies options for using the embedded wevbiew for interactive authentication.
         /// </summary>
         /// <param name="options">Data object with options</param>
         /// <returns>The builder to chain the .With methods</returns>
-#if !SUPPORTS_WEBVIEW2
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] // hide everywhere but NetStandard
-#endif
-        public AcquireTokenInteractiveParameterBuilder WithWebView2Options(WebView2Options options)
+        #if !SUPPORTS_WEBVIEW2 // currently only WebView2 allows customization
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        #endif
+        public AcquireTokenInteractiveParameterBuilder WithEmbeddedWebviewOptions(
+            EmbeddedWebViewOptions options)
         {
-            WebView2Options.ValidatePlatformAvailability();
+            EmbeddedWebViewOptions.ValidatePlatformAvailability();
 
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSystemBrowserOptions);
-            Parameters.UiParent.WebView2Options = options;
+            Parameters.UiParent.EmbeddedWebviewOptions = options;
             return this;
         }
 

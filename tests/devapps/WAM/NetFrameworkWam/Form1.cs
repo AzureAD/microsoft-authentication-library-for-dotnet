@@ -247,10 +247,9 @@ namespace NetDesktopWinForms
 
             var builder = pca.AcquireTokenInteractive(scopes)
                 .WithUseEmbeddedWebView(true)
-                .WithWebView2Options(
-                new WebView2Options() { 
-                    Title = "Hello world", 
-                    BrowserExecutableFolder = @"C:\Users\bogavril\Downloads\Microsoft.WebView2.FixedVersionRuntime.88.0.705.81.x64\Microsoft.WebView2.FixedVersionRuntime.88.0.705.81.x64"
+                .WithEmbeddedWebviewOptions(
+                new EmbeddedWebViewOptions() { 
+                    Title = "Hello world",                     
                 })
                 .WithParentActivityOrWindow(this.Handle);
 

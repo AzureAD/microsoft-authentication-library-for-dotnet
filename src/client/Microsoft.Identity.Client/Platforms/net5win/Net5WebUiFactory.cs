@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
             }
 
 
-            if (_isWebView2AvailableFunc(coreUIParent?.WebView2Options?.BrowserExecutableFolder))
+            if (_isWebView2AvailableFunc(coreUIParent?.EmbeddedWebviewOptions?.WebView2BrowserExecutableFolder))
             {
                 requestContext.Logger.Info("Using WebView2 embedded browser");
                 return new WebView2WebUi(coreUIParent, requestContext);

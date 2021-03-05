@@ -18,35 +18,39 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_WEBVIEW2
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-    public class WebView2Options
+    public class EmbeddedWebViewOptions
     {
         /// <summary>
-        /// Constructor
         /// </summary>
-        public WebView2Options()
+        public EmbeddedWebViewOptions()
         {
             ValidatePlatformAvailability();
+        }
+
+        internal static EmbeddedWebViewOptions GetDefaultOptions()
+        {
+            return new EmbeddedWebViewOptions();
         }
 
         /// <summary>
         /// Forces a static title to be set on the window hosting the browser. If not configured, the widow's title is set to the web page title.
         /// </summary>
+        /// <remarks>Currently only affects WebView2 browser on Windows.</remarks>
         public string Title { get; set; }
 
         /// <summary>
-        /// 
         /// It is possible for applications to bundle a fixed version of the runtime, and ship it side-by-side.
         /// For this you need to tell MSAL (so it can tell WebView2) where to find the runtime bits by setting this property. If you don't set it, MSAL will attempt to use a system-wide "evergreen" installation of the runtime."
         /// For more details see: https://docs.microsoft.com/en-us/dotnet/api/microsoft.web.webview2.core.corewebview2environment.createasync?view=webview2-dotnet-1.0.705.50
         /// </summary>
-        public string BrowserExecutableFolder { get; set; }
+        public string WebView2BrowserExecutableFolder { get; set; }
 
         internal void LogParameters(ICoreLogger logger)
         {
             logger.Info("WebView2Options configured");
 
             logger.Info($"Title: {Title}");
-            logger.InfoPii($"BrowserExecutableFolder: {BrowserExecutableFolder}", "BrowserExecutableFolder set");
+            logger.InfoPii($"BrowserExecutableFolder: {WebView2BrowserExecutableFolder}", "BrowserExecutableFolder set");
         }
 
         internal static void ValidatePlatformAvailability()
