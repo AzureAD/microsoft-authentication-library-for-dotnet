@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Microsoft.Identity.Client.Platforms.Features.Win32;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 info.dwDoubleClick = 0;
                 info.dwFlags = DOCHOSTUIFLAG_NO3DOUTERBORDER | DOCHOSTUIFLAG_DISABLE_SCRIPT_INACTIVE;
 
-                if (NativeDpiHelper.IsProcessDPIAware())
+                if (WindowsDpiHelper.IsProcessDPIAware())
                 {
                     info.dwFlags |= DOCHOSTUIFLAG_DPI_AWARE;
                 }
