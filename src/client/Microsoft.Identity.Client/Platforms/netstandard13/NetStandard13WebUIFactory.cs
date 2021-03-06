@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 
         public bool IsDesktopSession => DesktopOsHelper.IsDesktopSession();
 
-        public bool IsEmbeddedWebviewAvailable => throw new NotImplementedException();
+        public bool IsEmbeddedWebviewAvailable => false;
 
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference webViewPreference, RequestContext requestContext)
         {

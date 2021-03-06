@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
         }
 
-        public bool IsEmbeddedWebviewAvailable => throw new System.NotImplementedException();
+        public bool IsEmbeddedWebviewAvailable => IsDesktopSession; // WebBrowser control is always available
 
         public IWebUI CreateAuthenticationDialog(
             CoreUIParent coreUIParent,

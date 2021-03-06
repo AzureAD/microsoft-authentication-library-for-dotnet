@@ -26,7 +26,9 @@ namespace Microsoft.Identity.Client.Platforms.net5win
 
         public bool IsDesktopSession => DesktopOsHelper.IsDesktopSession();
 
-        public bool IsEmbeddedWebviewAvailable => throw new NotImplementedException();
+        public bool IsEmbeddedWebviewAvailable => 
+            IsDesktopSession &&
+            IsWebView2Available(null); // Look for the globally available WebView2 runtime
 
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference useEmbeddedWebView, RequestContext requestContext)
         {

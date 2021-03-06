@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
 
         public bool IsDesktopSession => DesktopOsHelper.IsDesktopSession();
 
-        public bool IsEmbeddedWebviewAvailable => throw new System.NotImplementedException();
+        public bool IsEmbeddedWebviewAvailable => false; 
 
         public IWebUI CreateAuthenticationDialog(
             CoreUIParent coreUIParent, 

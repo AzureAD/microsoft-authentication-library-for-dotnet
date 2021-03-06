@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Desktop
 
         public bool IsDesktopSession => DesktopOsHelper.IsDesktopSession();
 
-        public bool IsEmbeddedWebviewAvailable => throw new NotImplementedException();
+        public bool IsEmbeddedWebviewAvailable => IsDesktopSession && IsWebView2Available();
 
         public IWebUI CreateAuthenticationDialog(
             CoreUIParent coreUIParent, 
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Desktop
         }
 
 
-        private bool IsWebView2Available(string browserExecutableFolder)
+        private bool IsWebView2Available(string browserExecutableFolder = null)
         {
             try
             {
