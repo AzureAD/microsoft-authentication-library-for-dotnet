@@ -54,13 +54,47 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///
+        /// Returns true if MSAL can use a system browser.
         /// </summary>
+        /// <remarks>
+        /// On Windows, Mac and Linux a system browser can always be used, except in cases where there is no UI, e.g. SSH connection.
+        /// On Android, the browser must support tabs.
+        /// </remarks>
         public bool IsSystemWebViewAvailable
         {
             get
             {
                 return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsSystemWebViewAvailable;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if MSAL can use an embedded webview (browser). 
+        /// </summary>
+        /// <remarks>
+        /// Currently there are no embedded webviews on Mac and Linux. On Windows, app developers or users should install 
+        /// the WebView2 runtime and this helper will inform if the runtime is available, see https://aka.ms/msal-net-webview2
+        /// </remarks>
+        public bool IsEmbeddedWebViewAvailable
+        {
+            get
+            {
+                return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsEmbeddedWebviewAvailable;
+            }
+        }
+
+        /// <summary>
+        /// Returns false when the program runs in headless OS, for example when SSH-ed into a Linux machine.
+        /// Browsers (webviews) and brokers cannot be used if there is no UI support. Instead, please use <see cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>
+        /// </summary>
+        /// <remarks>
+        /// In cases where the library cannot reliably detect if a desktop session is available, this helper will return true.
+        /// </remarks>
+        public bool IsDesktopSession
+        {
+            get
+            {
+                return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsDesktopSession;
             }
         }
 

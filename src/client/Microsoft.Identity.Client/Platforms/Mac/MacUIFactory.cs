@@ -9,6 +9,10 @@ namespace Microsoft.Identity.Client.Platforms.Mac
     {
         public bool IsSystemWebViewAvailable => true;
 
+        public bool IsDesktopSession => true; 
+
+        public bool IsEmbeddedWebviewAvailable => true;
+
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference webViewPreference, RequestContext requestContext)
         {
             if (webViewPreference == WebViewPreference.System)

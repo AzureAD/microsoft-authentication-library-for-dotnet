@@ -11,6 +11,10 @@ namespace Microsoft.Identity.Client.Platforms.uap
     {
         public bool IsSystemWebViewAvailable => false;
 
+        public bool IsDesktopSession => true;
+
+        public bool IsEmbeddedWebviewAvailable => true;
+
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference webViewPreference, RequestContext requestContext)
         {
             if (webViewPreference == WebViewPreference.System)

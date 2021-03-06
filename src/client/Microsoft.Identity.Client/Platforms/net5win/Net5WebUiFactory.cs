@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
@@ -21,7 +22,11 @@ namespace Microsoft.Identity.Client.Platforms.net5win
             _isWebView2AvailableFunc = isWebView2AvailableForTest ?? IsWebView2Available;
         }
 
-        public bool IsSystemWebViewAvailable => true;
+        public bool IsSystemWebViewAvailable => IsDesktopSession;
+
+        public bool IsDesktopSession => DesktopOsHelper.IsDesktopSession();
+
+        public bool IsEmbeddedWebviewAvailable => throw new NotImplementedException();
 
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference useEmbeddedWebView, RequestContext requestContext)
         {
