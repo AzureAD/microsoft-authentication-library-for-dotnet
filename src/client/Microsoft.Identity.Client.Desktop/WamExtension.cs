@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Desktop
                     MsalErrorMessage.ExperimentalFeature(nameof(WithWindowsBroker)));
             }
 
-            builder.Config.IsBrokerEnabled = true;
+            builder.Config.IsBrokerEnabled = enableBroker;
             AddSupportForWam(builder);
             return builder;
         }

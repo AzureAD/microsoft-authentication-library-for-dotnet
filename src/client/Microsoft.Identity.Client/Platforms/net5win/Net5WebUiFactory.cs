@@ -14,9 +14,9 @@ namespace Microsoft.Identity.Client.Platforms.net5win
 {
     internal class Net5WebUiFactory : IWebUIFactory
     {
-        private readonly Func<bool> _isWebView2AvailableFunc;
+        private readonly Func<string, bool> _isWebView2AvailableFunc;
 
-        public Net5WebUiFactory(Func<bool> isWebView2AvailableForTest = null)
+        public Net5WebUiFactory(Func<string, bool> isWebView2AvailableForTest = null)
         {
             _isWebView2AvailableFunc = isWebView2AvailableForTest ?? IsWebView2Available;
         }
@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
             }
 
 
-            if (_isWebView2AvailableFunc())
+            if (_isWebView2AvailableFunc(coreUIParent?.EmbeddedWebviewOptions?.WebView2BrowserExecutableFolder))
             {
                 requestContext.Logger.Info("Using WebView2 embedded browser");
                 return new WebView2WebUi(coreUIParent, requestContext);
@@ -47,10 +47,18 @@ namespace Microsoft.Identity.Client.Platforms.net5win
                 " If you are an app developer, please ensure that your app installs the WebView2 runtime https://docs.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution");
         }
 
-        private bool IsWebView2Available()
+        private bool IsWebView2Available(string browserExecutableFolder)
         {
-            string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString();
-            return !string.IsNullOrEmpty(wv2Version);
+            try
+            {
+                string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString(browserExecutableFolder);
+                return !string.IsNullOrEmpty(wv2Version);
+            }
+            catch (WebView2RuntimeNotFoundException)
+            {
+                return false;
+            }
         }
     }
 }
+

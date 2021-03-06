@@ -27,6 +27,7 @@ namespace Microsoft.Identity.Client.UI
         internal SynchronizationContext SynchronizationContext { get; set; }
 
         internal SystemWebViewOptions SystemWebViewOptions { get; set; }
+        internal EmbeddedWebViewOptions EmbeddedWebviewOptions { get; set; }
 
 #if MAC
         /// <summary>

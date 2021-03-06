@@ -116,6 +116,24 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Specifies options for using the embedded wevbiew for interactive authentication.
+        /// </summary>
+        /// <param name="options">Data object with options</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        #if !SUPPORTS_WEBVIEW2 // currently only WebView2 allows customization
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        #endif
+        public AcquireTokenInteractiveParameterBuilder WithEmbeddedWebViewOptions(
+            EmbeddedWebViewOptions options)
+        {
+            EmbeddedWebViewOptions.ValidatePlatformAvailability();
+
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSystemBrowserOptions);
+            Parameters.UiParent.EmbeddedWebviewOptions = options;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the <paramref name="loginHint"/>, in order to avoid select account
         /// dialogs in the case the user is signed-in with several identities. This method is mutually exclusive
         /// with <see cref="WithAccount(IAccount)"/>. If both are used, an exception will be thrown
