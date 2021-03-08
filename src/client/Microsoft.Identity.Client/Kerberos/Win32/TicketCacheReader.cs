@@ -18,6 +18,11 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         private readonly SspiSecurityContext context;
         private bool disposedValue;
 
+        /// <summary>
+        /// Creates a <see cref="TicketCacheReader"/> object to read a Kerberos Ticket from Ticket Cache.
+        /// </summary>
+        /// <param name="spn">Service principal name of ticket to read out from Ticket Cache.</param>
+        /// <param name="package">The name of the LSA authentication package that will be interacted with.</param>
         public TicketCacheReader(string spn, string package = "Kerberos")
         {
             this.spn = spn;
@@ -25,6 +30,14 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             this.context = new SspiSecurityContext(Credential.Current(), package);
         }
 
+
+        /// <summary>
+        /// Read out a Kerberos Ticket.
+        /// </summary>
+        /// <returns>Byte stream of Kereros Ticket if exists. Null otherwise.</returns>
+        /// <remarks>
+        /// Can throws <see cref="Win32Exception"/> if any error occurs while interfacing with Ticket Cache.
+        /// </remarks>
         public byte[] RequestToken()
         {
             var status = this.context.InitializeSecurityContext(this.spn, out byte[] clientRequest);
@@ -37,6 +50,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             return clientRequest;
         }
 
+        /// <inheritdoc/>
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposedValue)
@@ -50,6 +64,9 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             }
         }
 
+        /// <summary>
+        /// Clean up all data members used for interaction with Ticket Cache.
+        /// </summary>
         public void Dispose()
         {
             this.Dispose(disposing: true);

@@ -5,6 +5,8 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Kerberos;
 
 using System;
+using System.ComponentModel;
+using System.Globalization;
 
 namespace KerberosConsole
 {
@@ -87,20 +89,13 @@ namespace KerberosConsole
                     ++i;
                     try
                     {
-                        LogonId = long.Parse(args[1]);
+                        LogonId = long.Parse(args[1], NumberStyles.None | NumberStyles.AllowHexSpecifier, NumberFormatInfo.InvariantInfo);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        try
-                        {
-                            LogonId = Convert.ToInt64(args[i], 16);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("-luid should be a long number or HEX format string!");
-                            Console.WriteLine(ex);
-                            return false;
-                        }
+                        Console.WriteLine("-luid should be a long number or HEX format string!");
+                        Console.WriteLine(ex);
+                        return false;
                     }
                 }
                 else
@@ -129,22 +124,28 @@ namespace KerberosConsole
 
         public bool ShowCachedTicket()
         {
-            string errorMessage;
-            byte[] ticket = KerberosTicketManager.GetKerberosTicketFromCache(KerberosServicePrincipalName, out errorMessage, LogonId);
-            if (ticket != null && ticket.Length > 32)
+            try
             {
-                var encode = Convert.ToBase64String(ticket);
+                byte[] ticket = KerberosSupplementalTicketManager.GetKerberosTicketFromCache(KerberosServicePrincipalName, LogonId);
+                if (ticket != null && ticket.Length > 32)
+                {
+                    var encode = Convert.ToBase64String(ticket);
 
-                AADKerberosLogger.PrintLines(2);
-                AADKerberosLogger.Save("---Find cached Ticket:");
-                AADKerberosLogger.Save(encode);
+                    AADKerberosLogger.PrintLines(2);
+                    AADKerberosLogger.Save("---Find cached Ticket:");
+                    AADKerberosLogger.Save(encode);
 
-                TicketDecoder decoder = new TicketDecoder();
-                decoder.ShowApReqTicket(encode);
-                return true;
+                    TicketDecoder decoder = new TicketDecoder();
+                    decoder.ShowApReqTicket(encode);
+                    return true;
+                }
+
+                Console.WriteLine($"There's no ticket associated with '{KerberosServicePrincipalName}'");
             }
-
-            Console.WriteLine($"ERROR while finding Kerberos Ticket for '{KerberosServicePrincipalName}': {errorMessage}");
+            catch (Win32Exception ex)
+            {
+                Console.WriteLine($"ERROR while finding Kerberos Ticket for '{KerberosServicePrincipalName}': {ex.Message}");
+            }
             return false;
         }
 
@@ -167,7 +168,7 @@ namespace KerberosConsole
             KerberosSupplementalTicket ticket;
             if (TicketContainer == KerberosTicketContainer.IdToken)
             {
-                ticket = KerberosTicketManager.FromIdToken(result.IdToken);
+                ticket = KerberosSupplementalTicketManager.FromIdToken(result.IdToken);
                 if (ticket == null)
                 {
                     AADKerberosLogger.Save("ERROR: There's no Kerberos Ticket information within the AuthResult.");
@@ -177,14 +178,14 @@ namespace KerberosConsole
                 {
                     AADKerberosLogger.PrintLines(2);
 
-                    string errorMessage;
-                    if (KerberosTicketManager.SaveToCache(ticket, out errorMessage, LogonId))
+                    try
                     {
+                        KerberosSupplementalTicketManager.SaveToCache(ticket, LogonId);
                         AADKerberosLogger.Save("---Kerberos Ticket cached into user's Ticket Cache\n");
                     }
-                    else
+                    catch (Win32Exception ex)
                     {
-                        AADKerberosLogger.Save("---Kerberos Ticket caching failed: " + errorMessage);
+                        AADKerberosLogger.Save("---Kerberos Ticket caching failed: " + ex.Message);
                     }
 
                     AADKerberosLogger.PrintLines(2);

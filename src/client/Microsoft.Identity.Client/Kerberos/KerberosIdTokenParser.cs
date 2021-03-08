@@ -10,7 +10,7 @@ using System.Text;
 namespace Microsoft.Identity.Client.Kerberos
 {
     /// <summary>
-    /// Utility class to parse raw JWT token string and read each payload fields.
+    /// Utility class to parse raw JWT token string and read out the payload field.
     /// </summary>
     internal class KerberosIdTokenParser
     {
