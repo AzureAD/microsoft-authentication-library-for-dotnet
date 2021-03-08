@@ -63,6 +63,16 @@ namespace Microsoft.Identity.Client.Utils
 
             return sb.ToString();
         }
+
+#if NETSTANDARD1_3
+        /// <summary>
+        /// Culture aware Contains
+        /// </summary>
+        public static bool Contains(this string source, string toCheck, StringComparison comp)
+        {
+            return source != null && toCheck != null && source.IndexOf(toCheck, comp) >= 0;
+        }
+#endif
     }
 }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 {
@@ -37,9 +38,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             }
 #else
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                && !RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.InvariantCultureIgnoreCase)
-                && !RuntimeInformation.OSDescription.Contains("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase)
-                && !RuntimeInformation.OSDescription.Contains("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase))
+                && !RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.OrdinalIgnoreCase)
+                && !RuntimeInformation.OSDescription.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase)
+                && !RuntimeInformation.OSDescription.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
             {               
                 return true;
             }
