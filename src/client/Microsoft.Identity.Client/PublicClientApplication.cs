@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
         }
 
         private const string CurrentOSAccountDescriptor = "current_os_account";
-        private static IAccount s_currentOsAccount = 
+        private static IAccount s_currentOsAccount =
             new Account(CurrentOSAccountDescriptor, null, null, null);
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
         /// On Windows, Mac and Linux a system browser can always be used, except in cases where there is no UI, e.g. SSH connection.
         /// On Android, the browser must support tabs.
         /// </remarks>
-        public bool IsSystemWebViewAvailable
+        public bool IsSystemWebViewAvailable // TODO MSAL5: consolidate these helpers in the interface
         {
             get
             {
@@ -73,29 +73,34 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>
         /// Currently there are no embedded webviews on Mac and Linux. On Windows, app developers or users should install 
-        /// the WebView2 runtime and this helper will inform if the runtime is available, see https://aka.ms/msal-net-webview2
+        /// the WebView2 runtime and this property will inform if the runtime is available, see https://aka.ms/msal-net-webview2
         /// </remarks>
-        public bool IsEmbeddedWebViewAvailable
+        public bool IsEmbeddedWebViewAvailable()
         {
-            get
-            {
-                return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsEmbeddedWebviewAvailable;
-            }
+            return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsEmbeddedWebviewAvailable;
         }
 
         /// <summary>
         /// Returns false when the program runs in headless OS, for example when SSH-ed into a Linux machine.
         /// Browsers (webviews) and brokers cannot be used if there is no UI support. Instead, please use <see cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>
         /// </summary>
-        /// <remarks>
-        /// In cases where the library cannot reliably detect if a desktop session is available, this helper will return true.
-        /// </remarks>
-        public bool IsDesktopSession
+        public bool IsDesktopSession()
         {
-            get
-            {
-                return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsDesktopSession;
-            }
+            return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsDesktopSession;
+        }
+
+        /// <summary>
+        /// Returns true if a broker can be used. 
+        /// </summary>
+        /// <remarks>
+        /// On Windows, the broker (WAM) can be used on Win10 and is always installed.
+        /// On Mac, Linux and older versions of Windows a broker is not available.
+        /// On mobile, the device must be Intune joined and Authenticator or Company Portal must be installed.
+        /// </remarks>
+        public bool IsBrokerAvailable()
+        {
+            return
+                ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null).IsBrokerInstalledAndInvokable();
         }
 
         /// <summary>

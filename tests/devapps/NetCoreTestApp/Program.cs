@@ -93,7 +93,11 @@ namespace NetCoreTestApp
             while (true)
             {
                 Console.Clear();
-
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine($"" +
+                    $"IsDesktopSession: {pca.IsDesktopSession()}, " +
+                    $"IsEmbeddedWebViewAvailable: {pca.IsEmbeddedWebViewAvailable()} " +
+                    $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}");
                 Console.WriteLine("Authority: " + GetAuthority());
                 await DisplayAccountsAsync(pca).ConfigureAwait(false);
 

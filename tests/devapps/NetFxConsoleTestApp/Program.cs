@@ -92,6 +92,9 @@ namespace NetFx
             Console.ResetColor();
             Console.BackgroundColor = ConsoleColor.Black;
             var pca = CreatePca();
+
+           
+
             await RunConsoleAppLogicAsync(pca).ConfigureAwait(false);
         }
 
@@ -178,6 +181,11 @@ namespace NetFx
             {
                 Console.Clear();
 
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine($"" +
+                    $"IsDesktopSession: {pca.IsDesktopSession()}, " +
+                    $"IsEmbeddedWebViewAvailable: {pca.IsEmbeddedWebViewAvailable()} " +
+                    $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}");
                 Console.WriteLine("Authority: " + GetAuthority());
                 Console.WriteLine("Use WAM: " + s_useBroker);
                 await DisplayAccountsAsync(pca).ConfigureAwait(false);
