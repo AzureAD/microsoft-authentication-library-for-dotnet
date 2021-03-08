@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new PlatformNotSupportedException(
                     "If you have a Windows application which targets net5 or net5-windows, please change the target to net5-windows10.0.17763.0, which provides support from Win7 to Win10. For details see https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md" +
-                    "If you have a cross-platform (Windows, Mac, Linux) application which targets net5, please dual target net5 and net5-windows. Your installer should deploy the net5 version on Mac and Linux and the net5-window10.0.17763.0 on Win7-Win10. For details see https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md" +
+                    "If you have a cross-platform (Windows, Mac, Linux) application which targets net5, please dual target net5 and net5-windows10.0.17763.0. Your installer should deploy the net5 version on Mac and Linux and the net5-window10.0.17763.0 on Win7-Win10. For details see https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md" +
                     "If you have a .NET Core 3.1 application, please install the nuget package named Microsoft.Identity.Client.Desktop and call the extension method .WithDesktopFeatures() first.");
             }
 #endif
