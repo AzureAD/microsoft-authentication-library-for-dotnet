@@ -29,9 +29,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
             string OSInfo = (string)reg.GetValue("ProductName");
 
-            if (OSInfo.IndexOf("Windows 10", StringComparison.InvariantCultureIgnoreCase) > 0
-                || OSInfo.IndexOf("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase) > 0
-                || OSInfo.IndexOf("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase) > 0)
+            if (OSInfo.Contains("Windows 10", StringComparison.InvariantCultureIgnoreCase) ||
+                OSInfo.Contains("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase) ||
+                OSInfo.Contains("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase))
             {                
                 return true;
             }

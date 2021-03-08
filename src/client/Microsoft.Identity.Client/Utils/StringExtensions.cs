@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Utils
             return sb.ToString();
         }
 
-#if NETSTANDARD1_3
+#if NETSTANDARD1_3 || DESKTOP
         /// <summary>
         /// Culture aware Contains
         /// </summary>
