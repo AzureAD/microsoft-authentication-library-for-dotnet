@@ -5,11 +5,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using System.Linq;
-using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -36,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-            CacheRefresh cacheRefresh = CacheRefresh.None;
+            CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
             MsalAccessTokenCacheItem msalAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
@@ -64,17 +63,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         TokenSource.Cache);
                 }
 
-                cacheRefresh = (msalAccessTokenItem == null) ? CacheRefresh.NoCachedAT : CacheRefresh.RefreshIn;
+                cacheInfoTelemetry = (msalAccessTokenItem == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.RefreshIn;
             }
             else
             {
                 logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
-                cacheRefresh = CacheRefresh.ForceRefresh;
+                cacheInfoTelemetry = CacheInfoTelemetry.ForceRefresh;
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh == null)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfoTelemetry.None)
             {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int)cacheRefresh;
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }
 
             // No AT in the cache or AT needs to be refreshed

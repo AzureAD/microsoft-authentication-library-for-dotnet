@@ -326,13 +326,13 @@ namespace Microsoft.Identity.Client
             // perf: take a snapshot as calling Count(), Any() etc. on the IEnumerable evaluates it each time
             IReadOnlyList<MsalAccessTokenCacheItem> finalList = tokenCacheItems.ToList();
 
-            CacheRefresh cacheRefresh = CacheRefresh.None;
+            CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
 
             // no match
             if (finalList.Count == 0)
             {
                 logger.Verbose("No tokens found for matching authority, client_id, user and scopes.");
-                cacheRefresh = CacheRefresh.NoCachedAT;
+                cacheInfoTelemetry = CacheInfoTelemetry.NoCachedAT;
                 return null;
             }
 
@@ -342,10 +342,10 @@ namespace Microsoft.Identity.Client
 
             if (msalAccessTokenCacheItem == null)
             {
-                cacheRefresh = CacheRefresh.Expired;
+                cacheInfoTelemetry = CacheInfoTelemetry.Expired;
             }
 
-            requestParams.RequestContext.ApiEvent.CacheRefresh = (int) cacheRefresh;
+            requestParams.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
 
             return msalAccessTokenCacheItem; 
         }
