@@ -30,16 +30,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             string OSInfo = (string)reg.GetValue("ProductName");
 
             if (OSInfo.IndexOf("Windows 10", StringComparison.InvariantCultureIgnoreCase) > 0
-                && OSInfo.IndexOf("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase) > 0
-                && OSInfo.IndexOf("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase) > 0)
+                || OSInfo.IndexOf("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase) > 0
+                || OSInfo.IndexOf("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase) > 0)
             {                
                 return true;
             }
 #else
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                && RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.OrdinalIgnoreCase)
-                && RuntimeInformation.OSDescription.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase)
-                && RuntimeInformation.OSDescription.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
+            if (RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.OrdinalIgnoreCase)
+                || RuntimeInformation.OSDescription.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase)
+                || RuntimeInformation.OSDescription.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
             {               
                 return true;
             }
