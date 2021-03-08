@@ -15,6 +15,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
@@ -80,6 +81,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);
             Assert.AreEqual(TestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
+        }
+
+        [TestMethod]
+        public void IsBrokerAvailable()
+        {
+            var app = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .Build();
+
+            Assert.AreEqual(app.IsBrokerAvailable(), DesktopOsHelper.IsWin10OrServerEquivalent());
         }
 
         [TestMethod]

@@ -18,6 +18,44 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 #endif
         }
 
+        private static bool IsWin10OrServerEquivalentInternal()
+        {
+            //Environment.OSVersion as it will return incorrect information on some operating systems
+            //For more information on how to acquire the current OS version from the registry
+            //See (https://stackoverflow.com/a/61914068)
+#if DESKTOP
+            var reg = Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+
+            string OSInfo = (string)reg.GetValue("ProductName");
+
+            if (OSInfo.IndexOf("Windows", StringComparison.InvariantCultureIgnoreCase) >= 0
+                && OSInfo.IndexOf("Windows 10", StringComparison.InvariantCultureIgnoreCase) < 0
+                && OSInfo.IndexOf("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase) < 0
+                && OSInfo.IndexOf("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase) < 0)
+            {                
+                return true;
+            }
+#else
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && !RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.InvariantCultureIgnoreCase)
+                && !RuntimeInformation.OSDescription.Contains("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase)
+                && !RuntimeInformation.OSDescription.Contains("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase))
+            {               
+                return true;
+            }
+#endif
+     
+            return false;
+        }
+
+        private static Lazy<bool> s_win10OrServerEquivalentLazy = new Lazy<bool>(
+            () => IsWin10OrServerEquivalentInternal());
+
+        public static bool IsWin10OrServerEquivalent()
+        {
+            return s_win10OrServerEquivalentLazy.Value;
+        }
+
         public static bool IsLinux()
         {
 #if DESKTOP

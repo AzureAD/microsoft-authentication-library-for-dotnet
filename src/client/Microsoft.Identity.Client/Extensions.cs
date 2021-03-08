@@ -65,6 +65,25 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Returns true if a broker can be used. 
+        /// </summary>
+        /// <remarks>
+        /// On Windows, the broker (WAM) can be used on Win10 and is always installed.
+        /// On Mac, Linux and older versions of Windows a broker is not available.
+        /// On mobile, the device must be Intune joined and Authenticator or Company Portal must be installed.
+        /// </remarks>
+        public static bool IsBrokerAvailable(this IPublicClientApplication publicClientApplication)
+        {
+            if (publicClientApplication is PublicClientApplication pca)
+            {
+                return pca.IsBrokerAvailable();
+            }
+
+            throw new ArgumentException("This extension method is only available for the PublicClientApplication implementation " +
+                "of the IPublicClientApplication interface.");
+        }
+
+        /// <summary>
         /// Returns the certificate used to create this <see cref="ConfidentialClientApplication"/>, if any.
         /// </summary>
         public static X509Certificate2 GetCertificate(this IConfidentialClientApplication confidentialClientApplication)

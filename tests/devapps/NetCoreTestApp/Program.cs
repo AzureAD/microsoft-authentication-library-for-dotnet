@@ -97,7 +97,8 @@ namespace NetCoreTestApp
                 Console.WriteLine($"" +
                     $"IsDesktopSession: {pca.IsDesktopSession()}, " +
                     $"IsEmbeddedWebViewAvailable: {pca.IsEmbeddedWebViewAvailable()} " +
-                    $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}");
+                    $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}" + 
+                    $"IsBrokerAvailable: {pca.IsBrokerAvailable()}" );
                 Console.WriteLine("Authority: " + GetAuthority());
                 await DisplayAccountsAsync(pca).ConfigureAwait(false);
 
