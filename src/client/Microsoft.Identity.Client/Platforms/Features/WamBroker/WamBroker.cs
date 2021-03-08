@@ -28,11 +28,15 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 #if DESKTOP || NET5_WIN
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Runtime.Versioning;
 #endif
 
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
+#if NET5_WIN
+    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
+#endif
     internal class WamBroker : IBroker
     {
         private readonly IWamPlugin _aadPlugin;

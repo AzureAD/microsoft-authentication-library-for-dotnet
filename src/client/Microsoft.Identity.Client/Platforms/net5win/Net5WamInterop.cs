@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Runtime.Versioning;
 using Windows.Foundation;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
@@ -13,6 +14,7 @@ using WinRT;
 
 namespace Microsoft.Identity.Client.Platforms.net5win
 {
+    [SupportedOSPlatform("windows10.0.17763.0")]
     internal static class WebAuthenticationCoreManagerInterop
     {
         public static IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr hWnd, WebTokenRequest request)
@@ -139,6 +141,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
     }
 
     //Helper to initialize AccountsSettingsPane
+    [SupportedOSPlatform("windows10.0.17763.0")]
     internal static class AccountsSettingsPaneInterop
     {
         [STAThread]
