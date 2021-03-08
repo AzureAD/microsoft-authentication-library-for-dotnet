@@ -2,6 +2,8 @@
 # Copied from the .NET Core repo https://github.com/dotnet/corefx/blob/master/.editorconfig
 # NOTE: Requires **VS2019 16.3** or later
 
+#These configuration override the config in the top most SDL editorconfig for a more personalized code style while maintaining required SDL rules
+
 # Default settings:
 # A newline ending every file
 # Use 4 spaces as indentation
@@ -240,3 +242,7 @@ dotnet_diagnostic.SX1101.severity = error
 dotnet_diagnostic.UseAsyncSuffix.severity = error
 
 dotnet_diagnostic.UseConfigureAwait.severity = error
+
+dotnet_diagnostic.AvoidAsyncSuffix.severity = none
+
+dotnet_diagnostic.AvoidAsyncVoid.severity = none

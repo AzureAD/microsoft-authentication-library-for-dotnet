@@ -3,7 +3,7 @@
 # Microsoft SDL Roslyn Rules - Required and Recommended (Error) PreRelease version
 # Description: This rule set contains all Microsoft SDL required and recommended rules for Microsoft.CodeAnalysis.NetAnalyzers v5.0.3 (and Microsoft.CodeAnalysis.FxCopAnalyzers), configured to error rather than warn.  Generated 2021-02-08T19:40:15Z.
 
-# top-most EditorConfig file
+# top-most EditorConfig file for the entire solution
 root = true
 
 # Code files
