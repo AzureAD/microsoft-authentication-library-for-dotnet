@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         public const int ErrorSecInteractionNotAllowed = -25308;
         public const int ErrorSecInteractionRequired = -25315;
         public const int ErrorSecNoSuchAttr = -25303;
-  
+
     }
 
     [Flags]
@@ -199,8 +199,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         public static IntPtr GetGlobal(IntPtr handle, string symbol)
         {
             IntPtr ptr = dlsym(handle, symbol);
+#if NET45
             var structure = Marshal.PtrToStructure(ptr, typeof(IntPtr));
-
+#else
+            var structure = Marshal.PtrToStructure<IntPtr>(ptr);
+#endif
             return (IntPtr)structure;
         }
     }
