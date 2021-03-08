@@ -83,15 +83,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
         }
 
-        [TestMethod]
-        public void IsBrokerAvailable()
-        {
-            var app = PublicClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .Build();
-
-            Assert.AreEqual(app.IsBrokerAvailable(), DesktopOsHelper.IsWin10OrServerEquivalent());
-        }
+       
 
         [TestMethod]
         public async Task NoStateReturnedTestAsync()
