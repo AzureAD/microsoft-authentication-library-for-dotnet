@@ -14,9 +14,9 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
     {
         public bool IsSystemWebViewAvailable => false;
 
-        public bool IsDesktopSession => DesktopOsHelper.IsDesktopSession();
+        public bool IsUserInteractive => DesktopOsHelper.IsUserInteractive();
 
-        public bool IsEmbeddedWebviewAvailable => false;
+        public bool IsEmbeddedWebViewAvailable => false;
 
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference webViewPreference, RequestContext requestContext)
         {

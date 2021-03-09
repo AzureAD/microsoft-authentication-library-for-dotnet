@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -73,7 +76,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 #endif
         }
 
-        private static unsafe bool IsWindowsDesktopSession()
+        private static unsafe bool IsInteractiveSessionWindows()
         {
             // Environment.UserInteractive is hard-coded to return true for POSIX and Windows platforms on .NET Core 2.x and 3.x.
             // In .NET 5 the implementation on Windows has been 'fixed', but still POSIX versions always return true.
@@ -100,7 +103,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
         }
 
-        private static bool IsMacDesktopSession()
+        private static bool IsInteractiveSessionMac()
         {
             // Get information about the current session
             int error = SecurityFramework.SessionGetInfo(SecurityFramework.CallerSecuritySession, out int id, out var sessionFlags);
@@ -112,27 +115,27 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             }
 
             // Fall-through and check if X11 is available on macOS
-            return IsLinuxDesktopSession();
+            return IsInteractiveSessionLinux();
         }
 
-        private static bool IsLinuxDesktopSession()
+        private static bool IsInteractiveSessionLinux()
         {
             return !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DISPLAY"));
         }
 
-        public static bool IsDesktopSession()
+        public static bool IsUserInteractive()
         {
             if (IsWindows())
             {
-                return IsWindowsDesktopSession();
+                return IsInteractiveSessionWindows();
             }
             if (IsMac())
             {
-                return IsMacDesktopSession();
+                return IsInteractiveSessionMac();
             }
             if (IsLinux())
             {
-                return IsLinuxDesktopSession();
+                return IsInteractiveSessionLinux();
             }
 
             throw new PlatformNotSupportedException();

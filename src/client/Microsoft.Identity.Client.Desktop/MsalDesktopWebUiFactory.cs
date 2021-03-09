@@ -25,11 +25,11 @@ namespace Microsoft.Identity.Client.Desktop
             _isWebView2AvailableFunc = isWebView2AvailableForTest ?? IsWebView2Available;
         }
 
-        public bool IsSystemWebViewAvailable => IsDesktopSession;
+        public bool IsSystemWebViewAvailable => IsUserInteractive;
 
-        public bool IsDesktopSession => DesktopOsHelper.IsDesktopSession();
+        public bool IsUserInteractive => DesktopOsHelper.IsUserInteractive();
 
-        public bool IsEmbeddedWebviewAvailable => IsDesktopSession && IsWebView2Available();
+        public bool IsEmbeddedWebViewAvailable => IsUserInteractive && IsWebView2Available();
 
         public IWebUI CreateAuthenticationDialog(
             CoreUIParent coreUIParent, 

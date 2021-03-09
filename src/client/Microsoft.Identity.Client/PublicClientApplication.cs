@@ -77,16 +77,16 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool IsEmbeddedWebViewAvailable()
         {
-            return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsEmbeddedWebviewAvailable;
+            return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsEmbeddedWebViewAvailable;
         }
 
         /// <summary>
         /// Returns false when the program runs in headless OS, for example when SSH-ed into a Linux machine.
         /// Browsers (webviews) and brokers cannot be used if there is no UI support. Instead, please use <see cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>
         /// </summary>
-        public bool IsDesktopSession()
+        public bool IsUserInteractive()
         {
-            return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsDesktopSession;
+            return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsUserInteractive;
         }
 
         /// <summary>

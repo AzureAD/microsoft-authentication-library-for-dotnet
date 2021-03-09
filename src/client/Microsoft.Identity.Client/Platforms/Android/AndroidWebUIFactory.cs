@@ -56,9 +56,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
         }
 
-        public bool IsDesktopSession => true;
+        public bool IsUserInteractive => true;
 
-        public bool IsEmbeddedWebviewAvailable => true;
+        public bool IsEmbeddedWebViewAvailable => true;
 
         private static bool IsBrowserWithCustomTabSupportAvailable()
         {

@@ -13,17 +13,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class NetDesktopWebUIFactory : IWebUIFactory
     {
-        public bool IsSystemWebViewAvailable => IsDesktopSession;
+        public bool IsSystemWebViewAvailable => IsUserInteractive;
 
-        public bool IsDesktopSession
-        {
-            get
-            {
-                return DesktopOsHelper.IsDesktopSession();
-            }
-        }
+        public bool IsUserInteractive => DesktopOsHelper.IsUserInteractive();
 
-        public bool IsEmbeddedWebviewAvailable => IsDesktopSession; // WebBrowser control is always available
+        public bool IsEmbeddedWebViewAvailable => IsUserInteractive; // WebBrowser control is always available
 
         public IWebUI CreateAuthenticationDialog(
             CoreUIParent coreUIParent,

@@ -11,11 +11,11 @@ namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
 {
     internal class NetCoreWebUIFactory : IWebUIFactory
     {
-        public bool IsSystemWebViewAvailable => IsDesktopSession;
+        public bool IsSystemWebViewAvailable => IsUserInteractive;
 
-        public bool IsDesktopSession => DesktopOsHelper.IsDesktopSession();
+        public bool IsUserInteractive => DesktopOsHelper.IsUserInteractive();
 
-        public bool IsEmbeddedWebviewAvailable => false; 
+        public bool IsEmbeddedWebViewAvailable => false; 
 
         public IWebUI CreateAuthenticationDialog(
             CoreUIParent coreUIParent, 
