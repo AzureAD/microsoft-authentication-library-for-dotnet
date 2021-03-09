@@ -126,9 +126,12 @@ namespace NetFx
             var builder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
+#if NET47
+                    .WithDesktopFeatures()
+#endif
                             .WithLogging(Log, LogLevel.Verbose, true);
-                            //.WithClientCapabilities(new[] { "llt" })
-                            //.WithRedirectUri("http://localhost"); // required for DefaultOsBrowser
+
+            Console.WriteLine($"IsBrokerAvailable: {builder.IsBrokerAvailable()}");
 
             if (s_useBroker)
             {
@@ -139,9 +142,7 @@ namespace NetFx
                     .WithParentActivityOrWindow(c)
                     .WithExperimentalFeatures()
                     
-#if NET47
-                    .WithWindowsBroker(true)
-#endif
+
                     .WithBroker(true);
             }
 
@@ -185,8 +186,8 @@ namespace NetFx
                 Console.WriteLine($"" +
                      $"IsDesktopSession: {pca.IsDesktopSession()}, " +
                      $"IsEmbeddedWebViewAvailable: {pca.IsEmbeddedWebViewAvailable()} " +
-                     $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}" +
-                     $"IsBrokerAvailable: {pca.IsBrokerAvailable()}");
+                     $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}");
+                     
                 Console.WriteLine("Authority: " + GetAuthority());
                 Console.WriteLine("Use WAM: " + s_useBroker);
                 await DisplayAccountsAsync(pca).ConfigureAwait(false);

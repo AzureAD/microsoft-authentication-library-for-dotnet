@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
         /// <remarks>If your app uses .NET classic or .NET Core 3.x, and you wish to use the Windows broker, 
-        /// please install the nuget package Microsoft.Identity.Client.Desktop and call .WithWindowsBroker(true)</remarks>
+        /// please install the nuget package Microsoft.Identity.Client.Desktop and call .WithDesktopFeatures()</remarks>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
 #if NET45
@@ -276,6 +276,23 @@ namespace Microsoft.Identity.Client
             return WithParentFunc(() => (object)windowFunc());
         }
 #endif
+
+        /// <summary>
+        /// Returns true if a broker can be used. 
+        /// </summary>
+        /// <remarks>
+        /// On Windows, the broker (WAM) can be used on Win10 and is always installed. See https://aka.ms/msal-net-wam
+        /// On Mac, Linux and older versions of Windows a broker is not available.
+        /// If your application is .NET5, please use the target .net5.0-windows10.0.17763.0 for all Windows versions and target net5.0 to target Linux and Mac.
+        /// If your application is .NET classic or .NET Core 3.1 and you wish to use the Windows Broker, please install Microsoft.Identity.Client.Desktop first and call WithDesktopFeatures().
+        /// 
+        /// On mobile, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers
+        /// </remarks>
+        public bool IsBrokerAvailable()
+        {            
+            return PlatformProxyFactory.CreatePlatformProxy(null)
+                .CreateBroker(base.Config, null).IsBrokerInstalledAndInvokable();
+        }
 
         /// <summary>
         /// </summary>

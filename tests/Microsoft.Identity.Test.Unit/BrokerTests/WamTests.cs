@@ -83,38 +83,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _msaPassthroughHandler);
         }
 
-#if NET5_WIN
-        [TestMethod]
-        public void IsBrokerAvailable_net5()
-        {
-            var app = PublicClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .Build();
 
-            Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), app.IsBrokerAvailable());
-        }
-#endif
-
-#if DESKTOP || NET_CORE
-        [TestMethod]
-        public void IsBrokerAvailable_OldDotNet()
-        {
-            var app1 = PublicClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .Build();
-
-            // broker is not available out of the box
-            Assert.AreEqual(false, app1.IsBrokerAvailable());
-
-            var app2 = PublicClientApplicationBuilder
-                   .Create(TestConstants.ClientId)
-                   .WithDesktopFeatures()
-                   .Build();
-
-            // broker is not available out of the box
-            Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), app2.IsBrokerAvailable());
-        }
-#endif
 
         [TestMethod]
         public void HandleInstallUrl_Throws()

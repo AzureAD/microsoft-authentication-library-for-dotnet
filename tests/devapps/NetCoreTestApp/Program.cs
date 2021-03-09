@@ -61,13 +61,16 @@ namespace NetCoreTestApp
 
         private static IPublicClientApplication CreatePca()
         {
-            IPublicClientApplication pca = PublicClientApplicationBuilder
+            var pcaBuilder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
                             .WithExperimentalFeatures()
-                            .WithWindowsBroker()
-                            .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
+                            .WithDesktopFeatures();
+
+            Console.WriteLine($"IsBrokerAvailable: {pcaBuilder.IsBrokerAvailable()}");
+            
+            var pca = pcaBuilder.WithRedirectUri("http://localhost") // required for DefaultOsBrowser
                             .Build();
 
             pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
@@ -97,8 +100,8 @@ namespace NetCoreTestApp
                 Console.WriteLine($"" +
                     $"IsDesktopSession: {pca.IsDesktopSession()}, " +
                     $"IsEmbeddedWebViewAvailable: {pca.IsEmbeddedWebViewAvailable()} " +
-                    $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}" + 
-                    $"IsBrokerAvailable: {pca.IsBrokerAvailable()}" );
+                    $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}");
+                    
                 Console.WriteLine("Authority: " + GetAuthority());
                 await DisplayAccountsAsync(pca).ConfigureAwait(false);
 
