@@ -91,5 +91,9 @@ namespace Microsoft.Identity.Client
         /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
         /// </remarks>
         GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
+
+        /// <inheritdoc/>
+        [Obsolete("Use GetAccountAsync in web apps and web APIs, and use a token cache serializer for better security and performance. See https://aka.ms/msal-net-cca-token-cache-serialization.")]
+        new Task<IEnumerable<IAccount>> GetAccountsAsync();
     }
 }
