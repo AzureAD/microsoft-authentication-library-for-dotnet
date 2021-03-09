@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
         /// Instead, please use <see cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>
         /// or <see cref="PublicClientApplication.AcquireTokenByIntegratedWindowsAuth(IEnumerable{string})"/>
         /// </summary>
-        public static bool IsDesktopSession(this IPublicClientApplication publicClientApplication)
+        public static bool IsUserInteractive(this IPublicClientApplication publicClientApplication)
         {
             if (publicClientApplication is PublicClientApplication pca)
             {

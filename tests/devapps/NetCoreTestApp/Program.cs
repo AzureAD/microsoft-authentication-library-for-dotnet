@@ -98,7 +98,7 @@ namespace NetCoreTestApp
                 Console.Clear();
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine($"" +
-                    $"IsDesktopSession: {pca.IsDesktopSession()}, " +
+                    $"IsDesktopSession: {pca.IsUserInteractive()}, " +
                     $"IsEmbeddedWebViewAvailable: {pca.IsEmbeddedWebViewAvailable()} " +
                     $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}");
                     
