@@ -15,9 +15,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker.win32
 {
     internal partial class Splash : Form
     {
-        public Splash()
+        private readonly IWin32Window _parentWindow;
+
+        public Splash(IWin32Window parentWindow)
         {
             InitializeComponent();
+            _parentWindow = parentWindow;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Identity.Client.Platforms.Features.WamBroker.win32
+﻿using System.Windows.Forms;
+
+namespace Microsoft.Identity.Client.Platforms.Features.WamBroker.win32
 {
     partial class Splash
     {
@@ -57,6 +59,11 @@
             this.Text = "Form1";
             this.ResumeLayout(false);
             this.PerformLayout();
+
+            // Move the window to the center of the parent window only if owner window is set.
+            StartPosition = (_parentWindow != null)
+                ? FormStartPosition.CenterParent
+                : FormStartPosition.CenterScreen;
 
         }
 

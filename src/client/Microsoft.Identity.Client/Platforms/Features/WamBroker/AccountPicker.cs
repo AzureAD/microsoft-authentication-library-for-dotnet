@@ -137,8 +137,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         private void ShowPickerWithSplashScreenImpl()
         {
+            var win32Window = new 
+                Microsoft.Identity.Client.Platforms.Features.WamBroker.SplashScreen.Win32Window(_parentHandle);
 
-            using (var splash = new Microsoft.Identity.Client.Platforms.Features.WamBroker.win32.Splash())
+            using (var splash = new Microsoft.Identity.Client.Platforms.Features.WamBroker.win32.Splash(win32Window))
             {
                 splash.DialogResult = System.Windows.Forms.DialogResult.OK;
                 splash.Shown += async (s, e) =>
@@ -148,11 +150,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     splash.Close();
                 };
 
-                var win32Window = new Microsoft.Identity.Client.Platforms.Features.WamBroker.SplashScreen.Win32Window(_parentHandle);
-
                 try
                 {
-                    splash.ShowDialog(win32Window);
+                    splash.ShowDialog();
                 }
                 catch (InvalidOperationException ex)
                 {
