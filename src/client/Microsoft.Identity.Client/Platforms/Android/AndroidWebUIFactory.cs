@@ -56,6 +56,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
         }
 
+        public bool IsUserInteractive => true;
+
+        public bool IsEmbeddedWebViewAvailable => true;
+
         private static bool IsBrowserWithCustomTabSupportAvailable()
         {
             Intent customTabServiceIntent = new Intent(CustomTabService);

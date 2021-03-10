@@ -5,7 +5,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Microsoft.Identity.Client.Platforms.Features.Win32;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
@@ -86,8 +86,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
         private void SetBrowserZoom()
         {
-            int windowsZoomPercent = NativeDpiHelper.ZoomPercent;
-            if (NativeDpiHelper.IsProcessDPIAware() && 100 != windowsZoomPercent && !_zoomed)
+            int windowsZoomPercent = WindowsDpiHelper.ZoomPercent;
+            if (WindowsDpiHelper.IsProcessDPIAware() && 100 != windowsZoomPercent && !_zoomed)
             {
                 // There is a bug in some versions of the IE browser control that causes it to
                 // ignore scaling unless it is changed.

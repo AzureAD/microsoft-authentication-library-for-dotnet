@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Client.UI
             RequestContext requestContext);
 
         bool IsSystemWebViewAvailable { get; }
-        
+        bool IsUserInteractive { get; }
+        bool IsEmbeddedWebViewAvailable { get; }
     }
 }

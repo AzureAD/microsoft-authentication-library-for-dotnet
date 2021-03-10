@@ -13,6 +13,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     internal class IosWebUIFactory : IWebUIFactory
     {
         public bool IsSystemWebViewAvailable => true;
+        public bool IsUserInteractive => true;
+        public bool IsEmbeddedWebViewAvailable => true;
 
         public IWebUI CreateAuthenticationDialog(
             CoreUIParent coreUIParent, 

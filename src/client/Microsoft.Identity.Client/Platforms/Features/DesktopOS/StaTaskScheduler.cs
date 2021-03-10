@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if !NETSTANDARD
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,9 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-// Moving the code to the library's main namespace
-
-namespace Microsoft.Identity.Client.Platforms.Features.Win32
+namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 {
     // This IDisposable class doe not need to implement Dispose method in standard way, because it is sealed.
     // If it ever needs to become inheritable, it should follow the standard pattern as desribed in http://msdn.microsoft.com/en-us/library/fs2xkftw(v=vs.110).aspx.
@@ -114,3 +112,4 @@ namespace Microsoft.Identity.Client.Platforms.Features.Win32
         }
     }
 }
+#endif

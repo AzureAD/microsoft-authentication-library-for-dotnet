@@ -4,14 +4,19 @@
 using System;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.netstandard13
 {
-    internal class WebUIFactory : IWebUIFactory
+    internal class NetStandard13WebUiFactory : IWebUIFactory
     {
         public bool IsSystemWebViewAvailable => false;
+
+        public bool IsUserInteractive => DesktopOsHelper.IsUserInteractive();
+
+        public bool IsEmbeddedWebViewAvailable => false;
 
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference webViewPreference, RequestContext requestContext)
         {

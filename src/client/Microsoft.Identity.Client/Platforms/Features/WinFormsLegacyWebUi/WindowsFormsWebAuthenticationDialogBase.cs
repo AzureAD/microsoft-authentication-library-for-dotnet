@@ -9,7 +9,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.Features.Win32;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
@@ -305,7 +305,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                     : Screen.PrimaryScreen;
 
                 // Window height is set to 70% of the screen height.
-                int uiHeight = (int)(Math.Max(screen.WorkingArea.Height, 160) * 70.0 / NativeDpiHelper.ZoomPercent);
+                int uiHeight = (int)(Math.Max(screen.WorkingArea.Height, 160) * 70.0 / WindowsDpiHelper.ZoomPercent);
                 _webBrowserPanel = new Panel();
                 _webBrowserPanel.SuspendLayout();
                 SuspendLayout();

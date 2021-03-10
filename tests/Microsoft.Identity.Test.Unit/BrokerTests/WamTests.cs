@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
@@ -21,6 +22,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
+
+#if !NET5_WIN
+using Microsoft.Identity.Client.Desktop;
+#endif
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -77,6 +82,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _accountPickerFactory,
                 _msaPassthroughHandler);
         }
+
+
 
         [TestMethod]
         public void HandleInstallUrl_Throws()
@@ -161,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-        #region CreateMsalTokenResponse
+#region CreateMsalTokenResponse
         [TestMethod]
         public async Task WAMBroker_CreateMsalTokenResponse_AccountSwitch_Async()
         {
@@ -702,7 +709,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 #endif
 
-        #region MSA-PT 
+#region MSA-PT 
         [TestMethod]
         public async Task ATI_WithPicker_MsaPt_Async()
         {
@@ -814,7 +821,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _msaPassthroughHandler.Received(1).AddTransferTokenToRequest(webTokenRequest, null);
             }
         }
-        #endregion
+#endregion
 
         private async Task RunPluginSelectionTestAsync(string inputAuthority, bool expectMsaPlugin)
         {

@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
@@ -24,7 +25,11 @@ namespace Microsoft.Identity.Client.Desktop
             _isWebView2AvailableFunc = isWebView2AvailableForTest ?? IsWebView2Available;
         }
 
-        public bool IsSystemWebViewAvailable => true;
+        public bool IsSystemWebViewAvailable => IsUserInteractive;
+
+        public bool IsUserInteractive => DesktopOsHelper.IsUserInteractive();
+
+        public bool IsEmbeddedWebViewAvailable => IsUserInteractive && IsWebView2Available();
 
         public IWebUI CreateAuthenticationDialog(
             CoreUIParent coreUIParent, 
@@ -61,7 +66,7 @@ namespace Microsoft.Identity.Client.Desktop
         }
 
 
-        private bool IsWebView2Available(string browserExecutableFolder)
+        private bool IsWebView2Available(string browserExecutableFolder = null)
         {
             try
             {

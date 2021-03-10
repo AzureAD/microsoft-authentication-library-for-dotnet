@@ -3,6 +3,7 @@
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -12,11 +13,15 @@ namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class NetDesktopWebUIFactory : IWebUIFactory
     {
-        public bool IsSystemWebViewAvailable => true;
+        public bool IsSystemWebViewAvailable => IsUserInteractive;
+
+        public bool IsUserInteractive => DesktopOsHelper.IsUserInteractive();
+
+        public bool IsEmbeddedWebViewAvailable => IsUserInteractive; // WebBrowser control is always available
 
         public IWebUI CreateAuthenticationDialog(
-            CoreUIParent coreUIParent, 
-            WebViewPreference useEmbeddedWebView, 
+            CoreUIParent coreUIParent,
+            WebViewPreference useEmbeddedWebView,
             RequestContext requestContext)
         {
             if (coreUIParent.UseHiddenBrowser)

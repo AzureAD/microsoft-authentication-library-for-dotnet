@@ -3,14 +3,12 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Microsoft.Identity.Client.Platforms.Features.Win32;
 
-namespace Microsoft.Identity.Client.Platforms.Features.Win32
+namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 {
-    internal static class NativeDpiHelper
-        
+    internal static class WindowsDpiHelper
     {
-        static NativeDpiHelper()
+        static WindowsDpiHelper()
         {
             const double DefaultDpi = 96.0;
 
@@ -57,4 +55,5 @@ namespace Microsoft.Identity.Client.Platforms.Features.Win32
         internal static extern bool IsProcessDPIAware();
     }
 }
+
 

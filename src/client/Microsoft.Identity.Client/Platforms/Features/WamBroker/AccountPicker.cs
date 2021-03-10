@@ -9,7 +9,10 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 using System.Runtime.InteropServices;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+
+#if !UAP10_0
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
+#endif
 
 #if NET5_WIN
 using Microsoft.Identity.Client.Platforms.net5win;
