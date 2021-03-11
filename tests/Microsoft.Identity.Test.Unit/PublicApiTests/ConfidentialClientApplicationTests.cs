@@ -60,10 +60,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             users.Add(mockUser1);
             users.Add(mockUser2);
+#pragma warning disable CS0618 // Type or member is obsolete
             mockApp.GetAccountsAsync().Returns(users);
 
             // Now call the substitute
             IEnumerable<IAccount> actualUsers = mockApp.GetAccountsAsync().Result;
+#pragma warning restore CS0618 // Type or member is obsolete
 
             // Check the users property
             Assert.IsNotNull(actualUsers);

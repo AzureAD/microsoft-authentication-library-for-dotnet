@@ -78,6 +78,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiCloudTestApp", "tests\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9B-427F-AC02-642BDF8D936B}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		changelog.txt = changelog.txt
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
@@ -163,11 +164,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Desktop", "src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj", "{A7679FF0-19E8-41E3-9F7C-F54235124CC4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.MsalNode", "tests\CacheCompat\CommonCache.Test.MsalNode\CommonCache.Test.MsalNode.csproj", "{BD9B34D8-401D-43D9-88B1-FE2C70889572}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{383AFE39-D93A-4EE7-B3FD-D233EF6B34D8}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
