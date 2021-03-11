@@ -30,6 +30,9 @@ namespace Microsoft.Identity.Client.Platforms.net5win
             IsUserInteractive &&
             IsWebView2Available(null); // Look for the globally available WebView2 runtime
 
+#if NET5_WIN
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference useEmbeddedWebView, RequestContext requestContext)
         {
             if (useEmbeddedWebView == WebViewPreference.System)

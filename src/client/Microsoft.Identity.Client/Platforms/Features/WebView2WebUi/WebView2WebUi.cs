@@ -14,6 +14,9 @@ using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
 {
+#if NET5_WIN
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
     internal class WebView2WebUi : IWebUI
     {
         private CoreUIParent _parent;

@@ -13,6 +13,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     /// Wrapper class to enable testing, since WebTokenRequestResult object doesn't have any ctor
     /// and interface is not accessible.
     /// </summary>
+#if NET5_WIN
+    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
+#endif
     internal class WebTokenRequestResultWrapper : IWebTokenRequestResultWrapper
     {
 

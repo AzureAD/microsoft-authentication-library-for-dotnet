@@ -12,6 +12,9 @@ using Windows.Security.Credentials;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
+#if NET5_WIN
+    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
+#endif
     internal class MsaPassthroughHandler : IMsaPassthroughHandler
     {
         public const string TransferTokenScopes =
