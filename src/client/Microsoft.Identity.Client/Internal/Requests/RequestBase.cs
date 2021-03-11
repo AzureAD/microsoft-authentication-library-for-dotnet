@@ -74,6 +74,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
+
+            if (authenticationRequestParameters.IsConfidentialClient && !CacheManager.TokenCacheInternal.IsTokenCacheSerialized())
+            {
+                authenticationRequestParameters.RequestContext.Logger.Error("The default token cache provided by MSAL is not designed to be performant when used in confidential client applications. Please use token cache serialization. See https://aka.ms/msal-net-cca-token-cache-serialization.");
+            }
         }
 
         /// <summary>
