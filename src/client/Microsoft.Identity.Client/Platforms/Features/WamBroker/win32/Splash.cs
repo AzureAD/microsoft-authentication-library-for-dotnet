@@ -19,6 +19,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker.win32
 
         public Splash(IWin32Window parentWindow)
         {
+            Application.EnableVisualStyles();
             InitializeComponent();
             _parentWindow = parentWindow;
         }

@@ -30,26 +30,27 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker.win32
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
-            // label1
+            // progressBar1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 26);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(104, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "...";
+            this.progressBar1.Location = new System.Drawing.Point(12, 12);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(158, 23);
+            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.progressBar1.TabIndex = 0;
+            this.progressBar1.MarqueeAnimationSpeed = 30;
             // 
             // Splash
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(231, 63);
+            this.ClientSize = new System.Drawing.Size(182, 46);
             this.ControlBox = false;
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.progressBar1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Splash";
@@ -58,6 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker.win32
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Form1";
             this.ResumeLayout(false);
+
             this.PerformLayout();
 
             // Move the window to the center of the parent window only if owner window is set.
@@ -69,6 +71,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker.win32
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
+        private ProgressBar progressBar1;
     }
 }
