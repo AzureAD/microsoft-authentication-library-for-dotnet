@@ -1,6 +1,5 @@
 <Project>
   <PropertyGroup>
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
 
     <LangVersion>7.2</LangVersion>
     <!-- This is strong naming, not signing-->
@@ -11,6 +10,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsPackable>false</IsPackable>
+    <MSBuildTreatWarningsAsErrors>false</MSBuildTreatWarningsAsErrors>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
