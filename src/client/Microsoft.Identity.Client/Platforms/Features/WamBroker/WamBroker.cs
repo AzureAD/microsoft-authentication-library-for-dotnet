@@ -338,7 +338,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return ptr;
             }
 
-            IntPtr foregroundWindow = WindowsNativeMethods.GetForegroundWindow();
+            // other MSALs prefer to default to GetForegroundWindow() but this causes issues 
+            // for example if the user quickly switches windows.
+            // GetDesktopWindow will make the default more consitent with the embedded browser
+            IntPtr foregroundWindow = WindowsNativeMethods.GetDesktopWindow();
             return foregroundWindow;
 #endif
         }

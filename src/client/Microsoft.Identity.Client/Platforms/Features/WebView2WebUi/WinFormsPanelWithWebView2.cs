@@ -53,9 +53,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             {
                 _ownerWindow = (IWin32Window)ownerWindow;
             }
-            else if (ownerWindow is IntPtr)
+            else if (ownerWindow is IntPtr ptr && ptr != IntPtr.Zero)
             {
-                _ownerWindow = new Win32Window((IntPtr)ownerWindow);
+                _ownerWindow = new Win32Window(ptr);
             }
             else
             {
