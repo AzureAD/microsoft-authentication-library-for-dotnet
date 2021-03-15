@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         public string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Constants.CodeVerifierByteSize];
-            using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
+            using (var randomSource = RandomNumberGenerator.Create())
             {
                 randomSource.GetBytes(buffer);
             }
@@ -45,8 +45,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         public byte[] CreateSha256HashBytes(string input)
-        {            
-            using (var sha = new SHA256Cng())
+        {
+            using (var sha = SHA256.Create())
             {
                 return sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             }
