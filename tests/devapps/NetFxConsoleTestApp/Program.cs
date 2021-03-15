@@ -214,8 +214,6 @@ namespace NetFx
                     Enter your Selection: ");
                 char.TryParse(Console.ReadLine(), out var selection);
 
-                Task<AuthenticationResult> authTask = null;
-
                 try
                 {
                     switch (selection)

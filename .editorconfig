@@ -142,6 +142,8 @@ csharp_space_between_parentheses = false
 csharp_space_between_square_brackets = false
 
 # C++ Files
+
+
 [*.{cpp,h,in}]
 curly_bracket_next_line = true
 indent_brace_style = Allman
@@ -181,6 +183,10 @@ dotnet_diagnostic.UseConfigureAwait.severity = error
 dotnet_diagnostic.AvoidAsyncSuffix.severity = none
 
 dotnet_diagnostic.AvoidAsyncVoid.severity = none
+
+
+# Compiler warnings that trigger SDL
+dotnet_diagnostic.CS0618.severity = error
 
 # Rules imported from Sdl.Recommended.Error.ruleset
 # https://dev.azure.com/SecurityTools/Phalanx/_git/RoslynInternalAnalyzers2?path=%2FExamples%2FRulesets%2FPublic%2FSdl.Recommended.Error.ruleset
