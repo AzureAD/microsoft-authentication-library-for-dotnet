@@ -477,6 +477,66 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public async Task ATI_WithoutPicker_Organizations_Async()
+        {
+            string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var requestParams = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityOrganizationsTenant); 
+                requestParams.Account = new Account(
+                   $"{TestConstants.Uid}.{TestConstants.Utid}",
+                   TestConstants.DisplayableId,
+                   null,
+                   new Dictionary<string, string>() { { TestConstants.ClientId, "wam_id_1" } }); // account has wam_id!
+
+                WebAccountProvider wamAccountProvider = await WebAuthenticationCoreManager.FindAccountProviderAsync(
+                    "https://login.microsoft.com", "organizations");
+                var webAccount = new WebAccount(wamAccountProvider, "user@contoso.com", WebAccountState.Connected);
+                var webTokenRequest = new WebTokenRequest(wamAccountProvider);
+
+                // will use the AAD provider because the authority is tenanted (i.e. AAD only)
+                _webAccountProviderFactory
+                    .GetAccountProviderAsync(TestConstants.AuthorityHomeTenant)
+                    .ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+
+                // account matching based on wam account ID (logic for matching based on home_account_id is checked in ATS tests)
+                _wamProxy.FindAccountAsync(Arg.Any<WebAccountProvider>(), "wam_id_1")
+                    .Returns(Task.FromResult(webAccount));
+
+                // WAM can give MSAL the home account ID of a Wam account, which MSAL matches to a WAM account
+                _aadPlugin.CreateWebTokenRequestAsync(
+                    wamAccountProvider,
+                    requestParams,
+                    isForceLoginPrompt: false,
+                    isAccountInWam: true,
+                    isInteractive: true)
+                    .Returns(Task.FromResult(webTokenRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest, webAccount).
+                    Returns(Task.FromResult(webTokenResponseWrapper));
+                _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
+
+                // Act
+                var result = await _wamBroker.AcquireTokenInteractiveAsync(
+                    requestParams,
+                    new AcquireTokenInteractiveParameters()).ConfigureAwait(false);
+
+                // Assert 
+                Assert.AreSame(_msalTokenResponse, result);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/common/",
+                    webTokenRequest.Properties["authority"]);
+            }
+        }
+
+        [TestMethod]
         public async Task ATI_WithDefaultUser_Async()
         {
             // Arrange

@@ -23,10 +23,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         internal static void AddMsalParamsToRequest(
           AuthenticationRequestParameters authenticationRequestParameters,
-          WebTokenRequest webTokenRequest)
+          WebTokenRequest webTokenRequest,
+          string overridentAuthority = null)
         {
             AddExtraParamsToRequest(webTokenRequest, authenticationRequestParameters.ExtraQueryParameters);
-            AddAuthorityParamToRequest(authenticationRequestParameters, webTokenRequest);
+            string authority = overridentAuthority ??
+                 authenticationRequestParameters.UserConfiguredAuthority.AuthorityInfo.CanonicalAuthority;
+            bool validate = authenticationRequestParameters.AuthorityInfo.ValidateAuthority;
+            AddAuthorityParamToRequest(authority, validate, webTokenRequest); ;
         }
 
         internal static MsalTokenResponse CreateMsalResponseFromWamResponse(
@@ -91,14 +95,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             };
         }
 
-        private static void AddAuthorityParamToRequest(AuthenticationRequestParameters authenticationRequestParameters, WebTokenRequest webTokenRequest)
+        private static void AddAuthorityParamToRequest(string authority, bool validate, WebTokenRequest webTokenRequest)
         {
             webTokenRequest.Properties.Add(
                             "authority",
-                            authenticationRequestParameters.UserConfiguredAuthority.AuthorityInfo.CanonicalAuthority);
+                            authority);
             webTokenRequest.Properties.Add(
                 "validateAuthority",
-                authenticationRequestParameters.AuthorityInfo.ValidateAuthority ? "yes" : "no");
+                validate ? "yes" : "no");
         }
 
         private static void AddExtraParamsToRequest(WebTokenRequest webTokenRequest, IDictionary<string, string> extraQueryParameters)

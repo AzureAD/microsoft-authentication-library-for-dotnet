@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _msaPassthroughHandler = msaPassthroughHandler ??
                 new MsaPassthroughHandler(_logger, _msaPlugin, _wamProxy, _parentHandle);
 
-            _wamOptions = appConfig.WindowsBrokerOptions ?? 
+            _wamOptions = appConfig.WindowsBrokerOptions ??
                 WindowsBrokerOptions.CreateDefault();
 
         }
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
 #if WINDOWS_APP
-            if (_synchronizationContext == null )
+            if (_synchronizationContext == null)
             {
                 throw new MsalClientException(
                     MsalError.WamUiThread,
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 }
                 else
                 {
-                    if (IsAadOnlyAuthority(authenticationRequestParameters.Authority) )
+                    if (IsAadOnlyAuthority(authenticationRequestParameters.Authority))
                     {
                         return await AcquireInteractiveWithAadBrowserAsync(
                             authenticationRequestParameters,
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     }
                 }
             }
-           
+
             return await AcquireInteractiveWithPickerAsync(
                 authenticationRequestParameters,
                 acquireTokenInteractiveParameters.Prompt)
@@ -235,12 +235,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebTokenRequest webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                 provider,
                 authenticationRequestParameters,
-                isForceLoginPrompt: false,
+                isForceLoginPrompt: false, 
                 isInteractive: true,
                 isAccountInWam: true)
            .ConfigureAwait(false);
 
-            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);          
+            // because of https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2476
+            string differentAuthority = null;
+            if (string.Equals(wamAccount?.WebAccountProvider?.Authority, Constants.OrganizationsTenant) && 
+                string.Equals(authenticationRequestParameters.Authority.TenantId, Constants.OrganizationsTenant))
+            {
+                differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("common");
+            }
+
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, differentAuthority);
 
             try
             {
@@ -572,7 +580,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     return Array.Empty<IAccount>();
                 }
 
-                if (                  
+                if (
                     !ApiInformation.IsMethodPresent(
                     "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
                     "FindAllAccountsAsync"))
