@@ -12,10 +12,14 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
@@ -26,6 +30,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -83,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
         }
 
-       
+
 
         [TestMethod]
         public async Task NoStateReturnedTestAsync()
@@ -399,7 +404,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 };
 
                 // repeat interactive call and pass in the same user
-                
+
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"),
                     dict);
@@ -546,15 +551,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 // repeat interactive call and pass in the same user
-              
-                    app.ServiceBundle.ConfigureMockWebUI(
-                        new MockWebUI()
-                        {
-                            ExceptionToThrow = new MsalClientException(
-                                MsalError.AuthenticationUiFailedError,
-                                "Failed to invoke webview",
-                                new InvalidOperationException("some-inner-Exception"))
-                        });
+
+                app.ServiceBundle.ConfigureMockWebUI(
+                    new MockWebUI()
+                    {
+                        ExceptionToThrow = new MsalClientException(
+                            MsalError.AuthenticationUiFailedError,
+                            "Failed to invoke webview",
+                            new InvalidOperationException("some-inner-Exception"))
+                    });
 
                 try
                 {
@@ -613,6 +618,38 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(userToFind.Username, acc.Username);
             Assert.AreEqual(userToFind.HomeAccountId, acc.HomeAccountId);
             Assert.AreEqual(userToFind.Environment, acc.Environment);
+        }
+
+        [TestMethod]
+        public void GetAccountWithDuplicateBrokerAccountsTest()
+        {
+            // Arrange
+            var app = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .BuildConcrete();
+
+            var broker = Substitute.For<IBroker>();
+            var expectedAccount = TestConstants.s_user;
+            broker.GetAccountsAsync(
+                TestConstants.ClientId,
+                TestConstants.RedirectUri,
+                TestConstants.AuthorityCommonTenant,
+                Arg.Any<ICacheSessionManager>(),
+                Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount, expectedAccount });
+            broker.IsBrokerInstalledAndInvokable().Returns(false);
+
+            var platformProxy = Substitute.For<IPlatformProxy>();
+            platformProxy.CanBrokerSupportSilentAuth().Returns(true);
+            platformProxy.CreateBroker(Arg.Any<ApplicationConfiguration>(), Arg.Any<CoreUIParent>()).ReturnsForAnyArgs(broker);
+
+            app.ServiceBundle.SetPlatformProxyForTest(platformProxy);
+            app.ServiceBundle.Config.IsBrokerEnabled = true;
+
+            // Act
+            var account = app.GetAccountAsync(TestConstants.HomeAccountId).GetAwaiter().GetResult();
+
+            // Assert
+            Assert.AreEqual(TestConstants.HomeAccountId, account.HomeAccountId.Identifier);
         }
 
         [TestMethod]
