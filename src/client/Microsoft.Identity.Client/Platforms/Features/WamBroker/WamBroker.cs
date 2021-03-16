@@ -232,30 +232,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebAccountProvider provider,
             WebAccount wamAccount)
         {
-         
-            
             WebTokenRequest webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                 provider,
                 authenticationRequestParameters,
-                isForceLoginPrompt: true,
+                isForceLoginPrompt: false,
                 isInteractive: true,
                 isAccountInWam: true)
            .ConfigureAwait(false);
 
-            if (provider.Authority == "organizations")
-            {
-                webTokenRequest.Properties.Add(
-                               "authority",
-                               "https://login.microsoftonline.com/common");
-            }
-            else
-            {
-                webTokenRequest.Properties.Add(
-                              "authority",
-                              "https://login.microsoftonline.com/organizations");
-            }
-
-            // WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);          
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);          
 
             try
             {
