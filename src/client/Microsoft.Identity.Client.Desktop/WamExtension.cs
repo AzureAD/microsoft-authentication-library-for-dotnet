@@ -36,7 +36,8 @@ namespace Microsoft.Identity.Client.Desktop
         internal static void AddSupportForWam(PublicClientApplicationBuilder builder)
         {
             builder.Config.BrokerCreatorFunc =
-                (uiParent, logger) => new Platforms.Features.WamBroker.WamBroker(uiParent, logger);
+                (uiParent, appConfig, logger) => 
+                    new Platforms.Features.WamBroker.WamBroker(uiParent, appConfig, logger);
         }
     }
 }

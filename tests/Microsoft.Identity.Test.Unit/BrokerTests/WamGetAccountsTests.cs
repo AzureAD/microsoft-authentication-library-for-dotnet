@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
-                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y) => mockBroker;
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
 
                 // Act
                 await pca.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
                 
-                pca2.ServiceBundle.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
+                pca2.ServiceBundle.Config.BrokerCreatorFunc = (app, config, logger) => mockBroker;
 
                 var accounts2 = await pca2.GetAccountsAsync().ConfigureAwait(false);
                 Assert.IsFalse(accounts2.Any());
@@ -97,8 +97,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 cache.Bind(pca1.UserTokenCache);
                 cache.Bind(pca2.UserTokenCache);
 
-                pca1.ServiceBundle.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
-                pca2.ServiceBundle.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
+                pca1.ServiceBundle.Config.BrokerCreatorFunc = (app, config, logger) => mockBroker;
+                pca2.ServiceBundle.Config.BrokerCreatorFunc = (app, config, logger) => mockBroker;
 
                 // Act 
                 mockBroker.AcquireTokenInteractiveAsync(null, null).ReturnsForAnyArgs(Task.FromResult(msalTokenResponse1));
@@ -170,6 +170,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
+
+
      
 
         private static MsalTokenResponse CreateMsalTokenResponseFromWam(string wamAccountId)
@@ -193,7 +195,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     {
         internal static PublicClientApplicationBuilder WithTestBroker(this PublicClientApplicationBuilder pcaBuilder, IBroker mockBroker)
         {
-            pcaBuilder.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
+            pcaBuilder.Config.BrokerCreatorFunc = (app, config, logger) => mockBroker;
             pcaBuilder.Config.IsBrokerEnabled = true;
 
             return pcaBuilder;

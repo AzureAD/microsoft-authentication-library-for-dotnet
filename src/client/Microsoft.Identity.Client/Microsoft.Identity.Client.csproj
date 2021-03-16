@@ -272,4 +272,5 @@
       <DependentUpon>Splash.resx</DependentUpon>
     </None>
   </ItemGroup>
+
 </Project>

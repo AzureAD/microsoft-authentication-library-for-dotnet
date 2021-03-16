@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
             return appConfig.BrokerCreatorFunc != null ? 
-                appConfig.BrokerCreatorFunc(uiParent, Logger) :
+                appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
                 new NullBroker();
         }
 

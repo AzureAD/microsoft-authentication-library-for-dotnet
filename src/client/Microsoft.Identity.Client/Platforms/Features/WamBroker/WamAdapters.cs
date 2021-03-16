@@ -27,7 +27,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             AddExtraParamsToRequest(webTokenRequest, authenticationRequestParameters.ExtraQueryParameters);
             AddAuthorityParamToRequest(authenticationRequestParameters, webTokenRequest);
-            AddPOPParamsToRequest(webTokenRequest);
         }
 
         internal static MsalTokenResponse CreateMsalResponseFromWamResponse(
@@ -90,11 +89,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 ErrorCodes = internalErrorCode != null ? new[] { internalErrorCode } : null,
                 ErrorDescription = errorMessage
             };
-        }
-
-        private static void AddPOPParamsToRequest(WebTokenRequest webTokenRequest)
-        {
-            // TODO: add POP support by adding "token_type" = "pop" and "req_cnf" = req_cnf
         }
 
         private static void AddAuthorityParamToRequest(AuthenticationRequestParameters authenticationRequestParameters, WebTokenRequest webTokenRequest)

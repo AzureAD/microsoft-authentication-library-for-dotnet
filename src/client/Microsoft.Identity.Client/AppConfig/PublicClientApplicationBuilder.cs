@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using System.ComponentModel;
 
 #if iOS
 using UIKit;
@@ -174,6 +175,19 @@ namespace Microsoft.Identity.Client
             Config.IsBrokerEnabled = enableBroker;
             return this;
 #pragma warning restore CS0162 // Unreachable code detected
+        }
+
+        /// <summary>
+        /// Allows customization of the Windows 10 Broker experience
+        /// </summary>
+#if !SUPPORTS_BROKER || __MOBILE__
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif  
+        public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
+        {
+            WindowsBrokerOptions.ValidatePlatformAvailability();
+            Config.WindowsBrokerOptions = options;
+            return this;
         }
 
 #if WINDOWS_APP

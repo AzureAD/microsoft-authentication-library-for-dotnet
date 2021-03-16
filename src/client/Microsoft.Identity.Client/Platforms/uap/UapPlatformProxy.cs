@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
-            return new WamBroker(uiParent, Logger);
+            return new WamBroker(uiParent, appConfig, Logger);
         }
 
         /// <inheritdoc />

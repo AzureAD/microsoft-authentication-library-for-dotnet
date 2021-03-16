@@ -45,7 +45,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             bool setLoginHint = false;
             bool addNewAccount = false;
 
-            string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters.Account?.Username;
+            string loginHint = !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint) ?
+                  authenticationRequestParameters.LoginHint :
+                  authenticationRequestParameters.Account?.Username;
 
             if (isInteractive && !isAccountInWam)
             {

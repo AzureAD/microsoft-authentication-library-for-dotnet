@@ -50,16 +50,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IMsaPassthroughHandler _msaPassthroughHandler;
         private const string WamErrorPrefix = "WAM Error ";
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
-
+        private readonly WindowsBrokerOptions _wamOptions;
 
         public WamBroker(
             CoreUIParent uiParent,
+            ApplicationConfiguration appConfig,
             ICoreLogger logger,
             IWamPlugin testAadPlugin = null,
             IWamPlugin testmsaPlugin = null,
             IWamProxy wamProxy = null,
             IWebAccountProviderFactory webAccountProviderFactory = null,
-            IAccountPickerFactory accountPickerFactory = null, 
+            IAccountPickerFactory accountPickerFactory = null,
             IMsaPassthroughHandler msaPassthroughHandler = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -73,8 +74,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _aadPlugin = testAadPlugin ?? new AadPlugin(_wamProxy, _webAccountProviderFactory, _logger);
             _msaPlugin = testmsaPlugin ?? new MsaPlugin(_wamProxy, _webAccountProviderFactory, _logger);
 
-            _msaPassthroughHandler = msaPassthroughHandler ?? 
+            _msaPassthroughHandler = msaPassthroughHandler ??
                 new MsaPassthroughHandler(_logger, _msaPlugin, _wamProxy, _parentHandle);
+
+            _wamOptions = appConfig.WindowsBrokerOptions ?? 
+                WindowsBrokerOptions.CreateDefault();
 
         }
 
@@ -112,20 +116,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (authenticationRequestParameters.Account != null ||
                 !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
             {
-                bool isMsaPassthrough = authenticationRequestParameters.AppConfig.IsMsaPassthrough;
+                bool isMsaPassthrough = _wamOptions.MsaPassthrough;
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     authenticationRequestParameters?.Account?.HomeAccountId?.TenantId, // TODO: we could furher optimize here by searching for an account based on UPN
                     isMsaPassthrough).ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
-                WebAccountProvider provider;
-                provider = await GetProviderAsync(authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority, isMsa)
+                WebAccountProvider provider = await GetProviderAsync(
+                    authenticationRequestParameters.Authority.TenantId, isMsa)
                     .ConfigureAwait(false);
 
                 if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
                 {
-                    var wamResult = await AcquireInteractiveWithoutPickerAsync(
+                    var wamResult = await AcquireInteractiveWithWamAccountAsync(
                         authenticationRequestParameters,
                         acquireTokenInteractiveParameters.Prompt,
                         wamPlugin,
@@ -144,7 +148,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 if (wamAccount != null)
                 {
-                    var wamResult = await AcquireInteractiveWithoutPickerAsync(
+                    var wamResult = await AcquireInteractiveWithWamAccountAsync(
                         authenticationRequestParameters,
                         acquireTokenInteractiveParameters.Prompt,
                         wamPlugin,
@@ -153,12 +157,62 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         .ConfigureAwait(false);
                     return WamAdapters.CreateMsalResponseFromWamResponse(wamResult, wamPlugin, _logger, isInteractive: true);
                 }
+                else
+                {
+                    if (IsAadOnlyAuthority(authenticationRequestParameters.Authority) )
+                    {
+                        return await AcquireInteractiveWithAadBrowserAsync(
+                            authenticationRequestParameters,
+                            acquireTokenInteractiveParameters.Prompt).ConfigureAwait(false);
+                    }
+                }
             }
-
+           
             return await AcquireInteractiveWithPickerAsync(
                 authenticationRequestParameters,
                 acquireTokenInteractiveParameters.Prompt)
                 .ConfigureAwait(false);
+        }
+
+        // only works for AAD plugin. MSA plugin does not allow for privacy reasons
+        private async Task<MsalTokenResponse> AcquireInteractiveWithAadBrowserAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            Prompt msalPrompt)
+        {
+            var provider = await _webAccountProviderFactory.GetAccountProviderAsync(
+                            authenticationRequestParameters.Authority.TenantId).ConfigureAwait(true);
+
+            WebTokenRequest webTokenRequest = await _aadPlugin.CreateWebTokenRequestAsync(
+               provider,
+               authenticationRequestParameters,
+               isForceLoginPrompt: true,
+               isInteractive: true,
+               isAccountInWam: false)
+                .ConfigureAwait(false);
+
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);
+            AddPromptToRequest(msalPrompt, true, webTokenRequest);
+
+            var wamResult = await _wamProxy.RequestTokenForWindowAsync(
+                  _parentHandle,
+                  webTokenRequest).ConfigureAwait(false);
+
+            return CreateMsalTokenResponse(wamResult, _aadPlugin, isInteractive: true);
+        }
+
+        private bool IsAadOnlyAuthority(Authority authority)
+        {
+            if (authority is AdfsAuthority)
+            {
+                return true;
+            }
+
+            if (authority is AadAuthority a && a.IsWorkAndSchoolOnly())
+            {
+                return true;
+            }
+
+            return false;
         }
 
         internal /* internal for test only */ static bool IsForceLoginPrompt(Prompt prompt)
@@ -171,26 +225,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return false;
         }
 
-        private async Task<IWebTokenRequestResultWrapper> AcquireInteractiveWithoutPickerAsync(
+        private async Task<IWebTokenRequestResultWrapper> AcquireInteractiveWithWamAccountAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             Prompt msalPrompt,
             IWamPlugin wamPlugin,
             WebAccountProvider provider,
             WebAccount wamAccount)
         {
-            bool isForceLoginPrompt = IsForceLoginPrompt(msalPrompt);
-
             WebTokenRequest webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                 provider,
                 authenticationRequestParameters,
-                isForceLoginPrompt: isForceLoginPrompt,
+                isForceLoginPrompt: false,
                 isInteractive: true,
                 isAccountInWam: true)
            .ConfigureAwait(false);
 
-            AddPromptToRequest(msalPrompt, isForceLoginPrompt, webTokenRequest);
-
-            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);          
 
             try
             {
@@ -237,7 +287,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             Prompt msalPrompt)
         {
-            bool isMsaPassthrough = authenticationRequestParameters.AppConfig.IsMsaPassthrough;
+            bool isMsaPassthrough = _wamOptions.MsaPassthrough;
             var accountPicker = _accountPickerFactory.Create(
                 _parentHandle,
                 _logger,
@@ -361,7 +411,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     null,
-                    authenticationRequestParameters.AppConfig.IsMsaPassthrough)
+                    _wamOptions.MsaPassthrough)
                     .ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
@@ -423,7 +473,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     null,
-                    authenticationRequestParameters.AppConfig.IsMsaPassthrough).ConfigureAwait(false);
+                    _wamOptions.MsaPassthrough).ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
                 WebAccountProvider provider = await GetProviderAsync(
@@ -491,12 +541,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             foreach (var wamAccount in wamAccounts)
             {
                 string homeAccountId = wamPlugin.GetHomeAccountIdOrNull(wamAccount);
-                if (string.Equals(homeAccountId, account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(homeAccountId) &&
+                    string.Equals(homeAccountId, account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase))
                 {
                     return wamAccount;
                 }
 
-                if (string.Equals(loginHint, wamAccount.UserName, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(loginHint) &&
+                    string.Equals(loginHint, wamAccount.UserName, StringComparison.OrdinalIgnoreCase))
                 {
                     matchedAccountByLoginHint = wamAccount;
                 }
@@ -505,7 +557,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return matchedAccountByLoginHint;
         }
 
-        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(                   
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientID,
             string redirectUri,
             string authority,
@@ -514,7 +566,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogMethodDuration())
             {
-                if (!ApiInformation.IsMethodPresent(
+                if (!_wamOptions.ListWindowsWorkAndSchoolAccounts)
+                {
+                    _logger.Info("WAM::FindAllAccountsAsync returning no accounts due to configuration option");
+                    return Array.Empty<IAccount>();
+                }
+
+                if (                  
+                    !ApiInformation.IsMethodPresent(
                     "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
                     "FindAllAccountsAsync"))
                 {
@@ -732,6 +791,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             _logger.Info("[WAM Broker] Tenant is not consumers and ATS will try WAM-AAD");
             return false;
-        }    
+        }
     }
 }

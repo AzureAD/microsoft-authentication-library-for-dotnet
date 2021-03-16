@@ -38,11 +38,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public async Task<string> TryFetchTransferTokenAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider accountProvider)
         {
-            if (!authenticationRequestParameters.AppConfig.IsMsaPassthrough)
-            {
-                throw new InvalidOperationException("Not configured for msa-pt");
-            }
-
             // Apps can have MSA-PT enabled and can configured to allow MSA users
             // However, some older apps have 2 incarnations, one in AAD tenant and one in MSA tenant
             // For this second case, we can't fetch the transfer token from the client_ID in AAD and this will fail

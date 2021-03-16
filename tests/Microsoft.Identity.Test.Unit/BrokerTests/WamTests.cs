@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _synchronizationContext = new DedicatedThreadSynchronizationContext();
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
-
+            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
             _logger = Substitute.For<ICoreLogger>();
             _aadPlugin = Substitute.For<IWamPlugin>();
             _msaPlugin = Substitute.For<IWamPlugin>();
@@ -74,6 +74,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             _wamBroker = new WamBroker(
                 _coreUIParent,
+                applicationConfiguration,
                 _logger,
                 _aadPlugin,
                 _msaPlugin,
@@ -526,7 +527,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             using (var harness = CreateTestHarness())
             {
-                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant); // AAD
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityCommonTenant);
                 requestParams.Account = new Account(
                    $"{TestConstants.Uid}.{TestConstants.Utid}",
                    TestConstants.DisplayableId,
@@ -545,6 +546,51 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     wamAccountProvider,
                     requestParams,
                     isForceLoginPrompt: false,
+                     isInteractive: true,
+                     isAccountInWam: false)
+                    .Returns(Task.FromResult(webTokenRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
+                    Returns(Task.FromResult(webTokenResponseWrapper));
+                _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
+
+                var atiParams = new AcquireTokenInteractiveParameters();
+
+                // Act
+                var result = await _wamBroker.AcquireTokenInteractiveAsync(requestParams, atiParams)
+                    .ConfigureAwait(false);
+
+                // Assert 
+                Assert.AreSame(_msalTokenResponse, result);
+            }
+        }
+
+        [TestMethod]
+        public async Task ATI_WithAadPlugin_LoginHint_Async()
+        {
+            string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var requestParams = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityOrganizationsTenant);
+                requestParams.LoginHint = "user@contoso.com";
+
+                var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+                _webAccountProviderFactory
+                   .GetAccountProviderAsync(TestConstants.AuthorityOrganizationsTenant)
+                   .ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+
+                var webTokenRequest = new WebTokenRequest(wamAccountProvider);
+                _aadPlugin.CreateWebTokenRequestAsync(
+                    wamAccountProvider,
+                    requestParams,
+                    isForceLoginPrompt: true, // force login!
                      isInteractive: true,
                      isAccountInWam: false)
                     .Returns(Task.FromResult(webTokenRequest));
@@ -600,6 +646,103 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 await AssertException.TaskThrowsAsync<FileNotFoundException>( // Since WebAccount is a real object, it throws this exception
                     () => _wamBroker.RemoveAccountAsync(harness.ServiceBundle.Config, requestParams.Account))
                     .ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetAccounts_DoesNotCallPlugins_Async()
+        {
+            string aadHomeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant); 
+
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { ListWindowsWorkAndSchoolAccounts = true };
+                _wamBroker = new WamBroker(
+                   _coreUIParent,
+                    requestParams.AppConfig,
+                   _logger,
+                   _aadPlugin,
+                   _msaPlugin,
+                   _wamProxy,
+                   _webAccountProviderFactory,
+                   _accountPickerFactory,
+                   _msaPassthroughHandler);              
+
+                var cacheSessionManager = NSubstitute.Substitute.For<ICacheSessionManager>();
+                var discoveryManager = NSubstitute.Substitute.For<IInstanceDiscoveryManager>();
+
+                // Act
+                await _wamBroker.GetAccountsAsync(
+                    TestConstants.ClientId,
+                    TestConstants.RedirectUri,
+                    TestConstants.AuthorityHomeTenant,
+                    cacheSessionManager,
+                    discoveryManager).ConfigureAwait(false);
+
+                // Assert
+                await _aadPlugin.Received().GetAccountsAsync(
+                    TestConstants.ClientId,
+                    TestConstants.AuthorityHomeTenant,
+                    cacheSessionManager,
+                    discoveryManager).ConfigureAwait(false);
+
+                await _msaPlugin.Received().GetAccountsAsync(
+                   TestConstants.ClientId,
+                   TestConstants.AuthorityHomeTenant,
+                   cacheSessionManager,
+                   discoveryManager).ConfigureAwait(false);
+            }
+        }
+
+
+        [TestMethod]
+        public async Task GetAccounts_CallsPlugins_Async()
+        {
+            string aadHomeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant);
+
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { 
+                    ListWindowsWorkAndSchoolAccounts = false};
+                _wamBroker = new WamBroker(
+                   _coreUIParent,
+                    requestParams.AppConfig,
+                   _logger,
+                   _aadPlugin,
+                   _msaPlugin,
+                   _wamProxy,
+                   _webAccountProviderFactory,
+                   _accountPickerFactory,
+                   _msaPassthroughHandler);
+
+                var cacheSessionManager = NSubstitute.Substitute.For<ICacheSessionManager>();
+                var discoveryManager = NSubstitute.Substitute.For<IInstanceDiscoveryManager>();
+
+                // Act
+                await _wamBroker.GetAccountsAsync(
+                    TestConstants.ClientId,
+                    TestConstants.RedirectUri,
+                    TestConstants.AuthorityHomeTenant,
+                    cacheSessionManager,
+                    discoveryManager).ConfigureAwait(false);
+
+                // Assert
+                await _aadPlugin.DidNotReceive().GetAccountsAsync(
+                    TestConstants.ClientId,
+                    TestConstants.AuthorityHomeTenant,
+                    cacheSessionManager,
+                    discoveryManager).ConfigureAwait(false);
+
+                await _msaPlugin.DidNotReceive().GetAccountsAsync(
+                   TestConstants.ClientId,
+                   TestConstants.AuthorityHomeTenant,
+                   cacheSessionManager,
+                   discoveryManager).ConfigureAwait(false);
             }
         }
 
@@ -721,7 +864,18 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     TestConstants.AuthorityHomeTenant); // AAD authorities for whi
 
                 // msa-pt scenario
-                requestParams.AppConfig.IsMsaPassthrough = true;
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
+                _wamBroker = new WamBroker(
+                   _coreUIParent,
+                    requestParams.AppConfig,
+                   _logger,
+                   _aadPlugin,
+                   _msaPlugin,
+                   _wamProxy,
+                   _webAccountProviderFactory,
+                   _accountPickerFactory,
+                   _msaPassthroughHandler);
+
                 var accountPicker = Substitute.For<IAccountPicker>();
                 _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
                 var msaProvider = new WebAccountProvider("msa", "user@contoso.com", null);
@@ -773,10 +927,20 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var harness = CreateTestHarness())
             {
                 var requestParams = harness.CreateAuthenticationRequestParameters(
-                    TestConstants.AuthorityHomeTenant); 
+                    TestConstants.AuthorityHomeTenant);
 
                 // msa-pt scenario
-                requestParams.AppConfig.IsMsaPassthrough = true;
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
+                _wamBroker = new WamBroker(
+                   _coreUIParent,
+                    requestParams.AppConfig,
+                   _logger,
+                   _aadPlugin,
+                   _msaPlugin,
+                   _wamProxy,
+                   _webAccountProviderFactory,
+                   _accountPickerFactory,
+                   _msaPassthroughHandler);
                 var accountPicker = Substitute.For<IAccountPicker>();
                 _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
                 var msaProvider = new WebAccountProvider("msa", "user@contoso.com", null);

@@ -43,8 +43,9 @@ namespace Microsoft.Identity.Client
         public string IosKeychainSecurityGroup { get; internal set; }
 
         public bool IsBrokerEnabled { get; internal set; }
+        public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
 
-        public Func<CoreUIParent, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
+        public Func<CoreUIParent, ApplicationConfiguration, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
         public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }
 
         public ITelemetryConfig TelemetryConfig { get; internal set; }
@@ -83,12 +84,6 @@ namespace Microsoft.Identity.Client
         internal int ConfidentialClientCredentialCount;
 
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
-
-        /// <summary>
-        /// Currently this is only required for WAM
-        /// </summary>
-        public bool IsMsaPassthrough { get; set; } = false;
-
 
         #region Authority
 
