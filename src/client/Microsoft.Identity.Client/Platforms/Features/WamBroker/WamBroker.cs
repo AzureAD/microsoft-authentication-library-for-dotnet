@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 new MsaPassthroughHandler(_logger, _msaPlugin, _wamProxy, _parentHandle);
 
             _wamOptions = appConfig.WindowsBrokerOptions ?? 
-                new WindowsBrokerOptions();
+                WindowsBrokerOptions.CreateDefault();
 
         }
 
@@ -231,16 +231,31 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             IWamPlugin wamPlugin,
             WebAccountProvider provider,
             WebAccount wamAccount)
-        {            
+        {
+         
+            
             WebTokenRequest webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                 provider,
                 authenticationRequestParameters,
-                isForceLoginPrompt: false,
+                isForceLoginPrompt: true,
                 isInteractive: true,
                 isAccountInWam: true)
            .ConfigureAwait(false);
 
-            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);          
+            if (provider.Authority == "organizations")
+            {
+                webTokenRequest.Properties.Add(
+                               "authority",
+                               "https://login.microsoftonline.com/common");
+            }
+            else
+            {
+                webTokenRequest.Properties.Add(
+                              "authority",
+                              "https://login.microsoftonline.com/organizations");
+            }
+
+            // WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);          
 
             try
             {
