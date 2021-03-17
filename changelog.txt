@@ -1,3 +1,28 @@
+4.28.0
+==========
+### New Features:
+**Updated token cache related telemetry**. See issue [#2406](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2406) for details.  
+**Added support for WebView2**. See issue [#1398](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1398) and [WebView2 wiki](https://aka.ms/msal-net-webview2.) for details.  
+**Added the ability to set a window title of a WebView2 window**. See issue [#2397](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2397) for details.  
+**Added support for specifying a custom fixed version of WebView2 runtime**. See issue [#2446](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2446) for details.  
+**Added helper methods for desktop apps**. See issue [#2459](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2459) for details.  
+**Added `refresh_in` logic to On-Behalf-Of flows**. See issue [#2389](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2389) for details.  
+**Stopped using reflection to deserialize JSON** to improve Unity apps built for UWP. See issue [#2343](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2343) and [Troubleshooting Unity](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Troubleshooting-Unity) for details.
+
+### Enhancements:
+**Added additional logging when the cache is not serialized in confidential client apps**. See issue [#2461](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2461) and [Token cache serialization](https://aka.ms/msal-net-cca-token-cache-serialization) for details.  
+**`GetAccountsAsync()` is now obsolete in confidential client apps**. Use `GetAccountAsync(string)`. See issue [#1967](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1967) for details.  
+
+### Bug Fixes:
+**Fixed `System.InvalidOperationException` when calling `GetAccountAsync` in a Xamarin Android app**. See issue [#2434](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2434) for details.  
+**Fixed a bug when a WAM account picker window was not correctly parented to windows**. See issue [#2469](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2469) for details.  
+**Fixed the behavior of `WithAuthority(string)` to correctly parse an authority string**. See [#2412](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2412) for details.  
+**Improved .NET 5 support for older versions of Windows**. See issue [#2445](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2445) for details.  
+**Added MSAL.NET assembly to `rd.xml` to enable MSAL.NET to work in optimized UWP apps**. See issue [#1617](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1617) for details.
+
+### Fundamentals:
+**Added additional code analyzers**. See issue [#2419](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2419) for details.
+
 4.27.0
 ==========
 ### New Features: 
