@@ -1,0 +1,5 @@
+<linker>
+    <assembly fullname="Microsoft.Identity.Client" preserve="all"/>
+    <assembly fullname="System.Net" preserve="all"/>
+    <assembly fullname="System.Net.Http" preserve="all"/>
+</linker>
