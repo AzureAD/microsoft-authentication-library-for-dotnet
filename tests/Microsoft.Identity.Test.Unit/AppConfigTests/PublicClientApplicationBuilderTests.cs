@@ -622,7 +622,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                    
 
             // broker is not available out of the box
-            Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), builder2.IsBrokerAvailable());
+            Assert.AreEqual(DesktopOsHelper.IsWin10(), builder2.IsBrokerAvailable());
         }
 #endif
     }
