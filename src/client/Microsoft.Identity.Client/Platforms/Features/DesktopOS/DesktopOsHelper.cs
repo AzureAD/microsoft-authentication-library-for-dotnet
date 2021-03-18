@@ -13,6 +13,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 {
     internal static class DesktopOsHelper
     {
+        private static Lazy<bool> s_win10OrServerEquivalentLazy = new Lazy<bool>(
+           () => IsWin10OrServerEquivalentInternal()); 
+        private static Lazy<bool> s_win10Lazy = new Lazy<bool>(
+            () => IsWin10Internal());
+
         public static bool IsWindows()
         {
 #if DESKTOP
@@ -45,13 +50,39 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             {               
                 return true;
             }
-#endif
-     
+#endif     
             return false;
         }
 
-        private static Lazy<bool> s_win10OrServerEquivalentLazy = new Lazy<bool>(
-            () => IsWin10OrServerEquivalentInternal());
+        public static bool IsWin10()
+        {
+            return s_win10Lazy.Value;
+        }
+
+        private static bool IsWin10Internal()
+        {
+            //Environment.OSVersion as it will return incorrect information on some operating systems
+            //For more information on how to acquire the current OS version from the registry
+            //See (https://stackoverflow.com/a/61914068)
+#if DESKTOP
+            var reg = Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+
+            string OSInfo = (string)reg.GetValue("ProductName");
+
+            if (OSInfo.Contains("Windows 10", StringComparison.InvariantCultureIgnoreCase))             
+            {
+                return true;
+            }
+#else
+            if (RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.OrdinalIgnoreCase))               
+            {               
+                return true;
+            }
+#endif     
+            return false;
+        }
+
+       
 
         public static bool IsWin10OrServerEquivalent()
         {

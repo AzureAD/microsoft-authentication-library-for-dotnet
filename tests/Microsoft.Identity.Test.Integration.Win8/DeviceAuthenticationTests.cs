@@ -21,8 +21,8 @@ namespace Microsoft.Identity.Test.Integration.Win8
         private const string _claims = "{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
         private const string _deviceAuthuser = "idlabca@msidlab8.onmicrosoft.com";
 
+        
         [TestMethod]
-
         public async Task PKeyAuthNonInteractiveTestAsync()
         {
             //Arrange

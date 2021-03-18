@@ -1,13 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
-using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Web.WebView2.Core;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 
 namespace Microsoft.Identity.Client.Desktop
 {
@@ -35,9 +30,20 @@ namespace Microsoft.Identity.Client.Desktop
 
         internal static void AddSupportForWam(PublicClientApplicationBuilder builder)
         {
-            builder.Config.BrokerCreatorFunc =
-                (uiParent, appConfig, logger) => 
-                    new Platforms.Features.WamBroker.WamBroker(uiParent, appConfig, logger);
+            if (DesktopOsHelper.IsWin10())
+            {
+                builder.Config.BrokerCreatorFunc =
+                    (uiParent, appConfig, logger) => new Platforms.Features.WamBroker.WamBroker(uiParent, appConfig, logger);
+            }
+            else
+            {
+                builder.Config.BrokerCreatorFunc =
+                   (uiParent, appConfig, logger) =>
+                   {
+                       logger.Info("Not a Win10 machine. WAM is not available");
+                       return new NullBroker();
+                   };
+            }
         }
     }
 }

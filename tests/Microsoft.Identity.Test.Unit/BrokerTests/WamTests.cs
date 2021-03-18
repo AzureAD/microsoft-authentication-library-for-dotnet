@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             WamAccountId = "wam_account_id",
         };
 
+
         [TestInitialize]
         public void Init()
         {
@@ -84,7 +85,23 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _msaPassthroughHandler);
         }
 
+        [TestMethod]
+        public void WamOnWin10()
+        {
+            if (!DesktopOsHelper.IsWin10())
+            {
+                Assert.Inconclusive("Needs to run on win10");
+            }
+            var pcaBuilder = PublicClientApplicationBuilder
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
+               .WithExperimentalFeatures();
+#if !NET5_WIN
+            pcaBuilder = pcaBuilder.WithWindowsBroker();
+#endif
 
+            Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
+
+        }
 
         [TestMethod]
         public void HandleInstallUrl_Throws()

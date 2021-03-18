@@ -22,6 +22,7 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.netcore;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 
 namespace Microsoft.Identity.Client.Platforms.net5win
 {
@@ -41,9 +42,17 @@ namespace Microsoft.Identity.Client.Platforms.net5win
 #endif
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
-            return appConfig.BrokerCreatorFunc != null ?
-                appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
-                new Features.WamBroker.WamBroker(uiParent, appConfig, Logger);
+            if (DesktopOsHelper.IsWin10())
+            {
+                return appConfig.BrokerCreatorFunc != null ?
+                    appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
+                    new Features.WamBroker.WamBroker(uiParent, appConfig, Logger);
+            }
+            else
+            {
+                Logger.Info("Not a Win10 machine. WAM is not available");
+                return new NullBroker();
+            }
         }
 
         public override bool CanBrokerSupportSilentAuth()
