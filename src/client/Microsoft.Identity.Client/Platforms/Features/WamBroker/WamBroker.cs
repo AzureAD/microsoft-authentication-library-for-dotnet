@@ -34,6 +34,10 @@ using System.Runtime.Versioning;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
+    /// <summary>
+    /// Important: all the WAM code has Win10 specific types and MUST be guarded against 
+    /// usage on older Windows, Mac and Linux, otherwise TypeLoadExceptions occur
+    /// </summary>
 #if NET5_WIN
     [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
@@ -52,6 +56,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
 
+        /// <summary>
+        /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See <see cref="DesktopOsHelper.IsWin10"></see>
+        /// </summary>
         public WamBroker(
             CoreUIParent uiParent,
             ApplicationConfiguration appConfig,

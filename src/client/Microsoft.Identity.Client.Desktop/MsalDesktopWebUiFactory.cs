@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Desktop
             throw new MsalClientException(
                 MsalError.WebView2NotInstalled,
                 "The embedded browser needs WebView2 runtime to be installed. If you are an end user of the app, please download and install the WebView2 runtime from https://go.microsoft.com/fwlink/p/?LinkId=2124703 and restart the app." +
-                " If you are an app developer, please ensure that your app installs the WebView2 runtime https://docs.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution");
+                " If you are an app developer, please ensure that your app installs the WebView2 runtime or that you provide a fixed version. See https://aka.ms/msal-net-webview2 for details");
         }
 
 
