@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
             {
                 throw new MsalClientException(MsalError.WebviewUnavailable, 
                    "An embedded webview is not available in the box on .NET Core 3.x " +
-                   "Please reference the package Microsoft.Indentity.Client.Desktop and call WithDesktopFeatures(). See https://aka.ms/msal-net-webview2 " +
+                   "Please reference the package Microsoft.Identity.Client.Desktop and call WithDesktopFeatures(). See https://aka.ms/msal-net-webview2 " +
                    "Or use the system webview - see https://aka.ms/msal-net-os-browser");
             }
 
