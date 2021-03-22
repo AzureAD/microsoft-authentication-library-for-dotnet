@@ -1,3 +1,8 @@
+4.28.1
+==========
+### Bug Fixes:
+**MSAL.NET now honors the `shouldClearExistingCache` when deserializing a null or empty blob**. See issues [#2490](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2490) and [#2216](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2216).
+
 4.28.0
 ==========
 ### New Features:
