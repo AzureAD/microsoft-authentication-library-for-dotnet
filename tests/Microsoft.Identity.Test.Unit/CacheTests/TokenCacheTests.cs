@@ -1098,6 +1098,39 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
+        public async Task SerializeDeserializeCache_ClearCacheTrueWithNoSerializedCache_TestAsync()
+        {
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+
+            MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
+
+            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle, requestContext: requestContext);
+            requestParams.Authority = Authority.CreateAuthorityWithTenant(
+              requestParams.AuthorityInfo,
+              TestConstants.Utid);
+            AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefNetworkEnvironment);
+
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
+            byte[] serializedCache = ((ITokenCacheSerializer)cache).SerializeMsalV3();
+
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
+
+            ((ITokenCacheSerializer)cache).DeserializeMsalV3(serializedCache);
+
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
+
+            ((ITokenCacheSerializer)cache).DeserializeMsalV3(null, true);
+
+            Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
         public void FindAccessToken_ScopeCaseInsensitive()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
