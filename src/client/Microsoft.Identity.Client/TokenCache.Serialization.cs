@@ -41,6 +41,10 @@ namespace Microsoft.Identity.Client
         {
             if (msalV3State == null || msalV3State.Length == 0)
             {
+                if (shouldClearExistingCache)
+                {
+                    _accessor.Clear();
+                }
                 return;
             }
             _unknownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State, shouldClearExistingCache);
