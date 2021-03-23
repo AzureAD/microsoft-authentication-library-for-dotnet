@@ -363,6 +363,11 @@ namespace DesktopTestApp
                 behavior = Prompt.NoPrompt;
             }
 
+            if (createPromptRadioButton.Checked)
+            {
+                behavior = Prompt.Create;
+            }
+
             return behavior;
         }
 

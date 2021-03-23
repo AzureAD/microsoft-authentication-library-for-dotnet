@@ -11,7 +11,7 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
-    <DelaySign>true</DelaySign>
+    <DelaySign>false</DelaySign>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
