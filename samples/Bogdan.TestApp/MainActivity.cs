@@ -1,13 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
+using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
+using Android.Util;
 using Android.Widget;
 using AndroidX.AppCompat.App;
 using Com.Microsoft.Identity.Client;
 using Com.Microsoft.Identity.Client.Exception;
+using Java.Security;
 using Java.Util;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Internet)]
@@ -17,17 +23,26 @@ namespace App1
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        private const string RedirectUriScheme = "msauth";
         private TextView _textView;
 
-        private ISingleAccountPublicClientApplication _ipca;
-        private SingleAccountPublicClientApplication _spca;
+        private IMultipleAccountPublicClientApplication _ipca;
+        private MultipleAccountPublicClientApplication _spca;
         private IAccount _account;
+        private bool loggerSet = false;
 
-        SingleAccountApplicationCreatedListener saacl;
+        MultipleAccountApplicationCreatedListener saacl;
         InteractiveAuthCallback cb;
 
+#pragma warning disable CA2000 // Dispose objects before losing scope
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            Logger.Instance.SetLogLevel(Logger.LogLevel.Verbose);
+            if (loggerSet == false)
+            {
+                Logger.Instance.SetExternalLogger(new LoggerCallback(this));
+                loggerSet = true;
+            }
 
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
@@ -48,15 +63,15 @@ namespace App1
             _textView = FindViewById<EditText>(Resource.Id.txtView);
             LogMessage("MainActivity::Created");
 
-
+            var temp = GetRedirectUriForBroker();
 
             // Create PCA
             int resourceId = Resource.Raw.single_account_config;
 
-            PublicClientApplication.CreateSingleAccountPublicClientApplication(
+            PublicClientApplication.CreateMultipleAccountPublicClientApplication(
                 this,
                 resourceId,
-                saacl = new SingleAccountApplicationCreatedListener(
+                saacl = new MultipleAccountApplicationCreatedListener(
                     onCreatedAction: (pca) =>
                     {
                         LogMessage("PCA created!");
@@ -72,14 +87,57 @@ namespace App1
 
         }
 
+        private string GetRedirectUriForBroker()
+        {
+            string packageName = Application.Context.PackageName;
+
+            // First available signature. Applications can be signed with multiple
+            // signatures.
+            string signatureDigest = GetCurrentSignatureForPackage(packageName);
+            if (!string.IsNullOrEmpty(signatureDigest))
+            {
+                return string.Format(CultureInfo.InvariantCulture, "{0}://{1}/{2}", RedirectUriScheme,
+                    packageName.ToLowerInvariant(), signatureDigest);
+            }
+
+            return string.Empty;
+        }
+
+        private string GetCurrentSignatureForPackage(string packageName)
+        {
+            try
+            {
+                PackageInfo info = Application.Context.PackageManager.GetPackageInfo(packageName,
+                    PackageInfoFlags.Signatures);
+#pragma warning disable CS0618 // Type or member is obsolete - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1854
+                if (info != null && info.Signatures != null && info.Signatures.Count > 0)
+                {
+                    Android.Content.PM.Signature signature = info.Signatures[0];
+                    MessageDigest md = MessageDigest.GetInstance("SHA");
+                    md.Update(signature.ToByteArray());
+                    return Convert.ToBase64String(md.Digest(), Base64FormattingOptions.None);
+                    // Server side needs to register all other tags. ADAL will
+                    // send one of them.
+                }
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            }
+            catch (PackageManager.NameNotFoundException)
+            {
+                //_logger.Info("[Android broker] Calling App's package does not exist in PackageManager. ");
+            }
+            catch (NoSuchAlgorithmException)
+            {
+                //_logger.Info("[Android broker] Digest SHA algorithm does not exists. ");
+            }
+
+            return null;
+        }
+
         private void SignOutBtn_Click(object sender, EventArgs e)
         {
-            _ipca.SignOut(
-                new SignOutCallback(
-                    onSuccessAction: () => LogMessage("Signed out!"),
-                    onErrorAction: (e) => LogMessage(e.ToString()))
-                );
-            
+            _ipca.RemoveAccount(_account);
+            LogMessage("Signed out!");
         }
 
         private void HelpBtbn_Click(object sender, EventArgs e)
@@ -95,39 +153,40 @@ namespace App1
             _textView.Text = "";
             LogMessage("MainActivity.SignInBtn.Click");
 
-            _spca = (SingleAccountPublicClientApplication)_ipca;
+            _spca = (MultipleAccountPublicClientApplication)_ipca;
             if (_spca == null)
             {
                 LogMessage("PCA not yet initialized!");
                 return;
             }
 
-            cb = new InteractiveAuthCallback(
-                onCancelAction: () => LogMessage("Auth cancelled"),
-                onErrorAction: (ex) => LogMessage(ex.ToString()),
-                onSuccessAction: (result) =>
-                {
-                    _account = result.Account;
-                    LogMessage(
-                        $"Success!! Token for {result.Account.Username}," +
-                        $" tenant {result.TenantId} - " +
-                        $" token {result.AccessToken} ");
-                });
-
+            _spca.GetAccounts(new MultipleAccountApplicationCurrentAccountCallback(
+                onAccountChangedAction: (p0, p1) => LogMessage(""),
+                onAccountLoaded: (p0) => LogMessage("AccountLoaded is called"),
+                onException: (p0) => LogMessage("Error")
+                ));
 
             // Doesn't work, no browser pop-up :(
-
-            //
-            LogMessage("mc++.MainActivity.SignIn.Begin");
-            _spca.SignIn(
+            this.RunOnUiThread( () =>
+            _spca.AcquireToken(
                 /*activity */ this,
-                /*login_hint*/"liu.kang@bogavrilltd.onmicrosoft.com",
+                /*login_hint*//*"IDLAB@msidlab4.onmicrosoft.com",*/
                 new[] { "User.Read" },
-                cb
-                );
-            LogMessage("mc++.MainActivity.SignIn.End");
+                new InteractiveAuthCallback(
+                    onCancelAction: () => LogMessage("Auth cancelled"),
+                    onErrorAction: (ex) => LogMessage(ex.ToString()),
+                    onSuccessAction: (result) =>
+                    {
+                        _account = result.Account;
+                        LogMessage(
+                            $"Success!! Token for {result.Account.Username}," +
+                            $" tenant {result.TenantId} - " +
+                            $" token {result.AccessToken} ");
+                    }))
+            );
 
 
+            
             //_pca.AcquireToken(
             //    this, 
             //    new[] { "User.Read" },
@@ -147,7 +206,8 @@ namespace App1
         private void SilentBtn_Click(object sender, EventArgs e)
         {
             var cb = new SilentAuthCallback(
-                    onErrorAction: (ex) => LogMessage("Error! " + ex.ToString()),
+                    onErrorAction: (ex) => 
+                    LogMessage("Error! " + ex.ToString()),
                      onSuccessAction: (result) =>
                      {
                          _account = result.Account;
@@ -161,7 +221,8 @@ namespace App1
             // TODO: try out the AcquireTokenSilent version as well, it's supposed to be for background thread
             _ipca.AcquireTokenSilentAsync(
                 new[] { "User.Read" },
-                _account?.Username,
+                _account,
+                "https://login.microsoftonline.com/f645ad92e38d4d1ab510d1b09a74a8ca",
                 cb
                 );
             Task.WaitAll();
@@ -198,8 +259,8 @@ namespace App1
                 return;
             }
 
-            _ipca.GetCurrentAccountAsync(
-                new SingleAccountApplicationCurrentAccountCallback(
+            _ipca.GetAccounts(
+                new MultipleAccountApplicationCurrentAccountCallback(
                     onAccountChangedAction: (priorAccount, newAccount) =>
                     {
                         LogMessage($"Account changed. Was {priorAccount?.Username ?? "null" }, is {newAccount.Username}");
@@ -218,7 +279,22 @@ namespace App1
 
         #region Callbacks
 
-        internal class SignOutCallback : Java.Lang.Object, ISingleAccountPublicClientApplicationSignOutCallback
+        internal class LoggerCallback : Java.Lang.Object, ILoggerCallback
+        {
+            MainActivity _mainActivity;
+
+            public LoggerCallback(MainActivity mainActivity)
+            {
+                _mainActivity = mainActivity;
+            }
+
+            public void Log(string p0, Logger.LogLevel p1, string p2, bool p3)
+            {
+                _mainActivity.LogMessage(p0 + " " + p2);
+            }
+        }
+
+        internal class SignOutCallback : Java.Lang.Object, IMultipleAccountPublicClientApplicationRemoveAccountCallback
         {
             private readonly Action _onSuccessAction;
             private readonly Action<MsalException> _onErrorAction;
@@ -235,7 +311,7 @@ namespace App1
             {
                 _onErrorAction(p0);
             }
-            public void OnSignOut()
+            public void OnRemoved()
             {
                 _onSuccessAction();
             }
@@ -334,55 +410,71 @@ namespace App1
             }
         }
 
-        internal class SingleAccountApplicationCurrentAccountCallback :
+        internal class MultipleAccountApplicationCurrentAccountCallback :
             Java.Lang.Object,
-            ISingleAccountPublicClientApplicationCurrentAccountCallback
+            IPublicClientApplicationLoadAccountsCallback
         {
             private readonly Action<IAccount, IAccount> _onAccountChangedAction;
             private readonly Action<IAccount> _onAccountLoaded;
-            private readonly Action<MsalException> _onException;
+            private readonly Action<Java.Lang.Object> _onException;
+            private readonly Action<MsalException> _onMsalException;
 
-            public SingleAccountApplicationCurrentAccountCallback(
+            public MultipleAccountApplicationCurrentAccountCallback(
                 Action<IAccount, IAccount> onAccountChangedAction,
                 Action<IAccount> onAccountLoaded,
-                Action<MsalException> onException)
+                Action<Java.Lang.Object> onException)
             {
                 _onAccountChangedAction = onAccountChangedAction;
                 _onAccountLoaded = onAccountLoaded;
                 _onException = onException;
             }
 
-            public void OnAccountChanged(IAccount p0, IAccount p1)
-            {
-                _onAccountChangedAction(p0, p1);
-            }
+            //public void OnAccountChanged(IAccount p0, IAccount p1)
+            //{
+            //    _onAccountChangedAction(p0, p1);
+            //}
 
-            public void OnAccountLoaded(IAccount p0)
-            {
-                _onAccountLoaded(p0);
-            }
+            //public void OnAccountLoaded(IAccount p0)
+            //{
+            //    _onAccountLoaded(p0);
+            //}
 
             public void OnError(MsalException ex)
             {
+                _onMsalException(ex);
+            }
+
+            public void OnError(Java.Lang.Object ex)
+            {
                 _onException(ex);
+            }
+
+            public void OnTaskCompleted(IList<IAccount> result)
+            {
+                _onAccountLoaded(result.FirstOrDefault());
+            }
+
+            public void OnTaskCompleted(Java.Lang.Object p0)
+            {
+                //throw new NotImplementedException();
             }
         }
 
-        internal class SingleAccountApplicationCreatedListener :
-            Java.Lang.Object, IPublicClientApplicationSingleAccountApplicationCreatedListener
+        internal class MultipleAccountApplicationCreatedListener :
+            Java.Lang.Object, IPublicClientApplicationMultipleAccountApplicationCreatedListener
         {
-            private readonly Action<ISingleAccountPublicClientApplication> _onCreatedAction;
+            private readonly Action<IMultipleAccountPublicClientApplication> _onCreatedAction;
             private readonly Action<MsalException> _onExceptionAction;
 
-            public SingleAccountApplicationCreatedListener(
-                Action<ISingleAccountPublicClientApplication> onCreatedAction,
+            public MultipleAccountApplicationCreatedListener(
+                Action<IMultipleAccountPublicClientApplication> onCreatedAction,
                 Action<MsalException> onExceptionAction)
             {
                 _onCreatedAction = onCreatedAction;
                 _onExceptionAction = onExceptionAction;
             }
 
-            public void OnCreated(ISingleAccountPublicClientApplication pca)
+            public void OnCreated(IMultipleAccountPublicClientApplication pca)
             {
                 _onCreatedAction(pca);
             }
@@ -394,7 +486,7 @@ namespace App1
         }
         #endregion
 
-        private void LogMessage(string message)
+        public void LogMessage(string message)
         {
             this.RunOnUiThread(
                 () =>
@@ -409,6 +501,7 @@ namespace App1
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+#pragma warning restore CA2000 // Dispose objects before losing scope
     }
 }
 
