@@ -21,6 +21,7 @@ using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Json.Utilities;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -50,6 +51,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string ArlingtonConfidentialClientIDOBO = "c0555d2d-02f2-4838-802e-3463422e571d";
         private const string ArlingtonPublicClientIDOBO = "cb7faed4-b8c0-49ee-b421-f5ed16894c83";
         private const string ArlingtonAuthority = "https://login.microsoftonline.us/45ff0c17-f8b5-489b-b7fd-2fedebbec0c4";
+        private const string OBOClientPpeClientID = "9793041b-9078-4942-b1d2-babdc472cc0c";
+        private const string OBOServicePpeClientID = "c84e9c32-0bc9-4a73-af05-9efe9982a322";
 
         private const string PublicCloudHost = "https://login.microsoftonline.com/";
         private const string ArlingtonCloudHost = "https://login.microsoftonline.us/";
@@ -691,6 +694,52 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Trace.WriteLine(e);
                 throw;
             }
+        }
+
+        [TestMethod]
+        public async Task ClientCreds_ServicePrincipal_OBO_PPE_Async()
+        {
+            string aadAuthenticationAuthority = "https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd";
+            X509Certificate2 cert = GetCertificate();
+            IReadOnlyList<string> scopes = new List<string>() { OBOServicePpeClientID + "/.default" };
+            IReadOnlyList<string> scopes2 = new List<string>() { "23d08a1e-1249-4f7c-b5a5-cb11f29b6923/.default" };
+
+            var confidentialSPApp = ConfidentialClientApplicationBuilder
+                                    .Create(OBOClientPpeClientID)
+                                    .WithAuthority(aadAuthenticationAuthority)
+                                    .WithCertificate(cert)
+                                    .WithTestLogging()
+                                    .Build();
+
+            var authenticationResult = await confidentialSPApp.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+
+            string appToken = authenticationResult.AccessToken;
+
+            var _confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(OBOServicePpeClientID)
+                .WithCertificate(cert)
+                .Build();
+
+            var userCacheRecorder = _confidentialApp.UserTokenCache.RecordAccess();
+            var userAssertion = new UserAssertion(appToken);
+            string atHash = userAssertion.AssertionHash;
+
+            authenticationResult = await _confidentialApp.AcquireTokenOnBehalfOf(scopes2, userAssertion)
+                                                         .WithAuthority(aadAuthenticationAuthority)
+                                                         .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(authenticationResult);
+            Assert.IsNotNull(authenticationResult.AccessToken);
+
+            authenticationResult = await _confidentialApp.AcquireTokenOnBehalfOf(scopes2, userAssertion)
+                                                         .WithAuthority(aadAuthenticationAuthority)
+                                                         .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(authenticationResult);
+            Assert.IsNotNull(authenticationResult.AccessToken);
+            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
         }
 
         private string GetSignedClientAssertionDirectly(
