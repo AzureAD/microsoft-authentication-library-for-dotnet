@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
 #endif
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
-            if (DesktopOsHelper.IsWin10())
+            if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
                 return appConfig.BrokerCreatorFunc != null ?
                     appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :

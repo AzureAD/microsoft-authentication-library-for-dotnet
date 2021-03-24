@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Desktop
 
         internal static void AddSupportForWam(PublicClientApplicationBuilder builder)
         {
-            if (DesktopOsHelper.IsWin10())
+            if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
                 builder.Config.BrokerCreatorFunc =
                     (uiParent, appConfig, logger) => new Platforms.Features.WamBroker.WamBroker(uiParent, appConfig, logger);
