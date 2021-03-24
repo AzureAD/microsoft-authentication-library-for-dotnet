@@ -1,12 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
@@ -36,6 +32,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         internal static MsalTokenResponse CreateMsalResponseFromWamResponse(
          IWebTokenRequestResultWrapper wamResponse,
          IWamPlugin wamPlugin,
+         string clientId,
          ICoreLogger logger,
          bool isInteractive)
         {
@@ -61,8 +58,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
                     errorMessage = WamErrorPrefix +
                         $"Wam plugin {wamPlugin.GetType()}" +
-                        $" error code: {internalErrorCode}" +
-                        $" error: " + wamResponse.ResponseError?.ErrorMessage;
+                        $" Error code: {internalErrorCode}" +
+                        $" Error Message: " + wamResponse.ResponseError?.ErrorMessage;
                     break;
                 case WebTokenRequestStatus.UserCancel:
                     errorCode = MsalError.AuthenticationCanceledError;
@@ -72,13 +69,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     errorCode =
                         wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError?.ErrorCode ?? 0, isInteractive);
                     errorMessage =
-                        WamErrorPrefix +
-                        " " +
-                        wamPlugin.GetType() +
-                        $" Error Code: {errorCode}." +
-                        $" Possible causes: no Internet connection or invalid redirect uri - please see https://aka.ms/msal-net-wam" +
-                        $" Details: " + wamResponse.ResponseError?.ErrorMessage;
-                    internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
+                        $"{WamErrorPrefix} {wamPlugin.GetType()} \n" +
+                        $" Error Code: {errorCode} \n" +
+                        $" Error Message: {wamResponse.ResponseError?.ErrorMessage} \n"  +
+                        $" Possible causes: \n " +
+                        $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: {GetExpectedRedirectUri(clientId)} \n" +
+                        $"- No Internet connection \n" +
+                        $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
+
+                internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
                     break;
                 default:
                     errorCode = MsalError.UnknownBrokerError;
@@ -93,6 +92,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 ErrorCodes = internalErrorCode != null ? new[] { internalErrorCode } : null,
                 ErrorDescription = errorMessage
             };
+        }
+
+        private static string GetExpectedRedirectUri(string clientId)
+        {
+#if WINDOWS_APP
+            string sid = Windows.Security.Authentication.Web.WebAuthenticationBroker.GetCurrentApplicationCallbackUri().Host.ToUpper();            
+            return $"ms-appx-web://microsoft.aad.brokerplugin/{sid}";
+#else
+
+            return $"ms-appx-web://microsoft.aad.brokerplugin/{clientId}";
+#endif
         }
 
         private static void AddAuthorityParamToRequest(string authority, bool validate, WebTokenRequest webTokenRequest)

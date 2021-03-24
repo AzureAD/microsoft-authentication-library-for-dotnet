@@ -143,7 +143,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         provider,
                         null)
                         .ConfigureAwait(false);
-                    return WamAdapters.CreateMsalResponseFromWamResponse(wamResult, wamPlugin, _logger, isInteractive: true);
+                    return WamAdapters.CreateMsalResponseFromWamResponse(
+                        wamResult,
+                        wamPlugin,
+                        authenticationRequestParameters.AppConfig.ClientId,
+                        _logger,
+                        isInteractive: true);
                 }
 
                 var wamAccount = await FindWamAccountForMsalAccountAsync(
@@ -162,7 +167,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         provider,
                         wamAccount)
                         .ConfigureAwait(false);
-                    return WamAdapters.CreateMsalResponseFromWamResponse(wamResult, wamPlugin, _logger, isInteractive: true);
+                    return WamAdapters.CreateMsalResponseFromWamResponse(
+                        wamResult,
+                        wamPlugin,
+                        authenticationRequestParameters.AppConfig.ClientId,
+                        _logger,
+                        isInteractive: true);
                 }
                 else
                 {
@@ -204,7 +214,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                   _parentHandle,
                   webTokenRequest).ConfigureAwait(false);
 
-            return CreateMsalTokenResponse(wamResult, _aadPlugin, isInteractive: true);
+            return WamAdapters.CreateMsalResponseFromWamResponse(
+                wamResult,
+                _aadPlugin,
+                authenticationRequestParameters.AppConfig.ClientId,
+                _logger,
+                isInteractive: true);
         }
 
         private bool IsAadOnlyAuthority(Authority authority)
@@ -242,14 +257,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebTokenRequest webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                 provider,
                 authenticationRequestParameters,
-                isForceLoginPrompt: false, 
+                isForceLoginPrompt: false,
                 isInteractive: true,
                 isAccountInWam: true)
            .ConfigureAwait(false);
 
             // because of https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2476
             string differentAuthority = null;
-            if (string.Equals(wamAccount?.WebAccountProvider?.Authority, Constants.OrganizationsTenant) && 
+            if (string.Equals(wamAccount?.WebAccountProvider?.Authority, Constants.OrganizationsTenant) &&
                 string.Equals(authenticationRequestParameters.Authority.TenantId, Constants.OrganizationsTenant))
             {
                 differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("common");
@@ -380,7 +395,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     "Could not get the result - account picker. See inner exception for details", ex);
             }
 
-            return CreateMsalTokenResponse(wamResult, wamPlugin, isInteractive: true);
+            return WamAdapters.CreateMsalResponseFromWamResponse(
+                wamResult,
+                wamPlugin,
+                authenticationRequestParameters.AppConfig.ClientId,
+                _logger,
+                isInteractive: true);
         }
 
         private IntPtr GetParentWindow(CoreUIParent uiParent)
@@ -461,7 +481,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 var wamResult =
                     await _wamProxy.GetTokenSilentlyAsync(webAccount, webTokenRequest).ConfigureAwait(false);
 
-                return WamAdapters.CreateMsalResponseFromWamResponse(wamResult, wamPlugin, _logger, isInteractive: false);
+                return WamAdapters.CreateMsalResponseFromWamResponse(
+                    wamResult, 
+                    wamPlugin,
+                    authenticationRequestParameters.AppConfig.ClientId,
+                    _logger, 
+                    isInteractive: false);
 
             }
         }
@@ -508,7 +533,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 var wamResult =
                     await _wamProxy.GetTokenSilentlyForDefaultAccountAsync(webTokenRequest).ConfigureAwait(false);
 
-                return WamAdapters.CreateMsalResponseFromWamResponse(wamResult, wamPlugin, _logger, isInteractive: false);
+                return WamAdapters.CreateMsalResponseFromWamResponse(
+                    wamResult, 
+                    wamPlugin,
+                    authenticationRequestParameters.AppConfig.ClientId,
+                    _logger, 
+                    isInteractive: false);
             }
         }
 
@@ -670,89 +700,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return
                 string.Equals(Constants.ConsumerTenant, tenantId, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(Constants.MsaTenantId, tenantId, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private MsalTokenResponse CreateMsalTokenResponse(
-            IWebTokenRequestResultWrapper wamResponse,
-            IWamPlugin wamPlugin,
-            bool isInteractive)
-        {
-            string internalErrorCode = null;
-            string errorMessage;
-            string errorCode;
-
-            switch (wamResponse.ResponseStatus)
-            {
-                case WebTokenRequestStatus.Success:
-                    _logger.Info("WAM response status success");
-                    return wamPlugin.ParseSuccessfullWamResponse(wamResponse.ResponseData[0], out _);
-
-                // Account Switch occurs when a login hint is passed to WAM but the user chooses a different account for login.
-                // MSAL treats this as a success scenario
-                case WebTokenRequestStatus.AccountSwitch:
-                    _logger.Info("WAM response status account switch. Treating as success");
-                    return wamPlugin.ParseSuccessfullWamResponse(wamResponse.ResponseData[0], out _);
-
-                case WebTokenRequestStatus.UserInteractionRequired:
-                    errorCode =
-                        wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError?.ErrorCode ?? 0, isInteractive);
-                    internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
-                    errorMessage = WamErrorPrefix +
-                        $"Wam plugin {wamPlugin.GetType()}" +
-                        $" error code: {internalErrorCode}" +
-                        $" error: " + wamResponse.ResponseError?.ErrorMessage;
-                    break;
-                case WebTokenRequestStatus.UserCancel:
-                    errorCode = MsalError.AuthenticationCanceledError;
-                    errorMessage = MsalErrorMessage.AuthenticationCanceled;
-                    break;
-                case WebTokenRequestStatus.ProviderError:
-                    errorCode =
-                        wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError?.ErrorCode ?? 0, isInteractive);
-                    errorMessage =
-                        WamErrorPrefix +
-                        " " +
-                        wamPlugin.GetType() +
-                        $" Error Code: {errorCode}." +
-                        $" Possible causes: no Internet connection or invalid redirect uri - please see https://aka.ms/msal-net-wam" +
-                        $" Details: " + wamResponse.ResponseError?.ErrorMessage;
-                    internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
-                    break;
-                default:
-                    errorCode = MsalError.UnknownBrokerError;
-                    internalErrorCode = wamResponse.ResponseError.ErrorCode.ToString(CultureInfo.InvariantCulture);
-                    errorMessage = $"Unknown WebTokenRequestStatus {wamResponse.ResponseStatus} (internal error code {internalErrorCode})";
-                    break;
-            }
-
-            return new MsalTokenResponse()
-            {
-                Error = errorCode,
-                ErrorCodes = internalErrorCode != null ? new[] { internalErrorCode } : null,
-                ErrorDescription = errorMessage
-            };
-        }
-
-        private void AddExtraParamsToRequest(WebTokenRequest webTokenRequest, IDictionary<string, string> extraQueryParameters)
-        {
-            if (extraQueryParameters != null)
-            {
-                // MSAL uses instance_aware=true, but WAM calls it discover=home, so we rename the parameter before passing
-                // it to WAM.
-                foreach (var kvp in extraQueryParameters)
-                {
-                    string key = kvp.Key;
-                    string value = kvp.Value;
-
-                    if (string.Equals("instance_aware", key) && string.Equals("true", value))
-                    {
-                        key = "discover";
-                        value = "home";
-                    }
-
-                    webTokenRequest.Properties.Add(key, value);
-                }
-            }
         }
 
         internal /* for test only */ async Task<bool> IsMsaRequestAsync(

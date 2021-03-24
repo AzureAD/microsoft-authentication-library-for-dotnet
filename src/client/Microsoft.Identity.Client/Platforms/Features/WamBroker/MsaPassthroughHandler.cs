@@ -113,7 +113,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             if (!webTokenResponseMsa.ResponseStatus.IsSuccessStatus())
             {
-                var errorResp = WamAdapters.CreateMsalResponseFromWamResponse(webTokenResponseMsa, _msaPlugin, _logger, true);
+                var errorResp = WamAdapters.CreateMsalResponseFromWamResponse(
+                    webTokenResponseMsa, 
+                    _msaPlugin, 
+                    authenticationRequestParameters.AppConfig.ClientId, 
+                    _logger, 
+                    isInteractive: true);
+
                 _logger.Warning(
                     "WAM MSA-PT: could not get a transfer token, ussually this is because the " +
                     "1st party app is configured for MSA-PT but not configured to login MSA users (signinaudience =2). " +
@@ -145,7 +151,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             if (!transferResponse.ResponseStatus.IsSuccessStatus())
             {
-                var errorResp = WamAdapters.CreateMsalResponseFromWamResponse(transferResponse, _msaPlugin, _logger, true);
+                var errorResp = WamAdapters.CreateMsalResponseFromWamResponse(
+                    transferResponse, 
+                    _msaPlugin,
+                    clientId,
+                    _logger, 
+                    true);
+
                 throw new MsalServiceException(
                     errorResp.Error,
                     "Error fetching the MSA-PT transfer token - " + errorResp.ErrorDescription);
