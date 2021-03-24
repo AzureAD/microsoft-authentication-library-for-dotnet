@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Client
         /// AcquireToken will send <c>prompt=create</c> to the authorization server's authorize endpoint
         /// which would trigger a sign-up experience, used for External Identities. 
         /// </summary>
+        /// <remarks>More details at https://aka.ms/msal-net-prompt-create. </remarks>
         public static readonly Prompt Create = new Prompt("create");
 
 #if DESKTOP || WINDOWS_APP
