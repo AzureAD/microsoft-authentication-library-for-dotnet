@@ -51,7 +51,8 @@ namespace XamarinDev
                 Prompt.SelectAccount.PromptValue,
                 Prompt.ForceLogin.PromptValue,
                 Prompt.Consent.PromptValue,
-                Prompt.NoPrompt.PromptValue
+                Prompt.NoPrompt.PromptValue,
+                Prompt.Create.PromptValue,
             };
 
             UIBehaviorPicker.ItemsSource = options;
@@ -75,6 +76,11 @@ namespace XamarinDev
             if (Prompt.NoPrompt.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
             {
                 return Prompt.NoPrompt;
+            }
+
+            if (Prompt.Create.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
+            {
+                return Prompt.Create;
             }
 
             return Prompt.SelectAccount;
