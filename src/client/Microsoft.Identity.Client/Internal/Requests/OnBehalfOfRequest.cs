@@ -90,6 +90,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
         {
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+            if (msalTokenResponse.ClientInfo is null &&
+                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs)
+            {
+                var logger = AuthenticationRequestParameters.RequestContext.Logger;
+                logger.Info("This is an on behalf of request for a service principal as no client info returned in the token response.");
+            }
+
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
