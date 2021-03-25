@@ -194,7 +194,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 {
                     try
                     {
-                        Process.Start("xdg-open", url);
+                        var psi = new ProcessStartInfo("xdg-open", url)
+                        {
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                        };
+                        Process.Start(psi);
                     }
                     catch (Exception ex)
                     {
