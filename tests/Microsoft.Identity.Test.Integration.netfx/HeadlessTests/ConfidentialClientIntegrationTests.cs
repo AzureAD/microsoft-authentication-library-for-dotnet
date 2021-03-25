@@ -53,6 +53,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string ArlingtonAuthority = "https://login.microsoftonline.us/45ff0c17-f8b5-489b-b7fd-2fedebbec0c4";
         private const string OBOClientPpeClientID = "9793041b-9078-4942-b1d2-babdc472cc0c";
         private const string OBOServicePpeClientID = "c84e9c32-0bc9-4a73-af05-9efe9982a322";
+        private const string OBOServiceDownStreamApiClientID = "23d08a1e-1249-4f7c-b5a5-cb11f29b6923";
+        private const string PPEAuthenticationAuthority = "https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd";
 
         private const string PublicCloudHost = "https://login.microsoftonline.com/";
         private const string ArlingtonCloudHost = "https://login.microsoftonline.us/";
@@ -699,14 +701,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ClientCreds_ServicePrincipal_OBO_PPE_Async()
         {
-            string aadAuthenticationAuthority = "https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd";
             X509Certificate2 cert = GetCertificate();
             IReadOnlyList<string> scopes = new List<string>() { OBOServicePpeClientID + "/.default" };
-            IReadOnlyList<string> scopes2 = new List<string>() { "23d08a1e-1249-4f7c-b5a5-cb11f29b6923/.default" };
+            IReadOnlyList<string> scopes2 = new List<string>() { OBOServiceDownStreamApiClientID + "/.default" };
 
             var confidentialSPApp = ConfidentialClientApplicationBuilder
                                     .Create(OBOClientPpeClientID)
-                                    .WithAuthority(aadAuthenticationAuthority)
+                                    .WithAuthority(PPEAuthenticationAuthority)
                                     .WithCertificate(cert)
                                     .WithTestLogging()
                                     .Build();
@@ -714,6 +715,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var authenticationResult = await confidentialSPApp.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
 
             string appToken = authenticationResult.AccessToken;
+            var userAssertion = new UserAssertion(appToken);
+            string atHash = userAssertion.AssertionHash;
 
             var _confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(OBOServicePpeClientID)
@@ -721,18 +724,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             var userCacheRecorder = _confidentialApp.UserTokenCache.RecordAccess();
-            var userAssertion = new UserAssertion(appToken);
-            string atHash = userAssertion.AssertionHash;
 
             authenticationResult = await _confidentialApp.AcquireTokenOnBehalfOf(scopes2, userAssertion)
-                                                         .WithAuthority(aadAuthenticationAuthority)
+                                                         .WithAuthority(PPEAuthenticationAuthority)
                                                          .ExecuteAsync().ConfigureAwait(false);
 
             Assert.IsNotNull(authenticationResult);
             Assert.IsNotNull(authenticationResult.AccessToken);
 
             authenticationResult = await _confidentialApp.AcquireTokenOnBehalfOf(scopes2, userAssertion)
-                                                         .WithAuthority(aadAuthenticationAuthority)
+                                                         .WithAuthority(PPEAuthenticationAuthority)
                                                          .ExecuteAsync().ConfigureAwait(false);
 
             Assert.IsNotNull(authenticationResult);
