@@ -731,6 +731,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(authenticationResult);
             Assert.IsNotNull(authenticationResult.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, authenticationResult.AuthenticationResultMetadata.TokenSource);
 
             authenticationResult = await _confidentialApp.AcquireTokenOnBehalfOf(scopes2, userAssertion)
                                                          .WithAuthority(PPEAuthenticationAuthority)
@@ -741,6 +742,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.Cache, authenticationResult.AuthenticationResultMetadata.TokenSource);
         }
 
         private string GetSignedClientAssertionDirectly(
