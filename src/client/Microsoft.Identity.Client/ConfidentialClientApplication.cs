@@ -37,6 +37,11 @@ namespace Microsoft.Identity.Client
             IConfidentialClientApplicationWithCertificate,
             IByRefreshToken
     {
+        /// <summary>
+        /// Instructs MSAL to try to auto discover the Azure region.
+        /// </summary>
+        public const string AttemptRegionAutoDiscovery = "AutoDetect";
+
         internal ConfidentialClientApplication(
             ApplicationConfiguration configuration)
             : base(configuration)

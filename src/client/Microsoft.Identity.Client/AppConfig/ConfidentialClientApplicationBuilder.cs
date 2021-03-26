@@ -45,6 +45,12 @@ namespace Microsoft.Identity.Client
             {
                 builder = builder.WithClientSecret(options.ClientSecret);
             }
+
+            if (!string.IsNullOrWhiteSpace(options.AzureRegion))
+            {
+                builder = builder.WithAzureRegion(options.AzureRegion);
+            }
+
             return builder;
         }
 
@@ -171,6 +177,38 @@ namespace Microsoft.Identity.Client
 
             Config.SignedClientAssertionDelegate = clientAssertionDelegate;
             Config.ConfidentialClientCredentialCount++;
+            return this;
+        }
+
+
+        /// <summary>
+        /// Instructs MSAL to use an Azure regional token service using the region given.
+        /// 
+        /// If the calling app knows the region it is deployed to, it should use this information. 
+        /// 
+        /// Otherwise, set the variable to <see cref="ConfidentialClientApplication.AttemptRegionAutoDiscovery"/>, and MSAL will attempt to auto-detect the region. This process
+        /// works on a limited number of Azure artifacts (TBD - which ones!?). If auto-discovery fails, MSAL will use the non-regional service.
+        ///         
+        /// See https://aka.ms/msal-net-region-discovery for more details.
+        /// </summary>
+        /// <param name="azureRegion">A string indicating the azure region, as per https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.fluent.core.region?view=azure-dotnet
+        /// Or <see cref="ConfidentialClientApplication.AttemptRegionAutoDiscovery"/> to have MSAL auto-detect the region.
+        /// </param>
+        /// <remarks>
+        /// Not all flows can use the regional token service. 
+        /// Service To Service (client credential) requests can be obtained from the regional service.
+        /// Requires configuration at the tenant level.
+        /// </remarks>
+        /// <returns>The builder to chain the .With methods</returns>
+        public ConfidentialClientApplicationBuilder WithAzureRegion(string azureRegion = ConfidentialClientApplication.AttemptRegionAutoDiscovery)
+        {
+            if (string.IsNullOrEmpty(azureRegion))
+            {
+                throw new ArgumentNullException(nameof(azureRegion));
+            }
+
+            Config.AzureRegion = azureRegion;
+
             return this;
         }
 
