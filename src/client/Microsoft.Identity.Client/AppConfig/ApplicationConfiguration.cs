@@ -85,6 +85,10 @@ namespace Microsoft.Identity.Client
 
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
 
+        #region Region
+        public string AzureRegion { get; set; }
+        #endregion
+
         #region Authority
 
         public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }

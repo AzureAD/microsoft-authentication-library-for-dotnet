@@ -60,16 +60,18 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private AuthorityInfo(string host, string canonicalAuthority, AuthorityType authorityType, string userRealmUriPrefix, bool validateAuthority, bool autoDetectRegion, string regionToUse, bool fallbackToGlobal)
+        private AuthorityInfo(
+            string host, 
+            string canonicalAuthority, 
+            AuthorityType authorityType, 
+            string userRealmUriPrefix, 
+            bool validateAuthority)
         {
             Host = host;
             CanonicalAuthority = canonicalAuthority;
             AuthorityType = authorityType;
             UserRealmUriPrefix = userRealmUriPrefix;
-            ValidateAuthority = validateAuthority;
-            AutoDetectRegion = autoDetectRegion;
-            RegionToUse = regionToUse;
-            FallbackToGlobal = fallbackToGlobal;
+            ValidateAuthority = validateAuthority;            
         }
 
         public AuthorityInfo(AuthorityInfo other) : 
@@ -78,10 +80,7 @@ namespace Microsoft.Identity.Client
                 other.CanonicalAuthority,
                 other.AuthorityType,
                 other.UserRealmUriPrefix,
-                other.ValidateAuthority,
-                other.AutoDetectRegion,
-                other.RegionToUse,
-                other.FallbackToGlobal)
+                other.ValidateAuthority)
         {
         }
 
@@ -90,9 +89,6 @@ namespace Microsoft.Identity.Client
         public AuthorityType AuthorityType { get; }
         public string UserRealmUriPrefix { get; }
         public bool ValidateAuthority { get; }
-        public bool AutoDetectRegion { get; set; }
-        public string RegionToUse { get; set; }
-        public bool FallbackToGlobal { get; set; }
 
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)

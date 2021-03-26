@@ -162,6 +162,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
                                          : null;
         }
 
+        #region Region
         public string RegionDiscovered
         {
             get => this.ContainsKey(RegionDiscoveredKey) ? this[RegionDiscoveredKey] : null;
@@ -216,6 +217,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             }
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
+
+#endregion
 
         public bool IsTokenCacheSerialized
         {

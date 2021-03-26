@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Instructs MSAL to try to auto discover the Azure region.
         /// </summary>
-        public const string AttemptRegionAutoDiscovery = "AutoDetect";
+        public const string AttemptRegionDiscovery = "TryAutoDetect";
 
         internal ConfidentialClientApplication(
             ApplicationConfiguration configuration)

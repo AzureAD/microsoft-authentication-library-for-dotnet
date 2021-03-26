@@ -17,11 +17,20 @@ namespace Microsoft.Identity.Client
         public string ClientSecret { get; set; }
 
         /// <summary>
-        /// Instructs MSAL to use an Azure regional token service using the region given.
-        /// If the calling app knows the region it is deployed to, it should use this information. Region strings are available at https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.fluent.core.region?view=azure-dotnet
-        /// Otherwise, set the variable to "AutoDetect", and MSAL will attempt to auto-detect the region. This process
-        /// works on a limited number of Azure artifacts (TBD - which ones!?). If auto-discovery fails, MSAL will use the non-regional service.
+        /// Instructs MSAL.NET to use an Azure regional token service.
+        /// This setting should be set to either the string with the region (preffered) or to 
+        /// "TryAutoDetect" and MSAL.NET will attempt to auto-detect the region. 
         /// </summary>
+        /// <remarks>
+        /// Region names as per https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.fluent.core.region?view=azure-dotnet.
+        /// Not all auth flows can use the regional token service. 
+        /// Service To Service (client credential flow) tokens can be obtained from the regional service.
+        /// Requires configuration at the tenant level.
+        /// Auto-detection works on a limited number of Azure artifacts (VMs, Azure functions). 
+        /// If auto-detection fails, the non-regional endpoint will be used.
+        /// If an invalid region name is provided, the non-regional endpoint MIGHT be used or the token request MIGHT fail.
+        /// See https://aka.ms/msal-net-region-discovery for more details.        
+        /// </remarks>
         public string AzureRegion { get; set; }
     }
 }
