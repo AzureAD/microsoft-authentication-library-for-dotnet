@@ -1,7 +1,21 @@
+4.29.0
+==========
+### Bug Fixes:
+**Custom Tabs now work correctly in Android 29+**. See issue [#2418](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2418).  
+**Output and error streams are now redirected from the child process when launching a browser on Linux**. See issue [#2427](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2427).  
+
+### New Features:
+**Added support for calling On-Behalf-Of flow for Service Principals**. See issue [#1845](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1845).  
+**Added support for `prompt=create` for External Identities**, which allows self-service sign-up experience. See issue [#2463](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2463) and [documentation](https://aka.ms/msal-net-prompt-create).  
+**MSAL.NET now suggests the correct redirect URI to use, if WAM was used with an incorrect URI**. See [#2358](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2358).  
+
+### Enhancements:
+**Redesigned support for calling regional token services** to increase resilience and API simplicity. See issue [#2508](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2508).  
+
 4.28.1
 ==========
 ### Bug Fixes:
-**MSAL.NET now honors the `shouldClearExistingCache` when deserializing a null or empty blob**. See issues [#2490](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2490) and [#2216](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2216).
+**MSAL.NET now honors the `shouldClearExistingCache` when deserializing a null or empty blob**. See issues [#2490](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2490) and [#2216](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2216).  
 
 4.28.0
 ==========
