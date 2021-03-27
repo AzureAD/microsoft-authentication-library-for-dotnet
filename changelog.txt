@@ -1,9 +1,5 @@
 4.29.0
 ==========
-### Bug Fixes:
-**Custom Tabs now work correctly in Android 29+**. See issue [#2418](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2418).  
-**Output and error streams are now redirected from the child process when launching a browser on Linux**. See issue [#2427](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2427).  
-
 ### New Features:
 **Added support for calling On-Behalf-Of flow for Service Principals**. See issue [#1845](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1845).  
 **Added support for `prompt=create` for External Identities**, which allows self-service sign-up experience. See issue [#2463](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2463) and [documentation](https://aka.ms/msal-net-prompt-create).  
@@ -11,6 +7,10 @@
 
 ### Enhancements:
 **Redesigned support for calling regional token services** to increase resilience and API simplicity. See issue [#2508](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2508).  
+
+### Bug Fixes:
+**Custom Tabs now work correctly in Android 29+**. See issue [#2418](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2418).  
+**Output and error streams are now redirected from the child process when launching a browser on Linux**. See issue [#2427](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2427).  
 
 4.28.1
 ==========
