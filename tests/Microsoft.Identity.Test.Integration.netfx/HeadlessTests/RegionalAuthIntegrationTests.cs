@@ -72,31 +72,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
             AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D}|centralus,1,0,,,0,1");
-
         }
 
         [TestMethod]
-        public async Task AcquireTokenUserProvidedRegionSameAsRegionDetectedAsync()
-        {
-            // Arrange
-            var factory = new HttpSnifferClientFactory();
-            _confidentialClientApplication = BuildCCA(factory, TestConstants.Region);
-
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-            AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
-            AssertTokenSourceIsIdp(result);
-            AssertValidHost(true, factory);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D}|centralus,1,0,centralus,1,0,1");
-
-            result = await GetAuthenticationResultAsync(withForceRefresh: true).ConfigureAwait(false); // regional endpoint
-            AssertTokenSourceIsIdp(result);
-            AssertValidHost(true, factory, 1);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.ForceRefresh:D}|centralus,3,0,centralus,,0,1", 1);
-
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenUserProvidedRegionDifferentFromRegionDetectedAsync()
+        public async Task InvalidRegion_GoesToInvalidAuthority_Async()
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
@@ -105,62 +84,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
             AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
-            AssertValidHost(true, factory);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D}|centralus,1,0,invalid,0,0,1");
+            Assert.AreEqual(
+              "https://invalid.login.microsoft.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token?allowestsrnonmsi=true",
+              factory.RequestsAndResponses.Single().Item1.RequestUri.ToString());
+
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D}|invalid,1,0,invalid,0,0,1");
 
             _confidentialClientApplication = BuildCCA(factory, TestConstants.Region);
             result = await GetAuthenticationResultAsync(withForceRefresh: true).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory, 1);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.ForceRefresh:D}|centralus,3,0,centralus,,0,1", 1);
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.ForceRefresh:D}|centralus,3,0,centralus,1,0,1", 1);
            
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenToRegionalEndpointThenGlobalEndpoint_UseTokenFromCacheAsync()
-        {
-            // Arrange
-            var factory = new HttpSnifferClientFactory();
-            _confidentialClientApplication = BuildCCA(factory);
-           
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-            AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
-            AssertTokenSourceIsIdp(result);
-            AssertValidHost(true, factory);
-
-            _confidentialClientApplication = BuildCCA(factory, null);
-            result = await GetAuthenticationResultAsync().ConfigureAwait(false); // global endpoint, use cached token
-            AssertTokenSource_IsCache(result);
-
-            _confidentialClientApplication = BuildCCA(factory);
-            result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint, use cached token
-            AssertTokenSource_IsCache(result);
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenToGlobalEndpointThenRegionalEndpoint_UseTokenFromCacheAsync()
-        {
-            // Arrange
-            var factory = new HttpSnifferClientFactory();
-            _confidentialClientApplication = BuildCCA(factory, null);
-
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-            AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // global endpoint
-            AssertValidHost(false, factory);
-            AssertTokenSourceIsIdp(result);
-
-            _confidentialClientApplication = BuildCCA(factory);
-            result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint, use cached token
-            AssertTokenSource_IsCache(result);
-
-            _confidentialClientApplication = BuildCCA(factory, null);
-            result = await GetAuthenticationResultAsync().ConfigureAwait(false); // global endpoint, use cached token
-            AssertTokenSource_IsCache(result);
-
-            _confidentialClientApplication = BuildCCA(factory);
-            result = await GetAuthenticationResultAsync(withForceRefresh: true).ConfigureAwait(false); // regional endpoint, new token
-            AssertValidHost(true, factory, 1);
-            AssertTokenSourceIsIdp(result);
         }
 
         private void AssertTelemetry(HttpSnifferClientFactory factory, string currentTelemetryHeader, int placement = 0)
@@ -202,7 +137,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var builder = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
                 .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, GetClaims()))
-                //.WithClientSecret(_keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value) //use the client secret in case of cert errors
                 .WithAuthority(PublicCloudTestAuthority)
                 .WithTestLogging()
                 .WithExperimentalFeatures(true)

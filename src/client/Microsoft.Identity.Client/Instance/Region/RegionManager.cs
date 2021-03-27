@@ -97,23 +97,36 @@ namespace Microsoft.Identity.Client.Region
         private void RecordTelemetry(ApiEvent apiEvent, string azureRegionConfig, RegionInfo discoveredRegion)
         {
             // already emitted telemetry for this request, don't emit again as it will overwrite with "from cache"
-            if (!string.IsNullOrEmpty(apiEvent.RegionDiscovered))
+            if (IsTelemetryRecorded(apiEvent))
             {
                 return;
             }
 
             bool isAutoDiscoveryRequested = IsAutoDiscoveryRequested(azureRegionConfig);
-            apiEvent.RegionDiscovered = discoveredRegion.Region;
 
             if (isAutoDiscoveryRequested)
             {
-                apiEvent.RegionSource = (int)discoveredRegion.RegionSource;
+                apiEvent.RegionUsed = discoveredRegion.Region;
+                if (discoveredRegion.RegionSource != RegionSource.FailedAutoDiscovery)
+                {
+                    apiEvent.RegionSource = (int)discoveredRegion.RegionSource;
+                }
                 apiEvent.FallbackToGlobal = discoveredRegion.Region == null;
                 apiEvent.IsValidUserProvidedRegion = null;
             }
             else
             {
-                apiEvent.RegionSource = (int)RegionSource.UserProvided;
+                apiEvent.RegionUsed = azureRegionConfig;
+
+                if (discoveredRegion.RegionSource == RegionSource.FailedAutoDiscovery)
+                {
+                    apiEvent.RegionSource = (int)RegionSource.UserProvided;
+                }
+                else
+                {
+                    apiEvent.RegionSource = (int)discoveredRegion.RegionSource;
+                }
+
                 apiEvent.UserProvidedRegion = azureRegionConfig;
                 apiEvent.FallbackToGlobal = false;
                 if (!string.IsNullOrEmpty(discoveredRegion.Region))
@@ -123,6 +136,16 @@ namespace Microsoft.Identity.Client.Region
                         azureRegionConfig);
                 }
             }
+        }
+
+        private bool IsTelemetryRecorded(ApiEvent apiEvent)
+        {
+            return 
+                !(apiEvent.RegionUsed == null &&
+                 apiEvent.RegionSource == (int)(default(RegionSource)) &&
+                 apiEvent.UserProvidedRegion == null &&
+                 apiEvent.FallbackToGlobal == null &&
+                 apiEvent.IsValidUserProvidedRegion == null);
         }
 
         private async Task<RegionInfo> DiscoverRegionWithCacheAsync(string azureRegionConfig, ICoreLogger logger, CancellationToken requestCancellationToken)

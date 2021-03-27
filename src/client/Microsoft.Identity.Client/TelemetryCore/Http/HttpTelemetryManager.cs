@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                     platformFields.Append(",");
 
                 ev.TryGetValue(MsalTelemetryBlobEventNames.RegionSource, out string regionSource);
-                platformFields.Append(ev.RegionDiscovered);
+                platformFields.Append(ev.RegionUsed);
                 platformFields.Append(",");
                 platformFields.Append(regionSource);
 

@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionDiscovered);
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionSource.Imds, result.ApiEvent.RegionSource);
                 Assert.AreEqual(null, result.ApiEvent.UserProvidedRegion);
                 Assert.AreEqual(false, result.ApiEvent.IsValidUserProvidedRegion);
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionDiscovered);
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionSource.Cache, result.ApiEvent.RegionSource);
                 Assert.AreEqual(null, result.ApiEvent.UserProvidedRegion);
                 Assert.AreEqual(false, result.ApiEvent.IsValidUserProvidedRegion);
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit
                   .ExecuteAsync(CancellationToken.None)
                   .ConfigureAwait(false);
 
-                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionDiscovered);
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionSource.Cache, result.ApiEvent.RegionSource);
                 Assert.AreEqual(null, result.ApiEvent.UserProvidedRegion);
                 Assert.AreEqual(false, result.ApiEvent.IsValidUserProvidedRegion);
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit
                   .ExecuteAsync(CancellationToken.None)
                   .ConfigureAwait(false);
 
-                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionDiscovered);
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionSource.Cache, result.ApiEvent.RegionSource);
                 Assert.AreEqual(null, result.ApiEvent.UserProvidedRegion);
                 Assert.AreEqual(false, result.ApiEvent.IsValidUserProvidedRegion);
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionDiscovered);
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionSource.Imds, result.ApiEvent.RegionSource);
                 Assert.AreEqual(null, result.ApiEvent.UserProvidedRegion);
                 Assert.AreEqual(false, result.ApiEvent.IsValidUserProvidedRegion);
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(null, result.ApiEvent.RegionDiscovered);
+                Assert.AreEqual(null, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionSource.None, result.ApiEvent.RegionSource);
                 Assert.AreEqual(null, result.ApiEvent.UserProvidedRegion);
                 Assert.AreEqual(null, result.ApiEvent.IsValidUserProvidedRegion);
@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
 
-                    Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionDiscovered);
+                    Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                     Assert.AreEqual((int)RegionSource.EnvVariable, result.ApiEvent.RegionSource);
                     Assert.AreEqual(null, result.ApiEvent.UserProvidedRegion);
                     Assert.AreEqual(false, result.ApiEvent.IsValidUserProvidedRegion);
@@ -238,8 +238,8 @@ namespace Microsoft.Identity.Test.Unit
 
                     Assert.IsNotNull(result.AccessToken);
 
-                    Assert.AreEqual(null, result.ApiEvent.RegionDiscovered);
-                    Assert.AreEqual((int)RegionSource.FailedAutoDiscovery, result.ApiEvent.RegionSource);
+                    Assert.AreEqual(null, result.ApiEvent.RegionUsed);
+                    Assert.AreEqual((int)RegionSource.None, result.ApiEvent.RegionSource);
                     Assert.AreEqual(null, result.ApiEvent.UserProvidedRegion);
                     Assert.AreEqual(false, result.ApiEvent.IsValidUserProvidedRegion);
                     Assert.AreEqual(true, result.ApiEvent.FallbackToGlobal);
@@ -269,11 +269,11 @@ namespace Microsoft.Identity.Test.Unit
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(null, result.ApiEvent.RegionDiscovered);
-                Assert.AreEqual((int)RegionSource.FailedAutoDiscovery, result.ApiEvent.RegionSource);
-                Assert.AreEqual(null, result.ApiEvent.UserProvidedRegion);
-                Assert.AreEqual(false, result.ApiEvent.IsValidUserProvidedRegion);
-                Assert.AreEqual(true, result.ApiEvent.FallbackToGlobal);
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
+                Assert.AreEqual((int)RegionSource.Imds, result.ApiEvent.RegionSource);
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.UserProvidedRegion);
+                Assert.AreEqual(true, result.ApiEvent.IsValidUserProvidedRegion);
+                Assert.AreEqual(false, result.ApiEvent.FallbackToGlobal);
 
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
 
@@ -305,7 +305,6 @@ namespace Microsoft.Identity.Test.Unit
         }
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(bool expectRegional)
         {
-
             return new MockHttpMessageHandler()
             {
                 ExpectedUrl = expectRegional ?

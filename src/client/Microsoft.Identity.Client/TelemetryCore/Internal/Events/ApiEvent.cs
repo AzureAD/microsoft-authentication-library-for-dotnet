@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         }
 
         #region Region
-        public string RegionDiscovered
+        public string RegionUsed
         {
             get => this.ContainsKey(RegionDiscoveredKey) ? this[RegionDiscoveredKey] : null;
             set => this[RegionDiscoveredKey] = value;
