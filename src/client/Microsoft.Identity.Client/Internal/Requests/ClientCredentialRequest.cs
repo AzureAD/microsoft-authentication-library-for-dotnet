@@ -53,7 +53,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         null,
                         AuthenticationRequestParameters.AuthenticationScheme,
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
-                        TokenSource.Cache);
+                        TokenSource.Cache,
+                        AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
 
                 cacheInfoTelemetry = (cachedAccessTokenItem == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.RefreshIn;

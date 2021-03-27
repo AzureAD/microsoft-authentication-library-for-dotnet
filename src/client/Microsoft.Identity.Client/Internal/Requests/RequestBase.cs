@@ -209,7 +209,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 idtItem, 
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
-                msalTokenResponse.TokenSource);
+                msalTokenResponse.TokenSource, 
+                AuthenticationRequestParameters.RequestContext.ApiEvent);
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
@@ -316,7 +317,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     null,
                     AuthenticationRequestParameters.AuthenticationScheme,
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
-                    TokenSource.Cache);
+                    TokenSource.Cache,
+                    AuthenticationRequestParameters.RequestContext.ApiEvent);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
