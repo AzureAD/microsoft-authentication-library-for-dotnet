@@ -27,9 +27,14 @@ namespace Microsoft.Identity.Client.Region
                 return null;
             }
 
+            // already regionalized
+            if (authority.Host.StartsWith(region))
+            {
+                return CreateEntry(requestContext.ServiceBundle.Config.AuthorityInfo.Host, authority.Host);
+            }
+
             string regionalEnv = GetRegionalizedEnviroment(authority, region);
             return CreateEntry(authority.Host, regionalEnv);
-
         }
 
         private static InstanceDiscoveryMetadataEntry CreateEntry(string originalEnv, string regionalEnv)

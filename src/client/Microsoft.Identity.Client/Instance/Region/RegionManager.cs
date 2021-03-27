@@ -96,25 +96,32 @@ namespace Microsoft.Identity.Client.Region
 
         private void RecordTelemetry(ApiEvent apiEvent, string azureRegionConfig, RegionInfo discoveredRegion)
         {
+            // already emitted telemetry for this request, don't emit again as it will overwrite with "from cache"
+            if (!string.IsNullOrEmpty(apiEvent.RegionDiscovered))
+            {
+                return;
+            }
+
             bool isAutoDiscoveryRequested = IsAutoDiscoveryRequested(azureRegionConfig);
             apiEvent.RegionDiscovered = discoveredRegion.Region;
 
             if (isAutoDiscoveryRequested)
             {
                 apiEvent.RegionSource = (int)discoveredRegion.RegionSource;
-                if (discoveredRegion.Region != null)
-                {
-                    apiEvent.IsValidUserProvidedRegion = string.Equals(azureRegionConfig, discoveredRegion.Region);
-                }
-                else
-                {
-                    apiEvent.FallbackToGlobal = discoveredRegion.Region == null;
-                }
+                apiEvent.FallbackToGlobal = discoveredRegion.Region == null;
+                apiEvent.IsValidUserProvidedRegion = null;
             }
             else
             {
                 apiEvent.RegionSource = (int)RegionSource.UserProvided;
                 apiEvent.UserProvidedRegion = azureRegionConfig;
+                apiEvent.FallbackToGlobal = false;
+                if (!string.IsNullOrEmpty(discoveredRegion.Region))
+                {
+                    apiEvent.IsValidUserProvidedRegion = string.Equals(
+                        discoveredRegion.Region,
+                        azureRegionConfig);
+                }
             }
         }
 
