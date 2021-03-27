@@ -2,7 +2,7 @@
 ==========
 ### New Features:
 **Added support for calling On-Behalf-Of flow for Service Principals**. See issue [#1845](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1845).  
-**Added support for `prompt=create` for External Identities**, which allows self-service sign-up experience. See issue [#2463](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2463) and [documentation](https://aka.ms/msal-net-prompt-create).  
+**MSAL.NET now supports `Prompt.Create`, which is needed for the self-service sign-up experience with External Identities**. See issue [#2463](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2463) and [documentation](https://aka.ms/msal-net-prompt-create) and learn more [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Acquiring-tokens-interactively#withprompt) about the different ways to control the user interaction.  
 **MSAL.NET now suggests the correct redirect URI to use, if WAM was used with an incorrect URI**. See [#2358](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2358).  
 
 ### Enhancements:
