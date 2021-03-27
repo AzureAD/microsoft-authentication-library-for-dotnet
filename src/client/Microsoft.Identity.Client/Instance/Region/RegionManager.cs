@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Region
                 }
             }
 
-            logger.Info($"[Region discovery] Returning user provided region {azureRegionConfig}");
+            logger.Info($"[Region discovery] Returning user provided region: {azureRegionConfig}.");
             return azureRegionConfig;
         }
 
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Region
             if (s_failedAutoDiscovery == false &&
                 !string.IsNullOrEmpty(s_autoDiscoveredRegion))
             {
-                logger.Info($"[Region discovery] Auto-discovery already ran and found {s_autoDiscoveredRegion}");
+                logger.Info($"[Region discovery] Auto-discovery already ran and found {s_autoDiscoveredRegion}.");
                 return new RegionInfo(s_autoDiscoveredRegion, RegionSource.Cache);
             }
 
@@ -173,22 +173,22 @@ namespace Microsoft.Identity.Client.Region
                 {
                     region = response.Body;
 
-                    logger.Info($"[Region discovery] Call to local IMDS succeeded. Region {region}");
+                    logger.Info($"[Region discovery] Call to local IMDS succeeded. Region: {region}.");
                     return new RegionInfo(region, RegionSource.Imds);
                 }
 
-                logger.Warning($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
+                logger.Warning($"[Region discovery] Call to local IMDS failed with status code {response.StatusCode} or an empty response.");
 
             }
             catch (Exception e)
             {
                 if (e is MsalServiceException msalEx && MsalError.RequestTimeout.Equals(msalEx?.ErrorCode))
                 {
-                    logger.Warning($"[Region discovery] Call to local IMDS timed out after {_imdsCallTimeoutMs}");
+                    logger.Warning($"[Region discovery] Call to local IMDS timed out after {_imdsCallTimeoutMs}.");
                 }
                 else
                 {
-                    logger.Warning($"[Region discovery] IMDS call failed with exception " + e);
+                    logger.Warning($"[Region discovery] IMDS call failed with exception {e}");
                 }
             }
 
@@ -208,14 +208,14 @@ namespace Microsoft.Identity.Client.Region
 
                 if (errorResponse != null && !errorResponse.NewestVersions.IsNullOrEmpty())
                 {
-                    logger.Info("[Region discovery] Updated the version for IMDS endpoint to: " + errorResponse.NewestVersions[0]);
+                    logger.Info($"[Region discovery] Updated the version for IMDS endpoint to: {errorResponse.NewestVersions[0]}.");
                     return errorResponse.NewestVersions[0];
                 }
 
                 logger.Info("[Region discovery] The response is empty or does not contain the newest versions.");
             }
 
-            logger.Info($"[Region discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}");
+            logger.Info($"[Region discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}.");
 
             throw MsalServiceExceptionFactory.FromImdsResponse(
             MsalError.RegionDiscoveryFailed,
