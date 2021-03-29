@@ -125,19 +125,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
            AuthenticationResult result)
         {
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-        }
-
-        private void AssertTokenSource_IsCache(
-           AuthenticationResult result)
-        {
-            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-        }
+        }       
 
         private IConfidentialClientApplication BuildCCA(HttpSnifferClientFactory factory, string region = ConfidentialClientApplication.AttemptRegionDiscovery)
         {
             var builder = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
                 .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, GetClaims()))
-                .WithAuthority(PublicCloudTestAuthority)
+                .WithAuthority(PublicCloudTestAuthority, false)
                 .WithTestLogging()
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(factory);

@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 case AcquireTokenForClientOutcome.Success:
 
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                       .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
+                       .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId, false)
                        .WithClientSecret(TestConstants.ClientSecret)
                        .WithHttpManager(_harness.HttpManager)
                        .WithAzureRegion()
@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityTenant);
 
                     var app2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
+                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId, false)
                      .WithClientSecret(TestConstants.ClientSecret)
                      .WithHttpManager(_harness.HttpManager)
                      .WithAzureRegion()
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
 
                     var app3 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
+                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId, false)
                      .WithClientSecret(TestConstants.ClientSecret)
                      .WithHttpManager(_harness.HttpManager)
                      .WithAzureRegion(TestConstants.Region)
@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     correlationId = Guid.NewGuid();
 
                     var app5 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId, false)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(_harness.HttpManager)
                     .WithAzureRegion()

@@ -179,7 +179,7 @@ namespace TestApp
             };
 
             var builder = ConfidentialClientApplicationBuilder.Create(clientId)
-                .WithAuthority("https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47")
+                .WithAuthority("https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47", false)
                 .WithCertificate(certificate)
                 .WithLogging(Log, LogLevel.Verbose, true);
 
