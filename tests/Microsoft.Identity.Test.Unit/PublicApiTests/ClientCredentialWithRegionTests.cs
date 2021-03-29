@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -286,11 +287,27 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        public void ValidateAuthorityTest()
+        {
+            var ex = AssertException.Throws<MsalClientException>(
+                () => ConfidentialClientApplicationBuilder
+                                  .Create(TestConstants.ClientId)
+                                  .WithAuthority(
+                                        new System.Uri(ClientApplicationBase.DefaultAuthority) /* validate is true by default */)
+                                  .WithClientSecret(TestConstants.ClientSecret)
+                                  .WithAzureRegion()
+                                  .Build());
+
+            Assert.AreEqual(MsalError.RegionalAuthorityValidation, ex.ErrorCode);
+            
+        }
+
         private static IConfidentialClientApplication CreateCca(MockHttpManager httpManager, string region)
         {
             var builder = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
-                                 .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
+                                 .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), false)
                                  .WithRedirectUri(TestConstants.RedirectUri)
                                  .WithHttpManager(httpManager)
                                  .WithClientSecret(TestConstants.ClientSecret);
