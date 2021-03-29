@@ -28,7 +28,6 @@ namespace Microsoft.Identity.Client.Region
             public RegionSource RegionSource { get; }
         }
 
-
         // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
         private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute/location";
         private const string DefaultApiVersion = "2020-06-01";
@@ -38,8 +37,6 @@ namespace Microsoft.Identity.Client.Region
 
         private static string s_autoDiscoveredRegion;
         private static bool s_failedAutoDiscovery = false;
-
-
 
         public RegionManager(
             IHttpManager httpManager,
@@ -68,7 +65,7 @@ namespace Microsoft.Identity.Client.Region
 
             // MSAL always performs region auto-discovery, even if the user configured an actual region
             // in order to detect inconsistencies and report via telemetry
-            var discoveredRegion = await DiscoverRegionWithCacheAsync(azureRegionConfig, logger, requestContext.UserCancellationToken).ConfigureAwait(false);
+            var discoveredRegion = await DiscoverAndCacheAsync(azureRegionConfig, logger, requestContext.UserCancellationToken).ConfigureAwait(false);
 
             RecordTelemetry(requestContext.ApiEvent, azureRegionConfig, discoveredRegion);
 
@@ -148,7 +145,7 @@ namespace Microsoft.Identity.Client.Region
                  apiEvent.IsValidUserProvidedRegion == null);
         }
 
-        private async Task<RegionInfo> DiscoverRegionWithCacheAsync(string azureRegionConfig, ICoreLogger logger, CancellationToken requestCancellationToken)
+        private async Task<RegionInfo> DiscoverAndCacheAsync(string azureRegionConfig, ICoreLogger logger, CancellationToken requestCancellationToken)
         {
             if (s_failedAutoDiscovery == true)
             {
@@ -163,7 +160,7 @@ namespace Microsoft.Identity.Client.Region
                 return new RegionInfo(s_autoDiscoveredRegion, RegionSource.Cache);
             }
 
-            var result = await DiscoverRegionNoCacheAsync(logger, requestCancellationToken).ConfigureAwait(false);
+            var result = await DiscoverAsync(logger, requestCancellationToken).ConfigureAwait(false);
 
             s_failedAutoDiscovery = result.RegionSource == RegionSource.FailedAutoDiscovery;
             s_autoDiscoveredRegion = result.Region;
@@ -171,7 +168,7 @@ namespace Microsoft.Identity.Client.Region
             return result;
         }
 
-        private async Task<RegionInfo> DiscoverRegionNoCacheAsync(ICoreLogger logger, CancellationToken requestCancellationToken)
+        private async Task<RegionInfo> DiscoverAsync(ICoreLogger logger, CancellationToken requestCancellationToken)
         {
             string region = Environment.GetEnvironmentVariable("REGION_NAME");
 

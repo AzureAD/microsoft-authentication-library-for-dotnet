@@ -30,6 +30,9 @@ namespace Microsoft.Identity.Client.Region
         /// </summary>
         Cache = 3,
 
+        /// <summary>
+        /// Region was configured by the user
+        /// </summary>
         UserProvided = 4,
 
         /// <summary>

@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>
-        [Obsolete("Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object", true)]
+        [Obsolete("Use WithAzureRegion on the ConfidentialClientApplicationBuilder object", true)]
         public AcquireTokenForClientParameterBuilder WithAzureRegion(bool useAzureRegion)
         {
             throw new NotImplementedException();
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>        
-        [Obsolete("Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object", true)]
+        [Obsolete("Use WithAzureRegion on the ConfidentialClientApplicationBuilder object", true)]
         public AcquireTokenForClientParameterBuilder WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true)
         {
             throw new NotImplementedException();            

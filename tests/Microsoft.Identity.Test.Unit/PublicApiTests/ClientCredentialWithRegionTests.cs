@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("Test with a user configured region.")]
-        public async Task UserRegionAsync()
+        public async Task UserRegion_DiscoveryHappensOnce_Async()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -283,7 +283,6 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
-
             }
         }
 

@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Region
             string region = await _regionManager.GetAzureRegionAsync(requestContext).ConfigureAwait(false);
             if (string.IsNullOrEmpty(region))
             {
-                requestContext.Logger.Info("Azure region was not configured or could not be discovered. Not using a regional autority.");
+                requestContext.Logger.Info("Azure region was not configured or could not be discovered. Not using a regional authority.");
                 return null;
             }
 

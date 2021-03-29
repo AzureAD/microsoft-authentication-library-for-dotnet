@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Instructs MSAL.NET to use an Azure regional token service.
-        /// This setting should be set to either the string with the region (preffered) or to 
+        /// This setting should be set to either the string with the region (preferred) or to 
         /// "TryAutoDetect" and MSAL.NET will attempt to auto-detect the region. 
         /// </summary>
         /// <remarks>
