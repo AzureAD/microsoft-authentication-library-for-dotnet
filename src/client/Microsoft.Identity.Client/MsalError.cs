@@ -954,10 +954,10 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>You configured both Regional Authority and Authority Validation. Authority validation is not currently supported for regional authorities.
-        /// <para>Mitigation</para>Set the validateAuthority flag to false to use Azure Regional authority. Do not disable authority validation if you read the authority from a potentially unstrusted source, 
+        /// <para>Mitigation</para>Set the validateAuthority flag to false to use Azure Regional authority. Do not disable authority validation if you read the authority from an untrusted source, 
         /// for example from the WWWAuthenticate header of an HTTP request that resulted in a 401 response. 
         ///  </summary>
-        public const string RegionalAuthorityValidation = "regional_autority_validation";
+        public const string RegionalAuthorityValidation = "regional_authority_validation";
 
     }
 }
