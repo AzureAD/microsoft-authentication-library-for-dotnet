@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2.Throttling;
+using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -22,7 +23,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
     public class RegionalTelemetryTests : TestBase
     {
         private MockHttpAndServiceBundle _harness;
-        private ConfidentialClientApplication _app;
 
         [TestInitialize]
         public override void TestInitialize()
@@ -30,12 +30,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             base.TestInitialize();
 
             _harness = CreateTestHarness();
-            _app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .WithHttpManager(_harness.HttpManager)
-                .WithExperimentalFeatures(true)
-                .BuildConcrete();
+           
         }
 
         [TestCleanup]
@@ -89,15 +84,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Trace.WriteLine("Step 3. Acquire Token For Client -> Success");
             result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
 
-            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, "3");
-            AssertPreviousTelemetry(
-                result.HttpRequest,
-                expectedSilentCount: 0,
-                expectedFailedApiIds: new[] { ApiIds.AcquireTokenForClient },
-                expectedCorrelationIds: new[] { step2CorrelationId },
-                expectedErrors: new[] { "service_not_available" },
-                expectedRegions: new[] { "centralus" },
-                expectedRegionSources: new[] { "3" });
+            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, "3");         
         }
 
         /// <summary>
@@ -110,32 +97,26 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         {
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-            var inMemoryTokenCache = new InMemoryTokenCache();
-            inMemoryTokenCache.Bind(_app.AppTokenCache);
-
             Trace.WriteLine("Acquire token for client with token serialization.");
-            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
+            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, serializeCache: true)
+                .ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                "1",
+                ((int)RegionSource.EnvVariable).ToString(),
                 isCacheSerialized: true);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
         }
-
-        /// <summary>
-        /// Acquire token for client with regionToUse when auto region discovery fails
-        ///    Current_request = 4 | ATC_ID, 0 | centralus, 1, 1, centralus,
-        ///    Last_request = 4 | 0 | | |
-        /// </summary>
+     
         [TestMethod]
         public async Task TelemetryUserProvidedRegionAutoDiscoveryFailsTestsAsync()
         {
             Trace.WriteLine("Acquire token for client with region provided by user and region detection fails.");
             _harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get, TestConstants.ImdsUrl);
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
-            AssertCurrentTelemetry(result.HttpRequest,
+            AssertCurrentTelemetry(
+                result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                "4",
+                ((int)RegionSource.UserProvided).ToString(),
                 isCacheSerialized: false,
                 userProvidedRegion: TestConstants.Region);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
@@ -155,34 +136,13 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                "1",
+                ((int)RegionSource.EnvVariable).ToString(),
                 isCacheSerialized: false,
                 userProvidedRegion: TestConstants.Region,
                 isValidUserProvidedRegion: "1");
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
         }
-
-        /// <summary>
-        /// Acquire token for client with regionToUse when auto region discovery passes with region different from regionToUse
-        ///    Current_request = 4 | ATC_ID, 0 | centralus, 1, 1, invalid, 0
-        ///    Last_request = 4 | 0 | | |
-        /// </summary>
-        [TestMethod]
-        public async Task TelemetryUserProvidedRegionAutoDiscoverRegionDifferentTestsAsync()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-
-            Trace.WriteLine("Acquire token for client with region provided by user and region detected is different from regionToUse.");
-            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedInvalidRegion).ConfigureAwait(false);
-            AssertCurrentTelemetry(result.HttpRequest,
-                ApiIds.AcquireTokenForClient,
-                "1",
-                isCacheSerialized: false,
-                userProvidedRegion: "invalid",
-                isValidUserProvidedRegion: "0");
-            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
-        }
-
+       
         /// <summary>
         /// Acquire token for client with regionToUse when auto region discovery fails
         ///    Current_request = 4 | ATC_ID, 0 | centralus, 1, 1, centralus,
@@ -207,13 +167,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         {
             Success,
             UserProvidedRegion,
-            UserProvidedInvalidRegion,
             AADUnavailableError,
             FallbackToGlobal
         }
 
         private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenForClientAsync(
-            AcquireTokenForClientOutcome outcome, bool forceRefresh = false)
+            AcquireTokenForClientOutcome outcome, bool forceRefresh = false, bool serializeCache = false)
         {
             MockHttpMessageHandler tokenRequestHandler = null;
             Guid correlationId = default;
@@ -222,10 +181,23 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             {
                 case AcquireTokenForClientOutcome.Success:
 
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                       .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
+                       .WithClientSecret(TestConstants.ClientSecret)
+                       .WithHttpManager(_harness.HttpManager)
+                       .WithAzureRegion()
+                       .WithExperimentalFeatures(true)
+                       .BuildConcrete();
+
+                    if (serializeCache)
+                    {
+                        InMemoryTokenCache mem = new InMemoryTokenCache();
+                        mem.Bind(app.AppTokenCache);
+                    }
+
                     tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
-                    var authResult = await _app
-                        .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithPreferredAzureRegion(true)
+                    var authResult = await app
+                        .AcquireTokenForClient(TestConstants.s_scope)                        
                         .WithForceRefresh(forceRefresh)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
@@ -235,9 +207,17 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 case AcquireTokenForClientOutcome.FallbackToGlobal:
                     _harness.HttpManager.AddInstanceDiscoveryMockHandler();
                     tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityTenant);
-                    authResult = await _app
+
+                    var app2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
+                     .WithClientSecret(TestConstants.ClientSecret)
+                     .WithHttpManager(_harness.HttpManager)
+                     .WithAzureRegion()
+                     .WithExperimentalFeatures(true)
+                     .BuildConcrete();
+
+                    authResult = await app2
                         .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithPreferredAzureRegion(true)
                         .WithForceRefresh(forceRefresh)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
@@ -247,29 +227,33 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 case AcquireTokenForClientOutcome.UserProvidedRegion:
 
                     tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
-                    authResult = await _app
+
+
+                    var app3 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
+                     .WithClientSecret(TestConstants.ClientSecret)
+                     .WithHttpManager(_harness.HttpManager)
+                     .WithAzureRegion(TestConstants.Region)
+                     .WithExperimentalFeatures(true)
+                     .BuildConcrete();
+                    authResult = await app3
                         .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithPreferredAzureRegion(true, TestConstants.Region)
                         .WithForceRefresh(forceRefresh)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
                     correlationId = authResult.CorrelationId;
-                    break;
-
-                case AcquireTokenForClientOutcome.UserProvidedInvalidRegion:
-
-                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
-                    authResult = await _app
-                        .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithPreferredAzureRegion(true, "invalid")
-                        .WithForceRefresh(forceRefresh)
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
-                    correlationId = authResult.CorrelationId;
-                    break;
+                    break;            
 
                 case AcquireTokenForClientOutcome.AADUnavailableError:
                     correlationId = Guid.NewGuid();
+
+                    var app5 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithAzureRegion()
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
 
                     tokenRequestHandler = new MockHttpMessageHandler()
                     {
@@ -289,9 +273,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     _harness.HttpManager.AddMockHandler(tokenRequestHandler);
 
                     var serviceEx = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
-                        _app
+                        app5
                         .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithPreferredAzureRegion(true)
                         .WithForceRefresh(true)
                         .WithCorrelationId(correlationId)
                         .ExecuteAsync())

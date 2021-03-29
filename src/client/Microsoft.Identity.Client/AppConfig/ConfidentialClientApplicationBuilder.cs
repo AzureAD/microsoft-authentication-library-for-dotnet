@@ -45,6 +45,12 @@ namespace Microsoft.Identity.Client
             {
                 builder = builder.WithClientSecret(options.ClientSecret);
             }
+
+            if (!string.IsNullOrWhiteSpace(options.AzureRegion))
+            {
+                builder = builder.WithAzureRegion(options.AzureRegion);
+            }
+
             return builder;
         }
 
@@ -171,6 +177,36 @@ namespace Microsoft.Identity.Client
 
             Config.SignedClientAssertionDelegate = clientAssertionDelegate;
             Config.ConfidentialClientCredentialCount++;
+            return this;
+        }
+
+
+        /// <summary>
+        /// Instructs MSAL.NET to use an Azure regional token service.
+        /// </summary>
+        /// <param name="azureRegion">Either the string with the region (preferred) or        
+        /// use <see cref="ConfidentialClientApplication.AttemptRegionDiscovery"/> and MSAL.NET will attempt to auto-detect the region.                
+        /// </param>
+        /// <remarks>
+        /// Region names as per https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.fluent.core.region?view=azure-dotnet.
+        /// Not all auth flows can use the regional token service. 
+        /// Service To Service (client credential flow) tokens can be obtained from the regional service.
+        /// Requires configuration at the tenant level.
+        /// Auto-detection works on a limited number of Azure artifacts (VMs, Azure functions). 
+        /// If auto-detection fails, the non-regional endpoint will be used.
+        /// If an invalid region name is provided, the non-regional endpoint MIGHT be used or the token request MIGHT fail.
+        /// See https://aka.ms/msal-net-region-discovery for more details.        
+        /// </remarks>
+        /// <returns>The builder to chain the .With methods</returns>
+        public ConfidentialClientApplicationBuilder WithAzureRegion(string azureRegion = ConfidentialClientApplication.AttemptRegionDiscovery)
+        {
+            if (string.IsNullOrEmpty(azureRegion))
+            {
+                throw new ArgumentNullException(nameof(azureRegion));
+            }
+
+            Config.AzureRegion = azureRegion;
+
             return this;
         }
 

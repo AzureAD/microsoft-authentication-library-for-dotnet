@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             IKnownMetadataProvider knownMetadataProvider = null,
             INetworkCacheMetadataProvider networkCacheMetadataProvider = null,
             INetworkMetadataProvider networkMetadataProvider = null,
-            IRegionDiscoveryProvider regionDiscovery = null)
+            IRegionDiscoveryProvider regionDiscoveryProvider = null)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
@@ -71,16 +71,16 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             _userMetadataProvider = userMetadataProvider;
             _knownMetadataProvider = knownMetadataProvider ?? new KnownMetadataProvider();
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
-            
-            _networkMetadataProvider = networkMetadataProvider ?? 
+
+            _networkMetadataProvider = networkMetadataProvider ??
                 new NetworkMetadataProvider(
-                    _httpManager, 
-                    _telemetryManager, 
-                    _networkCacheMetadataProvider, 
+                    _httpManager,
+                    _telemetryManager,
+                    _networkCacheMetadataProvider,
                     userProvidedInstanceDiscoveryUri);
 
-            _regionDiscoveryProvider = regionDiscovery ??
-                new RegionDiscoveryProvider(_httpManager, _networkCacheMetadataProvider, shouldClearCaches: shouldClearCaches);
+            _regionDiscoveryProvider = regionDiscoveryProvider ??
+                new RegionDiscoveryProvider(_httpManager, shouldClearCaches);
 
             if (shouldClearCaches)
             {
@@ -103,6 +103,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
                     return
                         _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
+                        await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
                         _networkCacheMetadataProvider.GetMetadata(environment, requestContext.Logger) ??
                         _knownMetadataProvider.GetMetadata(environment, existingEnvironmentsInCache, requestContext.Logger) ??
                         await GetMetadataEntryAsync(authority, requestContext).ConfigureAwait(false);
@@ -119,33 +120,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
-            string authority, 
+            string authority,
             RequestContext requestContext)
         {
-            var autoDetectRegion = requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion;
-
-            if (autoDetectRegion)
-            {
-                try
-                {
-                    return await _regionDiscoveryProvider.TryGetMetadataAsync(new Uri(authority), requestContext).ConfigureAwait(false);
-                }
-                catch
-                {
-                    //If the regional autodetection fails in TryGetMetadataAsync we check for FallbackToGlobal
-                    //If FallbackToGlobal is set, this will now fallback to using the metadata acquitition from global
-                    if (requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal)
-                    {
-                        requestContext.Logger.Info($"Attempting to fall back to global endpoint");
-                        requestContext.ApiEvent.FallbackToGlobal = true;
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
-
             AuthorityType type = Authority.GetAuthorityType(authority);
             Uri authorityUri = new Uri(authority);
             string environment = authorityUri.Host;
@@ -153,9 +130,10 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             switch (type)
             {
                 case AuthorityType.Aad:
-                    InstanceDiscoveryMetadataEntry entry =
-                    _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
+
+                    var entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??
+                                await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
+                                await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
 
                     if (entry == null)
                     {
@@ -166,8 +144,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     }
 
                     return entry;
-                    
-                    
+
+
                 // ADFS and B2C do not support instance discovery 
                 case AuthorityType.Adfs:
                 case AuthorityType.B2C:
@@ -180,7 +158,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         }
 
         private async Task<InstanceDiscoveryMetadataEntry> FetchNetworkMetadataOrFallbackAsync(
-            RequestContext requestContext, 
+            RequestContext requestContext,
             Uri authorityUri)
         {
             try
