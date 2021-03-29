@@ -10,7 +10,6 @@
 
 ### Bug Fixes:
 **Custom Tabs now work correctly in Android 29+**. See issue [#2418](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2418).  
-**Output and error streams are now redirected from the child process when launching a browser on Linux**. See issue [#2427](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2427).  
 
 4.28.1
 ==========
