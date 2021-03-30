@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         private string GetUserPrincipalName(int nameFormat)
         {
-            if (IsWindowsPlatform())
+            if (DesktopOsHelper.IsWindows())
             {
                 uint userNameSize = 0;
                 WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override Task StartDefaultOsBrowserAsync(string url)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (DesktopOsHelper.IsWindows())
             {
                 try
                 {
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
                 }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            else if (DesktopOsHelper.IsLinux())
             {
                 try
                 {
@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                         ex);
                 }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            else if (DesktopOsHelper.IsMac())
             {
                 Process.Start("/usr/bin/open", url);
             }
@@ -243,37 +243,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return PoPProviderFactory.GetOrCreateProvider();
         }
 
-        /// <summary>
-        ///  Is this a Windows platform
-        /// </summary>
-        /// <returns>A  value indicating if we are running on Windows or not</returns>
-        public static bool IsWindowsPlatform()
-        {
-            return Environment.OSVersion.Platform == PlatformID.Win32NT;
-        }
-
-        /// <summary>
-        /// Is this a Mac platform
-        /// </summary>
-        /// <returns>A value indicating if we are running on Mac or not</returns>
-        public static bool IsMacPlatform()
-        {
-            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-        }
-
-        /// <summary>
-        /// Is this a Linux platform
-        /// </summary>
-        /// <returns>A  value indicating if we are running on Linux or not</returns>
-        public static bool IsLinuxPlatform()
-        {
-            return Environment.OSVersion.Platform == PlatformID.Unix;
-        }
-
-        public override bool CanBrokerSupportSilentAuth()
-        {
-            return true;
-        }
+        public override bool CanBrokerSupportSilentAuth() => true;
 
         public override bool BrokerSupportsWamAccounts => true;
 
