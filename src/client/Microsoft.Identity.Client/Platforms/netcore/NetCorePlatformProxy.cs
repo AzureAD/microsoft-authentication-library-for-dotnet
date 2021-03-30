@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Process.Start("open", url);
+                Process.Start("/usr/bin/open", url);
             }
             else
             {
