@@ -377,5 +377,7 @@ namespace Microsoft.Identity.Client
                 "The certificate {0} does not have a private key. ",
                 certificateName);
         }
+
+        public const string LinuxOpenToolFailed = "Unable to open a web page using xdg-open, gnome-open, or kfmclient tools. See inner exception for details. Possible causes for this error are: tools are not installed or they cannot open a URL. Make sure you can open a web page by invoking from a terminal: xdg-open https://www.bing.com ";
     }
 }
