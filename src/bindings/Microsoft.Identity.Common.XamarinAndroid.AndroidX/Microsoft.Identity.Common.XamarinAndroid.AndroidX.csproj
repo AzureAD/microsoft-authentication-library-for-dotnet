@@ -50,10 +50,15 @@
   </ItemGroup>
   
   <ItemGroup>
+    <None Remove="Jars\LoadAccountCallback.jar" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <None Include="Jars\AboutJars.txt" />
     <None Include="Additions\AboutAdditions.txt" />
     <LibraryProjectZip Include="Jars\common-3.0.9.aar" />
     <EmbeddedReferenceJar Include="Jars\gson-2.8.6.jar" />
+    <EmbeddedReferenceJar Include="Jars\LoadAccountCallback.jar" />
     <EmbeddedReferenceJar Include="Jars\nimbus-jose-jwt-9.1.2.jar" />
   </ItemGroup>
   <ItemGroup>

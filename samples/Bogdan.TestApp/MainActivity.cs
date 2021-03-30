@@ -63,8 +63,6 @@ namespace App1
             _textView = FindViewById<EditText>(Resource.Id.txtView);
             LogMessage("MainActivity::Created");
 
-            var temp = GetRedirectUriForBroker();
-
             // Create PCA
             int resourceId = Resource.Raw.single_account_config;
 
@@ -85,53 +83,6 @@ namespace App1
 
             LogMessage("Finished OnInit");
 
-        }
-
-        private string GetRedirectUriForBroker()
-        {
-            string packageName = Application.Context.PackageName;
-
-            // First available signature. Applications can be signed with multiple
-            // signatures.
-            string signatureDigest = GetCurrentSignatureForPackage(packageName);
-            if (!string.IsNullOrEmpty(signatureDigest))
-            {
-                return string.Format(CultureInfo.InvariantCulture, "{0}://{1}/{2}", RedirectUriScheme,
-                    packageName.ToLowerInvariant(), signatureDigest);
-            }
-
-            return string.Empty;
-        }
-
-        private string GetCurrentSignatureForPackage(string packageName)
-        {
-            try
-            {
-                PackageInfo info = Application.Context.PackageManager.GetPackageInfo(packageName,
-                    PackageInfoFlags.Signatures);
-#pragma warning disable CS0618 // Type or member is obsolete - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1854
-                if (info != null && info.Signatures != null && info.Signatures.Count > 0)
-                {
-                    Android.Content.PM.Signature signature = info.Signatures[0];
-                    MessageDigest md = MessageDigest.GetInstance("SHA");
-                    md.Update(signature.ToByteArray());
-                    return Convert.ToBase64String(md.Digest(), Base64FormattingOptions.None);
-                    // Server side needs to register all other tags. ADAL will
-                    // send one of them.
-                }
-#pragma warning restore CS0618 // Type or member is obsolete
-
-            }
-            catch (PackageManager.NameNotFoundException)
-            {
-                //_logger.Info("[Android broker] Calling App's package does not exist in PackageManager. ");
-            }
-            catch (NoSuchAlgorithmException)
-            {
-                //_logger.Info("[Android broker] Digest SHA algorithm does not exists. ");
-            }
-
-            return null;
         }
 
         private void SignOutBtn_Click(object sender, EventArgs e)
@@ -410,9 +361,9 @@ namespace App1
             }
         }
 
-        internal class MultipleAccountApplicationCurrentAccountCallback :
-            Java.Lang.Object,
-            IPublicClientApplicationLoadAccountsCallback
+        internal class MultipleAccountApplicationCurrentAccountCallback : LoadAccountsFix.LoadAccountsCallback
+        //Java.Lang.Object,
+        //IPublicClientApplicationLoadAccountsCallback
         {
             private readonly Action<IAccount, IAccount> _onAccountChangedAction;
             private readonly Action<IAccount> _onAccountLoaded;
@@ -429,24 +380,14 @@ namespace App1
                 _onException = onException;
             }
 
-            //public void OnAccountChanged(IAccount p0, IAccount p1)
-            //{
-            //    _onAccountChangedAction(p0, p1);
-            //}
-
-            //public void OnAccountLoaded(IAccount p0)
-            //{
-            //    _onAccountLoaded(p0);
-            //}
-
             public void OnError(MsalException ex)
             {
                 _onMsalException(ex);
             }
 
-            public void OnError(Java.Lang.Object ex)
+            public void OnError(Java.Lang.Object p0)
             {
-                _onException(ex);
+                _onException(p0);
             }
 
             public void OnTaskCompleted(IList<IAccount> result)
