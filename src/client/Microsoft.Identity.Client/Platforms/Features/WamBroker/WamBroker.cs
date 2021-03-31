@@ -641,7 +641,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         public bool IsBrokerInstalledAndInvokable()
         {
 #if NET_CORE
-            if (!netcore.NetCorePlatformProxy.IsWindowsPlatform())
+            if (!DesktopOsHelper.IsWindows())
             {
                 return false;
             }
