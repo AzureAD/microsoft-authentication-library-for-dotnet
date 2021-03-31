@@ -18,7 +18,7 @@ namespace Net5TestApp
             catch (MsalException e)
             {
                 Console.BackgroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("Error: ErrorCode=" + e.ErrorCode + "ErrorMessage" + e.Message);
+                Console.WriteLine("Error: ErrorCode=" + e.ErrorCode + "ErrorMessage=" + e.Message);
                 Console.ResetColor();
             }
 
