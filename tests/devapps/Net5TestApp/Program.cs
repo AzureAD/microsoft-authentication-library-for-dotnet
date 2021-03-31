@@ -29,8 +29,8 @@ namespace Net5TestApp
         {
             var pca = PublicClientApplicationBuilder.Create("16dab2ba-145d-4b1b-8569-bf4b9aed4dc8")
                 .WithLogging(MyLoggingMethod, LogLevel.Info,
-                       enablePiiLogging: true,
-                       enableDefaultPlatformLogging: true)
+                             enablePiiLogging: true,
+                             enableDefaultPlatformLogging: true)
                 .WithDefaultRedirectUri()
                 .Build();
 
