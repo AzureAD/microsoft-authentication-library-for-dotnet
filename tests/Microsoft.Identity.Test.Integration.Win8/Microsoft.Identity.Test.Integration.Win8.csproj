@@ -1,84 +1,50 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Microsoft.Identity.Test.Integration.Win8</RootNamespace>
-    <AssemblyName>Microsoft.Identity.Test.Integration.Win8</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
+    <TargetFrameworkNetDesktop461>net472</TargetFrameworkNetDesktop461>
+    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+    <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>
+
+    <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet5Win)</TargetFrameworks>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
+
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="BrokerOnWin8Tests.cs" />
-    <Compile Include="DeviceAuthenticationTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="MSTest.TestFramework">
-      <Version>2.1.2</Version>
-    </PackageReference>
-    <PackageReference Include="MSTest.TestAdapter">
-      <Version>2.1.2</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk">
-      <Version>16.8.3</Version>
-    </PackageReference>
-    <PackageReference Include="System.Net.Http">
-      <Version>4.3.4</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj">
-      <Project>{a7679ff0-19e8-41e3-9f7c-f54235124cc4}</Project>
-      <Name>Microsoft.Identity.Client.Desktop</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
-      <Project>{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}</Project>
+      <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj">
-      <Project>{18559d36-c735-4933-aa86-398c8222d4f6}</Project>
-      <Name>Microsoft.Identity.Test.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
       <Project>{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}</Project>
       <Name>Microsoft.Identity.Test.LabInfrastructure</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
+    <PackageReference Include="NSubstitute" Version="4.2.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.1.2" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.4.0" />
+    <!-- This reference is a workaround for a bug in .net46
+    https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Net.Primitives">
-      <HintPath>..\..\..\..\Program Files (x86)\Microsoft SDKs\UWPNuGetPackages\microsoft.netcore.universalwindowsplatform\6.2.9\ref\uap10.0.15138\System.Net.Primitives.dll</HintPath>
-    </Reference>
+
+  <Import Project="../../build/platform_and_feature_flags.props" />
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472' or '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <PackageReference Include="System.Windows.Forms" Version="4.0.0" />
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
+    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
+    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net472' ">
+    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net5.0-windows10.0.17763.0' ">
+    <DefineConstants>$(DefineConstants);NET5_WIN</DefineConstants>
+  </PropertyGroup>
+
 </Project>
