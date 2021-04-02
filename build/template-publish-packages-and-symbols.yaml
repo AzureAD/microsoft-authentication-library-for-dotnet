@@ -34,5 +34,4 @@ steps:
   displayName: 'Publish symbols'
   inputs:
     SearchPattern: '${{ parameters.SymbolPublishWildcard }}'
-    IndexSources: false
     SymbolServerType: TeamServices
