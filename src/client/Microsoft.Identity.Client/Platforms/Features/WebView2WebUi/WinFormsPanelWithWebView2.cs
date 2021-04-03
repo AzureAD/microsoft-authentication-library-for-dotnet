@@ -66,9 +66,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
 
             InitializeComponent();
 
-            _webView2.CreationProperties = new CoreWebView2CreationProperties() { 
-                    BrowserExecutableFolder = _embeddedWebViewOptions.WebView2BrowserExecutableFolder,
-                    UserDataFolder = Environment.ExpandEnvironmentVariables(webView2UserDataFolder)
+            _webView2.CreationProperties = new CoreWebView2CreationProperties()
+            {
+                UserDataFolder = Environment.ExpandEnvironmentVariables(webView2UserDataFolder)
             };
 
         }

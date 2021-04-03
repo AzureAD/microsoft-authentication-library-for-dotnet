@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public void DefaultEmbedded_WebView2Available()
         {
             // Arrange
-            var webUIFactory = new Net5WebUiFactory((_) => true);
+            var webUIFactory = new Net5WebUiFactory(() => true);
 
 
             // Act
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public void DefaultEmbedded_WebView2NotAvailable()
         {
             // Arrange
-            var webUIFactory = new Net5WebUiFactory((_) => false);
+            var webUIFactory = new Net5WebUiFactory(() => false);
 
 
             // Act
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public void Embedded()
         {
             // Arrange
-            var webUIFactory = new Net5WebUiFactory((_) => true);
+            var webUIFactory = new Net5WebUiFactory(() => true);
 
             // Act
             var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.Embedded, _requestContext);

@@ -43,6 +43,7 @@ namespace Microsoft.Identity.Client
         /// For this you need to tell MSAL (so it can tell WebView2) where to find the runtime bits by setting this property. If you don't set it, MSAL will attempt to use a system-wide "evergreen" installation of the runtime."
         /// For more details see: https://docs.microsoft.com/en-us/dotnet/api/microsoft.web.webview2.core.corewebview2environment.createasync?view=webview2-dotnet-1.0.705.50
         /// </summary>
+        [Obsolete("In case when WebView2 is not available, MSAL.NET will fallback to legacy WebView.", true)]
         public string WebView2BrowserExecutableFolder { get; set; }
 
         internal void LogParameters(ICoreLogger logger)
@@ -50,7 +51,6 @@ namespace Microsoft.Identity.Client
             logger.Info("WebView2Options configured");
 
             logger.Info($"Title: {Title}");
-            logger.InfoPii($"BrowserExecutableFolder: {WebView2BrowserExecutableFolder}", "BrowserExecutableFolder set");
         }
 
         internal static void ValidatePlatformAvailability()

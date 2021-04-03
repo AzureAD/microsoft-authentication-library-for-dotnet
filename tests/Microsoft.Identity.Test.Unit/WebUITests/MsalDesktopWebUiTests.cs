@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Arrange
             var webUIFactory = new MsalDesktopWebUiFactory(
                 fallbackToLegacyWebBrowser: false, 
-                isWebView2AvailableForTest: (_) => true);
+                isWebView2AvailableForTest: () => true);
 
 
             // Act
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Arrange
             var webUIFactory = new MsalDesktopWebUiFactory(
                 fallbackToLegacyWebBrowser: true,
-                isWebView2AvailableForTest: (_) => false);
+                isWebView2AvailableForTest: () => false);
 
 
             // Act
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Arrange
             var webUIFactory = new MsalDesktopWebUiFactory(
                fallbackToLegacyWebBrowser: false,
-               isWebView2AvailableForTest: (_) => false);
+               isWebView2AvailableForTest: () => false);
 
 
             // Act
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Arrange
             var webUIFactory = new MsalDesktopWebUiFactory(
                fallbackToLegacyWebBrowser: false,
-               isWebView2AvailableForTest: (_) => true);
+               isWebView2AvailableForTest: () => true);
 
             // Act
             var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.Embedded, _requestContext);
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Arrange
             var webUIFactory = new MsalDesktopWebUiFactory(
               fallbackToLegacyWebBrowser: false,
-              isWebView2AvailableForTest: (_) => true);
+              isWebView2AvailableForTest: () => true);
 
             // Act
             var webUi = webUIFactory.CreateAuthenticationDialog(
