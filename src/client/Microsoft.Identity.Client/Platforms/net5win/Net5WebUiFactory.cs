@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
+using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Web.WebView2.Core;
@@ -37,7 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         {
             if (useEmbeddedWebView == WebViewPreference.System)
             {
-                requestContext.Logger.Info("Using system browser");
+                requestContext.Logger.Info("Using system browser.");
                 return new DefaultOsBrowserWebUi(
                     requestContext.ServiceBundle.PlatformProxy,
                     requestContext.Logger,
@@ -46,14 +43,12 @@ namespace Microsoft.Identity.Client.Platforms.net5win
 
             if (_isWebView2AvailableFunc())
             {
-                requestContext.Logger.Info("Using WebView2 embedded browser");
+                requestContext.Logger.Info("Using WebView2 embedded browser.");
                 return new WebView2WebUi(coreUIParent, requestContext);
             }
 
-            throw new MsalClientException(
-                MsalError.WebView2NotInstalled,
-                "The embedded browser needs WebView2 runtime to be installed. If you are an end user of the app, please download and install the WebView2 runtime from https://go.microsoft.com/fwlink/p/?LinkId=2124703 and restart the app." +
-                " If you are an app developer, please ensure that your app installs the WebView2 runtime or that you provide a fixed version. See https://aka.ms/msal-net-webview2 for details");
+            requestContext.Logger.Info("Using legacy embedded browser.");
+            return new InteractiveWebUI(coreUIParent, requestContext);
         }
 
         private bool IsWebView2Available()

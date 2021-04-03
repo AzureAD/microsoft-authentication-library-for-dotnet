@@ -6,7 +6,6 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45
@@ -31,6 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             if (useEmbeddedWebView == WebViewPreference.System)
             {
+                requestContext.Logger.Info("Using system browser.");
                 return new DefaultOsBrowserWebUi(
                     requestContext.ServiceBundle.PlatformProxy,
                     requestContext.Logger,
@@ -38,6 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
 
             // Use the old legacy WebUi by default on .NET classic
+            requestContext.Logger.Info("Using legacy embedded browser.");
             return new InteractiveWebUI(coreUIParent, requestContext);
         }
     }

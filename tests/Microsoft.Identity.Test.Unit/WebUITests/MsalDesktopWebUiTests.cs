@@ -36,7 +36,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
             // Arrange
             var webUIFactory = new MsalDesktopWebUiFactory(
-                fallbackToLegacyWebBrowser: false, 
                 isWebView2AvailableForTest: () => true);
 
 
@@ -55,7 +54,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
             // Arrange
             var webUIFactory = new MsalDesktopWebUiFactory(
-                fallbackToLegacyWebBrowser: true,
                 isWebView2AvailableForTest: () => false);
 
 
@@ -75,7 +73,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
             // Arrange
             var webUIFactory = new MsalDesktopWebUiFactory(
-               fallbackToLegacyWebBrowser: false,
                isWebView2AvailableForTest: () => false);
 
 
@@ -95,7 +92,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
             // Arrange
             var webUIFactory = new MsalDesktopWebUiFactory(
-               fallbackToLegacyWebBrowser: false,
                isWebView2AvailableForTest: () => true);
 
             // Act
@@ -110,7 +106,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
             // Arrange
             var webUIFactory = new MsalDesktopWebUiFactory(
-              fallbackToLegacyWebBrowser: false,
               isWebView2AvailableForTest: () => true);
 
             // Act

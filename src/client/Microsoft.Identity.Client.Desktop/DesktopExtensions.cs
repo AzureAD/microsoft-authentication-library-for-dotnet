@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Desktop
             AddSupportForWebView2(builder);
 
             return builder;
-        }       
+        }
 
         /// <summary>
         /// Enables Windows broker flows on older platforms, such as .NET framework, where these are not available in the box with Microsoft.Identity.Client
@@ -34,13 +34,7 @@ namespace Microsoft.Identity.Client.Desktop
         /// </summary>
         private static void AddSupportForWebView2(PublicClientApplicationBuilder builder)
         {
-#if NET45_OR_GREATER
-            builder.Config.WebUiFactoryCreator =
-                () => new MsalDesktopWebUiFactory(fallbackToLegacyWebBrowser: true);
-#else
-      builder.Config.WebUiFactoryCreator =
-                () => new MsalDesktopWebUiFactory(fallbackToLegacyWebBrowser: false);
-#endif
+            builder.Config.WebUiFactoryCreator = () => new MsalDesktopWebUiFactory();
         }
     }
 }
