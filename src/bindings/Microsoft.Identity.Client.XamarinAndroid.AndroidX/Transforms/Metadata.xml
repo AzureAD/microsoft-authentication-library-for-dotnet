@@ -37,7 +37,7 @@
   <remove-node
     path="/api/package[@name='com.microsoft.identity.client']/interface[@name='ITokenShare']/implements"
     />
-
+  <remove-node path="/api/package[@name='com.microsoft.identity.client']/interface[@name='IPublicClientApplication.LoadAccountsCallback']" />
 
   <!--
   copied to Additions and added logging/tracing

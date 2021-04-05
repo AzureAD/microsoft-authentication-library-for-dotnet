@@ -42,12 +42,17 @@
     <None Remove="Properties\**" />
     <None Remove="Transforms\*.xml" />
     <TransformFile Include="Transforms\*.xml" />
+    <None Remove="Jars\LoadAccountsCallback.jar" />
     <!--
 
     <EmbeddedJar Include="..\..\externals\*.jar" Link="Jars\%(Filename)%(Extension)" />
     <LibraryProjectZip Include="..\..\externals\*.aar" Link="Jars\%(Filename)%(Extension)" />
     -->
     <None Remove="Jars\msal-2.0.2-javadoc.jar" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedJar Include="Jars\LoadAccountsCallback.jar" />
   </ItemGroup>
   
   <ItemGroup>

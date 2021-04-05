@@ -361,7 +361,7 @@ namespace App1
             }
         }
 
-        internal class MultipleAccountApplicationCurrentAccountCallback : loadAccountsFix.LoadAccountsCallback
+        internal class MultipleAccountApplicationCurrentAccountCallback : LoadAccountsFix.LoadAccountsCallback
         //Java.Lang.Object,
         //IPublicClientApplicationLoadAccountsCallback
         {
