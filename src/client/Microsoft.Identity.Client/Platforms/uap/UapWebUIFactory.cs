@@ -20,9 +20,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
             if (webViewPreference == WebViewPreference.System)
             {
                 throw new MsalClientException(
-                    MsalError.WebviewUnavailable,
+                    MsalError.WebViewUnavailable,
                     "On UWP, MSAL cannot use the system browser. " +
-                    "The preffered auth mechanism is the Web Authentication Manager (WAM) see https://aka.ms/msal-net-uwp-wam");
+                    "The preferred auth mechanism is the Web Authentication Manager (WAM). See https://aka.ms/msal-net-uwp-wam");
             }
 
             return new WebUI(coreUIParent, requestContext);

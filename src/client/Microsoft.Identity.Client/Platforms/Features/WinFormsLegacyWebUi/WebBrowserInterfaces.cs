@@ -291,7 +291,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
         [ComImport]
         [Guid("D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")]
+#pragma warning disable CS0618 // Type or member is obsolete
         [InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
+#pragma warning restore CS0618 // Type or member is obsolete
         public interface IWebBrowser2
         {
             [DispId(0xcb)]
@@ -302,7 +304,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         }
 
         [ComImport, Guid("34A715A0-6587-11D0-924A-0020AFC7AC4D"), TypeLibType(TypeLibTypeFlags.FHidden),
+#pragma warning disable CS0618 // Type or member is obsolete
          InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
+#pragma warning restore CS0618 // Type or member is obsolete
         public interface DWebBrowserEvents2
         {
             [DispId(0x66)]

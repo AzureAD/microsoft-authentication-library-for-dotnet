@@ -1,23 +1,19 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
-using System;
+﻿using System;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
-using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Web.WebView2.Core;
 
-namespace Microsoft.Identity.Client.Desktop
+namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
 {
-    internal class MsalDesktopWebUiFactory : IWebUIFactory
+    internal class WebView2WebUiFactory : IWebUIFactory
     {
         private readonly Func<bool> _isWebView2AvailableFunc;
 
-        public MsalDesktopWebUiFactory(Func<bool> isWebView2AvailableForTest = null)
+        public WebView2WebUiFactory(Func<bool> isWebView2AvailableForTest = null)
         {
             _isWebView2AvailableFunc = isWebView2AvailableForTest ?? IsWebView2Available;
         }
@@ -26,12 +22,14 @@ namespace Microsoft.Identity.Client.Desktop
 
         public bool IsUserInteractive => DesktopOsHelper.IsUserInteractive();
 
-        public bool IsEmbeddedWebViewAvailable => IsUserInteractive && IsWebView2Available();
+        public bool IsEmbeddedWebViewAvailable =>
+            IsUserInteractive &&
+            IsWebView2Available(); // Look for the globally available WebView2 runtime
 
-        public IWebUI CreateAuthenticationDialog(
-            CoreUIParent coreUIParent,
-            WebViewPreference useEmbeddedWebView,
-            RequestContext requestContext)
+#if NET5_WIN
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference useEmbeddedWebView, RequestContext requestContext)
         {
             if (useEmbeddedWebView == WebViewPreference.System)
             {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 
 namespace Microsoft.Identity.Client.Desktop
 {
@@ -34,7 +30,7 @@ namespace Microsoft.Identity.Client.Desktop
         /// </summary>
         private static void AddSupportForWebView2(PublicClientApplicationBuilder builder)
         {
-            builder.Config.WebUiFactoryCreator = () => new MsalDesktopWebUiFactory();
+            builder.Config.WebUiFactoryCreator = () => new WebView2WebUiFactory();
         }
     }
 }

@@ -1,28 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Win32;
-using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Platforms.netcore;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
+using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
+using Microsoft.Identity.Client.Platforms.netcore;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net5win
 {
@@ -62,7 +47,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
 
         public override bool BrokerSupportsWamAccounts => true;
 
-        protected override IWebUIFactory CreateWebUiFactory() => new Net5WebUiFactory();
+        protected override IWebUIFactory CreateWebUiFactory() => new WebView2WebUiFactory();
 
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
@@ -73,6 +58,5 @@ namespace Microsoft.Identity.Client.Platforms.net5win
 
             return Constants.DefaultRedirectUri;
         }
-
     }
 }
