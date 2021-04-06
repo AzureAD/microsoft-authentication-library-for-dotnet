@@ -91,14 +91,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             IDictionary<string, string> challengeData,
             out string responseHeader)
         {
-            string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
+            string signedJwt = $"{responseJWT.GetResponseToSign()}.{Base64UrlHelpers.Encode(signedResponse)}";
+            string authToken = $"AuthToken=\"{signedJwt}\"";
 
-            string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", responseJWT.GetResponseToSign(), Base64UrlHelpers.Encode(signedResponse));
-            string authToken = string.Format(CultureInfo.InvariantCulture, " AuthToken=\"{0}\"", signedJwt);
-
-            responseHeader = string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken,
-                challengeData["Context"],
-                challengeData["Version"]);
+            responseHeader = $"PKeyAuth {authToken}, Context=\"{challengeData["Context"]}\", Version=\"{challengeData["Version"]}\"";
         }
 
         public static X509Certificate2 FindCertificate(IDictionary<string, string> challengeData)
