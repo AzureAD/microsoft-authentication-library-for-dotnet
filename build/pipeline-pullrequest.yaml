@@ -16,7 +16,7 @@ pool:
 
 variables:
   BuildPlatform: 'any cpu'
-  BuildConfiguration: 'release'
+  BuildConfiguration: 'debug'
 
 stages:
 - stage:
