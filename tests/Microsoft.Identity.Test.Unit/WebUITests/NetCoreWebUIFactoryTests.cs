@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                     _requestContext));
 
             // Assert
-            Assert.AreEqual(MsalError.WebviewUnavailable, ex.ErrorCode);
+            Assert.AreEqual(MsalError.WebViewUnavailable, ex.ErrorCode);
         }
 
         [TestMethod]

@@ -1,23 +1,22 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if DESKTOP || NET_CORE
+#if DESKTOP || NET_CORE || NET5_WIN
+
 using System;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Desktop;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
+using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.WebUITests
 {
     [TestClass]
-    public class MsalDesktopWebUiTests
+    public class WebView2WebUiFactoryTests
     {
         private readonly CoreUIParent _parent = new CoreUIParent();
         private readonly RequestContext _requestContext =
@@ -26,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public void IsSystemWebUiAvailable()
         {
-            var webUIFactory = new MsalDesktopWebUiFactory();
+            var webUIFactory = new WebView2WebUiFactory();
 
             Assert.IsTrue(webUIFactory.IsSystemWebViewAvailable);
         }
@@ -35,9 +34,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public void DefaultEmbedded_WebView2Available()
         {
             // Arrange
-            var webUIFactory = new MsalDesktopWebUiFactory(
-                fallbackToLegacyWebBrowser: false, 
-                isWebView2AvailableForTest: (_) => true);
+            var webUIFactory = new WebView2WebUiFactory(() => true);
 
 
             // Act
@@ -48,15 +45,15 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             // Assert
             Assert.IsTrue(webUi is WebView2WebUi);
+
         }
-#if DESKTOP
+
         [TestMethod]
-        public void DefaultEmbedded_Legacy()
+        public void DefaultEmbedded_WebView2NotAvailable()
         {
             // Arrange
-            var webUIFactory = new MsalDesktopWebUiFactory(
-                fallbackToLegacyWebBrowser: true,
-                isWebView2AvailableForTest: (_) => false);
+            var webUIFactory = new WebView2WebUiFactory(
+                isWebView2AvailableForTest: () => false);
 
 
             // Act
@@ -66,37 +63,14 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                     _requestContext);
 
             // Assert
-            Assert.IsTrue(webUi is Client.Platforms.Features.WinFormsLegacyWebUi.InteractiveWebUI);
-        }
-#endif
-
-        [TestMethod]
-        public void DefaultEmbedded_WebView2NotAvailable()
-        {
-            // Arrange
-            var webUIFactory = new MsalDesktopWebUiFactory(
-               fallbackToLegacyWebBrowser: false,
-               isWebView2AvailableForTest: (_) => false);
-
-
-            // Act
-            var ex = AssertException.Throws<MsalClientException>(() =>
-                webUIFactory.CreateAuthenticationDialog(
-                    _parent,
-                    WebViewPreference.NotSpecified,
-                    _requestContext));
-
-            // Assert
-            Assert.AreEqual(MsalError.WebView2NotInstalled, ex.ErrorCode);
+            Assert.IsTrue(webUi is InteractiveWebUI);
         }
 
         [TestMethod]
         public void Embedded()
         {
             // Arrange
-            var webUIFactory = new MsalDesktopWebUiFactory(
-               fallbackToLegacyWebBrowser: false,
-               isWebView2AvailableForTest: (_) => true);
+            var webUIFactory = new WebView2WebUiFactory(() => true);
 
             // Act
             var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.Embedded, _requestContext);
@@ -109,20 +83,14 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public void NetCoreFactory_System()
         {
             // Arrange
-            var webUIFactory = new MsalDesktopWebUiFactory(
-              fallbackToLegacyWebBrowser: false,
-              isWebView2AvailableForTest: (_) => true);
+            var webUIFactory = new WebView2WebUiFactory();
 
             // Act
-            var webUi = webUIFactory.CreateAuthenticationDialog(
-                _parent, 
-                WebViewPreference.System, 
-                _requestContext);
+            var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.System, _requestContext);
 
             // Assert
             Assert.IsTrue(webUi is DefaultOsBrowserWebUi);
         }
     }
 }
-
 #endif
