@@ -2,69 +2,32 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
-    internal class NetDesktopDeviceAuthManager : IDeviceAuthManager
+    internal class NetDesktopDeviceAuthManager : DeviceAuthManager
     {
-        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponseHeaders responseHeaders, Uri endpointUri, out string responseHeader)
+        protected override DeviceAuthJWTResponse GetDeviceAuthJwtResponse(string submitUrl, string nonce, X509Certificate2 certificate)
         {
-            responseHeader = string.Empty;
-            X509Certificate2 certificate = null;
+            return new DeviceAuthJWTResponse(submitUrl, nonce, Convert.ToBase64String(certificate.GetRawCertData()));
+        }
 
-            if (!DeviceAuthHelper.IsDeviceAuthChallenge(responseHeaders))
-            {
-                return false;
-            }
-
-            if (!DeviceAuthHelper.CanOSPerformPKeyAuth())
-            {
-                responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(responseHeaders);
-                return true;
-            }
-
-            IDictionary<string, string> challengeData = DeviceAuthHelper.ParseChallengeData(responseHeaders);
-
-            if (!challengeData.ContainsKey("SubmitUrl"))
-            {
-                challengeData["SubmitUrl"] = endpointUri.AbsoluteUri;
-            }
-
-            try
-            {
-                certificate = DeviceAuthHelper.FindCertificate(challengeData);
-            }
-            catch (MsalException ex)
-            {
-                if (ex.ErrorCode == MsalError.DeviceCertificateNotFound)
-                {
-                    responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(responseHeaders);
-                    return true;
-                }
-            }
-
-            DeviceAuthJWTResponse responseJWT = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
-                challengeData["nonce"], Convert.ToBase64String(certificate.GetRawCertData()));
-
+        protected override byte[] SignWithCertificate(DeviceAuthJWTResponse responseJwt, X509Certificate2 certificate)
+        {
             CngKey key = NetDesktopCryptographyManager.GetCngPrivateKey(certificate);
-            byte[] sig = null;
+            byte[] signedData = null;
             using (Native.RSACng rsa = new Native.RSACng(key))
             {
                 rsa.SignatureHashAlgorithm = CngAlgorithm.Sha256;
-                sig = rsa.SignData(responseJWT.GetResponseToSign().ToByteArray());
+                signedData = rsa.SignData(responseJwt.GetResponseToSign().ToByteArray());
             }
 
-            DeviceAuthHelper.FormatResponseHeader(responseJWT, sig, challengeData, out responseHeader);
-
-            return true;
+            return signedData;
         }
     }
 }
