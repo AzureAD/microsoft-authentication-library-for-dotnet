@@ -34,17 +34,24 @@ namespace Microsoft.Identity.Client
         internal static AcquireTokenByAuthorizationCodeParameterBuilder Create(
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes, 
-            string authorizationCode)
+            string authorizationCode,
+            string codeVerifier = null)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 
             return new AcquireTokenByAuthorizationCodeParameterBuilder(confidentialClientApplicationExecutor)
-                   .WithScopes(scopes).WithAuthorizationCode(authorizationCode);
+                   .WithScopes(scopes).WithAuthorizationCode(authorizationCode).WithCodeVerifier(codeVerifier);
         }
 
         private AcquireTokenByAuthorizationCodeParameterBuilder WithAuthorizationCode(string authorizationCode)
         {
             Parameters.AuthorizationCode = authorizationCode;
+            return this;
+        }
+
+        private AcquireTokenByAuthorizationCodeParameterBuilder WithCodeVerifier(string codeVerifier)
+        {
+            Parameters.PkceCodeVerifier = codeVerifier;
             return this;
         }
 

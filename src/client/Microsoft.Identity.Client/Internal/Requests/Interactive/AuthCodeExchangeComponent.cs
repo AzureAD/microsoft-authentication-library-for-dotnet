@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public AuthCodeExchangeComponent( 
             AuthenticationRequestParameters requestParams,
             AcquireTokenInteractiveParameters interactiveParameters,
-            string authorizationCode, 
+            string authorizationCode,
             string pkceCodeVerifier)
         {
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
