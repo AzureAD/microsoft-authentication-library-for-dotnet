@@ -4,8 +4,8 @@ The MSAL library for .NET is part of the [Microsoft identity platform for develo
 
 Quick links:
 
-| [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/#quickstarts) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [Library Reference](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet) | [Support](README.md#community-help-and-support) |
-| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/#quickstarts) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [Library Reference](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet) | [Support](README.md#community-help-and-support) | [Feedback](https://forms.office.com/r/FT93LipiGz)
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
 ## Nuget package
 
@@ -64,6 +64,9 @@ We use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) with the
 If you find a bug or have a feature request, please raise the issue on [GitHub Issues](../../issues).
 
 To provide a recommendation, visit our [User Voice page](https://feedback.azure.com/forums/169401-azure-active-directory).
+
+## Submit Feedback
+We'd like your thoughts on this library. Please complete [this short survey.](https://forms.office.com/r/FT93LipiGz)
 
 ## Contribute
 
