@@ -7,6 +7,11 @@ parameters:
   MsalClientSemVer: '4.0.0-devopsbuild'
 
 steps:
+- task: CmdLine@2
+  displayName: 'Clear Local NuGet Cache'
+  inputs:
+    script: 'nuget locals all -clear'
+    
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
