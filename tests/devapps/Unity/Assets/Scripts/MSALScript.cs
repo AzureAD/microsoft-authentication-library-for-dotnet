@@ -52,28 +52,25 @@ public class MSALScript : MonoBehaviour
 
             try
             {
-                try
-                {
-                    var accounts = await app.GetAccountsAsync();
-                    Log("MSAL acquiring token silently.");
-                    authResult = await app.AcquireTokenSilent(scopes, accounts.FirstOrDefault()).ExecuteAsync(CancellationToken.None);
-                    Log("MSAL acquired token silently.");
-                }
-                catch (MsalUiRequiredException)
-                {
-                    Log("MSAL acquiring token with device code.");
-                    authResult = await app
-                        .AcquireTokenWithDeviceCode(
-                            scopes,
-                            deviceCodeResult => {
-                                _deviceCode = deviceCodeResult.UserCode;
+                var accounts = await app.GetAccountsAsync();
+                Log("MSAL acquiring token silently.");
+                authResult = await app.AcquireTokenSilent(scopes, accounts.FirstOrDefault()).ExecuteAsync(CancellationToken.None);
+                Log("MSAL acquired token silently.");
+            }
+            catch (MsalUiRequiredException)
+            {
+                Log("MSAL acquiring token with device code.");
+                authResult = await app
+                    .AcquireTokenWithDeviceCode(
+                        scopes,
+                        deviceCodeResult => {
+                            _deviceCode = deviceCodeResult.UserCode;
                                 //CopyToClipboard(deviceCodeResult.UserCode);
 
                                 return Task.CompletedTask;
-                            })
-                        .ExecuteAsync();
-                    Log("MSAL acquired token with device code.");
-                }
+                        })
+                    .ExecuteAsync();
+                Log("MSAL acquired token with device code.");
             }
             catch (Exception ex)
             {
@@ -88,8 +85,8 @@ public class MSALScript : MonoBehaviour
             {
                 var sb = new StringBuilder();
                 sb.AppendLine($"MSAL Username={authResult.Account.Username}");
-                sb.AppendLine($"MSAL AccessToken={authResult.AccessToken}");
-                sb.AppendLine($"MSAL IdToken={authResult.IdToken}");
+                //sb.AppendLine($"MSAL AccessToken={authResult.AccessToken}");
+                //sb.AppendLine($"MSAL IdToken={authResult.IdToken}");
                 sb.AppendLine($"MSAL Account={authResult.Account}");
                 sb.AppendLine($"MSAL ExpiresOn={authResult.ExpiresOn}");
                 sb.AppendLine($"MSAL Scopes={string.Join(";", authResult.Scopes)}");
