@@ -5,12 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
-using Microsoft.Identity.Client.Http;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Win32;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
@@ -77,7 +75,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         //This corresponds to windows 7, 8, 8.1 and their server equivalents.       
         public static bool CanOSPerformPKeyAuth()
         {
-#if NET_CORE || NET5_WIN || DESKTOP
+#if NET_CORE || NET5_WIN || DESKTOP || NETSTANDARD
             return !Platforms.Features.DesktopOs.DesktopOsHelper.IsWin10OrServerEquivalent();
 #else
             return false;

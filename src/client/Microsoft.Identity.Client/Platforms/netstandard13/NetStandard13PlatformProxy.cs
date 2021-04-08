@@ -135,5 +135,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         {            
             return Task.FromResult(0);
         }
+
+        public override IDeviceAuthManager CreateDeviceAuthManager() => new NetStandardDeviceAuthManager();
+
     }
 }

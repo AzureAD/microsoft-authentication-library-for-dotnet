@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 using Microsoft.Identity.Client;
+#if !NET5_WIN
 using Microsoft.Identity.Client.Desktop;
+#endif
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.Win8
@@ -17,9 +17,10 @@ namespace Microsoft.Identity.Test.Integration.Win8
         {
             var pcaBuilder = PublicClientApplicationBuilder
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
-               .WithExperimentalFeatures()
-               .WithWindowsBroker();
-
+               .WithExperimentalFeatures();
+#if !NET5_WIN
+            pcaBuilder = pcaBuilder.WithWindowsBroker();
+#endif
 
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
         }

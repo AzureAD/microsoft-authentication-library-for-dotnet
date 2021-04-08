@@ -272,5 +272,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             path = null;
             return false;
         }
+
+        public override IDeviceAuthManager CreateDeviceAuthManager() => new NetCoreDeviceAuthManager();
     }
 }
