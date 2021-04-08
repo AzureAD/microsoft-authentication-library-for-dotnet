@@ -49,8 +49,15 @@ namespace Microsoft.Identity.Client.Platforms.net45.Http
                 // This specifies how long (in ms) the TCP socket can stay open. 
                 // By default the value of this property is set to -1 resulting in the socket 
                 // staying open indefinitely (relatively speaking) so all we have to do is set it to a more realistic value:
-                ServicePointManager.FindServicePoint(endpoint)
-                    .ConnectionLeaseTimeout = (int)HttpClientConfig.ConnectionLifeTime.TotalMilliseconds;
+                try
+                {
+                    ServicePointManager.FindServicePoint(endpoint)
+                        .ConnectionLeaseTimeout = (int)HttpClientConfig.ConnectionLifeTime.TotalMilliseconds;
+                }
+                catch (NotImplementedException)
+                {
+                    // Unity doesn't implement see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2537
+                }
                 _endpoinsWithTcp[key] = true;
             }
         }
