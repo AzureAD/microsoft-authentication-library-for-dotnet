@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Flurl.Http" Version="3.0.1" />
     <PackageReference Include="Kerberos.NET" Version="4.5.50" />
   </ItemGroup>
 

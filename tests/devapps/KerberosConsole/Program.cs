@@ -39,7 +39,7 @@ namespace KerberosConsole
                 return;
             }
 
-             program.AcquireToken();
+             program.AcquireKerberosTicket();
         }
 
         public bool Parse(string[] args)
@@ -108,17 +108,17 @@ namespace KerberosConsole
             return true;
         }
 
-        public void AcquireToken()
+        public void AcquireKerberosTicket()
         {
             Console.WriteLine("Acquiring authentication token ...");
-            AuthenticationResult result = ReadAccount(false);
+            AuthenticationResult result = AcquireToken(false);
             if (result == null)
             {
                 Console.WriteLine("Failed to get Access Token");
                 return;
             }
 
-            ShowKerberosTicketDetails(result);
+            GetAndCacheKerberosTicket(result);
             ShowCachedTicket();
         }
 
@@ -163,11 +163,12 @@ namespace KerberosConsole
             Console.WriteLine("    -h : show help for command options");
         }
 
-        private void ShowKerberosTicketDetails(AuthenticationResult result)
+        private void GetAndCacheKerberosTicket(AuthenticationResult result)
         {
             KerberosSupplementalTicket ticket;
             if (TicketContainer == KerberosTicketContainer.IdToken)
             {
+                // 1. Get the Kerberos Ticket contained in the Id Token.
                 ticket = KerberosSupplementalTicketManager.FromIdToken(result.IdToken);
                 if (ticket == null)
                 {
@@ -180,6 +181,7 @@ namespace KerberosConsole
 
                     try
                     {
+                        // 2. Save the Kerberos Ticket into current user's Windows Ticket Cache.
                         KerberosSupplementalTicketManager.SaveToCache(ticket, LogonId);
                         AADKerberosLogger.Save("---Kerberos Ticket cached into user's Ticket Cache\n");
                     }
@@ -211,8 +213,9 @@ namespace KerberosConsole
             }
         }
 
-        private AuthenticationResult ReadAccount(bool showTokenInfo)
+        private AuthenticationResult AcquireToken(bool showTokenInfo)
         {
+            // 1. Setup application to get Kerberos Ticket with Service Principal name and ticket container parameter.
             var app = PublicClientApplicationBuilder.Create(ClientId)
                 .WithTenantId(TenantId)
                 .WithRedirectUri(RedirectUri)
@@ -230,6 +233,9 @@ namespace KerberosConsole
                 AADKerberosLogger.Save("               spn: " + KerberosServicePrincipalName);
                 AADKerberosLogger.Save("  ticket container: " + TicketContainer);
 
+                // 2. Acquire the authentication token.
+                // Kerberos Ticket will be contained in Id Token or Access Token
+                // according to specified ticket container parameter.
                 AuthenticationResult result = app.AcquireTokenInteractive(GraphScopes)
                         .ExecuteAsync()
                         .GetAwaiter()
