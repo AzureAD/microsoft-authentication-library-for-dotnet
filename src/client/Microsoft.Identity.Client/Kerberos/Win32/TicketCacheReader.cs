@@ -9,6 +9,9 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
+// This workaround required for Native Win32 API call
+#pragma warning disable 618
+
     /// <summary>
     /// Helper class to check Kerberos Ticket in user's Ticket Cache.
     /// </summary>
@@ -73,4 +76,6 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             GC.SuppressFinalize(this);
         }
     }
+
+#pragma warning restore 618
 }

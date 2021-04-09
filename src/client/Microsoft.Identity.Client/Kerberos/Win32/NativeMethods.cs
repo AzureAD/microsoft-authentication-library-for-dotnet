@@ -10,6 +10,9 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
+// This workaround required for Native Win32 API call
+#pragma warning disable 618
+
     internal unsafe class NativeMethods
     {
         private const string SECUR32 = "secur32.dll";
@@ -462,4 +465,5 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             }
         }
     }
+#pragma warning restore 618
 }

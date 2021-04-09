@@ -132,8 +132,8 @@ namespace KerberosConsole
                     var encode = Convert.ToBase64String(ticket);
 
                     AADKerberosLogger.PrintLines(2);
-                    AADKerberosLogger.Save("---Find cached Ticket:");
-                    AADKerberosLogger.Save(encode);
+                    AADKerberosLogger.Save($"---Find cached Ticket: {ticket.Length} bytes");
+                    AADKerberosLogger.PrintBinaryData(ticket);
 
                     TicketDecoder decoder = new TicketDecoder();
                     decoder.ShowApReqTicket(encode);

@@ -25,10 +25,10 @@ namespace KerberosConsole
             Assert.IsNotNull(credPart);
 
             AADKerberosLogger.PrintLines(2);
-             AADKerberosLogger.Save("KRB-CRED Supplemental Ticket -----------------------------");
-             AADKerberosLogger.Save("  ProtocolVersionNumber: " + krbCred.ProtocolVersionNumber);
-             AADKerberosLogger.Save("  Message Type: " + krbCred.MessageType);
-             AADKerberosLogger.Save("  # of Tickets: " + krbCred.Tickets.Length);
+            AADKerberosLogger.Save("KRB-CRED Supplemental Ticket -----------------------------");
+            AADKerberosLogger.Save("  ProtocolVersionNumber: " + krbCred.ProtocolVersionNumber);
+            AADKerberosLogger.Save("  Message Type: " + krbCred.MessageType);
+            AADKerberosLogger.Save("  # of Tickets: " + krbCred.Tickets.Length);
 
             for (int i = 0; i < krbCred.Tickets.Length; i++)
             {
@@ -38,20 +38,20 @@ namespace KerberosConsole
                 var key = new byte[ticketInfo.Key.KeyValue.Length];
                 ticketInfo.Key.KeyValue.CopyTo(key);
 
-                 AADKerberosLogger.Save("  Number: " + ticket.TicketNumber);
-                 AADKerberosLogger.Save("  Realm: " + ticket.Realm);
-                 AADKerberosLogger.Save("  SName: " + ticket.SName.FullyQualifiedName);
+                AADKerberosLogger.Save("  Number: " + ticket.TicketNumber);
+                AADKerberosLogger.Save("  Realm: " + ticket.Realm);
+                AADKerberosLogger.Save("  SName: " + ticket.SName.FullyQualifiedName);
                 ShowEncryptedDataPart("EncryptedPart", ticket.EncryptedPart);
 
-                 AADKerberosLogger.Save("  Ticket.Flags: " + ticketInfo.Flags);
-                 AADKerberosLogger.Save("  Ticket.Realm: " + ticketInfo.Realm);
-                 AADKerberosLogger.Save("  Ticket.PName: " + ticketInfo.PName.FullyQualifiedName);
-                 AADKerberosLogger.Save("  Ticket.SRealm: " + ticketInfo.SRealm);
-                 AADKerberosLogger.Save("  Ticket.SName: " + ticketInfo.SName.FullyQualifiedName);
-                 AADKerberosLogger.Save("  Ticket.AuthTime: " + ticketInfo.AuthTime);
-                 AADKerberosLogger.Save("  Ticket.StartTime: " + ticketInfo.StartTime);
-                 AADKerberosLogger.Save("  Ticket.EndTime: " + ticketInfo.EndTime);
-                 AADKerberosLogger.Save("  Ticket.RenewTill: " + ticketInfo.RenewTill);
+                AADKerberosLogger.Save("  Ticket.Flags: " + ticketInfo.Flags);
+                AADKerberosLogger.Save("  Ticket.Realm: " + ticketInfo.Realm);
+                AADKerberosLogger.Save("  Ticket.PName: " + ticketInfo.PName.FullyQualifiedName);
+                AADKerberosLogger.Save("  Ticket.SRealm: " + ticketInfo.SRealm);
+                AADKerberosLogger.Save("  Ticket.SName: " + ticketInfo.SName.FullyQualifiedName);
+                AADKerberosLogger.Save("  Ticket.AuthTime: " + ticketInfo.AuthTime);
+                AADKerberosLogger.Save("  Ticket.StartTime: " + ticketInfo.StartTime);
+                AADKerberosLogger.Save("  Ticket.EndTime: " + ticketInfo.EndTime);
+                AADKerberosLogger.Save("  Ticket.RenewTill: " + ticketInfo.RenewTill);
                 ShowEncrytionKey("Ticket.Key", ticketInfo.Key);
 
                 if (ticketInfo.AuthorizationData == null)
@@ -96,14 +96,15 @@ namespace KerberosConsole
         {
             if (data == null)
             {
-                 AADKerberosLogger.Save($"  {title}:");
+                AADKerberosLogger.Save($"  {title}:");
             }
             else
             {
-                 AADKerberosLogger.Save($"  {title}.EType: " + data.EType);
-                 AADKerberosLogger.Save($"  {title}.KeyVersionNumber: " + data.KeyVersionNumber);
-                 AADKerberosLogger.Save($"  {title}.Cipher.Length: " + data.Cipher.Length);
-                 AADKerberosLogger.Save($"  {title}.Cipher.Value:\n{BitConverter.ToString(data.Cipher.ToArray())}");
+                AADKerberosLogger.Save($"  {title}.EType: " + data.EType);
+                AADKerberosLogger.Save($"  {title}.KeyVersionNumber: " + data.KeyVersionNumber);
+                AADKerberosLogger.Save($"  {title}.Cipher.Length: " + data.Cipher.Length);
+                AADKerberosLogger.Save($"  {title}.Cipher.Value:");
+                AADKerberosLogger.PrintBinaryData(data.Cipher.ToArray());
             }
         }
 
@@ -111,9 +112,10 @@ namespace KerberosConsole
         {
             if (auth != null)
             {
-                 AADKerberosLogger.Save($"  {title}.Type: {auth.Type}");
-                 AADKerberosLogger.Save($"  {title}.Data.Length: {auth.Data.Length}");
-                 AADKerberosLogger.Save($"  {title}.Data.Value:\n{BitConverter.ToString(auth.Data.ToArray())}");
+                AADKerberosLogger.Save($"  {title}.Type: {auth.Type}");
+                AADKerberosLogger.Save($"  {title}.Data.Length: {auth.Data.Length}");
+                AADKerberosLogger.Save($"  {title}.Data.Value:");
+                AADKerberosLogger.PrintBinaryData(auth.Data.ToArray());
             }
         }
 
@@ -125,10 +127,11 @@ namespace KerberosConsole
             }
             else
             {
-                 AADKerberosLogger.Save($"  {title}.Usage: {key.Usage}");
-                 AADKerberosLogger.Save($"  {title}.EType: {key.EType}");
-                 AADKerberosLogger.Save($"  {title}.KeyValue.Length: {key.KeyValue.Length}");
-                 AADKerberosLogger.Save($"  {title}.KeyValue.Value:\n{BitConverter.ToString(key.KeyValue.ToArray())}");
+                AADKerberosLogger.Save($"  {title}.Usage: {key.Usage}");
+                AADKerberosLogger.Save($"  {title}.EType: {key.EType}");
+                AADKerberosLogger.Save($"  {title}.KeyValue.Length: {key.KeyValue.Length}");
+                AADKerberosLogger.Save($"  {title}.KeyValue.Value:");
+                AADKerberosLogger.PrintBinaryData(key.KeyValue.ToArray());
             }
         }
     }

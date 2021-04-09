@@ -477,6 +477,11 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+        /// <summary>
+        /// Sets the container to place the Kerberos Ticket.
+        /// </summary>
+        /// <param name="ticketContainer">Container to use for Kerberos Ticket.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithKerberosTicketContainer(KerberosTicketContainer ticketContainer)
         {
             Config.TicketContainer = ticketContainer;

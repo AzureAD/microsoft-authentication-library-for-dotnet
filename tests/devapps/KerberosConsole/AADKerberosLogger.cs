@@ -14,6 +14,7 @@ namespace KerberosConsole
     /// </summary>
     public static class AADKerberosLogger
     {
+        private static int _bytesPerLine = 16;
         private static int _lastFileIndex = 0;
 
         /// <summary>
@@ -136,6 +137,41 @@ namespace KerberosConsole
             }
 
             return sb.ToString();
+        }
+
+        public static void PrintBinaryData(byte[] dataToPrint)
+        {
+            char[] line = new char[256];
+            int charIndexBegin = _bytesPerLine * 3;
+            int endOfLine = charIndexBegin + _bytesPerLine;
+
+            for (int i = 0; i < dataToPrint.Length; i += _bytesPerLine)
+            {
+                int index = 0, charindex = charIndexBegin;
+                Array.Fill(line, ' ');
+
+                for (int j = 0; (i + j) < dataToPrint.Length && j < _bytesPerLine; j++)
+                {
+                    string hex = dataToPrint[i + j].ToString("X2", CultureInfo.InvariantCulture);
+                    line[index] = hex[0];
+                    line[index + 1] = hex[1];
+
+                    if (dataToPrint[i + j] >= 32 && dataToPrint[i + j] < 127)
+                    {
+                        line[charindex] = (char)dataToPrint[i + j];
+                    }
+                    else
+                    {
+                        line[charindex] = '*';
+                    }
+
+                    charindex++;
+                    index += 3;
+                }
+
+                line[endOfLine] = (char) 0;
+                Save(new string(line, 0, _bytesPerLine * 4));
+            }
         }
     }
 }
