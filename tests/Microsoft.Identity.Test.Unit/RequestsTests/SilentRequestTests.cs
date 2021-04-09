@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 IBroker mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable().ReturnsForAnyArgs(brokerIsInstalledAndInvokable);
 
-                harness.ServiceBundle.Config.BrokerCreatorFunc = (app, logger) => mockBroker;
+                harness.ServiceBundle.Config.BrokerCreatorFunc = (app, config, logger) => mockBroker;
 
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,

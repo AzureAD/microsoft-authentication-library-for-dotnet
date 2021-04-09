@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
+
 namespace Microsoft.Identity.Client.Desktop
 {
     /// <summary>
@@ -20,10 +23,27 @@ namespace Microsoft.Identity.Client.Desktop
                     MsalErrorMessage.ExperimentalFeature(nameof(WithWindowsBroker)));
             }
 
-            builder.Config.IsBrokerEnabled = true;
-            builder.Config.BrokerCreatorFunc =
-                (uiParent, logger) => new Platforms.Features.WamBroker.WamBroker(uiParent, logger);
+            builder.Config.IsBrokerEnabled = enableBroker;
+            AddSupportForWam(builder);
             return builder;
+        }
+
+        internal static void AddSupportForWam(PublicClientApplicationBuilder builder)
+        {
+            if (DesktopOsHelper.IsWin10OrServerEquivalent())
+            {
+                builder.Config.BrokerCreatorFunc =
+                    (uiParent, appConfig, logger) => new Platforms.Features.WamBroker.WamBroker(uiParent, appConfig, logger);
+            }
+            else
+            {
+                builder.Config.BrokerCreatorFunc =
+                   (uiParent, appConfig, logger) =>
+                   {
+                       logger.Info("Not a Win10 machine. WAM is not available");
+                       return new NullBroker();
+                   };
+            }
         }
     }
 }

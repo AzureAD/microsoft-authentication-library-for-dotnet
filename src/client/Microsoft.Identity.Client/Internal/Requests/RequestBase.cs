@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -73,6 +74,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
+
+            if (authenticationRequestParameters.IsConfidentialClient && !CacheManager.TokenCacheInternal.IsTokenCacheSerialized())
+            {
+                authenticationRequestParameters.RequestContext.Logger.Error("The default token cache provided by MSAL is not designed to be performant when used in confidential client applications. Please use token cache serialization. See https://aka.ms/msal-net-cca-token-cache-serialization.");
+            }
         }
 
         /// <summary>
@@ -167,6 +173,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             apiEvent.IsTokenCacheSerialized = AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsTokenCacheSerialized();
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
+            apiEvent.CacheInfo = (int)CacheInfoTelemetry.None;
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);
@@ -183,7 +190,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenByRefreshToken &&
-                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs)
+                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs &&
+                !(msalTokenResponse.ClientInfo is null))
             {
                 //client_info is not returned from client credential flows because there is no user present.
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
@@ -202,7 +210,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 idtItem, 
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
-                msalTokenResponse.TokenSource);
+                msalTokenResponse.TokenSource, 
+                AuthenticationRequestParameters.RequestContext.ApiEvent);
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
@@ -293,6 +302,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         result.ExpiresOn, 
                         string.Join(" ", result.Scopes)));
             }
+        }
+
+        internal AuthenticationResult HandleTokenRefreshError(MsalServiceException e, MsalAccessTokenCacheItem cachedAccessTokenItem)
+        {
+            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            bool isAadUnavailable = e.IsAadUnavailable();
+            logger.Warning($"Fetching a new AT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
+
+            if (cachedAccessTokenItem != null && isAadUnavailable)
+            {
+                logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
+                return new AuthenticationResult(
+                    cachedAccessTokenItem,
+                    null,
+                    AuthenticationRequestParameters.AuthenticationScheme,
+                    AuthenticationRequestParameters.RequestContext.CorrelationId,
+                    TokenSource.Cache,
+                    AuthenticationRequestParameters.RequestContext.ApiEvent);
+            }
+
+            logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
+            throw e;
         }
     }
 }

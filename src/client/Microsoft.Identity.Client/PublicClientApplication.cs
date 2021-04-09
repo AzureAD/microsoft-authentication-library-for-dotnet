@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
         }
 
         private const string CurrentOSAccountDescriptor = "current_os_account";
-        private static IAccount s_currentOsAccount = 
+        private static IAccount s_currentOsAccount =
             new Account(CurrentOSAccountDescriptor, null, null, null);
 
         /// <summary>
@@ -54,11 +54,53 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///
+        /// Returns true if MSAL can use a system browser.
         /// </summary>
-        public bool IsSystemWebViewAvailable
+        /// <remarks>
+        /// On Windows, Mac and Linux a system browser can always be used, except in cases where there is no UI, e.g. SSH connection.
+        /// On Android, the browser must support tabs.
+        /// </remarks>
+        public bool IsSystemWebViewAvailable // TODO MSAL5: consolidate these helpers in the interface
         {
-            get => ServiceBundle.PlatformProxy.IsSystemWebViewAvailable;
+            get
+            {
+                return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsSystemWebViewAvailable;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if MSAL can use an embedded webview (browser). 
+        /// </summary>
+        /// <remarks>
+        /// Currently there are no embedded webviews on Mac and Linux. On Windows, app developers or users should install 
+        /// the WebView2 runtime and this property will inform if the runtime is available, see https://aka.ms/msal-net-webview2
+        /// </remarks>
+        public bool IsEmbeddedWebViewAvailable()
+        {
+            return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsEmbeddedWebViewAvailable;
+        }
+
+        /// <summary>
+        /// Returns false when the program runs in headless OS, for example when SSH-ed into a Linux machine.
+        /// Browsers (webviews) and brokers cannot be used if there is no UI support. Instead, please use <see cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>
+        /// </summary>
+        public bool IsUserInteractive()
+        {
+            return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsUserInteractive;
+        }
+
+        /// <summary>
+        /// Returns true if a broker can be used. 
+        /// </summary>
+        /// <remarks>
+        /// On Windows, the broker (WAM) can be used on Win10 and is always installed.
+        /// On Mac, Linux and older versions of Windows a broker is not available.
+        /// On mobile, the device must be Intune joined and Authenticator or Company Portal must be installed.
+        /// </remarks>
+        public bool IsBrokerAvailable()
+        {
+            return
+                ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null).IsBrokerInstalledAndInvokable();
         }
 
         /// <summary>

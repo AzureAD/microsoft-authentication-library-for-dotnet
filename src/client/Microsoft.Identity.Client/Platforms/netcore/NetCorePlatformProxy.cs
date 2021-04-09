@@ -5,6 +5,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,6 +15,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Platforms.Shared.NetStdCore;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -43,7 +45,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         private string GetUserPrincipalName(int nameFormat)
         {
-            if (IsWindowsPlatform())
+            if (DesktopOsHelper.IsWindows())
             {
                 uint userNameSize = 0;
                 WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
@@ -172,46 +174,65 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override Task StartDefaultOsBrowserAsync(string url)
         {
-            try
+            if (DesktopOsHelper.IsWindows())
             {
-                var psi = new ProcessStartInfo
+                try
                 {
-                    FileName = url,
-                    UseShellExecute = true
-                };
-                Process.Start(psi);
-            }
-            catch
-            {
-                // hack because of this: https://github.com/dotnet/corefx/issues/10361
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = url,
+                        UseShellExecute = true
+                    };
+                    Process.Start(psi);
+                }
+                catch
                 {
+                    // hack because of this: https://github.com/dotnet/corefx/issues/10361
                     url = url.Replace("&", "^&");
                     Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            }
+            else if (DesktopOsHelper.IsLinux())
+            {
+                try
                 {
-                    try
+                    ProcessStartInfo psi = null;
+                    foreach (string openTool in new[] { "xdg-open", "gnome-open", "kfmclient" })
                     {
-                        Process.Start("xdg-open", url);
+                        if (TryGetExecutablePath(openTool, out string openToolPath))
+                        {
+                            psi = new ProcessStartInfo(openToolPath, url)
+                            {
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true
+                            };
+
+                            Process.Start(psi);
+
+                            break;
+                        }
                     }
-                    catch (Exception ex)
+
+                    if (psi == null)
                     {
-                        throw new MsalClientException(
-                            MsalError.LinuxXdgOpen,
-                            "Unable to open a web page using xdg-open. See inner exception for details. Possible causes for this error are: xdg-open is not installed or " +
-                            "it cannot find a way to open an url - make sure you can open a web page by invoking from a terminal: xdg-open https://www.bing.com ",
-                            ex);
+                        throw new Exception("Failed to locate a utility to launch the default web browser.");
                     }
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                catch (Exception ex)
                 {
-                    Process.Start("open", url);
+                    throw new MsalClientException(
+                        MsalError.LinuxXdgOpen,
+                        MsalErrorMessage.LinuxOpenToolFailed,
+                        ex);
                 }
-                else
-                {
-                    throw new PlatformNotSupportedException(RuntimeInformation.OSDescription);
-                }
+            }
+            else if (DesktopOsHelper.IsMac())
+            {
+                Process.Start("/usr/bin/open", url);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException(RuntimeInformation.OSDescription);
             }
             return Task.FromResult(0);
 
@@ -221,42 +242,37 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
             return PoPProviderFactory.GetOrCreateProvider();
         }
-        public override bool UseEmbeddedWebViewDefault => false;
 
-
-        /// <summary>
-        ///  Is this a windows platform
-        /// </summary>
-        /// <returns>A  value indicating if we are running on windows or not</returns>
-        public static bool IsWindowsPlatform()
-        {
-            return Environment.OSVersion.Platform == PlatformID.Win32NT;
-        }
-
-        /// <summary>
-        /// Is this a MAC platform
-        /// </summary>
-        /// <returns>A value indicating if we are running on mac or not</returns>
-        public static bool IsMacPlatform()
-        {
-            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-        }
-
-        /// <summary>
-        /// Is this a linux platform
-        /// </summary>
-        /// <returns>A  value indicating if we are running on linux or not</returns>
-        public static bool IsLinuxPlatform()
-        {
-            return Environment.OSVersion.Platform == PlatformID.Unix;
-        }
-
-        public override bool CanBrokerSupportSilentAuth()
-        {
-            return true;
-        }
+        public override bool CanBrokerSupportSilentAuth() => true;
 
         public override bool BrokerSupportsWamAccounts => true;
 
+        /// <summary>
+        /// Searches through PATH variable to find the path to the specified executable.
+        /// </summary>
+        /// <param name="executable">Executable to find the path for.</param>
+        /// <param name="path">Location of the specified executable.</param>
+        /// <returns></returns>
+        private bool TryGetExecutablePath(string executable, out string path)
+        {
+            string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
+            if (pathEnvVar != null)
+            {
+                var paths = pathEnvVar.Split(':');
+                foreach (var basePath in paths)
+                {
+                    path = Path.Combine(basePath, executable);
+                    if (File.Exists(path))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            path = null;
+            return false;
+        }
+
+        public override IDeviceAuthManager CreateDeviceAuthManager() => new NetCoreDeviceAuthManager();
     }
 }

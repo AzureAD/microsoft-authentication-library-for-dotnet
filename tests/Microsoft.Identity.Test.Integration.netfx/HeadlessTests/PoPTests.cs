@@ -171,7 +171,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
             ConfigureInMemoryCache(pca);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
             result = await pca
                 .AcquireTokenSilent(s_keyvaultScope, accounts.Single())
                 .WithProofOfPossession(popConfig1)

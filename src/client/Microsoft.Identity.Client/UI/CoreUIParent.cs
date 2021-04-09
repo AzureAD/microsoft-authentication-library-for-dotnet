@@ -13,6 +13,7 @@ using AppKit;
 #endif
 
 using System.Threading;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Client.UI
 {
@@ -20,12 +21,13 @@ namespace Microsoft.Identity.Client.UI
     {
         public CoreUIParent()
         {
+
         }
 
-        internal bool UseEmbeddedWebview { get; set; }
         internal SynchronizationContext SynchronizationContext { get; set; }
 
         internal SystemWebViewOptions SystemWebViewOptions { get; set; }
+        internal EmbeddedWebViewOptions EmbeddedWebviewOptions { get; set; }
 
 #if MAC
         /// <summary>

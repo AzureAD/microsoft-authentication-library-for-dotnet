@@ -5,6 +5,7 @@ using System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 
@@ -51,7 +52,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string environment = TestConstants.ProductionPrefCacheEnvironment,
             string displayableId = TestConstants.DisplayableId,
             string rtSecret = TestConstants.RTSecret,
-            string overridenScopes = null, 
+            string overridenScopes = null,
+            string userAssertion = null,
             bool expiredAccessTokens = false, 
             bool addSecondAt = true)
         {
@@ -76,6 +78,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 extendedAccessTokenExpiresOn,
                 clientInfo, 
                 homeAccId);
+
+            if (userAssertion != null)
+            {
+                var crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
+                atItem.UserAssertionHash = crypto.CreateBase64UrlEncodedSha256Hash(userAssertion);
+            }
 
             // add access token
             accessor.SaveAccessToken(atItem);

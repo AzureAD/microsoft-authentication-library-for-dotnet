@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
-            return new WamBroker(uiParent, Logger);
+            return new WamBroker(uiParent, appConfig, Logger);
         }
 
         /// <inheritdoc />
@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage() => new UapTokenCacheBlobStorage(CryptographyManager, Logger);
 
-        protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
+        protected override IWebUIFactory CreateWebUiFactory() => new UapWebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
@@ -201,8 +201,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return MatsConverter.AsInt(OsPlatform.Win32);
         }
         protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
-
-        public override bool IsSystemWebViewAvailable => false;
+       
 
         public override IDeviceAuthManager CreateDeviceAuthManager()
         {

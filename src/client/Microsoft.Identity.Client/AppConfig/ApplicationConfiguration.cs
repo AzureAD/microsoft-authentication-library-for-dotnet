@@ -44,8 +44,10 @@ namespace Microsoft.Identity.Client
         public string IosKeychainSecurityGroup { get; internal set; }
 
         public bool IsBrokerEnabled { get; internal set; }
+        public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
 
-        public Func<CoreUIParent, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
+        public Func<CoreUIParent, ApplicationConfiguration, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
+        public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }
 
         /// <summary>
         /// Service principal name for Kerberos Service Ticket.
@@ -94,11 +96,9 @@ namespace Microsoft.Identity.Client
 
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
 
-        /// <summary>
-        /// Currently this is only required for WAM
-        /// </summary>
-        public bool IsMsaPassthrough { get; set; } = false;
-
+        #region Region
+        public string AzureRegion { get; set; }
+        #endregion
 
         #region Authority
 
@@ -108,32 +108,32 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
         /// </summary>
-        internal AadAuthorityAudience AadAuthorityAudience { get; set; }
+        public AadAuthorityAudience AadAuthorityAudience { get; set; }
 
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
         /// </summary>
-        internal AzureCloudInstance AzureCloudInstance { get; set; }
+        public AzureCloudInstance AzureCloudInstance { get; set; }
 
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
         /// </summary>
-        internal string Instance { get; set; }
+        public string Instance { get; set; }
 
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
         /// </summary>
-        internal bool ValidateAuthority { get; set; }
+        public bool ValidateAuthority { get; set; }
 
         #endregion
 
         #region Test Hooks
-        internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
+        public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
-        internal ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
-        internal ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
+        public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
+        public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
-        internal IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
+        public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
         #endregion
 
     }

@@ -603,7 +603,33 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(authorityUri));
             }
 
-            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), validateAuthority);
+            return WithAuthority(authorityUri.ToString(), validateAuthority);
+        }
+
+        /// <summary>
+        /// Adds a known Azure AD authority to the application to sign-in users specifying
+        /// the full authority Uri. See https://aka.ms/msal-net-application-configuration.
+        /// </summary>
+        /// <param name="authorityUri">URL of the security token service (STS) from which MSAL.NET will acquire the tokens.
+        ///  Usual authorities endpoints for the Azure public Cloud are:
+        ///  <list type="bullet">
+        ///  <item><description><c>https://login.microsoftonline.com/tenant/</c> where <c>tenant</c> is the tenant ID of the Azure AD tenant
+        ///  or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</description></item>
+        ///  <item><description><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal account</description></item>
+        ///  <item><description><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</description></item>
+        ///  <item><description><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</description></item>
+        ///  </list>
+        ///  Note that this setting needs to be consistent with what is declared in the application registration portal</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithAuthority(string authorityUri, bool validateAuthority = true)
+        {
+            if (string.IsNullOrWhiteSpace(authorityUri))
+            {
+                throw new ArgumentNullException(authorityUri);
+            }
+
+            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri, validateAuthority);
 
             return (T)this;
         }
@@ -749,35 +775,7 @@ namespace Microsoft.Identity.Client
             Config.AadAuthorityAudience = authorityAudience;
             Config.ValidateAuthority = validateAuthority;
             return (T)this;
-        }
-
-        /// <summary>
-        /// Adds a known Azure AD authority to the application to sign-in users specifying
-        /// the full authority Uri. See https://aka.ms/msal-net-application-configuration.
-        /// </summary>
-        /// <param name="authorityUri">URL of the security token service (STS) from which MSAL.NET will acquire the tokens.
-        ///  Usual authorities endpoints for the Azure public Cloud are:
-        ///  <list type="bullet">
-        ///  <item><description><c>https://login.microsoftonline.com/tenant/</c> where <c>tenant</c> is the tenant ID of the Azure AD tenant
-        ///  or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</description></item>
-        ///  <item><description><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal account</description></item>
-        ///  <item><description><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</description></item>
-        ///  <item><description><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</description></item>
-        ///  </list>
-        ///  Note that this setting needs to be consistent with what is declared in the application registration portal</param>
-        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithAuthority(string authorityUri, bool validateAuthority = true)
-        {
-            if (string.IsNullOrWhiteSpace(authorityUri))
-            {
-                throw new ArgumentNullException(authorityUri);
-            }
-
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(authorityUri, validateAuthority);
-
-            return (T)this;
-        }
+        }       
 
         /// <summary>
         /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs

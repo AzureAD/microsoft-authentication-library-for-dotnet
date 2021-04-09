@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Globalization;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
@@ -115,7 +116,8 @@ namespace Microsoft.Identity.Client
             MsalIdTokenCacheItem msalIdTokenCacheItem,
             IAuthenticationScheme authenticationScheme,
             Guid correlationID,
-            TokenSource tokenSource)
+            TokenSource tokenSource, 
+            ApiEvent apiEvent)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
             string homeAccountId =
@@ -154,6 +156,7 @@ namespace Microsoft.Identity.Client
             TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
             CorrelationId = correlationID;
+            ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
         }
 
@@ -224,6 +227,8 @@ namespace Microsoft.Identity.Client
         /// Gets the correlation id used for the request.
         /// </summary>
         public Guid CorrelationId { get; }
+
+        internal ApiEvent ApiEvent { get; }
 
         /// <summary>
         /// Identifies the type of access token. By default tokens returned by Azure Active Directory are Bearer tokens.        

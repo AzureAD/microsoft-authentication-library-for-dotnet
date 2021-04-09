@@ -515,15 +515,19 @@ namespace Microsoft.Identity.Json.Serialization
         {
             get
             {
-#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS || MAC)
+                // UNITY flag based on https://github.com/jilleJr/Newtonsoft.Json-for-Unity
+#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS || MAC || UNITY)
                 if (DynamicCodeGeneration)
                 {
                     return DynamicReflectionDelegateFactory.Instance;
                 }
 
                 return LateBoundReflectionDelegateFactory.Instance;
+
+#elif UNITY
+                 return LateBoundReflectionDelegateFactory.Instance;
 #else
-                return ExpressionReflectionDelegateFactory.Instance;
+                 return ExpressionReflectionDelegateFactory.Instance;
 #endif
             }
         }

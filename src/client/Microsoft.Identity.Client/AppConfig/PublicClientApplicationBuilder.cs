@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using System.ComponentModel;
 
 #if iOS
 using UIKit;
@@ -109,7 +110,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
 #if !iOS
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] 
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
         public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
         {
@@ -132,22 +133,36 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
         /// <remarks>If your app uses .NET classic or .NET Core 3.x, and you wish to use the Windows broker, 
-        /// please install the nuget package Microsoft.Identity.Client.Desktop and call .WithWindowsBroker(true)</remarks>
+        /// please install the nuget package Microsoft.Identity.Client.Desktop and call .WithDesktopFeatures()</remarks>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
+#pragma warning disable CS0162 // Unreachable code detected
+
 #if NET45
-            throw new PlatformNotSupportedException("The Windows broker is not available on .NET Framework 4.5, please use at least .NET Framework 4.6.2");
+            throw new PlatformNotSupportedException(
+                "The Windows broker is not available on .NET Framework 4.5, please use at least .NET Framework 4.6.2");
 #endif
 
-#if NET461 || NET_CORE
+#if NET461
             if (Config.BrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
-                    "The Windows broker is not directly available on MSAL for .NET Framework or .NET Core 3.x" +
+                    "The Windows broker is not directly available on MSAL for .NET Framework" +
                     " To use it, please install the nuget package named Microsoft.Identity.Client.Desktop " +
-                    "and call the extension method .WithWindowsBroker(true)");
+                    "and call the extension method .WithDesktopFeatures() first.");
             }
 #endif
+
+#if NET_CORE
+            if (Config.BrokerCreatorFunc == null && Platforms.Features.DesktopOs.DesktopOsHelper.IsWindows())
+            {
+                throw new PlatformNotSupportedException(
+                    "If you have a Windows application which targets net5 or net5-windows, please change the target to net5-windows10.0.17763.0, which provides support from Win7 to Win10. For details see https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md" +
+                    "If you have a cross-platform (Windows, Mac, Linux) application which targets net5, please dual target net5 and net5-windows10.0.17763.0. Your installer should deploy the net5 version on Mac and Linux and the net5-window10.0.17763.0 on Win7-Win10. For details see https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md" +
+                    "If you have a .NET Core 3.1 application, please install the nuget package named Microsoft.Identity.Client.Desktop and call the extension method .WithDesktopFeatures() first.");
+            }
+#endif
+
 #if NET461 || WINDOWS_APP || NET5_WIN
             if (!Config.ExperimentalFeaturesEnabled)
             {
@@ -157,10 +172,22 @@ namespace Microsoft.Identity.Client
             }
 #endif
 
-#pragma warning disable CS0162 // Unreachable code detected
             Config.IsBrokerEnabled = enableBroker;
             return this;
 #pragma warning restore CS0162 // Unreachable code detected
+        }
+
+        /// <summary>
+        /// Allows customization of the Windows 10 Broker experience
+        /// </summary>
+#if !SUPPORTS_BROKER || __MOBILE__
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif  
+        public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
+        {
+            WindowsBrokerOptions.ValidatePlatformAvailability();
+            Config.WindowsBrokerOptions = options;
+            return this;
         }
 
 #if WINDOWS_APP
@@ -278,6 +305,23 @@ namespace Microsoft.Identity.Client
 #endif
 
         /// <summary>
+        /// Returns true if a broker can be used. 
+        /// </summary>
+        /// <remarks>
+        /// On Windows, the broker (WAM) can be used on Win10 and is always installed. See https://aka.ms/msal-net-wam
+        /// On Mac, Linux and older versions of Windows a broker is not available.
+        /// If your application is .NET5, please use the target .net5.0-windows10.0.17763.0 for all Windows versions and target net5.0 to target Linux and Mac.
+        /// If your application is .NET classic or .NET Core 3.1 and you wish to use the Windows Broker, please install Microsoft.Identity.Client.Desktop first and call WithDesktopFeatures().
+        /// 
+        /// On mobile, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers
+        /// </remarks>
+        public bool IsBrokerAvailable()
+        {            
+            return PlatformProxyFactory.CreatePlatformProxy(null)
+                .CreateBroker(base.Config, null).IsBrokerInstalledAndInvokable();
+        }
+
+        /// <summary>
         /// </summary>
         /// <returns></returns>
         public IPublicClientApplication Build()
@@ -307,7 +351,7 @@ namespace Microsoft.Identity.Client
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
-            }          
+            }
         }
     }
 }

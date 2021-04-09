@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
@@ -17,6 +18,9 @@ using Windows.Security.Credentials;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
+#if NET5_WIN
+    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
+#endif
     internal class AadPlugin : IWamPlugin
     {
         private readonly IWamProxy _wamProxy;
@@ -238,7 +242,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             bool isInteractive,
             bool isAccountInWam)
         {
-            bool setLoginHint = isInteractive && !isAccountInWam && !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint);
+            string loginHint = !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint) ?
+                authenticationRequestParameters.LoginHint :
+                authenticationRequestParameters.Account?.Username;
+
+            bool setLoginHint = 
+                isInteractive && 
+                !isAccountInWam && 
+                !string.IsNullOrEmpty(loginHint);
+
             var wamPrompt = setLoginHint || (isInteractive && isForceLoginPrompt) ?
                 WebTokenRequestPromptType.ForceAuthentication :
                 WebTokenRequestPromptType.Default;
@@ -328,7 +340,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             foreach (var kvp in webTokenResponse.Properties)
             {
-                allProperties.Add(kvp.Key, kvp.Value);
+                allProperties[kvp.Key] = kvp.Value;
             }
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()

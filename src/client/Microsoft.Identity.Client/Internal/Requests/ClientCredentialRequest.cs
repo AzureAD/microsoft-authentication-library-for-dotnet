@@ -1,17 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Region;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -41,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
-            CacheRefresh cacheRefresh = CacheRefresh.None;
+            CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
 
             if (!_clientParameters.ForceRefresh && 
                 string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
@@ -57,16 +53,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         null,
                         AuthenticationRequestParameters.AuthenticationScheme,
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
-                        TokenSource.Cache);
+                        TokenSource.Cache,
+                        AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
-                else if (cachedAccessTokenItem == null)
-                {
-                    cacheRefresh = CacheRefresh.NoCachedAT;
-                }
-                else
-                {
-                    cacheRefresh = CacheRefresh.RefreshIn;
-                }
+
+                cacheInfoTelemetry = (cachedAccessTokenItem == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.RefreshIn;
             }
             else
             {
@@ -74,13 +65,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (_clientParameters.ForceRefresh)
                 {
-                    cacheRefresh = CacheRefresh.ForceRefresh;
+                    cacheInfoTelemetry = CacheInfoTelemetry.ForceRefresh;
                 }
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh == null)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfoTelemetry.None)
             {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int)cacheRefresh;
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }
 
             // No AT in the cache or AT needs to be refreshed
@@ -90,22 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (MsalServiceException e)
             {
-                bool isAadUnavailable = e.IsAadUnavailable();
-                logger.Warning($"Fetching a new AT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
-
-                if (cachedAccessTokenItem != null && isAadUnavailable)
-                {
-                    logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
-                    return new AuthenticationResult(
-                        cachedAccessTokenItem,
-                        null,
-                        AuthenticationRequestParameters.AuthenticationScheme,
-                        AuthenticationRequestParameters.RequestContext.CorrelationId,
-                        TokenSource.Cache);
-                }
-
-                logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
-                throw;
+                return HandleTokenRefreshError(e, cachedAccessTokenItem);
             }
         }
 

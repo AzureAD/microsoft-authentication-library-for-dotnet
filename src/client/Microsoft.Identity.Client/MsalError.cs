@@ -611,19 +611,19 @@ namespace Microsoft.Identity.Client
         public const string LoopbackResponseUriMismatch = "loopback_response_uri_mismatch";
 
         /// <summary>
-        /// <para>What happens?</para>MSAL tried to open the browser on Linux using the xdg-open tool, but failed.
+        /// <para>What happens?</para>MSAL tried to open the browser on Linux using the xdg-open, gnome-open, or kfmclient tools, but failed.
         /// <para>Mitigation</para>Make sure you can open a page using xdg-open tool. See https://aka.ms/msal-net-os-browser for details.
         /// </summary>
         public const string LinuxXdgOpen = "linux_xdg_open_failed";
 
         /// <summary>
-        /// The selected webview is not available on this platform. You can switch to a different webview using <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/>. See https://aka.ms/msal-net-os-browser for details
+        /// The selected WebView is not available on this platform. You can switch to a different WebView using <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/>. See https://aka.ms/msal-net-os-browser for details
         /// </summary>
-        public const string WebviewUnavailable = "no_system_webview";
+        public const string WebViewUnavailable = "no_system_webview";
 
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
         /// <summary>
-        /// <para>What happens?</para>You configured MSAL interactive authentication to use an embedded webview and you also configured <see cref="SystemWebViewOptions"/>.
+        /// <para>What happens?</para>You configured MSAL interactive authentication to use an embedded WebView and you also configured <see cref="SystemWebViewOptions"/>.
         /// These are mutually exclusive.
         /// <para>Mitigation</para>Either set <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/> to true or do not use
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(SystemWebViewOptions)"/>
@@ -943,5 +943,21 @@ namespace Microsoft.Identity.Client
         /// pops up
         /// </summary>
         public const string WamPickerError = "wam_interactive_picker_error";
+
+        /// <summary>
+        /// <para>What happens?</para>The embedded browser cannot be started because a runtime component is missing.
+        /// <para>Mitigation</para>"The embedded browser needs WebView2 runtime to be installed. An end user of the app can download and install the WebView2 runtime from https://go.microsoft.com/fwlink/p/?LinkId=2124703 and restart the app.
+        ///  or the app developer can install the WebView2 runtime https://docs.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution
+        /// </summary>
+        public const string WebView2NotInstalled = "webview2_runtime_not_installed";
+
+
+        /// <summary>
+        /// <para>What happens?</para>You configured both Regional Authority and Authority Validation. Authority validation is not currently supported for regional authorities.
+        /// <para>Mitigation</para>Set the validateAuthority flag to false to use Azure Regional authority. Do not disable authority validation if you read the authority from an untrusted source, 
+        /// for example from the WWWAuthenticate header of an HTTP request that resulted in a 401 response. 
+        ///  </summary>
+        public const string RegionalAuthorityValidation = "regional_authority_validation";
+
     }
 }

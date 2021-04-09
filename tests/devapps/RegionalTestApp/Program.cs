@@ -1,51 +1,209 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Microsoft.Identity.Client;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Threading;
 using System.Security.Cryptography.X509Certificates;
 
 /**
- * 1. Create an Azure VM.
- * 2. Clone the repo on the Azure VM or Create a new console app and copy the below code to the console app.
- * 3. Add the nuget package for MSAL to test.
- * 5. Install the cert from lab 
- * Sample powershell command: Import-PfxCertificate -FilePath "C:\cert\cert.pfx" -CertStoreLocation Cert:\CurrentUser\My
- * 4. Run the app.
+ * Note: Restart the application between the test cases to clear the statics.
  * 
- * Case 1: Verify WithAzureRegion(true)
- * 1. Verify the logs for "WithAzureRegion: True"
- * 2. Verify the region was discovered "[Region discovery] Region: eastus"
- * 3. Verify the token is obtained from the regional endpoint
- * 4. You can use fiddler to verify the token endpoint
+ * Case 1: Regional with a valid user-specified region
+ *  Look for:
+ *      [Region discovery] Region found in environment variable: centralus.
+ *      [Region discovery] Returning user provided region: westus.
+ *      [HttpManager] Sending request. Method: POST. URI: https://westus.login.microsoft.com...
+ *      Fetched access token from host westus.login.microsoft.com. Endpoint https://westus.login.microsoft.com...
  * 
- * Case 2: Verify WithAzureRegion(false)
- * 1. Verify the logs for "WithAzureRegion: False"
- * 2. Verify the token is obtained from the global endpoint.
+ * Case 2: Regional auto-detect with environment variable
+ *  Look for:
+ *      [Region discovery] Region found in environment variable: centralus.
+ *      [Region discovery] Auto-discovery already ran and found centralus
+ *      [HttpManager] Sending request. Method: POST. URI: https://centralus.login.microsoft.com...
+ *      Fetched access token from host centralus.login.microsoft.com. Endpoint https://centralus.login.microsoft.com...
+ *      
+ * Case 3: Regional auto-detect with IMDS call (without environment variable, test in Azure VM)
+ *  On Azure VM:
+ *      [Region discovery] Call to local IMDS succeeded. Region: {VM-region}.
+ *      [HttpManager] Sending request. Method: POST. URI: https://{VM-region}.login.microsoft.com
+ *      Fetched access token from host {VM-region}.login.microsoft.com. Endpoint https://{VM-region}.login.microsoft.com
+ *  On non-Azure VM:
+ *      [Region discovery] IMDS call failed...
+ *      [HttpManager] Sending request. Method: POST. URI: https://login.microsoftonline.com
+ *      Fetched access token from host login.microsoftonline.com. Endpoint https://login.microsoftonline.com...
+ * 
+ * Case 4: Acquire token with global, then regional 
+ *  Look for:
+ *      Global instance discovery
+ *      Token #1 request to and retrieved from a global endpoint
+ *      Region retrieved from the environment variable
+ *      Regional instance discovery
+ *      Token #2 request to and retrieved from a regional endpoint
+ * 
+ * Case 5: Acquire token with regional, then global 
+ *  Look for:
+ *      Region retrieved from the environment variable
+ *      Regional instance discovery
+ *      Token #1 request to and retrieved from a regional endpoint
+ *      Global instance discovery
+ *      Token #2 request to and retrieved from a global endpoint
+ * 
+ * Case 6: Acquire token twice in a row with regional (tests for double region appending regression)
+ *  Look for:
+ *      Region retrieved from the environment variable
+ *      Regional instance discovery
+ *      Token #1 request to and retrieved from a regional endpoint
+ *      Token #2 request to and retrieved from a regional endpoint
+ * 
+ * Case 7: Acquire token twice in a row with global
+ *  Look for:
+ *      Global instance discovery
+ *      Token #1 request to and retrieved from a global endpoint
+ *      Token #2 request to and retrieved from a global endpoint
+ *      
+ * Case 8: Regional with an invalid user-specified region.
+ *  Look for:
+ *      Retrieved region from the environment variable
+ *      Returns user-provided region
+ *      Sends request to a user-provided region (gateway forwards to global internally)
+ *      Token received from a user-provided region
+ * 
+ * General tips:
+ * - Run this app from an Azure VM to test the IMDS call
+ * - Make sure to reference the MSAL NuGet release package when testing
+ * - Make sure verbose and PII logging is enabled
+ * - Make sure the Lab certificate is installed
+ *    Sample PowerShell command: Import-PfxCertificate -FilePath "C:\cert\cert.pfx" -CertStoreLocation Cert:\CurrentUser\My
+ * - You can use Fiddler to verify the token endpoint
  **/
 namespace TestApp
 {
-    class Program
+    public class Program
     {
-        static string s_clientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
-#pragma warning disable UseAsyncSuffix // Use Async suffix
+        private const string s_environmentVarName = "REGION_NAME";
+        private const string s_region = "centralus";
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("AsyncUsage.CSharp.Naming", "UseAsyncSuffix:Use Async suffix", Justification = "Main method")]
         static async Task Main(string[] args)
-#pragma warning restore UseAsyncSuffix // Use Async suffix
         {
-            //Uncomment below line to test in dev env.
-            //Environment.SetEnvironmentVariable("REGION_NAME", "centralus");
-            X509Certificate2 certificate = ReadCertificate("97D8C9DB3C84874D0363DCA540778461B2291780");
+            while (true)
+            {
+                Console.Clear();
 
-            Console.WriteLine("=== Acquire token regional ===");
-            await AcquireTokenAsync(certificate).ConfigureAwait(false);
-            Console.WriteLine();
+                Console.WriteLine(@"
+    1: Regional with a valid user-specified region
+    2: Regional with environment variable
+    3: Regional with IMDS call (without environment variable, test in Azure VM)
+    4: Acquire token with global, then regional
+    5: Acquire token with regional, then global
+    6: Acquire token twice in a row with regional (tests for double region appending regression)
+    7: Acquire token twice in a row with global
+    8: Regional with an invalid user-specified region
+    0. Exit app
+    Enter your selection: ");
+                int.TryParse(Console.ReadLine(), out var menuSelection);
 
-            Console.WriteLine("=== Acquire token global ===");
-            await AcquireTokenAsync(certificate, false).ConfigureAwait(false);
-            Console.ReadLine();
+                try
+                {
+                    X509Certificate2 certificate = ReadCertificate();
+
+                    switch (menuSelection)
+                    {
+                        case 1: // Regional with a valid user-specified region
+                            await AcquireTokenAsync(certificate, region: "westus").ConfigureAwait(false);
+                            break;
+
+                        case 2: // Regional auto-detect with environment variable
+                            await AcquireTokenAsync(certificate, region: ConfidentialClientApplication.AttemptRegionDiscovery).ConfigureAwait(false);
+                            break;
+
+                        case 3: // Regional auto-detect with IMDS call (without environment variable, test in Azure VM)
+                            await AcquireTokenAsync(certificate, region: ConfidentialClientApplication.AttemptRegionDiscovery, setEnvVariable: false).ConfigureAwait(false);
+                            break;
+
+                        case 4: // Acquire token with global, then regional
+                            await AcquireTokenAsync(certificate, region: string.Empty).ConfigureAwait(false);
+                            await AcquireTokenAsync(certificate, region: ConfidentialClientApplication.AttemptRegionDiscovery).ConfigureAwait(false);
+                            break;
+
+                        case 5: // Acquire token with regional, then global
+                            await AcquireTokenAsync(certificate, region: ConfidentialClientApplication.AttemptRegionDiscovery).ConfigureAwait(false);
+                            await AcquireTokenAsync(certificate, region: string.Empty).ConfigureAwait(false);
+                            break;
+
+                        case 6: // Acquire token twice in a row with regional (tests for double region appending regression)
+                            await AcquireTokenAsync(certificate, region: ConfidentialClientApplication.AttemptRegionDiscovery).ConfigureAwait(false);
+                            await AcquireTokenAsync(certificate, region: ConfidentialClientApplication.AttemptRegionDiscovery).ConfigureAwait(false);
+                            break;
+
+                        case 7: // Acquire token twice in a row with global
+                            await AcquireTokenAsync(certificate, region: string.Empty).ConfigureAwait(false);
+                            await AcquireTokenAsync(certificate, region: string.Empty).ConfigureAwait(false);
+                            break;
+
+                        case 8: // Regional with an invalid user-specified region
+                            await AcquireTokenAsync(certificate, region: "invalidRegion").ConfigureAwait(false);
+                            break;
+
+                        case 0:
+                            return;
+
+                        default:
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log(LogLevel.Error, ex.Message, false);
+                    Log(LogLevel.Error, ex.StackTrace, false);
+                }
+
+                Console.WriteLine("\n\nHit 'ENTER' to exit...");
+                Console.ReadLine();
+            }
+        }
+
+        private static async Task AcquireTokenAsync(X509Certificate2 certificate, string region, bool setEnvVariable = true)
+        {
+            string clientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+
+            if (!string.IsNullOrEmpty(region) && setEnvVariable)
+            {
+                Environment.SetEnvironmentVariable(s_environmentVarName, s_region);
+            }
+
+            string[] scopes = new string[] { $"{clientId}/.default", };
+            Dictionary<string, string> dict = new Dictionary<string, string>
+            {
+                ["allowestsrnonmsi"] = "true"
+            };
+
+            var builder = ConfidentialClientApplicationBuilder.Create(clientId)
+                .WithAuthority("https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47", false)
+                .WithCertificate(certificate)
+                .WithLogging(Log, LogLevel.Verbose, true);
+
+            // Regional if region specified, global otherwise
+            if (!string.IsNullOrEmpty(region))
+            {
+                builder.WithAzureRegion(region);
+            }
+
+            var cca = builder.Build();
+
+            Console.WriteLine($"CCA created. Is regional:{region}, Set env var:{setEnvVariable}.");
+
+            AuthenticationResult result = await cca.AcquireTokenForClient(scopes)
+                .WithExtraQueryParameters(dict)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Console.WriteLine("Access token:" + result.AccessToken);
+
+            if (!string.IsNullOrEmpty(region) && setEnvVariable)
+            {
+                Environment.SetEnvironmentVariable(s_environmentVarName, null);
+            }
         }
 
         private static void Log(LogLevel level, string message, bool containsPii)
@@ -58,12 +216,10 @@ namespace TestApp
             Console.ResetColor();
         }
 
-        private static X509Certificate2 ReadCertificate(string thumbprint)
+        private static X509Certificate2 ReadCertificate()
         {
-            if (string.IsNullOrWhiteSpace(thumbprint))
-            {
-                throw new ArgumentException("certificateName should not be empty. Please set the CertificateName setting in the appsettings.json", "certificateName");
-            }
+            string thumbprint = "97D8C9DB3C84874D0363DCA540778461B2291780";
+
             X509Certificate2 cert = null;
 
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
@@ -81,32 +237,6 @@ namespace TestApp
                 cert = signingCert.OfType<X509Certificate2>().OrderByDescending(c => c.NotBefore).FirstOrDefault();
             }
             return cert;
-        }
-
-        private static async Task AcquireTokenAsync(X509Certificate2 certificate, bool withAzureRegion = true)
-        {
-            string[] scopes = new string[] { $"{s_clientId}/.default", };
-            Dictionary<string, string> dict = new Dictionary<string, string>
-            {
-                ["allowestsrnonmsi"] = "true"
-            };
-
-            var cca = ConfidentialClientApplicationBuilder.Create(s_clientId)
-                .WithAuthority("https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47")
-                .WithCertificate(certificate)
-                .WithExperimentalFeatures(true)
-                .WithLogging(Log, LogLevel.Info, true)
-                .Build();
-
-            Console.WriteLine("CCA created");
-
-            AuthenticationResult result = await cca.AcquireTokenForClient(scopes)
-            .WithPreferredAzureRegion(withAzureRegion, regionUsedIfAutoDetectFails: "centralus")
-            .WithExtraQueryParameters(dict)
-            .ExecuteAsync()
-            .ConfigureAwait(false);
-
-            Console.WriteLine("Access token:" + result.AccessToken);
         }
     }
 }

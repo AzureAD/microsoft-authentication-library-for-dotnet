@@ -76,10 +76,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public RequestContext RequestContext { get; }
 
         /// <summary>
-        /// Authority used by MSAL for most operations. After the /token call, the tenant ID is 
-        /// always known and TenantUpdatedCanonicalAuthority is created and used.
-        /// In Silent flows, the Authority cannot be unknown ("common" or "organizations") and 
-        /// a tenanted authority will always be used (if the tenant cannot be determined, IAccount.HomeTenantId is used).
+        /// Authority is the URI used by MSAL for communication and storage
+        /// During a request it can be updated: 
+        /// - with the preffered enviroment
+        /// - with actual tenant
         /// </summary>
         public Authority Authority { get; set; }
 

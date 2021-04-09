@@ -8,6 +8,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -29,11 +30,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         // HTTP Telemetry Constants
         private static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
-        private const string XClientCurrentTelemetryROPC = "3|1003,0,|,,0,,,,1";
-        private const string XClientCurrentTelemetryROPCFailure = "3|1003,0,|,,0,,,,1";
-        private const string XClientLastTelemetryROPC = "3|0|||";
-        private const string XClientLastTelemetryROPCFailure =
-            "3|0|1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|,";
+        private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheInfoTelemetry.None:D}|,,0,,,,1";
+        private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheInfoTelemetry.None:D}|,,0,,,,1";
+        private readonly string XClientLastTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|0|||";
+        private readonly string XClientLastTelemetryROPCFailure =
+            $"{TelemetryConstants.HttpTelemetrySchemaVersion}|0|1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|,";
         private const string ApiIdAndCorrelationIdSection =
             "1003,ad8c894a-557f-48c0-b045-c129590c344e";
         private const string InvalidGrantError = "invalid_grant";
@@ -296,7 +297,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 httpTelemetryRecorder.CheckSchemaVersion(csvCurrent);
 
                 Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
-                Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.ForceRefresh);
+                Assert.IsFalse(httpTelemetryRecorder.ForceRefresh);
                 Assert.AreEqual(XClientLastTelemetryROPC, csvPrevious);
             }
             else
@@ -311,7 +312,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
                 Assert.AreEqual(1, httpTelemetryRecorder.ErrorCode.Count());
                 Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.SilentCallSuccessfulCount);
-                Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.ForceRefresh);
+                Assert.IsFalse(httpTelemetryRecorder.ForceRefresh);
                 Assert.AreEqual(ApiIdAndCorrelationIdSection, httpTelemetryRecorder.ApiIdAndCorrelationIds.FirstOrDefault());
                 Assert.AreEqual(InvalidGrantError, httpTelemetryRecorder.ErrorCode.FirstOrDefault());
             }

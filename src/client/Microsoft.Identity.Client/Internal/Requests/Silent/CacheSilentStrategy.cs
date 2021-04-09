@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -11,7 +10,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.Internal.Requests.Silent
 {
@@ -40,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-            CacheRefresh cacheRefresh = CacheRefresh.None;
+            CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
 
             ThrowIfNoScopesOnB2C();
             ThrowIfCurrentBrokerAccount();
@@ -58,22 +56,22 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 }
                 else if (cachedAccessTokenItem == null)
                 {
-                    cacheRefresh = CacheRefresh.NoCachedAT;
+                    cacheInfoTelemetry = CacheInfoTelemetry.NoCachedAT;
                 } 
                 else
                 {
-                    cacheRefresh = CacheRefresh.RefreshIn;
+                    cacheInfoTelemetry = CacheInfoTelemetry.RefreshIn;
                 }
             }
             else
             {
-                cacheRefresh = CacheRefresh.ForceRefresh;
+                cacheInfoTelemetry = CacheInfoTelemetry.ForceRefresh;
                 logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set. ");
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh == null)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfoTelemetry.None)
             {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int)cacheRefresh;
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }
 
             // No AT or AT.RefreshOn > Now --> refresh the RT
@@ -140,7 +138,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 msalIdTokenItem,
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
-                TokenSource.Cache);
+                TokenSource.Cache,
+                AuthenticationRequestParameters.RequestContext.ApiEvent);
         }
 
         private void ThrowIfNoScopesOnB2C()

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -19,9 +20,9 @@ namespace Microsoft.Identity.Client.Instance
         private static readonly ISet<string> s_tenantlessTenantNames = new HashSet<string>(
           new[]
           {
-                "common",
-                "organizations",
-                "consumers"
+                Constants.CommonTenant,
+                Constants.OrganizationsTenant,
+                Constants.ConsumerTenant
           },
           StringComparer.OrdinalIgnoreCase);
 
@@ -31,6 +32,13 @@ namespace Microsoft.Identity.Client.Instance
         }
 
         internal override string TenantId { get; }
+
+        internal bool IsWorkAndSchoolOnly()
+        {
+            return !TenantId.Equals(Constants.CommonTenant) &&
+                  !TenantId.Equals(Constants.ConsumerTenant) &&
+                  !TenantId.Equals(Constants.MsaTenantId);
+        }
 
         internal bool IsCommonOrganizationsOrConsumersTenant()
         {

@@ -1378,8 +1378,8 @@ namespace Microsoft.Identity.Json.Serialization
         {
             // warning - this method use to cause errors with Intellitrace. Retest in VS Ultimate after changes
             IValueProvider valueProvider;
-
-#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS || MAC)
+            // UNITY flag based on https://github.com/jilleJr/Newtonsoft.Json-for-Unity
+#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS || MAC || UNITY)
             if (DynamicCodeGeneration)
             {
                 valueProvider = new DynamicValueProvider(member);
@@ -1388,7 +1388,7 @@ namespace Microsoft.Identity.Json.Serialization
             {
                 valueProvider = new ReflectionValueProvider(member);
             }
-#elif !PORTABLE40
+#elif !(PORTABLE40 || UNITY)
             valueProvider = new ExpressionValueProvider(member);
 #else
             valueProvider = new ReflectionValueProvider(member);

@@ -5,11 +5,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using System.Linq;
-using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -36,7 +35,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-            CacheRefresh cacheRefresh = CacheRefresh.None;
+            CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
+            MsalAccessTokenCacheItem msalAccessTokenItem = null;
+            var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             if (!_onBehalfOfParameters.ForceRefresh)
             {
@@ -45,8 +46,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // or new assertion has been passed. We should not use Refresh Token
                 // for the user because the new incoming token may have updated claims
                 // like MFA etc.
-                MsalAccessTokenCacheItem msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
-                if (msalAccessTokenItem != null)
+                msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                if (msalAccessTokenItem != null && !msalAccessTokenItem.NeedsRefresh())
                 {
                     var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
                     AuthenticationRequestParameters.RequestContext.Logger.Info(
@@ -59,24 +60,44 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         msalIdTokenItem,
                         AuthenticationRequestParameters.AuthenticationScheme,
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
-                        TokenSource.Cache);
+                        TokenSource.Cache,
+                        AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
-                else
-                {
-                    cacheRefresh = CacheRefresh.NoCachedAT;
-                }
+
+                cacheInfoTelemetry = (msalAccessTokenItem == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.RefreshIn;
             }
             else
             {
-                cacheRefresh = CacheRefresh.ForceRefresh;
+                logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
+                cacheInfoTelemetry = CacheInfoTelemetry.ForceRefresh;
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh == null)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfoTelemetry.None)
             {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheRefresh = (int)cacheRefresh;
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }
 
+            // No AT in the cache or AT needs to be refreshed
+            try
+            {
+                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (MsalServiceException e)
+            {
+                return HandleTokenRefreshError(e, msalAccessTokenItem);
+            }
+        }
+
+        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
+        {
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+            if (msalTokenResponse.ClientInfo is null &&
+                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs)
+            {
+                var logger = AuthenticationRequestParameters.RequestContext.Logger;
+                logger.Info("This is an on behalf of request for a service principal as no client info returned in the token response.");
+            }
+
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 

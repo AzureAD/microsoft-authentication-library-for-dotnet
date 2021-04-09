@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Desktop;
-using Microsoft.Identity.Client.MsaPassthrough;
 
 namespace NetDesktopWinForms
 {
@@ -72,11 +71,15 @@ namespace NetDesktopWinForms
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
                 .WithExperimentalFeatures(true)
-                .WithWindowsBroker(this.useBrokerChk.Checked)
+                .WithDesktopFeatures()
+                .WithBroker(this.useBrokerChk.Checked)
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
-                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
-                .WithMsaPassthrough(msaPt)
+                //.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
+                .WithWindowsBrokerOptions(new WindowsBrokerOptions() {
+                    ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
+                    MsaPassthrough = cbxMsaPt.Checked
+                })
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
@@ -244,6 +247,11 @@ namespace NetDesktopWinForms
             var scopes = GetScopes();
 
             var builder = pca.AcquireTokenInteractive(scopes)
+                .WithUseEmbeddedWebView(true)
+                .WithEmbeddedWebViewOptions(
+                new EmbeddedWebViewOptions() { 
+                    Title = "Hello world",                     
+                })
                 .WithParentActivityOrWindow(this.Handle);
 
 

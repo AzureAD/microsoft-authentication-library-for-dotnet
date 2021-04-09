@@ -59,15 +59,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _confidentialClientApplication.AppTokenCacheInternal);
 
-            if (clientParameters.AutoDetectRegion && requestContext.ServiceBundle.Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
-            {
-                throw new MsalClientException(MsalError.RegionDiscoveryNotEnabled, MsalErrorMessage.RegionDiscoveryNotAvailable);
-            }
-
+       
             requestParams.SendX5C = clientParameters.SendX5C;
-            requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion = clientParameters.AutoDetectRegion;
-            requestContext.ServiceBundle.Config.AuthorityInfo.RegionToUse = clientParameters.RegionToUse;
-            requestContext.ServiceBundle.Config.AuthorityInfo.FallbackToGlobal = clientParameters.FallbackToGlobal;
             
             var handler = new ClientCredentialRequest(
                 ServiceBundle,

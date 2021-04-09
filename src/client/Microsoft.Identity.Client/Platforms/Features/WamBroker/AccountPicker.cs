@@ -9,7 +9,10 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 using System.Runtime.InteropServices;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+
+#if !UAP10_0
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
+#endif
 
 #if NET5_WIN
 using Microsoft.Identity.Client.Platforms.net5win;
@@ -19,6 +22,9 @@ using Microsoft.Identity.Client.Platforms;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
+#if NET5_WIN
+    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
+#endif
     internal class AccountPicker : IAccountPicker
     {
         private readonly IntPtr _parentHandle;
@@ -134,8 +140,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         private void ShowPickerWithSplashScreenImpl()
         {
+            var win32Window = new 
+                Microsoft.Identity.Client.Platforms.Features.WamBroker.SplashScreen.Win32Window(_parentHandle);
 
-            using (var splash = new Microsoft.Identity.Client.Platforms.Features.WamBroker.win32.Splash())
+            using (var splash = new Microsoft.Identity.Client.Platforms.Features.WamBroker.win32.Splash(win32Window))
             {
                 splash.DialogResult = System.Windows.Forms.DialogResult.OK;
                 splash.Shown += async (s, e) =>
@@ -145,11 +153,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     splash.Close();
                 };
 
-                var win32Window = new Microsoft.Identity.Client.Platforms.Features.WamBroker.SplashScreen.Win32Window(_parentHandle);
-
                 try
                 {
-                    splash.ShowDialog(win32Window);
+                    splash.ShowDialog();
                 }
                 catch (InvalidOperationException ex)
                 {

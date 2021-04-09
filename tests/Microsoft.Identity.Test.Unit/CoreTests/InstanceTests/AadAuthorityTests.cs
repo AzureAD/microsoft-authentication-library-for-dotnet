@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
+
         [TestMethod]
         public void FailedValidationTest()
         {
@@ -109,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 }
             }
         }
-       
+
 
         [TestMethod]
         public void CanonicalAuthorityInitTest()
@@ -163,13 +164,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void MalformedAuthorityInitTest()
         {
             PublicClientApplication publicClient = null;
-            var expectedAuthority = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/", TestConstants.TenantId, "/");
+            var expectedAuthority = string.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/", TestConstants.TenantId, "/");
 
             //Check bad URI format
             var host = String.Concat("test", TestConstants.ProductionPrefNetworkEnvironment, "/");
             var fullAuthority = String.Concat(host, TestConstants.TenantId);
 
-            AssertException.Throws<UriFormatException>(() =>
+            AssertException.Throws<ArgumentException>(() =>
             {
                 publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                              .WithAuthority(fullAuthority)
@@ -177,8 +178,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             });
 
             //Check empty path segments
-            host = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/");
-            fullAuthority = String.Concat(host, TestConstants.TenantId, "//");
+            host = string.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/");
+            fullAuthority = string.Concat(host, TestConstants.TenantId, "//");
 
             publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(host, new Guid(TestConstants.TenantId))
@@ -187,13 +188,37 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
 
             //Check additional path segments
-            fullAuthority = String.Concat(host, TestConstants.TenantId, "/ABCD!@#$TEST//");
+            fullAuthority = string.Concat(host, TestConstants.TenantId, "/ABCD!@#$TEST//");
 
             publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(new Uri(fullAuthority))
                                                          .BuildConcrete();
 
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
+        }
+
+        [TestMethod]
+        public void CheckConsistentAuthorityTypeUriAndString()
+        {
+            ValidateAuthorityType(TestConstants.AadAuthorityWithTestTenantId, AuthorityType.Aad);
+            ValidateAuthorityType(TestConstants.AuthorityCommonTenant, AuthorityType.Aad);
+            ValidateAuthorityType(TestConstants.B2CAuthority, AuthorityType.B2C);
+            ValidateAuthorityType(TestConstants.ADFSAuthority, AuthorityType.Adfs);
+        }
+
+        private static void ValidateAuthorityType(string inputAuthority, AuthorityType expectedAuthorityType)
+        {
+            var pca1 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                     .WithAuthority(new Uri(inputAuthority)).BuildConcrete();
+            var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                   .WithAuthority(inputAuthority).BuildConcrete();
+
+            Assert.AreEqual(
+                expectedAuthorityType,
+                (pca1.AppConfig as ApplicationConfiguration).AuthorityInfo.AuthorityType);
+            Assert.AreEqual(
+                expectedAuthorityType,
+                (pca2.AppConfig as ApplicationConfiguration).AuthorityInfo.AuthorityType);
         }
 
         [TestMethod]
@@ -241,8 +266,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 //Ensure that the PublicClientApplication init does not remove the port from the authority
                 Assert.AreEqual(customPortAuthority, app.Authority);
 
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
+                
+                app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(customPortAuthority);

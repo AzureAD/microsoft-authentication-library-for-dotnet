@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             return new InMemoryTokenCacheAccessor(Logger);
         }
 
-        protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
+        protected override IWebUIFactory CreateWebUiFactory() => new NetStandard13WebUiFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetStandard13CryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             return Task.FromResult(0);
         }
 
-        public override bool UseEmbeddedWebViewDefault => false;
+        public override IDeviceAuthManager CreateDeviceAuthManager() => new NetStandardDeviceAuthManager();
 
     }
 }

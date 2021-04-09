@@ -29,10 +29,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
         }
 
-        public override bool IsSystemWebViewAvailable => true;
-
-        public override bool UseEmbeddedWebViewDefault => false;
-        
         public override Task<string> GetUserPrincipalNameAsync()
         {
             return Task.FromResult(string.Empty);

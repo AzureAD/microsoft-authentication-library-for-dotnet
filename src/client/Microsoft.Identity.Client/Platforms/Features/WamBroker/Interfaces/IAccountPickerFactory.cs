@@ -17,6 +17,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             bool isMsaPassthrough);
     }
 
+#if NET5_WIN
+    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
+#endif
     internal class AccountPickerFactory : IAccountPickerFactory
     {
         public IAccountPicker Create(IntPtr parentHandle, ICoreLogger logger, SynchronizationContext synchronizationContext, Authority authority, bool isMsaPassthrough)

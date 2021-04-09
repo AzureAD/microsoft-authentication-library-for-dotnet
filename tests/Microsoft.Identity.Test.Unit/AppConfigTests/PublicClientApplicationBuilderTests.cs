@@ -6,7 +6,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
+#if !NET5_WIN
+using Microsoft.Identity.Client.Desktop;
+#endif
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -524,8 +528,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(ex is InvalidOperationException);
-                Assert.AreEqual(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments, ex.Message);
+                Assert.IsTrue(ex is ArgumentException);
+                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.AuthorityUriInvalidPath));
             }
         }
 
@@ -589,5 +593,37 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             CollectionAssert.AreEquivalent(new string[] { "cp1", "cp2" }, app.AppConfig.ClientCapabilities.ToList());
         }
+
+#if NET5_WIN
+        [TestMethod]
+        public void IsBrokerAvailable_net5()
+        {
+            var appBuilder = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId);
+
+            Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), appBuilder.IsBrokerAvailable());
+        }
+#endif
+
+#if DESKTOP || NET_CORE
+        [TestMethod]
+        public void IsBrokerAvailable_OldDotNet()
+        {
+            var builder1 = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId);
+                    
+
+            // broker is not available out of the box
+            Assert.AreEqual(false, builder1.IsBrokerAvailable());
+
+            var builder2 = PublicClientApplicationBuilder
+                   .Create(TestConstants.ClientId)
+                   .WithDesktopFeatures();
+                   
+
+            // broker is not available out of the box
+            Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), builder2.IsBrokerAvailable());
+        }
+#endif
     }
 }

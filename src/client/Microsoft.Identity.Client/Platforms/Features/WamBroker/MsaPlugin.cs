@@ -18,6 +18,9 @@ using Windows.Security.Credentials;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
+#if NET5_WIN
+    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
+#endif
     internal class MsaPlugin : IWamPlugin
     {
         private const string MsaErrorCode = "wam_msa_error";
@@ -42,7 +45,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             bool setLoginHint = false;
             bool addNewAccount = false;
 
-            string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters.Account?.Username;
+            string loginHint = !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint) ?
+                  authenticationRequestParameters.LoginHint :
+                  authenticationRequestParameters.Account?.Username;
 
             if (isInteractive && !isAccountInWam)
             {

@@ -92,6 +92,9 @@ namespace NetFx
             Console.ResetColor();
             Console.BackgroundColor = ConsoleColor.Black;
             var pca = CreatePca();
+
+           
+
             await RunConsoleAppLogicAsync(pca).ConfigureAwait(false);
         }
 
@@ -123,9 +126,12 @@ namespace NetFx
             var builder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
+#if NET47
+                    .WithDesktopFeatures()
+#endif
                             .WithLogging(Log, LogLevel.Verbose, true);
-                            //.WithClientCapabilities(new[] { "llt" })
-                            //.WithRedirectUri("http://localhost"); // required for DefaultOsBrowser
+
+            Console.WriteLine($"IsBrokerAvailable: {builder.IsBrokerAvailable()}");
 
             if (s_useBroker)
             {
@@ -136,9 +142,7 @@ namespace NetFx
                     .WithParentActivityOrWindow(c)
                     .WithExperimentalFeatures()
                     
-#if NET47
-                    .WithWindowsBroker(true)
-#endif
+
                     .WithBroker(true);
             }
 
@@ -178,6 +182,12 @@ namespace NetFx
             {
                 Console.Clear();
 
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine($"" +
+                     $"IsDesktopSession: {pca.IsUserInteractive()}, " +
+                     $"IsEmbeddedWebViewAvailable: {pca.IsEmbeddedWebViewAvailable()} " +
+                     $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}");
+                     
                 Console.WriteLine("Authority: " + GetAuthority());
                 Console.WriteLine("Use WAM: " + s_useBroker);
                 await DisplayAccountsAsync(pca).ConfigureAwait(false);
@@ -203,8 +213,6 @@ namespace NetFx
                         x. Exit app
                     Enter your Selection: ");
                 char.TryParse(Console.ReadLine(), out var selection);
-
-                Task<AuthenticationResult> authTask = null;
 
                 try
                 {

@@ -17,10 +17,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
     /// </summary>
     internal interface IPlatformProxy
     {
-        bool IsSystemWebViewAvailable { get; }
-
-        bool UseEmbeddedWebViewDefault { get; }
-
         /// <summary>
         /// Gets the device model. On some TFMs this is not returned for security reasonons.
         /// </summary>
@@ -72,7 +68,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         IPlatformLogger PlatformLogger { get; }
 
-        IWebUIFactory GetWebUiFactory();
+        IWebUIFactory GetWebUiFactory(ApplicationConfiguration appConfig);
 
         IPoPCryptoProvider GetDefaultPoPCryptoProvider();
 
@@ -81,7 +77,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         string GetDeviceNetworkState();
         int GetMatsOsPlatformCode();
         string GetMatsOsPlatform();
-        void /* for test */ SetWebUiFactory(IWebUIFactory webUiFactory);
 
         IFeatureFlags GetFeatureFlags();
 
