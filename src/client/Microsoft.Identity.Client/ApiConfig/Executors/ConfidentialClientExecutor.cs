@@ -118,7 +118,16 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestParameters,
                 authorizationRequestUrlParameters.ToInteractiveParameters());
 
-            return handler.GetAuthorizationUriWithoutPkce();
+            if (authorizationRequestUrlParameters.CodeVerifier != null)
+            {
+                return handler.GetAuthorizationUriWithPkce(
+                    authorizationRequestUrlParameters.CodeVerifier,
+                    authorizationRequestUrlParameters.CodeChallengeMethod);
+            }
+            else
+            {
+                return handler.GetAuthorizationUriWithoutPkce();
+            }
         }
     }
 }

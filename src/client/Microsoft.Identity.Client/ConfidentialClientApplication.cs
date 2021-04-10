@@ -71,10 +71,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string authorizationCode)
         {
-            return AcquireTokenByAuthorizationCodeParameterBuilder.Create(
-                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
-                scopes,
-                authorizationCode);
+            return AcquireTokenByAuthorizationCode(scopes, authorizationCode, null);
         }
 
         /// <summary>
@@ -164,6 +161,8 @@ namespace Microsoft.Identity.Client
         /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
         /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithCodeChallenge(string)"/>
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithCodeChallengeMethod(string)"/>
         /// </remarks>
         public GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(
             IEnumerable<string> scopes)

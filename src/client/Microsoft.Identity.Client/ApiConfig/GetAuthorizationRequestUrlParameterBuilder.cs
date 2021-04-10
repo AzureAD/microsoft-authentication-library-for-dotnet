@@ -84,6 +84,24 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Used to secure authorization code grant via Proof of Key for Code Exchange (PKCE).
+        /// For more information, see the PKCE RCF:
+        /// https://tools.ietf.org/html/rfc7636
+        /// </summary>
+        /// <param name="codeVerifier">high-entropy cryptographic random STRING.</param>
+        /// <param name="codeChallengeMethod">The method used to encode the code verifier for the code challenge parameter. Can be one
+        /// of plain or S256. If excluded, code challenge is assumed to be plaintext.</param>
+        /// <returns></returns>
+        public GetAuthorizationRequestUrlParameterBuilder WithPkce(
+            string codeVerifier,
+            CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.Plain)
+        {
+            Parameters.CodeVerifier = codeVerifier ?? throw new ArgumentNullException(nameof(codeVerifier));
+            Parameters.CodeChallengeMethod = codeChallengeMethod;
+            return this;
+        }
+
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
@@ -121,5 +139,20 @@ namespace Microsoft.Identity.Client
         {
             return ApiEvent.ApiIds.GetAuthorizationRequestUrl;
         }
+    }
+
+    /// <summary>
+    /// Enum values for CodeChallengeMethod
+    /// </summary>
+    public enum CodeChallengeMethod
+    {
+        /// <summary>
+        /// Default.
+        /// </summary>
+        Plain = 0,
+        /// <summary>
+        /// S256.
+        /// </summary>
+        S256 = 1,
     }
 }
