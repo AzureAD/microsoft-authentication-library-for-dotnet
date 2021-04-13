@@ -31,13 +31,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
         private static bool IsWin10OrServerEquivalentInternal()
         {
-            string winVersion = GetWindowsVersionString();
-
-            if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase) ||
-                winVersion.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase) ||
-                winVersion.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
+            if (IsWindows())
             {
-                return true;
+                string winVersion = GetWindowsVersionString();
+
+                if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase) ||
+                    winVersion.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase) ||
+                    winVersion.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
             }
 
             return false;
@@ -50,11 +53,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
         private static bool IsWin10Internal()
         {
-            string winVersion = GetWindowsVersionString();
-
-            if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase))
+            if (IsWindows())
             {
-                return true;
+                string winVersion = GetWindowsVersionString();
+
+                if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
             }
 
             return false;
