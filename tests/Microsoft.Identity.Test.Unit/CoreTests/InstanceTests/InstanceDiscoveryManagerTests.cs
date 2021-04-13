@@ -53,7 +53,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                _harness.ServiceBundle.MatsTelemetryManager,
                 false,
                 null,
                 null,
@@ -89,14 +88,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Arrange
             INetworkMetadataProvider networkMetadataProvider = new NetworkMetadataProvider(
                 Substitute.For<IHttpManager>(),
-                Substitute.For<IMatsTelemetryManager>(),
                 _networkCacheMetadataProvider);
 
             _networkCacheMetadataProvider.GetMetadata("some_env.com", Arg.Any<ICoreLogger>()).Returns(_expectedResult);
 
             _discoveryManager = new InstanceDiscoveryManager(
               _harness.HttpManager,
-              _harness.ServiceBundle.MatsTelemetryManager,
               false,
               null,
               null,
@@ -228,7 +225,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Arrange
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                _harness.ServiceBundle.MatsTelemetryManager,
                 false,
                 null,
                 null,
@@ -267,7 +263,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Arrange
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                _harness.ServiceBundle.MatsTelemetryManager,
                 false,
                 _userMetadataProvider,
                 null,
@@ -308,7 +303,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                _harness.ServiceBundle.MatsTelemetryManager,
                 false,
                 null,
                 customDiscoveryEndpoint,

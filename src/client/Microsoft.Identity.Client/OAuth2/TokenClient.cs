@@ -39,8 +39,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             _oAuth2Client = new OAuth2Client(
                _serviceBundle.DefaultLogger,
-               _serviceBundle.HttpManager,
-               _serviceBundle.MatsTelemetryManager);
+               _serviceBundle.HttpManager);
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestAsync(
