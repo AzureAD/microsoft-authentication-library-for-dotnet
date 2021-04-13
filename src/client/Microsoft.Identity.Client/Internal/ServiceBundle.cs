@@ -54,10 +54,10 @@ namespace Microsoft.Identity.Client.Internal
 
             InstanceDiscoveryManager = new InstanceDiscoveryManager(
                 HttpManager,
-                MatsTelemetryManager,
                 shouldClearCaches,
                 config.CustomInstanceDiscoveryMetadata,
                 config.CustomInstanceDiscoveryMetadataUri);
+
 
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             ThrottlingManager = SingletonThrottlingManager.GetInstance();

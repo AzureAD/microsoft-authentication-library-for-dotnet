@@ -30,7 +30,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal class InstanceDiscoveryManager : IInstanceDiscoveryManager
     {
         private readonly IHttpManager _httpManager;
-        private readonly IMatsTelemetryManager _telemetryManager;
 
         private readonly IUserMetadataProvider _userMetadataProvider;
         private readonly IKnownMetadataProvider _knownMetadataProvider;
@@ -40,13 +39,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public InstanceDiscoveryManager(
           IHttpManager httpManager,
-          IMatsTelemetryManager telemetryManager,
           bool /* for test */ shouldClearCaches,
           InstanceDiscoveryResponse userProvidedInstanceDiscoveryResponse = null,
           Uri userProvidedInstanceDiscoveryUri = null) :
             this(
-                httpManager,
-                telemetryManager,
+                httpManager,                
                 shouldClearCaches,
                 userProvidedInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProvidedInstanceDiscoveryResponse) : null,
                 userProvidedInstanceDiscoveryUri,
@@ -56,7 +53,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public /* public for test */ InstanceDiscoveryManager(
             IHttpManager httpManager,
-            IMatsTelemetryManager telemetryManager,
             bool shouldClearCaches,
             IUserMetadataProvider userMetadataProvider = null,
             Uri userProvidedInstanceDiscoveryUri = null,
@@ -66,7 +62,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             IRegionDiscoveryProvider regionDiscoveryProvider = null)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
-            _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
 
             _userMetadataProvider = userMetadataProvider;
             _knownMetadataProvider = knownMetadataProvider ?? new KnownMetadataProvider();
@@ -75,7 +70,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             _networkMetadataProvider = networkMetadataProvider ??
                 new NetworkMetadataProvider(
                     _httpManager,
-                    _telemetryManager,
                     _networkCacheMetadataProvider,
                     userProvidedInstanceDiscoveryUri);
 
