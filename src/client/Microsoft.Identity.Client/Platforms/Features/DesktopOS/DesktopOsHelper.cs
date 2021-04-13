@@ -22,8 +22,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
         public static bool IsWindows()
         {
+
 #if DESKTOP
             return Environment.OSVersion.Platform == PlatformID.Win32NT;
+#elif ANDROID || iOS
+            return false;
 #else
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 #endif
@@ -84,7 +87,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             return OSInfo;
 #else
             return RuntimeInformation.OSDescription;           
-#endif     
+#endif
         }
 
         public static string GetWindowsVersionString()
