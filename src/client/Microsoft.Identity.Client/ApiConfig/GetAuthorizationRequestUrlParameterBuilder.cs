@@ -89,15 +89,15 @@ namespace Microsoft.Identity.Client
         /// For more information, see the PKCE RCF:
         /// https://tools.ietf.org/html/rfc7636
         /// </summary>
-        /// <param name="codeVerifier">high-entropy cryptographic random STRING.</param>
+        /// <param name="codeVerifier">High-entropy cryptographic random STRING. If null, MSAL.NET will generate it.</param>
         /// <param name="codeChallengeMethod">The method used to encode the code verifier for the code challenge parameter. Can be one
         /// of plain or S256. If excluded, code challenge is assumed to be plaintext.</param>
         /// <returns></returns>
         public GetAuthorizationRequestUrlParameterBuilder WithPkce(
-            string codeVerifier,
+            string codeVerifier = null,
             CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.Plain)
         {
-            Parameters.CodeVerifier = codeVerifier ?? throw new ArgumentNullException(nameof(codeVerifier));
+            Parameters.CodeVerifier = codeVerifier ?? ServiceBundle.PlatformProxy.CryptographyManager.GenerateCodeVerifier();
             Parameters.CodeChallengeMethod = codeChallengeMethod;
             return this;
         }
