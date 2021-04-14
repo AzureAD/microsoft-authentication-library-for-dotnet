@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         #region Authority
 
-        public AuthorityManager AuthorityManager { get; set; } // todo ... read-only?
+        public AuthorityManager AuthorityManager { get; set; } 
 
         /// <summary>
         /// Authority is the URI used by MSAL for communication and storage

@@ -172,6 +172,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 // Validate Authority exception
                 if (ex.ErrorCode == MsalError.InvalidInstance)
                 {
+                    requestContext.Logger.Error("[Instance Discovery] Instance discovery failed - invalid instance!");
                     throw;
                 }
 
