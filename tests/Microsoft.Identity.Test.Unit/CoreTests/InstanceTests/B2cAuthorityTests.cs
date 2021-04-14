@@ -28,12 +28,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
 
-                var resolver = new AuthorityEndpointResolutionManager(serviceBundle);
-                var endpoints = resolver.ResolveEndpointsAsync(
-                    instance.AuthorityInfo,
+                var resolver = new AuthorityResolutionManager(serviceBundle);
+                var endpoints = resolver.ResolveEndpoints(
+                    instance,
                     null,
-                    new RequestContext(serviceBundle, Guid.NewGuid()))
-                    .GetAwaiter().GetResult();
+                    new RequestContext(serviceBundle, Guid.NewGuid()));
                 Assert.Fail("test should have failed");
             }
             catch (Exception exc)
@@ -77,12 +76,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/");
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
-                var resolver = new AuthorityEndpointResolutionManager(serviceBundle);
-                var endpoints = resolver.ResolveEndpointsAsync(
-                    instance.AuthorityInfo,
+                var resolver = new AuthorityResolutionManager(serviceBundle);
+                var endpoints = resolver.ResolveEndpoints(
+                    instance,
                     null,
-                    new RequestContext(serviceBundle, Guid.NewGuid()))
-                    .GetAwaiter().GetResult();
+                    new RequestContext(serviceBundle, Guid.NewGuid()));
+                    
 
                 Assert.AreEqual(
                     "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/authorize",
@@ -90,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(
                     "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token",
                     endpoints.TokenEndpoint);
-                Assert.AreEqual("https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token", 
+                Assert.AreEqual("https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token",
                     endpoints.SelfSignedJwtAudience);
             }
         }
@@ -116,12 +115,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
 
-                var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
-                var endpoints = resolver.ResolveEndpointsAsync(
-                    instance.AuthorityInfo,
+                var resolver = new AuthorityResolutionManager(harness.ServiceBundle);
+                var endpoints = resolver.ResolveEndpoints(
+                    instance,
                     null,
-                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
-                    .GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()));
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/authorize",

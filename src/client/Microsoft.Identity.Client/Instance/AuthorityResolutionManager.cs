@@ -3,37 +3,70 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance
 {
     /// <summary>
-    /// Responsible for figuring out authority endpoints
+    /// Responsible for figuring out authority endpoints and for validation
     /// </summary>
-    internal class AuthorityEndpointResolutionManager : IAuthorityEndpointResolutionManager
+    internal class AuthorityResolutionManager
+        : IAuthorityResolutionManager
     {
         private static readonly ConcurrentDictionary<string, AuthorityEndpointCacheEntry> s_endpointCacheEntries =
             new ConcurrentDictionary<string, AuthorityEndpointCacheEntry>();
 
-        private readonly IServiceBundle _serviceBundle;
+        private static readonly ConcurrentHashSet<string> s_validatedEnvironments =
+            new ConcurrentHashSet<string>();
 
-        public AuthorityEndpointResolutionManager(IServiceBundle serviceBundle, bool shouldClearCache = true)
+        private readonly IServiceBundle _serviceBundle;
+        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+
+        public AuthorityResolutionManager(IServiceBundle serviceBundle, bool shouldClearCache = true)
         {
             _serviceBundle = serviceBundle;
             if (shouldClearCache)
             {
                 s_endpointCacheEntries.Clear();
+                s_validatedEnvironments.Clear();
             }
         }
 
-        public async Task<AuthorityEndpoints> ResolveEndpointsAsync(
-            AuthorityInfo authorityInfo,
+        public async Task ValidateAuthorityAsync(Authority authority, RequestContext context)
+        {
+            if (!s_validatedEnvironments.Contains(authority.AuthorityInfo.Host))
+            {
+                await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
+                {
+                    try
+                    {
+                        if (!s_validatedEnvironments.Contains(authority.AuthorityInfo.CanonicalAuthority))
+                        {
+
+                            // validate the original authority, as the resolved authority might be regionalized and we cannot validate regionalized authorities.
+                            var validator = AuthorityValidatorFactory.Create(authority.AuthorityInfo, _serviceBundle);
+                            await validator.ValidateAuthorityAsync(authority.AuthorityInfo, context).ConfigureAwait(false);
+                            s_validatedEnvironments.Add(authority.AuthorityInfo.Host);
+                        }
+                    }
+                    finally
+                    {
+                        _semaphoreSlim.Release();
+                    }
+                }
+            }
+        }
+
+        public AuthorityEndpoints ResolveEndpoints(
+            Authority authority,
             string userPrincipalName,
             RequestContext requestContext)
         {
-            if (TryGetCacheValue(authorityInfo, userPrincipalName, out var endpoints))
+            if (TryGetCacheValue(authority.AuthorityInfo, userPrincipalName, out var endpoints))
             {
                 requestContext.Logger.Info(LogMessages.ResolvingAuthorityEndpointsTrue);
                 return endpoints;
@@ -41,16 +74,8 @@ namespace Microsoft.Identity.Client.Instance
 
             requestContext.Logger.Info(LogMessages.ResolvingAuthorityEndpointsFalse);
 
-            var validator = AuthorityValidatorFactory.Create(authorityInfo, _serviceBundle);
-
-            // TODO: move this away from here?
-            await validator.ValidateAuthorityAsync(authorityInfo, requestContext).ConfigureAwait(false);
-
-            //TODO: stop using AuthorityInfo on its own
-            var authority = Authority.CreateAuthority(authorityInfo);
-
             endpoints = authority.GetHardcodedEndpoints();
-            Add(authorityInfo, userPrincipalName, endpoints);
+            Add(authority.AuthorityInfo, userPrincipalName, endpoints);
             return endpoints;
         }
 
@@ -103,6 +128,8 @@ namespace Microsoft.Identity.Client.Instance
 
             s_endpointCacheEntries.TryAdd(authorityInfo.CanonicalAuthority, updatedCacheEntry);
         }
+
+     
 
         private class AuthorityEndpointCacheEntry
         {

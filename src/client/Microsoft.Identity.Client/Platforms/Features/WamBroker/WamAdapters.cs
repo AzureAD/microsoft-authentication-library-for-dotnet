@@ -20,11 +20,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         internal static void AddMsalParamsToRequest(
           AuthenticationRequestParameters authenticationRequestParameters,
           WebTokenRequest webTokenRequest,
-          string overridentAuthority = null)
+          string overridenAuthority = null)
         {
             AddExtraParamsToRequest(webTokenRequest, authenticationRequestParameters.ExtraQueryParameters);
-            string authority = overridentAuthority ??
-                 authenticationRequestParameters.UserConfiguredAuthority.AuthorityInfo.CanonicalAuthority;
+            string authority = overridenAuthority ??
+                 authenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority;
             bool validate = authenticationRequestParameters.AuthorityInfo.ValidateAuthority;
             AddAuthorityParamToRequest(authority, validate, webTokenRequest); ;
         }

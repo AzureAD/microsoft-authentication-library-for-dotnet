@@ -13,6 +13,8 @@ using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
+   
+
     /// <summary>
     /// Priority order of metadata providers: 
     /// 

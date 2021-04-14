@@ -24,31 +24,5 @@ namespace Microsoft.Identity.Client.Instance
         public string SelfSignedJwtAudience { get; }
         public string DeviceCodeEndpoint { get; }
 
-        public static async Task UpdateAuthorityEndpointsAsync(
-            AuthenticationRequestParameters requestParameters)
-        {
-            // This will make a network call unless instance discovery is cached, but this ok
-            // GetAccounts and AcquireTokenSilent do not need this
-            await UpdateAuthorityWithPreferredNetworkHostAsync(requestParameters).ConfigureAwait(false);
-
-            requestParameters.Endpoints = await 
-                requestParameters.RequestContext.ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpointsAsync(
-                    requestParameters.AuthorityInfo,
-                    requestParameters.LoginHint,
-                    requestParameters.RequestContext).ConfigureAwait(false);
-        }
-
-        private async static Task UpdateAuthorityWithPreferredNetworkHostAsync(AuthenticationRequestParameters requestParameters)
-        {
-            InstanceDiscoveryMetadataEntry metadata = await
-                requestParameters.RequestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                    requestParameters.AuthorityInfo.CanonicalAuthority,
-                    requestParameters.RequestContext)
-                .ConfigureAwait(false);
-
-            requestParameters.Authority = Authority.CreateAuthorityWithEnvironment(
-                    requestParameters.AuthorityInfo,
-                    metadata.PreferredNetwork);
-        }
     }
 }

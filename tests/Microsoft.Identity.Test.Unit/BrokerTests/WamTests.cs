@@ -135,10 +135,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
                 var extraQP = new Dictionary<string, string>() { { "extraQp1", "extraVal1" }, { "instance_aware", "true" } };
                 var requestParams = harness.CreateAuthenticationRequestParameters(
-                    TestConstants.AuthorityHomeTenant,
+                    "https://login.microsoftonline.com/organizations",
                     extraQueryParameters: extraQP,
-                    validateAuthority: true); // AAD                
-                requestParams.UserConfiguredAuthority = Authority.CreateAuthority("https://login.microsoftonline.com/organizations");
+                    validateAuthority: true); // AAD
 
                 requestParams.Account = new Account(
                     $"{TestConstants.Uid}.{TestConstants.Utid}",

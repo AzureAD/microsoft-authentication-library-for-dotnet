@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.UI;
 using System.Threading;
 using System.Web;
 using Microsoft.Identity.Client.Internal;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
@@ -44,12 +45,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
 
-                var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
-                var endpoints = resolver.ResolveEndpointsAsync(
-                    instance.AuthorityInfo,
+                var resolver = new AuthorityResolutionManager(harness.ServiceBundle);
+                var endpoints = resolver.ResolveEndpoints(
+                    instance,
                     null,
-                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()));
 
                 Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/authorize", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", endpoints.TokenEndpoint);
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
 
         [TestMethod]
-        public void FailedValidationTest()
+        public async Task FailedValidationTestAsync()
         {
             using (var harness = CreateTestHarness())
             {
@@ -94,13 +94,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority, validateAuthority: true);
                 try
                 {
-                    var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
-                    var endpoints = resolver.ResolveEndpointsAsync(
-                        instance.AuthorityInfo,
-                        null,
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
-                        .ConfigureAwait(false).GetAwaiter().GetResult();
+                    var resolver = new AuthorityResolutionManager(harness.ServiceBundle);
 
+                    await resolver.ValidateAuthorityAsync(
+                        instance,
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid())).ConfigureAwait(false);
                     Assert.Fail("validation should have failed here");
                 }
                 catch (Exception exc)
@@ -266,7 +264,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 //Ensure that the PublicClientApplication init does not remove the port from the authority
                 Assert.AreEqual(customPortAuthority, app.Authority);
 
-                
+
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 

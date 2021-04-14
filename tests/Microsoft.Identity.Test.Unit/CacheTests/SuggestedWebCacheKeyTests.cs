@@ -2,6 +2,7 @@ using System;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -27,17 +28,23 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Arrange
             var appTokenCache = new TokenCache(this._serviceBundle, isApplicationTokenCache: true);
             var requestContext = new RequestContext(this._serviceBundle , Guid.NewGuid());
-            requestContext.ServiceBundle.Config.AuthorityInfo = 
-                AuthorityInfo.FromAuthorityUri(TestConstants.ADFSAuthority, true);
+            var authority = Authority.CreateAuthority(TestConstants.ADFSAuthority, true);
+
+            requestContext.ServiceBundle.Config.AuthorityInfo = authority.AuthorityInfo;
+                
+
 
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {
                 ApiId = ApiEvent.ApiIds.AcquireTokenForClient,                
             };
+
             var parameters = new AuthenticationRequestParameters(
                 this._serviceBundle,
                 appTokenCache,
-                acquireTokenCommonParameters, requestContext);
+                acquireTokenCommonParameters, 
+                requestContext,
+                authority);
 
 
             // Act
@@ -66,7 +73,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var parameters = new AuthenticationRequestParameters(
                 this._serviceBundle,
                 appTokenCache,
-                acquireTokenCommonParameters, requestContext);
+                acquireTokenCommonParameters, 
+                requestContext, 
+                Authority.CreateAuthority(tenantAuthority));
 
 
             // Act

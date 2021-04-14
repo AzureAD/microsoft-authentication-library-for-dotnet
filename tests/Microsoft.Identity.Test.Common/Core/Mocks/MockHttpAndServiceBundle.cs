@@ -63,14 +63,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ApiId = apiId
             };
 
-            AuthenticationRequestParameters authenticationRequestParameters = new AuthenticationRequestParameters(
-                ServiceBundle,
-                tokenCache,
-                commonParameters,
-                new RequestContext(ServiceBundle, Guid.NewGuid()))
+            var authorityObj = Authority.CreateAuthority(authority, validateAuthority);
+            var requestContext = new RequestContext(ServiceBundle, Guid.NewGuid());
+            AuthenticationRequestParameters authenticationRequestParameters = 
+                new AuthenticationRequestParameters(
+                    ServiceBundle,
+                    tokenCache,
+                    commonParameters,
+                    requestContext, 
+                    authorityObj)
             {
                 Account = account,
-                Authority = Authority.CreateAuthority(authority, validateAuthority)
             };
 
             authenticationRequestParameters.RequestContext.ApiEvent = new ApiEvent(

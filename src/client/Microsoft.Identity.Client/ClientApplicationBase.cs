@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 
 namespace Microsoft.Identity.Client
@@ -76,11 +77,16 @@ namespace Microsoft.Identity.Client
             RequestContext requestContext,
             ITokenCacheInternal cache)
         {
+            var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
+               requestContext.ServiceBundle.Config.AuthorityInfo,
+               commonParameters.AuthorityOverride);
+
             return new AuthenticationRequestParameters(
                 ServiceBundle,
                 cache,
                 commonParameters,
-                requestContext);
+                requestContext,
+                authority);
         }
 
 #region Accounts
@@ -149,11 +155,16 @@ namespace Microsoft.Identity.Client
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
 
+            var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
+              requestContext.ServiceBundle.Config.AuthorityInfo,
+              null);
+
             var authParameters = new AuthenticationRequestParameters(
                    ServiceBundle,
                    UserTokenCacheInternal,
                    new AcquireTokenCommonParameters() { ApiId = apiId },
                    requestContext,
+                   authority,
                    homeAccountIdFilter);
 
             // a simple session consisting of a single call
