@@ -23,12 +23,10 @@ namespace Microsoft.Identity.Client.Instance
         private static readonly ConcurrentHashSet<string> s_validatedEnvironments =
             new ConcurrentHashSet<string>();
 
-        private readonly IServiceBundle _serviceBundle;
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
-        public AuthorityResolutionManager(IServiceBundle serviceBundle, bool shouldClearCache = true)
+        public AuthorityResolutionManager(bool shouldClearCache = true)
         {
-            _serviceBundle = serviceBundle;
             if (shouldClearCache)
             {
                 s_endpointCacheEntries.Clear();
@@ -48,8 +46,8 @@ namespace Microsoft.Identity.Client.Instance
                         {
 
                             // validate the original authority, as the resolved authority might be regionalized and we cannot validate regionalized authorities.
-                            var validator = AuthorityValidatorFactory.Create(authority.AuthorityInfo, _serviceBundle);
-                            await validator.ValidateAuthorityAsync(authority.AuthorityInfo, context).ConfigureAwait(false);
+                            var validator = AuthorityValidatorFactory.Create(authority.AuthorityInfo, context);
+                            await validator.ValidateAuthorityAsync(authority.AuthorityInfo).ConfigureAwait(false);
                             s_validatedEnvironments.Add(authority.AuthorityInfo.Host);
                         }
                     }
@@ -127,9 +125,7 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             s_endpointCacheEntries.TryAdd(authorityInfo.CanonicalAuthority, updatedCacheEntry);
-        }
-
-     
+        }     
 
         private class AuthorityEndpointCacheEntry
         {

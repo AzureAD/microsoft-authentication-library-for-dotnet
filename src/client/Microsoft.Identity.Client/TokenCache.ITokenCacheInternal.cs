@@ -657,7 +657,7 @@ namespace Microsoft.Identity.Client
         async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(AuthenticationRequestParameters requestParameters)
         {
             var logger = requestParameters.RequestContext.Logger;
-            var environment = Authority.GetEnviroment(requestParameters.AuthorityInfo.CanonicalAuthority);
+            var environment = Authority.GetEnvironment(requestParameters.AuthorityInfo.CanonicalAuthority);
             bool filterByClientId = !_featureFlags.IsFociEnabled;
 
             IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);

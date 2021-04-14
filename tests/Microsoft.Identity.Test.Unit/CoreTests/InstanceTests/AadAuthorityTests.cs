@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
 
-                var resolver = new AuthorityResolutionManager(harness.ServiceBundle);
+                var resolver = new AuthorityResolutionManager();
                 var endpoints = resolver.ResolveEndpoints(
                     instance,
                     null,
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority, validateAuthority: true);
                 try
                 {
-                    var resolver = new AuthorityResolutionManager(harness.ServiceBundle);
+                    var resolver = new AuthorityResolutionManager();
 
                     await resolver.ValidateAuthorityAsync(
                         instance,
@@ -136,8 +136,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void TenantSpecificAuthorityInitTest()
         {
-            var host = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment);
-            var expectedAuthority = String.Concat(host, "/", TestConstants.TenantId, "/");
+            var host = string.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment);
+            var expectedAuthority = string.Concat(host, "/", TestConstants.TenantId, "/");
 
             var publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                              .WithAuthority(host, TestConstants.TenantId)
@@ -165,8 +165,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             var expectedAuthority = string.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/", TestConstants.TenantId, "/");
 
             //Check bad URI format
-            var host = String.Concat("test", TestConstants.ProductionPrefNetworkEnvironment, "/");
-            var fullAuthority = String.Concat(host, TestConstants.TenantId);
+            var host = string.Concat("test", TestConstants.ProductionPrefNetworkEnvironment, "/");
+            var fullAuthority = string.Concat(host, TestConstants.TenantId);
 
             AssertException.Throws<ArgumentException>(() =>
             {

@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
 
-                var resolver = new AuthorityResolutionManager(serviceBundle);
+                var resolver = new AuthorityResolutionManager();
                 var endpoints = resolver.ResolveEndpoints(
                     instance,
                     null,
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/");
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
-                var resolver = new AuthorityResolutionManager(serviceBundle);
+                var resolver = new AuthorityResolutionManager();
                 var endpoints = resolver.ResolveEndpoints(
                     instance,
                     null,
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
 
-                var resolver = new AuthorityResolutionManager(harness.ServiceBundle);
+                var resolver = new AuthorityResolutionManager();
                 var endpoints = resolver.ResolveEndpoints(
                     instance,
                     null,

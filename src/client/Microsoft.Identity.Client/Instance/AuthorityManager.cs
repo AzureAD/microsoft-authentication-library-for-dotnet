@@ -4,14 +4,12 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
 {
     internal class AuthorityManager
     {
-        private readonly IServiceBundle _serviceBundle;
         private readonly RequestContext _requestContext;
 
         private readonly Authority _initialAuthority;
@@ -22,7 +20,6 @@ namespace Microsoft.Identity.Client.Instance
         public /* for test */ AuthorityManager(RequestContext requestContext, Authority initialAuthority)
         {
             _requestContext = requestContext;
-            _serviceBundle = _requestContext.ServiceBundle;
 
             _initialAuthority = initialAuthority;
             _currentAuthority = initialAuthority;
@@ -39,7 +36,7 @@ namespace Microsoft.Identity.Client.Instance
                 // This will make a network call unless instance discovery is cached, but this ok
                 // GetAccounts and AcquireTokenSilent do not need this
                 InstanceDiscoveryMetadataEntry metadata = await
-                                _serviceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
+                                _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
                                     _initialAuthority.AuthorityInfo.CanonicalAuthority,
                                     _requestContext)
                                 .ConfigureAwait(false);
@@ -48,8 +45,8 @@ namespace Microsoft.Identity.Client.Instance
                                     _initialAuthority.AuthorityInfo,
                                     metadata.PreferredNetwork);
 
-                // We can only validate the initial enviroment, not regional enviroments
-                await _serviceBundle.AuthorityEndpointResolutionManager.ValidateAuthorityAsync(
+                // We can only validate the initial environment, not regional environments
+                await _requestContext.ServiceBundle.AuthorityEndpointResolutionManager.ValidateAuthorityAsync(
                     _initialAuthority, 
                     _requestContext).ConfigureAwait(false);
 
@@ -64,12 +61,10 @@ namespace Microsoft.Identity.Client.Instance
                 throw new InvalidOperationException("RunInstanceDiscoveryAndValidationAsync must be called first");
             }
 
-
-            return _serviceBundle.AuthorityEndpointResolutionManager.ResolveEndpoints(
+            return _requestContext.ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpoints(
                 _currentAuthority,
                 loginHint,
                 _requestContext);
         }
-
     }
 }

@@ -10,11 +10,11 @@ namespace Microsoft.Identity.Client.Instance.Validation
 {
     internal class AadAuthorityValidator : IAuthorityValidator
     {
-        private readonly IServiceBundle _serviceBundle;
+        private readonly RequestContext _requestContext;
 
-        public AadAuthorityValidator(IServiceBundle serviceBundle)
+        public AadAuthorityValidator(RequestContext requestContext)
         {
-            _serviceBundle = serviceBundle;
+            _requestContext = requestContext;
         }
 
         /// <summary>
@@ -23,23 +23,22 @@ namespace Microsoft.Identity.Client.Instance.Validation
         /// MSAL must figure out aliasing even if ValidateAuthority is set to false.
         /// </summary>
         public async Task ValidateAuthorityAsync(
-            AuthorityInfo authorityInfo,
-            RequestContext requestContext)
+            AuthorityInfo authorityInfo)
         {
             var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
             bool isKnownEnv = KnownMetadataProvider.IsKnownEnvironment(authorityUri.Host);
 
-            requestContext.Logger.Info($"Authority validation enabled? {authorityInfo.ValidateAuthority}");
-            requestContext.Logger.Info($"Authority validation - is known env? {isKnownEnv}");
+            _requestContext.Logger.Info($"Authority validation enabled? {authorityInfo.ValidateAuthority}. ");
+            _requestContext.Logger.Info($"Authority validation - is known env? {isKnownEnv}. ");
 
             if (authorityInfo.ValidateAuthority && !isKnownEnv)
             {
-                requestContext.Logger.Info($"Authority validation is being performed");
+                _requestContext.Logger.Info($"Authority validation is being performed. ");
 
                 // MSAL will throw if the instance discovery URI does not respond with a valid json
-                await _serviceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
+                await _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
                                              authorityInfo.CanonicalAuthority,
-                                             requestContext).ConfigureAwait(false);
+                                             _requestContext).ConfigureAwait(false);
             }
         }
     }

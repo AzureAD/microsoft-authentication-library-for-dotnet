@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal
 
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             ThrottlingManager = SingletonThrottlingManager.GetInstance();
-            AuthorityEndpointResolutionManager = new AuthorityResolutionManager(this, shouldClearCaches);
+            AuthorityEndpointResolutionManager = new AuthorityResolutionManager(shouldClearCaches);
             DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();
         }
 
