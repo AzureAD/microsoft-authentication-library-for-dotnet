@@ -10,8 +10,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
     {
         /// <inheritdoc />
         public Task ValidateAuthorityAsync(
-            AuthorityInfo authorityInfo,
-            RequestContext requestContext)
+            AuthorityInfo authorityInfo)
         {
             return Task.FromResult(0);
         }

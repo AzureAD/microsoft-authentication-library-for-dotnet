@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
 
-        internal static string GetEnviroment(string authority)
+        internal static string GetEnvironment(string authority)
         {
             return new Uri(authority).Host;
         }

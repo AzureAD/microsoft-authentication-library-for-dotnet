@@ -13,16 +13,15 @@ namespace Microsoft.Identity.Client.Instance.Validation
 {
     internal class AdfsAuthorityValidator : IAuthorityValidator
     {
-        private readonly IServiceBundle _serviceBundle;
+        private readonly RequestContext _requestContext;
 
-        public AdfsAuthorityValidator(IServiceBundle serviceBundle)
+        public AdfsAuthorityValidator(RequestContext requestContext)
         {
-            _serviceBundle = serviceBundle;
+            _requestContext = requestContext;
         }
 
         public async Task ValidateAuthorityAsync(
-            AuthorityInfo authorityInfo,
-            RequestContext requestContext)
+            AuthorityInfo authorityInfo)
         {
             if (authorityInfo.ValidateAuthority)
             {
@@ -30,11 +29,11 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
 
 
-                Http.HttpResponse httpResponse = await _serviceBundle.HttpManager.SendGetAsync(
+                Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendGetAsync(
                     new Uri(webFingerUrl), 
-                    null, 
-                    requestContext.Logger, 
-                    cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
+                    null,
+                    _requestContext.Logger, 
+                    cancellationToken: _requestContext.UserCancellationToken).ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
@@ -44,7 +43,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                         httpResponse);
                 }
 
-                AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext);
+                AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, _requestContext);
                 if (wfr.Links.FirstOrDefault(
                         a => a.Rel.Equals(Constants.DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
                              a.Href.Equals(resource)) == null)

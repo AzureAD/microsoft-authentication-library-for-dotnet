@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Cache
             return _userEntries
                 .Where(u => !string.IsNullOrEmpty(u.Authority) &&
                             !string.IsNullOrEmpty(u.ClientInfo) &&
-                            (envAliases?.ContainsOrdinalIgnoreCase(Authority.GetEnviroment(u.Authority)) ?? true))
+                            (envAliases?.ContainsOrdinalIgnoreCase(Authority.GetEnvironment(u.Authority)) ?? true))
                             .ToLookup(u => u.ClientInfo, u => u.UserInfo)
                             .ToDictionary(group => group.Key, group => group.First());
         }
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Cache
             return _userEntries
                 .Where(u => !string.IsNullOrEmpty(u.Authority) &&
                             string.IsNullOrEmpty(u.ClientInfo) &&
-                            (envAliases?.ContainsOrdinalIgnoreCase(Authority.GetEnviroment(u.Authority)) ?? true))
+                            (envAliases?.ContainsOrdinalIgnoreCase(Authority.GetEnvironment(u.Authority)) ?? true))
                 .Select(u => u.UserInfo);
         }
 
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             var envList = _userEntries
                 .Where(u => !string.IsNullOrEmpty(u.Authority))
-                .Select(u => Authority.GetEnviroment(u.Authority));
+                .Select(u => Authority.GetEnvironment(u.Authority));
 
             return new HashSet<string>(envList, StringComparer.OrdinalIgnoreCase);
         }

@@ -255,9 +255,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
         }
 
-        protected async Task ResolveAuthorityAsync()
+        protected Task ResolveAuthorityAsync()
         {      
-            await AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);            
+            return AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync();            
         }
 
         internal Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cancellationToken);
         }
 
-        protected async Task<MsalTokenResponse> SendTokenRequestAsync(
+        protected Task<MsalTokenResponse> SendTokenRequestAsync(
             string tokenEndpoint,
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
@@ -278,12 +278,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string scopes = GetOverridenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
             var tokenClient = new TokenClient(AuthenticationRequestParameters);
 
-            return await tokenClient.SendTokenRequestAsync(
+            return tokenClient.SendTokenRequestAsync(
                 additionalBodyParameters,
                 scopes,
                 tokenEndpoint,
-                cancellationToken)
-                .ConfigureAwait(false);
+                cancellationToken);
         }
 
         private void LogReturnedToken(AuthenticationResult result)

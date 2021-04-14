@@ -7,14 +7,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Region;
-using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
-   
-
     /// <summary>
     /// Priority order of metadata providers: 
     /// 
@@ -172,6 +168,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 // Validate Authority exception
                 if (ex.ErrorCode == MsalError.InvalidInstance)
                 {
+                    requestContext.Logger.Error("[Instance Discovery] Instance discovery failed - invalid instance!");
                     throw;
                 }
 

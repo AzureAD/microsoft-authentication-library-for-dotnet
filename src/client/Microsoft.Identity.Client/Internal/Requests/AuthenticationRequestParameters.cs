@@ -35,14 +35,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _commonParameters = commonParameters;
 
             CacheSessionManager = new CacheSessionManager(tokenCache, this);
-
-
             Scope = ScopeHelper.CreateScopeSet(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
-
-            AuthorityManager = new AuthorityManager(this.RequestContext, initialAuthority);
-
+            AuthorityManager = new AuthorityManager(RequestContext, initialAuthority);
 
             // Set application wide query parameters.
             ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ??
@@ -79,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         #region Authority
 
-        public AuthorityManager AuthorityManager { get; set; } // todo ... read-only?
+        public AuthorityManager AuthorityManager { get; set; } 
 
         /// <summary>
         /// Authority is the URI used by MSAL for communication and storage
@@ -168,7 +164,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public void LogParameters()
         {
-            var logger = this.RequestContext.Logger;
+            var logger = RequestContext.Logger;
 
             // Create PII enabled string builder
             var builder = new StringBuilder(
@@ -207,6 +203,5 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             logger.InfoPii(messageWithPii, builder.ToString());
         }
-
     }
 }

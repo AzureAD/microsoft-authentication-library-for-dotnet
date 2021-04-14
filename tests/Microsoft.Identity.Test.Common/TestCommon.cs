@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Common
             new InstanceDiscoveryManager(
                 Substitute.For<IHttpManager>(),
                 true, null, null);
-            new AuthorityResolutionManager(null, true);
+            new AuthorityResolutionManager(true);
             SingletonThrottlingManager.GetInstance().ResetCache();
         }
 
