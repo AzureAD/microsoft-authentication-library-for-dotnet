@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Instance
 
         internal static Authority CreateAuthorityWithTenant(AuthorityInfo authorityInfo, string tenantId)
         {
-            var initialAuthority = CreateAuthority(authorityInfo);
+            Authority initialAuthority = CreateAuthority(authorityInfo);
 
             if (string.IsNullOrEmpty(tenantId))
             {

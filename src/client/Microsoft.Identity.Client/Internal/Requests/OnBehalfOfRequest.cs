@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     MsalErrorMessage.ScopesRequired);
             }
 
-            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
+            await ResolveAuthorityAsync().ConfigureAwait(false);
             CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
             MsalAccessTokenCacheItem msalAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;

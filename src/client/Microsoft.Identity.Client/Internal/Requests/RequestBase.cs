@@ -253,10 +253,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
         }
 
-        protected async Task ResolveAuthorityEndpointsAsync()
-        {
-            await AuthorityEndpoints.UpdateAuthorityEndpointsAsync(AuthenticationRequestParameters)
-                .ConfigureAwait(false);
+        protected async Task ResolveAuthorityAsync()
+        {      
+            await AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);            
         }
 
         internal Task<MsalTokenResponse> SendTokenRequestAsync(

@@ -266,11 +266,18 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     AuthorityOverride = authorityOverride
                 };
 
+                var requestContext = new RequestContext(ServiceBundle, Guid.NewGuid());
+
+                var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
+                    requestContext.ServiceBundle.Config.AuthorityInfo,
+                    commonParameters.AuthorityOverride);
+
                 var parameters = new AuthenticationRequestParameters(
                     ServiceBundle,
                     cache,
                     commonParameters,
-                    new RequestContext(ServiceBundle, Guid.NewGuid()))
+                    requestContext,
+                    authority)
                 {
                     Account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null),
                 };

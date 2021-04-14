@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Common
             new InstanceDiscoveryManager(
                 Substitute.For<IHttpManager>(),
                 true, null, null);
-            new AuthorityEndpointResolutionManager(null, true);
+            new AuthorityResolutionManager(null, true);
             SingletonThrottlingManager.GetInstance().ResetCache();
         }
 
@@ -96,13 +96,15 @@ namespace Microsoft.Identity.Test.Common
                 Scopes = scopes ?? TestConstants.s_scope,
             };
 
+            authority = authority ?? Authority.CreateAuthority(TestConstants.AuthorityTestTenant);
+            requestContext  = requestContext ?? new RequestContext(serviceBundle, Guid.NewGuid());
             return new AuthenticationRequestParameters(
                 serviceBundle,
                 new TokenCache(serviceBundle, false),
                 commonParameters,
-                requestContext ?? new RequestContext(serviceBundle, Guid.NewGuid()))
-            {
-                Authority = authority ?? Authority.CreateAuthority(TestConstants.AuthorityTestTenant)
+                requestContext,
+                authority)
+            {                
             };
         }
     }
