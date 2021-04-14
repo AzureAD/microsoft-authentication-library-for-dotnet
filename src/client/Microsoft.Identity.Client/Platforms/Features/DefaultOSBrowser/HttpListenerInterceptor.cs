@@ -89,6 +89,13 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                 cancellationToken.ThrowIfCancellationRequested();
 
                 // if cancellation was not requested, propagate original ex
+                if (ex is HttpListenerException)
+                {
+                    throw new Exception("HttpListenerException occurred when listening for the response from the browser. " + 
+                        "One cause might be the app is unable to listen on the specified URL. " + 
+                        "One solution might be to run 'netsh http add iplisten 127.0.0.1' from the Admin command prompt.", 
+                        ex);
+                }
                 throw;
             }
             finally
