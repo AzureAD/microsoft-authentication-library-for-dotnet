@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public const string CodeChallengeMethod = "code_challenge_method";
         public const string CodeChallenge = "code_challenge";
-        public const string CodeVerifier = "code_verifier";
+        public const string PkceCodeVerifier = "code_verifier";
         // correlation id is not standard oauth2 parameter
         public const string LoginReq = "login_req";
         public const string DomainReq = "domain_req";

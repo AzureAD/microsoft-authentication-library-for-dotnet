@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.AuthorizationCode,
                 [OAuth2Parameter.Code] = _authorizationCode,
                 [OAuth2Parameter.RedirectUri] = _requestParams.RedirectUri.OriginalString,
-                [OAuth2Parameter.CodeVerifier] = _pkceCodeVerifier
+                [OAuth2Parameter.PkceCodeVerifier] = _pkceCodeVerifier
             };
 
             return dict;

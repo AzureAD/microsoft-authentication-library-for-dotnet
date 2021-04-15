@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (!string.IsNullOrEmpty(_authorizationCodeParameters.PkceCodeVerifier))
             {
-                dict[OAuth2Parameter.CodeVerifier] = _authorizationCodeParameters.PkceCodeVerifier;
+                dict[OAuth2Parameter.PkceCodeVerifier] = _authorizationCodeParameters.PkceCodeVerifier;
             }
 
             return dict;
