@@ -10,6 +10,7 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <SignAssembly>false</SignAssembly>
     <TargetFrameworkProfile />
+    <DefineConstants>MOBILE_UI_TESTS;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

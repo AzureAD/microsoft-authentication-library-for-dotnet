@@ -8,6 +8,7 @@
     <RootNamespace>Test.Microsoft.Identity.iOS.Msal.UIAutomation</RootNamespace>
     <AssemblyName>Test.Microsoft.Identity.iOS.Msal.UIAutomation</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <DefineConstants>MOBILE_UI_TESTS;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
