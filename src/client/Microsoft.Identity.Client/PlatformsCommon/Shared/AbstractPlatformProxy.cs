@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -127,7 +128,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected abstract ICryptographyManager InternalGetCryptographyManager();
         protected abstract IPlatformLogger InternalGetPlatformLogger();
 
-        public virtual ITokenCacheBlobStorage CreateTokenCacheBlobStorage()
+        public virtual ICacheSerializationProvider CreateTokenCacheBlobStorage()
         {
             return null;
         }

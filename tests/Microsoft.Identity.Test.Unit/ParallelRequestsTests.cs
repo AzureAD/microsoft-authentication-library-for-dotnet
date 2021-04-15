@@ -25,7 +25,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private const int CacheAccessPenaltyMs = 50;
         public const int NetworkAccessPenaltyMs = 50;
 
-        private TokenCacheHelper _tokenCacheHelper;
         private string _inMemoryCache = "{}";
         private int _beforeAccessCalls = 0;
         private int _afterAccessCalls = 0;
@@ -36,7 +35,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public override void TestInitialize()
         {
             base.TestInitialize();
-            _tokenCacheHelper = new TokenCacheHelper();
             _inMemoryCache = "{}";
         }
 
@@ -59,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 for (int i = 1; i <= NumberOfRequests; i++)
                 {
                     var user = GetUpn(i);
-                    _tokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor, GetUid(i), "utid", displayableId: user);
+                    TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor, GetUid(i), "utid", displayableId: user);
                     actualUsers.Add(user);
                 }
 
@@ -127,7 +125,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var actualUsers = new List<string>();
             for (int i = 1; i <= NumberOfRequests; i++)
             {
-                _tokenCacheHelper.PopulateCache(
+                TokenCacheHelper.PopulateCache(
                     pca.UserTokenCacheInternal.Accessor,
                     GetUid(i),
                     TestConstants.Utid,

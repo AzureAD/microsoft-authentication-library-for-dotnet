@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -33,10 +34,10 @@ namespace Microsoft.Identity.Client
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         private static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);
         internal const int ExpirationTooLongInDays = 10 * 365;
-
-        private readonly ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;
+        
         private readonly IFeatureFlags _featureFlags;
         private readonly ITokenCacheAccessor _accessor;
+        private bool _usesDefaultSerialization = false;
         private volatile bool _hasStateChanged;
 
         private ICoreLogger Logger => ServiceBundle.DefaultLogger;
@@ -51,6 +52,9 @@ namespace Microsoft.Identity.Client
         private bool IsAppTokenCache { get; }
         bool ITokenCacheInternal.IsApplicationCache => IsAppTokenCache;
 
+        bool ITokenCacheInternal.UsesDefaultSerialization => _usesDefaultSerialization;
+
+
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
         SemaphoreSlim ITokenCacheInternal.Semaphore => _semaphoreSlim;
@@ -61,27 +65,19 @@ namespace Microsoft.Identity.Client
         /// and <c>IConfidentialClientApplication.AppTokenCache</c> once the app is created.
         /// </summary>
         [Obsolete("The recommended way to get a cache is by using IClientApplicationBase.UserTokenCache or IClientApplicationBase.AppTokenCache")]
-        public TokenCache() : this((IServiceBundle)null, false)
+        public TokenCache() : this((IServiceBundle)null, false, null)
         {
         }
 
-        internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache)
+        internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache, ICacheSerializationProvider optionalDefaultSerializer = null)
         {
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             _accessor = proxy.CreateTokenCacheAccessor();
             _featureFlags = proxy.GetFeatureFlags();
-            _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
 
-            if (_defaultTokenCacheBlobStorage != null)
-            {
-                BeforeAccess = _defaultTokenCacheBlobStorage.OnBeforeAccess;
-                AfterAccess = _defaultTokenCacheBlobStorage.OnAfterAccess;
-                BeforeWrite = _defaultTokenCacheBlobStorage.OnBeforeWrite;
-                AsyncBeforeAccess = null;
-                AsyncAfterAccess = null;
-                AsyncBeforeWrite = null;
-            }
-
+            _usesDefaultSerialization = optionalDefaultSerializer != null;
+            optionalDefaultSerializer?.Initialize(this);
+            
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
 
 #if iOS
@@ -97,8 +93,12 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// This method is so we can inject test ILegacyCachePersistence...
         /// </summary>
-        internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest, bool isApplicationTokenCache)
-            : this(serviceBundle, isApplicationTokenCache)
+        internal TokenCache(
+            IServiceBundle serviceBundle, 
+            ILegacyCachePersistence legacyCachePersistenceForTest, 
+            bool isApplicationTokenCache, 
+            ICacheSerializationProvider optionalDefaultCacheSerializer = null)
+            : this(serviceBundle, isApplicationTokenCache, optionalDefaultCacheSerializer)
         {
             LegacyCachePersistence = legacyCachePersistenceForTest;
         }

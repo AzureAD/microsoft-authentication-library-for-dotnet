@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Cache.CacheImpl;
 
 namespace Microsoft.Identity.Client
 {
@@ -42,12 +43,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string AttemptRegionDiscovery = "TryAutoDetect";
 
+
         internal ConfidentialClientApplication(
             ApplicationConfiguration configuration)
             : base(configuration)
         {
             GuardMobileFrameworks();
-            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
+
+            InMemoryPartitionedCacheSerializer = new InMemoryPartitionedCacheSerializer(ServiceBundle.DefaultLogger);
+            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? 
+                new TokenCache(ServiceBundle, true, InMemoryPartitionedCacheSerializer);
             Certificate = configuration.ClientCredentialCertificate;
         }
 
@@ -170,7 +175,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public X509Certificate2 Certificate { get; }
 
+        // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
+
+        // App token cache is serialized by default (unless the user overrideds this) 
+        // the serialization stores tokens in this dictionary, where the key is the client_id + tenant_id
+        // This makes cache operations be O(1) instead of O(n), and avoids catastrophic latency of
+        // multi-tenant apps that do not serialize their cache.
+        internal InMemoryPartitionedCacheSerializer InMemoryPartitionedCacheSerializer { get; }
+
 
         internal override AuthenticationRequestParameters CreateRequestParameters(
             AcquireTokenCommonParameters commonParameters,

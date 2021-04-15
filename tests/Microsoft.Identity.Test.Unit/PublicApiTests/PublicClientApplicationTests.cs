@@ -37,13 +37,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class PublicClientApplicationTests : TestBase
     {
-        private TokenCacheHelper _tokenCacheHelper;
-
         [TestInitialize]
         public override void TestInitialize()
         {
             base.TestInitialize();
-            _tokenCacheHelper = new TokenCacheHelper();
         }
 
         [TestMethod]

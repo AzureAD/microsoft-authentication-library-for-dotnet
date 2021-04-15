@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly WindowsBrokerOptions _wamOptions;
 
         /// <summary>
-        /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See <see cref="DesktopOsHelper.IsWin10"></see>
+        /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
         /// </summary>
         public WamBroker(
             CoreUIParent uiParent,

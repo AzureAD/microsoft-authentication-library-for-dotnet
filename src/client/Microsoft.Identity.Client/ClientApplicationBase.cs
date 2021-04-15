@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Cache.CacheImpl;
 
 namespace Microsoft.Identity.Client
 {
@@ -58,14 +59,15 @@ namespace Microsoft.Identity.Client
         internal ClientApplicationBase(ApplicationConfiguration config)
         {
             ServiceBundle = Internal.ServiceBundle.Create(config);
+            ICacheSerializationProvider defaultCacheSerialization = ServiceBundle.PlatformProxy.CreateTokenCacheBlobStorage();
 
             if (config.UserTokenLegacyCachePersistenceForTest != null)
             {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest, false);
+                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest, false, defaultCacheSerialization);
             }
             else
             {
-                UserTokenCacheInternal = config.UserTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, false);
+                UserTokenCacheInternal = config.UserTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, false, defaultCacheSerialization);
             }
         }
 
@@ -81,7 +83,7 @@ namespace Microsoft.Identity.Client
                 requestContext);
         }
 
-        #region Accounts
+#region Accounts
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
@@ -255,7 +257,7 @@ namespace Microsoft.Identity.Client
             return new RequestContext(ServiceBundle, correlationId);
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.

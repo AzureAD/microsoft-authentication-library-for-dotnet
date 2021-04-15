@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using System;
@@ -18,25 +19,26 @@ namespace Microsoft.Identity.Client.Platforms.uap
     /// because the TokenCache calls are under lock() so continuing on different threads will cause
     /// deadlocks.
     /// </remarks>
-    internal class UapTokenCacheBlobStorage : ITokenCacheBlobStorage
+    internal class DpApiEncryptedFileProvider : ICacheSerializationProvider
     {
         private const string CacheFileName = "msalcache.dat";
 
         private readonly ICryptographyManager _cryptographyManager;
         private readonly ICoreLogger _logger;
 
-        public UapTokenCacheBlobStorage(ICryptographyManager cryptographyManager, ICoreLogger logger)
+        public DpApiEncryptedFileProvider(ICryptographyManager cryptographyManager, ICoreLogger logger)
         {
             _cryptographyManager = cryptographyManager;
             _logger = logger;
         }
 
-        public void OnBeforeWrite(TokenCacheNotificationArgs args)
+        public void Initialize(TokenCache tokenCache)
         {
-            // NO OP
+            tokenCache.AfterAccess = OnAfterAccess;
+            tokenCache.BeforeAccess = OnBeforeAccess;
         }
 
-        public void OnBeforeAccess(TokenCacheNotificationArgs args)
+        private void OnBeforeAccess(TokenCacheNotificationArgs args)
         {
             IStorageFile cacheFile = ApplicationData.Current.LocalFolder.TryGetItemAsync(CacheFileName)
                                 .AsTask().GetAwaiter().GetResult() as IStorageFile;
@@ -79,7 +81,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return null;
         }
 
-        public void OnAfterAccess(TokenCacheNotificationArgs args)
+        private void OnAfterAccess(TokenCacheNotificationArgs args)
         {
             if (args.HasStateChanged)
             {
@@ -93,5 +95,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 FileIO.WriteBytesAsync(cacheFile, encryptedBlob).GetAwaiter().GetResult();
             }
         }
+
+      
     }
 }

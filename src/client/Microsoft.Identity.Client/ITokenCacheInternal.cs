@@ -71,7 +71,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         bool HasTokensNoLocks();
 
+
         bool IsTokenCacheSerialized();
+
+        /// <summary>
+        /// MSAL adds serialziation for UWP and also for ConfidentiaClient app token cache. 
+        /// If the app developer provides their own serialization, this flags is true
+        /// </summary>
+        bool UsesDefaultSerialization { get; }
 
         #endregion
     }

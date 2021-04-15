@@ -56,12 +56,18 @@ namespace Microsoft.Identity.Client.Cache
             if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
                 string tenantId = requestParameters.Authority.TenantId ?? "";
-                key = $"{requestParameters.AppConfig.ClientId}_{tenantId}_AppTokenCache";
+                key = GetClientCredentialKey(requestParameters.AppConfig.ClientId, tenantId);
+                    
                 return true;
             }
 
             key = null;
             return false;
+        }
+
+        public /* for test */ static string GetClientCredentialKey(string clientId, string tenantId)
+        {                
+            return $"{clientId}_{tenantId}_AppTokenCache";
         }
     }
 }
