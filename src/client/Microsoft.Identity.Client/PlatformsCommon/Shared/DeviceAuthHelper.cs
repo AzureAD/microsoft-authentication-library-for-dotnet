@@ -79,9 +79,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             try
             {
                 return !Platforms.Features.DesktopOs.DesktopOsHelper.IsWin10OrServerEquivalent();
-            } catch (Exception ex)
+            } catch (DllNotFoundException)
             {
-                throw new MsalException("xamarin-ui-tests", $"ERROR TYPE: {ex.GetType().FullName}", ex);
+                // When running mobile UI tests, NETSTANDARD flag is set (instead of the mobile flags), which results in above method throwing the exception.
+                // Catching the exception and returning false, in this case.
+                return false;
             }
 #else
             return false;
