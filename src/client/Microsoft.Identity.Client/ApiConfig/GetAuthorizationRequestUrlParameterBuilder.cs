@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client
         /// of plain or S256. If excluded, code challenge is assumed to be plaintext.</param>
         /// <returns></returns>
         public GetAuthorizationRequestUrlParameterBuilder WithPkce(
-            string codeVerifier = null,
+            ref string codeVerifier,
             CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.Plain)
         {
             Parameters.CodeVerifier = codeVerifier ?? ServiceBundle.PlatformProxy.CryptographyManager.GenerateCodeVerifier();
