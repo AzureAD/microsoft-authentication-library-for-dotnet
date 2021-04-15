@@ -75,38 +75,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         //This corresponds to windows 7, 8, 8.1 and their server equivalents.       
         public static bool CanOSPerformPKeyAuth()
         {
-            var targets = "Targets: ";
-#if NET_CORE
-    targets += "NET_CORE ";
-#endif
-#if NET5_WIN
-    targets += "NET5_WIN ";
-#endif
-#if DESKTOP
-            targets += "DESKTOP ";
-#endif
-#if NETSTANDARD
-    targets += "NETSTANDARD ";
-#endif
-#if ANDROID
-    targets += "ANDROID ";
-#endif
-#if iOS
-    targets += "iOS ";
-#endif
-#if __MOBILE__
-    targets += "__MOBILE__ ";
-#endif
-#if MAC
-    targets += "MAC ";
-#endif
 #if NET_CORE || NET5_WIN || DESKTOP || NETSTANDARD
             try
             {
                 return !Platforms.Features.DesktopOs.DesktopOsHelper.IsWin10OrServerEquivalent();
             } catch (Exception ex)
             {
-                throw new MsalException("xamarin", $"Message: {targets}", ex);
+                throw new MsalException("xamarin-ui-tests", $"ERROR TYPE: {ex.GetType().FullName}", ex);
             }
 #else
             return false;
