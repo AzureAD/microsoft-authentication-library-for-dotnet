@@ -959,5 +959,9 @@ namespace Microsoft.Identity.Client
         ///  </summary>
         public const string RegionalAuthorityValidation = "regional_authority_validation";
 
+        /// <summary>
+        /// An HttpListenerException occurred while listening for the system browser to complete the login.
+        /// </summary>
+        public const string HttpListenerError = "http_listener_error";
     }
 }

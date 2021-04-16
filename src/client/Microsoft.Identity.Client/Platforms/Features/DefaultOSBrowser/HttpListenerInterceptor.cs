@@ -35,6 +35,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             cancellationToken.ThrowIfCancellationRequested();
 
             HttpListener httpListener = null;
+            string urlToListenTo = string.Empty;
             try
             {
                 if(string.IsNullOrEmpty(path))
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                     path = (path.StartsWith("/") ? path : "/" + path);
                 }
 
-                string urlToListenTo = "http://localhost:" + port + path;
+                urlToListenTo = "http://localhost:" + port + path;
 
                 if (!urlToListenTo.EndsWith("/"))
                 {
@@ -88,14 +89,16 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                 _logger.Info("HttpListenerException - cancellation requested? " + cancellationToken.IsCancellationRequested);
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // if cancellation was not requested, propagate original ex
                 if (ex is HttpListenerException)
                 {
-                    throw new Exception("HttpListenerException occurred when listening for the response from the browser. " + 
-                        "One cause might be the app is unable to listen on the specified URL. " + 
-                        "One solution might be to run 'netsh http add iplisten 127.0.0.1' from the Admin command prompt.", 
+                    throw new MsalClientException(MsalError.HttpListenerError, 
+                        $"An HttpListenerException occurred while listening on {urlToListenTo} for the system browser to complete the login. " +
+                        "Possible cause and mitigation: the app is unable to listen on the specified URL; " +
+                        "run 'netsh http add iplisten 127.0.0.1' from the Admin command prompt.",
                         ex);
                 }
+
+                // if cancellation was not requested, propagate original ex
                 throw;
             }
             finally
