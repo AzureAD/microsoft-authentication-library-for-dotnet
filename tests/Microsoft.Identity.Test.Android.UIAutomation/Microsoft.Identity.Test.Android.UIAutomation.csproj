@@ -9,7 +9,6 @@
     <AssemblyName>Microsoft.Identity.Test.UIAutomation</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
-    <DefineConstants>MOBILE_UI_TESTS;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
