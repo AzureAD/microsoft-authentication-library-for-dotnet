@@ -1,3 +1,8 @@
+4.27.1
+==========
+### Bug Fixes:
+**Remove iOS Xamarin workaround for background threads**. No longer needed with fixes done in [Mono](https://github.com/xamarin/xamarin-macios/issues/7080#issuecomment-609945804). This is a patch for a customer.
+
 4.27.0
 ==========
 ### New Features: 
