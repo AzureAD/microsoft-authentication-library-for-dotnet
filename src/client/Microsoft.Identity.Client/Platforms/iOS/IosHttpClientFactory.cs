@@ -14,13 +14,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             HttpClient httpClient;
             if (UIDevice.CurrentDevice.CheckSystemVersion(7, 0))
             {
-                var handler = new NSUrlSessionHandler()
-                {
-                    BypassBackgroundSessionCheck = false,
-                };
+                var handler = new NSUrlSessionHandler();
 
-                httpClient = new HttpClient(handler);
-               
+                httpClient = new HttpClient(handler);               
             }
             else
             {
