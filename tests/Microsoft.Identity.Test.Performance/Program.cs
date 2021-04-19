@@ -12,12 +12,13 @@ namespace Microsoft.Identity.Test.Performance
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<JsonTests>(
+            BenchmarkRunner.Run<AcquireTokenForClientLargeCacheTests>(
                 DefaultConfig.Instance
                     .WithOptions(ConfigOptions.DontOverwriteResults)
+                    
                     .AddJob(
                         Job.Default
-                            .WithId("Job-PerfTests")
+                            .WithId("Job-PerfTests")                            
                             ));
 
             Console.ReadKey();

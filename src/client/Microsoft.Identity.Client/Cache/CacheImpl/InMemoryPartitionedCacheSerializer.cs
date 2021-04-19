@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
     internal class InMemoryPartitionedCacheSerializer
         : AbstractPartitionedCacheSerializer
     {
-        internal /* internal for test only */ ConcurrentDictionary<string, byte[]> CachePartition { get; }
+        internal /* internal for test only */ ConcurrentDictionary<string, byte[]> CachePartition { get; }        
         private readonly ICoreLogger _logger;
 
         public InMemoryPartitionedCacheSerializer(ICoreLogger logger)
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
         {
             // As per https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2?redirectedfrom=MSDN&view=net-5.0#remarks
             // the indexer is ok to store a key/value pair unconditionally
-            _logger.Verbose($"[InMemoryPartitionedTokenCache] WriteCacheBytes with cacheKey {cacheKey}");
+            _logger.Verbose($"[InMemoryPartitionedTokenCache] WriteCacheBytes with cacheKey {cacheKey}. Cache partitions: {CachePartition.Count}"); // note: Count is expensive
             CachePartition[cacheKey] = bytes;
         }
     }
