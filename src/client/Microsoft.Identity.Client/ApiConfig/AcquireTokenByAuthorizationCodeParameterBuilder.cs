@@ -35,12 +35,12 @@ namespace Microsoft.Identity.Client
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes, 
             string authorizationCode,
-            string codeVerifier = null)
+            string PkceCodeVerifier = null)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 
             return new AcquireTokenByAuthorizationCodeParameterBuilder(confidentialClientApplicationExecutor)
-                   .WithScopes(scopes).WithAuthorizationCode(authorizationCode).WithCodeVerifier(codeVerifier);
+                   .WithScopes(scopes).WithAuthorizationCode(authorizationCode).WithCodeVerifier(PkceCodeVerifier);
         }
 
         private AcquireTokenByAuthorizationCodeParameterBuilder WithAuthorizationCode(string authorizationCode)
@@ -49,9 +49,9 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        private AcquireTokenByAuthorizationCodeParameterBuilder WithCodeVerifier(string codeVerifier)
+        private AcquireTokenByAuthorizationCodeParameterBuilder WithCodeVerifier(string PkceCodeVerifier)
         {
-            Parameters.PkceCodeVerifier = codeVerifier;
+            Parameters.PkceCodeVerifier = PkceCodeVerifier;
             return this;
         }
 

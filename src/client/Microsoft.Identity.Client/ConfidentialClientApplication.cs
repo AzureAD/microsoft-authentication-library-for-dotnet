@@ -62,30 +62,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="authorizationCode">The authorization code received from the service authorization endpoint.</param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
-        /// <remarks>You can set optional parameters by chaining the builder with:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>,
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>,
-        /// </remarks>
-        public AcquireTokenByAuthorizationCodeParameterBuilder AcquireTokenByAuthorizationCode(
-            IEnumerable<string> scopes,
-            string authorizationCode)
-        {
-            return AcquireTokenByAuthorizationCode(scopes, authorizationCode, null);
-        }
-
-        /// <summary>
-        /// Acquires a security token from the authority configured in the app using the authorization code
-        /// previously received from the STS.
-        /// It uses the OAuth 2.0 authorization code flow (See https://aka.ms/msal-net-authorization-code).
-        /// It's usually used in web apps (for instance ASP.NET / ASP.NET Core web apps) which sign-in users,
-        /// and can request an authorization code.
-        /// This method does not lookup the token cache, but stores the result in it, so it can be looked up
-        /// using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="authorizationCode">The authorization code received from the service authorization endpoint.</param>
-        /// <param name="codeVerifier">A dynamically created cryptographically random key used to provide proof of possession for the <paramref name="authorizationCode"/>.</param>
+        /// <param name="pkceCodeVerifier">A dynamically created cryptographically random key used to provide proof of possession for the <paramref name="authorizationCode"/>.
+        /// Adding this parameter will enable PKCE. See (https://tools.ietf.org/html/rfc7636). </param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can set optional parameters by chaining the builder with:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>,
@@ -94,13 +72,13 @@ namespace Microsoft.Identity.Client
         public AcquireTokenByAuthorizationCodeParameterBuilder AcquireTokenByAuthorizationCode(
             IEnumerable<string> scopes,
             string authorizationCode,
-            string codeVerifier)
+            string pkceCodeVerifier = null)
         {
             return AcquireTokenByAuthorizationCodeParameterBuilder.Create(
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes,
                 authorizationCode,
-                codeVerifier);
+                pkceCodeVerifier);
         }
 
         /// <summary>
