@@ -21,7 +21,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IAccount Account { get; set; }
         public ICustomWebUi CustomWebUi { get; set; }
         public string CodeVerifier { get; set; }
-        public CodeChallengeMethod CodeChallengeMethod { get; set; }
 
         public void LogParameters(ICoreLogger logger)
         {

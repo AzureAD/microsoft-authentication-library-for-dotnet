@@ -14,7 +14,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IEnumerable<string> ExtraScopesToConsent { get; set; }
         public string LoginHint { get; set; }
         public string CodeVerifier { get; set; }
-        public CodeChallengeMethod CodeChallengeMethod { get; set; }
 
         public AcquireTokenInteractiveParameters ToInteractiveParameters()
         {
@@ -25,8 +24,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 LoginHint = LoginHint,
                 Prompt = Prompt.SelectAccount,
                 UseEmbeddedWebView = WebViewPreference.NotSpecified,
-                CodeVerifier = CodeVerifier,
-                CodeChallengeMethod = CodeChallengeMethod
+                CodeVerifier = CodeVerifier
             };
         }
 

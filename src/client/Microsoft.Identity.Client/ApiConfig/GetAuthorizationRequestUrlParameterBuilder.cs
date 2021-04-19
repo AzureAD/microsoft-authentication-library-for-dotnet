@@ -90,15 +90,10 @@ namespace Microsoft.Identity.Client
         /// https://tools.ietf.org/html/rfc7636
         /// </summary>
         /// <param name="codeVerifier">High-entropy cryptographic random STRING. If null, MSAL.NET will generate it.</param>
-        /// <param name="codeChallengeMethod">The method used to encode the code verifier for the code challenge parameter. Can be one
-        /// of plain or S256. If excluded, code challenge is assumed to be plaintext.</param>
         /// <returns></returns>
-        public GetAuthorizationRequestUrlParameterBuilder WithPkce(
-            ref string codeVerifier,
-            CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.Plain)
+        public GetAuthorizationRequestUrlParameterBuilder WithPkce(out string codeVerifier)
         {
-            Parameters.CodeVerifier = codeVerifier ?? ServiceBundle.PlatformProxy.CryptographyManager.GenerateCodeVerifier();
-            Parameters.CodeChallengeMethod = codeChallengeMethod;
+            Parameters.CodeVerifier = codeVerifier = ServiceBundle.PlatformProxy.CryptographyManager.GenerateCodeVerifier();
             return this;
         }
 
@@ -139,20 +134,5 @@ namespace Microsoft.Identity.Client
         {
             return ApiEvent.ApiIds.GetAuthorizationRequestUrl;
         }
-    }
-
-    /// <summary>
-    /// Enum values for CodeChallengeMethod
-    /// </summary>
-    public enum CodeChallengeMethod
-    {
-        /// <summary>
-        /// Default.
-        /// </summary>
-        Plain = 0,
-        /// <summary>
-        /// S256.
-        /// </summary>
-        S256 = 1,
     }
 }

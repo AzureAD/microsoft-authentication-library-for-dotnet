@@ -50,13 +50,9 @@ namespace Microsoft.Identity.Client.Internal
             return result.Item1;
         }
 
-        public Uri GetAuthorizationUriWithPkce(
-            string codeVerifier,
-            CodeChallengeMethod codeChallengeMethod)
+        public Uri GetAuthorizationUriWithPkce(string codeVerifier)
         {
-            var result = CreateAuthorizationUriWithCodeChallenge(
-                codeVerifier,
-                codeChallengeMethod);
+            var result = CreateAuthorizationUriWithCodeChallenge(codeVerifier);
             return result.Item1;
         }
 
@@ -92,26 +88,18 @@ namespace Microsoft.Identity.Client.Internal
 
         }
 
-        private Tuple<Uri, string, string> CreateAuthorizationUriWithCodeChallenge(
-            string codeVerifier,
-            CodeChallengeMethod codeChallengeMethod)
+        private Tuple<Uri, string> CreateAuthorizationUriWithCodeChallenge(
+            string codeVerifier)
         {
             IDictionary<string, string> requestParameters = CreateAuthorizationRequestParameters();
-            if (codeChallengeMethod == CodeChallengeMethod.Plain)
-            {
-                requestParameters[OAuth2Parameter.CodeChallenge] = codeVerifier;
-                requestParameters[OAuth2Parameter.CodeChallengeMethod] = "plain";
-            }
-            else
-            {
-                string codeChallenge = _serviceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(codeVerifier);
-                requestParameters[OAuth2Parameter.CodeChallenge] = codeChallenge;
-                requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
-            }
+
+            string codeChallenge = _serviceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(codeVerifier);
+            requestParameters[OAuth2Parameter.CodeChallenge] = codeChallenge;
+            requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
 
             UriBuilder builder = CreateInteractiveRequestParameters(requestParameters);
 
-            return new Tuple<Uri, string, string>(builder.Uri, null, codeVerifier);
+            return new Tuple<Uri, string>(builder.Uri, codeVerifier);
         }
 
         private Tuple<Uri, string, string> CreateAuthorizationUri(bool addPkceAndState = false)

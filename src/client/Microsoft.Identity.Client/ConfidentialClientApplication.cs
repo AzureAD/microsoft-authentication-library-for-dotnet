@@ -62,8 +62,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="authorizationCode">The authorization code received from the service authorization endpoint.</param>
-        /// <param name="pkceCodeVerifier">A dynamically created cryptographically random key used to provide proof of possession for the <paramref name="authorizationCode"/>.
-        /// Adding this parameter will enable PKCE. See (https://tools.ietf.org/html/rfc7636). </param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can set optional parameters by chaining the builder with:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>,
@@ -77,8 +75,7 @@ namespace Microsoft.Identity.Client
             return AcquireTokenByAuthorizationCodeParameterBuilder.Create(
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes,
-                authorizationCode,
-                pkceCodeVerifier);
+                authorizationCode);
         }
 
         /// <summary>
@@ -139,8 +136,6 @@ namespace Microsoft.Identity.Client
         /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
         /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithCodeChallenge(string)"/>
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithCodeChallengeMethod(string)"/>
         /// </remarks>
         public GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(
             IEnumerable<string> scopes)

@@ -120,9 +120,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             if (authorizationRequestUrlParameters.CodeVerifier != null)
             {
-                return handler.GetAuthorizationUriWithPkce(
-                    authorizationRequestUrlParameters.CodeVerifier,
-                    authorizationRequestUrlParameters.CodeChallengeMethod);
+                return handler.GetAuthorizationUriWithPkce(authorizationRequestUrlParameters.CodeVerifier);
             }
             else
             {
