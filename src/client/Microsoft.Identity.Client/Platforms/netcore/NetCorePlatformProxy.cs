@@ -77,12 +77,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         protected override string InternalGetProcessorArchitecture()
         {
-            return null;
+            return DesktopOsHelper.IsWindows() ? WindowsNativeMethods.GetProcessorArchitecture() : null;
         }
 
         protected override string InternalGetOperatingSystem()
         {
-            return System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+            return DesktopOsHelper.GetWindowsVersionString();
         }
 
         protected override string InternalGetDeviceModel()
