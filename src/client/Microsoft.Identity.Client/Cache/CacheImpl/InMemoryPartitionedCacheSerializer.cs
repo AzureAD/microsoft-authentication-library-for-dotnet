@@ -44,7 +44,10 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
         {
             // As per https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2?redirectedfrom=MSDN&view=net-5.0#remarks
             // the indexer is ok to store a key/value pair unconditionally
-            _logger.Verbose($"[InMemoryPartitionedTokenCache] WriteCacheBytes with cacheKey {cacheKey}. Cache partitions: {CachePartition.Count}"); // note: Count is expensive
+            if (_logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
+                _logger.Verbose($"[InMemoryPartitionedTokenCache] WriteCacheBytes with cacheKey {cacheKey}. Cache partitions: {CachePartition.Count}"); // note: Count is expensive
+            }
             CachePartition[cacheKey] = bytes;
         }
     }

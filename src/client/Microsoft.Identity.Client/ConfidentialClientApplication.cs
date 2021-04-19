@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
 
-        // App token cache is serialized by default (unless the user overrideds this) 
+        // App token cache is serialized by default (unless the user overrides this) 
         // the serialization stores tokens in this dictionary, where the key is the client_id + tenant_id
         // This makes cache operations be O(1) instead of O(n), and avoids catastrophic latency of
         // multi-tenant apps that do not serialize their cache.
