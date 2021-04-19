@@ -50,6 +50,12 @@ namespace Microsoft.Identity.Client.Internal
             return result.Item1;
         }
 
+        public Uri GetAuthorizationUriWithPkce(string codeVerifier)
+        {
+            var result = CreateAuthorizationUriWithCodeChallenge(codeVerifier);
+            return result.Item1;
+        }
+
         private async Task<Tuple<string, string>> FetchAuthCodeAndPkceInternalAsync(
             IWebUI webUi,
             CancellationToken cancellationToken)
@@ -82,6 +88,20 @@ namespace Microsoft.Identity.Client.Internal
 
         }
 
+        private Tuple<Uri, string> CreateAuthorizationUriWithCodeChallenge(
+            string codeVerifier)
+        {
+            IDictionary<string, string> requestParameters = CreateAuthorizationRequestParameters();
+
+            string codeChallenge = _serviceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(codeVerifier);
+            requestParameters[OAuth2Parameter.CodeChallenge] = codeChallenge;
+            requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
+
+            UriBuilder builder = CreateInteractiveRequestParameters(requestParameters);
+
+            return new Tuple<Uri, string>(builder.Uri, codeVerifier);
+        }
+
         private Tuple<Uri, string, string> CreateAuthorizationUri(bool addPkceAndState = false)
         {
             IDictionary<string, string> requestParameters = CreateAuthorizationRequestParameters();
@@ -91,15 +111,22 @@ namespace Microsoft.Identity.Client.Internal
             if (addPkceAndState)
             {
                 codeVerifier = _serviceBundle.PlatformProxy.CryptographyManager.GenerateCodeVerifier();
-                string codeVerifierHash = _serviceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(codeVerifier);
+                string codeChallenge = _serviceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(codeVerifier);
 
-                requestParameters[OAuth2Parameter.CodeChallenge] = codeVerifierHash;
+                requestParameters[OAuth2Parameter.CodeChallenge] = codeChallenge;
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
 
                 state = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
                 requestParameters[OAuth2Parameter.State] = state;
             }
 
+            UriBuilder builder = CreateInteractiveRequestParameters(requestParameters);
+
+            return new Tuple<Uri, string, string>(builder.Uri, state, codeVerifier);
+        }
+
+        private UriBuilder CreateInteractiveRequestParameters(IDictionary<string, string> requestParameters)
+        {
             // Add uid/utid values to QP if user object was passed in.
             if (_interactiveParameters.Account != null)
             {
@@ -126,8 +153,7 @@ namespace Microsoft.Identity.Client.Internal
             string qp = requestParameters.ToQueryParameter();
             var builder = new UriBuilder(new Uri(_requestParams.Endpoints.AuthorizationEndpoint));
             builder.AppendQueryParameters(qp);
-
-            return new Tuple<Uri, string, string>(builder.Uri, state, codeVerifier);
+            return builder;
         }
 
         private Dictionary<string, string> CreateAuthorizationRequestParameters(Uri redirectUriOverride = null)

@@ -34,24 +34,17 @@ namespace Microsoft.Identity.Client
         internal static AcquireTokenByAuthorizationCodeParameterBuilder Create(
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes, 
-            string authorizationCode,
-            string PkceCodeVerifier = null)
+            string authorizationCode)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 
             return new AcquireTokenByAuthorizationCodeParameterBuilder(confidentialClientApplicationExecutor)
-                   .WithScopes(scopes).WithAuthorizationCode(authorizationCode).WithCodeVerifier(PkceCodeVerifier);
+                   .WithScopes(scopes).WithAuthorizationCode(authorizationCode);
         }
 
         private AcquireTokenByAuthorizationCodeParameterBuilder WithAuthorizationCode(string authorizationCode)
         {
             Parameters.AuthorizationCode = authorizationCode;
-            return this;
-        }
-
-        private AcquireTokenByAuthorizationCodeParameterBuilder WithCodeVerifier(string PkceCodeVerifier)
-        {
-            Parameters.PkceCodeVerifier = PkceCodeVerifier;
             return this;
         }
 
@@ -93,6 +86,19 @@ namespace Microsoft.Identity.Client
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
             Parameters.SendX5C = withSendX5C;
+            return this;
+        }
+
+        /// <summary>
+        /// Used to secure authorization code grant via Proof of Key for Code Exchange (PKCE).
+        /// See (https://tools.ietf.org/html/rfc7636) for more details.
+        /// </summary>
+        /// <param name="PkceCodeVerifier">A dynamically created cryptographically random key used to provide proof of possession for the authorization code.
+        /// </param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithCodeVerifier(string PkceCodeVerifier)
+        {
+            Parameters.PkceCodeVerifier = PkceCodeVerifier;
             return this;
         }
     }

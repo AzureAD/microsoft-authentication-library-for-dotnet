@@ -20,6 +20,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string LoginHint { get; set; }
         public IAccount Account { get; set; }
         public ICustomWebUi CustomWebUi { get; set; }
+        public string CodeVerifier { get; set; }
 
         public void LogParameters(ICoreLogger logger)
         {

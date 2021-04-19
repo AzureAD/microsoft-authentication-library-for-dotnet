@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public T WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
-            ValidateUseOfExpirementalFeature();
+            ValidateUseOfExperimentalFeature();
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 

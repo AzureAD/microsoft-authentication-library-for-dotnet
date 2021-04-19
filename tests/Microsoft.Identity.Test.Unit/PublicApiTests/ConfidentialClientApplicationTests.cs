@@ -25,6 +25,7 @@ using System.Threading;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Identity.Client.OAuth2;
 
 #if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -644,6 +645,41 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 CollectionAssert.AreEquivalent(
                     "offline_access openid profile r1/scope1 r1/scope2".Split(' '),
                     qp["scope"].Split(' '));
+            }
+        }
+
+        [TestMethod]
+        public async Task GetAuthorizationRequestUrlWithPKCETestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                string codeVerifier = string.Empty;
+                var uri = await app
+                    .GetAuthorizationRequestUrl(TestConstants.s_scope)
+                    .WithLoginHint(TestConstants.DisplayableId)
+                    .WithPkce(out codeVerifier)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(uri);
+                Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+                ValidateCommonQueryParams(qp);
+                CollectionAssert.AreEquivalent(
+                    "offline_access openid profile r1/scope1 r1/scope2".Split(' '),
+                    qp["scope"].Split(' '));
+
+                //Ensure that the code verifier returned matches the codeChallenge returned in the URL
+                var codeChallenge = TestCommon.CreateDefaultServiceBundle().PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(codeVerifier);
+                Assert.AreEqual(codeChallenge, qp[OAuth2Parameter.CodeChallenge]);
             }
         }
 

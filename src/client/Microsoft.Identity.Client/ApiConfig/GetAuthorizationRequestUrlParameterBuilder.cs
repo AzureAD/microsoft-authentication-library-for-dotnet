@@ -84,6 +84,19 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Used to secure authorization code grant via Proof of Key for Code Exchange (PKCE).
+        /// For more information, see the PKCE RCF:
+        /// https://tools.ietf.org/html/rfc7636
+        /// </summary>
+        /// <param name="codeVerifier">High-entropy cryptographic random STRING. If null, MSAL.NET will generate it.</param>
+        /// <returns></returns>
+        public GetAuthorizationRequestUrlParameterBuilder WithPkce(out string codeVerifier)
+        {
+            Parameters.CodeVerifier = codeVerifier = ServiceBundle.PlatformProxy.CryptographyManager.GenerateCodeVerifier();
+            return this;
+        }
+
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

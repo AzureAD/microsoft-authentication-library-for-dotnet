@@ -136,6 +136,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ImdsUrl = "http://169.254.169.254/metadata/instance/compute/location";
 
         public const string UserAssertion = "fake_access_token";
+        public const string CodeVerifier = "someCodeVerifier";
 
         //This value is only for testing purposes. It is for a certificate that is not used for anything other than running tests
         public const string _defaultx5cValue = @"MIIDHzCCAgegAwIBAgIQM6NFYNBJ9rdOiK+C91ZzFDANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwHhcNMTIwNTIyMj
