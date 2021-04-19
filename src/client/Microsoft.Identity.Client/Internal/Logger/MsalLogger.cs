@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             Log(LogLevel.Error, string.Empty, messageScrubbed);
         }
 
-     
+
         public void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
         {
             Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
@@ -153,16 +153,30 @@ namespace Microsoft.Identity.Client.Internal.Logger
             Log(LogLevel.Error, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
+        private static Lazy<string> s_osLazy = new Lazy<string>(() =>
+        {
+            if (MsalIdHelper.GetMsalIdParameters(null).TryGetValue(MsalIdParameter.OS, out string osValue))
+            {
+                return osValue;
+            }
+            return "Unknown OS";
+        });
+
+        private static Lazy<string> s_skuLazy = new Lazy<string>(() =>
+        {
+            if (MsalIdHelper.GetMsalIdParameters(null).TryGetValue(MsalIdParameter.Product, out string sku))
+            {
+                return sku;
+            }
+            return "Unknown SKU";
+        });
+
+        private static Lazy<string> s_versionLazy = new Lazy<string>(() => MsalIdHelper.GetMsalVersion());
+
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
             if (IsLoggingEnabled(logLevel))
-            {
-                var msalIdParameters = MsalIdHelper.GetMsalIdParameters(this);
-                string os = "N/A";
-                if (msalIdParameters.TryGetValue(MsalIdParameter.OS, out string osValue))
-                {
-                    os = osValue;
-                }
+            {               
 
                 bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
                 // If we have a message with PII, and PII logging is enabled, use the PII message, else use the scrubbed message.
@@ -171,9 +185,10 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
                 string log = string.Format(CultureInfo.InvariantCulture, "{0} MSAL {1} {2} {3} [{4}{5}]{6} {7}",
                     isLoggingPii ? "(True)" : "(False)",
-                    MsalIdHelper.GetMsalVersion(),
-                    msalIdParameters[MsalIdParameter.Product],
-                    os, DateTime.UtcNow, _correlationId, ClientInformation, messageToLog);
+                    s_versionLazy.Value,
+                    s_skuLazy.Value,
+                    s_osLazy.Value,
+                    DateTime.UtcNow, _correlationId, ClientInformation, messageToLog);
 
                 if (_isDefaultPlatformLoggingEnabled)
                 {
