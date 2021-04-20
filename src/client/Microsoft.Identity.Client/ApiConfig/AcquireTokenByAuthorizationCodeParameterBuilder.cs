@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
         /// <param name="PkceCodeVerifier">A dynamically created cryptographically random key used to provide proof of possession for the authorization code.
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenByAuthorizationCodeParameterBuilder WithCodeVerifier(string PkceCodeVerifier)
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithPkceCodeVerifier(string PkceCodeVerifier)
         {
             Parameters.PkceCodeVerifier = PkceCodeVerifier;
             return this;

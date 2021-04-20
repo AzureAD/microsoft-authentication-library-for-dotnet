@@ -681,7 +681,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost();
                 handler.ExpectedPostData = new Dictionary<string, string>()
                 {
-                    //Ensure that the code verifier is send along with the auth code request
+                    //Ensure that the code verifier is sent along with the auth code request
                     { "code_verifier", codeVerifier }
                 };
 
@@ -690,7 +690,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(codeChallenge, qp[OAuth2Parameter.CodeChallenge]);
 
                 await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                    .WithCodeVerifier(codeVerifier)
+                    .WithPkceCodeVerifier(codeVerifier)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
