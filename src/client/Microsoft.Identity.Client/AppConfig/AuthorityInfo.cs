@@ -288,7 +288,7 @@ namespace Microsoft.Identity.Client
         }
 
         // TODO: consolidate this with the same method in Authority.cs
-        private static string GetFirstPathSegment(string authority)
+        internal static string GetFirstPathSegment(string authority)
         {
             var uri = new Uri(authority);
             if (uri.Segments.Length >= 2)
