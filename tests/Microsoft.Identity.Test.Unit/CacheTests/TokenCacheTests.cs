@@ -31,8 +31,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     {
         public static long ValidExpiresIn = 3600;
         public static long ValidExtendedExpiresIn = 7200;
-
-        private readonly TokenCacheHelper _tokenCacheHelper = new TokenCacheHelper();
+        
         private string _clientInfo;
         private string _homeAccountId;
 
@@ -1136,7 +1135,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
 
-            _tokenCacheHelper.PopulateCacheWithOneAccessToken(cache.Accessor);
+            TokenCacheHelper.PopulateCacheWithOneAccessToken(cache.Accessor);
 
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(
                 serviceBundle, 

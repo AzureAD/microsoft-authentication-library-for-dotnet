@@ -32,8 +32,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor, addSecondAt: false);
+                TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor, addSecondAt: false);
                 var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).First();
 
                 // All these actions trigger a reloading of the cache
@@ -361,7 +360,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                .WithClientSecret(TestConstants.ClientSecret)
                .BuildConcrete();
 
-            Assert.IsFalse((cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
+            Assert.IsTrue(
+                (cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized(), 
+                "The app token cache, used by AcquireTokenForClient, is serialized by default");
             Assert.IsFalse((cca.UserTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
 
             var inMemoryTokenCache = new InMemoryTokenCache();

@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            args.TokenCache.DeserializeMsalV3(_cacheData);
+            args.TokenCache.DeserializeMsalV3(_cacheData, true);
         }
 
         public void AfterAccessNotification(TokenCacheNotificationArgs args)

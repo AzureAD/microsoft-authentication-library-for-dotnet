@@ -94,8 +94,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
                     new MsalAccessTokenCacheKey(
                         TestConstants.ProductionPrefNetworkEnvironment,
@@ -132,8 +132,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
                     new MsalAccessTokenCacheKey(
@@ -169,8 +169,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
                     new MsalAccessTokenCacheKey(
                         TestConstants.ProductionPrefNetworkEnvironment,
@@ -233,8 +233,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(new MsalAccessTokenCacheKey(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -289,8 +289,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 AuthenticationResult result = await app.AcquireTokenSilent(
@@ -317,8 +317,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
@@ -343,11 +343,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
-                var tokenCacheHelper = new TokenCacheHelper();
+                
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid1", "utid");
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid2", "utid");
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid1", "utid");
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid2", "utid");
 
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () => await app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
@@ -372,8 +372,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
@@ -399,8 +399,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -445,8 +445,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
 
@@ -577,8 +577,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 // PopulateCache() creates two access tokens
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
@@ -668,8 +668,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
                 httpManager.AddInstanceDiscoveryMockHandler();
                 //populate cache
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -711,9 +711,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 // Act
@@ -771,8 +769,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
-                var tokenCacheHelper = new TokenCacheHelper();
-                tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
+                TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 var acc = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();

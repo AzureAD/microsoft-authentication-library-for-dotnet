@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithHttpManager(httpManagerAndBundle.HttpManager)
                     .BuildConcrete();
-                new TokenCacheHelper().PopulateCache(
+                TokenCacheHelper.PopulateCache(
                     pca2.UserTokenCacheInternal.Accessor,
                     expiredAccessTokens: true);
 
@@ -453,7 +453,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                         .WithHttpManager(httpManager)
                                                                         .BuildConcrete();
-            new TokenCacheHelper().PopulateCache(app.UserTokenCacheInternal.Accessor, expiredAccessTokens: true);
+            TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, expiredAccessTokens: true);
 
             var tokenResponse = httpManager.AddAllMocks(tokenResponseType);
             UpdateStatusCodeAndHeaders(tokenResponse.ResponseMessage, httpStatusCode, retryAfterInSeconds);
