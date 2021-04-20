@@ -677,9 +677,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     "offline_access openid profile r1/scope1 r1/scope2".Split(' '),
                     qp["scope"].Split(' '));
 
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                handler.ExpectedPostData = new Dictionary<string, string>()
+                {
+                    //Ensure that the code verifier is send along with the auth code request
+                    { "code_verifier", codeVerifier }
+                };
+
                 //Ensure that the code verifier returned matches the codeChallenge returned in the URL
                 var codeChallenge = TestCommon.CreateDefaultServiceBundle().PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(codeVerifier);
                 Assert.AreEqual(codeChallenge, qp[OAuth2Parameter.CodeChallenge]);
+
+                await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .WithCodeVerifier(codeVerifier)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
             }
         }
 
