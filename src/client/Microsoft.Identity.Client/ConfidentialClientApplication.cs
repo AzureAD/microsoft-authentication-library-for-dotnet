@@ -69,8 +69,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public AcquireTokenByAuthorizationCodeParameterBuilder AcquireTokenByAuthorizationCode(
             IEnumerable<string> scopes,
-            string authorizationCode,
-            string pkceCodeVerifier = null)
+            string authorizationCode)
         {
             return AcquireTokenByAuthorizationCodeParameterBuilder.Create(
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),

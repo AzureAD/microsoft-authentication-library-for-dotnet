@@ -74,8 +74,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             
             await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common", false).ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{labResponse.User.TenantId}", false).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task GetTokenByAuthCode_WithPKCE_Async()
+        {
+            // Arrange
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common", true).ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{labResponse.User.TenantId}", true).ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, string authority, bool usePkce = false)
