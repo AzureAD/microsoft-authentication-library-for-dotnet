@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client
         public AcquireTokenSilentParameterBuilder WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
-            ValidateUseOfExpirementalFeature();
+            ValidateUseOfExperimentalFeature();
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 

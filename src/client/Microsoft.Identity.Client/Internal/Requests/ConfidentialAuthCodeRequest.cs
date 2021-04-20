@@ -46,6 +46,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.Code] = _authorizationCodeParameters.AuthorizationCode,
                 [OAuth2Parameter.RedirectUri] = AuthenticationRequestParameters.RedirectUri.OriginalString
             };
+
+            if (!string.IsNullOrEmpty(_authorizationCodeParameters.PkceCodeVerifier))
+            {
+                dict[OAuth2Parameter.PkceCodeVerifier] = _authorizationCodeParameters.PkceCodeVerifier;
+            }
+
             return dict;
         }
     }
