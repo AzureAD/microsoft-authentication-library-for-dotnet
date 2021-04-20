@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         protected override string InternalGetOperatingSystem()
         {
-            return DesktopOsHelper.GetWindowsVersionString();
+            return System.Runtime.InteropServices.RuntimeInformation.OSDescription;
         }
 
         protected override string InternalGetDeviceModel()
