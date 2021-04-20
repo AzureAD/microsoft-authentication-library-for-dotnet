@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
 
                 // MSAL will throw if the instance discovery URI does not respond with a valid json
                 await _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                                             authorityInfo.CanonicalAuthority,
+                                             authorityInfo,
                                              _requestContext).ConfigureAwait(false);
             }
         }

@@ -81,45 +81,43 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryTryAvoidNetworkAsync(
-            string authority,
+            AuthorityInfo authorityInfo,
             IEnumerable<string> existingEnvironmentsInCache,
             RequestContext requestContext)
         {
-            AuthorityType type = Authority.GetAuthorityType(authority);
-            Uri authorityUri = new Uri(authority);
-            string environment = authorityUri.Host;
+            string environment = authorityInfo.Host;
 
-            switch (type)
+            switch (authorityInfo.AuthorityType)
             {
                 case AuthorityType.Aad:
 
                     return
                         _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                        await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
+                        await _regionDiscoveryProvider.GetMetadataAsync(new Uri(authorityInfo.CanonicalAuthority), requestContext).ConfigureAwait(false) ??
                         _networkCacheMetadataProvider.GetMetadata(environment, requestContext.Logger) ??
                         _knownMetadataProvider.GetMetadata(environment, existingEnvironmentsInCache, requestContext.Logger) ??
-                        await GetMetadataEntryAsync(authority, requestContext).ConfigureAwait(false);
+                        await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
 
                 case AuthorityType.Adfs:
                 case AuthorityType.B2C:
 
                     requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority. ");
-                    return await GetMetadataEntryAsync(authority, requestContext).ConfigureAwait(false);
+                    return await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
 
                 default:
-                    throw new InvalidOperationException("Unexpected authority type " + type);
+                    throw new InvalidOperationException("Unexpected authority type " + authorityInfo.AuthorityType);
             }
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
-            string authority,
+            AuthorityInfo authorityInfo,
             RequestContext requestContext)
         {
-            AuthorityType type = Authority.GetAuthorityType(authority);
-            Uri authorityUri = new Uri(authority);
-            string environment = authorityUri.Host;
 
-            switch (type)
+            Uri authorityUri = new Uri(authorityInfo.CanonicalAuthority);
+            string environment = authorityInfo.Host;
+
+            switch (authorityInfo.AuthorityType)
             {
                 case AuthorityType.Aad:
 
@@ -130,7 +128,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     if (entry == null)
                     {
                         string message = "[Instance Discovery] Instance metadata for this authority could neither be fetched nor found. MSAL will continue regardless. SSO might be broken if authority aliases exist. ";
-                        requestContext.Logger.WarningPii(message + "Authority: " + authority, message);
+                        requestContext.Logger.WarningPii(message + "Authority: " + authorityInfo.CanonicalAuthority, message);
 
                         entry = CreateEntryForSingleAuthority(authorityUri);
                     }
@@ -145,7 +143,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     return CreateEntryForSingleAuthority(authorityUri);
 
                 default:
-                    throw new InvalidOperationException("Unexpected authority type " + type);
+                    throw new InvalidOperationException("Unexpected authority type " + authorityInfo.AuthorityType);
             }
         }
 

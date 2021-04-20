@@ -605,7 +605,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientID,
             string redirectUri,
-            string authority,
+            AuthorityInfo authorityInfo,
             ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
@@ -626,8 +626,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     return Array.Empty<IAccount>();
                 }
 
-                var aadAccounts = await _aadPlugin.GetAccountsAsync(clientID, authority, cacheSessionManager, instanceDiscoveryManager).ConfigureAwait(false);
-                var msaAccounts = await _msaPlugin.GetAccountsAsync(clientID, authority, cacheSessionManager, instanceDiscoveryManager).ConfigureAwait(false);
+                var aadAccounts = await _aadPlugin.GetAccountsAsync(clientID, authorityInfo, cacheSessionManager, instanceDiscoveryManager).ConfigureAwait(false);
+                var msaAccounts = await _msaPlugin.GetAccountsAsync(clientID, authorityInfo, cacheSessionManager, instanceDiscoveryManager).ConfigureAwait(false);
 
                 return (aadAccounts.Concat(msaAccounts)).ToList();
             }

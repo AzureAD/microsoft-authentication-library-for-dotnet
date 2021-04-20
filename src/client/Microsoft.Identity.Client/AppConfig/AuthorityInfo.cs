@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -61,20 +62,20 @@ namespace Microsoft.Identity.Client
         }
 
         private AuthorityInfo(
-            string host, 
-            string canonicalAuthority, 
-            AuthorityType authorityType, 
-            string userRealmUriPrefix, 
+            string host,
+            string canonicalAuthority,
+            AuthorityType authorityType,
+            string userRealmUriPrefix,
             bool validateAuthority)
         {
             Host = host;
             CanonicalAuthority = canonicalAuthority;
             AuthorityType = authorityType;
             UserRealmUriPrefix = userRealmUriPrefix;
-            ValidateAuthority = validateAuthority;            
+            ValidateAuthority = validateAuthority;
         }
 
-        public AuthorityInfo(AuthorityInfo other) : 
+        public AuthorityInfo(AuthorityInfo other) :
             this(
                 other.Host,
                 other.CanonicalAuthority,
@@ -96,7 +97,7 @@ namespace Microsoft.Identity.Client
             string canonicalUri = CanonicalizeAuthorityUri(authorityUri);
             ValidateAuthorityUri(canonicalUri);
 
-            var authorityType = Instance.Authority.GetAuthorityType(canonicalUri);
+            var authorityType = GetAuthorityType(canonicalUri);
 
             // If the authority type is B2C, validateAuthority must be false.
             if (authorityType == AuthorityType.B2C)
@@ -237,7 +238,7 @@ namespace Microsoft.Identity.Client
             {
                 return string.Equals(
                     CanonicalAuthority,
-                    ClientApplicationBase.DefaultAuthority, 
+                    ClientApplicationBase.DefaultAuthority,
                     StringComparison.OrdinalIgnoreCase);
             }
         }
@@ -298,5 +299,22 @@ namespace Microsoft.Identity.Client
 
             throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments);
         }
+
+        private static AuthorityType GetAuthorityType(string authority) // TODO: remove completely?
+        {
+            string firstPathSegment = GetFirstPathSegment(authority);
+
+            if (string.Equals(firstPathSegment, "adfs", StringComparison.OrdinalIgnoreCase))
+            {
+                return AuthorityType.Adfs;
+            }
+
+            if (string.Equals(firstPathSegment, B2CAuthority.Prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return AuthorityType.B2C;
+            }
+
+            return AuthorityType.Aad;
+        }      
     }
 }

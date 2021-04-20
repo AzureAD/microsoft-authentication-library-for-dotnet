@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         /// </summary>
         public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientId,
-            string authority,
+            AuthorityInfo authorityInfo,
             Cache.ICacheSessionManager cacheSessionManager,
             Instance.Discovery.IInstanceDiscoveryManager instanceDiscoveryManager)
         {
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     })
                     .Where(a => a != null);
 
-                var instanceMetadata = await instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(authority, webAccountEnvs, cacheSessionManager.RequestContext)
+                var instanceMetadata = await instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(authorityInfo, webAccountEnvs, cacheSessionManager.RequestContext)
                     .ConfigureAwait(false);
                 var accountsFromCache = await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
 

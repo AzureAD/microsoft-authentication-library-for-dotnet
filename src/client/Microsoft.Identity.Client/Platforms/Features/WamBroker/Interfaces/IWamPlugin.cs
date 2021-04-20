@@ -12,8 +12,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     internal interface IWamPlugin
     {
         Task<IReadOnlyList<IAccount>> GetAccountsAsync(
-            string clientID, 
-            string authority, 
+            string clientID,
+            AuthorityInfo authorityInfo,
             Cache.ICacheSessionManager cacheSessionManager, 
             Instance.Discovery.IInstanceDiscoveryManager instanceDiscoveryManager);
 

@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Instance
                 // GetAccounts and AcquireTokenSilent do not need this
                 InstanceDiscoveryMetadataEntry metadata = await
                                 _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                                    _initialAuthority.AuthorityInfo.CanonicalAuthority,
+                                    _initialAuthority.AuthorityInfo,
                                     _requestContext)
                                 .ConfigureAwait(false);
 

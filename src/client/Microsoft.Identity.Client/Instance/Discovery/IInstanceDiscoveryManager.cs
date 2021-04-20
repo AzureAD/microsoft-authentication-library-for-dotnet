@@ -13,13 +13,13 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal interface IInstanceDiscoveryManager
     {
         Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryTryAvoidNetworkAsync(
-            string authority,
+            AuthorityInfo authorityinfo,
             IEnumerable<string> existingEnvironmentsInCache,
             RequestContext requestContext);
 
         Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
-           string authority,
-           RequestContext requestContext);
+            AuthorityInfo authorityinfo,
+            RequestContext requestContext);
 
     }
 }
