@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Act
                 var accounts = await _aadPlugin.GetAccountsAsync(
                     TestConstants.ClientId,
-                    TestConstants.AuthorityCommonTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     _cacheSessionManager,
                     _instanceDiscoveryManager).ConfigureAwait(false);
 
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Act
                 var accounts = await _aadPlugin.GetAccountsAsync(
                     TestConstants.ClientId,
-                    TestConstants.AuthorityCommonTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     _cacheSessionManager,
                     _instanceDiscoveryManager).ConfigureAwait(false);
 
@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _cacheSessionManager.RequestContext.Returns(rq);
 
                 _instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                    harness.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
+                    Arg.Any<AuthorityInfo>(),
                     Arg.Any<IEnumerable<string>>(), rq)
                     .Returns(CreateEntryForSingleAuthority(new Uri(TestConstants.AuthorityCommonTenant))); // user set this authority in config
 
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Act
                 var accounts = await _aadPlugin.GetAccountsAsync(
                     TestConstants.ClientId,
-                    TestConstants.AuthorityCommonTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     _cacheSessionManager,
                     _instanceDiscoveryManager).ConfigureAwait(false);
 
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _cacheSessionManager.RequestContext.Returns(rq);
 
                 _instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                    harness.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
+                    Arg.Any<AuthorityInfo>(),
                     Arg.Any<IEnumerable<string>>(), rq)
                     .Returns(CreateEntryForSingleAuthority(new Uri(TestConstants.AuthorityCommonTenant))); // user set this authority in config
 
@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Act
                 var accounts = await _aadPlugin.GetAccountsAsync(
                     TestConstants.ClientId,
-                    TestConstants.AuthorityCommonTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     _cacheSessionManager,
                     _instanceDiscoveryManager).ConfigureAwait(false);
 
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _cacheSessionManager.RequestContext.Returns(rq);
 
                 _instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                    harness.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
+                    Arg.Any<AuthorityInfo>(),
                     Arg.Any<IEnumerable<string>>(), rq)
                     .Returns(CreateEntryForSingleAuthority(new Uri(TestConstants.AuthorityCommonTenant))); // user set this authority in config                
 
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Act
                 var accounts = await _aadPlugin.GetAccountsAsync(
                     TestConstants.ClientId,
-                    TestConstants.AuthorityCommonTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     _cacheSessionManager,
                     _instanceDiscoveryManager).ConfigureAwait(false);
 
@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _cacheSessionManager.RequestContext.Returns(rq);
 
                 _instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                    harness.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
+                    Arg.Any<AuthorityInfo>(),
                     Arg.Any<IEnumerable<string>>(), rq)
                     .Returns(CreateEntryForSingleAuthority(new Uri(TestConstants.AuthorityCommonTenant))); // user set this authority in config                
 
@@ -265,7 +265,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Act
                 var accounts = await _aadPlugin.GetAccountsAsync(
                     TestConstants.ClientId,
-                    TestConstants.AuthorityCommonTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     _cacheSessionManager,
                     _instanceDiscoveryManager).ConfigureAwait(false);
 
@@ -296,7 +296,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     new Account(TestConstants.HomeAccountId, "some_other_user", null, null )});
 
                 _instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                    harness.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
+                    Arg.Any<AuthorityInfo>(),
                     Arg.Any<IEnumerable<string>>(), rq)
                     .Returns(CreateEntryForSingleAuthority(new Uri(TestConstants.AuthorityCommonTenant))); // user set this authority in config                
 
@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Act
                 var accounts = await _aadPlugin.GetAccountsAsync(
                     TestConstants.ClientId,
-                    TestConstants.AuthorityCommonTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     _cacheSessionManager,
                     _instanceDiscoveryManager).ConfigureAwait(false);
 

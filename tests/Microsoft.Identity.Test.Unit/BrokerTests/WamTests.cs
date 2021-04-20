@@ -749,25 +749,26 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var cacheSessionManager = NSubstitute.Substitute.For<ICacheSessionManager>();
                 var discoveryManager = NSubstitute.Substitute.For<IInstanceDiscoveryManager>();
+                var authoritInfo = AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, true);
 
                 // Act
                 await _wamBroker.GetAccountsAsync(
                     TestConstants.ClientId,
                     TestConstants.RedirectUri,
-                    TestConstants.AuthorityHomeTenant,
+                    authoritInfo,
                     cacheSessionManager,
                     discoveryManager).ConfigureAwait(false);
 
                 // Assert
                 await _aadPlugin.Received().GetAccountsAsync(
                     TestConstants.ClientId,
-                    TestConstants.AuthorityHomeTenant,
+                    authoritInfo,
                     cacheSessionManager,
                     discoveryManager).ConfigureAwait(false);
 
                 await _msaPlugin.Received().GetAccountsAsync(
                    TestConstants.ClientId,
-                   TestConstants.AuthorityHomeTenant,
+                   authoritInfo,
                    cacheSessionManager,
                    discoveryManager).ConfigureAwait(false);
             }
@@ -803,20 +804,20 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 await _wamBroker.GetAccountsAsync(
                     TestConstants.ClientId,
                     TestConstants.RedirectUri,
-                    TestConstants.AuthorityHomeTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, true),
                     cacheSessionManager,
                     discoveryManager).ConfigureAwait(false);
 
                 // Assert
                 await _aadPlugin.DidNotReceive().GetAccountsAsync(
                     TestConstants.ClientId,
-                    TestConstants.AuthorityHomeTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, true),
                     cacheSessionManager,
                     discoveryManager).ConfigureAwait(false);
 
                 await _msaPlugin.DidNotReceive().GetAccountsAsync(
                    TestConstants.ClientId,
-                   TestConstants.AuthorityHomeTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, true),
                    cacheSessionManager,
                    discoveryManager).ConfigureAwait(false);
             }
