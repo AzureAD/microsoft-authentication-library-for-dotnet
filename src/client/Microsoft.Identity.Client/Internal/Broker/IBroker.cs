@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientId, 
             string redirectUri,
-            string authority,
+            AuthorityInfo authorityInfo,
             ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager);
 

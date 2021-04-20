@@ -117,8 +117,6 @@ namespace Microsoft.Identity.Client.Instance
                         requestAuthorityInfo.AuthorityType));
             }
         }
-
-
         public static Authority CreateAuthority(string authority, bool validateAuthority = false)
         {
             return CreateAuthority(AuthorityInfo.FromAuthorityUri(authority, validateAuthority));
@@ -146,7 +144,7 @@ namespace Microsoft.Identity.Client.Instance
 
         internal static Authority CreateAuthorityWithTenant(AuthorityInfo authorityInfo, string tenantId)
         {
-            var initialAuthority = CreateAuthority(authorityInfo);
+            Authority initialAuthority = CreateAuthority(authorityInfo);
 
             if (string.IsNullOrEmpty(tenantId))
             {
@@ -170,34 +168,6 @@ namespace Microsoft.Identity.Client.Instance
 
         #endregion Builders
 
-        internal static string GetFirstPathSegment(string authority)
-        {
-            var uri = new Uri(authority);
-            if (uri.Segments.Length > 1)
-            {
-                return uri.Segments[1].TrimEnd('/');
-            }
-            return string.Empty;
-        }
-
-        internal static AuthorityType GetAuthorityType(string authority)
-        {
-            string firstPathSegment = GetFirstPathSegment(authority);
-
-            if (string.Equals(firstPathSegment, "adfs", StringComparison.OrdinalIgnoreCase))
-            {
-                return AuthorityType.Adfs;
-            }
-            else if (string.Equals(firstPathSegment, B2CAuthority.Prefix, StringComparison.OrdinalIgnoreCase))
-            {
-                return AuthorityType.B2C;
-            }
-            else
-            {
-                return AuthorityType.Aad;
-            }
-        }
-
         internal abstract string TenantId { get; }
 
         /// <summary>
@@ -219,7 +189,7 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
 
-        internal static string GetEnviroment(string authority)
+        internal static string GetEnvironment(string authority)
         {
             return new Uri(authority).Host;
         }

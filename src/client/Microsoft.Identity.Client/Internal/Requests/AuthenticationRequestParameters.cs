@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
@@ -28,22 +27,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IServiceBundle serviceBundle,
             ITokenCacheInternal tokenCache,
             AcquireTokenCommonParameters commonParameters,
-            RequestContext requestContext, 
+            RequestContext requestContext,
+            Authority initialAuthority,
             string homeAccountId = null)
         {
             _serviceBundle = serviceBundle;
             _commonParameters = commonParameters;
 
-            Authority = Authority.CreateAuthorityForRequest(serviceBundle.Config.AuthorityInfo, commonParameters.AuthorityOverride);
-            UserConfiguredAuthority = Authority;
-
             CacheSessionManager = new CacheSessionManager(tokenCache, this);
             Scope = ScopeHelper.CreateScopeSet(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
+            AuthorityManager = new AuthorityManager(RequestContext, initialAuthority);
 
             // Set application wide query parameters.
-            ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? 
+            ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ??
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             // Copy in call-specific query parameters.
@@ -75,20 +73,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public RequestContext RequestContext { get; }
 
+        #region Authority
+
+        public AuthorityManager AuthorityManager { get; set; } 
+
         /// <summary>
         /// Authority is the URI used by MSAL for communication and storage
         /// During a request it can be updated: 
         /// - with the preffered enviroment
         /// - with actual tenant
         /// </summary>
-        public Authority Authority { get; set; }
+        public Authority Authority => AuthorityManager.Authority;
 
-        /// <summary>
-        /// Original authority configured by the user
-        /// </summary>
-        public Authority UserConfiguredAuthority { get; set; }
-        public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
-        public AuthorityEndpoints Endpoints { get; set; }
+        public AuthorityInfo AuthorityInfo => AuthorityManager.Authority.AuthorityInfo;
+        public AuthorityEndpoints Endpoints => AuthorityManager.GetEndpoints(LoginHint);
+        public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
+
+        #endregion
 
         public ICacheSessionManager CacheSessionManager { get; }
         public HashSet<string> Scope { get; }
@@ -96,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public bool HasScopes => Scope != null && Scope.Count > 0;
 
         public Uri RedirectUri { get; set; }
-       
+
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
         public string ClaimsAndClientCapabilities { get; private set; }
@@ -115,7 +116,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
         public IAuthenticationScheme AuthenticationScheme => _commonParameters.AuthenticationScheme;
 
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
         public bool SendX5C { get; set; }
-        
+
         public string LoginHint
         {
             get
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
         public IAccount Account { get; set; }
 
-        public string HomeAccountId { get;}
+        public string HomeAccountId { get; }
 
 
         public bool IsClientCredentialRequest => ApiId == ApiEvent.ApiIds.AcquireTokenForClient;
@@ -160,11 +160,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
         public UserAssertion UserAssertion { get; set; }
 
-#endregion
+        #endregion
 
         public void LogParameters()
         {
-            var logger = this.RequestContext.Logger;
+            var logger = RequestContext.Logger;
 
             // Create PII enabled string builder
             var builder = new StringBuilder(
@@ -203,6 +203,5 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             logger.InfoPii(messageWithPii, builder.ToString());
         }
-
     }
 }

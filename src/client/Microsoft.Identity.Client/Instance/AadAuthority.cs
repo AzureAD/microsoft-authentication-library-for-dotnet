@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Instance
 
         internal AadAuthority(AuthorityInfo authorityInfo) : base(authorityInfo)
         {
-            TenantId = GetFirstPathSegment(AuthorityInfo.CanonicalAuthority);
+            TenantId = AuthorityInfo.GetFirstPathSegment(AuthorityInfo.CanonicalAuthority);
         }
 
         internal override string TenantId { get; }

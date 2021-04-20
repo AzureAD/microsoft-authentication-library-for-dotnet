@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
             // so that the PreferredNetwork environment is up to date.
             var instanceDiscoveryMetadata = await ServiceBundle.InstanceDiscoveryManager
                                 .GetMetadataEntryAsync(
-                                    requestParams.Authority.AuthorityInfo.CanonicalAuthority,
+                                    requestParams.Authority.AuthorityInfo,
                                     requestParams.RequestContext)
                                 .ConfigureAwait(false);
 
@@ -509,7 +509,7 @@ namespace Microsoft.Identity.Client
         {
             // at this point we need env aliases, try to get them without a discovery call
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                                     requestParams.AuthorityInfo.CanonicalAuthority,
+                                     requestParams.AuthorityInfo,
                                      filteredItems.Select(at => at.Environment),  // if all environments are known, a network call can be avoided
                                      requestParams.RequestContext)
                             .ConfigureAwait(false);
@@ -569,7 +569,7 @@ namespace Microsoft.Identity.Client
 
             var metadata =
                 await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    requestParams.AuthorityInfo,
                     allRts.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
                     requestParams.RequestContext)
                 .ConfigureAwait(false);
@@ -621,7 +621,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<MsalAppMetadataCacheItem> allAppMetadata = _accessor.GetAllAppMetadata();
 
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    requestParams.AuthorityInfo,
                     allAppMetadata.Select(m => m.Environment),
                     requestParams.RequestContext)
                 .ConfigureAwait(false);
@@ -657,7 +657,7 @@ namespace Microsoft.Identity.Client
         async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(AuthenticationRequestParameters requestParameters)
         {
             var logger = requestParameters.RequestContext.Logger;
-            var environment = Authority.GetEnviroment(requestParameters.AuthorityInfo.CanonicalAuthority);
+            var environment = requestParameters.AuthorityInfo.Host;
             bool filterByClientId = !_featureFlags.IsFociEnabled;
 
             IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);
@@ -684,7 +684,7 @@ namespace Microsoft.Identity.Client
             }
 
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                requestParameters.AuthorityInfo.CanonicalAuthority,
+                requestParameters.AuthorityInfo,
                 allEnvironmentsInCache,
                 requestParameters.RequestContext).ConfigureAwait(false);
 

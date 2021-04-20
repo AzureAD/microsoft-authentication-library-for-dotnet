@@ -18,18 +18,15 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal class NetworkMetadataProvider : INetworkMetadataProvider
     {
         private readonly IHttpManager _httpManager;
-        private readonly IMatsTelemetryManager _telemetryManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
         private readonly Uri _userProvidedInstanceDiscoveryUri; // can be null
 
         public NetworkMetadataProvider(
             IHttpManager httpManager,
-            IMatsTelemetryManager telemetryManager,
             INetworkCacheMetadataProvider networkCacheMetadataProvider, 
             Uri userProvidedInstanceDiscoveryUri = null)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
-            _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? throw new ArgumentNullException(nameof(networkCacheMetadataProvider));
             _userProvidedInstanceDiscoveryUri = userProvidedInstanceDiscoveryUri; // can be null
         }
@@ -78,7 +75,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           Uri authority,
           RequestContext requestContext)
         {
-            var client = new OAuth2Client(requestContext.Logger, _httpManager, _telemetryManager);
+            var client = new OAuth2Client(requestContext.Logger, _httpManager);
 
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority));

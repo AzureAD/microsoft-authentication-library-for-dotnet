@@ -10,11 +10,11 @@ namespace Microsoft.Identity.Client.Instance.Validation
 {
     internal class AadAuthorityValidator : IAuthorityValidator
     {
-        private readonly IServiceBundle _serviceBundle;
+        private readonly RequestContext _requestContext;
 
-        public AadAuthorityValidator(IServiceBundle serviceBundle)
+        public AadAuthorityValidator(RequestContext requestContext)
         {
-            _serviceBundle = serviceBundle;
+            _requestContext = requestContext;
         }
 
         /// <summary>
@@ -23,16 +23,22 @@ namespace Microsoft.Identity.Client.Instance.Validation
         /// MSAL must figure out aliasing even if ValidateAuthority is set to false.
         /// </summary>
         public async Task ValidateAuthorityAsync(
-            AuthorityInfo authorityInfo,
-            RequestContext requestContext)
+            AuthorityInfo authorityInfo)
         {
             var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
-            if (authorityInfo.ValidateAuthority && !KnownMetadataProvider.IsKnownEnvironment(authorityUri.Host))
+            bool isKnownEnv = KnownMetadataProvider.IsKnownEnvironment(authorityUri.Host);
+
+            _requestContext.Logger.Info($"Authority validation enabled? {authorityInfo.ValidateAuthority}. ");
+            _requestContext.Logger.Info($"Authority validation - is known env? {isKnownEnv}. ");
+
+            if (authorityInfo.ValidateAuthority && !isKnownEnv)
             {
+                _requestContext.Logger.Info($"Authority validation is being performed. ");
+
                 // MSAL will throw if the instance discovery URI does not respond with a valid json
-                await _serviceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                                             authorityInfo.CanonicalAuthority,
-                                             requestContext).ConfigureAwait(false);
+                await _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
+                                             authorityInfo,
+                                             _requestContext).ConfigureAwait(false);
             }
         }
     }

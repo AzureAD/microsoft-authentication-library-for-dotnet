@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             mockBroker.GetAccountsAsync(
                 TestConstants.ClientId, 
                 TestConstants.RedirectUri,
-                TestConstants.AuthorityCommonTenant,
+                AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>())
                 .Returns(new[] { expectedAccount });
@@ -300,8 +300,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var expectedAccount = new Account("a.b", "user", "login.windows.net");
             mockBroker.GetAccountsAsync(
                 TestConstants.ClientId, 
-                TestConstants.RedirectUri, 
-                TestConstants.AuthorityCommonTenant, 
+                TestConstants.RedirectUri,
+                AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>() ).Returns(new[] { expectedAccount });
             mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
@@ -338,7 +338,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 mockBroker.GetAccountsAsync(
                     TestConstants.ClientId, 
                     TestConstants.RedirectUri,
-                    TestConstants.AuthorityCommonTenant,
+                    AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     Arg.Any<ICacheSessionManager>(),
                     Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount });
                 mockBroker.IsBrokerInstalledAndInvokable().Returns(false);

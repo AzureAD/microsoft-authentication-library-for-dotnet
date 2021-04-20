@@ -224,8 +224,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         private async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, CancellationToken cancellationToken)
         {
             AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
-            await AuthorityEndpoints.UpdateAuthorityEndpointsAsync(AuthenticationRequestParameters)
-                .ConfigureAwait(false);
+            await AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
 
             var msalTokenResponse = await _silentRequest.SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
                                     .ConfigureAwait(false);

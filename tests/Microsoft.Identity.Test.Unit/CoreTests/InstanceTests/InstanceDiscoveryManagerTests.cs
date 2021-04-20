@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     public class InstanceDiscoveryManagerTests : TestBase
     {
-        private const string Authority = "https://some_env.com/tid";
+        private const string Authority = "https://some_env.com/tid/";
         private INetworkMetadataProvider _networkMetadataProvider;
         private IKnownMetadataProvider _knownMetadataProvider;
         private INetworkCacheMetadataProvider _networkCacheMetadataProvider;
@@ -53,7 +53,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                _harness.ServiceBundle.MatsTelemetryManager,
                 false,
                 null,
                 null,
@@ -89,14 +88,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Arrange
             INetworkMetadataProvider networkMetadataProvider = new NetworkMetadataProvider(
                 Substitute.For<IHttpManager>(),
-                Substitute.For<IMatsTelemetryManager>(),
                 _networkCacheMetadataProvider);
 
             _networkCacheMetadataProvider.GetMetadata("some_env.com", Arg.Any<ICoreLogger>()).Returns(_expectedResult);
 
             _discoveryManager = new InstanceDiscoveryManager(
               _harness.HttpManager,
-              _harness.ServiceBundle.MatsTelemetryManager,
               false,
               null,
               null,
@@ -106,14 +103,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Act
             InstanceDiscoveryMetadataEntry actualResult1 = await _discoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                Authority,
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 new[] { "env1", "env2" },
                 _testRequestContext)
                 .ConfigureAwait(false);
             _networkCacheMetadataProvider.Received(1).GetMetadata("some_env.com", Arg.Any<ICoreLogger>());
 
             InstanceDiscoveryMetadataEntry actualResult2 = await _discoveryManager.GetMetadataEntryAsync(
-                "https://some_env.com/tid",
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 _testRequestContext)
                 .ConfigureAwait(false);
             _networkCacheMetadataProvider.Received(2).GetMetadata("some_env.com", Arg.Any<ICoreLogger>());
@@ -137,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Act
             InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                "https://some_env.com/tid",
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 otherEnvs,
                 _testRequestContext)
                 .ConfigureAwait(false);
@@ -164,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Act
             var actualException = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
             _discoveryManager.GetMetadataEntryAsync(
-                "https://some_env.com/tid",
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 _testRequestContext))
                 .ConfigureAwait(false);
 
@@ -188,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Act
             var actualResult = await _discoveryManager.GetMetadataEntryAsync(
-                "https://some_env.com/tid",
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 _testRequestContext)
                 .ConfigureAwait(false);
 
@@ -213,7 +210,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Act
             var actualResult = await _discoveryManager.GetMetadataEntryAsync(
-                "https://some_env.com/tid",
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 _testRequestContext)
                 .ConfigureAwait(false);
 
@@ -228,7 +225,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Arrange
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                _harness.ServiceBundle.MatsTelemetryManager,
                 false,
                 null,
                 null,
@@ -250,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Act
             InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                "https://some_env.com/tid",
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 otherEnvs,
                 _testRequestContext)
                 .ConfigureAwait(false);
@@ -267,7 +263,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Arrange
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                _harness.ServiceBundle.MatsTelemetryManager,
                 false,
                 _userMetadataProvider,
                 null,
@@ -289,7 +284,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Act
             InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                "https://some_env.com/tid",
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 otherEnvs,
                 _testRequestContext)
                 .ConfigureAwait(false);
@@ -308,7 +303,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                _harness.ServiceBundle.MatsTelemetryManager,
                 false,
                 null,
                 customDiscoveryEndpoint,
@@ -330,7 +324,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Act
             InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                "https://some_env.com/tid",
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 otherEnvs,
                 _testRequestContext)
                 .ConfigureAwait(false);
@@ -364,7 +358,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), requestContext))
                 .Do(x => throw validationException);
 
-            InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryAsync(Authority, requestContext).ConfigureAwait(false);
+            InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryAsync(
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
+                requestContext).ConfigureAwait(false);
 
             // Since the validateAuthority is set to false, proceed without alias. 
             ValidateSingleEntryMetadata(new Uri(Authority), actualResult);
@@ -375,14 +371,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 InstanceDiscoveryMetadataEntry entry = await harness.ServiceBundle.InstanceDiscoveryManager
-                    .GetMetadataEntryAsync(
-                        authority.AbsoluteUri,
+                    .GetMetadataEntryAsync(                    
+                        AuthorityInfo.FromAuthorityUri(authority.AbsoluteUri,true),
                         new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .ConfigureAwait(false);
 
                 InstanceDiscoveryMetadataEntry entry2 = await harness.ServiceBundle.InstanceDiscoveryManager
                     .GetMetadataEntryTryAvoidNetworkAsync(
-                        authority.AbsoluteUri,
+                        AuthorityInfo.FromAuthorityUri(authority.AbsoluteUri, true),
                         new[] { "some_env" },
                         new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .ConfigureAwait(false);

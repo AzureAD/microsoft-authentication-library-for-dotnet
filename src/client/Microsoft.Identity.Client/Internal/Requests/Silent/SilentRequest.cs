@@ -119,10 +119,16 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
             AuthenticationRequestParameters.Account = account;
 
-            AuthenticationRequestParameters.Authority = Authority.CreateAuthorityForRequest(
-                ServiceBundle.Config.AuthorityInfo,
+            // AcquireTokenSilent must not use "common" or "organizations". Instead, use the home tenant id.
+            var tenantedAuthority = Authority.CreateAuthorityForRequest(
+                AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.AuthorityInfo,
                 AuthenticationRequestParameters.AuthorityOverride,
                 account?.HomeAccountId?.TenantId);
+
+            AuthenticationRequestParameters.AuthorityManager = 
+                new AuthorityManager(
+                    AuthenticationRequestParameters.RequestContext,
+                    tenantedAuthority);
         }
 
         private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint)

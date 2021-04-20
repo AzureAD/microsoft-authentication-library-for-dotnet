@@ -4,6 +4,7 @@
 #if !ANDROID && !iOS && !WINDOWS_APP 
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -288,26 +289,49 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public void ValidateAuthorityTest()
+        // Test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2514
+        public async Task AuthorityValidationHappensOnNonRegionalAuthorityAsync()
         {
-            var ex = AssertException.Throws<MsalClientException>(
-                () => ConfidentialClientApplicationBuilder
-                                  .Create(TestConstants.ClientId)
-                                  .WithAuthority(
-                                        new System.Uri(ClientApplicationBase.DefaultAuthority) /* validate is true by default */)
-                                  .WithClientSecret(TestConstants.ClientSecret)
-                                  .WithAzureRegion()
-                                  .Build());
+            using (var httpManager = new MockHttpManager())
+            {
+                var handler = new MockHttpMessageHandler()
+                {
+                    ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                    {
+                        Content = new StringContent(TestConstants.DiscoveryFailedResponse)
+                    }
+                };
 
-            Assert.AreEqual(MsalError.RegionalAuthorityValidation, ex.ErrorCode);
-            
+                httpManager.AddMockHandler(handler);
+
+                var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority("https://invalid.com/common")
+                                 .WithRedirectUri(TestConstants.RedirectUri)
+                                 .WithHttpManager(httpManager)
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build();
+
+                // Act
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.InvalidInstance, ex.ErrorCode);
+                var qp = CoreHelpers.ParseKeyValueList(handler.ActualRequestMessage.RequestUri.Query.Substring(1), '&', true, null);
+                Assert.AreEqual("https://invalid.com/common/oauth2/v2.0/authorize", qp["authorization_endpoint"]);
+            }
         }
 
         private static IConfidentialClientApplication CreateCca(MockHttpManager httpManager, string region)
         {
             var builder = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
-                                 .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), false)
+                                 .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
                                  .WithRedirectUri(TestConstants.RedirectUri)
                                  .WithHttpManager(httpManager)
                                  .WithClientSecret(TestConstants.ClientSecret);

@@ -386,7 +386,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
                     string clientID,
                     string redirectUri,
-                    string authority,
+                    AuthorityInfo authorityInfo,
                     ICacheSessionManager cacheSessionManager,
                     IInstanceDiscoveryManager instanceDiscoveryManager)
         {

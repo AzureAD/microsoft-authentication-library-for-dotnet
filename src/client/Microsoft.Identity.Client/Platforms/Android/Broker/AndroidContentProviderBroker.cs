@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientId,
             string redirectUri,
-            string authority,
+            AuthorityInfo authorityInfo,
             ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {

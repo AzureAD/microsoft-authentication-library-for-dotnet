@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
@@ -63,11 +64,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid());
 
+                var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
+                    requestContext.ServiceBundle.Config.AuthorityInfo, null);                    
+
                 AuthenticationRequestParameters reqParams = new AuthenticationRequestParameters(
                     mocks.ServiceBundle,
                     app.UserTokenCacheInternal,
                     new Client.ApiConfig.Parameters.AcquireTokenCommonParameters(),
-                    requestContext);
+                    requestContext,
+                    authority);
 
                 var accounts = app.UserTokenCacheInternal.GetAccountsAsync(reqParams).Result;
                 foreach (IAccount account in accounts)

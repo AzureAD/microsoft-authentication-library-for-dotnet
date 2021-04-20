@@ -231,16 +231,7 @@ namespace Microsoft.Identity.Client
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
-            }
-
-            if (!string.IsNullOrEmpty(Config.AzureRegion) && Config.AuthorityInfo.ValidateAuthority == true)
-            {
-                throw new MsalClientException(
-                    MsalError.RegionalAuthorityValidation,
-                    "You configured both Regional Authority and Authority Validation. Authority validation is not currently supported for regional Azure authorities." +
-                    "You can set the validateAuthority flag to false to use Azure Regional authority. Do not disable authority validation if you read the authority from an untrusted source, " +
-                    "for example from the WWWAuthenticate header of an HTTP request that resulted in a 401 response. See https://aka.ms/msal-net-regional for details.");                    
-            }
+            }           
         }
 
         /// <summary>

@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 
 namespace Microsoft.Identity.Client
@@ -40,7 +41,9 @@ namespace Microsoft.Identity.Client
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
         /// </Summary>
-        public string Authority => ServiceBundle.Config.AuthorityInfo.CanonicalAuthority;
+        public string Authority => ServiceBundle.Config.AuthorityInfo.CanonicalAuthority; // Do not use in MSAL, use AuthorityInfo instead to avoid re-parsing
+
+        internal AuthorityInfo AuthorityInfo => ServiceBundle.Config.AuthorityInfo;
 
         /// <Summary>
         /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used
@@ -76,11 +79,16 @@ namespace Microsoft.Identity.Client
             RequestContext requestContext,
             ITokenCacheInternal cache)
         {
+            var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
+               requestContext.ServiceBundle.Config.AuthorityInfo,
+               commonParameters.AuthorityOverride);
+
             return new AuthenticationRequestParameters(
                 ServiceBundle,
                 cache,
                 commonParameters,
-                requestContext);
+                requestContext,
+                authority);
         }
 
 #region Accounts
@@ -149,11 +157,16 @@ namespace Microsoft.Identity.Client
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
 
+            var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
+              requestContext.ServiceBundle.Config.AuthorityInfo,
+              null);
+
             var authParameters = new AuthenticationRequestParameters(
                    ServiceBundle,
                    UserTokenCacheInternal,
                    new AcquireTokenCommonParameters() { ApiId = apiId },
                    requestContext,
+                   authority,
                    homeAccountIdFilter);
 
             // a simple session consisting of a single call
@@ -184,7 +197,7 @@ namespace Microsoft.Identity.Client
                     (await broker.GetAccountsAsync(
                         AppConfig.ClientId, 
                         AppConfig.RedirectUri, 
-                        Authority,
+                        AuthorityInfo,
                         cacheSessionManager,
                         ServiceBundle.InstanceDiscoveryManager).ConfigureAwait(false))
                     ?? Enumerable.Empty<IAccount>();
@@ -214,7 +227,7 @@ namespace Microsoft.Identity.Client
                 StringComparer.OrdinalIgnoreCase);
 
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                Authority,
+                AuthorityInfo,
                 allEnvs,
                 CreateRequestContext(Guid.NewGuid())).ConfigureAwait(false);
 

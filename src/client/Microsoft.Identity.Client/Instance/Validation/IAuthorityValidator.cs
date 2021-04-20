@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance.Validation
 {
@@ -12,7 +11,6 @@ namespace Microsoft.Identity.Client.Instance.Validation
         /// Validates the authority. This is specific to each authority type.
         /// </summary>
         Task ValidateAuthorityAsync(
-            AuthorityInfo authorityInfo,
-            RequestContext requestContext);
+            AuthorityInfo authorityInfo);
     }
 }
