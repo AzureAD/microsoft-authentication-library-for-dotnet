@@ -73,11 +73,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             
-            await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common").ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{labResponse.User.TenantId}").ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common", false).ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common", true).ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{labResponse.User.TenantId}", true).ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, string authority)
+        private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, string authority, bool usePkce = false)
         {
             var cert = await s_secretProvider.GetCertificateWithPrivateMaterialAsync(
                 CertificateName, KeyVaultInstance.MsalTeam).ConfigureAwait(false);
@@ -96,9 +97,17 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var cacheAccess = (cca as ConfidentialClientApplication).UserTokenCache.RecordAccess();
 
             Trace.WriteLine("Part 1 - Call GetAuthorizationRequestUrl to figure out where to go ");
-            var startUri = await cca
-                .GetAuthorizationRequestUrl(s_scopes)
-                .ExecuteAsync()
+            var authUriBuilder = cca
+                .GetAuthorizationRequestUrl(s_scopes);
+
+            string codeVerifier = "";
+            if (usePkce)
+            {
+                authUriBuilder.WithPkce(out codeVerifier);
+            }
+
+
+            Uri authUri = await authUriBuilder.ExecuteAsync()
                 .ConfigureAwait(false);
 
             cacheAccess.AssertAccessCounts(0, 0);
@@ -112,7 +121,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             CancellationTokenSource cts = new CancellationTokenSource(s_timeout);
             Uri authCodeUri = await seleniumUi.AcquireAuthorizationCodeAsync(
-                startUri,
+                authUri,
                 new Uri(redirectUri),
                 cts.Token)
                 .ConfigureAwait(false);
@@ -122,6 +131,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Trace.WriteLine("Part 3 - Get a token using the auth code, just like a website");
             var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
+                .WithCodeVerifier(codeVerifier)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client
         /// For more information, see the PKCE RCF:
         /// https://tools.ietf.org/html/rfc7636
         /// </summary>
-        /// <param name="codeVerifier">High-entropy cryptographic random STRING. If null, MSAL.NET will generate it.</param>
+        /// <param name="codeVerifier">MSAL.NET will generate it. </param>
         /// <returns></returns>
         public GetAuthorizationRequestUrlParameterBuilder WithPkce(out string codeVerifier)
         {
