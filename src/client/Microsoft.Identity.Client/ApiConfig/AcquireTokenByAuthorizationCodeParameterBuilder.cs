@@ -93,12 +93,12 @@ namespace Microsoft.Identity.Client
         /// Used to secure authorization code grant via Proof of Key for Code Exchange (PKCE).
         /// See (https://tools.ietf.org/html/rfc7636) for more details.
         /// </summary>
-        /// <param name="PkceCodeVerifier">A dynamically created cryptographically random key used to provide proof of possession for the authorization code.
+        /// <param name="pkceCodeVerifier">A dynamically created cryptographically random key used to provide proof of possession for the authorization code.
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenByAuthorizationCodeParameterBuilder WithPkceCodeVerifier(string PkceCodeVerifier)
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithPkceCodeVerifier(string pkceCodeVerifier)
         {
-            Parameters.PkceCodeVerifier = PkceCodeVerifier;
+            Parameters.PkceCodeVerifier = pkceCodeVerifier;
             return this;
         }
     }
