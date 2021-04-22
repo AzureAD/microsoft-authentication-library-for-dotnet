@@ -40,8 +40,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
 #if NET5_0_OR_GREATER
                 alg = certificate.GetRSAPrivateKey() ?? certificate.GetECDsaPrivateKey() ?? (AsymmetricAlgorithm?)certificate.GetDSAPrivateKey() ?? throw new NotSupportedException("The certificate key algorithm is not supported.");
-#else
+#elif !NETSTANDARD1_3
                 alg = certificate.GetRSAPrivateKey() ?? (AsymmetricAlgorithm)certificate.GetECDsaPrivateKey() ?? throw new NotSupportedException("The certificate key algorithm is not supported.");
+#else
+                alg = certificate.GetRSAPrivateKey() ?? throw new NotSupportedException("The certificate key algorithm is not supported.");
 #endif
             }
 
@@ -50,11 +52,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             {
                 signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             }
+#if !NETSTANDARD1_3
             else if (alg is ECDsa eCDsa)
             {
                 signedData = eCDsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256);
 
             }
+#endif
 #if NET5_0_OR_GREATER
             else if (alg is DSA dsa)
             {
