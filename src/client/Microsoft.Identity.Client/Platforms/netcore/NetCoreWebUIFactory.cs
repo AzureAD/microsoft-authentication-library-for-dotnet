@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
         {
             if (webViewPreference == WebViewPreference.Embedded)
             {
-                throw new MsalClientException(MsalError.WebViewUnavailable,
+                throw new MsalClientException(MsalError.WebviewUnavailable,
                     "If you have a Windows application which targets net5 or net5-windows, please change the target to net5-windows10.0.17763.0, " + 
                         "which provides support from Win7 to Win10. For details, see https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md" +
                     "If you have a cross-platform (Windows, Mac, Linux) application which targets net5, please dual target net5 and net5-windows10.0.17763.0." + 
