@@ -1,9 +1,29 @@
+4.30.0
+==========
+### New Features:
+**Added support for Proof Key for Code Exchange (PKCE) in confidential client authorization code flows**. See issue [#1473](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1473).  
+
+### Bug Fixes:
+**Removed iOS Xamarin workaround for background threads**, as it's no longer needed with fixes done in [Mono](https://github.com/xamarin/xamarin-macios/issues/7080#issuecomment-609945804). See issue [#2556](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2556).  
+**PKeyAuth challenge is now correctly performed on .NET Core, .NET 5, and .NET Standard platforms**. See issue [#2363](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2363).  
+**WebView2 embedded browser now works in an app that executes in a protected directory**. See issue [#2502](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2502).  
+**MSAL.NET now redirects standard and error output streams when starting a system browser on Linux**. See issue [#2427](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2427).  
+**Correct OS version is now sent in `x-client-os` header on .NET classic**. See issue [#2517](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2517).  
+**Fixed a `NotImplementedException` when setting a `ConnectionLeaseTimeout` on Unity**. See issue [#2537](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2537).  
+**Improved the error message when an app is unable to listen to system browser on localhost URL for interactive flow**. See issue [#2219](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2219).  
+**MSAL.NET will now fall back to WebView1 if WebView2 is unavailable** on .NET 5, .NET Core, and .NET classic. See issue [#2495](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2495).  
+**MSAL.NET now, by default, enables a partitioned token serialization cache for client credential flow** to improve performance. See issue [#2544](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2544).  
+**MSAL.NET now validates the domain of a regionalized authority** to enhance usability. See issue [#2514](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2514).  
+
+### Fundamentals:
+**Symbols are now published to //symweb**. See issue [#2497](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2497).  
+
 4.29.0
 ==========
 ### New Features:
 **Added support for calling On-Behalf-Of flow for Service Principals**. See issue [#1845](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1845).  
 **MSAL.NET now supports `Prompt.Create`, which is needed for the self-service sign-up experience with External Identities**. See issue [#2463](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2463) and [documentation](https://aka.ms/msal-net-prompt-create) and learn more [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Acquiring-tokens-interactively#withprompt) about the different ways to control the user interaction.  
-**MSAL.NET now suggests the correct redirect URI to use, if WAM was used with an incorrect URI**. See [#2358](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2358).  
+**MSAL.NET now suggests the correct redirect URI to use, if WAM was used with an incorrect URI**. See issue [#2358](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2358).  
 
 ### Enhancements:
 **Redesigned support for calling regional token services** to increase resilience and API simplicity. See issue [#2508](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2508).  
