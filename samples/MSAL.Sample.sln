@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Travis.TestApp", "Travis.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Common.XamarinAndroid.AndroidX", "..\src\bindings\Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj", "{FB514A7D-5FC0-4217-97FE-55F65A2F31C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindingTestApp1", "Travis.TestApp\BindingTestApp1\BindingTestApp1.csproj", "{68B39692-517B-4987-84AD-365A137C0F24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{FB514A7D-5FC0-4217-97FE-55F65A2F31C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB514A7D-5FC0-4217-97FE-55F65A2F31C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB514A7D-5FC0-4217-97FE-55F65A2F31C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68B39692-517B-4987-84AD-365A137C0F24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68B39692-517B-4987-84AD-365A137C0F24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68B39692-517B-4987-84AD-365A137C0F24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68B39692-517B-4987-84AD-365A137C0F24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,6 +60,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{89AB7AC4-6F5B-4FD2-8551-2BD0696ED2CA} = {15E23B85-08FE-4920-847B-3C6FD4F8D477}
 		{4CE00BAE-A8E0-4544-B8AF-75229A8D63FD} = {96BB07C2-887C-4989-A909-841AE1124E6C}
+		{68B39692-517B-4987-84AD-365A137C0F24} = {96BB07C2-887C-4989-A909-841AE1124E6C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8F6B78A2-90F7-44FF-A18A-BDD966EEBC35}

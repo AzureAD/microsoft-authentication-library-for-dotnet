@@ -1,17 +1,19 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Android.App;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
+using AndroidX.AppCompat.Widget;
 using AndroidX.AppCompat.App;
+using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.Snackbar;
+
+using System.Threading.Tasks;
+
 using Com.Microsoft.Identity.Client;
 using MsalAndroid = Com.Microsoft.Identity.Client;
 
-[assembly: UsesPermission(Android.Manifest.Permission.Internet)]
-
-namespace BindningTestApp
+namespace BindingTestApp1
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
@@ -20,6 +22,13 @@ namespace BindningTestApp
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            SetContentView(Resource.Layout.activity_main);
+
+            Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
+            SetSupportActionBar(toolbar);
+
+            FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
+            fab.Click += FabOnClick;
 
             tryAuth();
         }
@@ -45,14 +54,14 @@ namespace BindningTestApp
             ISingleAccountPublicClientApplication _boundApplication = null;
 
 
-            await Task.Run( () => _boundApplication = SingleAccountPublicClientApplication.CreateSingleAccountPublicClientApplication
-                                                                                (
-                                                                                    Android.App.Application.Context,
-                                                                                    //config
-                                                                                    Resource.Raw.config
-                                                                                )
+            await Task.Run(() => _boundApplication = SingleAccountPublicClientApplication.CreateSingleAccountPublicClientApplication
+                                                                               (
+                                                                                   Android.App.Application.Context,
+                                                                                   //config
+                                                                                   Resource.Raw.config
+                                                                               )
             ).ConfigureAwait(false);
-            
+
 
             AndroidAuthCallback callback = new AndroidAuthCallback();
 
@@ -65,6 +74,45 @@ namespace BindningTestApp
             _boundApplication.AcquireToken(parameters);
             Console.WriteLine("DONE");
             Console.WriteLine(callback.Result);
+        }
+
+        internal class AndroidAuthCallback : global::Java.Lang.Object, MsalAndroid.IAuthenticationCallback
+        {
+            public MsalAndroid.IAuthenticationResult Result { get; set; }
+
+            public void OnCancel()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void OnError(MsalAndroid.Exception.MsalException p0)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void OnSuccess(MsalAndroid.IAuthenticationResult result)
+            {
+                Result = result;
+            }
+        }
+
+        internal class AppListner : global::Java.Lang.Object, MsalAndroid.IPublicClientApplicationApplicationCreatedListener
+        {
+            public MsalAndroid.IPublicClientApplication PublicClientApplication
+            {
+                get;
+                set;
+            }
+
+            public void OnCreated(MsalAndroid.IPublicClientApplication publicClientApplication)
+            {
+                PublicClientApplication = publicClientApplication;
+            }
+
+            public void OnError(MsalAndroid.Exception.MsalException p0)
+            {
+
+            }
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -86,9 +134,9 @@ namespace BindningTestApp
 
         private void FabOnClick(object sender, EventArgs eventArgs)
         {
-            View view = (View) sender;
+            View view = (View)sender;
             Snackbar.Make(view, "Replace with your own action", Snackbar.LengthLong)
-                .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
+                .SetAction("Action", (View.IOnClickListener)null).Show();
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -97,45 +145,5 @@ namespace BindningTestApp
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-	}
-
-    internal class AndroidAuthCallback : global::Java.Lang.Object, MsalAndroid.IAuthenticationCallback
-    {
-        public MsalAndroid.IAuthenticationResult Result { get; set; }
-
-        public void OnCancel()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnError(MsalAndroid.Exception.MsalException p0)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnSuccess(MsalAndroid.IAuthenticationResult result)
-        {
-            Result = result;
-        }
     }
-
-    internal class AppListner : global::Java.Lang.Object, MsalAndroid.IPublicClientApplicationApplicationCreatedListener
-    {
-        public MsalAndroid.IPublicClientApplication PublicClientApplication 
-        { get; 
-            set; }
-
-        public void OnCreated(MsalAndroid.IPublicClientApplication publicClientApplication)
-        {
-            PublicClientApplication = publicClientApplication;
-        }
-
-        public void OnError(MsalAndroid.Exception.MsalException p0)
-        {
-
-        }
-
-        //public void OnError(MsalAndroid.) { }
-    }
-
 }
