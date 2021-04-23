@@ -16,18 +16,14 @@
 				<data android:host="com.azuresamples.msalandroidapp" android:path="/t+Bk/nrTiK6yhmUDgd80TS5ZZT8=" android:scheme="msauth" />
 			</intent-filter>
 		</activity>-->
-
-    <activity android:name="com.microsoft.identity.client.BrowserTabActivity">
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data
-          android:host="com.azuresamples.msalandroidapp"
-          android:path="/i0gj9MxJ7ABJtkaIyUBW4Xszw9Q="
-          android:scheme="msauth" />
-      </intent-filter>
-    </activity>
+		<activity android:name="com.microsoft.identity.client.BrowserTabActivity">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:host="com.azuresamples.msalandroidapp" android:path="/i0gj9MxJ7ABJtkaIyUBW4Xszw9Q=" android:scheme="msauth" />
+			</intent-filter>
+		</activity>
 		<!--
     <activity
       android:name="com.microsoft.identity.common.internal.providers.oauth2.AuthorizationActivity"
