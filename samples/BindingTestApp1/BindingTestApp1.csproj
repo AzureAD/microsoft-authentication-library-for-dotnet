@@ -39,6 +39,7 @@
     <AndroidLinkMode>None</AndroidLinkMode>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 <AndroidLinkTool>r8</AndroidLinkTool>
+<AndroidSupportedAbis>armeabi-v7a;arm64-v8a;x86;x86_64</AndroidSupportedAbis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -136,11 +137,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj">
+    <ProjectReference Include="..\..\src\bindings\Microsoft.Identity.Client.XamarinAndroid.AndroidX\Microsoft.Identity.Client.XamarinAndroid.AndroidX.csproj">
       <Project>{A91B7520-2660-422A-ACD8-48701ED24DE7}</Project>
       <Name>Microsoft.Identity.Client.XamarinAndroid.AndroidX</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\bindings\Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj">
+    <ProjectReference Include="..\..\src\bindings\Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj">
       <Project>{FB514A7D-5FC0-4217-97FE-55F65A2F31C8}</Project>
       <Name>Microsoft.Identity.Common.XamarinAndroid.AndroidX</Name>
     </ProjectReference>

@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Travis.TestApp", "Travis.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Common.XamarinAndroid.AndroidX", "..\src\bindings\Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj", "{FB514A7D-5FC0-4217-97FE-55F65A2F31C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindingTestApp1", "Travis.TestApp\BindingTestApp1\BindingTestApp1.csproj", "{68B39692-517B-4987-84AD-365A137C0F24}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindingTestApp1", "BindingTestApp1\BindingTestApp1.csproj", "{68B39692-517B-4987-84AD-365A137C0F24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
