@@ -347,7 +347,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private string SearializeBundleToJSON(Bundle bundle)
         {
-            return Base64UrlHelpers.Encode(Marshall(bundle));
+            var originalMarshalled = Marshall(bundle);
+            var originalUrlEncoded = Base64UrlHelpers.Encode(originalMarshalled);
+            var originalEncoded = Convert.ToBase64String(originalMarshalled);
+            var originalEqualsEncoded = originalUrlEncoded == originalEncoded;
+            _logger.Info($"[Android broker] originalEqualsEncoded = {originalEqualsEncoded}");
+            _logger.Info($"[Android broker] originalUrlEncoded = {originalUrlEncoded}");
+            _logger.Info($"[Android broker] originalEncoded = {originalEncoded}");
+            return originalEncoded;
         }
 
         private static byte[] Marshall(Bundle parcelable)
