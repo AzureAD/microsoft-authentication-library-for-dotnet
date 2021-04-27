@@ -1,3 +1,8 @@
+4.30.1
+==========
+### Bug Fix:
+**MSAL.NET now correctly does Base64 encoding instead of Base64 URL encoding when interacting with the broker**. See issue [#2554](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2554).
+
 4.30.0
 ==========
 ### New Features:
