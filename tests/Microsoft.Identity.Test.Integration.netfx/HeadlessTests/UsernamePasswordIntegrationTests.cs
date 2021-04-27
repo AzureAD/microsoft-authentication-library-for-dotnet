@@ -143,6 +143,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual(MsalError.RopcDoesNotSupportMsaAccounts, result.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.RopcDoesNotSupportMsaAccounts, result.Message);
+
         }
 
         [TestMethod]
