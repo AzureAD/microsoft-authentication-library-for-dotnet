@@ -1,0 +1,63 @@
+<Project>
+  <PropertyGroup>
+    <_JavaSourceVersion>1.8</_JavaSourceVersion>
+    <_JavaTargetVersion>1.8</_JavaTargetVersion>
+    <_Javac>javac</_Javac>
+    <_Jar>jar</_Jar>
+  </PropertyGroup>
+  <ItemGroup>
+    <_JavaSource Include="java\**\*.java" />
+  </ItemGroup>
+  <ItemGroup>
+    <_JavaSourceOutputs Include="@(_JavaSource->'$(IntermediateOutputPath)classes\%(RelativeDir)%(Filename).class" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_JavaCPAar Include="Jars/msal-2.0.6.aar" />
+    <_JavaCPAar Include="..\Microsoft.Identity.Common.XamarinAndroid.AndroidX\Jars\common-3.0.9.aar" />
+    <_JavaCPAarRefs Include="@(_JavaCPAar->'$(IntermediateOutputPath)\ref\%(Filename).jar')" />
+  </ItemGroup>
+
+  <Target Name="BuildLoadAccountsCallback"
+      DependsOnTargets="_CompileJavaSource"
+      BeforeTargets="GetReferenceAssemblyPaths"
+      Inputs="@(_JavaSourceOutputs)"
+      Outputs="Jars\LoadAccountsCallback.jar">
+    <Delete Files="Jars\LoadAccountsCallback.jar" />
+    <Exec Command="$(_Jar) cf Jars/LoadAccountsCallback.jar -C $(IntermediateOutputPath)/classes ." />
+    <Touch Files="Jars\LoadAccountsCallback.jar" />
+  </Target>
+
+  <Target Name="_CompileJavaSource"
+      DependsOnTargets="_GetJavaDependencies"
+      Inputs="@(_JavaSource)"
+      Outputs="@(_JavaSourceOutputs)">
+    <MakeDir Directories="$(IntermediateOutputPath)classes" />
+    <PropertyGroup>
+      <_Sep Condition=" '$(OS)' == 'Windows_NT' ">%3b</_Sep>
+      <_Sep Condition=" '$(_Sep)' == '' ">:</_Sep>
+      <_CP>-cp "@(_JavaCPAarRefs, '$(_Sep)')"</_CP>
+    </PropertyGroup>
+    <Exec Command="$(_Javac) -source $(_JavaSourceVersion) -target $(_JavaTargetVersion) $(_CP) -d $(IntermediateOutputPath)classes @(_JavaSource, ' ')" />
+  </Target>
+
+  <Target Name="_GetJavaDependencies"
+      Inputs="@(_JavaCPAar)"
+      Outputs="@(_JavaCPAarRefs)">
+    <ItemGroup>
+      <_TmpDirs Include="@(_JavaCPAar->'$(IntermediateOutputPath)ref-%(Filename)')" />
+    </ItemGroup>
+    <MakeDir Directories="$(IntermediateOutputPath)ref" />
+    <MakeDir Directories="@(_TmpDirs)" />
+    <Unzip
+        Sources="@(_JavaCPAar)"
+        DestinationDirectories="@(_TmpDirs)"
+    />
+    <Move
+        SourceFiles="@(_JavaCPAar->'$(IntermediateOutputPath)ref-%(Filename)\classes.jar')"
+        DestinationFiles="@(_JavaCPAarRefs)"
+    />
+    <RemoveDir Directories="@(_TmpDirs)" />
+    <Touch Files="@(_JavaCPAarRefs)" />
+  </Target>
+</Project>
