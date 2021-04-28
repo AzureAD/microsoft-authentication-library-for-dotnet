@@ -37,13 +37,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class PublicClientApplicationTests : TestBase
     {
-        private TokenCacheHelper _tokenCacheHelper;
-
         [TestInitialize]
         public override void TestInitialize()
         {
             base.TestInitialize();
-            _tokenCacheHelper = new TokenCacheHelper();
         }
 
         [TestMethod]
@@ -633,7 +630,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             broker.GetAccountsAsync(
                 TestConstants.ClientId,
                 TestConstants.RedirectUri,
-                TestConstants.AuthorityCommonTenant,
+                Arg.Any<AuthorityInfo>(), 
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount, expectedAccount });
             broker.IsBrokerInstalledAndInvokable().Returns(false);

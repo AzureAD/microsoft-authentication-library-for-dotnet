@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var builder = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
                 .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, GetClaims()))
-                .WithAuthority(PublicCloudTestAuthority, false)
+                .WithAuthority(PublicCloudTestAuthority)
                 .WithTestLogging()
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(factory);

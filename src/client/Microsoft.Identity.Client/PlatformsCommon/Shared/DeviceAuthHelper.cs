@@ -76,7 +76,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public static bool CanOSPerformPKeyAuth()
         {
 #if NET_CORE || NET5_WIN || DESKTOP || NETSTANDARD
-            return !Platforms.Features.DesktopOs.DesktopOsHelper.IsWin10OrServerEquivalent();
+            try
+            {
+                return !Platforms.Features.DesktopOs.DesktopOsHelper.IsWin10OrServerEquivalent();
+            }
+            catch (DllNotFoundException)
+            {
+                // When running mobile UI tests, NETSTANDARD flag is set (instead of the mobile flags), which results in above method throwing the exception.
+                // Catching the exception and returning false, in this case.
+                return false;
+            }
 #else
             return false;
 #endif

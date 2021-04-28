@@ -7,9 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Region;
-using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
@@ -30,7 +28,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal class InstanceDiscoveryManager : IInstanceDiscoveryManager
     {
         private readonly IHttpManager _httpManager;
-        private readonly IMatsTelemetryManager _telemetryManager;
 
         private readonly IUserMetadataProvider _userMetadataProvider;
         private readonly IKnownMetadataProvider _knownMetadataProvider;
@@ -40,13 +37,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public InstanceDiscoveryManager(
           IHttpManager httpManager,
-          IMatsTelemetryManager telemetryManager,
           bool /* for test */ shouldClearCaches,
           InstanceDiscoveryResponse userProvidedInstanceDiscoveryResponse = null,
           Uri userProvidedInstanceDiscoveryUri = null) :
             this(
-                httpManager,
-                telemetryManager,
+                httpManager,                
                 shouldClearCaches,
                 userProvidedInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProvidedInstanceDiscoveryResponse) : null,
                 userProvidedInstanceDiscoveryUri,
@@ -56,7 +51,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public /* public for test */ InstanceDiscoveryManager(
             IHttpManager httpManager,
-            IMatsTelemetryManager telemetryManager,
             bool shouldClearCaches,
             IUserMetadataProvider userMetadataProvider = null,
             Uri userProvidedInstanceDiscoveryUri = null,
@@ -66,7 +60,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             IRegionDiscoveryProvider regionDiscoveryProvider = null)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
-            _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
 
             _userMetadataProvider = userMetadataProvider;
             _knownMetadataProvider = knownMetadataProvider ?? new KnownMetadataProvider();
@@ -75,7 +68,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             _networkMetadataProvider = networkMetadataProvider ??
                 new NetworkMetadataProvider(
                     _httpManager,
-                    _telemetryManager,
                     _networkCacheMetadataProvider,
                     userProvidedInstanceDiscoveryUri);
 
@@ -89,45 +81,43 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryTryAvoidNetworkAsync(
-            string authority,
+            AuthorityInfo authorityInfo,
             IEnumerable<string> existingEnvironmentsInCache,
             RequestContext requestContext)
         {
-            AuthorityType type = Authority.GetAuthorityType(authority);
-            Uri authorityUri = new Uri(authority);
-            string environment = authorityUri.Host;
+            string environment = authorityInfo.Host;
 
-            switch (type)
+            switch (authorityInfo.AuthorityType)
             {
                 case AuthorityType.Aad:
 
                     return
                         _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                        await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
+                        await _regionDiscoveryProvider.GetMetadataAsync(new Uri(authorityInfo.CanonicalAuthority), requestContext).ConfigureAwait(false) ??
                         _networkCacheMetadataProvider.GetMetadata(environment, requestContext.Logger) ??
                         _knownMetadataProvider.GetMetadata(environment, existingEnvironmentsInCache, requestContext.Logger) ??
-                        await GetMetadataEntryAsync(authority, requestContext).ConfigureAwait(false);
+                        await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
 
                 case AuthorityType.Adfs:
                 case AuthorityType.B2C:
 
                     requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority. ");
-                    return await GetMetadataEntryAsync(authority, requestContext).ConfigureAwait(false);
+                    return await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
 
                 default:
-                    throw new InvalidOperationException("Unexpected authority type " + type);
+                    throw new InvalidOperationException("Unexpected authority type " + authorityInfo.AuthorityType);
             }
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
-            string authority,
+            AuthorityInfo authorityInfo,
             RequestContext requestContext)
         {
-            AuthorityType type = Authority.GetAuthorityType(authority);
-            Uri authorityUri = new Uri(authority);
-            string environment = authorityUri.Host;
 
-            switch (type)
+            Uri authorityUri = new Uri(authorityInfo.CanonicalAuthority);
+            string environment = authorityInfo.Host;
+
+            switch (authorityInfo.AuthorityType)
             {
                 case AuthorityType.Aad:
 
@@ -138,7 +128,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     if (entry == null)
                     {
                         string message = "[Instance Discovery] Instance metadata for this authority could neither be fetched nor found. MSAL will continue regardless. SSO might be broken if authority aliases exist. ";
-                        requestContext.Logger.WarningPii(message + "Authority: " + authority, message);
+                        requestContext.Logger.WarningPii(message + "Authority: " + authorityInfo.CanonicalAuthority, message);
 
                         entry = CreateEntryForSingleAuthority(authorityUri);
                     }
@@ -153,7 +143,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     return CreateEntryForSingleAuthority(authorityUri);
 
                 default:
-                    throw new InvalidOperationException("Unexpected authority type " + type);
+                    throw new InvalidOperationException("Unexpected authority type " + authorityInfo.AuthorityType);
             }
         }
 
@@ -176,6 +166,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 // Validate Authority exception
                 if (ex.ErrorCode == MsalError.InvalidInstance)
                 {
+                    requestContext.Logger.Error("[Instance Discovery] Instance discovery failed - invalid instance!");
                     throw;
                 }
 

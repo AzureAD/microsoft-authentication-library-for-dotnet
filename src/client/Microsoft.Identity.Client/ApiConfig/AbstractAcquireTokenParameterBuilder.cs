@@ -384,7 +384,7 @@ namespace Microsoft.Identity.Client
             CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
         }
 
-        internal void ValidateUseOfExpirementalFeature([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
+        internal void ValidateUseOfExperimentalFeature([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
         {
             if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
             {

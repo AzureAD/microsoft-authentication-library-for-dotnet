@@ -438,7 +438,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 authority, qp));
         }
 
-        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(
+        public static MockHttpMessageHandler CreateInstanceDiscoveryMockHandler(
             string discoveryEndpoint,
             string content = TestConstants.DiscoveryJsonResponse)
         {

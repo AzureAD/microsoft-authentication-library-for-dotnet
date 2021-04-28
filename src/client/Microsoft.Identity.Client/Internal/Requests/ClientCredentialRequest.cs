@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
         {
-            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
+            await ResolveAuthorityAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }

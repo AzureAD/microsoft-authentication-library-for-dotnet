@@ -8,14 +8,14 @@ namespace Microsoft.Identity.Client.Instance.Validation
 {
     internal static class AuthorityValidatorFactory
     {
-        public static IAuthorityValidator Create(AuthorityInfo authorityInfo, IServiceBundle serviceBundle)
+        public static IAuthorityValidator Create(AuthorityInfo authorityInfo, RequestContext requestContext)
         {
             switch (authorityInfo.AuthorityType)
             {
                 case AuthorityType.Adfs:
-                    return new AdfsAuthorityValidator(serviceBundle);
+                    return new AdfsAuthorityValidator(requestContext);
                 case AuthorityType.Aad:
-                    return new AadAuthorityValidator(serviceBundle);
+                    return new AadAuthorityValidator(requestContext);
                 case AuthorityType.B2C:
                     return new B2CAuthorityValidator();
                 default:

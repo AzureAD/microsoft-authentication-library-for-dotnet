@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         protected override string InternalGetProcessorArchitecture()
         {
-            return null;
+            return DesktopOsHelper.IsWindows() ? WindowsNativeMethods.GetProcessorArchitecture() : null;
         }
 
         protected override string InternalGetOperatingSystem()

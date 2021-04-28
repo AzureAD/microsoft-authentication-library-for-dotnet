@@ -32,13 +32,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     [TestClass]
     public class SilentRequestTests
     {
-        private TokenCacheHelper _tokenCacheHelper;
-
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
-            _tokenCacheHelper = new TokenCacheHelper();
         }
 
         [TestMethod]
@@ -65,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
-                _tokenCacheHelper.PopulateCache(harness.Cache.Accessor);
+                TokenCacheHelper.PopulateCache(harness.Cache.Accessor);
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
                     null,
@@ -144,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
                 // resul will be from the cache
-                _tokenCacheHelper.PopulateCache(harness.Cache.Accessor,
+                TokenCacheHelper.PopulateCache(harness.Cache.Accessor,
                     TestConstants.Uid,
                     TestConstants.Utid,
                     TestConstants.ClientId,
@@ -266,11 +263,18 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     AuthorityOverride = authorityOverride
                 };
 
+                var requestContext = new RequestContext(ServiceBundle, Guid.NewGuid());
+
+                var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
+                    requestContext.ServiceBundle.Config.AuthorityInfo,
+                    commonParameters.AuthorityOverride);
+
                 var parameters = new AuthenticationRequestParameters(
                     ServiceBundle,
                     cache,
                     commonParameters,
-                    new RequestContext(ServiceBundle, Guid.NewGuid()))
+                    requestContext,
+                    authority)
                 {
                     Account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null),
                 };

@@ -25,6 +25,7 @@ using System.Threading;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Identity.Client.OAuth2;
 
 #if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -35,13 +36,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class ConfidentialClientApplicationTests
     {
         private byte[] _serializedCache;
-        private TokenCacheHelper _tokenCacheHelper;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
-            _tokenCacheHelper = new TokenCacheHelper();
         }
 
         [TestMethod]
@@ -170,7 +169,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                ConfidentialClientApplication app = 
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
@@ -182,21 +182,65 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
+                Assert.AreEqual(1, app.InMemoryPartitionedCacheSerializer.CachePartition.Count);
+                Assert.IsTrue(app.InMemoryPartitionedCacheSerializer.CachePartition.Keys.Single().Contains(TestConstants.Utid));
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithAuthority(TestConstants.AuthorityUtid2Tenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-
-                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
+                Assert.AreEqual(2, app.InMemoryPartitionedCacheSerializer.CachePartition.Count);
+                Assert.IsTrue(app.InMemoryPartitionedCacheSerializer.CachePartition.Keys.Any(k => k.Contains(TestConstants.Utid)));
+                Assert.IsTrue(app.InMemoryPartitionedCacheSerializer.CachePartition.Keys.Any(k => k.Contains(TestConstants.Utid2)));
+
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientCreds_DefaultSerialization_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {                
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                // Will use the partitioned dictionary for token 
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
+                Assert.AreEqual(1, app.InMemoryPartitionedCacheSerializer.CachePartition.Count);
+                Assert.IsTrue(app.InMemoryPartitionedCacheSerializer.CachePartition.Keys.Single().Contains(TestConstants.Utid));
+
+                // memory cache should no longer be used
+                InMemoryTokenCache inMemoryTokenCache = new InMemoryTokenCache();
+                inMemoryTokenCache.Bind(app.AppTokenCache);
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
+                Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
             }
         }
 
         [TestMethod]
         [WorkItem(1403)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1403
-        public async Task FooAsync()
+        public async Task DefaultScopesForS2SAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -648,6 +692,54 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task GetAuthorizationRequestUrlWithPKCETestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                string codeVerifier = string.Empty;
+                var uri = await app
+                    .GetAuthorizationRequestUrl(TestConstants.s_scope)
+                    .WithLoginHint(TestConstants.DisplayableId)
+                    .WithPkce(out codeVerifier)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(uri);
+                Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+                ValidateCommonQueryParams(qp);
+                CollectionAssert.AreEquivalent(
+                    "offline_access openid profile r1/scope1 r1/scope2".Split(' '),
+                    qp["scope"].Split(' '));
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                handler.ExpectedPostData = new Dictionary<string, string>()
+                {
+                    //Ensure that the code verifier is sent along with the auth code request
+                    { "code_verifier", codeVerifier }
+                };
+
+                //Ensure that the code verifier returned matches the codeChallenge returned in the URL
+                var codeChallenge = TestCommon.CreateDefaultServiceBundle().PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(codeVerifier);
+                Assert.AreEqual(codeChallenge, qp[OAuth2Parameter.CodeChallenge]);
+
+                await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .WithPkceCodeVerifier(codeVerifier)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
         public async Task GetAuthorizationRequestUrlDuplicateParamsTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -786,12 +878,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
-                _tokenCacheHelper.PopulateCacheForClientCredential(app.AppTokenCacheInternal.Accessor);
-
-                var accessTokens = await app.AppTokenCacheInternal.GetAllAccessTokensAsync(true).ConfigureAwait(false);
-                var accessTokenInCache = accessTokens
-                                         .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, TestConstants.s_scope))
-                                         .ToList().FirstOrDefault();
+                TokenCacheHelper.PopulateDefaultAppTokenCache(app);
 
                 // Don't add mock to fail in case of network call
                 // If there's a network call by mistake, then there won't be a proper number
@@ -802,6 +889,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+
+                var accessTokens = await app.AppTokenCacheInternal.GetAllAccessTokensAsync(true).ConfigureAwait(false);
+                var accessTokenInCache = accessTokens
+                                         .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, TestConstants.s_scope))
+                                         .ToList().FirstOrDefault();
 
                 Assert.AreEqual(accessTokenInCache.Secret, result.AccessToken);
             }
@@ -825,7 +917,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTelemetry(receiver.HandleTelemetryEvents)
                     .BuildConcrete();
 
-                _tokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
+                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
 
                 // add mock response for successful token retrieval
                 const string TokenRetrievedFromNetCall = "token retrieved from network call";

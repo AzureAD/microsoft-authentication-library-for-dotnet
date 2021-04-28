@@ -48,7 +48,12 @@ namespace Microsoft.Identity.Client.Internal.Broker
             throw new PlatformNotSupportedException();
         }
 
-        Task<IReadOnlyList<IAccount>> IBroker.GetAccountsAsync(string clientID, string redirectUri, string authority, ICacheSessionManager cacheSessionManager, IInstanceDiscoveryManager instanceDiscoveryManager)
+        Task<IReadOnlyList<IAccount>> IBroker.GetAccountsAsync(
+            string clientID, 
+            string redirectUri,             
+            AuthorityInfo authorityInfo,
+            ICacheSessionManager cacheSessionManager, 
+            IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             throw new NotImplementedException();
         }

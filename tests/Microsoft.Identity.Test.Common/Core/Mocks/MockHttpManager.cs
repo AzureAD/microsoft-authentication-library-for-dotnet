@@ -50,11 +50,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
         }
 
-        public void AddMockHandler(HttpMessageHandler handler)
+        public MockHttpMessageHandler AddMockHandler(MockHttpMessageHandler handler)
         {
             string testName = _testContext?.TestName ?? "";
             Trace.WriteLine($"Test {testName} adds an HttpMessageHandler for { GetExpectedUrlFromHandler(handler) }");
             _httpMessageHandlerQueue.Enqueue(handler);
+            return handler;
         }
 
         public int QueueSize => _httpMessageHandlerQueue.Count;
@@ -97,7 +98,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
         {
             return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
-        }
-
+        }      
     }
 }

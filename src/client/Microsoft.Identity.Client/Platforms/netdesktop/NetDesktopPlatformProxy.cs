@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc />
         protected override string InternalGetOperatingSystem()
         {
-            return Environment.OSVersion.ToString();
+            return DesktopOsHelper.GetWindowsVersionString();
         }
 
         /// <inheritdoc />

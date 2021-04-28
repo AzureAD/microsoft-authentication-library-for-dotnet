@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
+            await ResolveAuthorityAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
             var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
             var msalTokenResponse =

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -105,9 +106,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         protected override string InternalGetOperatingSystem()
         {
-            // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check
-            // for existence of specific features which does not help in this case, so we do not emit OS in WinRT.
-            return null;
+            return "Windows 10";
         }
 
         protected override string InternalGetDeviceModel()
@@ -173,7 +172,8 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor() => new InMemoryTokenCacheAccessor(Logger);
 
-        public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage() => new UapTokenCacheBlobStorage(CryptographyManager, Logger);
+        public override ICacheSerializationProvider CreateTokenCacheBlobStorage() => 
+            new DpApiEncryptedFileProvider(CryptographyManager, Logger);
 
         protected override IWebUIFactory CreateWebUiFactory() => new UapWebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();

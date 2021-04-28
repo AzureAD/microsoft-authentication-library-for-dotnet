@@ -204,8 +204,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void TestGetAccounts()
         {
-            var tokenCacheHelper = new TokenCacheHelper();
-
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -216,7 +214,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 IEnumerable<IAccount> accounts = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(accounts);
                 Assert.IsFalse(accounts.Any());
-                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 
                 accounts = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(accounts);
@@ -305,14 +303,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task TestAccountAcrossMultipleClientIdsAsync()
         {
             // Arrange
-            var tokenCacheHelper = new TokenCacheHelper();
+            
             PublicClientApplication app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             // Populate with tokens tied to ClientId2
-            tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: TestConstants.ClientId2);
+            TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: TestConstants.ClientId2);
             var cacheAccessRecorder = app.UserTokenCache.RecordAccess();
 
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
@@ -332,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
 
             // Populate for clientid2
-            tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: TestConstants.ClientId);
+            TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: TestConstants.ClientId);
 
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
                 expectedAtCount: 4,
@@ -365,8 +363,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(TestConstants.ClientId)
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
-            var tokenCacheHelper = new TokenCacheHelper();
-            tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+            
+            TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
             foreach (var user in app.GetAccountsAsync().Result)
             {

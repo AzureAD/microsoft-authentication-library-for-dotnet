@@ -14,14 +14,19 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
     internal static class DesktopOsHelper
     {
         private static Lazy<bool> s_win10OrServerEquivalentLazy = new Lazy<bool>(
-           () => IsWin10OrServerEquivalentInternal()); 
+           () => IsWin10OrServerEquivalentInternal());
         private static Lazy<bool> s_win10Lazy = new Lazy<bool>(
             () => IsWin10Internal());
+        private static Lazy<string> s_winVersionLazy = new Lazy<string>(
+            () => GetWindowsVersionStringInternal());
 
         public static bool IsWindows()
         {
+
 #if DESKTOP
             return Environment.OSVersion.Platform == PlatformID.Win32NT;
+#elif ANDROID || iOS
+            return false;
 #else
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 #endif
@@ -29,28 +34,18 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
         private static bool IsWin10OrServerEquivalentInternal()
         {
-            //Environment.OSVersion as it will return incorrect information on some operating systems
-            //For more information on how to acquire the current OS version from the registry
-            //See (https://stackoverflow.com/a/61914068)
-#if DESKTOP
-            var reg = Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+            if (IsWindows())
+            {
+                string winVersion = GetWindowsVersionString();
 
-            string OSInfo = (string)reg.GetValue("ProductName");
+                if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase) ||
+                    winVersion.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase) ||
+                    winVersion.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
 
-            if (OSInfo.Contains("Windows 10", StringComparison.InvariantCultureIgnoreCase) ||
-                OSInfo.Contains("Windows Server 2016", StringComparison.InvariantCultureIgnoreCase) ||
-                OSInfo.Contains("Windows Server 2019", StringComparison.InvariantCultureIgnoreCase))
-            {                
-                return true;
-            }
-#else
-            if (RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.OrdinalIgnoreCase)
-                || RuntimeInformation.OSDescription.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase)
-                || RuntimeInformation.OSDescription.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
-            {               
-                return true;
-            }
-#endif     
             return false;
         }
 
@@ -61,6 +56,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
         private static bool IsWin10Internal()
         {
+            if (IsWindows())
+            {
+                string winVersion = GetWindowsVersionString();
+
+                if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static string GetWindowsVersionStringInternal()
+        {
             //Environment.OSVersion as it will return incorrect information on some operating systems
             //For more information on how to acquire the current OS version from the registry
             //See (https://stackoverflow.com/a/61914068)
@@ -69,20 +79,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
             string OSInfo = (string)reg.GetValue("ProductName");
 
-            if (OSInfo.Contains("Windows 10", StringComparison.InvariantCultureIgnoreCase))             
+            if (string.IsNullOrEmpty(OSInfo))
             {
-                return true;
+                return Environment.OSVersion.ToString();
             }
+
+            return OSInfo;
 #else
-            if (RuntimeInformation.OSDescription.Contains("Windows 10", StringComparison.OrdinalIgnoreCase))               
-            {               
-                return true;
-            }
-#endif     
-            return false;
+            return RuntimeInformation.OSDescription;           
+#endif
         }
 
-       
+        public static string GetWindowsVersionString()
+        {
+            return s_winVersionLazy.Value;
+        }
 
         public static bool IsWin10OrServerEquivalent()
         {

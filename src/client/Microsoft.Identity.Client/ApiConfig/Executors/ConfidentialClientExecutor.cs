@@ -113,12 +113,19 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestParameters.RedirectUri = new Uri(authorizationRequestUrlParameters.RedirectUri);
             }
 
-            await AuthorityEndpoints.UpdateAuthorityEndpointsAsync(requestParameters).ConfigureAwait(false);
+            await requestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);            
             var handler = new AuthCodeRequestComponent(
                 requestParameters,
                 authorizationRequestUrlParameters.ToInteractiveParameters());
 
-            return handler.GetAuthorizationUriWithoutPkce();
+            if (authorizationRequestUrlParameters.CodeVerifier != null)
+            {
+                return handler.GetAuthorizationUriWithPkce(authorizationRequestUrlParameters.CodeVerifier);
+            }
+            else
+            {
+                return handler.GetAuthorizationUriWithoutPkce();
+            }
         }
     }
 }

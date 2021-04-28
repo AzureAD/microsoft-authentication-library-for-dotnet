@@ -619,7 +619,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// The selected WebView is not available on this platform. You can switch to a different WebView using <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/>. See https://aka.ms/msal-net-os-browser for details
         /// </summary>
-        public const string WebViewUnavailable = "no_system_webview";
+        public const string WebviewUnavailable = "no_system_webview";
 
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
         /// <summary>
@@ -959,5 +959,9 @@ namespace Microsoft.Identity.Client
         ///  </summary>
         public const string RegionalAuthorityValidation = "regional_authority_validation";
 
+        /// <summary>
+        /// An HttpListenerException occurred while listening for the system browser to complete the login.
+        /// </summary>
+        public const string HttpListenerError = "http_listener_error";
     }
 }

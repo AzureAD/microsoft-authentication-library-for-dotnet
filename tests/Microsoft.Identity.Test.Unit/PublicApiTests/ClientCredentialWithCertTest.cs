@@ -25,13 +25,10 @@ namespace Microsoft.Identity.Test.Unit
     [DeploymentItem(@"Resources\RSATestCertDotNet.pfx")]
     public class ConfidentialClientWithCertTests : TestBase
     {
-        private TokenCacheHelper _tokenCacheHelper;
-
         [TestInitialize]
         public override void TestInitialize()
         {
             base.TestInitialize();
-            _tokenCacheHelper = new TokenCacheHelper();
         }
 
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(bool clientCredentialFlow)
@@ -288,7 +285,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate).BuildConcrete();
 
-                _tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
+                TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 

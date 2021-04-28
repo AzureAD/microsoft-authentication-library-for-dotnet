@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         /// </summary>
         public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientID,
-            string authority, 
+            AuthorityInfo authorityInfo, 
             ICacheSessionManager cacheSessionManager, 
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {

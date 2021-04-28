@@ -136,6 +136,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ImdsUrl = "http://169.254.169.254/metadata/instance/compute/location";
 
         public const string UserAssertion = "fake_access_token";
+        public const string CodeVerifier = "someCodeVerifier";
 
         //This value is only for testing purposes. It is for a certificate that is not used for anything other than running tests
         public const string _defaultx5cValue = @"MIIDHzCCAgegAwIBAgIQM6NFYNBJ9rdOiK+C91ZzFDANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwHhcNMTIwNTIyMj
@@ -291,6 +292,16 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                                 ""login-us.microsoftonline.com""]}
                         ]
                 }";
+
+        public const string DiscoveryFailedResponse =
+            @"{""error"":""invalid_instance"",
+               ""error_description"":""AADSTS50049: Unknown or invalid instance.\r\nTrace ID: 82e709b9-f0b3-431d-99cd-f3c2ca3d4b00\r\nCorrelation ID: e7619cf4-53ea-443c-b76a-194c032e9840\r\nTimestamp: 2021-04-14 11:27:26Z"",
+               ""error_codes"":[50049],
+               ""timestamp"":""2021-04-14 11:27:26Z"",
+               ""trace_id"":""82e709b9-f0b3-431d-99cd-f3c2ca3d4b00"",
+               ""correlation_id"":""e7619cf4-53ea-443c-b76a-194c032e9840"",
+               ""error_uri"":""https://login.microsoftonline.com/error?code=50049""}";
+        
 
         public const string TokenResponseJson = @"{
                                                    ""token_type"": ""Bearer"",

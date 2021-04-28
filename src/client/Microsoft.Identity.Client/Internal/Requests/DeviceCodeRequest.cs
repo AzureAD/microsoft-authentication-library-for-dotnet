@@ -27,9 +27,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
+            await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            var client = new OAuth2Client(ServiceBundle.DefaultLogger, ServiceBundle.HttpManager, ServiceBundle.MatsTelemetryManager);
+            var client = new OAuth2Client(ServiceBundle.DefaultLogger, ServiceBundle.HttpManager);
 
             var deviceCodeScopes = new HashSet<string>();
             deviceCodeScopes.UnionWith(AuthenticationRequestParameters.Scope);
