@@ -160,7 +160,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInCacheInMs > 0);
 
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
