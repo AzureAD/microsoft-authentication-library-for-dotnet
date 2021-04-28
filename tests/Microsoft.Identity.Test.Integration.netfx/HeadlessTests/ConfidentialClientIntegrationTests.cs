@@ -150,6 +150,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
+            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
@@ -159,7 +161,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             MsalAssert.AssertAuthResult(authResult);
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
+            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs == 0);
 
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
