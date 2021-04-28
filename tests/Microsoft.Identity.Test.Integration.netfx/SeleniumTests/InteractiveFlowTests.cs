@@ -210,7 +210,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
             Assert.IsTrue(result.AuthenticationResultMetadata.DurationInHttpInMs > 0);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
 
             userCacheAccess.AssertAccessCounts(0, 1);
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
