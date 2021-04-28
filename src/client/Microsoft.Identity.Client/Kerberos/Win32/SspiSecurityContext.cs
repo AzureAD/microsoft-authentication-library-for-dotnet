@@ -12,6 +12,8 @@ using static Microsoft.Identity.Client.Kerberos.Win32.NativeMethods;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
+// This workaround required for Native Win32 API call
+#pragma warning disable 618
     internal partial class SspiSecurityContext : IDisposable
     {
         private const int SECPKG_CRED_BOTH = 0x00000003;
@@ -28,16 +30,6 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                                     InitContextFlag.Delegate |
                                     InitContextFlag.InitExtendedError;
 
-        private const AcceptContextFlag DefaultServerRequiredFlags =
-                                    AcceptContextFlag.Connection |
-                                    AcceptContextFlag.ReplayDetect |
-                                    AcceptContextFlag.SequenceDetect |
-                                    AcceptContextFlag.Confidentiality |
-                                    AcceptContextFlag.AllocateMemory |
-                                    AcceptContextFlag.Delegate |
-                                    AcceptContextFlag.AcceptStream |
-                                    AcceptContextFlag.AcceptExtendedError;
-
         private readonly HashSet<object> disposable = new HashSet<object>();
 
         private readonly Credential credential;
@@ -45,15 +37,18 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
         private SECURITY_HANDLE credentialsHandle;
         private SECURITY_HANDLE securityContext;
+        private long logonId;
 
         public SspiSecurityContext(
             Credential credential,
             string package,
+            long logonId = 0,
             InitContextFlag clientFlags = DefaultRequiredFlags)
         {
             this.credential = credential;
             this.clientFlags = clientFlags;
             this.Package = package;
+            this.logonId = logonId;
         }
 
         public string Package { get; private set; }
@@ -151,12 +146,17 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             CredentialHandle creds = this.credential.Structify();
 
             this.TrackUnmanaged(creds);
-
+            IntPtr authIdPtr = IntPtr.Zero;
+            if (this.logonId != 0)
+            {
+                authIdPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(long)));
+                Marshal.StructureToPtr(this.logonId, authIdPtr, false);
+            }
             SecStatus result = AcquireCredentialsHandle(
                                     null,
                                     this.Package,
                                     SECPKG_CRED_BOTH,
-                                    IntPtr.Zero,
+                                    authIdPtr,
                                     (void*)creds.DangerousGetHandle(),
                                     IntPtr.Zero,
                                     IntPtr.Zero,
@@ -192,4 +192,6 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             }
         }
     }
+
+#pragma warning restore 618
 }

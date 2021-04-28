@@ -10,6 +10,26 @@ using System.Globalization;
 
 namespace KerberosConsole
 {
+    /// <summary>
+    /// It is a sample console program to show the primary usage of the Azure AD Kerberos Feature.
+    /// Usages:
+    ///     KerberosConsole -h
+    ///         show usage format
+    ///     KerberosConsole -cached
+    ///         find cached Kerberos Ticket with default name defined in the sample application.
+    ///     KerberosConsole -cached -spn {spn name}
+    ///         find cached Kerberos ticket matched with given {spn name}
+    ///     KerberosConsole
+    ///         acquire an authentication token, retrieves the Kerberos Ticket, and cache it into the
+    ///         current user's Windows Ticket Cache. You can check cached ticket information with "klist" 
+    ///         utility command or "KerberosConsole -cached" command.
+    ///     KerberosConsole -spn {spn name} -tenantId { tid} -clientId { cid}
+    ///         acquire an authentication token with your application configuration.
+    /// Note:
+    ///     This application uses the Kerberos.NET package to show detailed information of a cached 
+    ///     Kerberos Ticket. You can get detailed information for the Kerberos.NET package here:
+    ///         https://www.nuget.org/packages/Kerberos.NET/
+    /// </summary>
     class Program
     {
         private string TenantId = "428881af-9ab1-40b3-8158-3611358fff68";
@@ -28,7 +48,7 @@ namespace KerberosConsole
         public static void Main(string[] args)
         {
             Program program = new Program();
-            if (args.Length > 0 && !program.Parse(args))
+            if (args.Length > 0 && !program.ParseCommandLineArguments(args))
             {
                 return;
             }
@@ -42,7 +62,13 @@ namespace KerberosConsole
              program.AcquireKerberosTicket();
         }
 
-        public bool Parse(string[] args)
+        /// <summary>
+        /// Parse the command line arguments and set internal parameters with supplied value.
+        /// </summary>
+        /// <param name="args">List of commandline arguments.</param>
+        /// <returns>True if argument parsing completed. False, if there's an error detected.</returns>
+
+        public bool ParseCommandLineArguments(string[] args)
         {
             for (int i = 0; i < args.Length; i++)
             {
@@ -89,7 +115,7 @@ namespace KerberosConsole
                     ++i;
                     try
                     {
-                        LogonId = long.Parse(args[1], NumberStyles.None | NumberStyles.AllowHexSpecifier, NumberFormatInfo.InvariantInfo);
+                        LogonId = long.Parse(args[i], NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo);
                     }
                     catch (Exception ex)
                     {
@@ -108,6 +134,12 @@ namespace KerberosConsole
             return true;
         }
 
+        /// <summary>
+        /// Acquire an authentication token.
+        /// If a valid token recevied, then show the received token information with included Kerberos Ticket.
+        /// If IdToken is used for token container, cached the received Kerberos Ticket into current user's
+        /// Windows Ticket Cache.
+        /// </summary>
         public void AcquireKerberosTicket()
         {
             Console.WriteLine("Acquiring authentication token ...");
@@ -122,11 +154,17 @@ namespace KerberosConsole
             ShowCachedTicket();
         }
 
+        /// <summary>
+        /// Checks there's a Kerberos Ticket in current user's Windows Ticket Cache matched with the service principal name.
+        /// If there's a valid ticket, then show the Ticket Information on the console.
+        /// </summary>
+        /// <returns></returns>
         public bool ShowCachedTicket()
         {
             try
             {
-                byte[] ticket = KerberosSupplementalTicketManager.GetKerberosTicketFromCache(KerberosServicePrincipalName, LogonId);
+                byte[] ticket
+                    = KerberosSupplementalTicketManager.GetKerberosTicketFromCache(KerberosServicePrincipalName, LogonId);
                 if (ticket != null && ticket.Length > 32)
                 {
                     var encode = Convert.ToBase64String(ticket);
@@ -149,6 +187,9 @@ namespace KerberosConsole
             return false;
         }
 
+        /// <summary>
+        /// Shows the program usages.
+        /// </summary>
         private static void ShowUsages()
         {
             Console.WriteLine("KerberosConsole {option}");
@@ -159,10 +200,16 @@ namespace KerberosConsole
             Console.WriteLine("    -redirectUri {uri} : set redirectUri for OAuth2 authentication.");
             Console.WriteLine("    -scopes {scopes} : list of scope separated by space.");
             Console.WriteLine("    -cached : check cached ticket first.");
-            Console.WriteLine("    -luid {loginId} : sets login id of current user.");
+            Console.WriteLine("    -luid {loginId} : sets login id of current user with HEX format.");
             Console.WriteLine("    -h : show help for command options");
         }
 
+        /// <summary>
+        /// Checks there's a valid Kerberos Ticket information within the received authentication token.
+        /// If there's a valid one, show the ticket information and cache it into current user's
+        /// Windows Ticket Cache so that it can be shared with other Kerberos-aware applications.
+        /// </summary>
+        /// <param name="result">The <see cref="AuthenticationResult"/> from token request.</param>
         private void GetAndCacheKerberosTicket(AuthenticationResult result)
         {
             KerberosSupplementalTicket ticket;
@@ -213,14 +260,18 @@ namespace KerberosConsole
             }
         }
 
+        /// <summary>
+        /// Acquire an authentication token.
+        /// </summary>
+        /// <param name="showTokenInfo">Set true to show the acuired token information.</param>
+        /// <returns></returns>
         private AuthenticationResult AcquireToken(bool showTokenInfo)
         {
             // 1. Setup application to get Kerberos Ticket with Service Principal name and ticket container parameter.
             var app = PublicClientApplicationBuilder.Create(ClientId)
                 .WithTenantId(TenantId)
                 .WithRedirectUri(RedirectUri)
-                .WithKerberosServicePrincipal(KerberosServicePrincipalName)
-                .WithKerberosTicketContainer(TicketContainer)
+                .WithKerberosTicketClaim(KerberosServicePrincipalName, TicketContainer)
                 .WithLogging(LogDelegate, LogLevel.Verbose, true, true)
                 .Build();
 
@@ -261,6 +312,10 @@ namespace KerberosConsole
             }
         }
 
+        /// <summary>
+        /// Shows the account information included in the authentication result.
+        /// </summary>
+        /// <param name="account">The <see cref="IAccount"/> information to display.</param>
         private void ShowAccount(IAccount account)
         {
             AADKerberosLogger.Save("                 Username: " + account.Username);
@@ -270,6 +325,14 @@ namespace KerberosConsole
             AADKerberosLogger.Save("  Home Account Identifier: " + account.HomeAccountId.Identifier);
         }
 
+        /// <summary>
+        /// Callback to receive logging message for internal operation of the MSAL.
+        /// Show the received message to the console and save to the logging file.
+        /// </summary>
+        /// <param name="level">Log level of the log message to process</param>
+        /// <param name="message">Pre-formatted log message</param>
+        /// <param name="containsPii">Indicates if the log message contains Organizational Identifiable Information (OII)
+        /// or Personally Identifiable Information (PII) nor not.</param>
         private static void LogDelegate(LogLevel level, string message, bool containsPii)
         {
             AADKerberosLogger.Save(message);

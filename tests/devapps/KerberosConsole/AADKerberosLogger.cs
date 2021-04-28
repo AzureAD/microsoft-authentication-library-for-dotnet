@@ -11,6 +11,7 @@ namespace KerberosConsole
 {
     /// <summary>
     /// Helper to provide internal tracking log for debugging.
+    /// Shows the message to the console and save to internal log file under 'Documents' folder.
     /// </summary>
     public static class AADKerberosLogger
     {
@@ -139,6 +140,11 @@ namespace KerberosConsole
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Shows given binary data with HEX display format as following format:
+        ///     1C 4B 45 52 42 45 52 4F 53 2E 4D 49 43 52 4F 53 *KERBEROS.MICROS
+        /// </summary>
+        /// <param name="dataToPrint">Array of binary data to be displayed.</param>
         public static void PrintBinaryData(byte[] dataToPrint)
         {
             char[] line = new char[256];

@@ -25,12 +25,14 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// Creates a <see cref="TicketCacheReader"/> object to read a Kerberos Ticket from Ticket Cache.
         /// </summary>
         /// <param name="spn">Service principal name of ticket to read out from Ticket Cache.</param>
+        /// <param name="logonId">The Logon Id of the user owning the ticket cache.
+        /// The default of 0 represents the currently logged on user.</param>
         /// <param name="package">The name of the LSA authentication package that will be interacted with.</param>
-        public TicketCacheReader(string spn, string package = "Kerberos")
+        public TicketCacheReader(string spn, long logonId = 0, string package = "Kerberos")
         {
             this.spn = spn;
 
-            this.context = new SspiSecurityContext(Credential.Current(), package);
+            this.context = new SspiSecurityContext(Credential.Current(), package, logonId);
         }
 
 

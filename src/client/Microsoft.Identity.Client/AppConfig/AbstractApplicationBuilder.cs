@@ -383,8 +383,7 @@ namespace Microsoft.Identity.Client
                 applicationOptions.EnablePiiLogging,
                 applicationOptions.IsDefaultPlatformLoggingEnabled);
 
-            WithKerberosServicePrincipal(applicationOptions.KerberosServicePrincipalName);
-            WithKerberosTicketContainer(applicationOptions.TicketContainer);
+            WithKerberosTicketClaim(applicationOptions.KerberosServicePrincipalName, applicationOptions.TicketContainer);
 
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
@@ -467,23 +466,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the Azure AD Kerberos Service Principal name.
+        /// Sets the parameters required to get a Kerberos Ticket from Azure AD service.
         /// </summary>
         /// <param name="servicePrincipalName">Service principal name to get Kerberos Service Ticket.</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithKerberosServicePrincipal(string servicePrincipalName)
-        {
-            Config.KerberosServicePrincipalName = servicePrincipalName;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Sets the container to place the Kerberos Ticket.
-        /// </summary>
         /// <param name="ticketContainer">Container to use for Kerberos Ticket.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithKerberosTicketContainer(KerberosTicketContainer ticketContainer)
+        public T WithKerberosTicketClaim(string servicePrincipalName, KerberosTicketContainer ticketContainer)
         {
+            Config.KerberosServicePrincipalName = servicePrincipalName;
             Config.TicketContainer = ticketContainer;
             return (T)this;
         }

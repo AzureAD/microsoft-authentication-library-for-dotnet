@@ -11,10 +11,21 @@ using System;
 namespace KerberosConsole
 {
     /// <summary>
-    /// Utility class to check Kerberos Ticket
+    /// Utility class to handle the Kerberos Ticket.
+    /// The Kerberos.NET package is used to show detailed internal structure of a Kerberos Ticket.
+    /// You can get detailed information for the Kerberos.NET package here:
+    ///    https://www.nuget.org/packages/Kerberos.NET/
     /// </summary>
     public class TicketDecoder
     {
+        /// <summary>
+        /// Shows the Kerberos Ticket included in an authentication token with KrbCred format
+        /// which is used to transfer Kerberos credentials between applications.
+        /// Reference: 
+        ///     The Unencrypted Form of Kerberos 5 KRB-CRED Message
+        ///     https://tools.ietf.org/html/rfc6448
+        /// </summary>
+        /// <param name="message"></param>
         internal void ShowKrbCredTicket(string message)
         {
             var krbAsRepBytes = Convert.FromBase64String(message);
@@ -69,6 +80,14 @@ namespace KerberosConsole
             }
         }
 
+        /// <summary>
+        /// Shows the internal information of a cached Kerberos Ticket in current user's Windows Ticket Cache
+        /// with KRB_AP_REQ format.
+        /// Reference:
+        ///     The Kerberos Network Authentication Service (V5)
+        ///     https://tools.ietf.org/html/rfc4120#section-3.2.1
+        /// </summary>
+        /// <param name="messaage"></param>
         internal void ShowApReqTicket(string messaage)
         {
             var tokenBytes = System.Convert.FromBase64String(messaage);
