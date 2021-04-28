@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string authority = overridenAuthority ??
                  authenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority;
             bool validate = authenticationRequestParameters.AuthorityInfo.ValidateAuthority;
-            AddAuthorityParamToRequest(authority, validate, webTokenRequest); ;
+            AddAuthorityParamToRequest(authority, validate, webTokenRequest);
         }
 
         internal static MsalTokenResponse CreateMsalResponseFromWamResponse(
