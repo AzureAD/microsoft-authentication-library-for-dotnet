@@ -145,6 +145,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string HomeAccountId { get; }
 
+        public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 
         public bool IsClientCredentialRequest => ApiId == ApiEvent.ApiIds.AcquireTokenForClient;
         public bool IsConfidentialClient

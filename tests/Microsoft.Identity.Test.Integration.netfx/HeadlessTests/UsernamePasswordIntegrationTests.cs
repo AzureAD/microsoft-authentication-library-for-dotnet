@@ -267,6 +267,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
             AssertTelemetryHeaders(factory, false, labResponse);
+            AssertCCSRoutingInformationIsSent(factory, labResponse);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
@@ -274,6 +275,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
+        }
+
+        private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
+        {
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == labResponse.Lab.Authority + "organizations/oauth2/v2.0/token" &&
+            x.Item2.StatusCode == HttpStatusCode.OK);
+
+            var CCSHeader = req.Headers.Single(h => h.Key == "X-AnchorMailbox").Value.FirstOrDefault();
+
+            Assert.AreEqual($@":""upn:<{labResponse.User.Upn}>""", CCSHeader);
         }
 
         private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, LabResponse labResponse)

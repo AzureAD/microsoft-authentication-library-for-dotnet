@@ -27,5 +27,15 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
                 .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true)
                 .WithHttpClientFactory(httpClientFactory);            
         }
+
+        internal static PublicClientApplicationBuilder WithTestLogging(this PublicClientApplicationBuilder builder, out HttpSnifferClientFactory factory)
+        {
+            factory = new HttpSnifferClientFactory();
+
+            return builder
+                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true)
+                .WithHttpClientFactory(factory);
+
+        }
     }
 }

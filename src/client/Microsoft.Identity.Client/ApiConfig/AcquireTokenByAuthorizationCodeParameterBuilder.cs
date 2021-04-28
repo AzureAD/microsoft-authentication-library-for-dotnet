@@ -101,5 +101,16 @@ namespace Microsoft.Identity.Client
             Parameters.PkceCodeVerifier = pkceCodeVerifier;
             return this;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="extraHttpHeaders"></param>
+        /// <returns></returns>
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithExtraHttpHeaders(IDictionary<string, string> extraHttpHeaders)
+        {
+            CommonParameters.ExtraHttpHeaders = extraHttpHeaders;
+            return this;
+        }
     }
 }

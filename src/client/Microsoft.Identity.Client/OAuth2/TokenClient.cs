@@ -161,6 +161,44 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
             }
+
+            if (_requestParams.Account != null && _requestParams.Account.HomeAccountId != null)
+            {
+                if (!String.IsNullOrEmpty(_requestParams.Account.HomeAccountId.Identifier))
+                {
+                    var userObjectId = _requestParams.Account.HomeAccountId.ObjectId;
+                    var userTenantID = _requestParams.Account.HomeAccountId.TenantId;
+                    string OidCCSHeader = $@":""oid:<{userObjectId}>@<{userTenantID}>""";
+
+                    _oAuth2Client.AddHeader(Constants.OidCCSHeader, OidCCSHeader);
+                }
+                else if (!String.IsNullOrEmpty(_requestParams.Account.Username))
+                {
+                    AddCCSUpnHeader(_requestParams.Account.Username);
+                }
+            }
+            else if (additionalBodyParameters.ContainsKey(OAuth2Parameter.Username))
+            {
+                AddCCSUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
+            }
+            else if (!String.IsNullOrEmpty(_requestParams.LoginHint))
+            {
+                AddCCSUpnHeader(_requestParams.LoginHint);
+            }
+
+            if (_requestParams.ExtraHttpHeaders != null)
+            {
+                foreach (KeyValuePair<string, string> pair in _requestParams.ExtraHttpHeaders)
+                {
+                    _oAuth2Client.AddHeader(pair.Key, pair.Value);
+                }
+            }
+        }
+
+        private void AddCCSUpnHeader(string upnHeader)
+        {
+            string OidCCSHeader = $@":""upn:<{upnHeader}>""";
+            _oAuth2Client.AddHeader(Constants.OidCCSHeader, OidCCSHeader);
         }
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
