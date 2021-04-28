@@ -110,7 +110,10 @@ namespace Microsoft.Identity.Client.OAuth2
                         cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
                 }
 
-                requestContext.ApiEvent.TimeSpentInHttp += _httpManager.LastRequestTime;
+                if (requestContext.ApiEvent != null)
+                {
+                    requestContext.ApiEvent.DurationInHttpInMs += _httpManager.LastRequestDurationInMs;
+                }
 
                 DecorateHttpEvent(method, requestContext, response, httpEvent);
 

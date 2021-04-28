@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Http
 {
     internal interface IHttpManager
     {
-        long LastRequestTime { get; }
+        long LastRequestDurationInMs { get; }
 
         Task<HttpResponse> SendPostAsync(
             Uri endpoint,

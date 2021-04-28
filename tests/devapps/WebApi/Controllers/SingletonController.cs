@@ -47,7 +47,7 @@ namespace WebApi.Controllers
                  .WithForceRefresh(!cacheHit)
                  .ExecuteAsync().ConfigureAwait(false);
 
-            return res.AuthenticationResultMetadata.TimeSpentInTotal;
+            return res.AuthenticationResultMetadata.DurationTotalInMs;
         }
     }
 }

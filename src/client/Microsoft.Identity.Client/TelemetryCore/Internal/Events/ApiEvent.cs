@@ -245,13 +245,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             set => this[CacheInfoKey] = value.ToString(CultureInfo.InvariantCulture);
         }
 
-        public long TimeSpentInHttp
+        public long DurationInHttpInMs
         {
             get;
             set;
         }
 
-        public long TimeSpentInCache
+        public long DurationInCacheInMs
         {
             get;
             set;

@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Cache
 
                                     stopwatch.Start();
                                     await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
-                                    RequestContext.ApiEvent.TimeSpentInCache += stopwatch.ElapsedMilliseconds;                                    
+                                    RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;                                    
                                 }
                                 finally
                                 {
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client.Cache
                                     stopwatch.Reset();
                                     stopwatch.Start();
                                     await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
-                                    RequestContext.ApiEvent.TimeSpentInCache += stopwatch.ElapsedMilliseconds;
+                                    RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
 
                                 }
 

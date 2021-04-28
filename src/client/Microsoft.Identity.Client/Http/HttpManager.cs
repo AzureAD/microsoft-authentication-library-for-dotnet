@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Http
     internal class HttpManager : IHttpManager
     {
         private readonly IMsalHttpClientFactory _httpClientFactory;
-        public long LastRequestTime { get; private set; }
+        public long LastRequestDurationInMs { get; private set; }
 
         public HttpManager(IMsalHttpClientFactory httpClientFactory)
         {
@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Client.Http
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                 {
-                    LastRequestTime = sw.ElapsedMilliseconds;
+                    LastRequestDurationInMs = sw.ElapsedMilliseconds;
                     logger.Verbose($"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
 
                     HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);

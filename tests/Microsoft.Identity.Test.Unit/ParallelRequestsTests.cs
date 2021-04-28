@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     /// </summary>
     internal class ParallelRequestMockHanler : IHttpManager
     {
-        public long LastRequestTime => 0;
+        public long LastRequestDurationInMs => 0;
 
         public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ICoreLogger logger, bool retry = true, CancellationToken cancellationToken = default)
         {

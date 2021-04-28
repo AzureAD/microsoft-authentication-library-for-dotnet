@@ -125,9 +125,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         apiEvent.AccountId = authenticationResult.UniqueId;
                         apiEvent.WasSuccessful = true;
 
-                        authenticationResult.AuthenticationResultMetadata.TimeSpentInTotal = sw.ElapsedMilliseconds;
-                        authenticationResult.AuthenticationResultMetadata.TimeSpentInHttp = apiEvent.TimeSpentInHttp;
-                        authenticationResult.AuthenticationResultMetadata.TimeSpentInCache = apiEvent.TimeSpentInCache;                        
+                        authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
+                        authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
+                        authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;                        
                         return authenticationResult;
                     }
                     catch (MsalException ex)

@@ -158,9 +158,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.TimeSpentInTotal > 0);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.TimeSpentInHttp > 0);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.TimeSpentInCache > 0);
+            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
+            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
+            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInCacheInMs > 0);
 
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);

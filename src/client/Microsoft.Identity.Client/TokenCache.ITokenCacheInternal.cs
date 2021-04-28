@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
-                        requestParams.RequestContext.ApiEvent.TimeSpentInCache += sw.ElapsedMilliseconds;                        
+                        requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;                        
                     }
 
                     if (msalAccessTokenCacheItem != null)
@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Client
                         Stopwatch sw = new Stopwatch();
                         sw.Start();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
-                        requestParams.RequestContext.ApiEvent.TimeSpentInCache += sw.ElapsedMilliseconds;
+                        requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
                     }
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;

@@ -16,7 +16,7 @@ namespace WebApi.Controllers
     /// </summary>
     internal class ParallelRequestMockHanler : IHttpManager
     {
-        public long LastRequestTime => Settings.NetworkAccessPenaltyMs;
+        public long LastRequestDurationInMs => Settings.NetworkAccessPenaltyMs;
 
         public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ICoreLogger logger, bool retry = true, CancellationToken cancellationToken = default)
         {
