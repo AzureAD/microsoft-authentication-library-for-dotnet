@@ -34,7 +34,7 @@ namespace WebApi.Controllers
             bool cacheHit = s_random.NextDouble() <= Settings.CacheHitRatio;
 
 
-            ParallelRequestMockHanler httpManager = new ParallelRequestMockHanler();
+            ParallelRequestMockHandler httpManager = new ParallelRequestMockHandler();
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")

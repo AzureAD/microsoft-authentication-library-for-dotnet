@@ -22,7 +22,7 @@ namespace WebApi.Controllers
 
         private static ConfidentialClientApplication CreateCCA()
         {
-            ParallelRequestMockHanler httpManager = new ParallelRequestMockHanler();
+            ParallelRequestMockHandler httpManager = new ParallelRequestMockHandler();
 
             return ConfidentialClientApplicationBuilder
                 .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
