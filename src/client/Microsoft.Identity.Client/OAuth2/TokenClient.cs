@@ -162,6 +162,13 @@ namespace Microsoft.Identity.Client.OAuth2
                 _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
             }
 
+            AddCCSRoutingInformation(additionalBodyParameters);
+
+            AddExtraHttpHeaders();
+        }
+
+        private void AddCCSRoutingInformation(IDictionary<string, string> additionalBodyParameters)
+        {
             if (_requestParams.Account != null && _requestParams.Account.HomeAccountId != null)
             {
                 if (!String.IsNullOrEmpty(_requestParams.Account.HomeAccountId.Identifier))
@@ -185,7 +192,10 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 AddCCSUpnHeader(_requestParams.LoginHint);
             }
+        }
 
+        private void AddExtraHttpHeaders()
+        {
             if (_requestParams.ExtraHttpHeaders != null)
             {
                 foreach (KeyValuePair<string, string> pair in _requestParams.ExtraHttpHeaders)

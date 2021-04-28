@@ -266,6 +266,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             var CCSHeader = req.Headers.Single(h => h.Key == "X-AnchorMailbox").Value.FirstOrDefault();
 
+            ValidateCCSHeader(CCSHeader, labResponse);
+        }
+
+        private void ValidateCCSHeader(string CCSHeader, LabResponse labResponse)
+        {
             if (CCSHeader.Contains("upn"))
             {
                 Assert.AreEqual($@":""upn:<{labResponse.User.Upn}>""", CCSHeader);
