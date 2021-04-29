@@ -5,6 +5,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Kerberos;
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 
@@ -40,9 +41,16 @@ namespace KerberosConsole
         private bool FromCache = false;
         private long LogonId = 0;
 
-        private string[] GraphScopes = {
+        private string[] PublicAppScopes = 
+        {
             "user.read",
             "Application.Read.All"
+        };
+
+        private string ClientSecret = string.Empty;
+        private string[] ConfidentialAppScopes =
+        {
+            "https://graph.microsoft.com/.default"
         };
 
         public static void Main(string[] args)
@@ -104,7 +112,7 @@ namespace KerberosConsole
                 }
                 else if (args[i].Equals("-scopes", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    GraphScopes = args[++i].Split(' ');
+                    PublicAppScopes = args[++i].Split(' ');
                 }
                 else if (args[i].Equals("-cached", StringComparison.OrdinalIgnoreCase))
                 {
@@ -123,6 +131,11 @@ namespace KerberosConsole
                         Console.WriteLine(ex);
                         return false;
                     }
+                }
+                else if (args[i].Equals("-secret", StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    ClientSecret = args[i];
                 }
                 else
                 {
@@ -143,15 +156,27 @@ namespace KerberosConsole
         public void AcquireKerberosTicket()
         {
             Console.WriteLine("Acquiring authentication token ...");
-            AuthenticationResult result = AcquireToken(false);
+            AuthenticationResult result;
+            if (string.IsNullOrEmpty(ClientSecret))
+            {
+                result = AcquireTokenFromPublicClient(true);
+            }
+            else
+            {
+                result = AcquireTokenFromConfidentialClient(true);
+            }
+
             if (result == null)
             {
                 Console.WriteLine("Failed to get Access Token");
                 return;
             }
 
-            GetAndCacheKerberosTicket(result);
-            ShowCachedTicket();
+            if (string.IsNullOrEmpty(ClientSecret))
+            {
+                ProcessKerberosTicket(result);
+                ShowCachedTicket();
+            }
         }
 
         /// <summary>
@@ -201,6 +226,7 @@ namespace KerberosConsole
             Console.WriteLine("    -scopes {scopes} : list of scope separated by space.");
             Console.WriteLine("    -cached : check cached ticket first.");
             Console.WriteLine("    -luid {loginId} : sets login id of current user with HEX format.");
+            Console.WriteLine("    -secret {application secret} : Acquire token using confidential application configuration.");
             Console.WriteLine("    -h : show help for command options");
         }
 
@@ -210,7 +236,7 @@ namespace KerberosConsole
         /// Windows Ticket Cache so that it can be shared with other Kerberos-aware applications.
         /// </summary>
         /// <param name="result">The <see cref="AuthenticationResult"/> from token request.</param>
-        private void GetAndCacheKerberosTicket(AuthenticationResult result)
+        private void ProcessKerberosTicket(AuthenticationResult result)
         {
             KerberosSupplementalTicket ticket;
             if (TicketContainer == KerberosTicketContainer.IdToken)
@@ -219,39 +245,37 @@ namespace KerberosConsole
                 ticket = KerberosSupplementalTicketManager.FromIdToken(result.IdToken);
                 if (ticket == null)
                 {
-                    AADKerberosLogger.Save("ERROR: There's no Kerberos Ticket information within the AuthResult.");
-                    AADKerberosLogger.Save("Access Token: " + result.AccessToken);
+                    AADKerberosLogger.Save("ERROR: There's no Kerberos Ticket information within the IdToken.");
+                    return;
                 }
-                else
+
+                AADKerberosLogger.PrintLines(2);
+
+                try
                 {
-                    AADKerberosLogger.PrintLines(2);
-
-                    try
-                    {
-                        // 2. Save the Kerberos Ticket into current user's Windows Ticket Cache.
-                        KerberosSupplementalTicketManager.SaveToCache(ticket, LogonId);
-                        AADKerberosLogger.Save("---Kerberos Ticket cached into user's Ticket Cache\n");
-                    }
-                    catch (Win32Exception ex)
-                    {
-                        AADKerberosLogger.Save("---Kerberos Ticket caching failed: " + ex.Message);
-                    }
-
-                    AADKerberosLogger.PrintLines(2);
-                    AADKerberosLogger.Save("KerberosSupplementalTicket {");
-                    AADKerberosLogger.Save("                Client Key: " + ticket.ClientKey);
-                    AADKerberosLogger.Save("                  Key Type: " + ticket.KeyType);
-                    AADKerberosLogger.Save("            Errorr Message: " + ticket.ErrorMessage);
-                    AADKerberosLogger.Save("                     Realm: " + ticket.Realm);
-                    AADKerberosLogger.Save("    Service Principal Name: " + ticket.ServicePrincipalName);
-                    AADKerberosLogger.Save("               Client Name: " + ticket.ClientName);
-                    AADKerberosLogger.Save("     KerberosMessageBuffer: " + ticket.KerberosMessageBuffer);
-                    AADKerberosLogger.Save("}\n");
-
-                    // shows detailed ticket information.
-                    TicketDecoder decoder = new TicketDecoder();
-                    decoder.ShowKrbCredTicket(ticket.KerberosMessageBuffer);
+                    // 2. Save the Kerberos Ticket into current user's Windows Ticket Cache.
+                    KerberosSupplementalTicketManager.SaveToCache(ticket, LogonId);
+                    AADKerberosLogger.Save("---Kerberos Ticket cached into user's Ticket Cache\n");
                 }
+                catch (Win32Exception ex)
+                {
+                    AADKerberosLogger.Save("---Kerberos Ticket caching failed: " + ex.Message);
+                }
+
+                AADKerberosLogger.PrintLines(2);
+                AADKerberosLogger.Save("KerberosSupplementalTicket {");
+                AADKerberosLogger.Save("                Client Key: " + ticket.ClientKey);
+                AADKerberosLogger.Save("                  Key Type: " + ticket.KeyType);
+                AADKerberosLogger.Save("            Errorr Message: " + ticket.ErrorMessage);
+                AADKerberosLogger.Save("                     Realm: " + ticket.Realm);
+                AADKerberosLogger.Save("    Service Principal Name: " + ticket.ServicePrincipalName);
+                AADKerberosLogger.Save("               Client Name: " + ticket.ClientName);
+                AADKerberosLogger.Save("     KerberosMessageBuffer: " + ticket.KerberosMessageBuffer);
+                AADKerberosLogger.Save("}\n");
+
+                // shows detailed ticket information.
+                TicketDecoder decoder = new TicketDecoder();
+                decoder.ShowKrbCredTicket(ticket.KerberosMessageBuffer);
             }
             else
             {
@@ -261,13 +285,13 @@ namespace KerberosConsole
         }
 
         /// <summary>
-        /// Acquire an authentication token.
+        /// Acquire an authentication token with public client configuration.
         /// </summary>
         /// <param name="showTokenInfo">Set true to show the acuired token information.</param>
         /// <returns></returns>
-        private AuthenticationResult AcquireToken(bool showTokenInfo)
+        private AuthenticationResult AcquireTokenFromPublicClient(bool showTokenInfo)
         {
-            // 1. Setup application to get Kerberos Ticket with Service Principal name and ticket container parameter.
+            // 1. Setup pulic client application to get Kerberos Ticket.
             var app = PublicClientApplicationBuilder.Create(ClientId)
                 .WithTenantId(TenantId)
                 .WithRedirectUri(RedirectUri)
@@ -287,7 +311,7 @@ namespace KerberosConsole
                 // 2. Acquire the authentication token.
                 // Kerberos Ticket will be contained in Id Token or Access Token
                 // according to specified ticket container parameter.
-                AuthenticationResult result = app.AcquireTokenInteractive(GraphScopes)
+                AuthenticationResult result = app.AcquireTokenInteractive(PublicAppScopes)
                         .ExecuteAsync()
                         .GetAwaiter()
                         .GetResult();
@@ -295,6 +319,62 @@ namespace KerberosConsole
                 if (showTokenInfo)
                 {
                     ShowAccount(result.Account);
+                    AADKerberosLogger.Save("Token Information:");
+                    AADKerberosLogger.Save("           Correlation Id: " + result.CorrelationId);
+                    AADKerberosLogger.Save("                Unique Id:" + result.UniqueId);
+                    AADKerberosLogger.Save("                Expres On: " + result.ExpiresOn);
+                    AADKerberosLogger.Save("  IsExtendedLifeTimeToken: " + result.IsExtendedLifeTimeToken);
+                    AADKerberosLogger.Save("       Extended Expres On: " + result.ExtendedExpiresOn);
+                    AADKerberosLogger.Save("             Access Token:\n" + result.AccessToken);
+                    AADKerberosLogger.Save("                 Id Token:\n" + result.IdToken);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                AADKerberosLogger.Save("Exception: " + ex);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Acquire an authentication token with confidential client configuration.
+        /// </summary>
+        /// <param name="showTokenInfo">Set true to show the acuired token information.</param>
+        /// <returns></returns>
+        private AuthenticationResult AcquireTokenFromConfidentialClient(bool showTokenInfo)
+        {
+            // 1. Setup confidential client application to get Kerberos Ticket.
+            // NOTE: We will use AcquireTokenForClient() API to get token for the application which uses the application cache.
+            // The id token is for the user and the access token is for the application. With this reason, we have to use AccessToken
+            // as the Kerberos Token container for this case.
+            var app = ConfidentialClientApplicationBuilder.Create(ClientId)
+                .WithRedirectUri(RedirectUri)
+                .WithClientSecret(ClientSecret)
+                .WithAuthority("https://login.microsoftonline.com/" + TenantId)
+                .WithKerberosTicketClaim(KerberosServicePrincipalName, KerberosTicketContainer.AccessToken)
+                .WithLogging(LogDelegate, LogLevel.Verbose, true, true)
+                .Build();
+
+            try
+            {
+                AADKerberosLogger.Save("Calling AcquireTokenInteractive() with:");
+                AADKerberosLogger.Save("         Tenant Id: " + TenantId);
+                AADKerberosLogger.Save("         Client Id: " + ClientId);
+                AADKerberosLogger.Save("      Redirect Uri: " + RedirectUri);
+                AADKerberosLogger.Save("               spn: " + KerberosServicePrincipalName);
+                AADKerberosLogger.Save("  ticket container: " + TicketContainer);
+
+                // 2. Acquire the authentication token.
+                // Kerberos Ticket will be contained in Id Token or Access Token
+                // according to specified ticket container parameter.
+                AuthenticationResult result = app.AcquireTokenForClient(ConfidentialAppScopes)
+                        .ExecuteAsync()
+                        .GetAwaiter()
+                        .GetResult();
+
+                if (showTokenInfo)
+                {
                     AADKerberosLogger.Save("           Correlation Id: " + result.CorrelationId);
                     AADKerberosLogger.Save("                Unique Id:" + result.UniqueId);
                     AADKerberosLogger.Save("                Expres On: " + result.ExpiresOn);
@@ -318,11 +398,15 @@ namespace KerberosConsole
         /// <param name="account">The <see cref="IAccount"/> information to display.</param>
         private void ShowAccount(IAccount account)
         {
-            AADKerberosLogger.Save("                 Username: " + account.Username);
-            AADKerberosLogger.Save("              Environment: " + account.Environment);
-            AADKerberosLogger.Save("    HomeAccount Tenant Id: " + account.HomeAccountId.TenantId);
-            AADKerberosLogger.Save("    HomeAccount Object Id: " + account.HomeAccountId.ObjectId);
-            AADKerberosLogger.Save("  Home Account Identifier: " + account.HomeAccountId.Identifier);
+            if (account != null)
+            {
+                AADKerberosLogger.Save("Account Info:");
+                AADKerberosLogger.Save("                 Username: " + account.Username);
+                AADKerberosLogger.Save("              Environment: " + account.Environment);
+                AADKerberosLogger.Save("    HomeAccount Tenant Id: " + account.HomeAccountId.TenantId);
+                AADKerberosLogger.Save("    HomeAccount Object Id: " + account.HomeAccountId.ObjectId);
+                AADKerberosLogger.Save("  Home Account Identifier: " + account.HomeAccountId.Identifier);
+            }
         }
 
         /// <summary>
@@ -336,6 +420,29 @@ namespace KerberosConsole
         private static void LogDelegate(LogLevel level, string message, bool containsPii)
         {
             AADKerberosLogger.Save(message);
+        }
+
+        internal class LocalAccount : IAccount
+        {
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="homeAccountId">Home account id in "uid.utid" format; can be null, for example when migrating the ADAL v3 cache</param>
+            /// <param name="username">UPN style , can be null</param>
+            /// <param name="environment">Identity provider for this account, e.g. <c>login.microsoftonline.com</c></param>
+            /// <param name="wamAccountIds">Map of (client_id, wam_account_id)</param>
+            public LocalAccount(string homeAccountObjectId, string tenantId, string username, string environment = "login.windows.net")
+            {
+                Username = username;
+                Environment = environment;
+                HomeAccountId = new AccountId(homeAccountObjectId + "." + tenantId, homeAccountObjectId, tenantId);
+            }
+
+            public string Username { get; }
+
+            public string Environment { get; }
+
+            public AccountId HomeAccountId { get; }
         }
     }
 }

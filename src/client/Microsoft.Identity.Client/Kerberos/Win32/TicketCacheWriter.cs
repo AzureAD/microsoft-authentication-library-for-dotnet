@@ -9,8 +9,7 @@ using static Microsoft.Identity.Client.Kerberos.Win32.NativeMethods;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
-// This workaround required for Native Win32 API call
-#pragma warning disable 618
+#pragma warning disable 618 // This workaround required for Native Win32 API call
 
     /// <summary>
     /// Provides a layer to interact with the LSA functions used to create logon sessions and manipulate the ticket caches.

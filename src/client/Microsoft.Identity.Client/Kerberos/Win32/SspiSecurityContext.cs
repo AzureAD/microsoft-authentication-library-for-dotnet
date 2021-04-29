@@ -12,8 +12,8 @@ using static Microsoft.Identity.Client.Kerberos.Win32.NativeMethods;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
-// This workaround required for Native Win32 API call
-#pragma warning disable 618
+#pragma warning disable 618 // This workaround required for Native Win32 API call
+
     internal partial class SspiSecurityContext : IDisposable
     {
         private const int SECPKG_CRED_BOTH = 0x00000003;
