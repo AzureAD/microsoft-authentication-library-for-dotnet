@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 bool isMsaPassthrough = _wamOptions.MsaPassthrough;
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
-                    authenticationRequestParameters?.Account?.HomeAccountId?.TenantId, // TODO: we could furher optimize here by searching for an account based on UPN
+                    authenticationRequestParameters?.Account?.HomeAccountId?.TenantId, // TODO: we could further optimize here by searching for an account based on UPN
                     isMsaPassthrough).ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                isAccountInWam: false)
                 .ConfigureAwait(false);
 
-            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger);
             AddPromptToRequest(msalPrompt, true, webTokenRequest);
 
             var wamResult = await _wamProxy.RequestTokenForWindowAsync(
@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("common");
             }
 
-            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, differentAuthority);
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, differentAuthority);
 
             try
             {
@@ -370,7 +370,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 _msaPassthroughHandler.AddTransferTokenToRequest(webTokenRequest, transferToken);
 
-                WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);
+                WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger);
                 AddPromptToRequest(msalPrompt, isForceLoginPrompt, webTokenRequest);
 
             }
@@ -429,7 +429,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             // other MSALs prefer to default to GetForegroundWindow() but this causes issues 
             // for example if the user quickly switches windows.
-            // GetDesktopWindow will make the default more consitent with the embedded browser
+            // GetDesktopWindow will make the default more consistent with the embedded browser
             IntPtr foregroundWindow = WindowsNativeMethods.GetDesktopWindow();
             return foregroundWindow;
 #endif
@@ -476,7 +476,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     isInteractive: false)
                     .ConfigureAwait(false);
 
-                WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);
+                WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger);
 
                 var wamResult =
                     await _wamProxy.GetTokenSilentlyAsync(webAccount, webTokenRequest).ConfigureAwait(false);
@@ -528,7 +528,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     isInteractive: false)
                     .ConfigureAwait(false);
 
-                WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest);
+                WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger);
 
                 var wamResult =
                     await _wamProxy.GetTokenSilentlyForDefaultAccountAsync(webTokenRequest).ConfigureAwait(false);
@@ -558,14 +558,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (accountInternal?.WamAccountIds != null &&
                 accountInternal.WamAccountIds.TryGetValue(clientId, out string wamAccountId))
             {
-                _logger.Info("WAM will try to find an account based on the wam account id from the cache");
+                _logger.Info("WAM will try to find an account based on the WAM account id from the cache");
                 WebAccount result = await _wamProxy.FindAccountAsync(provider, wamAccountId).ConfigureAwait(false);
                 if (result != null)
                 {
                     return result;
                 }
 
-                _logger.Warning("WAM account was not found for given wam account id.");
+                _logger.Warning("WAM account was not found for given WAM account id.");
             }
 
             var wamAccounts = await _wamProxy.FindAllWebAccountsAsync(provider, clientId).ConfigureAwait(false);
@@ -686,7 +686,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (!string.IsNullOrEmpty(homeTenantId))
             {
                 bool result = IsConsumerTenantId(homeTenantId);
-                _logger.Info("[WAM Broker] Deciding plugin based on home tenant Id ... Msa? " + result);
+                _logger.Info("[WAM Broker] Deciding plugin based on home tenant Id ... MSA? " + result);
                 return result;
             }
 

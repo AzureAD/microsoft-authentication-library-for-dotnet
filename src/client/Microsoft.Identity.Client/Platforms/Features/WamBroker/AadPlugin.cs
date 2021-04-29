@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -26,14 +25,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
         private readonly ICoreLogger _logger;
-        private readonly Dictionary<string, string> _telemetryHeaders;
+        
 
         public AadPlugin(IWamProxy wamProxy, IWebAccountProviderFactory webAccountProviderFactory, ICoreLogger logger)
         {
             _wamProxy = wamProxy;
             _webAccountProviderFactory = webAccountProviderFactory;
             _logger = logger;
-            _telemetryHeaders = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
         }
 
         /// <summary>
@@ -283,8 +281,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 request.Properties.Add("claims", authenticationRequestParameters.ClaimsAndClientCapabilities);
             }
 
-            AddTelemetryPropertiesToRequest(request);
-
             return Task.FromResult(request);
         }
 
@@ -297,17 +293,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             request.Properties.Add("wam_compat", "2.0");
 
-            AddTelemetryPropertiesToRequest(request);
-
             return Task.FromResult(request);
-        }
-
-        private void AddTelemetryPropertiesToRequest(WebTokenRequest request)
-        {
-            foreach (var kvp in _telemetryHeaders)
-            {
-                request.Properties.Add(kvp);
-            }
         }
 
         public MsalTokenResponse ParseSuccessfullWamResponse(

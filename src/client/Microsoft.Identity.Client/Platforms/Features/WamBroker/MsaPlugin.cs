@@ -28,14 +28,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
         private readonly ICoreLogger _logger;
-        private readonly Dictionary<string, string> _telemetryHeaders;
 
         public MsaPlugin(IWamProxy wamProxy, IWebAccountProviderFactory webAccountProviderFactory, ICoreLogger logger)
         {
             _wamProxy = wamProxy;
             _webAccountProviderFactory = webAccountProviderFactory;
             _logger = logger;
-            _telemetryHeaders = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
         }
 
         public async Task<WebTokenRequest> CreateWebTokenRequestAsync(
@@ -96,8 +94,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 _logger.Warning("[WAM MSA Plugin] Could not add the correlation ID to the request.");
             }
 
-            AddTelemetryPropertiesToRequest(request);
-
             return request;
         }
 
@@ -111,8 +107,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             AddV2Properties(request);
 
-            AddTelemetryPropertiesToRequest(request);
-
             return Task.FromResult(request);
         }
 
@@ -121,14 +115,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             request.Properties.Add("api-version", "2.0"); // request V2 tokens over V1
             request.Properties.Add("oauth2_batch", "1"); // request tokens as OAuth style name/value pairs
             request.Properties.Add("x-client-info", "1"); // request client_info
-        }
-
-        private void AddTelemetryPropertiesToRequest(WebTokenRequest request)
-        {
-            foreach (var kvp in _telemetryHeaders)
-            {
-                request.Properties.Add(kvp);
-            }
         }
 
         public string GetHomeAccountIdOrNull(WebAccount webAccount)
