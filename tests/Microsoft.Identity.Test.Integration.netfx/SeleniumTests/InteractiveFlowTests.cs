@@ -266,7 +266,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             var CCSHeader = req.Headers.Single(h => h.Key == "X-AnchorMailbox").Value.FirstOrDefault();
 
-            ValidateCCSHeader(CCSHeader, labResponse);
+            if (!String.IsNullOrEmpty(CCSHeader))
+            {
+                ValidateCCSHeader(CCSHeader, labResponse);
+            }
         }
 
         private void ValidateCCSHeader(string CCSHeader, LabResponse labResponse)
