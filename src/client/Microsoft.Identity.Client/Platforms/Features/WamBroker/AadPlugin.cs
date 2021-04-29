@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     {
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
-        private readonly ICoreLogger _logger; 
+        private readonly ICoreLogger _logger;
 
         public AadPlugin(IWamProxy wamProxy, IWebAccountProviderFactory webAccountProviderFactory, ICoreLogger logger)
         {
