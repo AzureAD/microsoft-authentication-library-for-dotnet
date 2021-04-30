@@ -32,7 +32,7 @@ namespace WebApi.Controllers
                 };
             }
 
-            throw new InvalidOperationException("Only instance discovery is supported");            
+            throw new InvalidOperationException("Only instance discovery is supported");
         }
 
         public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ICoreLogger logger, CancellationToken cancellationToken = default)
@@ -49,19 +49,16 @@ namespace WebApi.Controllers
             {
                 return new HttpResponse()
                 {
-                    Body = "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"secret\"}",
+                    Body = "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"" + tid + "\"}",
                     StatusCode = System.Net.HttpStatusCode.OK
                 };
             }
             else
             {
-               throw new InvalidOperationException("Not expecting this /token request " + endpoint.AbsoluteUri);
+                throw new InvalidOperationException("Not expecting this /token request " + endpoint.AbsoluteUri);
             }
-            
+
         }
-
-
-
         public Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ICoreLogger logger, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();

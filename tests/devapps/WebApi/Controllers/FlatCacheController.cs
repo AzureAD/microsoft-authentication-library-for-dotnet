@@ -11,40 +11,39 @@ namespace WebApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class StaticDictionaryController : ControllerBase
+    public class FlatCacheController : ControllerBase
     {
-        private readonly ILogger<StaticDictionaryController> _logger;
+        private readonly ILogger<SingletonController> _logger;
         private static Random s_random = new Random();
+        
 
-
-        public StaticDictionaryController(ILogger<StaticDictionaryController> logger)
+        public FlatCacheController(ILogger<SingletonController> logger)
         {
             _logger = logger;
         }
-
-        static InMemoryPartitionedCacheSerializer s_inMemoryPartitionedCacheSerializer =
-          new InMemoryPartitionedCacheSerializer(new NullLogger(),
-              new System.Collections.Concurrent.ConcurrentDictionary<string, byte[]>(100, Settings.NumberOfTenants + 1));
+      
+        static InMemoryTokenCache s_flatTokenCache = new InMemoryTokenCache();
 
 
         [HttpGet]
 #pragma warning disable UseAsyncSuffix // Use Async suffix
-        public async Task<ActionResult<long>> Get()
+        public async Task<long> Get()
 #pragma warning restore UseAsyncSuffix // Use Async suffix
         {
             var tid = $"tid{s_random.Next(Settings.NumberOfTenants)}";
             bool cacheHit = s_random.NextDouble() <= Settings.CacheHitRatio;
 
+
             ParallelRequestMockHandler httpManager = new ParallelRequestMockHandler();
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
-                .WithHttpManager(httpManager)
                 .WithAuthority($"https://login.microsoftonline.com/{tid}")
+                .WithHttpManager(httpManager)
                 .WithClientSecret("secret")
                 .BuildConcrete();
 
-            s_inMemoryPartitionedCacheSerializer.Initialize(cca.AppTokenCache as TokenCache);
+            s_flatTokenCache.Bind(cca.AppTokenCache as TokenCache);
 
 
             var res = await cca.AcquireTokenForClient(new[] { "scope" })

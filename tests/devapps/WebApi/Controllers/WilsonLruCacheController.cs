@@ -6,23 +6,30 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Internal.Logger;
+using WebApi.Misc;
 
 namespace WebApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class FastCacheController : ControllerBase
+    public class WilsonLruCacheController : ControllerBase
     {
         private readonly ILogger<SingletonController> _logger;
         private static Random s_random = new Random();
         
 
-        public FastCacheController(ILogger<SingletonController> logger)
+        public WilsonLruCacheController(ILogger<SingletonController> logger)
         {
             _logger = logger;
         }
-      
-        static InMemoryTokenCache s_flatTokenCache = new InMemoryTokenCache();
+
+        // size of cache
+        // 1 token -> ~2200 bytes (assuming 1 simple scope + bearer token)
+        // 975k tokens -> ~2GB
+        private static EventBasedLRUCache<string, byte[]> s_wilsonCache =
+            new EventBasedLRUCache<string, byte[]>(500 * 1000 );
+        private static MsalCacheBasedOnWilson s_msalCache = new MsalCacheBasedOnWilson(s_wilsonCache);
+            
 
 
         [HttpGet]
@@ -33,7 +40,6 @@ namespace WebApi.Controllers
             var tid = $"tid{s_random.Next(Settings.NumberOfTenants)}";
             bool cacheHit = s_random.NextDouble() <= Settings.CacheHitRatio;
 
-
             ParallelRequestMockHandler httpManager = new ParallelRequestMockHandler();
 
             var cca = ConfidentialClientApplicationBuilder
@@ -43,12 +49,17 @@ namespace WebApi.Controllers
                 .WithClientSecret("secret")
                 .BuildConcrete();
 
-            s_flatTokenCache.Bind(cca.AppTokenCache as TokenCache);
+            s_msalCache.Initialize(cca.AppTokenCache as TokenCache);
 
 
             var res = await cca.AcquireTokenForClient(new[] { "scope" })
                  .WithForceRefresh(!cacheHit)
                  .ExecuteAsync().ConfigureAwait(false);
+
+            if (res.AccessToken != tid)
+            {
+                throw new InvalidOperationException("failed");
+            }
 
             return res.AuthenticationResultMetadata.DurationTotalInMs;
         }
