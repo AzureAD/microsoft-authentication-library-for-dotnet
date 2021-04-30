@@ -5,9 +5,9 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Kerberos;
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Security;
 
 namespace KerberosConsole
 {
@@ -40,6 +40,9 @@ namespace KerberosConsole
         private string RedirectUri = "http://localhost:8940/";
         private bool FromCache = false;
         private long LogonId = 0;
+
+        private string UserName = "localAdmin@aadktest.onmicrosoft.com";
+        private string UserPassword = string.Empty;
 
         private string[] PublicAppScopes = 
         {
@@ -137,6 +140,16 @@ namespace KerberosConsole
                     i++;
                     ClientSecret = args[i];
                 }
+                else if (args[i].Equals("-upn", StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    UserName = args[i];
+                }
+                else if (args[i].Equals("-password", StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    UserPassword = args[i];
+                }
                 else
                 {
                     ShowUsages();
@@ -159,7 +172,14 @@ namespace KerberosConsole
             AuthenticationResult result;
             if (string.IsNullOrEmpty(ClientSecret))
             {
-                result = AcquireTokenFromPublicClient(true);
+                if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(UserPassword))
+                {
+                    result = AcquireTokenFromPublicClient(true);
+                }
+                else
+                {
+                    result = AcquireTokenFromPublicClientWithUserPassword(true);
+                }
             }
             else
             {
@@ -227,6 +247,8 @@ namespace KerberosConsole
             Console.WriteLine("    -cached : check cached ticket first.");
             Console.WriteLine("    -luid {loginId} : sets login id of current user with HEX format.");
             Console.WriteLine("    -secret {application secret} : Acquire token using confidential application configuration.");
+            Console.WriteLine("    -upn {username}: Username with UPN format, e.g john@contoso.com..");
+            Console.WriteLine("    -password {password}: Password for the given username.");
             Console.WriteLine("    -h : show help for command options");
         }
 
@@ -306,12 +328,75 @@ namespace KerberosConsole
                 AADKerberosLogger.Save("         Client Id: " + ClientId);
                 AADKerberosLogger.Save("      Redirect Uri: " + RedirectUri);
                 AADKerberosLogger.Save("               spn: " + KerberosServicePrincipalName);
-                AADKerberosLogger.Save("  ticket container: " + TicketContainer);
+                AADKerberosLogger.Save("  Ticket container: " + TicketContainer);
 
                 // 2. Acquire the authentication token.
                 // Kerberos Ticket will be contained in Id Token or Access Token
                 // according to specified ticket container parameter.
                 AuthenticationResult result = app.AcquireTokenInteractive(PublicAppScopes)
+                        .ExecuteAsync()
+                        .GetAwaiter()
+                        .GetResult();
+
+                if (showTokenInfo)
+                {
+                    ShowAccount(result.Account);
+                    AADKerberosLogger.Save("Token Information:");
+                    AADKerberosLogger.Save("           Correlation Id: " + result.CorrelationId);
+                    AADKerberosLogger.Save("                Unique Id:" + result.UniqueId);
+                    AADKerberosLogger.Save("                Expres On: " + result.ExpiresOn);
+                    AADKerberosLogger.Save("  IsExtendedLifeTimeToken: " + result.IsExtendedLifeTimeToken);
+                    AADKerberosLogger.Save("       Extended Expres On: " + result.ExtendedExpiresOn);
+                    AADKerberosLogger.Save("             Access Token:\n" + result.AccessToken);
+                    AADKerberosLogger.Save("                 Id Token:\n" + result.IdToken);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                AADKerberosLogger.Save("Exception: " + ex);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Acquire an authentication token with public client configuration using username/password.
+        /// 
+        /// NOTE: To use this flow, you have to enable "Allow public client flows" in the application 
+        /// registration page of the Azure Portal.
+        /// </summary>
+        /// <param name="showTokenInfo">Set true to show the acuired token information.</param>
+        /// <returns></returns>
+        private AuthenticationResult AcquireTokenFromPublicClientWithUserPassword(bool showTokenInfo)
+        {
+            // 1. Setup pulic client application to get Kerberos Ticket.
+            var app = PublicClientApplicationBuilder.Create(ClientId)
+                .WithTenantId(TenantId)
+                .WithRedirectUri(RedirectUri)
+                .WithKerberosTicketClaim(KerberosServicePrincipalName, TicketContainer)
+                .WithLogging(LogDelegate, LogLevel.Verbose, true, true)
+                .Build();
+
+            try
+            {
+                AADKerberosLogger.Save("Calling AcquireTokenByUsernamePassword() with:");
+                AADKerberosLogger.Save("         Tenant Id: " + TenantId);
+                AADKerberosLogger.Save("         Client Id: " + ClientId);
+                AADKerberosLogger.Save("      Redirect Uri: " + RedirectUri);
+                AADKerberosLogger.Save("               spn: " + KerberosServicePrincipalName);
+                AADKerberosLogger.Save("  Ticket container: " + TicketContainer);
+                AADKerberosLogger.Save("          Username: " + UserName);
+
+                // 2. Acquire the authentication token.
+                // Kerberos Ticket will be contained in Id Token or Access Token
+                // according to specified ticket container parameter.
+                SecureString password = new SecureString();
+                foreach (var c in UserPassword.ToCharArray())
+                {
+                    password.AppendChar(c);
+                }
+
+                AuthenticationResult result = app.AcquireTokenByUsernamePassword(PublicAppScopes, UserName, password)
                         .ExecuteAsync()
                         .GetAwaiter()
                         .GetResult();
@@ -420,29 +505,6 @@ namespace KerberosConsole
         private static void LogDelegate(LogLevel level, string message, bool containsPii)
         {
             AADKerberosLogger.Save(message);
-        }
-
-        internal class LocalAccount : IAccount
-        {
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="homeAccountId">Home account id in "uid.utid" format; can be null, for example when migrating the ADAL v3 cache</param>
-            /// <param name="username">UPN style , can be null</param>
-            /// <param name="environment">Identity provider for this account, e.g. <c>login.microsoftonline.com</c></param>
-            /// <param name="wamAccountIds">Map of (client_id, wam_account_id)</param>
-            public LocalAccount(string homeAccountObjectId, string tenantId, string username, string environment = "login.windows.net")
-            {
-                Username = username;
-                Environment = environment;
-                HomeAccountId = new AccountId(homeAccountObjectId + "." + tenantId, homeAccountObjectId, tenantId);
-            }
-
-            public string Username { get; }
-
-            public string Environment { get; }
-
-            public AccountId HomeAccountId { get; }
         }
     }
 }
