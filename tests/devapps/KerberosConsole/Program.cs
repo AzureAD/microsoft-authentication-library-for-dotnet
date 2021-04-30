@@ -307,7 +307,7 @@ namespace KerberosConsole
         }
 
         /// <summary>
-        /// Acquire an authentication token with public client configuration.
+        /// Acquire an authentication token interactively with public client configuration.
         /// </summary>
         /// <param name="showTokenInfo">Set true to show the acuired token information.</param>
         /// <returns></returns>
@@ -360,10 +360,15 @@ namespace KerberosConsole
         }
 
         /// <summary>
-        /// Acquire an authentication token with public client configuration using username/password.
+        /// Acquire an authentication token with public client configuration using username/password non-interactively.
         /// 
-        /// NOTE: To use this flow, you have to enable "Allow public client flows" in the application 
-        /// registration page of the Azure Portal.
+        /// NOTE: You have to enable public client flows for your application in the Azure Portal:
+        ///     Login to the Azure Portal
+        ///     Goto "App Registrations"
+        ///     Select your application
+        ///     Select "Authentication" under the Manage section.
+        ///     Select "Yes" for the "Allow public client flows" under the Advanced Settings.
+        ///     Click "Save" to save the changes.
         /// </summary>
         /// <param name="showTokenInfo">Set true to show the acuired token information.</param>
         /// <returns></returns>
