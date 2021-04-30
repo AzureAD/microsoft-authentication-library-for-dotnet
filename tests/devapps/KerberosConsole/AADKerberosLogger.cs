@@ -47,6 +47,12 @@ namespace KerberosConsole
             }
         }
 
+        public static bool SkipLoggingToConsole
+        {
+            get;
+            set;
+        } = false;
+
         /// <summary>
         /// Save the given formatted log text to log file.
         /// </summary>
@@ -64,7 +70,11 @@ namespace KerberosConsole
         /// <param name="logText">Log message to be saved.</param>
         public static void Save(string logText)
         {
-            Console.WriteLine("[AADKerberos] " + logText);
+            if (!SkipLoggingToConsole)
+            {
+                Console.WriteLine("[AADKerberos] " + logText);
+            }
+
             File.AppendAllText(LogFileName, logText + Environment.NewLine);
         }
 
@@ -82,7 +92,11 @@ namespace KerberosConsole
                     message += Environment.NewLine;
                 }
 
-                Console.Write(message);
+                if (!SkipLoggingToConsole)
+                {
+                    Console.Write(message);
+                }
+
                 File.AppendAllText(LogFileName, message);
             }
         }
@@ -95,7 +109,11 @@ namespace KerberosConsole
         {
             string logMessage = DateTime.Now.ToString("s", CultureInfo.InvariantCulture) + ": " + logText;
 
-            Console.WriteLine("[AADKerberos] " + logMessage);
+            if (!SkipLoggingToConsole)
+            {
+                Console.WriteLine("[AADKerberos] " + logMessage);
+            }
+
             File.AppendAllText(
                 LogFileName,
                 Environment.NewLine + logMessage + Environment.NewLine);
