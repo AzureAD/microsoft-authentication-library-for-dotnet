@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -23,78 +22,209 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     [TestClass]
     public class ParallelRequestsTests : TestBase
     {
-
+        private const int CacheAccessPenaltyMs = 50;
         public const int NetworkAccessPenaltyMs = 50;
-        private const double CacheHitRatio = 0.8;
-        private const int NumberOfTenants = 5000;
-        private const int ConcurrencyLevel = 10;
 
-        private const int NumberOfRequets = 50;
+        private string _inMemoryCache = "{}";
+        private int _beforeAccessCalls = 0;
+        private int _afterAccessCalls = 0;
+        private int _afterAccessWriteCalls = 0;
+        private int _beforeWriteCalls = 0;
 
-        static Random s_random = new Random();
-
-
-        private async Task<string> S2SAsync()
+        [TestInitialize]
+        public override void TestInitialize()
         {
-            var taskId = Guid.NewGuid();
-            var tid = $"tid{s_random.Next(NumberOfTenants)}";
-            bool cacheHit = s_random.NextDouble() <= CacheHitRatio;
-
-            Trace.WriteLine($"[{taskId}] Starting S2SAsync for tid: {tid} cachehit: {cacheHit}");
-
-            //return cca.AcquireTokenForClient(new[] { "scope" })
-            //     .WithAuthority($"https://login.microsoft.com/{tid}")
-            //     .WithForceRefresh(cacheHit)
-            //     .ExecuteAsync();
-            await Task.Delay(100).ConfigureAwait(false);
-
-            Trace.WriteLine($"[{taskId}] Completing S2SAsync for tid: {tid} cachehit: {cacheHit}");
-
-            return taskId.ToString();
-
+            base.TestInitialize();
+            _inMemoryCache = "{}";
         }
-
-        // time spent in lib
-        // time spent in cache
-        // time spent in HTTP
-
-        private static ConfidentialClientApplication s_cca;
 
         [TestMethod]
         public async Task AcquireTokenSilent_ValidATs_ParallelRequests_Async()
         {
             // Arrange
-          
+            const int NumberOfRequests = 10;
 
-            ParallelRequestMockHanler httpManager = new ParallelRequestMockHanler();
-
-            s_cca = ConfidentialClientApplicationBuilder
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            {
+                PublicClientApplication pca = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithHttpManager(httpManager)
-                    .WithClientSecret("secret")
+                    .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-            var schedulerPair = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default,
-                            maxConcurrencyLevel: ConcurrencyLevel);
-            TaskScheduler scheduler = schedulerPair.ConcurrentScheduler;
-            TaskFactory taskFactory = new TaskFactory(scheduler);
+                ConfigureCacheSerialization(pca);
 
-            List<Task> tasksInProgress = new List<Task>();
-            for (int i=0; i< NumberOfRequets; i++)
-            {
-                Task t = taskFactory.StartNew(() => S2SAsync());
-                
-                tasksInProgress.Add(t);
+                var actualUsers = new List<string>();
+                for (int i = 1; i <= NumberOfRequests; i++)
+                {
+                    var user = GetUpn(i);
+                    TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor, GetUid(i), "utid", displayableId: user);
+                    actualUsers.Add(user);
+                }
+
+                byte[] bytes = (pca.UserTokenCacheInternal as ITokenCacheSerializer).SerializeMsalV3();
+                _inMemoryCache = Encoding.UTF8.GetString(bytes);
+
+                pca.UserTokenCacheInternal.Accessor.AssertItemCount(
+                   expectedAtCount: NumberOfRequests * 2,
+                   expectedRtCount: NumberOfRequests,
+                   expectedAccountCount: NumberOfRequests,
+                   expectedIdtCount: NumberOfRequests,
+                   expectedAppMetadataCount: 1);
+
+                IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                AuthenticationResult[] results;
+
+                // Act
+                using (new PerformanceValidator(
+                    NumberOfRequests * (2 * CacheAccessPenaltyMs + 100),
+                    "AcquireTokenSilent should take roughly 100ms for its internal logic, " +
+                    "plus the time needed to access the cache and all the thread context switches"))
+                {
+                    // execute won't start here because IEnumerable is lazy
+                    IEnumerable<Task<AuthenticationResult>> tasks = accounts.Select(acc =>
+                        pca.AcquireTokenSilent(TestConstants.s_scope, acc).ExecuteAsync());
+
+                    // execution starts here 
+                    Task<AuthenticationResult>[] taskArray = tasks.ToArray();
+
+                    // wait for all requests to complete
+                    results = await Task.WhenAll(taskArray).ConfigureAwait(false);
+                }
+
+                // Assert
+                CollectionAssert.AreEquivalent(
+                    actualUsers,
+                    results.Select(r => r.Account.Username).ToArray());
+
+                // Expecting the number of cache accesses to be equal to the number of request plus one for GetAccounts
+                Assert.AreEqual(NumberOfRequests + 1, _afterAccessCalls);
+                Assert.AreEqual(NumberOfRequests + 1, _beforeAccessCalls);
+
+                // Acquire token silent with valid ATs in the cache -> no data is written
+                Assert.AreEqual(0, _beforeWriteCalls);
+                Assert.AreEqual(0, _afterAccessWriteCalls);
             }
-
-
-            Trace.WriteLine("Ok, time to wait for these to stop");
-            await Task.WhenAll(tasksInProgress).ConfigureAwait(false);
         }
 
-     
+        [TestMethod]
+        public async Task AcquireTokenSilent_ExpiredATs_ParallelRequests_Async()
+        {
+            // Arrange
+            const int NumberOfRequests = 10;
 
-   
+            // The typical HttpMockHandler used by other tests can't deal with parallel request
+            ParallelRequestMockHanler httpManager = new ParallelRequestMockHanler();
+
+            PublicClientApplication pca = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithHttpManager(httpManager)
+                .BuildConcrete();
+
+            ConfigureCacheSerialization(pca);
+
+            var actualUsers = new List<string>();
+            for (int i = 1; i <= NumberOfRequests; i++)
+            {
+                TokenCacheHelper.PopulateCache(
+                    pca.UserTokenCacheInternal.Accessor,
+                    GetUid(i),
+                    TestConstants.Utid,
+                    displayableId: GetUpn(i),
+                    rtSecret: i.ToString(CultureInfo.InvariantCulture), // this will help create a valid response
+                    expiredAccessTokens: true);
+                actualUsers.Add(GetUpn(i));
+            }
+
+            byte[] bytes = (pca.UserTokenCacheInternal as ITokenCacheSerializer).SerializeMsalV3();
+            _inMemoryCache = Encoding.UTF8.GetString(bytes);
+
+            pca.UserTokenCacheInternal.Accessor.AssertItemCount(
+               expectedAtCount: NumberOfRequests * 2,
+               expectedRtCount: NumberOfRequests,
+               expectedAccountCount: NumberOfRequests,
+               expectedIdtCount: NumberOfRequests,
+               expectedAppMetadataCount: 1);
+
+            IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            AuthenticationResult[] results;
+
+            // Act
+            using (new PerformanceValidator(
+                NumberOfRequests *
+                    (2 * CacheAccessPenaltyMs + NetworkAccessPenaltyMs /* refresh the RT */ + 1000 /* internal logic */) +
+                    2 * NetworkAccessPenaltyMs, /* one time discovery calls */
+                "AcquireTokenSilent in parallel should take roughly 100ms for its internal logic, " +
+                "plus the time needed to access the cache, the network, and all the thread context switches"))
+            {
+                // execute won't start here because IEnumerable is lazy
+                IEnumerable<Task<AuthenticationResult>> tasks = accounts.Select(acc =>
+                    pca.AcquireTokenSilent(TestConstants.s_scope, acc).ExecuteAsync());
+
+                // execution starts here 
+                Task<AuthenticationResult>[] taskArray = tasks.ToArray();
+
+                // wait for all requests to complete
+                results = await Task.WhenAll(taskArray).ConfigureAwait(false);
+            }
+
+            // Assert
+            CollectionAssert.AreEquivalent(
+                actualUsers,
+                results.Select(r => r.Account.Username).ToArray());
+
+            // Each task will write tokens
+            Assert.AreEqual(NumberOfRequests, _beforeWriteCalls);
+            Assert.AreEqual(NumberOfRequests, _afterAccessWriteCalls);
+
+            // Expecting the number of cache accesses to be equal to twice the number of requests 
+            // (one for the initial read access, one for when writing the tokens)
+            // plus one for GetAccounts
+            Assert.AreEqual(NumberOfRequests * 2 + 1, _afterAccessCalls);
+            Assert.AreEqual(NumberOfRequests * 2 + 1, _beforeAccessCalls);
+        }
+
+        public static string GetUid(int rtSecret)
+        {
+            return "uid" + rtSecret;
+        }
+
+        public static string GetUpn(int rtSecret)
+        {
+            return "user_" + rtSecret;
+        }
+
+        private void ConfigureCacheSerialization(IPublicClientApplication pca)
+        {
+            pca.UserTokenCache.SetBeforeAccessAsync(async notificationArgs =>
+            {
+                // Introduce more complexity in the test by adding this context change
+                // .Net will suspend the current thread untul
+                await Task.Delay(CacheAccessPenaltyMs).ConfigureAwait(false);
+
+                byte[] bytes = Encoding.UTF8.GetBytes(_inMemoryCache);
+                notificationArgs.TokenCache.DeserializeMsalV3(bytes);
+                _beforeAccessCalls++;
+            });
+
+            pca.UserTokenCache.SetAfterAccessAsync(async notificationArgs =>
+            {
+                await Task.Delay(50).ConfigureAwait(false);
+
+                _afterAccessCalls++;
+                if (notificationArgs.HasStateChanged)
+                {
+                    _afterAccessWriteCalls++;
+                    byte[] bytes = notificationArgs.TokenCache.SerializeMsalV3();
+                    _inMemoryCache = Encoding.UTF8.GetString(bytes);
+                }
+            });
+
+
+            pca.UserTokenCache.SetBeforeWrite(notificationArgs =>
+            {
+                _beforeWriteCalls++;
+            });
+        }
     }
 
     /// <summary>
@@ -104,7 +234,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     /// </summary>
     internal class ParallelRequestMockHanler : IHttpManager
     {
-        public long LastRequestDurationInMs => 0;
+        public long LastRequestDurationInMs => 50;
 
         public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ICoreLogger logger, bool retry = true, CancellationToken cancellationToken = default)
         {
@@ -118,7 +248,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Body = TestConstants.DiscoveryJsonResponse,
                     StatusCode = System.Net.HttpStatusCode.OK
                 };
-            }           
+            }
 
             Assert.Fail("Only instance discovery is supported");
             return null;
@@ -134,16 +264,28 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 return new HttpResponse()
                 {
-                   // Body = GetTokenResponseForRt(rtSecret),
+                    Body = GetTokenResponseForRt(rtSecret),
                     StatusCode = System.Net.HttpStatusCode.OK
                 };
             }
 
-            
+            Assert.Fail("Only refresh flow is supported");
             return null;
         }
 
-  
+        private string GetTokenResponseForRt(string rtSecret)
+        {
+            if (int.TryParse(rtSecret, out int i))
+            {
+                var upn = ParallelRequestsTests.GetUpn(i);
+                var uid = ParallelRequestsTests.GetUid(i);
+                HttpResponseMessage response = MockHelpers.CreateSuccessTokenResponseMessageWithUid(uid, TestConstants.Utid, upn);
+                return response.Content.ReadAsStringAsync().Result;
+            }
+
+            Assert.Fail("Expecting the rt secret to be a number, to be able to craft a response");
+            return null;
+        }
 
         public Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ICoreLogger logger, CancellationToken cancellationToken)
         {
