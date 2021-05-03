@@ -234,6 +234,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     /// </summary>
     internal class ParallelRequestMockHanler : IHttpManager
     {
+        public long LastRequestDurationInMs => 50;
+
         public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ICoreLogger logger, bool retry = true, CancellationToken cancellationToken = default)
         {
             // simulate delay and also add complexity due to thread context switch
@@ -246,7 +248,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Body = TestConstants.DiscoveryJsonResponse,
                     StatusCode = System.Net.HttpStatusCode.OK
                 };
-            }           
+            }
 
             Assert.Fail("Only instance discovery is supported");
             return null;
