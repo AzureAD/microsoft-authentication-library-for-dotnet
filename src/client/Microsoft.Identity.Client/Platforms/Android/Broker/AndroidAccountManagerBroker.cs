@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private Intent CreateInteractiveBrokerIntent(BrokerRequest brokerRequest, Intent brokerIntent)
         {
-            _brokerHelper.ValidateBrokerRedirectURI(brokerRequest);
+            _brokerHelper.ValidateBrokerRedirectUri(brokerRequest);
             string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
             _logger.InfoPii("[Android broker] GetInteractiveBrokerIntent: " + brokerRequestJson, "Enable PII to see the broker request. ");
             brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, brokerRequestJson);

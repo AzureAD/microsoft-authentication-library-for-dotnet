@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return brokerAccounts;
         }
 
-        public void ValidateBrokerRedirectURI(BrokerRequest brokerRequest)
+        public void ValidateBrokerRedirectUri(BrokerRequest brokerRequest)
         {
             using (_logger.LogMethodDuration())
             {
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public Bundle CreateSilentBrokerBundle(BrokerRequest brokerRequest)
         {
-            ValidateBrokerRedirectURI(brokerRequest);
+            ValidateBrokerRedirectUri(brokerRequest);
             Bundle bundle = new Bundle();
             string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
             _logger.InfoPii("[Android broker] CreateSilentBrokerBundle: " + brokerRequestJson, "Enable PII to see the silent broker request. ");
