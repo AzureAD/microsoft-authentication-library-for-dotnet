@@ -10,6 +10,19 @@ Conclusion:
 - make app cache static
 - use Wilson's LRU cache with a 2GB limit 
 
+No cache
+--------
+
+Initialize a CCA per request. Do not serialize the cache. A lot of apps do this because our samples indicate it (for simplicity).
+           
+     50%   119.99ms
+     75%   128.00ms
+     90%   138.59ms
+     95%   147.00ms
+     99%   208.00ms
+
+Conclusion: not catastrophic for the app, but catastrophic for ESTS due to massive load. ESTS might throttle apps that do this.
+
 
 Flat cache
 ----------
