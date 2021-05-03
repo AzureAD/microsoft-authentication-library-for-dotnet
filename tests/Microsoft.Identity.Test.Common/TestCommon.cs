@@ -97,7 +97,14 @@ namespace Microsoft.Identity.Test.Common
             };
 
             authority = authority ?? Authority.CreateAuthority(TestConstants.AuthorityTestTenant);
-            requestContext  = requestContext ?? new RequestContext(serviceBundle, Guid.NewGuid());
+            requestContext = requestContext ?? new RequestContext(serviceBundle, Guid.NewGuid())
+            {
+                ApiEvent = new Client.TelemetryCore.Internal.Events.ApiEvent(
+                    serviceBundle.DefaultLogger,
+                    serviceBundle.PlatformProxy.CryptographyManager,
+                    Guid.NewGuid().ToString())
+            };
+
             return new AuthenticationRequestParameters(
                 serviceBundle,
                 new TokenCache(serviceBundle, false),

@@ -12,6 +12,8 @@ namespace Microsoft.Identity.Client.Http
 {
     internal interface IHttpManager
     {
+        long LastRequestDurationInMs { get; }
+
         Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,

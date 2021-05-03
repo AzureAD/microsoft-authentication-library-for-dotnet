@@ -33,11 +33,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             _serviceBundle = serviceBundle;
             _commonParameters = commonParameters;
+            RequestContext = requestContext;
 
             CacheSessionManager = new CacheSessionManager(tokenCache, this);
             Scope = ScopeHelper.CreateScopeSet(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
-            RequestContext = requestContext;
             AuthorityManager = new AuthorityManager(RequestContext, initialAuthority);
 
             // Set application wide query parameters.
