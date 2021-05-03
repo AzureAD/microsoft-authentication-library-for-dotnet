@@ -182,40 +182,54 @@ namespace Microsoft.Identity.Client.Kerberos
             OAuth2Client oAuth2Client,
             AuthenticationRequestParameters requestParams)
         {
-            if (!string.IsNullOrEmpty(requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName))
+            string kerberosClaim = GetKerberosTicketClaim(
+                requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName,
+                requestParams.RequestContext.ServiceBundle.Config.TicketContainer);
+
+            if (string.IsNullOrEmpty(kerberosClaim))
             {
-                string kerberosClaim;
-                if (requestParams.RequestContext.ServiceBundle.Config.TicketContainer == KerberosTicketContainer.IdToken)
-                {
-                    kerberosClaim = string.Format(
-                        CultureInfo.InvariantCulture,
-                        IdTokenAsRepTemplate,
-                        requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName);
-                }
-                else
-                {
-                    kerberosClaim = string.Format(
-                        CultureInfo.InvariantCulture,
-                        AccessTokenAsRepTemplate,
-                        requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName);
-                }
-
-                if (string.IsNullOrEmpty(requestParams.ClaimsAndClientCapabilities))
-                {
-                    oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, kerberosClaim);
-                }
-                else
-                {
-                    JObject existingClaims = JObject.Parse(requestParams.ClaimsAndClientCapabilities);
-                    JObject mergedClaims
-                        = ClaimsHelper.MergeClaimsIntoCapabilityJson(kerberosClaim, existingClaims);
-
-                    oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, mergedClaims.ToString(Formatting.None));
-                }
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, requestParams.ClaimsAndClientCapabilities);
+            }
+            else if (string.IsNullOrEmpty(requestParams.ClaimsAndClientCapabilities))
+            {
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, kerberosClaim);
             }
             else
             {
-                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, requestParams.ClaimsAndClientCapabilities);
+                JObject existingClaims = JObject.Parse(requestParams.ClaimsAndClientCapabilities);
+                JObject mergedClaims
+                    = ClaimsHelper.MergeClaimsIntoCapabilityJson(kerberosClaim, existingClaims);
+
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, mergedClaims.ToString(Formatting.None));
+            }
+        }
+
+        /// <summary>
+        /// Generate a Kerberos Ticket Claim string.
+        /// </summary>
+        /// <param name="servicePrincipalName">Service principal name to use.</param>
+        /// <param name="ticketContainer">Ticket container to use.</param>
+        /// <returns>A Kerberos Ticket Claim string if valid service principal name was given. Empty string, otherwise.</returns>
+        internal static string GetKerberosTicketClaim(string servicePrincipalName, KerberosTicketContainer ticketContainer)
+        {
+            if (string.IsNullOrEmpty(servicePrincipalName))
+            {
+                return string.Empty;
+            }
+
+            if (ticketContainer == KerberosTicketContainer.IdToken)
+            {
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    IdTokenAsRepTemplate,
+                    servicePrincipalName);
+            }
+            else
+            {
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    AccessTokenAsRepTemplate,
+                    servicePrincipalName);
             }
         }
     }
