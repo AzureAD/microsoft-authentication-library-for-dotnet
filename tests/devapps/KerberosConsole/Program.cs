@@ -16,17 +16,20 @@ namespace KerberosConsole
     /// It is a sample console program to show the primary usage of the Azure AD Kerberos Feature.
     /// Usages:
     ///     KerberosConsole -h
-    ///         show usage format
+    ///         show usage format.
     ///     KerberosConsole -cached
     ///         find cached Kerberos Ticket with default name defined in the sample application.
     ///     KerberosConsole -cached -spn {spn name}
-    ///         find cached Kerberos ticket matched with given {spn name}
+    ///         find cached Kerberos ticket matched with given {spn name}.
     ///     KerberosConsole
     ///         acquire an authentication token, retrieves the Kerberos Ticket, and cache it into the
     ///         current user's Windows Ticket Cache. You can check cached ticket information with "klist" 
     ///         utility command or "KerberosConsole -cached" command.
-    ///     KerberosConsole -spn {spn name} -tenantId { tid} -clientId { cid}
-    ///         acquire an authentication token with your application configuration.
+    ///     KerberosConsole -devicecodeflow
+    ///         acquire an authentication token using the device code flow.
+    ///     KerberosConsole -upn john@contoso.com -password passwordxxx
+    ///         acquire an authentication token using Username/Password flow.
+    ///         You have to provide both the upn and password.
     /// Note:
     ///     This application uses the Kerberos.NET package to show detailed information of a cached 
     ///     Kerberos Ticket. You can get detailed information for the Kerberos.NET package here:
