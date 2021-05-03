@@ -67,7 +67,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <inheritdoc />
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-            if (certificate.PublicKey.Key.KeySize < ClientCredentialWrapper.MinKeySizeInBits)
+            if ((certificate.GetRSAPublicKey() != null && certificate.GetRSAPublicKey().KeySize < ClientCredentialWrapper.MinKeySizeInBits)
+                || (certificate.GetECDsaPublicKey() != null && certificate.GetECDsaPublicKey().KeySize < ClientCredentialWrapper.MinKeySizeInBitsECDsa)
+#if NET5_WIN
+                || (certificate.GetDSAPublicKey() != null && certificate.GetDSAPublicKey().KeySize < ClientCredentialWrapper.MinKeySizeInBitsDSA)
+#endif
+                )
             {
                 throw new ArgumentOutOfRangeException(nameof(certificate),
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,

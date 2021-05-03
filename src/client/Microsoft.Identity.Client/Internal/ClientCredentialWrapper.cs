@@ -164,6 +164,8 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public static int MinKeySizeInBits { get; } = 2048;
+        public static int MinKeySizeInBitsECDsa { get; } = 256;
+        public static int MinKeySizeInBitsDSA { get; } = 512;
         internal string Thumbprint { get { return Base64UrlHelpers.Encode(Certificate.GetCertHash()); } }
         internal X509Certificate2 Certificate { get; private set; }
         // The cached assertion created from the JWT signing operation
