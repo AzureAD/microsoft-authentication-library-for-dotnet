@@ -28,14 +28,23 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
                 .WithHttpClientFactory(httpClientFactory);            
         }
 
-        internal static PublicClientApplicationBuilder WithTestLogging(this PublicClientApplicationBuilder builder, out HttpSnifferClientFactory factory)
+        internal static PublicClientApplicationBuilder WithTestLogging(this PublicClientApplicationBuilder builder, out HttpSnifferClientFactory httpClientFactory)
         {
-            factory = new HttpSnifferClientFactory();
+            httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
                 .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true)
-                .WithHttpClientFactory(factory);
+                .WithHttpClientFactory(httpClientFactory);
 
+        }
+
+        internal static ConfidentialClientApplicationBuilder WithTestLogging(this ConfidentialClientApplicationBuilder builder, out HttpSnifferClientFactory httpClientFactory)
+        {
+            httpClientFactory = new HttpSnifferClientFactory();
+
+            return builder
+                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true)
+                .WithHttpClientFactory(httpClientFactory);
         }
     }
 }

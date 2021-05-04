@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using System;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -113,6 +114,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.Scope] = AuthenticationRequestParameters.Scope.AsSingleString()
             };
             return dict;
+        }
+
+        protected override Tuple<string, string> GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
+        {
+            return null;
         }
     }
 }

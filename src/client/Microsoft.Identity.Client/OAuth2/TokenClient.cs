@@ -162,36 +162,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
             }
 
-            AddCCSRoutingInformation(additionalBodyParameters);
-
             AddExtraHttpHeaders();
-        }
-
-        private void AddCCSRoutingInformation(IDictionary<string, string> additionalBodyParameters)
-        {
-            if (_requestParams.Account != null && _requestParams.Account.HomeAccountId != null)
-            {
-                if (!String.IsNullOrEmpty(_requestParams.Account.HomeAccountId.Identifier))
-                {
-                    var userObjectId = _requestParams.Account.HomeAccountId.ObjectId;
-                    var userTenantID = _requestParams.Account.HomeAccountId.TenantId;
-                    string OidCCSHeader = $@":""oid:<{userObjectId}>@<{userTenantID}>""";
-
-                    _oAuth2Client.AddHeader(Constants.OidCCSHeader, OidCCSHeader);
-                }
-                else if (!String.IsNullOrEmpty(_requestParams.Account.Username))
-                {
-                    AddCCSUpnHeader(_requestParams.Account.Username);
-                }
-            }
-            else if (additionalBodyParameters.ContainsKey(OAuth2Parameter.Username))
-            {
-                AddCCSUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
-            }
-            else if (!String.IsNullOrEmpty(_requestParams.LoginHint))
-            {
-                AddCCSUpnHeader(_requestParams.LoginHint);
-            }
         }
 
         private void AddExtraHttpHeaders()
@@ -205,10 +176,9 @@ namespace Microsoft.Identity.Client.OAuth2
             }
         }
 
-        private void AddCCSUpnHeader(string upnHeader)
+        public void AddHeaderToClient(string name, string value)
         {
-            string OidCCSHeader = $@":""upn:<{upnHeader}>""";
-            _oAuth2Client.AddHeader(Constants.OidCCSHeader, OidCCSHeader);
+            _oAuth2Client.AddHeader(name, value);
         }
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
