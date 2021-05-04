@@ -1,7 +1,5 @@
-// -----------------------------------------------------------------------
-// Licensed to The .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// -----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -10,8 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
-// This workaround required for Native Win32 API call
-#pragma warning disable 618
+#pragma warning disable 618 // This workaround required for Native Win32 API call
 
     internal unsafe class NativeMethods
     {
