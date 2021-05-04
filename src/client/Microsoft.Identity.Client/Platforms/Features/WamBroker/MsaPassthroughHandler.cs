@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                      isAccountInWam: false)
                     .ConfigureAwait(false);
 
-            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequestMsa);
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequestMsa, _logger);
 
             var webTokenResponseMsa = await _wamProxy.RequestTokenForWindowAsync(_parentHandle, webTokenRequestMsa)
                 .ConfigureAwait(true);
