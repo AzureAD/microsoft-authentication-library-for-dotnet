@@ -302,7 +302,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     var userObjectId = AuthenticationRequestParameters.Account.HomeAccountId.ObjectId;
                     var userTenantID = AuthenticationRequestParameters.Account.HomeAccountId.TenantId;
-                    string OidCCSHeader = $@"""oid:<{userObjectId}>@<{userTenantID}>""";
+                    string OidCCSHeader = CoreHelpers.GetCCSClientInfoheader(userObjectId, userTenantID);
 
                     return new Tuple<string, string>(Constants.OidCCSHeader, OidCCSHeader);
                 }
@@ -325,7 +325,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected Tuple<string, string> GetCCSUpnHeader(string upnHeader)
         {
-            string OidCCSHeader = $@"""upn:<{upnHeader}>""";
+            string OidCCSHeader = CoreHelpers.GetCCSUpnHeader(upnHeader);
             return new Tuple<string, string>(Constants.OidCCSHeader, OidCCSHeader);
         }
 

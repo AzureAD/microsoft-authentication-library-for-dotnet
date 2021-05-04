@@ -12,6 +12,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Advanced;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -271,6 +272,45 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 userCacheAccess.AssertAccessCounts(0, 2);
+            }
+        }
+
+        [TestMethod]
+        public void AcquireTokenExtraHeadersTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+                app.ServiceBundle.ConfigureMockWebUI();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+                var extraExpectedHeaders = TestConstants.ExtraHttpHeader;
+                extraExpectedHeaders.Add(Constants.OidCCSHeader, CoreHelpers.GetCCSUpnHeader(TestConstants.s_user.Username));
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant, null, null, false, null, extraExpectedHeaders);
+
+                Guid correlationId = Guid.NewGuid();
+
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithCorrelationId(correlationId)
+                    .WithExtraHttpHeaders(TestConstants.ExtraHttpHeader)
+                    .WithLoginHint(TestConstants.s_user.Username)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Account);
+                Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
+                Assert.AreEqual(TestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.IsNull(userCacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey, "Don't suggest keys for public client");
+                Assert.IsNull(userCacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey, "Don't suggest keys for public client");
+                userCacheAccess.AssertAccessCounts(0, 1);
             }
         }
 

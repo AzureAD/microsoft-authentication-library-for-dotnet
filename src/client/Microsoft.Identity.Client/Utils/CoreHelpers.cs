@@ -237,5 +237,15 @@ namespace Microsoft.Identity.Client.Utils
             messageBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}=", delimiter, key);
             messageBuilder.Append(value);
         }
+
+        internal static string GetCCSClientInfoheader(string userObjectId, string userTenantID)
+        {
+            return $@"oid:{userObjectId}@{userTenantID}";
+        }
+
+        internal static string GetCCSUpnHeader(string upn)
+        {
+            return $@"upn:{upn}";
+        }
     }
 }

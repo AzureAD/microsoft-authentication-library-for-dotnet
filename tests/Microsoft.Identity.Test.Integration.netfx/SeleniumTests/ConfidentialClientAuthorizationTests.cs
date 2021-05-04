@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Advanced;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
@@ -158,12 +159,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 result.Account.HomeAccountId.Identifier,
                 cacheAccess.LastBeforeWriteNotificationArgs.SuggestedCacheKey);
 
-            AssertExtraHTTPHeadersAreSent(factory, labResponse);
+            AssertExtraHTTPHeadersAreSent(factory);
 
             return result;
         }
 
-        private void AssertExtraHTTPHeadersAreSent(HttpSnifferClientFactory factory, LabResponse labResponse)
+        private void AssertExtraHTTPHeadersAreSent(HttpSnifferClientFactory factory)
         {
             var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
             x.Item2.StatusCode == HttpStatusCode.OK);

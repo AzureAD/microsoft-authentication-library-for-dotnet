@@ -85,17 +85,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="extraHttpHeaders"></param>
-        /// <returns></returns>
-        public AcquireTokenOnBehalfOfParameterBuilder WithExtraHttpHeaders(IDictionary<string, string> extraHttpHeaders)
-        {
-            CommonParameters.ExtraHttpHeaders = extraHttpHeaders;
-            return this;
-        }
-
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -264,7 +266,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
             x.Item2.StatusCode == HttpStatusCode.OK);
 
-            var CCSHeader = req.Headers.Single(h => h.Key == "X-AnchorMailbox").Value.FirstOrDefault();
+            var CCSHeader = req.Headers.Single(h => h.Key == Constants.OidCCSHeader).Value.FirstOrDefault();
 
             if (!String.IsNullOrEmpty(CCSHeader))
             {
@@ -276,13 +278,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             if (CCSHeader.Contains("upn"))
             {
-                Assert.AreEqual($@":""upn:<{labResponse.User.Upn}>""", CCSHeader);
+                Assert.AreEqual(CoreHelpers.GetCCSUpnHeader(labResponse.User.Upn), CCSHeader);
             }
             else
             {
                 var userObjectId = labResponse.User.ObjectId;
                 var userTenantID = labResponse.User.TenantId;
-                Assert.AreEqual($@":""oid:<{userObjectId}>@<{userTenantID}>""", CCSHeader);
+                Assert.AreEqual(CoreHelpers.GetCCSClientInfoheader(userObjectId.ToString(), userTenantID), CCSHeader);
             }
         }
 
