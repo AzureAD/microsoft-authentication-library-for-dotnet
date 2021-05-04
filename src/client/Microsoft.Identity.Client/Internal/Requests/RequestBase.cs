@@ -323,7 +323,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return null;
         }
 
-        private Tuple<string, string> GetCCSUpnHeader(string upnHeader)
+        protected Tuple<string, string> GetCCSUpnHeader(string upnHeader)
         {
             string OidCCSHeader = $@"""upn:<{upnHeader}>""";
             return new Tuple<string, string>(Constants.OidCCSHeader, OidCCSHeader);
