@@ -78,7 +78,6 @@ namespace KerberosConsole
         /// </summary>
         /// <param name="args">List of commandline arguments.</param>
         /// <returns>True if argument parsing completed. False, if there's an error detected.</returns>
-
         public bool ParseCommandLineArguments(string[] args)
         {
             for (int i = 0; i < args.Length; i++)
@@ -202,7 +201,7 @@ namespace KerberosConsole
             try
             {
                 byte[] ticket
-                    = KerberosSupplementalTicketManager.GetKerberosTicketFromCache(KerberosServicePrincipalName, LogonId);
+                    = KerberosSupplementalTicketManager.GetKerberosTicketFromWindowsTicketCache(KerberosServicePrincipalName, LogonId);
                 if (ticket != null && ticket.Length > 32)
                 {
                     var encode = Convert.ToBase64String(ticket);
@@ -269,7 +268,7 @@ namespace KerberosConsole
                 try
                 {
                     // 2. Save the Kerberos Ticket into current user's Windows Ticket Cache.
-                    KerberosSupplementalTicketManager.SaveToCache(ticket, LogonId);
+                    KerberosSupplementalTicketManager.SaveToWindowsTicketCache(ticket, LogonId);
                     AADKerberosLogger.Save("---Kerberos Ticket cached into user's Ticket Cache\n");
                 }
                 catch (Win32Exception ex)
