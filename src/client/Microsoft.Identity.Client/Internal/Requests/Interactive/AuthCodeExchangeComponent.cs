@@ -40,7 +40,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public Task<MsalTokenResponse> FetchTokensAsync(CancellationToken cancellationToken)
         {
-            _tokenClient.AddHeaderToClient(Constants.OidCCSHeader, CoreHelpers.GetCCSUpnHeader(_interactiveParameters.LoginHint));
+            if (!string.IsNullOrEmpty(_interactiveParameters.LoginHint))
+            {
+                _tokenClient.AddHeaderToClient(Constants.OidCCSHeader, CoreHelpers.GetCCSUpnHeader(_interactiveParameters.LoginHint));
+            }
             return _tokenClient.SendTokenRequestAsync(GetBodyParameters());
         }
 
