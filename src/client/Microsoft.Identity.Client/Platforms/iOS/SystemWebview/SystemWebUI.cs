@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                             new ASWebAuthenticationPresentationContextProviderWindow();
 
                             // If HidePrivacyPrompt has a value, it will be set. Else, it will be false.
-                            asWebAuthenticationSession.PrefersEphemeralWebBrowserSession = WebViewOptions?.HidePrivacyPrompt ?? false;
+                            asWebAuthenticationSession.PrefersEphemeralWebBrowserSession = WebViewOptions?.iOSHidePrivacyPrompt ?? false;
                         }
                         asWebAuthenticationSession.Start();
                     });

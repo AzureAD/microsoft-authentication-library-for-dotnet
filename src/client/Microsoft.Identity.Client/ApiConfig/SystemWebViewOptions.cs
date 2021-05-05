@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client
     /// It can however respond with a 200 OK message or a 302 Redirect, which can be configured here.
     /// For more details see https://aka.ms/msal-net-os-browser
     /// </summary>
-#if !SUPPORTS_OS_SYSTEM_BROWSER
+#if WINDOWS_APP
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
     public class SystemWebViewOptions
@@ -62,7 +62,10 @@ namespace Microsoft.Identity.Client
         /// This hides the privacy prompt displayed on iOS Devices (ver 13.0+) when set to true.
         /// By default, it is false and displays the prompt.
         /// </summary>
-        public bool HidePrivacyPrompt { get; set; } = false;
+        #if WINDOWS_APP
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        #endif
+        public bool iOSHidePrivacyPrompt { get; set; } = false;
 
         /// <summary>
         /// Allows developers to implement their own logic for starting a browser and navigating to a specific Uri. MSAL
@@ -83,19 +86,16 @@ namespace Microsoft.Identity.Client
                "BrowserRedirectSuccess? " + (BrowserRedirectSuccess != null));
             logger.InfoPii("BrowserRedirectError " + BrowserRedirectError,
                "BrowserRedirectError? " + (BrowserRedirectError != null));
-            logger.Info($"HidePrivacyPrompt {HidePrivacyPrompt}");
+            logger.Info($"HidePrivacyPrompt {iOSHidePrivacyPrompt}");
         }
 
         internal static void ValidatePlatformAvailability()
         {
-#if !SUPPORTS_OS_SYSTEM_BROWSER
-            throw new PlatformNotSupportedException(
-                "WithSystemWebViewOptions API is not supported on this platform. " +
-                "No options are available on other platforms.");
-#endif
+            // This is supported only on .net core and iOS.
+            // Kept valid being part of .net standard
         }
 
-#if SUPPORTS_OS_SYSTEM_BROWSER
+#if (NET_CORE || NET5_WIN || DESKTOP || MAC || NETSTANDARD || iOS)
 
         /// <summary>
         /// Use Microsoft Edge to navigate to the given URI. On non-windows platforms it uses 

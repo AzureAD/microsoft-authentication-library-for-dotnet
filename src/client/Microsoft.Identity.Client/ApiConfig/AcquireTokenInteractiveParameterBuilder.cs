@@ -96,15 +96,15 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        // Remark: Default browser WebUI is not available on mobile (Android, iOS, UWP), but allow it at runtime
+        // Remark: Default browser WebUI is not available on mobile (Android, UWP), but allow it at runtime
         // to avoid MissingMethodException
         /// <summary>
         /// Specifies options for using the system OS browser handle interactive authentication.
         /// </summary>
         /// <param name="options">Data object with options</param>
         /// <returns>The builder to chain the .With methods</returns>
-#if !SUPPORTS_OS_SYSTEM_BROWSER
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] // hide everywhere but NetStandard
+#if WINDOWS_APP
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] // hide everywhere but NetStandard and iOS
 #endif
         public AcquireTokenInteractiveParameterBuilder WithSystemWebViewOptions(SystemWebViewOptions options)
         {
