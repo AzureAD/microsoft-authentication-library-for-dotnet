@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -115,6 +116,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.RequestedTokenUse] = OAuth2RequestedTokenUse.OnBehalfOf
             };
             return dict;
+        }
+
+        protected override Tuple<string, string> GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
+        {
+            return null;
         }
     }
 }

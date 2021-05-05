@@ -223,7 +223,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             userCacheAccess.AssertAccessCounts(2, 2);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
 
-            factory.RequestsAndResponses.Clear();
+            if (factory?.RequestsAndResponses != null)
+            {
+                factory.RequestsAndResponses.Clear();
+            }
 
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
@@ -240,7 +243,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             userCacheAccess.AssertAccessCounts(3, 3);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
 
-            factory.RequestsAndResponses.Clear();
+            if (factory?.RequestsAndResponses != null)
+            {
+                factory.RequestsAndResponses.Clear();
+            }
+
             Trace.WriteLine("Part 4 - Acquire a token silently");
             result = await pca
                 .AcquireTokenSilent(s_scopes, account)
@@ -263,6 +270,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
         {
+            if (labResponse.User.FederationProvider != FederationProvider.None)
+            {
+                return;
+            }
             var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
             x.Item2.StatusCode == HttpStatusCode.OK);
 

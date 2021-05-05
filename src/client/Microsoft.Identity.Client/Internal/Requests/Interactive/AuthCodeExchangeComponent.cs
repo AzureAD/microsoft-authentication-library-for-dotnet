@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -39,6 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public Task<MsalTokenResponse> FetchTokensAsync(CancellationToken cancellationToken)
         {
+            _tokenClient.AddHeaderToClient(Constants.OidCCSHeader, CoreHelpers.GetCCSUpnHeader(_interactiveParameters.LoginHint));
             return _tokenClient.SendTokenRequestAsync(GetBodyParameters());
         }
 
