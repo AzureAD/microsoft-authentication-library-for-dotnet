@@ -4,12 +4,14 @@
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 
 using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Text;
 
 namespace Microsoft.Identity.Client.Kerberos
 {
@@ -32,22 +34,36 @@ namespace Microsoft.Identity.Client.Kerberos
         {
             if (string.IsNullOrEmpty(idToken) || idToken.Length < 128)
             {
-                // Token is empty or too short -ignore parsing.
+                // Token is empty or too short - ignore parsing.
                 return null;
             }
 
-            KerberosIdTokenParser jwt = KerberosIdTokenParser.Parse(idToken);
-            if (jwt == null)
+            string[] sections = idToken.Split('.');
+            if (sections.Length != 3)
+            {
+                // JWT should be consists of 3 parts separated with '.'
+                return null;
+            }
+
+            // decodes the second section containing the Kerberos Ticket claim if exists.
+            byte[] payloadBytes = Base64UrlHelpers.DecodeToBytes(sections[1]);
+            string payload = Encoding.UTF8.GetString(payloadBytes);
+            if (string.IsNullOrEmpty(payload))
             {
                 return null;
             }
 
-            string kerberosAsRep = jwt.GetValueOrEmptyString(KerberosClaimType);
-            if (string.IsNullOrEmpty(kerberosAsRep))
+            // parse the JSON data anf find the included Kerberos Ticket claim.
+            JObject payloadJson = JObject.Parse(payload);
+            JToken claimValue;
+            if (!payloadJson.TryGetValue(KerberosClaimType, out claimValue))
             {
                 return null;
             }
 
+            // Kerberos Ticket claim found.
+            // Parse the json and construct the KerberosSupplementalTicket object.
+            string kerberosAsRep = claimValue.Value<string>();
             return (KerberosSupplementalTicket)JsonConvert.DeserializeObject(kerberosAsRep, typeof(KerberosSupplementalTicket));
         }
 
