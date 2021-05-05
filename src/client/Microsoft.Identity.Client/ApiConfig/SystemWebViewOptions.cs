@@ -59,6 +59,12 @@ namespace Microsoft.Identity.Client
         public Uri BrowserRedirectError { get; set; }
 
         /// <summary>
+        /// This hides privacy prompt displayed on the iOS Devices (ver 13.0+) when set to true.
+        /// By default, it is false and displays the prompt.
+        /// </summary>
+        public bool HidePrivacyPrompt { get; set; } = false;
+
+        /// <summary>
         /// Allows developers to implement their own logic for starting a browser and navigating to a specific Uri. MSAL
         /// will use this when opening the browser. Leave it null and the user configured browser will be used.
         /// Consider using the static helpers OpenWithEdgeBrowserAsync and OpenWithChromeEdgeBrowserAsync
@@ -77,13 +83,14 @@ namespace Microsoft.Identity.Client
                "BrowserRedirectSuccess? " + (BrowserRedirectSuccess != null));
             logger.InfoPii("BrowserRedirectError " + BrowserRedirectError,
                "BrowserRedirectError? " + (BrowserRedirectError != null));
+            logger.Info($"HidePrivacyPrompt {HidePrivacyPrompt}");
         }
 
         internal static void ValidatePlatformAvailability()
         {
 #if !SUPPORTS_OS_SYSTEM_BROWSER
             throw new PlatformNotSupportedException(
-                "WithSystemWebViewOptions API is only supported on .NET Classic and .NET Core. " +
+                "WithSystemWebViewOptions API is not supported on this platform. " +
                 "No options are available on other platforms.");
 #endif
         }

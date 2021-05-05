@@ -32,7 +32,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             
             return new SystemWebUI()
             {
-                RequestContext = requestContext
+                RequestContext = requestContext,
+                WebViewOptions = coreUIParent.SystemWebViewOptions
             };
         }
 

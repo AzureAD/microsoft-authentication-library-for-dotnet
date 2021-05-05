@@ -6,19 +6,19 @@
     <DefineConstants>$(DefineConstants);NET5_WIN;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_OS_SYSTEM_BROWSER;SUPPORTS_BROKER;SUPPORTS_WEBVIEW2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
-    <DefineConstants>$(DefineConstants);WINDOWS_APP;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE</DefineConstants>
+    <DefineConstants>$(DefineConstants);WINDOWS_APP;SUPPORTS_BROKER;SUPPORTS_OS_SYSTEM_BROWSER;SUPPORTS_CUSTOM_CACHE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-    <DefineConstants>$(DefineConstants);ANDROID;SUPPORTS_BROKER</DefineConstants>
+    <DefineConstants>$(DefineConstants);ANDROID;SUPPORTS_BROKER;SUPPORTS_OS_SYSTEM_BROWSER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <DefineConstants>$(DefineConstants);DESKTOP;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_OS_SYSTEM_BROWSER;SUPPORTS_WEBVIEW2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)'">
-    <DefineConstants>$(DefineConstants);SUPPORTS_BROKER</DefineConstants>
+    <DefineConstants>$(DefineConstants);SUPPORTS_BROKER;SUPPORTS_OS_SYSTEM_BROWSER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)'">
-    <DefineConstants>$(DefineConstants);iOS;SUPPORTS_BROKER</DefineConstants>
+    <DefineConstants>$(DefineConstants);iOS;SUPPORTS_BROKER;SUPPORTS_OS_SYSTEM_BROWSER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkMac)'">
     <DefineConstants>$(DefineConstants);MAC;SUPPORTS_CUSTOM_CACHE;SUPPORTS_OS_SYSTEM_BROWSER;</DefineConstants>

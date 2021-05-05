@@ -17,6 +17,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
     {
         public RequestContext RequestContext { get; set; }
 
+        internal SystemWebViewOptions WebViewOptions { get; set; }
+
         public override async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri,
             Uri redirectUri,
@@ -38,6 +40,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             s_returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);
             await s_returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
+            s_returnedUriReady.Dispose();
+            s_returnedUriReady = null;
 
             //dismiss safariviewcontroller
             s_viewController.InvokeOnMainThread(() =>
@@ -77,6 +81,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                             // be called on the main UI thread
                             asWebAuthenticationSession.PresentationContextProvider =
                             new ASWebAuthenticationPresentationContextProviderWindow();
+
+                            // If HidePrivacyPrompt has a value, it will be set. Else, it will be false.
+                            asWebAuthenticationSession.PrefersEphemeralWebBrowserSession = WebViewOptions?.HidePrivacyPrompt ?? false;
                         }
                         asWebAuthenticationSession.Start();
                     });
