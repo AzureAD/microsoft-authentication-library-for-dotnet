@@ -118,9 +118,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return dict;
         }
 
-        protected override Tuple<string, string> GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
+        protected override KeyValuePair<string, string> GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
         {
-            return null;
+            return new KeyValuePair<string, string>();
         }
     }
 }

@@ -279,9 +279,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var tokenClient = new TokenClient(AuthenticationRequestParameters);
 
             var CCSHeader = GetCCSHeader(additionalBodyParameters);
-            if (CCSHeader != null)
+            if (!string.IsNullOrEmpty(CCSHeader.Key))
             {
-                tokenClient.AddHeaderToClient(CCSHeader.Item1, CCSHeader.Item2);
+                tokenClient.AddHeaderToClient(CCSHeader.Key, CCSHeader.Value);
             }
 
             return tokenClient.SendTokenRequestAsync(
@@ -294,7 +294,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         //The CCS header is used by the CCS service to help route requests to resources in Azure during requests to speed up authentication.
         //It consists of either the ObjectId.TenantId or the upn of the account signign in.
         //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
-        protected virtual Tuple<string, string> GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
+        protected virtual KeyValuePair<string, string> GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
         {
             if (AuthenticationRequestParameters?.Account?.HomeAccountId != null)
             {
@@ -304,29 +304,32 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     var userTenantID = AuthenticationRequestParameters.Account.HomeAccountId.TenantId;
                     string OidCCSHeader = CoreHelpers.GetCCSClientInfoheader(userObjectId, userTenantID);
 
-                    return new Tuple<string, string>(Constants.OidCCSHeader, OidCCSHeader);
+                    return new KeyValuePair<string, string>(Constants.OidCCSHeader, OidCCSHeader);
                 }
-                else if (!String.IsNullOrEmpty(AuthenticationRequestParameters.Account.Username))
+
+                if (!String.IsNullOrEmpty(AuthenticationRequestParameters.Account.Username))
                 {
                     return GetCCSUpnHeader(AuthenticationRequestParameters.Account.Username);
                 }
             }
-            else if (additionalBodyParameters.ContainsKey(OAuth2Parameter.Username))
+
+            if (additionalBodyParameters.ContainsKey(OAuth2Parameter.Username))
             {
                 return GetCCSUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
             }
-            else if (!String.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
+            
+            if (!String.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
             {
                 return GetCCSUpnHeader (AuthenticationRequestParameters.LoginHint);
             }
 
-            return null;
+            return new KeyValuePair<string, string>();
         }
 
-        protected Tuple<string, string> GetCCSUpnHeader(string upnHeader)
+        protected KeyValuePair<string, string> GetCCSUpnHeader(string upnHeader)
         {
             string OidCCSHeader = CoreHelpers.GetCCSUpnHeader(upnHeader);
-            return new Tuple<string, string>(Constants.OidCCSHeader, OidCCSHeader);
+            return new KeyValuePair<string, string>(Constants.OidCCSHeader, OidCCSHeader);
         }
 
         private void LogReturnedToken(AuthenticationResult result)
