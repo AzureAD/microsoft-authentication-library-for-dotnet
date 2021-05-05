@@ -17,9 +17,9 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         private const int SECPKG_CRED_BOTH = 0x00000003;
         private const int SECURITY_NETWORK_DREP = 0x00;
 
-        private const int MaxTokenSize = 16 * 1024;
+        private const int _maxTokenSize = 16 * 1024;
 
-        private const InitContextFlag DefaultRequiredFlags =
+        private const InitContextFlag _defaultRequiredFlags =
                                     InitContextFlag.Connection |
                                     InitContextFlag.ReplayDetect |
                                     InitContextFlag.SequenceDetect |
@@ -28,25 +28,25 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                                     InitContextFlag.Delegate |
                                     InitContextFlag.InitExtendedError;
 
-        private readonly HashSet<object> disposable = new HashSet<object>();
+        private readonly HashSet<object> _disposable = new HashSet<object>();
 
-        private readonly Credential credential;
-        private readonly InitContextFlag clientFlags;
+        private readonly Credential _credential;
+        private readonly InitContextFlag _clientFlags;
 
-        private SECURITY_HANDLE credentialsHandle;
-        private SECURITY_HANDLE securityContext;
-        private long logonId;
+        private SECURITY_HANDLE _credentialsHandle;
+        private SECURITY_HANDLE _securityContext;
+        private long _logonId;
 
         public SspiSecurityContext(
             Credential credential,
             string package,
             long logonId = 0,
-            InitContextFlag clientFlags = DefaultRequiredFlags)
+            InitContextFlag clientFlags = _defaultRequiredFlags)
         {
-            this.credential = credential;
-            this.clientFlags = clientFlags;
+            this._credential = credential;
+            this._clientFlags = clientFlags;
             this.Package = package;
-            this.logonId = logonId;
+            this._logonId = logonId;
         }
 
         public string Package { get; private set; }
@@ -83,28 +83,28 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
                     clientToken = new SecBufferDesc(tokenSize);
 
-                    if (!this.credentialsHandle.IsSet || result == SecStatus.SEC_I_CONTINUE_NEEDED)
+                    if (!this._credentialsHandle.IsSet || result == SecStatus.SEC_I_CONTINUE_NEEDED)
                     {
                         this.AcquireCredentials();
                     }
 
                     result = InitializeSecurityContext_0(
-                                    ref this.credentialsHandle,
+                                    ref this._credentialsHandle,
                                     IntPtr.Zero,
                                     targetNameNormalized,
-                                    this.clientFlags,
+                                    this._clientFlags,
                                     0,
                                     SECURITY_NETWORK_DREP,
                                     IntPtr.Zero,
                                     0,
-                                    ref this.securityContext,
+                                    ref this._securityContext,
                                     ref clientToken,
                                     out contextFlags,
                                     IntPtr.Zero);
 
                     if (result == SecStatus.SEC_E_INSUFFICENT_MEMORY)
                     {
-                        if (tokenSize > MaxTokenSize)
+                        if (tokenSize > _maxTokenSize)
                         {
                             break;
                         }
@@ -136,19 +136,19 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
         private void TrackUnmanaged(object thing)
         {
-            this.disposable.Add(thing);
+            this._disposable.Add(thing);
         }
 
         private unsafe void AcquireCredentials()
         {
-            CredentialHandle creds = this.credential.Structify();
+            CredentialHandle creds = this._credential.Structify();
 
             this.TrackUnmanaged(creds);
             IntPtr authIdPtr = IntPtr.Zero;
-            if (this.logonId != 0)
+            if (this._logonId != 0)
             {
                 authIdPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(long)));
-                Marshal.StructureToPtr(this.logonId, authIdPtr, false);
+                Marshal.StructureToPtr(this._logonId, authIdPtr, false);
             }
             SecStatus result = AcquireCredentialsHandle(
                                     null,
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                                     (void*)creds.DangerousGetHandle(),
                                     IntPtr.Zero,
                                     IntPtr.Zero,
-                                    ref this.credentialsHandle,
+                                    ref this._credentialsHandle,
                                     IntPtr.Zero);
 
             if (result != SecStatus.SEC_E_OK)
@@ -166,12 +166,12 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                 throw new Win32Exception((int)result);
             }
 
-            this.TrackUnmanaged(this.credentialsHandle);
+            this.TrackUnmanaged(this._credentialsHandle);
         }
 
         public unsafe void Dispose()
         {
-            foreach (var thing in this.disposable)
+            foreach (var thing in this._disposable)
             {
                 if (thing is IDisposable managedDispose)
                 {

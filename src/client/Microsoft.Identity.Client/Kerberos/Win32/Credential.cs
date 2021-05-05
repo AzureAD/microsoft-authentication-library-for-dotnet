@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// <summary>
         /// Create a new <see cref="Credential"/> object.
         /// </summary>
-        /// <returns>Creted new <see cref="Credential"/> object.</returns>
+        /// <returns>Newly created <see cref="Credential"/> object.</returns>
         public static Credential Current()
         {
             return new CurrentCredential();

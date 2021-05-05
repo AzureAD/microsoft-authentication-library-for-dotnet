@@ -37,20 +37,20 @@ namespace KerberosConsole
     /// </summary>
     class Program
     {
-        private string TenantId = "428881af-9ab1-40b3-8158-3611358fff68";
-        private string ClientId = "5221b482-2651-4cb3-9ad8-c09a78e4de9e";
-        private string KerberosServicePrincipalName = "HTTP/prod.aadkreberos.msal.com";
-        private KerberosTicketContainer TicketContainer = KerberosTicketContainer.IdToken;
-        private string RedirectUri = "http://localhost:8940/";
-        private bool FromCache = false;
-        private long LogonId = 0;
+        private string _tenantId = "428881af-9ab1-40b3-8158-3611358fff68";
+        private string _clientId = "5221b482-2651-4cb3-9ad8-c09a78e4de9e";
+        private string _kerberosServicePrincipalName = "HTTP/prod.aadkreberos.msal.com";
+        private KerberosTicketContainer _ticketContainer = KerberosTicketContainer.IdToken;
+        private string _redirectUri = "http://localhost:8940/";
+        private bool _isReadFromCache = false;
+        private long _logonId = 0;
 
-        private string UserName = "localAdmin@aadktest.onmicrosoft.com";
-        private string UserPassword = string.Empty;
+        private string _Username = "localAdmin@aadktest.onmicrosoft.com";
+        private string _UserPassword = string.Empty;
 
-        private bool DeviceCodeFlow = false;
+        private bool _isDeviceCodeFlow = false;
 
-        private string[] PublicAppScopes = 
+        private string[] _publicAppScopes = 
         {
             "user.read",
             "Application.Read.All"
@@ -64,7 +64,7 @@ namespace KerberosConsole
                 return;
             }
 
-            if (program.FromCache)
+            if (program._isReadFromCache)
             {
                 program.ShowCachedTicket();
                 return;
@@ -84,23 +84,23 @@ namespace KerberosConsole
             {
                 if (args[i].Equals("-tenantId", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    TenantId = args[++i];
+                    _tenantId = args[++i];
                 }
                 else if (args[i].Equals("-clientId", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    ClientId = args[++i];
+                    _clientId = args[++i];
                 }
                 else if (args[i].Equals("-spn", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    KerberosServicePrincipalName = args[++i];
+                    _kerberosServicePrincipalName = args[++i];
                 }
                 else if (args[i].Equals("-container", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
                     ++i;
                     if (args[i].Equals("id", StringComparison.OrdinalIgnoreCase))
-                        TicketContainer = KerberosTicketContainer.IdToken;
+                        _ticketContainer = KerberosTicketContainer.IdToken;
                     else if (args[i].Equals("access", StringComparison.OrdinalIgnoreCase))
-                        TicketContainer = KerberosTicketContainer.AccessToken;
+                        _ticketContainer = KerberosTicketContainer.AccessToken;
                     else
                     {
                         Console.WriteLine("Unknown ticket container type '" + args[i] + "'");
@@ -110,22 +110,22 @@ namespace KerberosConsole
                 }
                 else if (args[i].Equals("-redirectUri", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    RedirectUri = args[++i];
+                    _redirectUri = args[++i];
                 }
                 else if (args[i].Equals("-scopes", StringComparison.OrdinalIgnoreCase) && (i + 1) < args.Length)
                 {
-                    PublicAppScopes = args[++i].Split(' ');
+                    _publicAppScopes = args[++i].Split(' ');
                 }
                 else if (args[i].Equals("-cached", StringComparison.OrdinalIgnoreCase))
                 {
-                    FromCache = true;
+                    _isReadFromCache = true;
                 }
                 else if (args[i].Equals("-luid", StringComparison.OrdinalIgnoreCase))
                 {
                     ++i;
                     try
                     {
-                        LogonId = long.Parse(args[i], NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo);
+                        _logonId = long.Parse(args[i], NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo);
                     }
                     catch (Exception ex)
                     {
@@ -137,16 +137,16 @@ namespace KerberosConsole
                 else if (args[i].Equals("-upn", StringComparison.OrdinalIgnoreCase))
                 {
                     i++;
-                    UserName = args[i];
+                    _Username = args[i];
                 }
                 else if (args[i].Equals("-password", StringComparison.OrdinalIgnoreCase))
                 {
                     i++;
-                    UserPassword = args[i];
+                    _UserPassword = args[i];
                 }
                 else if (args[i].Equals("-devicecodeflow", StringComparison.OrdinalIgnoreCase))
                 {
-                    DeviceCodeFlow = true;
+                    _isDeviceCodeFlow = true;
                 }
                 else
                 {
@@ -168,11 +168,11 @@ namespace KerberosConsole
         {
             Console.WriteLine("Acquiring authentication token ...");
             AuthenticationResult result;
-            if (DeviceCodeFlow)
+            if (_isDeviceCodeFlow)
             {
                 result = AcquireTokenWithDeviceCodeFlow();
             }
-            else if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(UserPassword))
+            else if (string.IsNullOrEmpty(_Username) || string.IsNullOrEmpty(_UserPassword))
             {
                 result = AcquireTokenFromPublicClientWithInteractive();
             }
@@ -201,7 +201,7 @@ namespace KerberosConsole
             try
             {
                 byte[] ticket
-                    = KerberosSupplementalTicketManager.GetKerberosTicketFromWindowsTicketCache(KerberosServicePrincipalName, LogonId);
+                    = KerberosSupplementalTicketManager.GetKerberosTicketFromWindowsTicketCache(_kerberosServicePrincipalName, _logonId);
                 if (ticket != null && ticket.Length > 32)
                 {
                     var encode = Convert.ToBase64String(ticket);
@@ -215,11 +215,11 @@ namespace KerberosConsole
                     return true;
                 }
 
-                Console.WriteLine($"There's no ticket associated with '{KerberosServicePrincipalName}'");
+                Console.WriteLine($"There's no ticket associated with '{_kerberosServicePrincipalName}'");
             }
             catch (Win32Exception ex)
             {
-                Console.WriteLine($"ERROR while finding Kerberos Ticket for '{KerberosServicePrincipalName}': {ex.Message}");
+                Console.WriteLine($"ERROR while finding Kerberos Ticket for '{_kerberosServicePrincipalName}': {ex.Message}");
             }
             return false;
         }
@@ -253,7 +253,7 @@ namespace KerberosConsole
         private void ProcessKerberosTicket(AuthenticationResult result)
         {
             KerberosSupplementalTicket ticket;
-            if (TicketContainer == KerberosTicketContainer.IdToken)
+            if (_ticketContainer == KerberosTicketContainer.IdToken)
             {
                 // 1. Get the Kerberos Ticket contained in the Id Token.
                 ticket = KerberosSupplementalTicketManager.FromIdToken(result.IdToken);
@@ -268,7 +268,7 @@ namespace KerberosConsole
                 try
                 {
                     // 2. Save the Kerberos Ticket into current user's Windows Ticket Cache.
-                    KerberosSupplementalTicketManager.SaveToWindowsTicketCache(ticket, LogonId);
+                    KerberosSupplementalTicketManager.SaveToWindowsTicketCache(ticket, _logonId);
                     AADKerberosLogger.Save("---Kerberos Ticket cached into user's Ticket Cache\n");
                 }
                 catch (Win32Exception ex)
@@ -305,26 +305,26 @@ namespace KerberosConsole
         private AuthenticationResult AcquireTokenFromPublicClientWithInteractive()
         {
             // 1. Setup pulic client application to get Kerberos Ticket.
-            var app = PublicClientApplicationBuilder.Create(ClientId)
-                .WithTenantId(TenantId)
-                .WithRedirectUri(RedirectUri)
-                .WithKerberosTicketClaim(KerberosServicePrincipalName, TicketContainer)
+            var app = PublicClientApplicationBuilder.Create(_clientId)
+                .WithTenantId(_tenantId)
+                .WithRedirectUri(_redirectUri)
+                .WithKerberosTicketClaim(_kerberosServicePrincipalName, _ticketContainer)
                 .WithLogging(LogDelegate, LogLevel.Verbose, true, true)
                 .Build();
 
             try
             {
                 AADKerberosLogger.Save("Calling AcquireTokenInteractive() with:");
-                AADKerberosLogger.Save("         Tenant Id: " + TenantId);
-                AADKerberosLogger.Save("         Client Id: " + ClientId);
-                AADKerberosLogger.Save("      Redirect Uri: " + RedirectUri);
-                AADKerberosLogger.Save("               spn: " + KerberosServicePrincipalName);
-                AADKerberosLogger.Save("  Ticket container: " + TicketContainer);
+                AADKerberosLogger.Save("         Tenant Id: " + _tenantId);
+                AADKerberosLogger.Save("         Client Id: " + _clientId);
+                AADKerberosLogger.Save("      Redirect Uri: " + _redirectUri);
+                AADKerberosLogger.Save("               spn: " + _kerberosServicePrincipalName);
+                AADKerberosLogger.Save("  Ticket container: " + _ticketContainer);
 
                 // 2. Acquire the authentication token.
                 // Kerberos Ticket will be contained in Id Token or Access Token
                 // according to specified ticket container parameter.
-                AuthenticationResult result = app.AcquireTokenInteractive(PublicAppScopes)
+                AuthenticationResult result = app.AcquireTokenInteractive(_publicAppScopes)
                         .ExecuteAsync()
                         .GetAwaiter()
                         .GetResult();
@@ -354,33 +354,33 @@ namespace KerberosConsole
         private AuthenticationResult AcquireTokenFromPublicClientWithUserPassword()
         {
             // 1. Setup pulic client application to get Kerberos Ticket.
-            var app = PublicClientApplicationBuilder.Create(ClientId)
-                .WithTenantId(TenantId)
-                .WithRedirectUri(RedirectUri)
-                .WithKerberosTicketClaim(KerberosServicePrincipalName, TicketContainer)
+            var app = PublicClientApplicationBuilder.Create(_clientId)
+                .WithTenantId(_tenantId)
+                .WithRedirectUri(_redirectUri)
+                .WithKerberosTicketClaim(_kerberosServicePrincipalName, _ticketContainer)
                 .WithLogging(LogDelegate, LogLevel.Verbose, true, true)
                 .Build();
 
             try
             {
                 AADKerberosLogger.Save("Calling AcquireTokenByUsernamePassword() with:");
-                AADKerberosLogger.Save("         Tenant Id: " + TenantId);
-                AADKerberosLogger.Save("         Client Id: " + ClientId);
-                AADKerberosLogger.Save("      Redirect Uri: " + RedirectUri);
-                AADKerberosLogger.Save("               spn: " + KerberosServicePrincipalName);
-                AADKerberosLogger.Save("  Ticket container: " + TicketContainer);
-                AADKerberosLogger.Save("          Username: " + UserName);
+                AADKerberosLogger.Save("         Tenant Id: " + _tenantId);
+                AADKerberosLogger.Save("         Client Id: " + _clientId);
+                AADKerberosLogger.Save("      Redirect Uri: " + _redirectUri);
+                AADKerberosLogger.Save("               spn: " + _kerberosServicePrincipalName);
+                AADKerberosLogger.Save("  Ticket container: " + _ticketContainer);
+                AADKerberosLogger.Save("          Username: " + _Username);
 
                 // 2. Acquire the authentication token.
                 // Kerberos Ticket will be contained in Id Token or Access Token
                 // according to specified ticket container parameter.
                 SecureString password = new SecureString();
-                foreach (var c in UserPassword.ToCharArray())
+                foreach (var c in _UserPassword.ToCharArray())
                 {
                     password.AppendChar(c);
                 }
 
-                AuthenticationResult result = app.AcquireTokenByUsernamePassword(PublicAppScopes, UserName, password)
+                AuthenticationResult result = app.AcquireTokenByUsernamePassword(_publicAppScopes, _Username, password)
                         .ExecuteAsync()
                         .GetAwaiter()
                         .GetResult();
@@ -402,28 +402,28 @@ namespace KerberosConsole
         private AuthenticationResult AcquireTokenWithDeviceCodeFlow()
         {
             // 1. Setup pulic client application to get Kerberos Ticket.
-            var app = PublicClientApplicationBuilder.Create(ClientId)
-                .WithTenantId(TenantId)
-                .WithRedirectUri(RedirectUri)
-                .WithKerberosTicketClaim(KerberosServicePrincipalName, TicketContainer)
+            var app = PublicClientApplicationBuilder.Create(_clientId)
+                .WithTenantId(_tenantId)
+                .WithRedirectUri(_redirectUri)
+                .WithKerberosTicketClaim(_kerberosServicePrincipalName, _ticketContainer)
                 .WithLogging(LogDelegate, LogLevel.Verbose, true, true)
                 .Build();
 
             try
             {
                 AADKerberosLogger.Save("Calling AcquireTokenWithDeviceCodeFlow() with:");
-                AADKerberosLogger.Save("         Tenant Id: " + TenantId);
-                AADKerberosLogger.Save("         Client Id: " + ClientId);
-                AADKerberosLogger.Save("      Redirect Uri: " + RedirectUri);
-                AADKerberosLogger.Save("               spn: " + KerberosServicePrincipalName);
-                AADKerberosLogger.Save("  Ticket container: " + TicketContainer);
+                AADKerberosLogger.Save("         Tenant Id: " + _tenantId);
+                AADKerberosLogger.Save("         Client Id: " + _clientId);
+                AADKerberosLogger.Save("      Redirect Uri: " + _redirectUri);
+                AADKerberosLogger.Save("               spn: " + _kerberosServicePrincipalName);
+                AADKerberosLogger.Save("  Ticket container: " + _ticketContainer);
 
                 // 2. Acquire the authentication token.
                 // Kerberos Ticket will be contained in Id Token or Access Token
                 // according to specified ticket container parameter.
                 AuthenticationResult result = app
                     .AcquireTokenWithDeviceCode(
-                        PublicAppScopes,
+                        _publicAppScopes,
                         deviceCodeCallback =>
                         {
                             ConsoleColor current = Console.ForegroundColor;

@@ -14,14 +14,14 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
     /// </summary>
     public class TicketCacheWriter : IDisposable
     {
-        private const string KerberosPackageName = "Kerberos";
-        private const string NegotiatePackageName = "Negotiate";
+        private const string _kerberosPackageName = "Kerberos";
+        private const string _negotiatePackageName = "Negotiate";
 
-        private readonly LsaSafeHandle lsaHandle;
-        private readonly int selectedAuthPackage;
-        private readonly int negotiateAuthPackage;
+        private readonly LsaSafeHandle _lsaHandle;
+        private readonly int _selectedAuthPackage;
+        private readonly int _negotiateAuthPackage;
 
-        private bool disposedValue;
+        private bool _disposedValue;
 
         /*
          * Windows creates a new ticket cache for primary NT tokens. This allows callers to create a dedicated cache for whatever they're doing
@@ -44,9 +44,9 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
          * pool of memory to create a working for the current operation. On dispose it zeros the memory and returns it to the pool.
          */
 
-        internal unsafe TicketCacheWriter(LsaSafeHandle lsaHandle, string packageName = KerberosPackageName)
+        internal unsafe TicketCacheWriter(LsaSafeHandle lsaHandle, string packageName = _kerberosPackageName)
         {
-            this.lsaHandle = lsaHandle;
+            this._lsaHandle = lsaHandle;
 
             var kerberosPackageName = new LSA_STRING
             {
@@ -55,17 +55,17 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                 MaximumLength = (ushort)packageName.Length
             };
 
-            var result = LsaLookupAuthenticationPackage(this.lsaHandle, ref kerberosPackageName, out this.selectedAuthPackage);
+            var result = LsaLookupAuthenticationPackage(this._lsaHandle, ref kerberosPackageName, out this._selectedAuthPackage);
             LsaThrowIfError(result);
 
             var negotiatePackageName = new LSA_STRING
             {
-                Buffer = NegotiatePackageName,
-                Length = (ushort)NegotiatePackageName.Length,
-                MaximumLength = (ushort)NegotiatePackageName.Length
+                Buffer = _negotiatePackageName,
+                Length = (ushort)_negotiatePackageName.Length,
+                MaximumLength = (ushort)_negotiatePackageName.Length
             };
 
-            result = LsaLookupAuthenticationPackage(this.lsaHandle, ref negotiatePackageName, out this.negotiateAuthPackage);
+            result = LsaLookupAuthenticationPackage(this._lsaHandle, ref negotiatePackageName, out this._negotiateAuthPackage);
             LsaThrowIfError(result);
         }
 
@@ -74,18 +74,18 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// </summary>
         /// <param name="package">The name of the LSA authentication package that will be interacted with.</param>
         /// <returns>Returns an instance of the <see cref="TicketCacheWriter"/> class.</returns>
-        public static TicketCacheWriter Connect(string package = KerberosPackageName)
+        public static TicketCacheWriter Connect(string package = _kerberosPackageName)
         {
             if (string.IsNullOrWhiteSpace(package))
             {
-                package = KerberosPackageName;
+                package = _kerberosPackageName;
             }
 
-            var result = LsaConnectUntrusted(out LsaSafeHandle lsaHandle);
+            var result = LsaConnectUntrusted(out LsaSafeHandle _lsaHandle);
 
             LsaThrowIfError(result);
 
-            return new TicketCacheWriter(lsaHandle, package);
+            return new TicketCacheWriter(_lsaHandle, package);
         }
 
         /// <summary>
@@ -129,8 +129,8 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             try
             {
                 var result = NativeMethods.LsaCallAuthenticationPackage(
-                    this.lsaHandle,
-                    this.selectedAuthPackage,
+                    this._lsaHandle,
+                    this._selectedAuthPackage,
                     pBuffer,
                     bufferSize,
                     out returnBuffer,
@@ -153,10 +153,10 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// <param name="disposing">True if Dispose() called by the user. False, otherwise.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.disposedValue)
+            if (!this._disposedValue)
             {
-                this.lsaHandle.Dispose();
-                this.disposedValue = true;
+                this._lsaHandle.Dispose();
+                this._disposedValue = true;
             }
         }
 

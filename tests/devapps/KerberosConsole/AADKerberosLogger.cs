@@ -38,7 +38,8 @@ namespace KerberosConsole
 
                         _logFileName = String.Format(
                             CultureInfo.InvariantCulture,
-                            @"C:\Users\yoko\Documents\AzureAD-MSAL-{0}-{1}.log",
+                            @"{0}\AzureAD-MSAL-{1}-{2}.log",
+                            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                             DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                             _lastFileIndex);
                     } while (File.Exists(_logFileName));

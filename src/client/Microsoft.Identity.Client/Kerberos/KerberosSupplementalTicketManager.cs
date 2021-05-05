@@ -20,16 +20,17 @@ namespace Microsoft.Identity.Client.Kerberos
     /// </summary>
     public static class KerberosSupplementalTicketManager
     {
-        private const int DefaultLogonId = 0;
-        private const string KerberosClaimType = "xms_as_rep";
-        private const string IdTokenAsRepTemplate = @"{{""id_token"": {{ ""xms_as_rep"":{{""essential"":""false"",""value"":""{0}""}} }} }}";
-        private const string AccessTokenAsRepTemplate = @"{{""access_token"": {{ ""xms_as_rep"":{{""essential"":""false"",""value"":""{0}""}} }} }}";
+        private const int _defaultLogonId = 0;
+        private const string _kerberosClaimType = "xms_as_rep";
+        private const string _idTokenAsRepTemplate = @"{{""id_token"": {{ ""xms_as_rep"":{{""essential"":""false"",""value"":""{0}""}} }} }}";
+        private const string _accessTokenAsRepTemplate = @"{{""access_token"": {{ ""xms_as_rep"":{{""essential"":""false"",""value"":""{0}""}} }} }}";
 
         /// <summary>
         /// Creates a <see cref="KerberosSupplementalTicket"/> object from given ID token string..
         /// </summary>
         /// <param name="idToken">ID token string.</param>
-        /// <returns>A <see cref="KerberosSupplementalTicket"/> object if exists and parsed correctly. Null, otherwise.</returns>
+        /// <returns>A <see cref="KerberosSupplementalTicket"/> object if a Kerberos Ticket Claim exists in the given
+        /// idToken parameter and is parsed correctly. Null, otherwise.</returns>
         public static KerberosSupplementalTicket FromIdToken(string idToken)
         {
             if (string.IsNullOrEmpty(idToken) || idToken.Length < 128)
@@ -53,10 +54,10 @@ namespace Microsoft.Identity.Client.Kerberos
                 return null;
             }
 
-            // parse the JSON data anf find the included Kerberos Ticket claim.
+            // parse the JSON data and find the included Kerberos Ticket claim.
             JObject payloadJson = JObject.Parse(payload);
             JToken claimValue;
-            if (!payloadJson.TryGetValue(KerberosClaimType, out claimValue))
+            if (!payloadJson.TryGetValue(_kerberosClaimType, out claimValue))
             {
                 return null;
             }
@@ -76,7 +77,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// </remarks>
         public static void SaveToWindowsTicketCache(KerberosSupplementalTicket ticket)
         {
-            SaveToWindowsTicketCache(ticket, DefaultLogonId);
+            SaveToWindowsTicketCache(ticket, _defaultLogonId);
         }
 
         /// <summary>
@@ -115,7 +116,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// </remarks>
         public static byte[] GetKerberosTicketFromWindowsTicketCache(string servicePrincipalName)
         {
-            return GetKerberosTicketFromWindowsTicketCache(servicePrincipalName, DefaultLogonId);
+            return GetKerberosTicketFromWindowsTicketCache(servicePrincipalName, _defaultLogonId);
         }
 
         /// <summary>
@@ -205,16 +206,14 @@ namespace Microsoft.Identity.Client.Kerberos
             {
                 return string.Format(
                     CultureInfo.InvariantCulture,
-                    IdTokenAsRepTemplate,
+                    _idTokenAsRepTemplate,
                     servicePrincipalName);
             }
-            else
-            {
-                return string.Format(
-                    CultureInfo.InvariantCulture,
-                    AccessTokenAsRepTemplate,
-                    servicePrincipalName);
-            }
+
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                _accessTokenAsRepTemplate,
+                servicePrincipalName);
         }
     }
 }

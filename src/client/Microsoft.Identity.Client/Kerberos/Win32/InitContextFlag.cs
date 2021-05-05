@@ -7,7 +7,6 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 {
     /// <summary>
     /// Bit flags that indicate requests for the context for InitializeSecurityContext API call.
-    /// 
     /// https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-initializesecuritycontexta
     /// </summary>
     [Flags]

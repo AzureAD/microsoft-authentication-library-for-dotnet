@@ -14,9 +14,9 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
     /// </summary>
     public class TicketCacheReader : IDisposable
     {
-        private readonly string spn;
-        private readonly SspiSecurityContext context;
-        private bool disposedValue;
+        private readonly string _spn;
+        private readonly SspiSecurityContext _context;
+        private bool _disposedValue;
 
         /// <summary>
         /// Creates a <see cref="TicketCacheReader"/> object to read a Kerberos Ticket from Ticket Cache.
@@ -27,9 +27,9 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// <param name="package">The name of the LSA authentication package that will be interacted with.</param>
         public TicketCacheReader(string spn, long logonId = 0, string package = "Kerberos")
         {
-            this.spn = spn;
+            this._spn = spn;
 
-            this.context = new SspiSecurityContext(Credential.Current(), package, logonId);
+            this._context = new SspiSecurityContext(Credential.Current(), package, logonId);
         }
 
 
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// </remarks>
         public byte[] RequestToken()
         {
-            var status = this.context.InitializeSecurityContext(this.spn, out byte[] clientRequest);
+            var status = this._context.InitializeSecurityContext(this._spn, out byte[] clientRequest);
 
             if (status == ContextStatus.Error)
             {
@@ -55,14 +55,14 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// <inheritdoc/>
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.disposedValue)
+            if (!this._disposedValue)
             {
                 if (disposing)
                 {
-                    this.context.Dispose();
+                    this._context.Dispose();
                 }
 
-                this.disposedValue = true;
+                this._disposedValue = true;
             }
         }
 

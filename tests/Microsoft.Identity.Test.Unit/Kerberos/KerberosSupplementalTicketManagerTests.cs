@@ -18,17 +18,17 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         /// <summary>
         /// Service principal name for testing.
         /// </summary>
-        private static readonly string TestSpn = "HTTP/prod.aadkreberos.msal.com";
+        private static readonly string _testServicePrincipalName = "HTTP/prod.aadkreberos.msal.com";
 
         /// <summary>
         /// Username within the ID token.
         /// </summary>
-        private static readonly string TestCn = "localAdmin@aadktest.onmicrosoft.com";
+        private static readonly string _testClientName = "localAdmin@aadktest.onmicrosoft.com";
 
         /// <summary>
         /// Sample ID Token without Kerbero Service Ticket.
         /// </summary>
-        private static readonly string TestToken =
+        private static readonly string _testIdToken =
             "eyJ0eXAiOiJKV1QiLCJyaCI6IjAuQWdBQXI0R0lRckdhczBDQldEWVJOWV9fYUlLMElWSlJKck5NbXRqQW1uamszcDRzQU5NLiIsImFsZyI6IlJTMjU2"
             + "Iiwia2lkIjoibk9vM1pEck9EWEVLMWpLV2hYc2xIUl9LWEVnIn0.eyJhdWQiOiI1MjIxYjQ4Mi0yNjUxLTRjYjMtOWFkOC1jMDlhNzhlNGRlOWUiLCJp"
             + "c3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNDI4ODgxYWYtOWFiMS00MGIzLTgxNTgtMzYxMTM1OGZmZjY4L3YyLjAiLCJpYXQi"
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         /// <summary>
         /// Sample ID token sample with Kerberos Service Ticket.
         /// </summary>
-        private static readonly string TestTokenWithTicket =
+        private static readonly string _testIdTokenWithKerberosTicketClaim =
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Im5PbzNaRHJPRFhFSzFqS1doWHNsSFJfS1hFZyJ9.eyJhdWQiOiI1MjIxYjQ4Mi0yNjUxLTRj"
             + "YjMtOWFkOC1jMDlhNzhlNGRlOWUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNDI4ODgxYWYtOWFiMS00MGIzLTgxNTgtMz"
             + "YxMTM1OGZmZjY4L3YyLjAiLCJpYXQiOjE2MTk4MTg1MTgsIm5iZiI6MTYxOTgxODUxOCwiZXhwIjoxNjE5ODIyNDE4LCJhaW8iOiJBVFFBeS84VEFBQUFP"
@@ -95,19 +95,19 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         [TestMethod]
         public void FromIdToken_WithKerberosTicket()
         {
-            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(TestTokenWithTicket);
+            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(_testIdTokenWithKerberosTicketClaim);
 
             Assert.IsNotNull(ticket);
             Assert.IsTrue(string.IsNullOrEmpty(ticket.ErrorMessage));
             Assert.IsFalse(string.IsNullOrEmpty(ticket.KerberosMessageBuffer));
-            Assert.AreEqual(TestSpn, ticket.ServicePrincipalName, "Service principal name is not matched.");
-            Assert.AreEqual(TestCn, ticket.ClientName, "Clien name is not matched.");
+            Assert.AreEqual(_testServicePrincipalName, ticket.ServicePrincipalName, "Service principal name is not matched.");
+            Assert.AreEqual(_testClientName, ticket.ClientName, "Client name is not matched.");
         }
 
         [TestMethod]
         public void FromIdToken_WithoutKerberosTicket()
         {
-            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(TestToken);
+            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(_testIdToken);
 
             Assert.IsNull(ticket);
         }
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         [TestMethod]
         public void GetKrbCred()
         {
-            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(TestTokenWithTicket);
+            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(_testIdTokenWithKerberosTicketClaim);
             byte[] krbCred = KerberosSupplementalTicketManager.GetKrbCred(ticket);
 
             Assert.IsNotNull(krbCred);
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         public void GetKerberosTicketClaim_IdToken()
         {
             string kerberosClaim
-                = KerberosSupplementalTicketManager.GetKerberosTicketClaim(TestSpn, KerberosTicketContainer.IdToken);
+                = KerberosSupplementalTicketManager.GetKerberosTicketClaim(_testServicePrincipalName, KerberosTicketContainer.IdToken);
 
             Assert.IsFalse(string.IsNullOrEmpty(kerberosClaim));
 
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         public void GetKerberosTicketClaim_AccessToken()
         {
             string kerberosClaim
-                = KerberosSupplementalTicketManager.GetKerberosTicketClaim(TestSpn, KerberosTicketContainer.AccessToken);
+                = KerberosSupplementalTicketManager.GetKerberosTicketClaim(_testServicePrincipalName, KerberosTicketContainer.AccessToken);
 
             Assert.IsFalse(string.IsNullOrEmpty(kerberosClaim));
 
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
             Assert.AreEqual("false", asRep.GetNamedString("essential"), "essential field is not matched.");
 
             Assert.IsTrue(asRep.ContainsKey("value"));
-            Assert.AreEqual(TestSpn, asRep.GetNamedString("value"), "Service principal name is not matched.");
+            Assert.AreEqual(_testServicePrincipalName, asRep.GetNamedString("value"), "Service principal name is not matched.");
         }
     }
 }
