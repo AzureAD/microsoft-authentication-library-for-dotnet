@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
         public Uri BrowserRedirectError { get; set; }
 
         /// <summary>
-        /// This hides privacy prompt displayed on the iOS Devices (ver 13.0+) when set to true.
+        /// This hides the privacy prompt displayed on iOS Devices (ver 13.0+) when set to true.
         /// By default, it is false and displays the prompt.
         /// </summary>
         public bool HidePrivacyPrompt { get; set; } = false;
