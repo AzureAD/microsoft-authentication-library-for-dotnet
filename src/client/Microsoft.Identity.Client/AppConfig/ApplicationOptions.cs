@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
 using Microsoft.Identity.Client.Kerberos;
 
 namespace Microsoft.Identity.Client

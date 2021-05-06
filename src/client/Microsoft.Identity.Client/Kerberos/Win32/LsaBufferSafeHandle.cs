@@ -3,10 +3,10 @@
 
 using System;
 using System.Runtime.InteropServices;
-using static Microsoft.Identity.Client.Kerberos.Win32.NativeMethods;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
+#if !(iOS || MAC || ANDROID)
     internal class LsaBufferSafeHandle : SafeHandle
     {
         public LsaBufferSafeHandle()
@@ -18,13 +18,14 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
         protected override bool ReleaseHandle()
         {
-            var result = LsaFreeReturnBuffer(this.handle);
+            var result = NativeMethods.LsaFreeReturnBuffer(this.handle);
 
-            LsaThrowIfError(result);
+            NativeMethods.LsaThrowIfError(result);
 
             this.handle = IntPtr.Zero;
 
             return true;
         }
     }
+#endif
 }

@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
 #pragma warning disable 618 // This workaround required for Native Win32 API call
+#if !(iOS || MAC || ANDROID)
 
     /// <summary>
     /// Helper class to check Kerberos Ticket in user's Ticket Cache.
@@ -76,5 +77,6 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         }
     }
 
+#endif
 #pragma warning restore 618
 }

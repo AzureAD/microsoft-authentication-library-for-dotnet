@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-using static Microsoft.Identity.Client.Kerberos.Win32.NativeMethods;
-
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
 #pragma warning disable 618 // This workaround required for Native Win32 API call
-
+#if !(iOS || MAC || ANDROID)
     internal partial class SspiSecurityContext : IDisposable
     {
         private const int SECPKG_CRED_BOTH = 0x00000003;
@@ -33,8 +31,8 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         private readonly Credential _credential;
         private readonly InitContextFlag _clientFlags;
 
-        private SECURITY_HANDLE _credentialsHandle;
-        private SECURITY_HANDLE _securityContext;
+        private NativeMethods.SECURITY_HANDLE _credentialsHandle;
+        private NativeMethods.SECURITY_HANDLE _securityContext;
         private long _logonId;
 
         public SspiSecurityContext(
@@ -67,7 +65,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
             SecStatus result = 0;
             int tokenSize = 0;
-            SecBufferDesc clientToken = default;
+            NativeMethods.SecBufferDesc clientToken = default;
 
             try
             {
@@ -75,14 +73,14 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                 {
                     InitContextFlag contextFlags;
 
-                    clientToken = new SecBufferDesc(tokenSize);
+                    clientToken = new NativeMethods.SecBufferDesc(tokenSize);
 
                     if (!this._credentialsHandle.IsSet || result == SecStatus.SEC_I_CONTINUE_NEEDED)
                     {
                         this.AcquireCredentials();
                     }
 
-                    result = InitializeSecurityContext_0(
+                    result = NativeMethods.InitializeSecurityContext_0(
                                     ref this._credentialsHandle,
                                     IntPtr.Zero,
                                     targetNameNormalized,
@@ -146,7 +144,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                 Marshal.StructureToPtr(this._logonId, authIdPtr, false);
             }
 
-            SecStatus result = AcquireCredentialsHandle(
+            SecStatus result = NativeMethods.AcquireCredentialsHandle(
                                     null,
                                     this.Package,
                                     SECPKG_CRED_BOTH,
@@ -173,11 +171,11 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                 {
                     managedDispose.Dispose();
                 }
-                else if (thing is SECURITY_HANDLE handle)
+                else if (thing is NativeMethods.SECURITY_HANDLE handle)
                 {
-                    DeleteSecurityContext(&handle);
+                    NativeMethods.DeleteSecurityContext(&handle);
 
-                    ThrowIfError(FreeCredentialsHandle(&handle));
+                    ThrowIfError(NativeMethods.FreeCredentialsHandle(&handle));
                 }
                 else if (thing is IntPtr pThing)
                 {
@@ -186,6 +184,6 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             }
         }
     }
-
+#endif
 #pragma warning restore 618
 }

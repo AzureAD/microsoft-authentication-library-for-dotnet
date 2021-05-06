@@ -96,11 +96,11 @@ namespace Microsoft.Identity.Client
 
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
 
-        #region Region
+#region Region
         public string AzureRegion { get; set; }
-        #endregion
+#endregion
 
-        #region Authority
+#region Authority
 
         public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }
         public Uri CustomInstanceDiscoveryMetadataUri { get; set; }
@@ -125,16 +125,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-        #endregion
+#endregion
 
-        #region Test Hooks
+#region Test Hooks
         public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
-        #endregion
+#endregion
 
     }
 }

@@ -9,7 +9,6 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
@@ -383,8 +382,6 @@ namespace Microsoft.Identity.Client
                 applicationOptions.EnablePiiLogging,
                 applicationOptions.IsDefaultPlatformLoggingEnabled);
 
-            WithKerberosTicketClaim(applicationOptions.KerberosServicePrincipalName, applicationOptions.TicketContainer);
-
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
             Config.AzureCloudInstance = applicationOptions.AzureCloudInstance;
@@ -462,19 +459,6 @@ namespace Microsoft.Identity.Client
         public T WithTelemetry(ITelemetryConfig telemetryConfig)
         {
             Config.TelemetryConfig = telemetryConfig;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Sets the parameters required to get a Kerberos Ticket from Azure AD service.
-        /// </summary>
-        /// <param name="servicePrincipalName">Service principal name to get Kerberos Service Ticket.</param>
-        /// <param name="ticketContainer">Container to use for Kerberos Ticket.</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithKerberosTicketClaim(string servicePrincipalName, KerberosTicketContainer ticketContainer)
-        {
-            Config.KerberosServicePrincipalName = servicePrincipalName;
-            Config.TicketContainer = ticketContainer;
             return (T)this;
         }
 

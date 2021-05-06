@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
+#if !(iOS || MAC || ANDROID)
     /// <summary>
     /// Extension of a wrapper class for operating system handles.
     /// </summary>
@@ -34,4 +35,5 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             return true;
         }
     }
+#endif
 }

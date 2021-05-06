@@ -3,11 +3,11 @@
 
 using System;
 using System.Runtime.InteropServices;
-using static Microsoft.Identity.Client.Kerberos.Win32.NativeMethods;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
 #pragma warning disable 618 // This workaround required for Native Win32 API call
+#if !(iOS || MAC || ANDROID)
 
     /// <summary>
     /// Provides a layer to interact with the LSA functions used to create logon sessions and manipulate the ticket caches.
@@ -48,25 +48,25 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         {
             this._lsaHandle = lsaHandle;
 
-            var kerberosPackageName = new LSA_STRING
+            var kerberosPackageName = new NativeMethods.LSA_STRING
             {
                 Buffer = packageName,
                 Length = (ushort)packageName.Length,
                 MaximumLength = (ushort)packageName.Length
             };
 
-            var result = LsaLookupAuthenticationPackage(this._lsaHandle, ref kerberosPackageName, out this._selectedAuthPackage);
-            LsaThrowIfError(result);
+            var result = NativeMethods.LsaLookupAuthenticationPackage(this._lsaHandle, ref kerberosPackageName, out this._selectedAuthPackage);
+            NativeMethods.LsaThrowIfError(result);
 
-            var negotiatePackageName = new LSA_STRING
+            var negotiatePackageName = new NativeMethods.LSA_STRING
             {
                 Buffer = _negotiatePackageName,
                 Length = (ushort)_negotiatePackageName.Length,
                 MaximumLength = (ushort)_negotiatePackageName.Length
             };
 
-            result = LsaLookupAuthenticationPackage(this._lsaHandle, ref negotiatePackageName, out this._negotiateAuthPackage);
-            LsaThrowIfError(result);
+            result = NativeMethods.LsaLookupAuthenticationPackage(this._lsaHandle, ref negotiatePackageName, out this._negotiateAuthPackage);
+            NativeMethods.LsaThrowIfError(result);
         }
 
         /// <summary>
@@ -81,9 +81,9 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                 package = _kerberosPackageName;
             }
 
-            var result = LsaConnectUntrusted(out LsaSafeHandle _lsaHandle);
+            var result = NativeMethods.LsaConnectUntrusted(out LsaSafeHandle _lsaHandle);
 
-            LsaThrowIfError(result);
+            NativeMethods.LsaThrowIfError(result);
 
             return new TicketCacheWriter(_lsaHandle, package);
         }
@@ -100,11 +100,11 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                 throw new ArgumentNullException(nameof(ticketBytes));
             }
 
-            var ticketRequest = new KERB_SUBMIT_TKT_REQUEST
+            var ticketRequest = new NativeMethods.KERB_SUBMIT_TKT_REQUEST
             {
-                MessageType = KERB_PROTOCOL_MESSAGE_TYPE.KerbSubmitTicketMessage,
+                MessageType = NativeMethods.KERB_PROTOCOL_MESSAGE_TYPE.KerbSubmitTicketMessage,
                 KerbCredSize = ticketBytes.Length,
-                KerbCredOffset = Marshal.SizeOf(typeof(KERB_SUBMIT_TKT_REQUEST)),
+                KerbCredOffset = Marshal.SizeOf(typeof(NativeMethods.KERB_SUBMIT_TKT_REQUEST)),
                 LogonId = luid
             };
 
@@ -138,8 +138,8 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                     out int protocolStatus
                 );
 
-                LsaThrowIfError(result);
-                LsaThrowIfError(protocolStatus);
+                NativeMethods.LsaThrowIfError(result);
+                NativeMethods.LsaThrowIfError(protocolStatus);
             }
             finally
             {
@@ -176,5 +176,6 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         }
     }
 
+#endif
 #pragma warning restore 618
 }

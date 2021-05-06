@@ -91,7 +91,9 @@ namespace Microsoft.Identity.Client.Kerberos
          /// </remarks>
         public static void SaveToWindowsTicketCache(KerberosSupplementalTicket ticket, long logonId)
         {
-#if SUPPORT_KERBEROS
+#if (iOS || MAC || ANDROID)
+            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+#else
             if (ticket == null || string.IsNullOrEmpty(ticket.KerberosMessageBuffer))
             {
                 throw new ArgumentException("Kerberos Ticket information is not valid");
@@ -132,13 +134,13 @@ namespace Microsoft.Identity.Client.Kerberos
         /// </remarks>
         public static byte[] GetKerberosTicketFromWindowsTicketCache(string servicePrincipalName, long logonId)
         {
-#if SUPPORT_KERBEROS
+#if (iOS || MAC || ANDROID)
+            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+#else
             using (var reader = new Win32.TicketCacheReader(servicePrincipalName, logonId))
             {
                 return reader.RequestToken();
             }
-#else
-            return null;
 #endif
         }
 

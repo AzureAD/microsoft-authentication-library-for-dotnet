@@ -4,10 +4,10 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using static Microsoft.Identity.Client.Kerberos.Win32.NativeMethods;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
+#if !(iOS || MAC || ANDROID)
     internal class LsaTokenSafeHandle : SafeHandle
     {
         public LsaTokenSafeHandle()
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         {
             this.Revert();
 
-            if (!CloseHandle(this.handle))
+            if (!NativeMethods.CloseHandle(this.handle))
             {
                 var error = Marshal.GetLastWin32Error();
 
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                 return;
             }
 
-            if (!RevertToSelf())
+            if (!NativeMethods.RevertToSelf())
             {
                 var error = Marshal.GetLastWin32Error();
 
@@ -50,4 +50,5 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             this.Impersonating = false;
         }
     }
+#endif
 }

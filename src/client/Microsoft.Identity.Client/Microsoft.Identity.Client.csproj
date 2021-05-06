@@ -126,7 +126,7 @@
     <None Include="$(PathToMsalSources)\**\*.cs;$(PathToMsalSources)\**\*.xml;$(PathToMsalSources)\**\*.axml" Exclude="$(PathToMsalSources)\obj\**\*.*;$(PathToMsalSources)\bin\**\*.*" />
     <!-- Manually include the cs files -->
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
-    <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs;$(PathToMsalSources)\Kerberos\*.cs;$(PathToMsalSources)\Kerberos\Win32\*.cs" />
+    <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
 
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
@@ -273,11 +273,5 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Splash.resx</DependentUpon>
     </None>
-  </ItemGroup>
-
-  <!-- Configurations for Azure AD Kerberos. -->
-  <ItemGroup Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-    <Compile Include="$(PathToMsalSources)\Kerberos\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Kerberos\Win32\*.cs" />
   </ItemGroup>
 </Project>

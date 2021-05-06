@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.ComponentModel;
 
@@ -44,7 +45,9 @@ namespace Microsoft.Identity.Client
         public static PublicClientApplicationBuilder CreateWithApplicationOptions(PublicClientApplicationOptions options)
         {
             var config = new ApplicationConfiguration();
-            return new PublicClientApplicationBuilder(config).WithOptions(options);
+            return new PublicClientApplicationBuilder(config)
+                .WithOptions(options)
+                .WithKerberosTicketClaim(options.KerberosServicePrincipalName, options.TicketContainer);
         }
 
         /// <summary>
@@ -182,7 +185,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
 #if !SUPPORTS_BROKER || __MOBILE__
         [EditorBrowsable(EditorBrowsableState.Never)]
-#endif  
+#endif
         public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
         {
             WindowsBrokerOptions.ValidatePlatformAvailability();
@@ -303,6 +306,19 @@ namespace Microsoft.Identity.Client
             return WithParentFunc(() => (object)windowFunc());
         }
 #endif
+
+        /// <summary>
+        /// Sets the parameters required to get a Kerberos Ticket from Azure AD service.
+        /// </summary>
+        /// <param name="servicePrincipalName">Service principal name to get Kerberos Service Ticket.</param>
+        /// <param name="ticketContainer">Container to use for Kerberos Ticket.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public PublicClientApplicationBuilder WithKerberosTicketClaim(string servicePrincipalName, KerberosTicketContainer ticketContainer)
+        {
+            Config.KerberosServicePrincipalName = servicePrincipalName;
+            Config.TicketContainer = ticketContainer;
+            return this;
+        }
 
         /// <summary>
         /// Returns true if a broker can be used. 
