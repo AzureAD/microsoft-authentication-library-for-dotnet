@@ -1,12 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -120,8 +119,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (!envMetadata.Aliases.ContainsOrdinalIgnoreCase(accountEnv))
             {
                 _logger.InfoPii(
-                $"[WAM AAD Provider] Account {webAccount.UserName} enviroment {accountEnv} does not match input authority env {envMetadata.PreferredNetwork} or an alias",
-                $"[WAM AAD Provider] Account enviroment {accountEnv} does not match input authority env {envMetadata.PreferredNetwork}");
+                $"[WAM AAD Provider] Account {webAccount.UserName} environment {accountEnv} does not match input authority environment {envMetadata.PreferredNetwork} or an alias",
+                $"[WAM AAD Provider] Account environment {accountEnv} does not match input authority environment {envMetadata.PreferredNetwork}");
 
                 return null;
             }
@@ -391,7 +390,5 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             return "WAM_unexpected_aad_error";
         }
-
-
     }
 }

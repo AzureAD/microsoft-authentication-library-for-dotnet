@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.Cache;
+using System.Diagnostics;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -69,7 +70,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             string correlationId) : base(EventNamePrefix + "api_event", correlationId)
         {
             _logger = logger;
-            _cryptographyManager = cryptographyManager;
+            _cryptographyManager = cryptographyManager;            
         }
 
         public ApiTelemetryId ApiTelemId
@@ -242,6 +243,18 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
                 (int)Enum.Parse(typeof(CacheInfoTelemetry), this[CacheInfoKey]) : (int)CacheInfoTelemetry.None;
 
             set => this[CacheInfoKey] = value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        public long DurationInHttpInMs
+        {
+            get;
+            set;
+        }
+
+        public long DurationInCacheInMs
+        {
+            get;
+            set;
         }
     }
 }

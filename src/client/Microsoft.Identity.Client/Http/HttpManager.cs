@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -24,6 +25,7 @@ namespace Microsoft.Identity.Client.Http
     internal class HttpManager : IHttpManager
     {
         private readonly IMsalHttpClientFactory _httpClientFactory;
+        public long LastRequestDurationInMs { get; private set; }
 
         public HttpManager(IMsalHttpClientFactory httpClientFactory)
         {
@@ -216,9 +218,12 @@ namespace Microsoft.Identity.Client.Http
                     $"[HttpManager] Sending request. Method: {method}. URI: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ",
                     $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. ");
 
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                 {
+                    LastRequestDurationInMs = sw.ElapsedMilliseconds;
                     logger.Verbose($"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
 
                     HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);

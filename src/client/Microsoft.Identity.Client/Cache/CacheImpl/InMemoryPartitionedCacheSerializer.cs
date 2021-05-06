@@ -16,9 +16,9 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
         internal /* internal for test only */ ConcurrentDictionary<string, byte[]> CachePartition { get; }        
         private readonly ICoreLogger _logger;
 
-        public InMemoryPartitionedCacheSerializer(ICoreLogger logger)
+        public InMemoryPartitionedCacheSerializer(ICoreLogger logger, ConcurrentDictionary<string, byte[]> dictionary = null)
         {
-            CachePartition = new ConcurrentDictionary<string, byte[]>();
+            CachePartition = dictionary ?? new ConcurrentDictionary<string, byte[]>();
             _logger = logger;
         }
 

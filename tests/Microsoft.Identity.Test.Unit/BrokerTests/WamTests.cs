@@ -22,6 +22,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
+using Microsoft.Identity.Client.Internal;
 
 #if !NET5_WIN
 using Microsoft.Identity.Client.Desktop;
@@ -176,12 +177,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreSame(_msalTokenResponse, result);
                 Assert.AreEqual("yes", webTokenRequest.Properties["validateAuthority"]);
                 Assert.AreEqual("extraVal1", webTokenRequest.Properties["extraQp1"]);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
 
                 // Although at the time of writing, MSAL does not support instance aware ...
                 // WAM does support it but the param is different - discovery=home              
                 Assert.AreEqual("home", webTokenRequest.Properties["discover"]);
                 Assert.AreEqual("https://login.microsoftonline.com/organizations/", webTokenRequest.Properties["authority"]);
-
             }
         }
 
@@ -354,6 +355,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert 
                 Assert.AreSame(_msalTokenResponse, result);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
             }
         }
 
@@ -389,7 +391,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Act / Assert
                 var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                     () => _wamBroker.AcquireTokenSilentAsync(requestParams, atsParams)).ConfigureAwait(false);
-
             }
         }
 
@@ -434,6 +435,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    isForceLoginPrompt: false,
                    isAccountInWam: false,
                    isInteractive: false).ConfigureAwait(false);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
             }
         }
 
@@ -489,6 +491,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert 
                 Assert.AreSame(_msalTokenResponse, result);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
             }
         }
 
@@ -549,6 +552,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/common/",
                     webTokenRequest.Properties["authority"]);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
             }
         }
 
@@ -593,6 +597,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert 
                 Assert.AreSame(_msalTokenResponse, result);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
             }
         }
 
@@ -643,6 +648,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert 
                 Assert.AreSame(_msalTokenResponse, result);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
             }
         }
 
@@ -688,6 +694,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert 
                 Assert.AreSame(_msalTokenResponse, result);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
             }
         }
 
@@ -993,6 +1000,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Assert 
                 Assert.AreSame(_msalTokenResponse, result);
                 _msaPassthroughHandler.Received(1).AddTransferTokenToRequest(webTokenRequest, "transfer_token");
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
             }
         }
 
@@ -1060,6 +1068,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreSame(_msalTokenResponse, result);
                 Assert.AreEqual("select_account", webTokenRequest.Properties["prompt"]);
                 _msaPassthroughHandler.Received(1).AddTransferTokenToRequest(webTokenRequest, null);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
             }
         }
 #endregion
@@ -1100,6 +1109,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
+        private void AssertTelemetryHeadersInRequest(IDictionary<string, string> webTokenRequestProperties)
+        {
+            Assert.IsTrue(webTokenRequestProperties.ContainsKey(MsalIdParameter.Product));
+            Assert.IsTrue(webTokenRequestProperties.ContainsKey(MsalIdParameter.Version));
+            Assert.IsTrue(webTokenRequestProperties.ContainsKey(MsalIdParameter.CpuPlatform));
+            Assert.IsTrue(webTokenRequestProperties.ContainsKey(MsalIdParameter.OS));
+        }
     }
 }
 
