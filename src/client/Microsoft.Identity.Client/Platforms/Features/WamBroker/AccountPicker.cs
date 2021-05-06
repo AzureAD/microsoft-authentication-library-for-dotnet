@@ -98,6 +98,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         /// </summary>
         private bool UseSplashScreen()
         {
+            if (_synchronizationContext == null)
+            {
+                return true;
+            }
+
             WindowsNativeMethods.GetWindowThreadProcessId(_parentHandle, out uint windowProcessId);
             uint appProcessId = WindowsNativeMethods.GetCurrentProcessId();
 
