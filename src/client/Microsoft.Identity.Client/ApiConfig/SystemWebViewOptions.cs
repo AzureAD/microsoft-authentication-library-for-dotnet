@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client
         internal static void ValidatePlatformAvailability()
         {
             // This is supported only on .net core and iOS.
-            // Kept valid being part of .net standard
+            // Kept the method being part of .net standard
         }
 
 #if (NET_CORE || NET5_WIN || DESKTOP || MAC || NETSTANDARD || iOS)

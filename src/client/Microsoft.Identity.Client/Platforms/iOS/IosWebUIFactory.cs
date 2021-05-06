@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     CoreUIParent = coreUIParent
                 };
             }
-            
+
             return new SystemWebUI()
             {
                 RequestContext = requestContext,
