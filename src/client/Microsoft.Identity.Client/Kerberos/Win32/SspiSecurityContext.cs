@@ -65,14 +65,8 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
             clientRequest = null;
 
-            // 1. acquire
-            // 2. initialize
-            // 3. ??
-
             SecStatus result = 0;
-
             int tokenSize = 0;
-
             SecBufferDesc clientToken = default;
 
             try
@@ -145,11 +139,13 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
             this.TrackUnmanaged(creds);
             IntPtr authIdPtr = IntPtr.Zero;
+
             if (this._logonId != 0)
             {
                 authIdPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(long)));
                 Marshal.StructureToPtr(this._logonId, authIdPtr, false);
             }
+
             SecStatus result = AcquireCredentialsHandle(
                                     null,
                                     this.Package,

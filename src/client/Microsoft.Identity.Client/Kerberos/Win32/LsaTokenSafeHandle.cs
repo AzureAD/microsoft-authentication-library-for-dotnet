@@ -33,20 +33,6 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             return true;
         }
 
-        public void Impersonate()
-        {
-            this.Revert();
-
-            if (!ImpersonateLoggedOnUser(this))
-            {
-                var error = Marshal.GetLastWin32Error();
-
-                throw new Win32Exception(error);
-            }
-
-            this.Impersonating = true;
-        }
-
         private void Revert()
         {
             if (!this.Impersonating)
