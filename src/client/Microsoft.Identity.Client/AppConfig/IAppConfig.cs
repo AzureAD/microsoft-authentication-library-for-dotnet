@@ -109,6 +109,11 @@ namespace Microsoft.Identity.Client
         bool LegacyCacheCompatibilityEnabled { get; }
 
         /// <summary>
+        /// Requires that even if the host is detected to use HTTP, the redirect_url value should use HTTPS.
+        /// </summary>
+        bool ForceHttpsOnRedirectUrl {get; }
+
+        /// <summary>
         /// </summary>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile

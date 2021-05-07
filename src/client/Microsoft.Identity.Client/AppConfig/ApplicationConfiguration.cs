@@ -75,6 +75,11 @@ namespace Microsoft.Identity.Client
 
 
         public ClientCredentialWrapper ClientCredential { get; internal set; }
+
+        /// <summary>
+        /// Requires that even if the host is detected to use HTTP, the redirect_url value should use HTTPS.
+        /// </summary>
+        public bool ForceHttpsOnRedirectUrl { get; internal set; }
         public string ClientSecret { get; internal set; }
         public string SignedClientAssertion { get; internal set; }
         public Func<string> SignedClientAssertionDelegate { get; internal set; }
