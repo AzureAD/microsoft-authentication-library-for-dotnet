@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -16,6 +16,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
     internal class SystemWebUI : WebviewBase
     {
         public RequestContext RequestContext { get; set; }
+
+        internal SystemWebViewOptions WebViewOptions { get; set; }
 
         public override async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri,
@@ -38,6 +40,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             s_returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);
             await s_returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
+            s_returnedUriReady.Dispose();
+            s_returnedUriReady = null;
 
             //dismiss safariviewcontroller
             s_viewController.InvokeOnMainThread(() =>
@@ -77,6 +81,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                             // be called on the main UI thread
                             asWebAuthenticationSession.PresentationContextProvider =
                             new ASWebAuthenticationPresentationContextProviderWindow();
+
+                            // If iOSHidePrivacyPrompt has a value, it will be set. Else, it will be false.
+                            asWebAuthenticationSession.PrefersEphemeralWebBrowserSession = WebViewOptions?.iOSHidePrivacyPrompt ?? false;
                         }
                         asWebAuthenticationSession.Start();
                     });
