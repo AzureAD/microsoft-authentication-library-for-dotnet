@@ -11,65 +11,145 @@ schedules:
     include:
     - master
 
-pool:
-  vmImage: 'windows-latest'
-  demands:
-  - msbuild
-  - visualstudio
-
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
-  
-steps:
-# Required for the signing task, but does not need to be used
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 2.x'
-  inputs:
-    version: 2.x
 
-# Unit tests require .NET 3.x
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 3.x'
-  inputs:
-    version: 3.x
-    
-# Use the latest .NET SDK
-- task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 5.x'
-  inputs:
-    version: 5.x
+stages:
+- stage: MSAL Release
+  jobs: #Build and stage projects
+  - job: 'BuildAndStageProjects'
+    pool:
+        vmImage: 'windows-latest'
+        demands:
+        - msbuild
+        - visualstudio
 
-# Run pre-build code analysis (policheck, credscan, etc)
-- template: template-prebuild-code-analysis.yaml
+    steps:
+    # Run pre-build code analysis (policheck, credscan, etc)
+    - template: template-prebuild-code-analysis.yaml
 
-# Bootstrap the build
-- template: template-bootstrap-build.yaml
+    # Unit tests require .NET 3.x
+    - task: UseDotNet@2
+      displayName: 'Use .Net Core SDK 3.x'
+      inputs:
+        version: 3.x
+        
+    # Use the latest .NET SDK
+    - task: UseDotNet@2
+      displayName: 'Use .Net Core sdk 5.x'
+      inputs:
+        version: 5.x
 
-# Nuget Restore and Build 
-- template: template-restore-build-libsandsamples.yaml
-  parameters:
-    BuildPlatform: '$(BuildPlatform)'
-    BuildConfiguration: '$(BuildConfiguration)'
-    MsalClientSemVer: $(MsalClientSemVer)
-    Solution: 'LibsAndSamples.sln'
+    # Bootstrap the build
+    - template: template-build-and-prep-automation.yaml
 
-# Run Post-build code analysis (e.g. Roslyn)
-- template: template-postbuild-code-analysis.yaml
+    # BUILD IOS APPCENTER APP PHASE
+  - job: 'BuildiOSAppCenterApp'
+    pool:
+        name: Azure Pipelines
+        vmImage: macos-10.15
 
-# Run All Tests
-- template: template-run-all-tests.yaml
-  parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
+    steps:
+    - template: template-build-ios-automation.yaml
 
+    #Desktop Unit + Integration Tests
+  - job: 'RunDesktopTests'
+    dependsOn:
+    - 'BuildAndStageProjects'
+    pool:
+        vmImage: 'windows-latest'
+        demands:
+        - msbuild
+        - visualstudio
 
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Drop'
+      inputs:
+        artifactName: drop
+        itemPattern: '**/*'
 
-# Pack and sign all of the nuget packages
-- template: template-pack-and-sign-all-nugets.yaml
+    - task: CopyFiles@2
+      displayName: 'Get MSAL tests'
+      inputs:
+        SourceFolder: '$(build.artifactstagingdirectory)\drop\msalTests' 
+        Contents: '**\*'
+        TargetFolder: $(Build.SourcesDirectory)\tests\
 
-# Publish nuget packages and symbols to VSTS package manager.
-- template: template-publish-packages-and-symbols.yaml
+    - task: CopyFiles@2
+      displayName: 'Get MSAL Cache Compat'
+      inputs:
+        SourceFolder: '$(build.artifactstagingdirectory)\drop\msalCacheTests' 
+        Contents: '**\*'
+        TargetFolder: $(Build.SourcesDirectory)\tests
 
-# Publish analysis and cleanup
-- template: template-publish-analysis-and-cleanup.yaml
+      # Run All Desktop Tests
+    - template: template-run-all-tests.yaml
+      parameters:
+        BuildConfiguration: '$(BuildConfiguration)'
 
+# APP CENTER ANDROID MSAL TESTS PHASE
+
+  - job: 'AppCenterAndroidMsalTests'
+    dependsOn: 'BuildAndStageProjects'
+    pool:
+      vmImage: 'windows-latest'
+
+    steps:
+    - template: template-android-appcenter-tests.yaml
+
+# APP CENTER IOS MSAL TESTS PHASE
+  - job: 'AppCenterIosMsalTests'
+    dependsOn:
+    - 'BuildAndStageProjects'
+    - 'BuildiOSAppCenterApp'
+    pool:
+      vmImage: 'windows-latest'
+
+    steps:
+    - template: template-ios-appcenter-tests.yaml
+
+    # Pack and sign packages
+  - job: 'PackAndSign'
+    dependsOn:
+    - 'BuildAndStageProjects'
+    - 'AppCenterIosMsalTests'
+    - 'RunDesktopTests'
+    pool:
+        vmImage: 'windows-latest'
+        demands:
+        - msbuild
+        - visualstudio
+
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Drop'
+      inputs:
+        artifactName: drop
+        itemPattern: '**/*'
+
+    - task: CopyFiles@2
+      displayName: 'Get MSAL src'
+      inputs:
+        SourceFolder: '$(build.artifactstagingdirectory)\drop\msalSrc'
+        Contents: '**\*'
+        TargetFolder: $(Build.SourcesDirectory)\src\client
+
+    # Run Post-build code analysis (e.g. Roslyn)
+    - template: template-postbuild-code-analysis.yaml
+
+    # Pack and sign all of the nuget packages
+    # Required for the signing task, but does not need to be used
+    - task: UseDotNet@2
+      displayName: 'Use .Net Core SDK 2.x'
+      inputs:
+        version: 2.x
+
+    - template: template-pack-and-sign-all-nugets.yaml
+
+    # Publish nuget packages and symbols to VSTS package manager.
+    - template: template-publish-packages-and-symbols.yaml
+
+    # Publish analysis and cleanup
+    - template: template-publish-analysis-and-cleanup.yaml
