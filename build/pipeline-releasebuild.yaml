@@ -16,7 +16,7 @@ variables:
   BuildConfiguration: 'release'
 
 stages:
-- stage: MSAL Release
+- stage: MSALRelease
   jobs: #Build and stage projects
   - job: 'BuildAndStageProjects'
     pool:
