@@ -11,18 +11,18 @@ steps:
     MsalClientSemVer: $(MsalClientSemVer)
     Solution: 'LibsAndSamples.sln'
 
-# - task: DownloadSecureFile@1
-#   displayName: 'Download Xamarin Ui Test Tools'
-#   inputs:
-#     secureFile: '8967c7eb-9f99-4122-ac28-84ae962a71bd'
+- task: DownloadSecureFile@1
+  displayName: 'Download Xamarin Ui Test Tools'
+  inputs:
+    secureFile: '8967c7eb-9f99-4122-ac28-84ae962a71bd'
 
-# - task: CopyFiles@2
-#   displayName: 'Stage Xamarin Ui Test Tools'
-#   inputs:
-#     SourceFolder: '$(Agent.TempDirectory)'
-#     Contents: 'test-cloud.exe'
-#     TargetFolder: '$(build.artifactstagingdirectory)'
-#     flattenFolders: true
+- task: CopyFiles@2
+  displayName: 'Stage Xamarin Ui Test Tools'
+  inputs:
+    SourceFolder: '$(Agent.TempDirectory)'
+    Contents: 'test-cloud.exe'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+    flattenFolders: true
 
 # - task: VSBuild@1
 #   displayName: 'NuGet restore ${{ parameters.Solution }}'
