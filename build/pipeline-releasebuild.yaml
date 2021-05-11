@@ -107,6 +107,8 @@ stages:
 
     steps:
     - template: template-android-appcenter-tests.yaml
+      parameters:
+        DataFileDirectory: 'Release'
 
 # APP CENTER IOS MSAL TESTS PHASE
   - job: 'AppCenterIosMsalTests'
@@ -118,6 +120,8 @@ stages:
 
     steps:
     - template: template-ios-appcenter-tests.yaml
+      parameters:
+        DataFileDirectory: 'Release'
 
     # Pack and sign packages
   - job: 'PackAndSign'

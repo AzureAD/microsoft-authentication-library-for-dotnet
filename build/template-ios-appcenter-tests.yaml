@@ -1,3 +1,6 @@
+parameters:
+  DataFileDirectory: 'Debug'
+
 steps:
 
 - task: DownloadBuildArtifacts@0
@@ -30,7 +33,7 @@ steps:
 
 - powershell: |
     $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
-    $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\iOS\bin\Debug\data.txt
+    $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\iOS\bin\$(parameters.BuildConfiguration)\data.txt
   displayName: 'Get Credentials'
 - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-iOS" --devices ADAL-DotNet/ios-12-plus --app-path $(System.ArtifactsDirectory)\Xamarin.iOS\XForms.iOS.ipa --test-series "master" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\iOS\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --include-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
   displayName: 'Run App Center MSAL Tests (Fast)'
