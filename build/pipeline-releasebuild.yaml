@@ -32,6 +32,7 @@ stages:
     # Use the latest .NET SDK
     - task: UseDotNet@2
       displayName: 'Use .Net Core sdk 5.x'
+      enabled: false
       inputs:
         version: 5.x
 
