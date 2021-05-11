@@ -3,7 +3,7 @@
 ### New Features:
 **Added time metrics to `AuthenticationResultMetadata`**, which includes total duration, time spent in HTTP, and duration of token cache callbacks. See pull request [#2581](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2581).  
 **Added telemetry data to requests sent to WAM**. See issue [#2562](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2562).  
-**Added option to hide iOS security prompt for system browser**. See issues [#2131](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2131), [#114](https://github.com/Azure-Samples/active-directory-xamarin-native-v2/issues/114), [#512](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/512).  
+**Added option to hide iOS security prompt for system browser** for iOS 13+. See issues [#2131](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2131), [#114](https://github.com/Azure-Samples/active-directory-xamarin-native-v2/issues/114), [#512](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/512).  
 
 ### Bug Fixes:
 **Fixed parenting of WAM account picker control**. See issue [#2566](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2566).  
