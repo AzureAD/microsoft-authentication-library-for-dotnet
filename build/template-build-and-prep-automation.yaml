@@ -24,6 +24,14 @@ steps:
     TargetFolder: '$(build.artifactstagingdirectory)'
     flattenFolders: true
 
+- task: VSBuild@1
+  displayName: 'NuGet restore ${{ parameters.Solution }}'
+  inputs:
+    solution: ${{ parameters.Solution }}
+    msbuildArgs: '/t:restore'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: 'debug'
+
 - task: MSBuild@1
   displayName: 'Build and Sign MSAL Android apk'
   inputs:
