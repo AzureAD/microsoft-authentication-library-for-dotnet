@@ -14,6 +14,9 @@ schedules:
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
+  FastRun: true
+
+#BUILD PHASE 
 
 stages:
 - stage: MSALRelease
@@ -28,13 +31,18 @@ stages:
     steps:
     # Run pre-build code analysis (policheck, credscan, etc)
     - template: template-prebuild-code-analysis.yaml
+
+    # # Unit tests require .NET 3.x
+    # - task: UseDotNet@2
+    #   displayName: 'Use .Net Core SDK 3.x'
+    #   inputs:
+    #     version: 3.x
         
-    # Use the latest .NET SDK
-    - task: UseDotNet@2
-      displayName: 'Use .Net Core sdk 5.x'
-      enabled: false
-      inputs:
-        version: 5.x
+    # # Use the latest .NET SDK
+    # - task: UseDotNet@2
+    #   displayName: 'Use .Net Core sdk 5.x'
+    #   inputs:
+    #     version: 5.x
 
     # Bootstrap the build
     - template: template-build-and-prep-automation.yaml
