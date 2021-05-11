@@ -5,9 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+#if !NETSTANDARD1_3
+using System.Security.Claims;
+#endif
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client
 {
@@ -263,5 +268,47 @@ namespace Microsoft.Identity.Client
                 _authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType,
                 AccessToken);
         }
+
+#if !NETSTANDARD1_3
+        /// <summary>
+        /// Creates an object to hold the claims from an ID Token.
+        /// </summary>
+        /// <returns>ClaimsPrincipal object containing the claims from the ID Token.</returns>
+        public ClaimsPrincipal GetIdTokenClaims()
+        {
+            if (string.IsNullOrEmpty(IdToken))
+                return null;
+
+            string[] idTokenSegments = IdToken.Split(new[] { '.' });
+
+            if (idTokenSegments.Length < 2)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidJwtError,
+                    MsalErrorMessage.IDTokenMustHaveTwoParts);
+            }
+
+            try
+            {
+                IDictionary<string, string> idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                    Base64UrlHelpers.DecodeToString(idTokenSegments[1]));
+
+                IList<Claim> claims = new List<Claim>();
+                foreach (KeyValuePair<string, string> claim in idTokenClaims)
+                {
+                    claims.Add(new Claim(claim.Key, claim.Value));
+                }
+
+                return new ClaimsPrincipal(new ClaimsIdentity(claims));
+            }
+            catch (JsonException exc)
+            {
+                throw new MsalClientException(
+                    MsalError.JsonParseError,
+                    MsalErrorMessage.FailedToParseIDToken,
+                    exc);
+            }
+        }
+#endif
     }
 }

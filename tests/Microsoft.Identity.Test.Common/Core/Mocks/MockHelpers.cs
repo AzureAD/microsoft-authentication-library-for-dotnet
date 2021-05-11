@@ -303,6 +303,30 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
 
+        public static string CreateIdTokenWithExtraClaim(string uniqueId, string displayableId, string tenantId)
+        {
+            string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
+                        "\"iss\": \"https://login.microsoftonline.com/6c3d51dd-f0e5-4959-b4ea-a80c4e36fe5e/v2.0/\"," +
+                        "\"iat\": 1455833828," +
+                        "\"nbf\": 1455833828," +
+                        "\"exp\": 1455837728," +
+                        "\"ipaddr\": \"131.107.159.117\"," +
+                        "\"name\": \"Marrrrrio Bossy\"," +
+                        "\"oid\": \"" + uniqueId + "\"," +
+                        "\"preferred_username\": \"" + displayableId + "\"," +
+                        "\"some_claim\": \"value\"," +
+                        "\"sub\": \"K4_SGGxKqW1SxUAmhg6C1F6VPiFzcx-Qd80ehIEdFus\"," +
+                        "\"tid\": \"" + tenantId + "\"," +
+                        "\"ver\": \"2.0\"}";
+            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
+        }
+
+        public static string CreateIdTokenWithInvalidJson()
+        {
+            string id = "{\"aud\"}";
+            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
+        }
+
         private static string CreateIdTokenForB2C(string uniqueId, string tenantId, string policy)
         {
             string id = "{" + 

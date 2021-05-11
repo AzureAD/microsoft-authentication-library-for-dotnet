@@ -2,10 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Claims;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -50,6 +53,111 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 new AuthenticationResultMetadata(TokenSource.Cache));
 
             Assert.AreEqual("SomeTokenType at", ar.CreateAuthorizationHeader());
+        }
+
+        [TestMethod]
+        public void GetIdTokenClaimsTest()
+        {
+            var ar = new AuthenticationResult(
+                "at",
+                false,
+                "uid",
+                DateTime.UtcNow,
+                DateTime.UtcNow,
+                "tid",
+                new Account("aid", "user", "env"),
+                MockHelpers.CreateIdTokenWithExtraClaim(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.TenantId), 
+                new[] { "scope" }, Guid.NewGuid(),
+                "SomeTokenType",
+                new AuthenticationResultMetadata(TokenSource.Cache));
+            
+            ClaimsPrincipal claimsPrincipal = ar.GetIdTokenClaims();
+            Assert.IsNotNull(claimsPrincipal);
+            Assert.AreEqual(13, claimsPrincipal.Claims.Count());
+            var claims = claimsPrincipal.Claims;
+            IDictionary<string, string> claimsDictionary = new Dictionary<string, string>();
+            foreach (Claim claim in claims)
+            {
+                claimsDictionary.Add(claim.Type, claim.Value);
+            }
+
+            Assert.IsTrue(claimsDictionary.TryGetValue("some_claim", out string value));
+            Assert.AreEqual("value", value);
+        }
+
+        [TestMethod]
+        public void GetIdTokenClaimsWithNullIdTokenTest()
+        {
+            var ar = new AuthenticationResult(
+                "at",
+                false,
+                "uid",
+                DateTime.UtcNow,
+                DateTime.UtcNow,
+                "tid",
+                new Account("aid", "user", "env"),
+                null,
+                new[] { "scope" }, Guid.NewGuid(),
+                "SomeTokenType",
+                new AuthenticationResultMetadata(TokenSource.Cache));
+
+            Assert.IsNull(ar.GetIdTokenClaims());
+        }
+
+        [TestMethod]
+        public void GetIdTokenClaimsWithInvalidIdTokenStringTest()
+        {
+            var ar = new AuthenticationResult(
+                "at",
+                false,
+                "uid",
+                DateTime.UtcNow,
+                DateTime.UtcNow,
+                "tid",
+                new Account("aid", "user", "env"),
+                "bad_token",
+                new[] { "scope" }, Guid.NewGuid(),
+                "SomeTokenType",
+                new AuthenticationResultMetadata(TokenSource.Cache));
+
+            try
+            {
+                ar.GetIdTokenClaims();
+                Assert.Fail("Should have failed due to invalid token");
+            } 
+            catch (MsalClientException e)
+            {
+                Assert.IsNotNull(e);
+                Assert.AreEqual(MsalError.InvalidJwtError, e.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public void GetIdTokenClaimsWithInvalidIdTokenTest()
+        {
+            var ar = new AuthenticationResult(
+                "at",
+                false,
+                "uid",
+                DateTime.UtcNow,
+                DateTime.UtcNow,
+                "tid",
+                new Account("aid", "user", "env"),
+                MockHelpers.CreateIdTokenWithInvalidJson(),
+                new[] { "scope" }, Guid.NewGuid(),
+                "SomeTokenType",
+                new AuthenticationResultMetadata(TokenSource.Cache));
+
+            try
+            {
+                ar.GetIdTokenClaims();
+                Assert.Fail("Should have failed due to invalid token");
+            }
+            catch (MsalClientException e)
+            {
+                Assert.IsNotNull(e);
+                Assert.AreEqual(MsalError.JsonParseError, e.ErrorCode);
+            }
         }
 
         [TestMethod]
