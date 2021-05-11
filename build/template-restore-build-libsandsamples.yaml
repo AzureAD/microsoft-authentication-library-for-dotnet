@@ -18,7 +18,7 @@ steps:
     solution: ${{ parameters.Solution }}
     msbuildArgs: '/t:restore'
     platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
+    configuration: 'debug'
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
