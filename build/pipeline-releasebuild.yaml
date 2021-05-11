@@ -56,6 +56,17 @@ stages:
     steps:
     - template: template-build-ios-automation.yaml
 
+    # BUILD ANDROID APPCENTER APP PHASE
+  - job: 'BuildAndroidAppCenterApp'
+    pool:
+        vmImage: 'windows-latest'
+        demands:
+        - msbuild
+        - visualstudio
+
+    steps:
+    - template: template-build-android-automation.yaml
+
     #Desktop Unit + Integration Tests
   - job: 'RunDesktopTests'
     dependsOn:
