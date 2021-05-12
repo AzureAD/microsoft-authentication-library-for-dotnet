@@ -150,6 +150,14 @@ stages:
     # Install KeyVault secrets
     - template: template-install-keyvault-secrets.yaml
 
+    - task: VSBuild@1
+      displayName: 'NuGet restore ${{ parameters.Solution }}'
+      inputs:
+        solution: ${{ parameters.Solution }}
+        msbuildArgs: '/t:restore'
+        platform: ${{ parameters.BuildPlatform }}
+        configuration: 'debug'
+
     - template: template-run-device-auth-tests.yaml
 
     # Pack and sign packages
