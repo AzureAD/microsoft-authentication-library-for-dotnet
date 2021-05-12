@@ -185,7 +185,7 @@ stages:
         version: 5.x
 
     - task: VSBuild@1
-      displayName: 'NuGet restore ${{ parameters.Solution }}'
+      displayName: 'NuGet restore'
       inputs:
         solution: 'LibsAndSamples.sln'
         msbuildArgs: '/t:restore'
