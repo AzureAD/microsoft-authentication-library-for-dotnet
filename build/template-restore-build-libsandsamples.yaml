@@ -18,7 +18,7 @@ steps:
     solution: ${{ parameters.Solution }}
     msbuildArgs: '/t:restore'
     platform: ${{ parameters.BuildPlatform }}
-    configuration: 'debug'
+    configuration: ${{ parameters.BuildConfiguration }}
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
@@ -26,7 +26,7 @@ steps:
     solution: ${{ parameters.Solution }}
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
-    configuration: 'debug'
+    configuration: ${{ parameters.BuildConfiguration }}
 
 - task: CopyFiles@2
   displayName: 'Stage Device Authentication Tests'
