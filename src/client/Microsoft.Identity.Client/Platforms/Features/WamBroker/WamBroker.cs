@@ -414,7 +414,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             if (uiParent?.OwnerWindow is IWin32Window window)
             {
-                _logger.Info("Owner window specified as IWin32Window.");
+                _logger.Info("[WAM Broker] Owner window specified as IWin32Window.");
                 return window.Handle;
             }
 #endif
@@ -423,15 +423,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             if (uiParent?.OwnerWindow is IntPtr ptr)
             {
-                _logger.Info("Owner window specified as IntPtr.");
+                _logger.Info("[WAM Broker] Owner window specified as IntPtr.");
                 return ptr;
             }
 
             // other MSALs prefer to default to GetForegroundWindow() but this causes issues 
             // for example if the user quickly switches windows.
             // GetDesktopWindow will make the default more consistent with the embedded browser
-            IntPtr foregroundWindow = WindowsNativeMethods.GetDesktopWindow();
-            return foregroundWindow;
+            _logger.Info("[WAM Broker] Using desktop as a parent window.");
+            IntPtr desktopWindow = WindowsNativeMethods.GetDesktopWindow();
+            return desktopWindow;
 #endif
         }
 

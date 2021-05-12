@@ -1,3 +1,14 @@
+4.31.0
+==========
+### New Features:
+**Added time metrics to `AuthenticationResultMetadata`**, which includes total duration, time spent in HTTP, and duration of token cache callbacks. See pull request [#2581](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2581).  
+**Added telemetry data to requests sent to WAM**. See issue [#2562](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2562).  
+**Added option to hide iOS security prompt for system browser** for iOS 13+. See issues [#2131](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2131), [#114](https://github.com/Azure-Samples/active-directory-xamarin-native-v2/issues/114), [#512](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/512).  
+
+### Bug Fixes:
+**Fixed parenting of WAM account picker control**. See issue [#2566](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2566).  
+**Fixed an exception in console apps that use WAM when they are run directly as an executable**. See issue [#2608](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2608).  
+
 4.30.1
 ==========
 ### Bug Fix:
@@ -207,6 +218,7 @@ New Features:
 Bug Fixes:
 **When the parsing of a WsTrust error fails, MSAL will now return the entire body**. This allows for a better understanding of the error. See issue [#1984](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1984) for details.
 **When creating an HttpClient we were forcing a ServicePointManager.DefaultConnectionLimit = 30**. The fix removes the setting of the connection limit (though the max limit in the config setting is updated to 50 connections it's not set for net desktop and net core. See issue [#1992](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1992).
+**MSAL.NET now hides the Sign In Title bar in embedded webview sign-in on Android**. See issue [#2014](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2014) and [#1927](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1927).
 
 4.17.1
 ============
