@@ -150,6 +150,12 @@ stages:
     # Install KeyVault secrets
     - template: template-install-keyvault-secrets.yaml
 
+      #Clear local nuget cache
+    - task: CmdLine@2
+      displayName: 'Clear local NuGet cache'
+      inputs:
+        script: 'nuget locals all -clear'
+
     - task: VSBuild@1
       displayName: 'NuGet restore'
       inputs:
