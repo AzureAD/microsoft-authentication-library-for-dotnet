@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
@@ -52,6 +53,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(authResult.AccessToken);
+            ClaimsPrincipal claimsPrincipal = authResult.GetIdTokenClaims();
+            Assert.IsNotNull(claimsPrincipal);
+            Assert.IsTrue(claimsPrincipal.Claims.Count() > 0);
 
             Trace.WriteLine("Acquire a token silently using the common authority alias");
 

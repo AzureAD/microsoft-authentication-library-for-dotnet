@@ -271,9 +271,8 @@ namespace Microsoft.Identity.Client
 
 #if !NETSTANDARD1_3
         /// <summary>
-        /// Creates an object to hold the claims from an ID Token.
+        /// Returns a <See cref= "ClaimsPrincipal"/> object containing the claims extracted from the ID Token.
         /// </summary>
-        /// <returns>ClaimsPrincipal object containing the claims from the ID Token.</returns>
         public ClaimsPrincipal GetIdTokenClaims()
         {
             if (string.IsNullOrEmpty(IdToken))
