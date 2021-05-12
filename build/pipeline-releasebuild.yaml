@@ -156,7 +156,7 @@ stages:
         solution: 'LibsAndSamples.sln'
         msbuildArgs: '/t:restore'
         platform: 'any cpu'
-        configuration: 'debug'
+        configuration: 'release'
 
     - template: template-run-device-auth-tests.yaml
 
