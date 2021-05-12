@@ -139,18 +139,18 @@ stages:
     #Because this agent pool is shared with other teams in our org, a specific agent has been assigned to this build to avoid collisions
     #and to allow teams to configure the agent as needed for their specific platform.
     #This agent ('MSIDWIN802') is configured to specifically run MSAL.NET PKey Auth tests and should be used primarily.
-  - job: 'RunDeviceAuthTests'
-    dependsOn: 'BuildAndStageProjects'
-    pool:
-        name: DevEx Win8 Automation
-        demands: VisualStudio2019 -equals 2019
+  # - job: 'RunDeviceAuthTests'
+  #   dependsOn: 'BuildAndStageProjects'
+  #   pool:
+  #       name: DevEx Win8 Automation
+  #       demands: VisualStudio2019 -equals 2019
 
-    steps:
+  #   steps:
 
-    # Install KeyVault secrets
-    - template: template-install-keyvault-secrets.yaml
+  #   # Install KeyVault secrets
+  #   - template: template-install-keyvault-secrets.yaml
 
-    - template: template-run-device-auth-tests.yaml
+  #   - template: template-run-device-auth-tests.yaml
 
     # Pack and sign packages
   - job: 'PackAndSign'
