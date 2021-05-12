@@ -11,7 +11,7 @@ steps:
   displayName: 'DeviceAuthTests'
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '$(System.ArtifactsDirectory)\drop\**\**'
+    testAssemblyVer2: '$(System.ArtifactsDirectory)\drop\DeviceAuth\**\**'
     searchFolder: '$(System.ArtifactsDirectory)'
     rerunFailedTests: true
     rerunMaxAttempts: '3'
