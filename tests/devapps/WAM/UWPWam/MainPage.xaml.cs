@@ -51,7 +51,7 @@ namespace UWP_standalone
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
-            SyncronizedEncryptedFileMsalCache cache = new SyncronizedEncryptedFileMsalCache();
+            SynchronizedEncryptedFileMsalCache cache = new SynchronizedEncryptedFileMsalCache();
             cache.Initialize(pca.UserTokenCache);
 
             return pca;

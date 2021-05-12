@@ -23,7 +23,7 @@ namespace UWP_standalone
     /// - encrypts data with DPAPI
     /// - syncronizes using a SemaphoreSlim (i.e. does not allow multiple reads / writes)
     /// </summary>
-    internal class SyncronizedEncryptedFileMsalCache
+    internal class SynchronizedEncryptedFileMsalCache
     {
         private const string CacheFileName = "msalcache.dat"; // same as what MSAL out of the box
 
@@ -121,7 +121,7 @@ namespace UWP_standalone
             {
                 DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
                 IBuffer clearBuffer = await dataProtectionProvider.UnprotectAsync(buffer);
-                return clearBuffer.ToArray(0, (int)buffer.Length);
+                return clearBuffer.ToArray(0, (int)clearBuffer.Length);
             }
 
             return null;
