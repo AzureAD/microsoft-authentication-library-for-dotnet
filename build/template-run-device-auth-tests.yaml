@@ -1,10 +1,6 @@
 # template-run-device-auth-tests.yaml
 # Performs pkeyAuth device authentication on an enrolled Windows 8 machine
 
-parameters:
-  TestDirectory: '$(System.ArtifactsDirectory)'
-  TestFilter: '$(System.ArtifactsDirectory)\drop\DeviceAuth\**\**'
-
 steps:
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Build Artifacts'
@@ -15,8 +11,8 @@ steps:
   displayName: 'DeviceAuthTests'
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: ${{ parameters.TestFilter }}
-    searchFolder: ${{ parameters.TestDirectory }}
+    testAssemblyVer2: '$(System.ArtifactsDirectory)\drop\DeviceAuth\**\**'
+    searchFolder: '$(System.ArtifactsDirectory)'
     rerunFailedTests: true
     rerunMaxAttempts: '3'
     runInParallel: false
