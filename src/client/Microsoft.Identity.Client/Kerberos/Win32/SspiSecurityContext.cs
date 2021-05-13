@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
 #pragma warning disable 618 // This workaround required for Native Win32 API call
-#if !(iOS || MAC || ANDROID)
+
     internal partial class SspiSecurityContext : IDisposable
     {
         private const int SECPKG_CRED_BOTH = 0x00000003;
@@ -28,12 +28,13 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
         private readonly HashSet<object> _disposable = new HashSet<object>();
 
+#if !(iOS || MAC || ANDROID)
         private readonly Credential _credential;
         private readonly InitContextFlag _clientFlags;
-
         private NativeMethods.SECURITY_HANDLE _credentialsHandle;
         private NativeMethods.SECURITY_HANDLE _securityContext;
         private long _logonId;
+#endif
 
         public SspiSecurityContext(
             Credential credential,
@@ -41,10 +42,19 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             long logonId = 0,
             InitContextFlag clientFlags = _defaultRequiredFlags)
         {
+#if (iOS || MAC || ANDROID)
+            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+#else
+            if (!KerberosSupplementalTicketManager.IsWindows())
+            {
+                throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+            }
+
             this._credential = credential;
             this._clientFlags = clientFlags;
             this.Package = package;
             this._logonId = logonId;
+#endif
         }
 
         public string Package { get; private set; }
@@ -59,6 +69,9 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
         public ContextStatus InitializeSecurityContext(string targetName, out byte[] clientRequest)
         {
+#if (iOS || MAC || ANDROID)
+            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+#else
             var targetNameNormalized = targetName.ToLowerInvariant();
 
             clientRequest = null;
@@ -124,6 +137,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             {
                 clientToken.Dispose();
             }
+#endif
         }
 
         private void TrackUnmanaged(object thing)
@@ -133,6 +147,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
         private unsafe void AcquireCredentials()
         {
+#if !(iOS || MAC || ANDROID)
             CredentialHandle creds = this._credential.Structify();
 
             this.TrackUnmanaged(creds);
@@ -161,10 +176,12 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             }
 
             this.TrackUnmanaged(this._credentialsHandle);
+#endif
         }
 
         public unsafe void Dispose()
         {
+#if !(iOS || MAC || ANDROID)
             foreach (var thing in this._disposable)
             {
                 if (thing is IDisposable managedDispose)
@@ -182,8 +199,8 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                     Marshal.FreeHGlobal(pThing);
                 }
             }
+#endif
         }
     }
-#endif
 #pragma warning restore 618
 }

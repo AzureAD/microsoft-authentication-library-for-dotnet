@@ -268,6 +268,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\Microsoft.VisualBasic.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Platforms\Features\WamBroker\win32\Splash.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
 #pragma warning disable 618 // This workaround required for Native Win32 API call
-#if !(iOS || MAC || ANDROID)
 
     /// <summary>
     /// Provides a layer to interact with the LSA functions used to create logon sessions and manipulate the ticket caches.
@@ -17,11 +16,12 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         private const string _kerberosPackageName = "Kerberos";
         private const string _negotiatePackageName = "Negotiate";
 
+#if !(iOS || MAC || ANDROID)
         private readonly LsaSafeHandle _lsaHandle;
         private readonly int _selectedAuthPackage;
         private readonly int _negotiateAuthPackage;
-
         private bool _disposedValue;
+#endif
 
         /*
          * Windows creates a new ticket cache for primary NT tokens. This allows callers to create a dedicated cache for whatever they're doing
@@ -46,6 +46,9 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
         internal unsafe TicketCacheWriter(LsaSafeHandle lsaHandle, string packageName = _kerberosPackageName)
         {
+#if (iOS || MAC || ANDROID)
+            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+#else
             this._lsaHandle = lsaHandle;
 
             var kerberosPackageName = new NativeMethods.LSA_STRING
@@ -67,6 +70,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
             result = NativeMethods.LsaLookupAuthenticationPackage(this._lsaHandle, ref negotiatePackageName, out this._negotiateAuthPackage);
             NativeMethods.LsaThrowIfError(result);
+#endif
         }
 
         /// <summary>
@@ -76,6 +80,14 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// <returns>Returns an instance of the <see cref="TicketCacheWriter"/> class.</returns>
         public static TicketCacheWriter Connect(string package = _kerberosPackageName)
         {
+#if (iOS || MAC || ANDROID)
+            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+#else
+            if (!KerberosSupplementalTicketManager.IsWindows())
+            {
+                throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+            }
+
             if (string.IsNullOrWhiteSpace(package))
             {
                 package = _kerberosPackageName;
@@ -86,6 +98,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             NativeMethods.LsaThrowIfError(result);
 
             return new TicketCacheWriter(_lsaHandle, package);
+#endif
         }
 
         /// <summary>
@@ -95,6 +108,9 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// <param name="luid">The Logon Id of the user owning the ticket cache. The default of 0 represents the currently logged on user.</param>
         public unsafe void ImportCredential(byte[] ticketBytes, long luid = 0)
         {
+#if (iOS || MAC || ANDROID)
+            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+#else
             if (ticketBytes is null)
             {
                 throw new ArgumentNullException(nameof(ticketBytes));
@@ -114,6 +130,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             Marshal.StructureToPtr(ticketRequest, (IntPtr)pBuffer, false);
             Marshal.Copy(ticketBytes, 0, pBuffer + ticketRequest.KerbCredOffset, ticketBytes.Length);
             this.LsaCallAuthenticationPackage(pBuffer.ToPointer(), bufferSize);
+#endif
         }
 
         /// <summary>
@@ -124,6 +141,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
         private unsafe void LsaCallAuthenticationPackage(void* pBuffer, int bufferSize)
         {
+#if !(iOS || MAC || ANDROID)
             LsaBufferSafeHandle returnBuffer = null;
 
             try
@@ -145,6 +163,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             {
                 returnBuffer?.Dispose();
             }
+#endif
         }
 
         /// <summary>
@@ -153,11 +172,13 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// <param name="disposing">True if Dispose() called by the user. False, otherwise.</param>
         protected virtual void Dispose(bool disposing)
         {
+#if !(iOS || MAC || ANDROID)
             if (!this._disposedValue)
             {
                 this._lsaHandle.Dispose();
                 this._disposedValue = true;
             }
+#endif
         }
 
         /// <summary>
@@ -176,6 +197,5 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         }
     }
 
-#endif
 #pragma warning restore 618
 }

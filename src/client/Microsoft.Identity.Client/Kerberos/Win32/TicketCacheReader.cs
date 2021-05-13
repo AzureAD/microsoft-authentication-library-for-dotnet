@@ -8,16 +8,16 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
 #pragma warning disable 618 // This workaround required for Native Win32 API call
-#if !(iOS || MAC || ANDROID)
-
     /// <summary>
     /// Helper class to check Kerberos Ticket in user's Ticket Cache.
     /// </summary>
     public class TicketCacheReader : IDisposable
     {
+#if !(iOS || MAC || ANDROID)
         private readonly string _spn;
         private readonly SspiSecurityContext _context;
         private bool _disposedValue;
+#endif
 
         /// <summary>
         /// Creates a <see cref="TicketCacheReader"/> object to read a Kerberos Ticket from Ticket Cache.
@@ -28,9 +28,17 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// <param name="package">The name of the LSA authentication package that will be interacted with.</param>
         public TicketCacheReader(string spn, long logonId = 0, string package = "Kerberos")
         {
-            this._spn = spn;
+#if (iOS || MAC || ANDROID)
+            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+#else
+            if (!KerberosSupplementalTicketManager.IsWindows())
+            {
+                throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+            }
 
+            this._spn = spn;
             this._context = new SspiSecurityContext(Credential.Current(), package, logonId);
+#endif
         }
 
 
@@ -43,6 +51,9 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         /// </remarks>
         public byte[] RequestToken()
         {
+#if (iOS || MAC || ANDROID)
+            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+#else
             var status = this._context.InitializeSecurityContext(this._spn, out byte[] clientRequest);
 
             if (status == ContextStatus.Error)
@@ -51,11 +62,13 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             }
 
             return clientRequest;
+#endif
         }
 
         /// <inheritdoc/>
         protected virtual void Dispose(bool disposing)
         {
+#if !(iOS || MAC || ANDROID)
             if (!this._disposedValue)
             {
                 if (disposing)
@@ -65,6 +78,7 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
                 this._disposedValue = true;
             }
+#endif
         }
 
         /// <summary>
@@ -77,6 +91,5 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         }
     }
 
-#endif
 #pragma warning restore 618
 }

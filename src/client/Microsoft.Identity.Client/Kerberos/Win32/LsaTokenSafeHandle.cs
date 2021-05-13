@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
-#if !(iOS || MAC || ANDROID)
     internal class LsaTokenSafeHandle : SafeHandle
     {
         public LsaTokenSafeHandle()
@@ -23,13 +22,14 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
         {
             this.Revert();
 
+#if !(iOS || MAC || ANDROID)
             if (!NativeMethods.CloseHandle(this.handle))
             {
                 var error = Marshal.GetLastWin32Error();
 
                 throw new Win32Exception(error);
             }
-
+#endif
             return true;
         }
 
@@ -40,15 +40,15 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
                 return;
             }
 
+#if !(iOS || MAC || ANDROID)
             if (!NativeMethods.RevertToSelf())
             {
                 var error = Marshal.GetLastWin32Error();
 
                 throw new Win32Exception(error);
             }
-
+#endif
             this.Impersonating = false;
         }
     }
-#endif
 }

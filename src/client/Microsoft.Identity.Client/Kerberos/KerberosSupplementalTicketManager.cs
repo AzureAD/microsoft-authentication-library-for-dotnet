@@ -11,6 +11,7 @@ using Microsoft.Identity.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Kerberos
@@ -91,9 +92,11 @@ namespace Microsoft.Identity.Client.Kerberos
          /// </remarks>
         public static void SaveToWindowsTicketCache(KerberosSupplementalTicket ticket, long logonId)
         {
-#if (iOS || MAC || ANDROID)
-            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
-#else
+            if (!IsWindows())
+            {
+                throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+            }
+
             if (ticket == null || string.IsNullOrEmpty(ticket.KerberosMessageBuffer))
             {
                 throw new ArgumentException("Kerberos Ticket information is not valid");
@@ -104,7 +107,6 @@ namespace Microsoft.Identity.Client.Kerberos
                 byte[] krbCred = Convert.FromBase64String(ticket.KerberosMessageBuffer);
                 cache.ImportCredential(krbCred, logonId);
             }
-#endif
         }
 
         /// <summary>
@@ -134,14 +136,15 @@ namespace Microsoft.Identity.Client.Kerberos
         /// </remarks>
         public static byte[] GetKerberosTicketFromWindowsTicketCache(string servicePrincipalName, long logonId)
         {
-#if (iOS || MAC || ANDROID)
-            throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
-#else
+            if (!IsWindows())
+            {
+                throw new NotSupportedException("Ticket Cache interface is not supported for this OS platform.");
+            }
+
             using (var reader = new Win32.TicketCacheReader(servicePrincipalName, logonId))
             {
                 return reader.RequestToken();
             }
-#endif
         }
 
         /// <summary>
@@ -158,6 +161,22 @@ namespace Microsoft.Identity.Client.Kerberos
             }
 
             return null;
+        }
+
+        /// <summary>
+        ///  Checks the current application is running under Windows OS or not.
+        /// </summary>
+        /// <returns>True if running under Windows OS. False, otherwise.</returns>
+        internal static bool IsWindows()
+        {
+#if (iOS || MAC || ANDROID)
+            return false;
+#elif DESKTOP
+            // PlatformID.Win32NT: The operating system is Windows NT or later.
+            return (Environment.OSVersion.Platform == PlatformID.Win32NT);
+#else
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#endif
         }
 
         /// <summary>

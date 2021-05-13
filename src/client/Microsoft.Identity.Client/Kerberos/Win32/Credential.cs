@@ -3,7 +3,6 @@
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
-#if !(iOS || MAC || ANDROID)
     /// <summary>
     /// Previously authenticated logon data used by a security principal to establish its own identity, 
     /// such as a password, or a Kerberos protocol ticket.
@@ -29,5 +28,4 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
             }
         }
     }
-#endif
 }

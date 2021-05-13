@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.Kerberos.Win32
 {
-#if !(iOS || MAC || ANDROID)
     internal class LsaBufferSafeHandle : SafeHandle
     {
         public LsaBufferSafeHandle()
@@ -18,14 +17,14 @@ namespace Microsoft.Identity.Client.Kerberos.Win32
 
         protected override bool ReleaseHandle()
         {
+#if !(iOS || MAC || ANDROID)
             var result = NativeMethods.LsaFreeReturnBuffer(this.handle);
 
             NativeMethods.LsaThrowIfError(result);
 
             this.handle = IntPtr.Zero;
-
+#endif
             return true;
         }
     }
-#endif
 }
