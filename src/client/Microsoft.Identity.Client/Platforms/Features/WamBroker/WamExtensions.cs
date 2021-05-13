@@ -26,8 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("=== WebTokenRequest ===");
-            stringBuilder.AppendLine($"ClientId: {webTokenRequest?.ClientId}");
-            stringBuilder.AppendLine($"CorrelationId: {webTokenRequest?.CorrelationId}");
+            stringBuilder.AppendLine($"ClientId: {webTokenRequest?.ClientId}");            
             stringBuilder.AppendLine($"PromptType: {webTokenRequest?.PromptType}");
             stringBuilder.AppendLine($"Scope: {webTokenRequest?.Scope}");
             stringBuilder.AppendLine($"Properties.Count: {webTokenRequest?.Properties?.Count ?? 0}");
