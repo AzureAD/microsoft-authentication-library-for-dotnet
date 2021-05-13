@@ -165,6 +165,8 @@ stages:
         configuration: 'debug'
 
     - template: template-run-device-auth-tests.yaml
+      parameters:
+        TestFilter: '$(System.ArtifactsDirectory)\drop\msalTests\Microsoft.Identity.Test.Integration.Win8\**\*'
 
     # Pack and sign packages
   - job: 'PackAndSign'
