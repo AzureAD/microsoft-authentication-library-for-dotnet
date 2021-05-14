@@ -21,3 +21,4 @@ steps:
     rerunMaxAttempts: '3'
     runInParallel: false
     diagnosticsEnabled: True
+    failOnMinTestsNotRun: true

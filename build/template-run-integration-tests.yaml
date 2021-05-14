@@ -26,3 +26,4 @@ steps:
     rerunMaxAttempts: '3'
     runInParallel: false
     codeCoverageEnabled: true
+    failOnMinTestsNotRun: true

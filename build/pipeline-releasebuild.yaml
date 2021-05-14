@@ -150,20 +150,6 @@ stages:
     # Install KeyVault secrets
     - template: template-install-keyvault-secrets.yaml
 
-      #Clear local nuget cache
-    - task: CmdLine@2
-      displayName: 'Clear local NuGet cache'
-      inputs:
-        script: 'nuget locals all -clear'
-
-    - task: VSBuild@1
-      displayName: 'NuGet restore'
-      inputs:
-        solution: 'LibsAndSamples.sln'
-        msbuildArgs: '/t:restore'
-        platform: 'any cpu'
-        configuration: 'debug'
-
     - template: template-run-device-auth-tests.yaml
       parameters:
         TestFilter: '$(System.ArtifactsDirectory)\drop\msalTests\Microsoft.Identity.Test.Integration.Win8\**\*'
