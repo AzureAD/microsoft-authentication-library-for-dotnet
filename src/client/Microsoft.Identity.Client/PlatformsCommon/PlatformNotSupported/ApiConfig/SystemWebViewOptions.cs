@@ -8,6 +8,7 @@ namespace Microsoft.Identity.Client
 {
     public partial class SystemWebViewOptions
     {
+#pragma warning disable 1998
         /// <summary>
         /// Use Microsoft Edge to navigate to the given URI. On non-windows platforms it uses 
         /// whatever browser is the default.
@@ -25,5 +26,6 @@ namespace Microsoft.Identity.Client
         {
             throw new PlatformNotSupportedException("Only on .NET  Classic / Core ");
         }
+#pragma warning restore 1998
     }
 }
