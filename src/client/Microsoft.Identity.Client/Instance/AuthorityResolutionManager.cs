@@ -38,8 +38,11 @@ namespace Microsoft.Identity.Client.Instance
         {
             if (!s_validatedEnvironments.Contains(authority.AuthorityInfo.Host))
             {
+                context.Logger.Verbose("[AuthorityResolutionManager] Entering authority resolution semaphore");
                 await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
                 {
+                    context.Logger.Verbose("[AuthorityResolutionManager] Entered authority resolution semaphore");
+
                     try
                     {
                         if (!s_validatedEnvironments.Contains(authority.AuthorityInfo.CanonicalAuthority))
@@ -54,6 +57,7 @@ namespace Microsoft.Identity.Client.Instance
                     finally
                     {
                         _semaphoreSlim.Release();
+                        context.Logger.Verbose("[AuthorityResolutionManager] Released authority resolution semaphore");
                     }
                 }
             }
@@ -125,7 +129,7 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             s_endpointCacheEntries.TryAdd(authorityInfo.CanonicalAuthority, updatedCacheEntry);
-        }     
+        }
 
         private class AuthorityEndpointCacheEntry
         {

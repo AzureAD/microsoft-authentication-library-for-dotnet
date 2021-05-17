@@ -124,7 +124,10 @@ namespace Microsoft.Identity.Client.Http
                     clonedBody = await CloneHttpContentAsync(body).ConfigureAwait(false);
                 }
 
-                response = await ExecuteAsync(endpoint, headers, clonedBody, method, logger, cancellationToken).ConfigureAwait(false);
+                using (logger.LogBlockDuration("[HttpManager] ExecuteAsync"))
+                {
+                    response = await ExecuteAsync(endpoint, headers, clonedBody, method, logger, cancellationToken).ConfigureAwait(false);
+                }
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
