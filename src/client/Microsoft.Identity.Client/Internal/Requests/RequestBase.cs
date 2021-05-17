@@ -305,9 +305,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} and Scopes {1}",
+                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} and Scopes {1} from {2}",
                         result.ExpiresOn, 
-                        string.Join(" ", result.Scopes)));
+                        string.Join(" ", result.Scopes),
+                        result.AuthenticationResultMetadata.TokenSource));
             }
         }
 

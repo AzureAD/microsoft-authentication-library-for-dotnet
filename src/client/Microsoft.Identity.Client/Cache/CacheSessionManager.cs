@@ -105,7 +105,10 @@ namespace Microsoft.Identity.Client.Cache
                         TokenType = cacheEventType
                     };
 
+                    _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Waiting for cache semaphore");
                     await TokenCacheInternal.Semaphore.WaitAsync().ConfigureAwait(false);
+                    _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Entered cache semaphore");
+
                     Stopwatch stopwatch = new Stopwatch();
                     try
                     {
@@ -128,7 +131,7 @@ namespace Microsoft.Identity.Client.Cache
 
                                     stopwatch.Start();
                                     await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
-                                    RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;                                    
+                                    RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
                                 }
                                 finally
                                 {
@@ -155,6 +158,7 @@ namespace Microsoft.Identity.Client.Cache
                     finally
                     {
                         TokenCacheInternal.Semaphore.Release();
+                        _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Released cache semaphore");
                     }
                 }
             }

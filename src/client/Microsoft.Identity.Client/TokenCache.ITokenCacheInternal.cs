@@ -123,8 +123,10 @@ namespace Microsoft.Identity.Client
                     username,
                     instanceDiscoveryMetadata.PreferredNetwork, 
                     wamAccountIds);
-
+            requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entering token cache semaphore");
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
+            requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore");
+
             try
             {
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -234,6 +236,7 @@ namespace Microsoft.Identity.Client
             finally
             {
                 _semaphoreSlim.Release();
+                requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore");
             }
         }
 
@@ -765,7 +768,7 @@ namespace Microsoft.Identity.Client
         }
 
         async Task<IEnumerable<MsalRefreshTokenCacheItem>> ITokenCacheInternal.GetAllRefreshTokensAsync(bool filterByClientId)
-        {
+        {            
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {

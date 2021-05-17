@@ -35,10 +35,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
-            CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
             MsalAccessTokenCacheItem msalAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
+            CacheInfoTelemetry cacheInfoTelemetry;
             if (!_onBehalfOfParameters.ForceRefresh)
             {
                 // look for access token in the cache first.
@@ -46,12 +46,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // or new assertion has been passed. We should not use Refresh Token
                 // for the user because the new incoming token may have updated claims
                 // like MFA etc.
-                msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                logger.Verbose("[OBO Request] Looking in the cache for an acces token");
+                msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);                
+                logger.Verbose($"[OBO Request] Found an access token token? {msalAccessTokenItem != null}" );
+
                 if (msalAccessTokenItem != null && !msalAccessTokenItem.NeedsRefresh())
                 {
                     var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
-                    AuthenticationRequestParameters.RequestContext.Logger.Info(
-                        "OBO found a valid access token in the cache. ID token also found? " + (msalIdTokenItem != null));
+                    logger.Info(
+                        "[OBO Request] Found a valid access token in the cache. ID token also found? " + (msalIdTokenItem != null));
 
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 
@@ -68,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             else
             {
-                logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
+                logger.Info("[OBO Request] Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
                 cacheInfoTelemetry = CacheInfoTelemetry.ForceRefresh;
             }
 
@@ -80,7 +83,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // No AT in the cache or AT needs to be refreshed
             try
             {
-                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                logger.Verbose("[OBO Request] Fetching new access token with OBO");
+                var result = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                logger.Verbose("[OBO Request] Fetched new access token with OBO");
+
+                return result;
             }
             catch (MsalServiceException e)
             {
