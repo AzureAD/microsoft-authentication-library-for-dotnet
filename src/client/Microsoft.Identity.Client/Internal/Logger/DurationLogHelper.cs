@@ -22,8 +22,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _logger = logger;
             _measuredBlockName = measuredBlockName;
             _logLevel = logLevel;
-            _stopwatch = new Stopwatch();
-            _stopwatch.Start();
+            _stopwatch = Stopwatch.StartNew();
 
             logger.Log(logLevel, null, $"Starting {measuredBlockName}");
         }
