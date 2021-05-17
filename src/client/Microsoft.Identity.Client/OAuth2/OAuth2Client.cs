@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             using (requestContext.CreateTelemetryHelper(httpEvent))
             {
-                using (logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
+                using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
                 {
                     if (method == HttpMethod.Post)
                     {
