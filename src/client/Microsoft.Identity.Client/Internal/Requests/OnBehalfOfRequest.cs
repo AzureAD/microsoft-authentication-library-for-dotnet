@@ -46,9 +46,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // or new assertion has been passed. We should not use Refresh Token
                 // for the user because the new incoming token may have updated claims
                 // like MFA etc.
-                logger.Verbose("[OBO Request] Looking in the cache for an acces token");
-                msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);                
-                logger.Verbose($"[OBO Request] Found an access token token? {msalAccessTokenItem != null}" );
+                using (logger.LogBlockDuration("[OBO Request] Looking in the cache for an access token"))
+                {
+                    msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                }
 
                 if (msalAccessTokenItem != null && !msalAccessTokenItem.NeedsRefresh())
                 {
@@ -68,6 +69,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
 
                 cacheInfoTelemetry = (msalAccessTokenItem == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.RefreshIn;
+                logger.Verbose($"[OBO request] No valid access token found because {cacheInfoTelemetry} ");
             }
             else
             {
@@ -83,11 +85,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // No AT in the cache or AT needs to be refreshed
             try
             {
-                logger.Verbose("[OBO Request] Fetching new access token with OBO");
-                var result = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
-                logger.Verbose("[OBO Request] Fetched new access token with OBO");
-
-                return result;
+                using (logger.LogBlockDuration("[OBO request] Fetching OBO token from ESTS"))
+                {
+                    var result = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                    return result;
+                }
             }
             catch (MsalServiceException e)
             {
@@ -102,7 +104,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs)
             {
                 var logger = AuthenticationRequestParameters.RequestContext.Logger;
-                logger.Info("This is an on behalf of request for a service principal as no client info returned in the token response.");
+                logger.Info("[OBO request] This is an on behalf of request for a service principal as no client info returned in the token response.");
             }
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);

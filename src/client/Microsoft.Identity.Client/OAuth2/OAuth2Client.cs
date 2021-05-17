@@ -80,8 +80,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool addCommonHeaders = true)
         {
-            var logger = requestContext.Logger;
-
             //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
             if (addCommonHeaders)
             {
@@ -124,7 +122,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
                 {
-                    logger.Verbose("[Oauth2Client] Processing error response ");
+                    requestContext.Logger.Verbose("[Oauth2Client] Processing error response ");
 
                     try
                     {
@@ -212,8 +210,10 @@ namespace Microsoft.Identity.Client.OAuth2
 
             VerifyCorrelationIdHeaderInResponse(response.HeadersAsDictionary, requestContext);
 
-            requestContext.Logger.Verbose("[OAuth2Client] Deserialzing response");
-            return JsonHelper.DeserializeFromJson<T>(response.Body);
+            using (requestContext.Logger.LogBlockDuration("[OAuth2Client] Deserializing response"))
+            {
+                return JsonHelper.DeserializeFromJson<T>(response.Body);
+            }
         }
 
         private static void ThrowServerException(HttpResponse response, RequestContext requestContext)
