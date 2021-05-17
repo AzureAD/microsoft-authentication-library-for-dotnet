@@ -80,6 +80,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool addCommonHeaders = true)
         {
+            var logger = requestContext.Logger;
+
             //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
             if (addCommonHeaders)
             {
@@ -96,18 +98,21 @@ namespace Microsoft.Identity.Client.OAuth2
 
             using (requestContext.CreateTelemetryHelper(httpEvent))
             {
-                if (method == HttpMethod.Post)
+                using (logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
                 {
-                    response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
-                                                .ConfigureAwait(false);
-                }
-                else
-                {
-                    response = await _httpManager.SendGetAsync(
-                        endpointUri, 
-                        _headers, 
-                        requestContext.Logger,
-                        cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
+                    if (method == HttpMethod.Post)
+                    {
+                        response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
+                                                    .ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        response = await _httpManager.SendGetAsync(
+                            endpointUri,
+                            _headers,
+                            requestContext.Logger,
+                            cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
+                    }
                 }
 
                 if (requestContext.ApiEvent != null)
@@ -119,6 +124,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
                 {
+                    logger.Verbose("[Oauth2Client] Processing error response ");
+
                     try
                     {
                         httpEvent.OauthErrorCode = MsalError.UnknownError;
@@ -205,6 +212,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             VerifyCorrelationIdHeaderInResponse(response.HeadersAsDictionary, requestContext);
 
+            requestContext.Logger.Verbose("[OAuth2Client] Deserialzing response");
             return JsonHelper.DeserializeFromJson<T>(response.Body);
         }
 
