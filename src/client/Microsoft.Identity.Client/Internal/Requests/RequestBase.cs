@@ -104,8 +104,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            Stopwatch sw = Stopwatch.StartNew();
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;            
@@ -208,7 +207,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateAccountIdentifiers(fromServer);
 
-            AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
+            AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
             var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
             var atItem = tuple.Item1;
@@ -305,9 +304,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} and Scopes {1}",
+                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} and Scopes {1} from {2}",
                         result.ExpiresOn, 
-                        string.Join(" ", result.Scopes)));
+                        string.Join(" ", result.Scopes),
+                        result.AuthenticationResultMetadata.TokenSource));
             }
         }
 

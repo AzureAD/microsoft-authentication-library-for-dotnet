@@ -228,13 +228,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public Guid CorrelationId { get; }
 
-        internal ApiEvent ApiEvent { get; }
-
         /// <summary>
         /// Identifies the type of access token. By default tokens returned by Azure Active Directory are Bearer tokens.        
         /// <seealso cref="CreateAuthorizationHeader"/> for getting an HTTP authorization header from an AuthenticationResult.
         /// </summary>
-        internal string TokenType { get; }
+        public string TokenType { get; }
+
+        internal ApiEvent ApiEvent { get; }
 
         /// <summary>
         /// Contains metadata for the Authentication result.

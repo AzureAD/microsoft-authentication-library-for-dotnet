@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .GetProperties()
                 .Where(p => p.GetCustomAttribute(typeof(ObsoleteAttribute)) == null);
 
-            Assert.AreEqual(ctorParameters.Length, classProperties.Count() + 1, "The <for test> constructor should include all properties of AuthenticationObject except AuthenticationScheme"); ;
+            Assert.AreEqual(ctorParameters.Length, classProperties.Count(), "The <for test> constructor should include all properties of AuthenticationObject"); ;
         }
 
         [TestMethod]
