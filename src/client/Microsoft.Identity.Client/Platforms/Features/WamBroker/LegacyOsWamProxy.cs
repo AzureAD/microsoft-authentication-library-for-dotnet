@@ -8,10 +8,6 @@ using Microsoft.Identity.Client.Core;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-#if NET5_WIN
-#elif DESKTOP || NET_CORE
-using Microsoft.Identity.Client.Platforms;
-#endif
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
