@@ -107,9 +107,12 @@ namespace Microsoft.Identity.Client.Region
                 if (discoveredRegion.RegionSource != RegionSource.FailedAutoDiscovery)
                 {
                     apiEvent.RegionSource = (int)discoveredRegion.RegionSource;
+                    apiEvent.RegionOutcome = (int)RegionOutcome.AutodetectSuccess;
                 }
-                apiEvent.FallbackToGlobal = discoveredRegion.Region == null;
-                apiEvent.IsValidUserProvidedRegion = null;
+                else
+                {
+                    apiEvent.RegionOutcome = (int)RegionOutcome.FallbackToGlobal;
+                }
             }
             else
             {
@@ -118,19 +121,18 @@ namespace Microsoft.Identity.Client.Region
                 if (discoveredRegion.RegionSource == RegionSource.FailedAutoDiscovery)
                 {
                     apiEvent.RegionSource = (int)RegionSource.UserProvided;
+                    apiEvent.RegionOutcome = (int)RegionOutcome.UserProvidedNoValidation;
                 }
                 else
                 {
                     apiEvent.RegionSource = (int)discoveredRegion.RegionSource;
                 }
 
-                apiEvent.UserProvidedRegion = azureRegionConfig;
-                apiEvent.FallbackToGlobal = false;
                 if (!string.IsNullOrEmpty(discoveredRegion.Region))
                 {
-                    apiEvent.IsValidUserProvidedRegion = string.Equals(
-                        discoveredRegion.Region,
-                        azureRegionConfig);
+                    apiEvent.RegionOutcome = string.Equals(discoveredRegion.Region, azureRegionConfig) ? 
+                        (int)RegionOutcome.UserProvidedValid : 
+                        (int)RegionOutcome.UserProvidedInvalid;
                 }
             }
         }

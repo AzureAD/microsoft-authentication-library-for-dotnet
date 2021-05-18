@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
         public const string LoginHintKey = EventNamePrefix + "login_hint";
         public const string IsAccessTokenCacheHitKey = EventNamePrefix + "at_cache_hit";
-        public const string RegionDiscoveredKey = EventNamePrefix + "region_discovered";
+        public const string RegionUsedKey = EventNamePrefix + "region_discovered";
         public const string RegionSourceKey = EventNamePrefix + "region_source";
         public const string UserProvidedRegionKey = EventNamePrefix + "user_provided_region";
         public const string IsTokenCacheSerializedKey = EventNamePrefix + "is_token_cache_serialized";
@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string FallbackToGlobalKey = EventNamePrefix + "fallback_to_global";
         public const string IsLegacyCacheEnabledKey = EventNamePrefix + "is_legacy_cache_enabled";
         public const string CacheInfoKey = EventNamePrefix + "cache_info";
+        public const string RegionOutcomeKey = EventNamePrefix + "region_outcome";
 
         public enum ApiIds
         {
@@ -163,11 +164,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
                                          : null;
         }
 
-        #region Region
+#region Region
         public string RegionUsed
         {
-            get => this.ContainsKey(RegionDiscoveredKey) ? this[RegionDiscoveredKey] : null;
-            set => this[RegionDiscoveredKey] = value;
+            get => this.ContainsKey(RegionUsedKey) ? this[RegionUsedKey] : null;
+            set => this[RegionUsedKey] = value;
         }
 
         public int RegionSource
@@ -177,48 +178,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             set => this[RegionSourceKey] = (value).ToString(CultureInfo.InvariantCulture);
         }
 
-        public string UserProvidedRegion
+        public int RegionOutcome
         {
-            get => this.ContainsKey(UserProvidedRegionKey) ? this[UserProvidedRegionKey] : null;
-            set => this[UserProvidedRegionKey] = value;
+            get => this.ContainsKey(RegionOutcomeKey) ?
+                (int)Enum.Parse(typeof(RegionOutcome), this[RegionOutcomeKey]) : 0;
+            set => this[RegionOutcomeKey] = (value).ToString(CultureInfo.InvariantCulture);
         }
-
-        public bool? IsValidUserProvidedRegion
-        {
-#pragma warning disable CA1305 // .net standard does not have an overload for ToString() with Culture
-            set { this[IsValidUserProvidedRegionKey] = value.ToString().ToLowerInvariant(); }
-            get 
-            {
-                if (this.ContainsKey(IsValidUserProvidedRegionKey))
-                {
-                    return this[IsValidUserProvidedRegionKey] == true.ToString().ToLowerInvariant();
-                }
-                else
-                {
-                    return null;
-                }
-            }
-#pragma warning restore CA1305 // Specify IFormatProvider
-        }
-
-        public bool? FallbackToGlobal
-        {
-#pragma warning disable CA1305 // .net standard does not have an overload for ToString() with Culture
-            set { this[FallbackToGlobalKey] = value.ToString().ToLowerInvariant(); }
-            get
-            {
-                if (this.ContainsKey(FallbackToGlobalKey))
-                {
-                    return this[FallbackToGlobalKey] == true.ToString().ToLowerInvariant();
-                }
-                else
-                {
-                    return null;
-                }
-            }
-#pragma warning restore CA1305 // Specify IFormatProvider
-        }
-
 #endregion
 
         public bool IsTokenCacheSerialized

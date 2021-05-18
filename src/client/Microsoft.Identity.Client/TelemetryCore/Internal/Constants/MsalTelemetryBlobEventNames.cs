@@ -23,12 +23,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Constants
         public const string TenantIdConstStrKey = "Microsoft_MSAL_tenant_id";
         public const string UiEventCountTelemetryBatchKey = "Microsoft_MSAL_ui_event_count";
         public const string ApiErrorCodeConstStrKey = "msal.api_error_code";
-        public const string RegionDiscovered = "msal.region_discovered";
+        public const string RegionUsed = "msal.region_Used";
         public const string RegionSource = "msal.region_source";
+        public const string RegionOutcome = "msal.region_outcome";
         public const string IsTokenCacheSerializedKey = "msal.is_token_cache_serialized";
-        public const string UserProvidedRegion = "msal.user_provided_region";
-        public const string IsValidUserProvidedRegion = "msal.is_valid_user_provided_region";
-        public const string FallbackToGlobal = "msal.fallback_to_global";
         public const string IsLegacyCacheEnabledKey = "msal.is_legacy_cache_enabled";
         public const string CacheInfoKey = "msal.cache_info";
     }
