@@ -142,9 +142,7 @@ namespace Microsoft.Identity.Client.Region
             return 
                 !(apiEvent.RegionUsed == null &&
                  apiEvent.RegionSource == (int)(default(RegionSource)) &&
-                 apiEvent.UserProvidedRegion == null &&
-                 apiEvent.FallbackToGlobal == null &&
-                 apiEvent.IsValidUserProvidedRegion == null);
+                 apiEvent.RegionOutcome == (int)(default(RegionOutcome)));
         }
 
         private async Task<RegionInfo> DiscoverAndCacheAsync(string azureRegionConfig, ICoreLogger logger, CancellationToken requestCancellationToken)
