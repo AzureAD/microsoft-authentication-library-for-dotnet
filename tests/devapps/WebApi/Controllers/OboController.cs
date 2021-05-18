@@ -90,7 +90,6 @@ namespace WebApi.Controllers
 
             }
 
-
             return res.AuthenticationResultMetadata.DurationTotalInMs;
         }
 
