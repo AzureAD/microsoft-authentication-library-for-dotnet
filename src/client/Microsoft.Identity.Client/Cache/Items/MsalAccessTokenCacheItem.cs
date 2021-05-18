@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             DateTimeOffset? accessTokenRefreshOn = null,
             string tokenType = StorageJsonValues.TokenTypeBearer) : this(scopes)
         {
+            tokenType = tokenType == null ? StorageJsonValues.TokenTypeBearer : tokenType;
             Environment = preferredCacheEnv;
             ClientId = clientId;
             TenantId = tenantId;
