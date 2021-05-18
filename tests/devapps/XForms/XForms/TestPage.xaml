@@ -28,6 +28,8 @@
                             <x:String>B2C Local microsoftonline.com</x:String>
                             <x:String>B2C Google b2clogin.com</x:String>
                             <x:String>B2C Google microsoftonline.com</x:String>
+                            <x:String>Acquire Token attempt Open Edge</x:String>
+                            <x:String>Acquire Token attempt Open Chrome Edge</x:String>
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>

@@ -124,7 +124,10 @@ namespace Microsoft.Identity.Client.Http
                     clonedBody = await CloneHttpContentAsync(body).ConfigureAwait(false);
                 }
 
-                response = await ExecuteAsync(endpoint, headers, clonedBody, method, logger, cancellationToken).ConfigureAwait(false);
+                using (logger.LogBlockDuration("[HttpManager] ExecuteAsync"))
+                {
+                    response = await ExecuteAsync(endpoint, headers, clonedBody, method, logger, cancellationToken).ConfigureAwait(false);
+                }
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -218,8 +221,8 @@ namespace Microsoft.Identity.Client.Http
                     $"[HttpManager] Sending request. Method: {method}. URI: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ",
                     $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. ");
 
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
+                Stopwatch sw = Stopwatch.StartNew();
+
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                 {
