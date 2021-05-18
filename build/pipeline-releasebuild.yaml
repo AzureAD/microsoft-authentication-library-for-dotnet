@@ -21,6 +21,8 @@ stages:
 - stage: MSALBuildAndTest
   jobs: #Build and stage projects
   - template: template-build-and-run-all-tests.yaml
+    parameters:
+      DataFileDirectory: 'Release'
 
     # Pack and sign packages
   - job: 'PackAndSign'

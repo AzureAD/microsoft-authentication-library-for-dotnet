@@ -1,3 +1,6 @@
+parameters:
+  DataFileDirectory: 'Debug'
+
 jobs: #Build and stage projects
 - job: 'BuildAndStageProjects'
   pool:
@@ -52,7 +55,7 @@ jobs: #Build and stage projects
   steps:
   - template: template-android-appcenter-tests.yaml
     parameters:
-      DataFileDirectory: 'Release'
+      DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
 # APP CENTER IOS MSAL TESTS PHASE
 - job: 'RunAppCenterIosMsalTests'
@@ -65,7 +68,7 @@ jobs: #Build and stage projects
   steps:
   - template: template-ios-appcenter-tests.yaml
     parameters:
-      DataFileDirectory: 'Release'
+      DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
   #This task will initiate PKey Authentication tests on a dedicated virtual machine that has been preconfigured to allow device Authentication
   #using a dedicated lab account ("idlabca@msidlab8.com"). This machine is part of the "DevEx Win8 Automation" agent pool.
