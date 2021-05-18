@@ -30,37 +30,37 @@ stages:
         - visualstudio
     
     steps:
-    # Bootstrap the build
-    - template: template-build-and-prep-automation.yaml
+#     # Bootstrap the build
+#     - template: template-build-and-prep-automation.yaml
 
-# BUILD IOS APPCENTER APP PHASE
+# # BUILD IOS APPCENTER APP PHASE
 
-  - job: 'BuildiOSAppCenterApp'
-    pool:
-        name: Azure Pipelines
-        vmImage: macos-10.15
+#   - job: 'BuildiOSAppCenterApp'
+#     pool:
+#         name: Azure Pipelines
+#         vmImage: macos-10.15
 
-    steps:
-    - template: template-build-ios-automation.yaml
+#     steps:
+#     - template: template-build-ios-automation.yaml
 
-# APP CENTER ANDROID MSAL TESTS PHASE
+# # APP CENTER ANDROID MSAL TESTS PHASE
 
-  - job: 'AppCenterAndroidMsalTests'
-    dependsOn: 'Build'
-    pool:
-      vmImage: 'windows-latest'
+#   - job: 'AppCenterAndroidMsalTests'
+#     dependsOn: 'Build'
+#     pool:
+#       vmImage: 'windows-latest'
 
-    steps:
-    - template: template-android-appcenter-tests.yaml
+#     steps:
+#     - template: template-android-appcenter-tests.yaml
 
-# APP CENTER IOS MSAL TESTS PHASE
+# # APP CENTER IOS MSAL TESTS PHASE
 
-  - job: 'AppCenterIosMsalTests'
-    dependsOn:
-    - 'Build'
-    - 'BuildiOSAppCenterApp'
-    pool:
-      vmImage: 'windows-latest'
+#   - job: 'AppCenterIosMsalTests'
+#     dependsOn:
+#     - 'Build'
+#     - 'BuildiOSAppCenterApp'
+#     pool:
+#       vmImage: 'windows-latest'
 
-    steps:
-    - template: template-ios-appcenter-tests.yaml
+#     steps:
+#     - template: template-ios-appcenter-tests.yaml

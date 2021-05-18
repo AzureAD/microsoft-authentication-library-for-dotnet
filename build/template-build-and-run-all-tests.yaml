@@ -1,0 +1,87 @@
+jobs: #Build and stage projects
+- job: 'BuildAndStageProjects'
+  pool:
+      vmImage: 'windows-latest'
+      demands:
+      - msbuild
+      - visualstudio
+
+  steps:
+  # Bootstrap the build
+  - template: template-build-and-prep-automation.yaml
+
+  # BUILD IOS APPCENTER APP PHASE
+- job: 'BuildiOSAppCenterApp'
+  pool:
+      name: Azure Pipelines
+      vmImage: macos-10.15
+
+  steps:
+  - template: template-build-ios-automation.yaml
+
+  # BUILD ANDROID APPCENTER APP PHASE
+- job: 'BuildAndroidAppCenterApp'
+  pool:
+      vmImage: 'windows-latest'
+      demands:
+      - msbuild
+      - visualstudio
+
+  steps:
+  - template: template-build-android-automation.yaml
+
+  #Desktop Unit + Integration Tests
+- job: 'RunDesktopTests'
+  dependsOn:
+  - 'BuildAndStageProjects'
+  pool:
+      vmImage: 'windows-latest'
+      demands:
+      - msbuild
+      - visualstudio
+
+  steps:
+  - template: template-desktop-unit and-automation.yaml
+
+# APP CENTER ANDROID MSAL TESTS PHASE
+- job: 'RunAppCenterAndroidMsalTests'
+  dependsOn: 'BuildAndStageProjects'
+  pool:
+    vmImage: 'windows-latest'
+
+  steps:
+  - template: template-android-appcenter-tests.yaml
+    parameters:
+      DataFileDirectory: 'Release'
+
+# APP CENTER IOS MSAL TESTS PHASE
+- job: 'RunAppCenterIosMsalTests'
+  dependsOn:
+  - 'BuildAndStageProjects'
+  - 'BuildiOSAppCenterApp'
+  pool:
+    vmImage: 'windows-latest'
+
+  steps:
+  - template: template-ios-appcenter-tests.yaml
+    parameters:
+      DataFileDirectory: 'Release'
+
+  #This task will initiate PKey Authentication tests on a dedicated virtual machine that has been preconfigured to allow device Authentication
+  #using a dedicated lab account ("idlabca@msidlab8.com"). This machine is part of the "DevEx Win8 Automation" agent pool.
+  #Because this agent pool is shared with other teams in our org, a specific agent has been assigned to this build to avoid collisions
+  #and to allow teams to configure the agent as needed for their specific platform.
+  #This agent ('MSIDWIN802') is configured to specifically run MSAL.NET PKey Auth tests and should be used primarily.
+- job: 'RunDeviceAuthTests'
+  dependsOn: 'BuildAndStageProjects'
+  pool:
+      name: DevEx Win8 Automation
+      demands: VisualStudio2019 -equals 2019
+
+  steps:
+  # Install KeyVault secrets
+  - template: template-install-keyvault-secrets.yaml
+
+  - template: template-run-device-auth-tests.yaml
+    parameters:
+      TestFilter: '$(System.ArtifactsDirectory)\drop\msalTests\Microsoft.Identity.Test.Integration.Win8\**\*'
