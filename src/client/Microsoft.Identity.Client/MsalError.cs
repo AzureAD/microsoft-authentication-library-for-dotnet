@@ -758,6 +758,12 @@ namespace Microsoft.Identity.Client
         public const string TokenTypeMismatch = "token_type_mismatch";
 
         /// <summary>
+        /// <para>What happens?</para>The response from the token endpoint does not contain token_type parameter.
+        /// <para>Mitigation</para>This happens if the Identity Provider (AAD, B2C, ADFS, etc.) did not include the token type in the response. In case of ADFS, verify the configuration or consider upgrading to the latest version.
+        /// </summary>
+        public const string TokenTypeMissing = "token_type_missing";
+
+        /// <summary>
         /// <para>What happens?</para>You are trying to use a feature which was marked as experimental
         /// <para>Mitigation</para>When creating the PublicClientApplication or ConfidentialClientApplication, use .WithExperimentalFeatures() option. See https://aka.ms/msal-net-experimental-features for details.
         /// </summary>

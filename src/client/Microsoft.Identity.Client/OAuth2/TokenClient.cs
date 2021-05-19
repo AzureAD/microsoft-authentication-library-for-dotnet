@@ -79,8 +79,12 @@ namespace Microsoft.Identity.Client.OAuth2
                         "ScopeSet was missing from the token response, so using developer provided scopes in the result. ");
                 }
 
-                if (!string.IsNullOrEmpty(response.TokenType) &&
-                    !string.Equals(
+                if (string.IsNullOrEmpty(response.TokenType))
+                {
+                    throw new MsalClientException(MsalError.TokenTypeMissing, MsalErrorMessage.TokenTypeMissing);
+                }
+
+                if (!string.Equals(
                         response.TokenType,
                         _requestParams.AuthenticationScheme.AccessTokenType,
                         StringComparison.OrdinalIgnoreCase))
