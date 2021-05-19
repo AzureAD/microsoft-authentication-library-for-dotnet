@@ -116,6 +116,7 @@ namespace NetCoreTestApp
                         7. Confidential Client
                         8. Clear cache
                         9. Rotate Tenant ID
+                       10. Acquire Token Interactive with Chrome
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -221,6 +222,23 @@ namespace NetCoreTestApp
                             s_currentTid = (s_currentTid + 1) % s_tids.Length;
                             pca = CreatePca();
                             RunConsoleAppLogicAsync(pca).Wait();
+                            break;
+
+                        case 10: // acquire token interactive with Chrome
+
+                            var optionsChrome = new SystemWebViewOptions()
+                            {
+                                //BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
+                                OpenBrowserAsync = SystemWebViewOptions.OpenWithChromeEdgeBrowserAsync
+                            };
+
+                            var ctsChrome = new CancellationTokenSource();
+                            authTask = pca.AcquireTokenInteractive(s_scopes)
+                                .WithSystemWebViewOptions(optionsChrome)
+                                .ExecuteAsync(ctsChrome.Token);
+
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+
                             break;
 
                         case 0:
