@@ -44,11 +44,13 @@ jobs: #Build and stage projects
       - visualstudio
 
   steps:
-  - template: template-desktop-unit and-automation.yaml
+  - template: template-desktop-unit-and-automation.yaml
 
 # APP CENTER ANDROID MSAL TESTS PHASE
 - job: 'RunAppCenterAndroidMsalTests'
-  dependsOn: 'BuildAndStageProjects'
+  dependsOn: 
+  - 'BuildAndStageProjects'
+  - 'BuildAndroidAppCenterApp'
   pool:
     vmImage: 'windows-latest'
 

@@ -16,6 +16,7 @@ steps:
     runInParallel: true
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET CORE)'
@@ -27,6 +28,7 @@ steps:
     runInParallel: true
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
 
 # install python and run cache tests
 - task: stevedower.python.PythonScript.PythonScript@1
@@ -50,3 +52,4 @@ steps:
     searchFolder: '$(System.DefaultWorkingDirectory)'
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'

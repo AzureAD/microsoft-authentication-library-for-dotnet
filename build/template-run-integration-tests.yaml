@@ -27,3 +27,4 @@ steps:
     runInParallel: false
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
