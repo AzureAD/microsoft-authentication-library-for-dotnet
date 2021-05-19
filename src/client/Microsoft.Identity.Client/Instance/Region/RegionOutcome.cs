@@ -35,11 +35,9 @@ namespace Microsoft.Identity.Client.Region
         /// </summary>
         AutodetectSuccess = 4,
 
-
         /// <summary>
         /// Region autodetect requested but failed. Fallback to global
         /// </summary>
         FallbackToGlobal = 5
-
     }
 }
