@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
         public const string LoginHintKey = EventNamePrefix + "login_hint";
         public const string IsAccessTokenCacheHitKey = EventNamePrefix + "at_cache_hit";
-        public const string RegionUsedKey = EventNamePrefix + "region_discovered";
+        public const string RegionUsedKey = EventNamePrefix + "region_used";
         public const string RegionSourceKey = EventNamePrefix + "region_source";
         public const string UserProvidedRegionKey = EventNamePrefix + "user_provided_region";
         public const string IsTokenCacheSerializedKey = EventNamePrefix + "is_token_cache_serialized";
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public int RegionSource
         {
             get => this.ContainsKey(RegionSourceKey) ? 
-                (int)Enum.Parse(typeof(RegionSource), this[RegionSourceKey]) : 0;
+                (int)Enum.Parse(typeof(RegionAutodetectionSource), this[RegionSourceKey]) : 0;
             set => this[RegionSourceKey] = (value).ToString(CultureInfo.InvariantCulture);
         }
 

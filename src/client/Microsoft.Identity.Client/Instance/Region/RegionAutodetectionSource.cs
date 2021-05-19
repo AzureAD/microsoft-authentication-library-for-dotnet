@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client.Region
     /// <summary>
     /// Indicates where the region information came from. 
     /// </summary>
-    internal enum RegionSource
+    internal enum RegionAutodetectionSource
     {
         /// <summary>
         /// Indicates that the API .WithAzureRegion() was not used
@@ -34,12 +34,6 @@ namespace Microsoft.Identity.Client.Region
         /// Auto-detected from IMDS
         /// </summary>
         Imds = 4,
-
-
-        /// <summary>
-        /// Region was configured by the user
-        /// </summary>
-        UserProvided = 5
 
     }
 }
