@@ -26,10 +26,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string IsAccessTokenCacheHitKey = EventNamePrefix + "at_cache_hit";
         public const string RegionUsedKey = EventNamePrefix + "region_used";
         public const string RegionSourceKey = EventNamePrefix + "region_source";
-        public const string UserProvidedRegionKey = EventNamePrefix + "user_provided_region";
         public const string IsTokenCacheSerializedKey = EventNamePrefix + "is_token_cache_serialized";
-        public const string IsValidUserProvidedRegionKey = EventNamePrefix + "is_valid_user_provided_region";
-        public const string FallbackToGlobalKey = EventNamePrefix + "fallback_to_global";
         public const string IsLegacyCacheEnabledKey = EventNamePrefix + "is_legacy_cache_enabled";
         public const string CacheInfoKey = EventNamePrefix + "cache_info";
         public const string RegionOutcomeKey = EventNamePrefix + "region_outcome";

@@ -113,7 +113,23 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 isCacheSerialized: true);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
         }
-     
+
+        [TestMethod]
+        public async Task TelemetryAutoDiscoveryFailsTestsAsync()
+        {
+            Trace.WriteLine("Acquire token for client with region detection fails.");
+            _harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get, TestConstants.ImdsUrl);
+            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.FallbackToGlobal).ConfigureAwait(false);
+            AssertCurrentTelemetry(
+                result.HttpRequest,
+                ApiIds.AcquireTokenForClient,
+                ((int)RegionAutodetectionSource.FailedAutoDiscovery).ToString(),
+                ((int)RegionOutcome.FallbackToGlobal).ToString(),
+                isCacheSerialized: false,
+                region: "");
+            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
+        }
+
         [TestMethod]
         public async Task TelemetryUserProvidedRegionAutoDiscoveryFailsTestsAsync()
         {

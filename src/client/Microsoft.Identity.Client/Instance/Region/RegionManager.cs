@@ -105,9 +105,9 @@ namespace Microsoft.Identity.Client.Region
             if (isAutoDiscoveryRequested)
             {
                 apiEvent.RegionUsed = discoveredRegion.Region;
-                apiEvent.RegionOutcome = discoveredRegion.RegionSource != RegionAutodetectionSource.FailedAutoDiscovery ? 
-                    (int)RegionOutcome.AutodetectSuccess : 
-                    apiEvent.RegionOutcome = (int)RegionOutcome.FallbackToGlobal;
+                apiEvent.RegionOutcome = discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery ? 
+                    (int)RegionOutcome.FallbackToGlobal : 
+                    (int)RegionOutcome.AutodetectSuccess;
             }
             else
             {
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Region
         private bool IsTelemetryRecorded(ApiEvent apiEvent)
         {
             return 
-                !(apiEvent.RegionUsed == null &&
+                !(string.IsNullOrEmpty(apiEvent.RegionUsed) &&
                  apiEvent.RegionAutodetectionSource == (int)(default(RegionAutodetectionSource)) &&
                  apiEvent.RegionOutcome == (int)(default(RegionOutcome)));
         }
