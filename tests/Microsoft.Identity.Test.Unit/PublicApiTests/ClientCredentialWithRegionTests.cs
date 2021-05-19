@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
-                Assert.AreEqual((int)RegionAutodetectionSource.Imds, result.ApiEvent.RegionSource);
+                Assert.AreEqual((int)RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
 
                 // try again, result will be from cache
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
-                Assert.AreEqual((int)RegionAutodetectionSource.Cache, result.ApiEvent.RegionSource);
+                Assert.AreEqual((int)RegionAutodetectionSource.Cache, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
 
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit
                   .ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
-                Assert.AreEqual((int)RegionAutodetectionSource.Cache, result.ApiEvent.RegionSource);
+                Assert.AreEqual((int)RegionAutodetectionSource.Cache, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
 
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit
                   .ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
-                Assert.AreEqual((int)RegionAutodetectionSource.Cache, result.ApiEvent.RegionSource);
+                Assert.AreEqual((int)RegionAutodetectionSource.Cache, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
             }
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
-                Assert.AreEqual((int)RegionAutodetectionSource.Imds, result.ApiEvent.RegionSource);
+                Assert.AreEqual((int)RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
 
                 // when switching to non-region, token is found in the cache
@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(null, result.ApiEvent.RegionUsed);
-                Assert.AreEqual((int)RegionAutodetectionSource.None, result.ApiEvent.RegionSource);
+                Assert.AreEqual((int)RegionAutodetectionSource.None, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.None, result.ApiEvent.RegionOutcome);
 
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Unit
                         .ConfigureAwait(false);
 
                     Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
-                    Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, result.ApiEvent.RegionSource);
+                    Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, result.ApiEvent.RegionAutodetectionSource);
                     Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
 
                     Assert.IsNotNull(result.AccessToken);
@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.IsNotNull(result.AccessToken);
 
                     Assert.AreEqual(null, result.ApiEvent.RegionUsed);
-                    Assert.AreEqual((int)RegionAutodetectionSource.None, result.ApiEvent.RegionSource);
+                    Assert.AreEqual((int)RegionAutodetectionSource.FailedAutoDiscovery, result.ApiEvent.RegionAutodetectionSource);
                     Assert.AreEqual((int)RegionOutcome.FallbackToGlobal, result.ApiEvent.RegionOutcome);
                 }
                 catch (MsalServiceException)
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
-                Assert.AreEqual((int)RegionAutodetectionSource.Imds, result.ApiEvent.RegionSource);
+                Assert.AreEqual((int)RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.UserProvidedValid, result.ApiEvent.RegionOutcome);
 
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);

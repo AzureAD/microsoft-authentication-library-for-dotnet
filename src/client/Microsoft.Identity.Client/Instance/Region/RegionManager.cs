@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Region
             }
 
             bool isAutoDiscoveryRequested = IsAutoDiscoveryRequested(azureRegionConfig);
-            apiEvent.RegionSource = (int)discoveredRegion.RegionSource;
+            apiEvent.RegionAutodetectionSource = (int)discoveredRegion.RegionSource;
 
             if (isAutoDiscoveryRequested)
             {
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Region
 
                 if (!string.IsNullOrEmpty(discoveredRegion.Region))
                 {
-                    apiEvent.RegionOutcome = string.Equals(discoveredRegion.Region, azureRegionConfig) ? 
+                    apiEvent.RegionOutcome = string.Equals(discoveredRegion.Region, azureRegionConfig, StringComparison.OrdinalIgnoreCase) ? 
                         (int)RegionOutcome.UserProvidedValid : 
                         (int)RegionOutcome.UserProvidedInvalid;
                 }
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.Region
         {
             return 
                 !(apiEvent.RegionUsed == null &&
-                 apiEvent.RegionSource == (int)(default(RegionAutodetectionSource)) &&
+                 apiEvent.RegionAutodetectionSource == (int)(default(RegionAutodetectionSource)) &&
                  apiEvent.RegionOutcome == (int)(default(RegionOutcome)));
         }
 

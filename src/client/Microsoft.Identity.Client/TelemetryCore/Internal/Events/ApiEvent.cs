@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             set => this[RegionUsedKey] = value;
         }
 
-        public int RegionSource
+        public int RegionAutodetectionSource
         {
             get => this.ContainsKey(RegionSourceKey) ? 
                 (int)Enum.Parse(typeof(RegionAutodetectionSource), this[RegionSourceKey]) : 0;
