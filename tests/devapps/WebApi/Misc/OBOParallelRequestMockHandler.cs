@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Utils;
 
 namespace WebApi.Controllers
 {
-    /// <summary>
-    /// This custom HttpManager does the following: 
-    /// - provides a standard reponse for discovery calls
-    /// - responds with valid tokens based on a naming convention (uid = "uid" + rtSecret, upn = "user_" + rtSecret)
-    /// </summary>
-    internal class ParallelRequestMockHandler : IHttpManager
+    internal class OBOParallelRequestMockHandler : IHttpManager
     {
         public long LastRequestDurationInMs => Settings.NetworkAccessPenaltyMs;
 
@@ -35,27 +32,70 @@ namespace WebApi.Controllers
             throw new InvalidOperationException("Only instance discovery is supported");
         }
 
+        private static Random s_random = new Random();
+        public static string GetDefaultTokenResponse(string tenantId)
+        {
+            // add anywhere between 0 and 30 s to the expiration, just to emulate some of these tokens expiring
+            int expirationBaseline = 5 * 60; // 5 min
+            int seconds = s_random.Next(30);
+
+            int totalExpiration = expirationBaseline + seconds;
+
+            return
+          "{\"token_type\":\"Bearer\",\"expires_in\":\"" + totalExpiration + "\",\"scope\":" +
+          "\"scope\",\"access_token\":\"" + "secret_at" + "\"" +
+          ",\"refresh_token\":\"secret_rt\",\"client_info\"" +
+          ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+          ":\"" + CreateIdToken(tenantId) +
+          "\",\"id_token_expires_in\":\"" + totalExpiration + "\"}";
+        }
+
+        public static string CreateIdToken(string tenantId, string uniqueId = "uid", string displayableId = "joe@contoso.com")
+        {
+            string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
+                        "\"iss\": \"https://login.microsoftonline.com/6c3d51dd-f0e5-4959-b4ea-a80c4e36fe5e/v2.0/\"," +
+                        "\"iat\": 1455833828," +
+                        "\"nbf\": 1455833828," +
+                        "\"exp\": 1455837728," +
+                        "\"ipaddr\": \"131.107.159.117\"," +
+                        "\"name\": \"Marrrrrio Bossy\"," +
+                        "\"oid\": \"" + uniqueId + "\"," +
+                        "\"preferred_username\": \"" + displayableId + "\"," +
+                        "\"sub\": \"K4_SGGxKqW1SxUAmhg6C1F6VPiFzcx-Qd80ehIEdFus\"," +
+                        "\"tid\": \"" + tenantId + "\"," +
+                        "\"ver\": \"2.0\"}";
+            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
+        }
+
+        private static string CreateClientInfo(string uid = "uid", string utid = "utid")
+        {
+            return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
+        }
+
         public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ICoreLogger logger, CancellationToken cancellationToken = default)
         {
-            await Task.Delay(Settings.NetworkAccessPenaltyMs).ConfigureAwait(false);
-
-            // example endpoint https://login.microsoftonline.com/tid2/oauth2/v2.0/token
-
-            var regexp = @"https://login.microsoftonline.com/(?<tid>.*)/oauth2/v2.0/token"; // captures the tenantID
-            var m = Regex.Match(endpoint.AbsoluteUri, regexp);
-            var tid = m.Groups["tid"];
-
-            if (tid != null)
+            using (logger.LogBlockDuration("Test HttpManager - SendPostAsync"))
             {
-                return new HttpResponse()
+                await Task.Delay(Settings.NetworkAccessPenaltyMs).ConfigureAwait(false);
+
+                // example endpoint https://login.microsoftonline.com/tid2/oauth2/v2.0/token
+
+                var regexp = @"https://login.microsoftonline.com/(?<tid>.*)/oauth2/v2.0/token"; // captures the tenantID
+                var m = Regex.Match(endpoint.AbsoluteUri, regexp);
+                var tid = m.Groups["tid"];
+
+                if (tid != null)
                 {
-                    Body = "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"" + tid + "\"}",
-                    StatusCode = System.Net.HttpStatusCode.OK
-                };
-            }
-            else
-            {
-                throw new InvalidOperationException("Not expecting this /token request " + endpoint.AbsoluteUri);
+                    return new HttpResponse()
+                    {
+                        Body = GetDefaultTokenResponse(tid.Value),
+                        StatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
+                else
+                {
+                    throw new InvalidOperationException("Not expecting this /token request " + endpoint.AbsoluteUri);
+                }
             }
 
         }
