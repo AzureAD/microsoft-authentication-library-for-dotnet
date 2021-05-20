@@ -62,7 +62,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     userRealmResponse.CloudAudienceUrn,
                     UserAuthType.IntegratedAuth,
                     _integratedWindowsAuthParameters.Username,
-                    null).ConfigureAwait(false);
+                    null,
+                    AuthenticationRequestParameters.FederationMetadataFileName).ConfigureAwait(false);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
                 return new UserAssertion(

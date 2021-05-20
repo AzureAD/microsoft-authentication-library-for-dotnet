@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -26,8 +27,20 @@ namespace Microsoft.Identity.Client.WsTrust
         }
 
         /// <inheritdoc/>
-        public async Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext)
+        public async Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext, string federationMetadataFilename)
         {
+            MexDocument mexDoc;
+
+            if (!string.IsNullOrEmpty(federationMetadataFilename))
+            {
+                var federationMetadata = File.ReadAllText(federationMetadataFilename);
+                mexDoc = new MexDocument(federationMetadata);
+                requestContext.Logger.InfoPii(
+                    $"MEX document fetched and parsed from '{federationMetadataFilename}'",
+                    "Fetched and parsed MEX");
+                return mexDoc;
+            }
+
             IDictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
 
             var uri = new UriBuilder(federationMetadataUrl);
@@ -48,7 +61,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     httpResponse);
             }
 
-            var mexDoc = new MexDocument(httpResponse.Body);
+            mexDoc = new MexDocument(httpResponse.Body);
 
             requestContext.Logger.InfoPii(
                 $"MEX document fetched and parsed from '{federationMetadataUrl}'",

@@ -57,8 +57,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 try
                 {
                     await harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync("http://somehost",
-                                            new RequestContext(harness.ServiceBundle, Guid.NewGuid())
-
+                                            new RequestContext(harness.ServiceBundle, Guid.NewGuid()),
+                                            string.Empty
                         ).ConfigureAwait(false);
                     Assert.Fail("We expect an exception to be thrown here");
                 }

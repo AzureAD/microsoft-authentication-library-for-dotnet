@@ -37,6 +37,18 @@ namespace Microsoft.Identity.Client
                    .WithScopes(scopes).WithUsername(username).WithPassword(password);
         }
 
+        /// <summary>
+        /// Enables MSAL to read the federation metada for a wstrust exchange from a file instead of acquiring it from an endpoint
+        /// See aka.ms/MsalFederationMetadata
+        /// </summary>
+        /// <param name="fileName">Path to federation metada xml file.</param>
+        /// <returns></returns>
+        public AcquireTokenByUsernamePasswordParameterBuilder WithFederationMetadata(string fileName)
+        {
+            CommonParameters.FederationMetadataFilePath = fileName;
+            return this;
+        }
+
         private AcquireTokenByUsernamePasswordParameterBuilder WithUsername(string username)
         {
             Parameters.Username = username;

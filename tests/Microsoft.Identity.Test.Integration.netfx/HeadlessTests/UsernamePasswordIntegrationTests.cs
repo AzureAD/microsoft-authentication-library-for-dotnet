@@ -84,6 +84,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        public async Task ROPC_ADFSv4Federated_WithMetada_Async()
+        {
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse, @"federationMetadata.xml").ConfigureAwait(false);
+        }
+
+        [TestMethod]
         public async Task ROPC_ADFSv3Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
@@ -246,7 +253,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.Fail("Bad exception or no exception thrown");
         }
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse)
+        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
         {
             var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
@@ -259,6 +266,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
                 .WithCorrelationId(CorrelationId)
+                .WithFederationMetadata(federationMetadata)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
