@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Region
             var logger = requestContext.Logger;
             if (string.IsNullOrEmpty(azureRegionConfig))
             {
-                logger.Verbose($"[Region discovery] WithRegion not configured.");
+                logger.Verbose($"[Region discovery] WithAzureRegion not configured. ");
                 return null;
             }
 

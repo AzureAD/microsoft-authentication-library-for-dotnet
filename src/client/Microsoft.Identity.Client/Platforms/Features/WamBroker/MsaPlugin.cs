@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             if (ApiInformation.IsPropertyPresent("Windows.Security.Authentication.Web.Core.WebTokenRequest", "CorrelationId"))
             {
-                request.CorrelationId = authenticationRequestParameters.CorrelationId.ToString();
+                LegacyOsWamProxy.SetCorrelationId(request, authenticationRequestParameters.CorrelationId.ToString());
             }
             else
             {

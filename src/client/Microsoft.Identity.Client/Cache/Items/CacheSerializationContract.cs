@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal static CacheSerializationContract FromJsonString(string json)
         {
             JObject root = JObject.Parse(json);
-            var unkownNodes = ExtractUnkownNodes(root);
+            var unkownNodes = ExtractUnknownNodes(root);
 
             var contract = new CacheSerializationContract(unkownNodes);
 
@@ -119,7 +119,8 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             return contract;
         }
-        private static IDictionary<string, JToken> ExtractUnkownNodes(JObject root)
+
+        private static IDictionary<string, JToken> ExtractUnknownNodes(JObject root)
         {
             return (root as IDictionary<string, JToken>)
                 .Where(kvp => !s_knownPropertyNames.Any(p => string.Equals(kvp.Key, p, StringComparison.OrdinalIgnoreCase)))

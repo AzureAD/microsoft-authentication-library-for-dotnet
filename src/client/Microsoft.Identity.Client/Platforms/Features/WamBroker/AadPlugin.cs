@@ -268,7 +268,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             request.Properties.Add("wam_compat", "2.0");
             if (ApiInformation.IsPropertyPresent("Windows.Security.Authentication.Web.Core.WebTokenRequest", "CorrelationId"))
             {
-                request.CorrelationId = authenticationRequestParameters.CorrelationId.ToString();
+                LegacyOsWamProxy.SetCorrelationId(request, authenticationRequestParameters.CorrelationId.ToString());
             }
             else
             {
@@ -386,6 +386,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         return "WAM_internal_error_ApiContractViolation";
                     }
                 }
+
+                return $"WAM_aad_provider_error_{errorCode}";
             }
 
             return "WAM_unexpected_aad_error";
