@@ -99,8 +99,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 if (!_cacheRefreshedForRead)
                 {
-                    string telemetryId = _requestParams.RequestContext.CorrelationId.AsMatsCorrelationId();
-                    var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup, telemetryId)
+                    var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup, _requestParams.RequestContext.CorrelationId.AsMatsCorrelationId())
                     {
                         TokenType = cacheEventType
                     };
