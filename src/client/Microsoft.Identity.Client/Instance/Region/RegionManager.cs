@@ -18,14 +18,14 @@ namespace Microsoft.Identity.Client.Region
     {
         private class RegionInfo
         {
-            public RegionInfo(string region, RegionSource regionSource)
+            public RegionInfo(string region, RegionAutodetectionSource regionSource)
             {
                 Region = region;
                 RegionSource = regionSource;
             }
 
             public string Region { get; }
-            public RegionSource RegionSource { get; }
+            public RegionAutodetectionSource RegionSource { get; }
         }
 
         // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (IsAutoDiscoveryRequested(azureRegionConfig))
             {
-                if (discoveredRegion.RegionSource != RegionSource.FailedAutoDiscovery)
+                if (discoveredRegion.RegionSource != RegionAutodetectionSource.FailedAutoDiscovery)
                 {
                     return discoveredRegion.Region;
                 }
@@ -100,37 +100,29 @@ namespace Microsoft.Identity.Client.Region
             }
 
             bool isAutoDiscoveryRequested = IsAutoDiscoveryRequested(azureRegionConfig);
+            apiEvent.RegionAutodetectionSource = (int)discoveredRegion.RegionSource;
 
             if (isAutoDiscoveryRequested)
             {
                 apiEvent.RegionUsed = discoveredRegion.Region;
-                if (discoveredRegion.RegionSource != RegionSource.FailedAutoDiscovery)
-                {
-                    apiEvent.RegionSource = (int)discoveredRegion.RegionSource;
-                }
-                apiEvent.FallbackToGlobal = discoveredRegion.Region == null;
-                apiEvent.IsValidUserProvidedRegion = null;
+                apiEvent.RegionOutcome = discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery ? 
+                    (int)RegionOutcome.FallbackToGlobal : 
+                    (int)RegionOutcome.AutodetectSuccess;
             }
             else
             {
                 apiEvent.RegionUsed = azureRegionConfig;
 
-                if (discoveredRegion.RegionSource == RegionSource.FailedAutoDiscovery)
+                if (discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery)
                 {
-                    apiEvent.RegionSource = (int)RegionSource.UserProvided;
-                }
-                else
-                {
-                    apiEvent.RegionSource = (int)discoveredRegion.RegionSource;
+                    apiEvent.RegionOutcome = (int)RegionOutcome.UserProvidedAutodetectionFailed;
                 }
 
-                apiEvent.UserProvidedRegion = azureRegionConfig;
-                apiEvent.FallbackToGlobal = false;
                 if (!string.IsNullOrEmpty(discoveredRegion.Region))
                 {
-                    apiEvent.IsValidUserProvidedRegion = string.Equals(
-                        discoveredRegion.Region,
-                        azureRegionConfig);
+                    apiEvent.RegionOutcome = string.Equals(discoveredRegion.Region, azureRegionConfig, StringComparison.OrdinalIgnoreCase) ? 
+                        (int)RegionOutcome.UserProvidedValid : 
+                        (int)RegionOutcome.UserProvidedInvalid;
                 }
             }
         }
@@ -138,11 +130,9 @@ namespace Microsoft.Identity.Client.Region
         private bool IsTelemetryRecorded(ApiEvent apiEvent)
         {
             return 
-                !(apiEvent.RegionUsed == null &&
-                 apiEvent.RegionSource == (int)(default(RegionSource)) &&
-                 apiEvent.UserProvidedRegion == null &&
-                 apiEvent.FallbackToGlobal == null &&
-                 apiEvent.IsValidUserProvidedRegion == null);
+                !(string.IsNullOrEmpty(apiEvent.RegionUsed) &&
+                 apiEvent.RegionAutodetectionSource == (int)(default(RegionAutodetectionSource)) &&
+                 apiEvent.RegionOutcome == (int)(default(RegionOutcome)));
         }
 
         private async Task<RegionInfo> DiscoverAndCacheAsync(string azureRegionConfig, ICoreLogger logger, CancellationToken requestCancellationToken)
@@ -150,19 +140,19 @@ namespace Microsoft.Identity.Client.Region
             if (s_failedAutoDiscovery == true)
             {
                 logger.Info($"[Region discovery] Auto-discovery failed in the past. Not trying again.");
-                return new RegionInfo(null, RegionSource.FailedAutoDiscovery);
+                return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery);
             }
 
             if (s_failedAutoDiscovery == false &&
                 !string.IsNullOrEmpty(s_autoDiscoveredRegion))
             {
                 logger.Info($"[Region discovery] Auto-discovery already ran and found {s_autoDiscoveredRegion}.");
-                return new RegionInfo(s_autoDiscoveredRegion, RegionSource.Cache);
+                return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache);
             }
 
             var result = await DiscoverAsync(logger, requestCancellationToken).ConfigureAwait(false);
 
-            s_failedAutoDiscovery = result.RegionSource == RegionSource.FailedAutoDiscovery;
+            s_failedAutoDiscovery = result.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery;
             s_autoDiscoveredRegion = result.Region;
 
             return result;
@@ -175,7 +165,7 @@ namespace Microsoft.Identity.Client.Region
             if (!string.IsNullOrEmpty(region))
             {
                 logger.Info($"[Region discovery] Region found in environment variable: {region}.");
-                return new RegionInfo(region, RegionSource.EnvVariable);
+                return new RegionInfo(region, RegionAutodetectionSource.EnvVariable);
             }
 
             try
@@ -201,7 +191,7 @@ namespace Microsoft.Identity.Client.Region
                     region = response.Body;
 
                     logger.Info($"[Region discovery] Call to local IMDS succeeded. Region: {region}.");
-                    return new RegionInfo(region, RegionSource.Imds);
+                    return new RegionInfo(region, RegionAutodetectionSource.Imds);
                 }
 
                 logger.Warning($"[Region discovery] Call to local IMDS failed with status code {response.StatusCode} or an empty response.");
@@ -219,7 +209,7 @@ namespace Microsoft.Identity.Client.Region
                 }
             }
 
-            return new RegionInfo(null, RegionSource.FailedAutoDiscovery);
+            return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery);
         }
 
         private async Task<string> GetImdsUriApiVersionAsync(ICoreLogger logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
