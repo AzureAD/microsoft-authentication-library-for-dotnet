@@ -49,62 +49,65 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthorityEndpoints endpoints,
             bool sendX5C)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            if (clientCredential != null)
+            using (logger.LogMethodDuration())
             {
-                if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.ClientSecret)
+                Dictionary<string, string> parameters = new Dictionary<string, string>();
+                if (clientCredential != null)
                 {
-                    parameters[OAuth2Parameter.ClientSecret] = clientCredential.Secret;
-                }
-                else
-                {
-                    if ((clientCredential.CachedAssertion == null || clientCredential.ValidTo != 0) 
-                        && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertion
-                        && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertionDelegate)
+                    if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.ClientSecret)
                     {
-                        if (!ValidateClientAssertion(clientCredential, endpoints.SelfSignedJwtAudience, sendX5C))
-                        {
-                            logger.Info(LogMessages.ClientAssertionDoesNotExistOrNearExpiry);
-                           
-                            JsonWebToken jwtToken;
-                            
-                            if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.ClientCertificateWithClaims)
-                            {
-                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints.SelfSignedJwtAudience, clientCredential.ClaimsToSign, clientCredential.AppendDefaultClaims);
-                            }
-                            else
-                            {
-                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints.SelfSignedJwtAudience);
-                            }
-
-                            clientCredential.CachedAssertion = jwtToken.Sign(clientCredential, sendX5C);
-                            clientCredential.ValidTo = jwtToken.ValidTo;
-                            clientCredential.ContainsX5C = sendX5C;
-                            clientCredential.Audience = endpoints.SelfSignedJwtAudience;
-                        }
-                        else
-                        {
-                            logger.Info(LogMessages.ReusingTheUnexpiredClientAssertion);
-                        }
-                    }
-
-                    parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
-                    
-                    if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.SignedClientAssertion)
-                    {
-                        parameters[OAuth2Parameter.ClientAssertion] = clientCredential.SignedAssertion;
-                    }
-                    else if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.SignedClientAssertionDelegate)
-                    {
-                        parameters[OAuth2Parameter.ClientAssertion] = clientCredential.SignedAssertionDelegate();
+                        parameters[OAuth2Parameter.ClientSecret] = clientCredential.Secret;
                     }
                     else
                     {
-                        parameters[OAuth2Parameter.ClientAssertion] = clientCredential.CachedAssertion;
+                        if ((clientCredential.CachedAssertion == null || clientCredential.ValidTo != 0)
+                            && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertion
+                            && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertionDelegate)
+                        {
+                            if (!ValidateClientAssertion(clientCredential, endpoints.SelfSignedJwtAudience, sendX5C))
+                            {
+                                logger.Info(LogMessages.ClientAssertionDoesNotExistOrNearExpiry);
+
+                                JsonWebToken jwtToken;
+
+                                if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.ClientCertificateWithClaims)
+                                {
+                                    jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints.SelfSignedJwtAudience, clientCredential.ClaimsToSign, clientCredential.AppendDefaultClaims);
+                                }
+                                else
+                                {
+                                    jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints.SelfSignedJwtAudience);
+                                }
+
+                                clientCredential.CachedAssertion = jwtToken.Sign(clientCredential, sendX5C);
+                                clientCredential.ValidTo = jwtToken.ValidTo;
+                                clientCredential.ContainsX5C = sendX5C;
+                                clientCredential.Audience = endpoints.SelfSignedJwtAudience;
+                            }
+                            else
+                            {
+                                logger.Info(LogMessages.ReusingTheUnexpiredClientAssertion);
+                            }
+                        }
+
+                        parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
+
+                        if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.SignedClientAssertion)
+                        {
+                            parameters[OAuth2Parameter.ClientAssertion] = clientCredential.SignedAssertion;
+                        }
+                        else if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.SignedClientAssertionDelegate)
+                        {
+                            parameters[OAuth2Parameter.ClientAssertion] = clientCredential.SignedAssertionDelegate();
+                        }
+                        else
+                        {
+                            parameters[OAuth2Parameter.ClientAssertion] = clientCredential.CachedAssertion;
+                        }
                     }
                 }
+                return parameters;
             }
-            return parameters;
         }
     }
 }

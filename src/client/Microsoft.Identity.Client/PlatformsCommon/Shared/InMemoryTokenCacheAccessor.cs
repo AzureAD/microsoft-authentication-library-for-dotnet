@@ -50,31 +50,31 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string key = item.GetKey().ToString();
 
             // if a conflict occurs, pick the latest value
-            _accessTokenCacheDictionary.AddOrUpdate(key, item, (k, oldValue) => item);
+            _accessTokenCacheDictionary[key] = item;
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
             string key = item.GetKey().ToString();
-            _refreshTokenCacheDictionary.AddOrUpdate(key, item, (k, oldValue) => item);
+            _refreshTokenCacheDictionary[key] = item;
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
             string key = item.GetKey().ToString();
-            _idTokenCacheDictionary.AddOrUpdate(key, item, (k, oldValue) => item);
+            _idTokenCacheDictionary[key] = item;
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
             string key = item.GetKey().ToString();
-            _accountCacheDictionary.AddOrUpdate(key, item, (k, oldValue) => item);
+            _accountCacheDictionary[key] = item;
         }
 
         public void SaveAppMetadata(MsalAppMetadataCacheItem item)
         {
             string key = item.GetKey().ToString();
-            _appMetadataDictionary.AddOrUpdate(key, item, (k, oldValue) => item);
+            _appMetadataDictionary[key] = item;
         }
         #endregion
 

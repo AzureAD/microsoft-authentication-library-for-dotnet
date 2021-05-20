@@ -83,6 +83,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             if (_lastCleanupTime + s_cleanupCacheInterval < DateTimeOffset.UtcNow &&
                 !_cleanupInProgress)
             {
+                logger.Verbose($"[Throttling] Acquiring lock to cleanup throttling state");
+
                 lock (_padlock)
                 {
                     if (!_cleanupInProgress)

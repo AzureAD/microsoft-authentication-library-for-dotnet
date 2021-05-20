@@ -146,22 +146,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     return Enumerable.Empty<WebAccount>().ToList();
                 }
 
-                FindAllAccountsResult findResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider, clientID);
-
-                // This is expected to happen with the MSA provider, which does not allow account listing
-                if (findResult.Status != FindAllWebAccountsStatus.Success)
-                {
-                    var error = findResult.ProviderError;
-                    _logger.Info($"[WAM Proxy] WebAuthenticationCoreManager.FindAllAccountsAsync failed " +
-                        $" with error code {error.ErrorCode} error message {error.ErrorMessage} and status {findResult.Status}");
-
-                    return Enumerable.Empty<WebAccount>().ToList();
-                }
-
-                _logger.Info($"[WAM Proxy] FindAllWebAccountsAsync returning {findResult.Accounts.Count()} WAM accounts");
-                return findResult.Accounts;
+                return await LegacyOsWamProxy.FindAllAccountsAsync(provider, clientID, _logger).ConfigureAwait(false);
             }
         }
+
 
         public bool TryGetAccountProperty(WebAccount webAccount, string propertyName, out string propertyValue)
         {

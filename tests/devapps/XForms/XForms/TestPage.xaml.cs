@@ -135,6 +135,13 @@ namespace XForms
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
+                case 12: // AT with Edge
+                    AcquireTokenInteractiveWithEdgeAsync(Prompt.ForceLogin).ConfigureAwait(false);
+                    break;
+                case 13: // AT with Chrome Edge
+                    AcquireTokenInteractiveWithChromeEdgeAsync(Prompt.NoPrompt).ConfigureAwait(false);
+                    break;
+
             }
         }
 
@@ -261,6 +268,30 @@ namespace XForms
                 }
 
                 acquireResponseLabel.Text = "Acquire Token Silent Acquisition Result....\n" + resText;
+            }
+            catch (Exception exception)
+            {
+                CreateExceptionMessage(exception);
+            }
+        }
+
+        private async Task AcquireTokenInteractiveWithEdgeAsync(Prompt prompt)
+        {
+            try
+            {
+                await SystemWebViewOptions.OpenWithEdgeBrowserAsync(new Uri("https://localhost")).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                CreateExceptionMessage(exception);
+            }
+        }
+
+        private async Task AcquireTokenInteractiveWithChromeEdgeAsync(Prompt prompt)
+        {
+            try
+            {
+                await SystemWebViewOptions.OpenWithChromeEdgeBrowserAsync(new Uri("https://localhost")).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
