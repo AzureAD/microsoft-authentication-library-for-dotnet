@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (string.IsNullOrEmpty(response.TokenType))
                 {
-                    throw new MsalClientException(MsalError.TokenTypeMissing, MsalErrorMessage.TokenTypeMissing);
+                    throw new MsalClientException(MsalError.AccessTokenTypeMissing, MsalErrorMessage.AccessTokenTypeMissing);
                 }
 
                 if (!string.Equals(

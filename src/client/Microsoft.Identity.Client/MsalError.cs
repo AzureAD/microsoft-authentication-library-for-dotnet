@@ -759,9 +759,9 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>The response from the token endpoint does not contain the token_type parameter.
-        /// <para>Mitigation</para>This happens if the identity provider (AAD, B2C, ADFS, etc.) did not include the token type in the token response. Verify the configuration of the identity provider.
+        /// <para>Mitigation</para>This happens if the identity provider (AAD, B2C, ADFS, etc.) did not include the access token type in the token response. Verify the configuration of the identity provider.
         /// </summary>
-        public const string TokenTypeMissing = "token_type_missing";
+        public const string AccessTokenTypeMissing = "token_type_missing";
 
         /// <summary>
         /// <para>What happens?</para>You are trying to use a feature which was marked as experimental
