@@ -6,6 +6,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.ComponentModel;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 #if iOS
 using UIKit;
@@ -157,7 +158,7 @@ namespace Microsoft.Identity.Client
 #endif
 
 #if NET_CORE
-            if (Config.BrokerCreatorFunc == null && Platforms.Features.DesktopOs.DesktopOsHelper.IsWindows())
+            if (Config.BrokerCreatorFunc == null && DesktopOsHelper.IsWindows())
             {
                 throw new PlatformNotSupportedException(
                     "If you have a Windows application which targets net5 or net5-windows, please change the target to net5-windows10.0.17763.0, which provides support from Win7 to Win10. For details see https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md" +

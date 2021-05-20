@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Client.Kerberos.Win32
+namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 {
     /// <summary>
     /// Bit flags that indicate requests for the context for InitializeSecurityContext API call.

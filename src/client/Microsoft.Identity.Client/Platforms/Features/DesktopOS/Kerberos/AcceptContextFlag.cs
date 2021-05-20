@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Client.Kerberos.Win32
+namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 {
     /// <summary>
     /// Flags that specify the attributes required by the AcceptSecurityContext (CredSSP) function

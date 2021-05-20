@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace Microsoft.Identity.Client.Kerberos.Win32
+namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 {
     internal enum SecurityContextAttribute
     {

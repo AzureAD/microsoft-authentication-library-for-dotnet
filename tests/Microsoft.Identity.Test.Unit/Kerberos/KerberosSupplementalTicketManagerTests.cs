@@ -10,7 +10,9 @@ using Windows.Data.Json;
 namespace Microsoft.Identity.Test.Unit.Kerberos
 {
     /// <summary>
-    /// Unit test for <see cref="KerberosSupplementalTicketManager"/> class.
+    /// For an overview of Kerberos and testing please see: 
+    /// https://identitydivision.visualstudio.com/IdentityWiki/_wiki/wikis/IdentityWiki.wiki/20501/-AADK-AAD-Kerberos
+    /// https://identitydivision.visualstudio.com/IdentityWiki/_wiki/wikis/IdentityWiki.wiki/20601/AAD-Kerberos-for-MSAL 
     /// </summary>
     [TestClass]
     public class KerberosSupplementalTicketManagerTests
