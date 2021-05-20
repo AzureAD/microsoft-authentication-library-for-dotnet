@@ -362,7 +362,7 @@ namespace Microsoft.Identity.Client
                 requestTokenType, responseTokenType);
         }
 
-        public const string TokenTypeMissing = "The response from the token endpoint does not contain token_type parameter. This happens if the Identity Provider (AAD, B2C, ADFS, etc.) did not include the token type in the response. In case of ADFS, verify the configuration or consider upgrading to the latest version. ";
+        public const string TokenTypeMissing = "The response from the token endpoint does not contain the token_type parameter. This happens if the Identity Provider (AAD, B2C, ADFS, etc.) did not include the token type in the token response. Verify the configuration of the IdP. ";
 
         public static string InvalidJsonClaimsFormat(string claims)
         {

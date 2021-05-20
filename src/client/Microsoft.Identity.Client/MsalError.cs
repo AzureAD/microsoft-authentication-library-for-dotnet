@@ -758,8 +758,8 @@ namespace Microsoft.Identity.Client
         public const string TokenTypeMismatch = "token_type_mismatch";
 
         /// <summary>
-        /// <para>What happens?</para>The response from the token endpoint does not contain token_type parameter.
-        /// <para>Mitigation</para>This happens if the Identity Provider (AAD, B2C, ADFS, etc.) did not include the token type in the response. In case of ADFS, verify the configuration or consider upgrading to the latest version.
+        /// <para>What happens?</para>The response from the token endpoint does not contain the token_type parameter.
+        /// <para>Mitigation</para>This happens if the Identity Provider (AAD, B2C, ADFS, etc.) did not include the token type in the token response. Verify the configuration of the IdP.
         /// </summary>
         public const string TokenTypeMissing = "token_type_missing";
 
