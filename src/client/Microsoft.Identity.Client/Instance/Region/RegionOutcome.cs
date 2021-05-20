@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Region
         /// <summary>
         /// Region provided by the user, auto detection cannot be done
         /// </summary>
-        UserProvidedNoValidation = 2,
+        UserProvidedAutodetectionFailed = 2,
 
         /// <summary>
         /// Region provided by the user, does not match auto detected region

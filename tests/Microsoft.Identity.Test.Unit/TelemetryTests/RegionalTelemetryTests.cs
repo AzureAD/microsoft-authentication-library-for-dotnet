@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
                 ((int)RegionAutodetectionSource.FailedAutoDiscovery).ToString(),
-                ((int)RegionOutcome.UserProvidedNoValidation).ToString(),
+                ((int)RegionOutcome.UserProvidedAutodetectionFailed).ToString(),
                 isCacheSerialized: false,
                 region: TestConstants.Region);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);

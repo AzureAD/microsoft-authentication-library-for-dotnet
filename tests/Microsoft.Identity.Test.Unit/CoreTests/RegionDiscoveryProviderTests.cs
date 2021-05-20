@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual((int)RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.UserProvidedNoValidation, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual((int)RegionOutcome.UserProvidedAutodetectionFailed, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]

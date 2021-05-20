@@ -188,7 +188,8 @@ namespace Microsoft.Identity.Client
         /// use <see cref="ConfidentialClientApplication.AttemptRegionDiscovery"/> and MSAL.NET will attempt to auto-detect the region.                
         /// </param>
         /// <remarks>
-        /// Region names as per https://azure.microsoft.com/en-ca/global-infrastructure/geographies/. 
+        /// Region names as per https://azure.microsoft.com/en-ca/global-infrastructure/geographies/.
+        /// See https://aka.ms/region-map for more details on region names.
         /// The region value should be short region name for the region where the service is deployed. 
         /// For example "centralus" is short name for region Central US.
         /// Not all auth flows can use the regional token service. 

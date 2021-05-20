@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Region
 
                 if (discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery)
                 {
-                    apiEvent.RegionOutcome = (int)RegionOutcome.UserProvidedNoValidation;
+                    apiEvent.RegionOutcome = (int)RegionOutcome.UserProvidedAutodetectionFailed;
                 }
 
                 if (!string.IsNullOrEmpty(discoveredRegion.Region))
