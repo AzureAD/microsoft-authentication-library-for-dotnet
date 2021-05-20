@@ -33,7 +33,16 @@ namespace Microsoft.Identity.Client.WsTrust
 
             if (!string.IsNullOrEmpty(federationMetadataFilename))
             {
-                var federationMetadata = File.ReadAllText(federationMetadataFilename);
+                string federationMetadata;
+                try
+                {
+                    federationMetadata = File.ReadAllText(federationMetadataFilename);
+                }
+                catch (Exception exception)
+                {
+                    throw new MsalClientException(MsalError.FailedToFindProvidedFederationMetata, exception.Message, exception);
+                }
+
                 mexDoc = new MexDocument(federationMetadata);
                 requestContext.Logger.InfoPii(
                     $"MEX document fetched and parsed from '{federationMetadataFilename}'",
