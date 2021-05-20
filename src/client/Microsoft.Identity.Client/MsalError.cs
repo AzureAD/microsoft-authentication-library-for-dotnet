@@ -759,7 +759,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>The response from the token endpoint does not contain the token_type parameter.
-        /// <para>Mitigation</para>This happens if the Identity Provider (AAD, B2C, ADFS, etc.) did not include the token type in the token response. Verify the configuration of the IdP.
+        /// <para>Mitigation</para>This happens if the identity provider (AAD, B2C, ADFS, etc.) did not include the token type in the token response. Verify the configuration of the identity provider.
         /// </summary>
         public const string TokenTypeMissing = "token_type_missing";
 
