@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D}|centralus,1,0,,,0,1");
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},centralus,3,4|0,1");
         }
 
         [TestMethod]
@@ -88,13 +88,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
               "https://invalid.login.microsoft.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token?allowestsrnonmsi=true",
               factory.RequestsAndResponses.Single().Item1.RequestUri.ToString());
 
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D}|invalid,1,0,invalid,0,0,1");
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},invalid,3,3|0,1");
 
             _confidentialClientApplication = BuildCCA(factory, TestConstants.Region);
             result = await GetAuthenticationResultAsync(withForceRefresh: true).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory, 1);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.ForceRefresh:D}|centralus,3,0,centralus,1,0,1", 1);
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.ForceRefresh:D},centralus,2,1|0,1", 1);
            
         }
 

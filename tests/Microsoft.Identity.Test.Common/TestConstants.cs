@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
         public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com";
+        public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
 
         public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
@@ -65,6 +66,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";
         public const string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/common/";
         public const string AuthorityRegional = "https://" + ProductionPrefRegionalEnvironment + "/" + TenantId + "/";
+        public const string AuthorityRegionalInvalidRegion = "https://" + ProductionPrefInvalidRegionEnvironment + "/" + TenantId + "/";
         public const string AuthorityTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantId + "/";
         public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";
 
@@ -132,6 +134,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string RegionName = "REGION_NAME";
         public const string Region = "centralus";
+        public const string InvalidRegion = "invalidregion";
         public const int TimeoutInMs = 2000;
         public const string ImdsUrl = "http://169.254.169.254/metadata/instance/compute/location";
 
