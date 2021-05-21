@@ -12,7 +12,7 @@ variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
   #intended for running all ui automation tests as one to reduce time
-  FastRun: true
+  ConsolidateAppCenterTests: true
 
 #BUILD PHASE 
 

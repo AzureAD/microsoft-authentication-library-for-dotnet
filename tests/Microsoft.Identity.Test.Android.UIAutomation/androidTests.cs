@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// Test runner to run all tests, as test initialization is expensive.
         /// </summary>
         [Test]
-        [Category("FastRun")]
+        [Category("ConsolidateAppCenterTests")]
         public void RunAllTests()
         {
             var tests = new List<Action>()
