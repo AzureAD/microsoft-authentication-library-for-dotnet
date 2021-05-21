@@ -362,6 +362,8 @@ namespace Microsoft.Identity.Client
                 requestTokenType, responseTokenType);
         }
 
+        public const string AccessTokenTypeMissing = "The response from the token endpoint does not contain the token_type parameter. This happens if the identity provider (AAD, B2C, ADFS, etc.) did not include the access token type in the token response. Verify the configuration of the identity provider. ";
+
         public static string InvalidJsonClaimsFormat(string claims)
         {
             return string.Format(
