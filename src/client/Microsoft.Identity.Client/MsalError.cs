@@ -951,6 +951,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string WebView2NotInstalled = "webview2_runtime_not_installed";
 
+        /// <summary>
+        /// <para>What happens?</para>The embedded WebView2 browser cannot be started because a runtime component cannot be loaded.
+        /// <para>Mitigation</para> For troubleshooting details, see https://aka.ms/msal-net-webview2 .
+        /// </summary>
+        public const string WebView2LoaderNotFound = "webview2loader_not_found";
 
         /// <summary>
         /// <para>What happens?</para>You configured both Regional Authority and Authority Validation. Authority validation is not currently supported for regional authorities.
