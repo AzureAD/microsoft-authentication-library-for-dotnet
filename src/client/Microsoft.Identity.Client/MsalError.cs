@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// This occurs when you provide federation metadata via a file using WithFederationMetada and the file cannot be found.
         /// </summary>
-        public const string FailedToFindProvidedFederationMetata = "failed_to_find_provided_federation_metada";
+        public const string FailedToFindProvidedFederationMetadata = "failed_to_find_provided_federation_metadata";
 
         /// <summary>
         /// <para>What happens</para>
