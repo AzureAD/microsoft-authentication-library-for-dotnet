@@ -305,7 +305,7 @@ namespace Microsoft.Identity.Client
         public const string ParsingWsTrustResponseFailed = "parsing_wstrust_response_failed";
 
         /// <summary>
-        /// This occurs when you provide federation metadata via a file using WithFederationMetada and the file cannot be found.
+        /// This occurs when you provide federation metadata via a file using WithFederationMetadata and the file cannot be found.
         /// </summary>
         public const string FailedToFindProvidedFederationMetadata = "failed_to_find_provided_federation_metadata";
 
