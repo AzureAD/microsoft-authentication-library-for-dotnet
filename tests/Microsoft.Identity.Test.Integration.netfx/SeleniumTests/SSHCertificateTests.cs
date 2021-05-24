@@ -21,6 +21,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
     public partial class InteractiveFlowTests
     {
+        //This client id is for Azure CLI which is one of the only 2 clients that have PreAuth to use ssh cert feature
+        string _SSH_ClientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
+        //SSH User impersonation scope required for this test
         private string[] _SSH_scopes = new[] { "https://pas.windows.net/CheckMyAccess/Linux/user_impersonation" };
 
         [TestMethod]
@@ -32,11 +35,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private async Task CreateSSHCertTestAsync(LabResponse labResponse)
         {
-            //This client id is for Azure CLI which is one of the only 2 clients that have PreAuth to use ssh cert feature
-            string SSH_ClientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
-
             IPublicClientApplication pca = PublicClientApplicationBuilder
-            .Create(SSH_ClientId)
+            .Create(_SSH_ClientId)
             .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
             .WithTestLogging()
             .Build();
