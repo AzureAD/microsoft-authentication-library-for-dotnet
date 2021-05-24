@@ -1,13 +1,25 @@
 steps:
-
 # Bootstrap the build
 - template: template-bootstrap-build.yaml
+
+# Unit tests require .NET 3.x
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK 3.x'
+  inputs:
+    version: 3.x
+    
+# Use the latest .NET SDK
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 5.x'
+  inputs:
+    version: 5.x
 
 # Nuget Restore and Build 
 - template: template-restore-build-libsandsamples.yaml
   parameters:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
+    MsalClientSemVer: $(MsalClientSemVer)
     Solution: 'LibsAndSamples.sln'
 
 - task: DownloadSecureFile@1
@@ -23,52 +35,26 @@ steps:
     TargetFolder: '$(build.artifactstagingdirectory)'
     flattenFolders: true
 
-- task: MSBuild@1
-  displayName: 'Build and Sign MSAL Android apk'
+- task: CopyFiles@2
+  displayName: 'Stage MSAL src'
   inputs:
-    solution: tests/devapps/XForms/XForms.Android/XForms.Android.csproj
-    configuration: Release
-    msbuildArguments: '/t:SignAndroidPackage'
-    clean: true
-    restoreNugetPackages: true
-
-- task: MSBuild@1
-  displayName: 'Build and Sign MSAL Android broker apk'
-  enabled: false
-  inputs:
-    solution: tests/devapps/XForms/XamarinDev/XamarinDev.csproj
-    configuration: Release
-    msbuildArguments: '/t:SignAndroidPackage'
-    clean: true
-    restoreNugetPackages: true
+    SourceFolder: src\client
+    Contents: '**\*'
+    TargetFolder: '$(build.artifactstagingdirectory)/msalSrc'
 
 - task: CopyFiles@2
-  displayName: 'Stage App Center Android Automation Tests'
+  displayName: 'Stage MSAL tests'
   inputs:
-    SourceFolder: tests/Microsoft.Identity.Test.Android.UIAutomation
-    Contents: '**\bin\**'
-    TargetFolder: '$(build.artifactstagingdirectory)/AppCenter/MSAL/Android'
+    SourceFolder: tests
+    Contents: 'Microsoft.Identity**\**'
+    TargetFolder: '$(build.artifactstagingdirectory)/msalTests'
 
 - task: CopyFiles@2
-  displayName: 'Stage App Center iOS Automation Tests'
+  displayName: 'Stage MSAL CacheCompatTests'
   inputs:
-    SourceFolder: tests/Microsoft.Identity.Test.iOS.UIAutomation
-    Contents: '**\bin\**'
-    TargetFolder: '$(build.artifactstagingdirectory)/AppCenter/MSAL/iOS'
-
-- task: CopyFiles@2
-  displayName: 'Stage Xforms MSAL apk'
-  inputs:
-    SourceFolder: tests/devapps/XForms/XForms.Android
-    Contents: '**\*Signed.apk'
-    TargetFolder: '$(build.artifactstagingdirectory)'
-
-- task: CopyFiles@2
-  displayName: 'Stage XformsDev MSAL broker apk'
-  inputs:
-    SourceFolder: tests/devapps/XamarinDev/XamarinDev
-    Contents: '**\*Signed.apk'
-    TargetFolder: '$(build.artifactstagingdirectory)/brokerTestApp'
+    SourceFolder: tests
+    Contents: 'CacheCompat\**'
+    TargetFolder: '$(build.artifactstagingdirectory)/msalCacheTests' 
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: drop'

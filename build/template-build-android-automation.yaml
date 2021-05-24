@@ -1,0 +1,67 @@
+steps:
+
+# Bootstrap the build
+- template: template-bootstrap-build.yaml
+
+#Prep Xamarin UI test file
+- task: DownloadSecureFile@1
+  displayName: 'Download Xamarin Ui Test Tools'
+  inputs:
+    secureFile: '8967c7eb-9f99-4122-ac28-84ae962a71bd'
+
+- task: CopyFiles@2
+  displayName: 'Stage Xamarin Ui Test Tools'
+  inputs:
+    SourceFolder: '$(Agent.TempDirectory)'
+    Contents: 'test-cloud.exe'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+    flattenFolders: true
+
+#Build and restore test packages
+- task: VSBuild@1
+  displayName: 'NuGet restore ${{ parameters.Solution }}'
+  inputs:
+    solution: 'LibsAndSamples.sln'
+    msbuildArgs: '/t:restore'
+    platform: 'any cpu'
+    configuration: 'debug'
+
+- task: MSBuild@1
+  displayName: 'Build and Sign MSAL Android apk'
+  inputs:
+    solution: tests/devapps/XForms/XForms.Android/XForms.Android.csproj
+    configuration: Release
+    msbuildArguments: '/t:SignAndroidPackage'
+    clean: true
+    restoreNugetPackages: true
+
+- task: MSBuild@1
+  displayName: 'Build and Sign MSAL Android broker apk'
+  enabled: false
+  inputs:
+    solution: tests/devapps/XForms/XamarinDev/XamarinDev.csproj
+    configuration: Release
+    msbuildArguments: '/t:SignAndroidPackage'
+    clean: true
+    restoreNugetPackages: true
+
+#Stage files
+- task: CopyFiles@2
+  displayName: 'Stage Xforms MSAL apk'
+  inputs:
+    SourceFolder: tests/devapps/XForms/XForms.Android
+    Contents: '**\*Signed.apk'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+
+- task: CopyFiles@2
+  displayName: 'Stage XformsDev MSAL broker apk'
+  inputs:
+    SourceFolder: tests/devapps/XamarinDev/XamarinDev
+    Contents: '**\*Signed.apk'
+    TargetFolder: '$(build.artifactstagingdirectory)/brokerTestApp'
+
+#Public drop
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Xamarin.iOS'
+  inputs:
+    ArtifactName: Xamarin.Android
