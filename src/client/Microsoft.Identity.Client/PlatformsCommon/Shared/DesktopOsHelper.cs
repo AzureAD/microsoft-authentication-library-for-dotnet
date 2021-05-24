@@ -9,7 +9,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
+#if SUPPORTS_WIN32 && !WINDOWS_APP
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
+#endif
+
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal static class DesktopOsHelper
     {
@@ -22,31 +26,63 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
         public static bool IsWindows()
         {
-
-#if DESKTOP
-            return Environment.OSVersion.Platform == PlatformID.Win32NT;
-#elif ANDROID || iOS
-            return false;
+#if WINDOWS_APP
+        return true;
 #else
+
+
+    #if DESKTOP
+            return Environment.OSVersion.Platform == PlatformID.Win32NT;
+    #elif SUPPORTS_WIN32
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    #else
+            return false;
+    #endif
+
 #endif
         }
 
-        private static bool IsWin10OrServerEquivalentInternal()
+        public static bool IsWin32()
         {
-            if (IsWindows())
-            {
-                string winVersion = GetWindowsVersionString();
-
-                if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase) ||
-                    winVersion.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase) ||
-                    winVersion.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-
+#if WINDOWS_APP
             return false;
+#else
+
+            return IsWindows();
+#endif
+        }
+
+        public static bool IsXamarinOrUwp()
+        {
+#if IS_XAMARIN_OR_UWP
+            return true;
+#else
+            return false;
+#endif
+        }
+
+        public static bool IsLinux()
+        {
+#if IS_XAMARIN_OR_UWP
+            return false;
+#elif DESKTOP
+            return Environment.OSVersion.Platform == PlatformID.Unix;
+#else
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+#endif
+        }
+
+        public static bool IsMac()
+        {
+#if MAC
+            return true;
+#elif DESKTOP
+            return Environment.OSVersion.Platform == PlatformID.MacOSX;
+#elif !IS_XAMARIN_OR_UWP
+            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+#else
+            return false;
+#endif
         }
 
         public static bool IsWin10()
@@ -69,6 +105,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             return false;
         }
 
+        private static bool IsWin10OrServerEquivalentInternal()
+        {
+            if (IsWindows())
+            {
+                string winVersion = GetWindowsVersionString();
+
+                if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase) ||
+                    winVersion.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase) ||
+                    winVersion.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         private static string GetWindowsVersionStringInternal()
         {
             //Environment.OSVersion as it will return incorrect information on some operating systems
@@ -86,7 +138,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
             return OSInfo;
 #else
-            return RuntimeInformation.OSDescription;           
+            return RuntimeInformation.OSDescription;
 #endif
         }
 
@@ -100,26 +152,33 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             return s_win10OrServerEquivalentLazy.Value;
         }
 
-        public static bool IsLinux()
+      
+        public static bool IsUserInteractive()
         {
-#if DESKTOP
-            return Environment.OSVersion.Platform == PlatformID.Unix;
-#else
-            return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
+#if SUPPORTS_WIN32
+            if (IsWindows())
+            {
+                return IsInteractiveSessionWindows();
+            }
+            if (IsMac())
+            {
+                return IsInteractiveSessionMac();
+            }
+            if (IsLinux())
+            {
+                return IsInteractiveSessionLinux();
+            }
+
 #endif
+            throw new PlatformNotSupportedException();
         }
 
-        public static bool IsMac()
-        {
-#if DESKTOP
-            return Environment.OSVersion.Platform == PlatformID.MacOSX;
-#else
-            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-#endif
-        }
+#if SUPPORTS_WIN32
 
         private static unsafe bool IsInteractiveSessionWindows()
         {
+
             // Environment.UserInteractive is hard-coded to return true for POSIX and Windows platforms on .NET Core 2.x and 3.x.
             // In .NET 5 the implementation on Windows has been 'fixed', but still POSIX versions always return true.
             //
@@ -147,6 +206,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
         private static bool IsInteractiveSessionMac()
         {
+
             // Get information about the current session
             int error = SecurityFramework.SessionGetInfo(SecurityFramework.CallerSecuritySession, out int id, out var sessionFlags);
 
@@ -158,29 +218,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
             // Fall-through and check if X11 is available on macOS
             return IsInteractiveSessionLinux();
+
         }
 
         private static bool IsInteractiveSessionLinux()
         {
             return !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DISPLAY"));
         }
-
-        public static bool IsUserInteractive()
-        {
-            if (IsWindows())
-            {
-                return IsInteractiveSessionWindows();
-            }
-            if (IsMac())
-            {
-                return IsInteractiveSessionMac();
-            }
-            if (IsLinux())
-            {
-                return IsInteractiveSessionLinux();
-            }
-
-            throw new PlatformNotSupportedException();
-        }
+#endif
     }
 }
