@@ -47,14 +47,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Enables MSAL to read the federation metada for a wstrust exchange from a file instead of acquiring it from an endpoint.
+        /// Enables MSAL to read the federation metada for a wstrust exchange from a file instead of acquiring it from an endpoint
         /// See aka.ms/MsalFederationMetadata
         /// </summary>
-        /// <param name="fileName">Path to federation metada xml file.</param>
+        /// <param name="federationMetadata">Federation metadata in the form of XML.</param>
         /// <returns></returns>
-        public AcquireTokenByIntegratedWindowsAuthParameterBuilder WithFederationMetadata(string fileName)
+        public AcquireTokenByIntegratedWindowsAuthParameterBuilder WithFederationMetadata(string federationMetadata)
         {
-            CommonParameters.FederationMetadataFilePath = fileName;
+            Parameters.FederationMetadata = federationMetadata;
             return this;
         }
 
