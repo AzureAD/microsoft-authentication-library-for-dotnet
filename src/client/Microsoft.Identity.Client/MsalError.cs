@@ -305,11 +305,6 @@ namespace Microsoft.Identity.Client
         public const string ParsingWsTrustResponseFailed = "parsing_wstrust_response_failed";
 
         /// <summary>
-        /// This occurs when you provide federation metadata via a file using WithFederationMetadata and the file cannot be found.
-        /// </summary>
-        public const string FailedToFindProvidedFederationMetadata = "failed_to_find_provided_federation_metadata";
-
-        /// <summary>
         /// <para>What happens</para>
         /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
         /// The user is not recognized as a managed user, or a federated user. Azure AD was not
