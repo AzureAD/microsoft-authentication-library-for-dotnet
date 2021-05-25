@@ -36,11 +36,17 @@ steps:
     flattenFolders: true
 
 - task: CopyFiles@2
-  displayName: 'Stage MSAL src'
+  displayName: 'Stage MSAL src code'
   inputs:
     SourceFolder: src\client
-    Contents: '**\bin\*
-    **\*.cs'
+    Contents: '**\*.cs'
+    TargetFolder: '$(build.artifactstagingdirectory)/msalSrc'
+
+- task: CopyFiles@2
+  displayName: 'Stage MSAL src bin'
+  inputs:
+    SourceFolder: src\client
+    Contents: '**\bin\**\**\*'
     TargetFolder: '$(build.artifactstagingdirectory)/msalSrc'
 
 - task: CopyFiles@2
