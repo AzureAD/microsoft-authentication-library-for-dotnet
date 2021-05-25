@@ -687,6 +687,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.B2CEnvironment, userToFind.Environment);
             Assert.AreEqual(TestConstants.Utid, userToFind.HomeAccountId.TenantId);
             Assert.AreEqual(TestConstants.B2CEditProfileHomeAccountObjectId, userToFind.HomeAccountId.ObjectId);
+
+            accounts = PopulateB2CTokenCacheAsync(TestConstants.B2CProfileWithDot, app).Result;
+
+            Assert.IsNotNull(accounts);
+            // one account in the cache for edit profile user flow
+
+            userToFind = accounts.First();
+            Assert.IsNull(userToFind.Username);
+            Assert.AreEqual(TestConstants.B2CProfileWithDotHomeAccountIdentifer, userToFind.HomeAccountId.Identifier);
+            Assert.AreEqual(TestConstants.B2CEnvironment, userToFind.Environment);
+            Assert.AreEqual(TestConstants.Utid, userToFind.HomeAccountId.TenantId);
+            Assert.AreEqual(TestConstants.B2CProfileWithDotHomeAccountObjectId, userToFind.HomeAccountId.ObjectId);
         }
 
         [TestMethod]
@@ -1169,6 +1181,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CEditProfileHomeAccountObjectId,
                 TestConstants.Utid, TestConstants.ClientId, TestConstants.B2CEnvironment);
             TokenCacheHelper.AddAccountToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CEditProfileHomeAccountObjectId,
+                TestConstants.Utid, TestConstants.B2CEnvironment);
+
+            TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CProfileWithDotHomeAccountObjectId,
+                TestConstants.Utid, TestConstants.ClientId, TestConstants.B2CEnvironment);
+            TokenCacheHelper.AddAccountToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CProfileWithDotHomeAccountObjectId,
                 TestConstants.Utid, TestConstants.B2CEnvironment);
 
             return app.GetAccountsAsync(userFlow);
