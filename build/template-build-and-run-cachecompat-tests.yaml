@@ -27,17 +27,17 @@ steps:
     script: 'nuget locals all -clear'
 
 - task: VSBuild@1
-  displayName: 'NuGet restore ${{ parameters.Solution }}'
+  displayName: 'NuGet restore ${{ parameters.BuildSolution }}'
   inputs:
-    solution: ${{ parameters.Solution }}
+    solution: ${{ parameters.BuildSolution }}
     msbuildArgs: '/t:restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
 - task: VSBuild@1
-  displayName: 'Build solution ${{ parameters.Solution }}'
+  displayName: 'Build solution ${{ parameters.BuildSolution }}'
   inputs:
-    solution: ${{ parameters.Solution }}
+    solution: ${{ parameters.BuildSolution }}
     msbuildArgs: '/p:RunCodeAnalysis=false'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
