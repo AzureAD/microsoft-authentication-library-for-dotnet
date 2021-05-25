@@ -46,14 +46,14 @@ steps:
   displayName: 'Stage MSAL tests'
   inputs:
     SourceFolder: tests
-    Contents: 'Microsoft.Identity**\**'
+    Contents: 'Microsoft.Identity**\bin\**\**'
     TargetFolder: '$(build.artifactstagingdirectory)/msalTests'
 
 - task: CopyFiles@2
   displayName: 'Stage MSAL CacheCompatTests'
   inputs:
     SourceFolder: tests
-    Contents: 'CacheCompat\**'
+    Contents: 'CacheCompat\**\bin\**\*'
     TargetFolder: '$(build.artifactstagingdirectory)/msalCacheTests' 
 
 - task: PublishBuildArtifacts@1
