@@ -80,6 +80,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
 
         public const string B2CSignUpSignIn = "b2c_1_susi";
+        public const string B2CProfileWithDot = "b2c.someprofile";
         public const string B2CEditProfile = "b2c_1_editprofile";
         public const string B2CEnvironment = "sometenantid.b2clogin.com";
         public static readonly string B2CAuthority = $"https://login.microsoftonline.in/tfp/tenant/{B2CSignUpSignIn}/";
@@ -91,6 +92,8 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly string B2CLoginAuthorityBlackforest = $"https://sometenantid.b2clogin.de/tfp/sometenantid/{B2CSignUpSignIn}/";
         public static readonly string B2CSuSiHomeAccountIdentifer = $"{Uid}-{B2CSignUpSignIn}.{Utid}";
         public static readonly string B2CSuSiHomeAccountObjectId = $"{Uid}-{B2CSignUpSignIn}";
+        public static readonly string B2CProfileWithDotHomeAccountIdentifer = $"{Uid}-{B2CProfileWithDot}.{Utid}";
+        public static readonly string B2CProfileWithDotHomeAccountObjectId = $"{Uid}-{B2CProfileWithDot}";
         public static readonly string B2CEditProfileHomeAccountIdentifer = $"{Uid}-{B2CEditProfile}.{Utid}";
         public static readonly string B2CEditProfileHomeAccountObjectId = $"{Uid}-{B2CEditProfile}";
 

@@ -12,7 +12,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
@@ -23,6 +22,7 @@ using NSubstitute;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 #if !NET5_WIN
 using Microsoft.Identity.Client.Desktop;
