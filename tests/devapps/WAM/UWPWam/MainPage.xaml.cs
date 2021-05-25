@@ -91,7 +91,6 @@ namespace UWP_standalone
             var pca = CreatePublicClient();
             var tokenCacheInternal = pca.UserTokenCache as ITokenCacheInternal;
 
-
             TokenCacheNotificationArgs args =
                  new TokenCacheNotificationArgs(
                  pca.UserTokenCache as ITokenCacheInternal,
@@ -99,7 +98,8 @@ namespace UWP_standalone
                  null,
                  true,
                  false,
-                 true);
+                 true,
+                 CancellationToken.None);
 
             await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
 

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Threading;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -18,6 +20,7 @@ namespace Microsoft.Identity.Client
             bool hasStateChanged,
             bool isAppCache, 
             bool hasTokens,
+            CancellationToken userCancellationToken,
             string suggestedCacheKey = null)
         {
             TokenCache = tokenCacheSerializer;
@@ -27,6 +30,7 @@ namespace Microsoft.Identity.Client
             IsApplicationCache = isAppCache;
             HasTokens = hasTokens;
             SuggestedCacheKey = suggestedCacheKey;
+            UserCancellationToken = userCancellationToken;
         }
 
         /// <summary>
@@ -84,5 +88,7 @@ namespace Microsoft.Identity.Client
         /// MSAL takes into consideration access tokens expiration when computing this flag, but not refresh token expiration, which is not known to MSAL.7
         /// </remarks>
         public bool HasTokens { get; }
+
+        public CancellationToken UserCancellationToken { get; }
     }
 }

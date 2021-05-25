@@ -273,6 +273,98 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        public async Task TestCancellationTokenAsync()
+        {
+            using (var _harness = CreateTestHarness())
+            {
+                // Arrange
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(_harness.HttpManager)
+                    .BuildConcrete();
+
+                app.ServiceBundle.ConfigureMockWebUI(
+                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+                var cacheAccessRecorder = app.UserTokenCache.RecordAccess();
+
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(10000);
+
+                await app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync(cancellationTokenSource.Token)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.HasTokens);
+                Assert.IsNotNull(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken);
+                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.CanBeCanceled);
+                Assert.IsFalse(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.IsCancellationRequested);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestCancelledCancellationTokenAsync()
+        {
+            using (var _harness = CreateTestHarness())
+            {
+                // Arrange
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(_harness.HttpManager)
+                    .BuildConcrete();
+
+                app.ServiceBundle.ConfigureMockWebUI(
+                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+                var cacheAccessRecorder = app.UserTokenCache.RecordAccess();
+
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(1000);
+
+                await app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync(cancellationTokenSource.Token)
+                    .ConfigureAwait(false);
+
+                await Task.Delay(1000).ConfigureAwait(false);
+                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.HasTokens);
+                Assert.IsNotNull(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken);
+                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.CanBeCanceled);
+                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.IsCancellationRequested);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestNoneCancellationTokenAsync()
+        {
+            using (var _harness = CreateTestHarness())
+            {
+                // Arrange
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(_harness.HttpManager)
+                    .BuildConcrete();
+
+                app.ServiceBundle.ConfigureMockWebUI(
+                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+                var cacheAccessRecorder = app.UserTokenCache.RecordAccess();
+
+                await app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.HasTokens);
+                Assert.IsNotNull(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken);
+                Assert.IsFalse(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.CanBeCanceled);
+                Assert.IsFalse(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.IsCancellationRequested);
+            }
+        }
+
+        [TestMethod]
         public async Task GetAccounts_DoesNotFireNotifications_WhenTokenCacheIsNotSerialized_Async()
         {
             // Arrange
