@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Kerberos;
 
 namespace Microsoft.Identity.Client
 {
@@ -126,5 +127,15 @@ namespace Microsoft.Identity.Client
         /// Enables legacy ADAL cache serialization and deserialization.
         /// </summary>
         public bool LegacyCacheCompatibilityEnabled { get; set; } = true;
+
+        /// <summary>
+        /// Service principal name for Kerberos Service Ticket.
+        /// </summary>
+        public string KerberosServicePrincipalName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Kerberos Service Ticket container to be used.
+        /// </summary>
+        public KerberosTicketContainer TicketContainer { get; set; } = KerberosTicketContainer.IdToken;
     }
 }

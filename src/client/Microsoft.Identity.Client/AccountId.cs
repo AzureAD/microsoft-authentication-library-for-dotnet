@@ -63,14 +63,14 @@ namespace Microsoft.Identity.Client
             {
                 return null;
             }
-            string[] elements = str.Split('.');
+            int lastIndexOfDot = str.LastIndexOf('.');
 
-            if (elements.Length == 1)
+            if (lastIndexOfDot == -1)
             {
                 return new AccountId(str); //Account id is from ADFS; no . in the string
             }
 
-            return new AccountId(str, elements[0], elements[1]);
+            return new AccountId(str, str.Substring(0, lastIndexOfDot), str.Substring(lastIndexOfDot + 1));
         }
 
         /// <summary>

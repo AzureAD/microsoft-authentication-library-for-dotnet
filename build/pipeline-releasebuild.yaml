@@ -11,65 +11,29 @@ schedules:
     include:
     - master
 
-pool:
-  vmImage: 'windows-latest'
-  demands:
-  - msbuild
-  - visualstudio
-
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
-  
-steps:
-# Required for the signing task, but does not need to be used
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 2.x'
-  inputs:
-    version: 2.x
+  #intended for running all ui automation tests as one to reduce time
+  ConsolidateAppCenterTests: true
 
-# Unit tests require .NET 3.x
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 3.x'
-  inputs:
-    version: 3.x
-    
-# Use the latest .NET SDK
-- task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 5.x'
-  inputs:
-    version: 5.x
+#BUILD PHASE 
+stages:
+- stage: MSALBuildAndTest
+  jobs: #Build and stage projects
+  - template: template-build-and-run-all-tests.yaml
+    parameters:
+      DataFileDirectory: 'Release'
 
-# Run pre-build code analysis (policheck, credscan, etc)
-- template: template-prebuild-code-analysis.yaml
+    # Pack and sign packages
+  - job: 'PackAndSign'
+    dependsOn:
+    - 'BuildAndStageProjects'
+    pool:
+      vmImage: 'windows-latest'
+      demands:
+      - msbuild
+      - visualstudio
 
-# Bootstrap the build
-- template: template-bootstrap-build.yaml
-
-# Nuget Restore and Build 
-- template: template-restore-build-libsandsamples.yaml
-  parameters:
-    BuildPlatform: '$(BuildPlatform)'
-    BuildConfiguration: '$(BuildConfiguration)'
-    MsalClientSemVer: $(MsalClientSemVer)
-    Solution: 'LibsAndSamples.sln'
-
-# Run Post-build code analysis (e.g. Roslyn)
-- template: template-postbuild-code-analysis.yaml
-
-# Run All Tests
-- template: template-run-all-tests.yaml
-  parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
-
-
-
-# Pack and sign all of the nuget packages
-- template: template-pack-and-sign-all-nugets.yaml
-
-# Publish nuget packages and symbols to VSTS package manager.
-- template: template-publish-packages-and-symbols.yaml
-
-# Publish analysis and cleanup
-- template: template-publish-analysis-and-cleanup.yaml
-
+    steps:
+    - template: template-pack-and-sign-packages.yaml

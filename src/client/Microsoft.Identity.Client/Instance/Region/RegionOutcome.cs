@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client.Region
     /// <summary>
     /// Indicates where the region information came from. 
     /// </summary>
-    internal enum RegionSource
+    internal enum RegionOutcome
     {
         /// <summary>
         /// Indicates that the API .WithAzureRegion() was not used
@@ -16,28 +16,28 @@ namespace Microsoft.Identity.Client.Region
         None = 0,
 
         /// <summary>
-        /// Auto-detected from Env Variable
+        /// Region provided by the user, matches auto detected region
         /// </summary>
-        EnvVariable = 1,
+        UserProvidedValid = 1,
 
         /// <summary>
-        /// Auto-detected from IMDS
+        /// Region provided by the user, auto detection cannot be done
         /// </summary>
-        Imds = 2,
+        UserProvidedAutodetectionFailed = 2,
 
         /// <summary>
-        /// Auto-detected from MSAL's static cache
+        /// Region provided by the user, does not match auto detected region
         /// </summary>
-        Cache = 3,
+        UserProvidedInvalid = 3,
 
         /// <summary>
-        /// Region was configured by the user
+        /// Region autodetect requested and was successful
         /// </summary>
-        UserProvided = 4,
+        AutodetectSuccess = 4,
 
         /// <summary>
-        /// Auto-detection failed, fallback to global
+        /// Region autodetect requested but failed. Fallback to global
         /// </summary>
-        FailedAutoDiscovery = 5
+        FallbackToGlobal = 5
     }
 }

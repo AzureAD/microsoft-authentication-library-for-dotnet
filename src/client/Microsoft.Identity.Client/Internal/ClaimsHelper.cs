@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Internal
             return claims;
         }
 
-        private static JObject MergeClaimsIntoCapabilityJson(string claims, JObject capabilitiesJson)
+        internal static JObject MergeClaimsIntoCapabilityJson(string claims, JObject capabilitiesJson)
         {
             if (!string.IsNullOrEmpty(claims))
             {
