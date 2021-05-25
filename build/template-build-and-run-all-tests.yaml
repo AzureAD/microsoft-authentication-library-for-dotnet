@@ -33,6 +33,17 @@ jobs: #Build and stage projects
   steps:
   - template: template-build-android-automation.yaml
 
+# BUILD AND RUN CACHE COMPAT TESTS
+- job: 'BuildAndRunCacheCompatTests'
+  pool:
+      vmImage: 'windows-latest'
+      demands:
+      - msbuild
+      - visualstudio
+
+  steps:
+  - template: template-build-and-run-cachecompat-tests.yaml
+
   #Desktop Unit + Integration Tests
 - job: 'RunDesktopTests'
   dependsOn:

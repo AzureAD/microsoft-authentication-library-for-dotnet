@@ -56,12 +56,12 @@ steps:
     Contents: 'Microsoft.Identity**\bin\**\**'
     TargetFolder: '$(build.artifactstagingdirectory)/msalTests'
 
-- task: CopyFiles@2
-  displayName: 'Stage MSAL CacheCompatTests'
-  inputs:
-    SourceFolder: tests
-    Contents: 'CacheCompat\**\bin\**\**'
-    TargetFolder: '$(build.artifactstagingdirectory)/msalCacheTests' 
+# - task: CopyFiles@2
+#   displayName: 'Stage MSAL CacheCompatTests'
+#   inputs:
+#     SourceFolder: tests
+#     Contents: 'CacheCompat\**'
+#     TargetFolder: '$(build.artifactstagingdirectory)/msalCacheTests' 
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: drop'

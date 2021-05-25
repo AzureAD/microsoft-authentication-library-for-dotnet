@@ -1,0 +1,49 @@
+steps:
+
+# Bootstrap the build
+- template: template-bootstrap-build.yaml
+
+# Unit tests require .NET 3.x
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK 3.x'
+  inputs:
+    version: 3.x
+    
+# Use the latest .NET SDK
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 5.x'
+  inputs:
+    version: 5.x
+
+#Build and restore test packages
+- task: CmdLine@2
+  displayName: 'Clear local NuGet cache'
+  inputs:
+    script: 'nuget locals all -clear'
+
+- task: VSBuild@1
+  displayName: 'NuGet restore ${{ parameters.Solution }}'
+  inputs:
+    solution: ${{ parameters.Solution }}
+    msbuildArgs: '/t:restore'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+
+- task: VSBuild@1
+  displayName: 'Build solution ${{ parameters.Solution }}'
+  inputs:
+    solution: ${{ parameters.Solution }}
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+
+- task: VSTest@2
+  displayName: 'Run cache compat tests'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
