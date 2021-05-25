@@ -34,9 +34,8 @@ namespace Microsoft.Identity.Client.WsTrust
             if (!string.IsNullOrEmpty(federationMetadata))
             {
                 mexDoc = new MexDocument(federationMetadata);
-                requestContext.Logger.InfoPii(
-                    $"MEX document fetched and parsed from provided federation metadata",
-                    "Fetched and parsed MEX");
+                requestContext.Logger.Info(
+                    $"MEX document fetched and parsed from provided federation metadata");
                 return mexDoc;
             }
 

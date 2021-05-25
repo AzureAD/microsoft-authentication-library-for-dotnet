@@ -38,11 +38,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Enables MSAL to read the federation metadata for a wstrust exchange from a file instead of acquiring it from an endpoint
-        /// See aka.ms/MsalFederationMetadata
+        /// Enables MSAL to read the federation metadata for a WS-Trust exchange from the provided <see cref="federationMetadata"/> instead of acquiring it from an endpoint.
+        /// This is only applicable for managed ADFS accounts. See aka.ms/MsalFederationMetadata.
         /// </summary>
         /// <param name="federationMetadata">Federation metadata in the form of XML.</param>
-        /// <returns></returns>
+        /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenByUsernamePasswordParameterBuilder WithFederationMetadata(string federationMetadata)
         {
             Parameters.FederationMetadata = federationMetadata;
