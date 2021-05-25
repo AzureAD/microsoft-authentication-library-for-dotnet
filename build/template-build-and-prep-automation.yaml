@@ -60,7 +60,7 @@ steps:
   displayName: 'Stage MSAL CacheCompatTests'
   inputs:
     SourceFolder: tests
-    Contents: 'CacheCompat\**\bin\*'
+    Contents: 'CacheCompat\**\bin\**\**'
     TargetFolder: '$(build.artifactstagingdirectory)/msalCacheTests' 
 
 - task: PublishBuildArtifacts@1
