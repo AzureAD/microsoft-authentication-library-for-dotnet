@@ -42,18 +42,18 @@ steps:
     Contents: '**\**.cs'
     TargetFolder: '$(build.artifactstagingdirectory)/msalSrc'
 
-- task: CopyFiles@2
-  displayName: 'Stage MSAL src bin'
-  inputs:
-    SourceFolder: src\client
-    Contents: '**\bin\**\**\*'
-    TargetFolder: '$(build.artifactstagingdirectory)/msalSrc'
+# - task: CopyFiles@2
+#   displayName: 'Stage MSAL src bin'
+#   inputs:
+#     SourceFolder: src\client
+#     Contents: '**\bin\**\**\*'
+#     TargetFolder: '$(build.artifactstagingdirectory)/msalSrc'
 
 - task: CopyFiles@2
   displayName: 'Stage MSAL tests'
   inputs:
     SourceFolder: tests
-    Contents: 'Microsoft.Identity**\bin\**\*'
+    Contents: 'Microsoft.Identity**\bin\*\*\*'
     TargetFolder: '$(build.artifactstagingdirectory)/msalTests'
 
 - task: CopyFiles@2
