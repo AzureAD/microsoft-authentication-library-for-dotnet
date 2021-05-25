@@ -21,8 +21,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
     public partial class InteractiveFlowTests
     {
+        //This client id is for Azure CLI which is one of the only 2 clients that have PreAuth to use ssh cert feature
+        string _SSH_ClientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
+        //SSH User impersonation scope required for this test
+        private string[] _SSH_scopes = new[] { "https://pas.windows.net/CheckMyAccess/Linux/user_impersonation" };
+
         [TestMethod]
-        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2004
         public async Task Interactive_SSHCert_Async()
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -32,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private async Task CreateSSHCertTestAsync(LabResponse labResponse)
         {
             IPublicClientApplication pca = PublicClientApplicationBuilder
-            .Create(labResponse.App.AppId)
+            .Create(_SSH_ClientId)
             .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
             .WithTestLogging()
             .Build();
@@ -43,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             string jwk = CreateJwk();
 
             AuthenticationResult result = await pca
-                .AcquireTokenInteractive(s_scopes)
+                .AcquireTokenInteractive(_SSH_scopes)
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin))
                 .WithSSHCertificateAuthenticationScheme(jwk, "key1")
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
@@ -56,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Trace.WriteLine("Part 2 - Acquire a token silent with the same keyID - should be served from the cache");
             result = await pca
-                .AcquireTokenSilent(s_scopes, account)
+                .AcquireTokenSilent(_SSH_scopes, account)
                 .WithSSHCertificateAuthenticationScheme(jwk, "key1")
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
@@ -67,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Trace.WriteLine("Part 3 - Acquire a token silent with a different keyID - should not sbe served from the cache");
             result = await pca
-                .AcquireTokenSilent(s_scopes, account)
+                .AcquireTokenSilent(_SSH_scopes, account)
                 .WithSSHCertificateAuthenticationScheme(jwk, "key2")
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
