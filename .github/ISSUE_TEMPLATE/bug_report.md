@@ -7,34 +7,35 @@ assignees: ''
 
 ---
 
-**Logs and Network traces**
-Without logs or traces, it is unlikely that the team can investigate your issue. Capturing logs and network traces is described at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
+**Logs and network traces**
+Without logs or traces, it is unlikely that the team can investigate your issue. Capturing logs and network traces is described in [Logging wiki](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging).
 
-**Which Version of MSAL are you using ?**
-<!-- E.g. MSAL 2.6.2, MSAL 3.0.0-preview -->
+**Which version of MSAL.NET are you using?**
+<!-- Ex: MSAL.NET 4.30.0 -->
 
 **Platform**
-<!-- Ex: net45, netcore, UWP, xamarin android, xamarin iOS -->
+<!-- Ex: .NET 4.5, .NET Core, UWP, Xamarin Android, Xamarin iOS -->
 
 **What authentication flow has the issue?**
 * Desktop / Mobile
     * [ ] Interactive
-    * [ ] Integrated Windows Auth
+    * [ ] Integrated Windows Authentication
     * [ ] Username Password
     * [ ] Device code flow (browserless)
-* Web App 
+* Web app 
     * [ ] Authorization code
-    * [ ] OBO
-* Daemon App 
+    * [ ] On-Behalf-Of
+* Daemon app 
     * [ ] Service to Service calls
 
-Other? - please describe;
+Other?
+<!-- Please describe here -->
 
 **Is this a new or existing app?**
 <!-- Ex:
-a. The app is in production, and I have upgraded to a new version of MSAL
-b. The app is in production, I haven't upgraded MSAL, but started seeing this issue
-c. This is a new app or experiment
+a. The app is in production, and I have upgraded to a new version of MSAL.
+b. The app is in production, I haven't upgraded MSAL, but started seeing this issue.
+c. This is a new app or experiment.
 -->
 
 **Repro**
@@ -47,10 +48,10 @@ var your = (code) => here;
 A clear and concise description of what you expected to happen (or code).
 
 **Actual behavior**
-A clear and concise description of what happens, e.g. exception is thrown, UI freezes  
+A clear and concise description of what happens, e.g. exception is thrown, UI freezes.  
 
-**Possible Solution**
+**Possible solution**
 <!--- Only if you have suggestions on a fix for the bug -->
 
-**Additional context/ Logs / Screenshots**
-Add any other context about the problem here, such as logs and screebshots. 
+**Additional context / logs / screenshots**
+Add any other context about the problem here, such as logs and screenshots. 
