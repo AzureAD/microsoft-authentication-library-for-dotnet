@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
@@ -47,6 +48,16 @@ namespace Microsoft.Identity.Client
 
         public Func<CoreUIParent, ApplicationConfiguration, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
         public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }
+
+        /// <summary>
+        /// Service principal name for Kerberos Service Ticket.
+        /// </summary>
+        public string KerberosServicePrincipalName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Kerberos Service Ticket container to be used.
+        /// </summary>
+        public KerberosTicketContainer TicketContainer { get; set; } = KerberosTicketContainer.IdToken;
 
         public ITelemetryConfig TelemetryConfig { get; internal set; }
 
@@ -85,11 +96,11 @@ namespace Microsoft.Identity.Client
 
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
 
-        #region Region
+#region Region
         public string AzureRegion { get; set; }
-        #endregion
+#endregion
 
-        #region Authority
+#region Authority
 
         public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }
         public Uri CustomInstanceDiscoveryMetadataUri { get; set; }
@@ -114,16 +125,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-        #endregion
+#endregion
 
-        #region Test Hooks
+#region Test Hooks
         public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
-        #endregion
+#endregion
 
     }
 }

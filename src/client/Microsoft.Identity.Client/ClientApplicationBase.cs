@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client
             var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountsByUserFlow).ConfigureAwait(false);
 
             return accounts.Where(acc =>
-                acc.HomeAccountId.ObjectId.Split('.')[0].EndsWith(
+                acc.HomeAccountId.ObjectId.EndsWith(
                     userFlow, StringComparison.OrdinalIgnoreCase));
         }
 
