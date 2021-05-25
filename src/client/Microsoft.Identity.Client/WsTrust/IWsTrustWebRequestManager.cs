@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.WsTrust
         /// <param name="federationMetadataUrl"></param>
         /// <param name="requestContext"></param>
         /// <returns></returns>
-        Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext, string federationMetadataFilename);
+        Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext, string federationMetadata);
 
         /// <summary>
         ///

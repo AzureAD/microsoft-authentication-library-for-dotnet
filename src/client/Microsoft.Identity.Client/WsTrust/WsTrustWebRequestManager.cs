@@ -27,25 +27,15 @@ namespace Microsoft.Identity.Client.WsTrust
         }
 
         /// <inheritdoc/>
-        public async Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext, string federationMetadataFilename)
+        public async Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext, string federationMetadata)
         {
             MexDocument mexDoc;
 
-            if (!string.IsNullOrEmpty(federationMetadataFilename))
+            if (!string.IsNullOrEmpty(federationMetadata))
             {
-                string federationMetadata;
-                try
-                {
-                    federationMetadata = File.ReadAllText(federationMetadataFilename);
-                }
-                catch (Exception exception)
-                {
-                    throw new MsalClientException(MsalError.FailedToFindProvidedFederationMetata, exception.Message, exception);
-                }
-
                 mexDoc = new MexDocument(federationMetadata);
                 requestContext.Logger.InfoPii(
-                    $"MEX document fetched and parsed from '{federationMetadataFilename}'",
+                    $"MEX document fetched and parsed from provided federation metadata",
                     "Fetched and parsed MEX");
                 return mexDoc;
             }

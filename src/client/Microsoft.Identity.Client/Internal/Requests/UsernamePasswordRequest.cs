@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                           UserAuthType.UsernamePassword,
                                           _usernamePasswordParameters.Username,
                                           _usernamePasswordParameters.Password,
-                                          AuthenticationRequestParameters.FederationMetadataFileName).ConfigureAwait(false);
+                                          _usernamePasswordParameters.FederationMetadata).ConfigureAwait(false);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
                 return new UserAssertion(

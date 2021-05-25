@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security;
@@ -84,10 +85,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task ROPC_ADFSv4Federated_WithMetada_Async()
+        public async Task ROPC_ADFSv4Federated_WithMetadata_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse, @"federationMetadata.xml").ConfigureAwait(false);
+            string federationMetadata = File.ReadAllText(@"federationMetadata.xml").ToString();
+            await RunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
         }
 
         [TestMethod]

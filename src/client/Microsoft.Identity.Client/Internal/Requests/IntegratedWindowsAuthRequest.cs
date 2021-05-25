@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     UserAuthType.IntegratedAuth,
                     _integratedWindowsAuthParameters.Username,
                     null,
-                    AuthenticationRequestParameters.FederationMetadataFileName).ConfigureAwait(false);
+                    _integratedWindowsAuthParameters.FederationMetadata).ConfigureAwait(false);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
                 return new UserAssertion(

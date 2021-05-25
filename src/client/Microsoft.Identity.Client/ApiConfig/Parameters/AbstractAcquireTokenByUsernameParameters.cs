@@ -6,5 +6,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     internal abstract class AbstractAcquireTokenByUsernameParameters
     {
         public string Username { get; set; }
+
+        public string FederationMetadata { get; set; }
     }
 }

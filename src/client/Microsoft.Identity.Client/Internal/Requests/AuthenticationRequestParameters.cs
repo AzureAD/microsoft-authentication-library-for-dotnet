@@ -104,8 +104,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public Guid CorrelationId => _commonParameters.CorrelationId;
 
-        public string FederationMetadataFileName => _commonParameters.FederationMetadataFilePath;
-
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>
