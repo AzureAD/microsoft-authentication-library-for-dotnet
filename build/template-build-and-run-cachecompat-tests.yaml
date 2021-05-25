@@ -1,3 +1,8 @@
+parameters:
+  BuildPlatform: 'any cpu'
+  BuildConfiguration: 'debug'
+  BuildSolution: 'LibsAndSamples.sln'
+
 steps:
 
 # Bootstrap the build
@@ -33,7 +38,7 @@ steps:
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    msbuildArgs: '/p:RunCodeAnalysis=false'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 

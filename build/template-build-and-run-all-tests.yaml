@@ -43,6 +43,10 @@ jobs: #Build and stage projects
 
   steps:
   - template: template-build-and-run-cachecompat-tests.yaml
+    parameters:
+      BuildPlatform: '$(BuildPlatform)'
+      BuildConfiguration: '$(BuildConfiguration)'
+      BuildSolution: 'LibsAndSamples.sln'
 
   #Desktop Unit + Integration Tests
 - job: 'RunDesktopTests'
