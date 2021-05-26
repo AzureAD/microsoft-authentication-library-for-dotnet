@@ -265,12 +265,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
            .ConfigureAwait(false);
 
             // because of https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2476
-            string differentAuthority = null;
-            if (string.Equals(wamAccount?.WebAccountProvider?.Authority, Constants.OrganizationsTenant) &&
-                string.Equals(authenticationRequestParameters.Authority.TenantId, Constants.OrganizationsTenant))
-            {
-                differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("common");
-            }
+            string differentAuthority = WorkaroundOrganizationsBug(authenticationRequestParameters, wamAccount);
 
             WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, differentAuthority);
 
@@ -301,6 +296,19 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     MsalError.WamInteractiveError,
                     "AcquireTokenInteractive without picker failed. See inner exception for details. ", ex);
             }
+        }
+
+        private static string WorkaroundOrganizationsBug(AuthenticationRequestParameters authenticationRequestParameters, WebAccount wamAccount)
+        {
+            string differentAuthority = null;
+            if (string.Equals(authenticationRequestParameters.Authority.TenantId, Constants.OrganizationsTenant) && // "organizations" tenant is configured
+                (string.Equals(wamAccount?.WebAccountProvider?.Authority, Constants.OrganizationsTenant) || // AND user is Work and School
+                PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))) // OR user is Current Windows User
+            {
+                differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("common");
+            }
+
+            return differentAuthority;
         }
 
         private static void AddPromptToRequest(Prompt prompt, bool isForceLoginPrompt, WebTokenRequest webTokenRequest)

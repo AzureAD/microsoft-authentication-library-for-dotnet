@@ -39,22 +39,15 @@ steps:
   displayName: 'Stage MSAL src'
   inputs:
     SourceFolder: src\client
-    Contents: '**\*'
+    Contents: '**\**.cs'
     TargetFolder: '$(build.artifactstagingdirectory)/msalSrc'
 
 - task: CopyFiles@2
   displayName: 'Stage MSAL tests'
   inputs:
     SourceFolder: tests
-    Contents: 'Microsoft.Identity**\**'
+    Contents: 'Microsoft.Identity**\bin\**\**'
     TargetFolder: '$(build.artifactstagingdirectory)/msalTests'
-
-- task: CopyFiles@2
-  displayName: 'Stage MSAL CacheCompatTests'
-  inputs:
-    SourceFolder: tests
-    Contents: 'CacheCompat\**'
-    TargetFolder: '$(build.artifactstagingdirectory)/msalCacheTests' 
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: drop'
