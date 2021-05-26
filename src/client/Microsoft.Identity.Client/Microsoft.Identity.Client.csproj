@@ -133,7 +133,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOs\**\*.cs" Exclude="$(PathToMsalSources)\Platforms\Features\DesktopOs\WindowsNativeUtils.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOs\**\*.cs" />
 
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
