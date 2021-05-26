@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.WsTrust
         }
 
         /// <inheritdoc/>
-        public async Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext, string federationMetadata)
+        public async Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext, string federationMetadata = null)
         {
             MexDocument mexDoc;
 
