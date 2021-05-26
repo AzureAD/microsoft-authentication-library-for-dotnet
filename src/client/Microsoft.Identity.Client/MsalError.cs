@@ -974,5 +974,11 @@ namespace Microsoft.Identity.Client
         /// An HttpListenerException occurred while listening for the system browser to complete the login.
         /// </summary>
         public const string HttpListenerError = "http_listener_error";
+
+        /// <summary>
+        /// <para>What happens?</para>Failure setting process security to enable WAM Account Picker in an elevated process.
+        /// <para>Mitigation</para>For troubleshooting details, see https://aka.ms/msal-net-wam .
+        /// </summary>
+        public const string InitializeProcessSecurityError = "initialize_process_security_error";
     }
 }
