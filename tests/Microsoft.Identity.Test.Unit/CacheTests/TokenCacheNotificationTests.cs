@@ -327,7 +327,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .ExecuteAsync(cancellationTokenSource.Token)
                     .ConfigureAwait(false);
 
-                await Task.Delay(1000).ConfigureAwait(false);
+                cancellationTokenSource.Cancel();
                 Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.HasTokens);
                 Assert.IsNotNull(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken);
                 Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.CanBeCanceled);
