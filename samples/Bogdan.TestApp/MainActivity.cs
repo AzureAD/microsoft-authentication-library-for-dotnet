@@ -87,7 +87,18 @@ namespace App1
 
         private void SignOutBtn_Click(object sender, EventArgs e)
         {
-            _ipca.RemoveAccount(_account);
+            _ipca.RemoveAccount(_account,
+                new SignOutCallback(
+                    onSuccessAction: () =>
+                    {
+                        LogMessage("Signout success!!!");
+                        _account = null;
+                    },
+                    onErrorAction: (MsalException ex) =>
+                    {
+                        LogMessage(ex.ToString());
+                    }));
+
             LogMessage("Signed out!");
         }
 

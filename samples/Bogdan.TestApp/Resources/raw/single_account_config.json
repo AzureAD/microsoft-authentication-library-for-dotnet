@@ -1,11 +1,9 @@
 ﻿{
-    "client_id": "31156476-e2b3-4aef-9bb5-10cc0a55107d",
+    "client_id": "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8",
     "authorization_user_agent": "WEBVIEW",
-    "redirect_uri": "msauth://com.azuresamples.msalandroidapp/i0gj9MxJ7ABJtkaIyUBW4Xszw9Q%3D",
+    "redirect_uri": "msauth://com.microsoft.identity.client/2RJuUvgnnEn0C0I0IOd1qHqOUMg%3D",
     "account_mode": "MULTIPLE",
     "broker_redirect_uri_registered": true,
-    //"logcat_enabled": true,
-    //"log_level": "verbose",
     "authorities": [
         {
             "type": "AAD",
