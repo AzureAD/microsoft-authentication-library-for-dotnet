@@ -64,6 +64,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             {
                 return false;
             }
+            catch (Exception ex) when (ex is BadImageFormatException || ex is DllNotFoundException)
+            {
+                throw new MsalClientException(MsalError.WebView2LoaderNotFound, MsalErrorMessage.WebView2LoaderNotFound, ex);
+            }
         }
     }
 }
