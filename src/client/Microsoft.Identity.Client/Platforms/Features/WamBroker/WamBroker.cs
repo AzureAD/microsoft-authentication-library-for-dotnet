@@ -20,14 +20,17 @@ using Microsoft.Identity.Client.Utils;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 #if !UAP10_0
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
+using Microsoft.Identity.Client.Utils.Windows;
 #endif
 
 #if DESKTOP || NET5_WIN
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Runtime.Versioning;
+using Microsoft.Identity.Client.Utils.Windows;
 #endif
 
 
@@ -333,13 +336,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 if (accountProvider == null)
                 {
+                    var errorMessage = "WAM Account Picker did not return an account.";
 #if !WINDOWS_APP
                     if (WindowsNativeUtils.IsElevatedUser())
                     {
-                        throw new MsalClientException(MsalError.AuthenticationFailedWamElevatedProcess, MsalErrorMessage.AuthenticationFailedWamElevatedProcess);
+                        errorMessage = MsalErrorMessage.AuthenticationFailedWamElevatedProcess;
                     }
 #endif
-                    throw new MsalClientException(MsalError.AuthenticationCanceledError, "WAM Account Picker did not return an account.");
+                    throw new MsalClientException(MsalError.AuthenticationCanceledError, errorMessage);
                 }
 
                 bool isConsumerTenant = _webAccountProviderFactory.IsConsumerProvider(accountProvider);

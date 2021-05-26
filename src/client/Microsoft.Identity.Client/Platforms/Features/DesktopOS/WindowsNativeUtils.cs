@@ -4,7 +4,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
+namespace Microsoft.Identity.Client.Utils.Windows
 {
     /// <summary>
     /// Public Windows native methods
