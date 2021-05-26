@@ -20,6 +20,9 @@ steps:
   inputs:
     version: 5.x
 
+# Install keyvault secrets
+- template: template-install-keyvault-secrets.yaml
+
 #Build and restore test packages
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
@@ -41,6 +44,19 @@ steps:
     msbuildArgs: '/p:RunCodeAnalysis=false'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
+
+# install python and run cache tests
+- task: stevedower.python.PythonScript.PythonScript@1
+  displayName: 'Update PIP'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  inputs:
+    arguments: '-m pip install --upgrade pip'
+
+- task: stevedower.python.PythonScript.PythonScript@1
+  displayName: 'Install MSAL.Python PIP'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  inputs:
+    arguments: '-m pip install msal'
 
 - task: VSTest@2
   displayName: 'Run cache compat tests'
