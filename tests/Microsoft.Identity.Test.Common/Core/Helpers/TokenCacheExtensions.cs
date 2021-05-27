@@ -22,6 +22,14 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             }
         }
 
+        public static void AddAccessTokenCacheItem(this ITokenCacheInternal tokenCache, MsalRefreshTokenCacheItem accessTokenItem)
+        {
+            lock (_lock)
+            {
+                tokenCache.Accessor.SaveRefreshToken(accessTokenItem);
+            }
+        }
+
         public static TokenCacheAccessRecorder RecordAccess(this ITokenCache tokenCache)
         {
             return new TokenCacheAccessRecorder(tokenCache as TokenCache);

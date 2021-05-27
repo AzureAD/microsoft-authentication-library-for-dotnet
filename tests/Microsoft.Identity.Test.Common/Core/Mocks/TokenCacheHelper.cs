@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
@@ -247,6 +248,24 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 null);
 
             accessor.SaveAccount(accountCacheItem);
+        }
+
+        public static async void ExpireAccessTokens(ITokenCacheInternal tokenCache)
+        {
+            var allAccessTokens = await tokenCache
+                .GetAllAccessTokensAsync(true)
+                .ConfigureAwait(true);
+
+            foreach (MsalAccessTokenCacheItem atItem in allAccessTokens)
+            {
+                ExpireAndSaveAccessToken(tokenCache, atItem);
+            }
+        }
+
+        public static void ExpireAndSaveAccessToken(ITokenCacheInternal tokenCache, MsalAccessTokenCacheItem atItem)
+        {
+            atItem.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow);
+            tokenCache.AddAccessTokenCacheItem(atItem);
         }
     }
 }
