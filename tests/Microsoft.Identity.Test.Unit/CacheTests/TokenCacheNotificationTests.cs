@@ -273,7 +273,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        public async Task TestCancellationTokenAsync()
+        public async Task TestCancellationTokenPropagatesAsync()
         {
             using (var _harness = CreateTestHarness())
             {
@@ -289,22 +289,49 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
                 var cacheAccessRecorder = app.UserTokenCache.RecordAccess();
 
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(10000);
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-                await app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(cancellationTokenSource.Token)
-                    .ConfigureAwait(false);
+                var accounts = app.GetAccountsAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                AssertCancellationToken(cacheAccessRecorder, cancellationTokenSource);
+                cacheAccessRecorder.AssertAccessCounts(expectedReads: 1, expectedWrites: 0);
 
-                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.HasTokens);
-                Assert.IsNotNull(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken);
-                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.CanBeCanceled);
-                Assert.IsFalse(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.IsCancellationRequested);
+                try
+                {
+                    await app
+                      .AcquireTokenSilent(TestConstants.s_scope, new Account("a.b", "upn", "login.microsoft.com"))
+                      .ExecuteAsync(cancellationTokenSource.Token)
+                      .ConfigureAwait(false);
+                    AssertCancellationToken(cacheAccessRecorder, cancellationTokenSource);
+                    cacheAccessRecorder.AssertAccessCounts(expectedReads: 2, expectedWrites: 0);
+                }
+                catch (MsalUiRequiredException)
+                {
+                    await app
+                        .AcquireTokenInteractive(TestConstants.s_scope)
+                        .ExecuteAsync(cancellationTokenSource.Token)
+                        .ConfigureAwait(false);
+                }
+
+                AssertCancellationToken(cacheAccessRecorder, cancellationTokenSource, write: true);
+                cacheAccessRecorder.AssertAccessCounts(expectedReads: 2, expectedWrites: 1);
+            }
+        }
+
+        private static void AssertCancellationToken(TokenCacheAccessRecorder cacheAccessRecorder, CancellationTokenSource cancellationTokenSource, bool write = false)
+        {
+            Assert.AreEqual(cancellationTokenSource.Token, cacheAccessRecorder.LastAfterAccessNotificationArgs.CancellationToken);
+            Assert.IsFalse(default(CancellationToken) == cacheAccessRecorder.LastAfterAccessNotificationArgs.CancellationToken);
+            Assert.AreEqual(cancellationTokenSource.Token, cacheAccessRecorder.LastBeforeAccessNotificationArgs.CancellationToken);
+            Assert.IsFalse(default(CancellationToken) == cacheAccessRecorder.LastBeforeAccessNotificationArgs.CancellationToken);
+            if (write)
+            {
+                Assert.AreEqual(cancellationTokenSource.Token, cacheAccessRecorder.LastBeforeWriteNotificationArgs.CancellationToken);
+                Assert.IsFalse(default(CancellationToken) == cacheAccessRecorder.LastBeforeWriteNotificationArgs.CancellationToken);
             }
         }
 
         [TestMethod]
-        public async Task TestCancelledCancellationTokenAsync()
+        public async Task MsalOperationCanBeCancelledFromTheCacheAsync()
         {
             using (var _harness = CreateTestHarness())
             {
@@ -314,55 +341,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .WithHttpManager(_harness.HttpManager)
                     .BuildConcrete();
 
-                app.ServiceBundle.ConfigureMockWebUI(
-                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
-                var cacheAccessRecorder = app.UserTokenCache.RecordAccess();
+                app.UserTokenCache.SetBeforeAccess(notificationArgs =>
+                {
+                    throw new OperationCanceledException();
+                });
 
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(1000);
 
-                await app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(cancellationTokenSource.Token)
-                    .ConfigureAwait(false);
-
-                cancellationTokenSource.Cancel();
-                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.HasTokens);
-                Assert.IsNotNull(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken);
-                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.CanBeCanceled);
-                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.IsCancellationRequested);
+                await AssertException.TaskThrowsAsync<OperationCanceledException>(() => app.GetAccountsAsync()).ConfigureAwait(false);
             }
         }
 
-        [TestMethod]
-        public async Task TestNoneCancellationTokenAsync()
-        {
-            using (var _harness = CreateTestHarness())
-            {
-                // Arrange
-                PublicClientApplication app = PublicClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithHttpManager(_harness.HttpManager)
-                    .BuildConcrete();
-
-                app.ServiceBundle.ConfigureMockWebUI(
-                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
-                var cacheAccessRecorder = app.UserTokenCache.RecordAccess();
-
-                await app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-
-                Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.HasTokens);
-                Assert.IsNotNull(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken);
-                Assert.IsFalse(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.CanBeCanceled);
-                Assert.IsFalse(cacheAccessRecorder.LastAfterAccessNotificationArgs.UserCancellationToken.IsCancellationRequested);
-            }
-        }
+    
 
         [TestMethod]
         public async Task GetAccounts_DoesNotFireNotifications_WhenTokenCacheIsNotSerialized_Async()
@@ -453,7 +442,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                .BuildConcrete();
 
             Assert.IsTrue(
-                (cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized(), 
+                (cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized(),
                 "The app token cache, used by AcquireTokenForClient, is serialized by default");
             Assert.IsFalse((cca.UserTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
 

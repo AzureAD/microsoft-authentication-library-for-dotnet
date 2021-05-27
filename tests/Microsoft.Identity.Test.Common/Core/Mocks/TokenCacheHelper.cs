@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                        hasStateChanged: false,
                                        true,
                                        hasTokens: true,
-                                       userCancellationToken: CancellationToken.None,
+                                       cancellationToken: CancellationToken.None,
                                        suggestedCacheKey: key);
             app.AppTokenCacheInternal.OnBeforeAccessAsync(args).GetAwaiter().GetResult();
         }     

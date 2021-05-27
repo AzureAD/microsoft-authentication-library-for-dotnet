@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.Performance
                                      hasStateChanged: false,
                                      true,
                                      hasTokens: true,
-                                     userCancellationToken: CancellationToken.None,
+                                     cancellationToken: CancellationToken.None,
                                      suggestedCacheKey: key);
             cca.AppTokenCacheInternal.OnBeforeAccessAsync(args).GetAwaiter().GetResult();
 
