@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client
             return GetAccountsAsync(default(CancellationToken));
         }
 
-        // TODO: MSAL 5 - add it to the interface
+        // TODO: MSAL 5 - add cancellationToken to the interface
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client
             return GetAccountsAsync(userFlow, default(CancellationToken));
         }
 
-        // TODO: MSAL 5 - add it to the interface
+        // TODO: MSAL 5 - add cancellationToken to the interface
         /// <summary>
         /// Get the <see cref="IAccount"/> collection by its identifier among the accounts available in the token cache,
         /// based on the user flow. This is for Azure AD B2C scenarios.
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client
                     userFlow, StringComparison.OrdinalIgnoreCase));
         }
 
-        // TODO: MSAL 5 - add it to the interface
+        // TODO: MSAL 5 - add cancellationToken to the interface
         /// <summary>
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
         /// </summary>
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client
             return RemoveAsync(account);
         }
 
-        // TODO: MSAL 5 - add it to the interface
+        // TODO: MSAL 5 - add cancellationToken to the interface
 
         /// <summary>
         /// Removes all tokens in the cache for the specified account.
