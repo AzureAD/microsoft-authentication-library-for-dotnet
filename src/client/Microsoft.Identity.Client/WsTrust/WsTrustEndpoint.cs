@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     writer.WriteString(soapAction);
                     writer.WriteEndElement(); // Action
 
-                    writer.WriteStartElement("messageID", wsaNamespaceValue);
+                    writer.WriteStartElement("MessageID", wsaNamespaceValue);
 #pragma warning disable CA1305 // Specify IFormatProvider - no overload on netcore
                     writer.WriteString($"urn:uuid:{_guidFactory.NewGuid().ToString("D")}");
 #pragma warning restore CA1305 // Specify IFormatProvider
