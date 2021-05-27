@@ -957,6 +957,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string WebView2NotInstalled = "webview2_runtime_not_installed";
 
+        /// <summary>
+        /// <para>What happens?</para>The embedded WebView2 browser cannot be started because a runtime component cannot be loaded.
+        /// <para>Mitigation</para> For troubleshooting details, see https://aka.ms/msal-net-webview2 .
+        /// </summary>
+        public const string WebView2LoaderNotFound = "webview2loader_not_found";
 
         /// <summary>
         /// <para>What happens?</para>You configured both Regional Authority and Authority Validation. Authority validation is not currently supported for regional authorities.
@@ -969,5 +974,11 @@ namespace Microsoft.Identity.Client
         /// An HttpListenerException occurred while listening for the system browser to complete the login.
         /// </summary>
         public const string HttpListenerError = "http_listener_error";
+
+        /// <summary>
+        /// <para>What happens?</para>Failure setting process security to enable WAM Account Picker in an elevated process.
+        /// <para>Mitigation</para>For troubleshooting details, see https://aka.ms/msal-net-wam .
+        /// </summary>
+        public const string InitializeProcessSecurityError = "initialize_process_security_error";
     }
 }

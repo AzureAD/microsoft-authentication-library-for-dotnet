@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security;
@@ -81,6 +82,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ROPC_ADFSv4Federated_WithMetadata_Async()
+        {
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
+            string federationMetadata = File.ReadAllText(@"federationMetadata.xml").ToString();
+            await RunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -246,7 +255,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.Fail("Bad exception or no exception thrown");
         }
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse)
+        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
         {
             var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
@@ -259,6 +268,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
                 .WithCorrelationId(CorrelationId)
+                .WithFederationMetadata(federationMetadata)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 

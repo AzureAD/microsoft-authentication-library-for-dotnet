@@ -40,27 +40,4 @@ steps:
     runInParallel: true
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
-
-# install python and run cache tests
-- task: stevedower.python.PythonScript.PythonScript@1
-  displayName: 'Update PIP'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
-  inputs:
-    arguments: '-m pip install --upgrade pip'
-
-- task: stevedower.python.PythonScript.PythonScript@1
-  displayName: 'Install MSAL.Python PIP'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
-  inputs:
-    arguments: '-m pip install msal'
-
-- task: VSTest@2
-  displayName: 'Run cache compat tests'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
-  inputs:
-    testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit.dll'
-    searchFolder: '$(System.DefaultWorkingDirectory)'
-    codeCoverageEnabled: true
-    failOnMinTestsNotRun: true
     minimumExpectedTests: '1'

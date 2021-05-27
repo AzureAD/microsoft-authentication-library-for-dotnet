@@ -23,13 +23,6 @@ steps:
     Contents: '**\*'
     TargetFolder: $(Build.SourcesDirectory)\tests\
 
-- task: CopyFiles@2
-  displayName: 'Get MSAL Cache Compat'
-  inputs:
-    SourceFolder: '$(build.artifactstagingdirectory)\drop\msalCacheTests' 
-    Contents: '**\*'
-    TargetFolder: $(Build.SourcesDirectory)\tests
-
   # Run All Desktop Tests
 - template: template-run-all-tests.yaml
   parameters:
