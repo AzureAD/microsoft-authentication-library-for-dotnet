@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         public override ITokenCacheAccessor CreateTokenCacheAccessor() => new InMemoryTokenCacheAccessor(Logger);
 
         public override ICacheSerializationProvider CreateTokenCacheBlobStorage() => 
-            new DpApiEncryptedFileProvider(CryptographyManager, Logger);
+            new SynchronizedAndEncryptedFileProvider(Logger);
 
         protected override IWebUIFactory CreateWebUiFactory() => new UapWebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
