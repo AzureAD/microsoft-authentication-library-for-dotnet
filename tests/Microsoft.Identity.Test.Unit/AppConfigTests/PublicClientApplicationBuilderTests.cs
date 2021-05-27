@@ -594,6 +594,38 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             CollectionAssert.AreEquivalent(new string[] { "cp1", "cp2" }, app.AppConfig.ClientCapabilities.ToList());
         }
 
+        [TestMethod]
+        // bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2543
+        public void AuthorityWithTenant()
+        {
+            var options = new PublicClientApplicationOptions();
+            options.ClientId = TestConstants.ClientId;            
+
+            var app1 = PublicClientApplicationBuilder
+                .CreateWithApplicationOptions(options)
+                .WithTenantId(TestConstants.TenantId)                            
+                .WithAuthority("https://login.microsoftonline.com/common")       
+               .Build();
+
+            Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app1.Authority);
+
+            var app2 = PublicClientApplicationBuilder
+               .CreateWithApplicationOptions(options)
+               .WithTenantId(TestConstants.TenantId)
+              .Build();
+
+            Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app2.Authority);
+
+            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder
+             .CreateWithApplicationOptions(options)
+             .WithTenantId(TestConstants.TenantId)
+             .WithAuthority($"https://login.microsoftonline.com/{TestConstants.TenantId2}")
+            .Build());
+
+            Assert.AreEqual(MsalError.AuthorityTenantSpecifiedTwice, ex.ErrorCode);
+          
+        }
+
 #if NET5_WIN
         [TestMethod]
         public void IsBrokerAvailable_net5()
