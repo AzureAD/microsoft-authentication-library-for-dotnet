@@ -30,7 +30,6 @@ using Microsoft.Identity.Client.Utils.Windows;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Runtime.Versioning;
-using Microsoft.Identity.Client.Utils.Windows;
 #endif
 
 
