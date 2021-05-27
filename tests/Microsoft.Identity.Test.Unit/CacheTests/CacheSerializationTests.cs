@@ -64,7 +64,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Environment = "env",
                 HomeAccountId = TestConstants.HomeAccountId,
                 Secret = "access_token_secret",
-                RawClientInfo = string.Empty, 
+                RawClientInfo = string.Empty,
+                UserAssertionHash = "assertion hash"
             };
         }
 
@@ -678,7 +679,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Environment = "login.windows.net",
                 HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
                 RawClientInfo = string.Empty,
-                ClientId = "b945c513-3946-4ecd-b179-6499803a2167"
+                ClientId = "b945c513-3946-4ecd-b179-6499803a2167",
+                UserAssertionHash = string.Empty
             };
             AssertRefreshTokenCacheItemsAreEqual(expectedRefreshTokenItem, accessor.GetAllRefreshTokens().First());
 
@@ -853,7 +855,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.AreEqual(expected.FamilyId, actual.FamilyId);
             }
 
-
+            if (string.IsNullOrEmpty(expected.UserAssertionHash))
+            {
+                Assert.IsTrue(string.IsNullOrEmpty(actual.UserAssertionHash));
+            }
+            else
+            {
+                Assert.AreEqual(expected.UserAssertionHash, actual.UserAssertionHash);
+            }
         }
 
         private void AssertIdTokenCacheItemsAreEqual(MsalIdTokenCacheItem expected, MsalIdTokenCacheItem actual)
