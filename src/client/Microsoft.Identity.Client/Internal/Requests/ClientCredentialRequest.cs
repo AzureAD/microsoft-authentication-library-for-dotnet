@@ -48,6 +48,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 
+                    Metrics.TotalTokensObtainedByMsalViaCache++;
                     return new AuthenticationResult(
                         cachedAccessTokenItem,
                         null,

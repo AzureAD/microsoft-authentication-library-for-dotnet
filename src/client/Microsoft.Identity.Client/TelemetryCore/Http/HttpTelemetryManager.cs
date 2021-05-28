@@ -114,7 +114,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
             var platformConfig = new StringBuilder();
             platformConfig.Append(ConvertFromStringToBitwise(isTokenCacheSerialized) + ",");
-            platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled));
+            platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled) + ",");
+            platformConfig.Append(Metrics.TotalTokensObtainedByMsal + ",");
+            platformConfig.Append(Metrics.TotalTokensObtainedByMsalViaCache);
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion}" +
                 $"|{apiId},{cacheInfo},{regionUsed},{regionSource},{regionOutcome}" +

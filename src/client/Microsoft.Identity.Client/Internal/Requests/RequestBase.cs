@@ -284,11 +284,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string scopes = GetOverridenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
             var tokenClient = new TokenClient(AuthenticationRequestParameters);
 
-            return tokenClient.SendTokenRequestAsync(
+            var token = tokenClient.SendTokenRequestAsync(
                 additionalBodyParameters,
                 scopes,
                 tokenEndpoint,
                 cancellationToken);
+            Metrics.TotalTokensObtainedByMsal++;
+            return token;
         }
 
         private void LogReturnedToken(AuthenticationResult result)
