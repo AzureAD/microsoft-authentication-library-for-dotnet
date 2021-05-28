@@ -79,20 +79,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
         private void ReadPolicies(XContainer mexDocument)
         {
-            IEnumerable<XElement> policyElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsp + "Policy");
-
-            //Unable to find policy information in root node. Attempting to search document for policy information
-            if (policyElements.Count() == 0)
-            {
-                policyElements = mexDocument.Elements().DescendantsAndSelf().Elements(XmlNamespace.Wsp + "Policy");
-
-                if (policyElements.Count() == 0)
-                {
-                    throw new MsalClientException(
-                    MsalError.ParsingWsMetadataExchangeFailed,
-                    MsalErrorMessage.ParsingMetadataDocumentFailed + " Could not parse policy data.");
-                }
-            }
+            IEnumerable<XElement> policyElements = FindElements(mexDocument, XmlNamespace.Wsp, "Policy");
 
             foreach (XElement policy in policyElements)
             {
@@ -149,20 +136,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
         private void ReadPolicyBindings(XContainer mexDocument)
         {
-            IEnumerable<XElement> bindingElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "binding");
-
-            //Unable to find binding information in root node. Attempting to search document for binding information
-            if (bindingElements.Count() == 0)
-            {
-                bindingElements = mexDocument.Elements().DescendantsAndSelf().Elements(XmlNamespace.Wsdl + "binding");
-
-                if (bindingElements.Count() == 0)
-                {
-                    throw new MsalClientException(
-                    MsalError.ParsingWsMetadataExchangeFailed,
-                    MsalErrorMessage.ParsingMetadataDocumentFailed + " Could not parse binding data.");
-                }
-            }
+            IEnumerable<XElement> bindingElements = FindElements(mexDocument, XmlNamespace.Wsdl, "binding");    
 
             foreach (XElement binding in bindingElements)
             {
@@ -222,23 +196,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
         private void SetPolicyEndpointAddresses(XContainer mexDocument)
         {
-            XElement serviceElement = null;
-            IEnumerable<XElement> serviceElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "service");
-            
-            //Unable to find service information in root node. Attempting to search document for service information
-            if (serviceElements.Count() == 0)
-            {
-                serviceElements = mexDocument.Elements().DescendantsAndSelf().Elements(XmlNamespace.Wsdl + "service");
-
-                if (serviceElements.Count() == 0)
-                {
-                    throw new MsalClientException(
-                    MsalError.ParsingWsMetadataExchangeFailed,
-                    MsalErrorMessage.ParsingMetadataDocumentFailed + " Could not parse service data.");
-                }
-            }
-            
-            serviceElement = serviceElements.First();
+            XElement serviceElement = FindElements(mexDocument, XmlNamespace.Wsdl, "service").First();
 
             IEnumerable<XElement> portElements = serviceElement.Elements(XmlNamespace.Wsdl + "port");
             foreach (XElement port in portElements)
@@ -268,6 +226,26 @@ namespace Microsoft.Identity.Client.WsTrust
                     _bindings[portBindingNameSegments[1]].Url = new Uri(endpointAddress.Value);
                 }
             }
+        }
+
+        private IEnumerable<XElement> FindElements(XContainer mexDocument, XNamespace xNamespace, string element)
+        {
+            IEnumerable<XElement> bindingElements = mexDocument.Elements().First().Elements(xNamespace + element);
+
+            //Unable to find metadata information in root node. Attempting to search document.
+            if (bindingElements.Count() == 0)
+            {
+                bindingElements = mexDocument.Elements().DescendantsAndSelf().Elements(xNamespace + element);
+
+                if (bindingElements.Count() == 0)
+                {
+                    throw new MsalClientException(
+                    MsalError.ParsingWsMetadataExchangeFailed,
+                    MsalErrorMessage.ParsingMetadataDocumentFailed + $" Could not parse {element} data.");
+                }
+            }
+
+            return bindingElements;
         }
 
         private void AddPolicy(XElement policy, UserAuthType policyAuthType)
