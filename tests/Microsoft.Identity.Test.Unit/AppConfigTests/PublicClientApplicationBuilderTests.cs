@@ -623,7 +623,19 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             .Build());
 
             Assert.AreEqual(MsalError.AuthorityTenantSpecifiedTwice, ex.ErrorCode);
-          
+
+            var options2 = new PublicClientApplicationOptions();
+            options2.ClientId = TestConstants.ClientId;
+            options2.TenantId = TestConstants.TenantId;
+
+            var app4 = PublicClientApplicationBuilder
+                .CreateWithApplicationOptions(options)
+                .WithTenantId(TestConstants.TenantId)
+                .WithAuthority("https://login.microsoftonline.com/common")
+               .Build();
+
+            Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app4.Authority);
+
         }
 
 #if NET5_WIN
