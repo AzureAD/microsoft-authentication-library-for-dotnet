@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
@@ -43,6 +44,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.AT).ConfigureAwait(false);
             return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
+
         }
 
         public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
@@ -97,14 +99,16 @@ namespace Microsoft.Identity.Client.Cache
             {
                 if (!_cacheRefreshedForRead)
                 {
-                    string telemetryId = _requestParams.RequestContext.CorrelationId.AsMatsCorrelationId();
-                    var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup, telemetryId)
+                    var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup, _requestParams.RequestContext.CorrelationId.AsMatsCorrelationId())
                     {
                         TokenType = cacheEventType
                     };
 
+                    _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Waiting for cache semaphore");
                     await TokenCacheInternal.Semaphore.WaitAsync().ConfigureAwait(false);
+                    _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Entered cache semaphore");
 
+                    Stopwatch stopwatch = new Stopwatch();
                     try
                     {
                         if (!_cacheRefreshedForRead) // double check locking
@@ -123,7 +127,10 @@ namespace Microsoft.Identity.Client.Cache
                                        TokenCacheInternal.IsApplicationCache,
                                        hasTokens: TokenCacheInternal.HasTokensNoLocks(),
                                        suggestedCacheKey: key);
+
+                                    stopwatch.Start();
                                     await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
+                                    RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
                                 }
                                 finally
                                 {
@@ -135,7 +142,12 @@ namespace Microsoft.Identity.Client.Cache
                                        TokenCacheInternal.IsApplicationCache,
                                        hasTokens: TokenCacheInternal.HasTokensNoLocks(),
                                        suggestedCacheKey: key);
+
+                                    stopwatch.Reset();
+                                    stopwatch.Start();
                                     await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                                    RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
+
                                 }
 
                                 _cacheRefreshedForRead = true;
@@ -145,6 +157,7 @@ namespace Microsoft.Identity.Client.Cache
                     finally
                     {
                         TokenCacheInternal.Semaphore.Release();
+                        _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Released cache semaphore");
                     }
                 }
             }

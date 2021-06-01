@@ -258,6 +258,49 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var expectedRequestHeaders = new Dictionary<string, string> { { Constants.OidCCSHeader, CoreHelpers.GetCCSUpnHeader(TestConstants.s_user.Username) } };
 
                 MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
+                AddMockHandlerWsTrustWindowsTransport(httpManager);
+                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
+                mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParameters;
+                mockTokenRequestHttpHandler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
+                string federationMetadata = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex.xml"));
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithHttpManager(httpManager)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParameters)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
+                                                        .BuildConcrete();
+
+                AuthenticationResult result = await app
+                    .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
+                                                        .WithClaims(TestConstants.Claims)
+                                                        .WithUsername(TestConstants.s_user.Username)
+                                                        .WithFederationMetadata(federationMetadata)
+                                                        .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual("some-access-token", result.AccessToken);
+                Assert.IsNotNull(result.Account);
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
+                    "Client info header should contain " + TestConstants.XClientSku,
+                    StringComparison.OrdinalIgnoreCase);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
+                    "Client info header should contain " + TestConstants.XClientVer,
+                    StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        [DeploymentItem(@"Resources\TestMex.xml")]
+        [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
+        public async Task AcquireTokenByIntegratedWindowsAuthMetadataTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
                 

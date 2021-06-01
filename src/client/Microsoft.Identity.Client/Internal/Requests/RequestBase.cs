@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Cache.Items;
+using System.Diagnostics;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -91,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return null;
         }
 
-        private void ValidateScopeInput(HashSet<string> scopesToValidate)
+        private void ValidateScopeInput(ISet<string> scopesToValidate)
         {
             if (scopesToValidate.Contains(AuthenticationRequestParameters.AppConfig.ClientId))
             {
@@ -103,9 +104,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
-            ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
-            AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
+            Stopwatch sw = Stopwatch.StartNew();
 
+            ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
+            AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;            
             try
             {
                 using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
@@ -121,6 +123,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         apiEvent.TenantId = authenticationResult.TenantId;
                         apiEvent.AccountId = authenticationResult.UniqueId;
                         apiEvent.WasSuccessful = true;
+
+                        authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
+                        authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
+                        authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;                        
                         return authenticationResult;
                     }
                     catch (MsalException ex)
@@ -201,7 +207,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateAccountIdentifiers(fromServer);
 
-            AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
+            AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
             var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
             var atItem = tuple.Item1;
@@ -345,9 +351,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} and Scopes {1}",
+                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} and Scopes {1} from {2}",
                         result.ExpiresOn, 
-                        string.Join(" ", result.Scopes)));
+                        string.Join(" ", result.Scopes),
+                        result.AuthenticationResultMetadata.TokenSource));
             }
         }
 

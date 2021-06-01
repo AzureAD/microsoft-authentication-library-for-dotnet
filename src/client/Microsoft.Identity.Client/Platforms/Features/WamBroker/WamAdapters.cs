@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Windows.Security.Authentication.Web.Core;
@@ -16,17 +17,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     internal class WamAdapters
     {
         private const string WamErrorPrefix = "WAM Error ";
+        private static IDictionary<string, string> s_telemetryHeaders;
 
         internal static void AddMsalParamsToRequest(
           AuthenticationRequestParameters authenticationRequestParameters,
           WebTokenRequest webTokenRequest,
+          ICoreLogger logger,
           string overridenAuthority = null)
         {
             AddExtraParamsToRequest(webTokenRequest, authenticationRequestParameters.ExtraQueryParameters);
             string authority = overridenAuthority ??
                  authenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority;
             bool validate = authenticationRequestParameters.AuthorityInfo.ValidateAuthority;
-            AddAuthorityParamToRequest(authority, validate, webTokenRequest); ;
+            AddAuthorityParamToRequest(authority, validate, webTokenRequest);
+
+            AddTelemetryPropertiesToRequest(webTokenRequest, logger);
         }
 
         internal static MsalTokenResponse CreateMsalResponseFromWamResponse(
@@ -137,5 +142,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
         }
 
+        private static void AddTelemetryPropertiesToRequest(WebTokenRequest request, ICoreLogger logger)
+        {
+            if (s_telemetryHeaders == null)
+            {
+                s_telemetryHeaders = MsalIdHelper.GetMsalIdParameters(logger);
+            }
+
+            foreach (var kvp in s_telemetryHeaders)
+            {
+                request.Properties.Add(kvp);
+            }
+        }
     }
 }

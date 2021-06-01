@@ -14,6 +14,7 @@ using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Cache.CacheImpl;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
@@ -116,7 +117,7 @@ namespace Microsoft.Identity.Client
             var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountsByUserFlow).ConfigureAwait(false);
 
             return accounts.Where(acc =>
-                acc.HomeAccountId.ObjectId.Split('.')[0].EndsWith(
+                acc.HomeAccountId.ObjectId.EndsWith(
                     userFlow, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -155,7 +156,10 @@ namespace Microsoft.Identity.Client
 
         private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(ApiIds apiId, string homeAccountIdFilter = null)
         {
-            RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
+            Guid correlationId = Guid.NewGuid();
+            RequestContext requestContext = CreateRequestContext(correlationId);
+            requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId.ToString());
+            requestContext.ApiEvent.ApiId = apiId;
 
             var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
               requestContext.ServiceBundle.Config.AuthorityInfo,

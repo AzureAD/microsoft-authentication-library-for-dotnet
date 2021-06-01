@@ -15,6 +15,8 @@ steps:
     searchFolder: '$(System.DefaultWorkingDirectory)'
     runInParallel: true
     codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET CORE)'
@@ -25,25 +27,17 @@ steps:
     searchFolder: '$(System.DefaultWorkingDirectory)'
     runInParallel: true
     codeCoverageEnabled: true
-
-# install python and run cache tests
-- task: stevedower.python.PythonScript.PythonScript@1
-  displayName: 'Update PIP'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
-  inputs:
-    arguments: '-m pip install --upgrade pip'
-
-- task: stevedower.python.PythonScript.PythonScript@1
-  displayName: 'Install MSAL.Python PIP'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
-  inputs:
-    arguments: '-m pip install msal'
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
 
 - task: VSTest@2
-  displayName: 'Run cache compat tests'
+  displayName: 'Run unit tests (NET5-WIN)'
   condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit.dll'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net5.0-windows10.0.17763.0\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
+    runInParallel: true
     codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'

@@ -1018,6 +1018,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(
                 serviceBundle,
                 Authority.CreateAuthority(TestConstants.AuthorityHomeTenant));
+            
 
 
             AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefNetworkEnvironment);

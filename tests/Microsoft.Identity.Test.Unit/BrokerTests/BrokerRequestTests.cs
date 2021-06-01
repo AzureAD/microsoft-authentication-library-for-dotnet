@@ -264,26 +264,29 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         public async Task BrokerGetAccountsWithBrokerInstalledTestAsync()
         {
             // Arrange
-            var mockBroker = Substitute.For<IBroker>();
-            var expectedAccount = new Account("a.b", "user", "login.windows.net");
-            mockBroker.GetAccountsAsync(
-                TestConstants.ClientId, 
-                TestConstants.RedirectUri,
-                AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
-                Arg.Any<ICacheSessionManager>(),
-                Arg.Any<IInstanceDiscoveryManager>())
-                .Returns(new[] { expectedAccount });
-            mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
-            platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
                 .WithBroker(true)
                 .WithPlatformProxy(platformProxy)
                 .Build();
+
+            var mockBroker = Substitute.For<IBroker>();
+            var expectedAccount = new Account("a.b", "user", "login.windows.net");
+            mockBroker.GetAccountsAsync(
+                TestConstants.ClientId, 
+                TestConstants.RedirectUri,
+                (pca.AppConfig as ApplicationConfiguration).AuthorityInfo,
+                Arg.Any<ICacheSessionManager>(),
+                Arg.Any<IInstanceDiscoveryManager>())
+                .Returns(new[] { expectedAccount });
+            mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
+
+            platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
+
 
             // Act
             var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -296,25 +299,27 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         public async Task BrokerGetAccountsWithBrokerNotInstalledTestAsync()
         {
             // Arrange
-            var mockBroker = Substitute.For<IBroker>();
-            var expectedAccount = new Account("a.b", "user", "login.windows.net");
-            mockBroker.GetAccountsAsync(
-                TestConstants.ClientId, 
-                TestConstants.RedirectUri,
-                AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
-                Arg.Any<ICacheSessionManager>(),
-                Arg.Any<IInstanceDiscoveryManager>() ).Returns(new[] { expectedAccount });
-            mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
-
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
-            platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
                 .WithBroker(true)
                 .WithPlatformProxy(platformProxy)
                 .Build();
+
+            var mockBroker = Substitute.For<IBroker>();
+            var expectedAccount = new Account("a.b", "user", "login.windows.net");
+            mockBroker.GetAccountsAsync(
+                TestConstants.ClientId, 
+                TestConstants.RedirectUri,
+                (pca.AppConfig as ApplicationConfiguration).AuthorityInfo,
+                Arg.Any<ICacheSessionManager>(),
+                Arg.Any<IInstanceDiscoveryManager>() ).Returns(new[] { expectedAccount });
+            mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
+
+            platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
+
 
             // Act
             var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);

@@ -1,0 +1,29 @@
+# Unit tests require .NET 3.x
+steps:
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK 3.x'
+  inputs:
+    version: 3.x
+
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK 5.x'
+  inputs:
+    version: 5.x
+
+- task: DownloadBuildArtifacts@0
+  displayName: 'Download Drop'
+  inputs:
+    artifactName: drop
+    itemPattern: '**/*'
+
+- task: CopyFiles@2
+  displayName: 'Get MSAL tests'
+  inputs:
+    SourceFolder: '$(build.artifactstagingdirectory)\drop\msalTests' 
+    Contents: '**\*'
+    TargetFolder: $(Build.SourcesDirectory)\tests\
+
+  # Run All Desktop Tests
+- template: template-run-all-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'

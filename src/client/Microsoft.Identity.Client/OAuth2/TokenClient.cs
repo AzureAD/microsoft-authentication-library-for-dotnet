@@ -14,6 +14,7 @@ using System.Net;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Kerberos;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -48,48 +49,56 @@ namespace Microsoft.Identity.Client.OAuth2
             string tokenEndpointOverride = null,
             CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Endpoints.TokenEndpoint;
-            string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
-            AddBodyParamsAndHeaders(additionalBodyParameters, scopes);
-            AddThrottlingHeader();
-
-            _serviceBundle.ThrottlingManager.TryThrottle(_requestParams, _oAuth2Client.GetBodyParameters());
-
-            MsalTokenResponse response;
-            try
+            using (_requestParams.RequestContext.Logger.LogMethodDuration())
             {
-                response = await SendHttpAndClearTelemetryAsync(tokenEndpoint)
-                    .ConfigureAwait(false);
-            }
-            catch (MsalServiceException e)
-            {
-                _serviceBundle.ThrottlingManager.RecordException(_requestParams, _oAuth2Client.GetBodyParameters(), e);
-                throw;
-            }
+                cancellationToken.ThrowIfCancellationRequested();
 
-            if (string.IsNullOrEmpty(response.Scope))
-            {
-                response.Scope = _requestParams.Scope.AsSingleString();
-                _requestParams.RequestContext.Logger.Info(
-                    "ScopeSet was missing from the token response, so using developer provided scopes in the result. ");
-            }
+                string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Endpoints.TokenEndpoint;
+                string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
 
-            if (!string.IsNullOrEmpty(response.TokenType) &&
-                !string.Equals(
-                    response.TokenType,
-                    _requestParams.AuthenticationScheme.AccessTokenType,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                throw new MsalClientException(
-                    MsalError.TokenTypeMismatch,
-                    MsalErrorMessage.TokenTypeMismatch(
+                AddBodyParamsAndHeaders(additionalBodyParameters, scopes);
+                AddThrottlingHeader();
+
+                _serviceBundle.ThrottlingManager.TryThrottle(_requestParams, _oAuth2Client.GetBodyParameters());
+
+                MsalTokenResponse response;
+                try
+                {
+                    response = await SendHttpAndClearTelemetryAsync(tokenEndpoint, _requestParams.RequestContext.Logger)
+                        .ConfigureAwait(false);
+                }
+                catch (MsalServiceException e)
+                {
+                    _serviceBundle.ThrottlingManager.RecordException(_requestParams, _oAuth2Client.GetBodyParameters(), e);
+                    throw;
+                }
+
+                if (string.IsNullOrEmpty(response.Scope))
+                {
+                    response.Scope = _requestParams.Scope.AsSingleString();
+                    _requestParams.RequestContext.Logger.Info(
+                        "ScopeSet was missing from the token response, so using developer provided scopes in the result. ");
+                }
+
+                if (string.IsNullOrEmpty(response.TokenType))
+                {
+                    throw new MsalClientException(MsalError.AccessTokenTypeMissing, MsalErrorMessage.AccessTokenTypeMissing);
+                }
+
+                if (!string.Equals(
+                        response.TokenType,
                         _requestParams.AuthenticationScheme.AccessTokenType,
-                        response.TokenType));
-            }
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new MsalClientException(
+                        MsalError.TokenTypeMismatch,
+                        MsalErrorMessage.TokenTypeMismatch(
+                            _requestParams.AuthenticationScheme.AccessTokenType,
+                            response.TokenType));
+                }
 
-            return response;
+                return response;
+            }
         }
 
         /// <summary>
@@ -130,7 +139,11 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
-            _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, _requestParams.ClaimsAndClientCapabilities);
+
+            // Add Kerberos Ticket claims if there's valid service principal name in Configuration.
+            // Kerberos Ticket claim is only allowed at token request due to security issue.
+            // It should not be included for authorize request.
+            KerberosSupplementalTicketManager.AddKerberosTicketClaim(_oAuth2Client, _requestParams);
 
             foreach (var kvp in additionalBodyParameters)
             {
@@ -181,7 +194,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client.AddHeader(name, value);
         }
 
-        private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
+        private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, Core.ICoreLogger logger)
         {
             UriBuilder builder = new UriBuilder(tokenEndpoint);
             builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
@@ -189,6 +202,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             try
             {
+                logger.Verbose("[Token Client] Fetching MsalTokenResponse .... ");
                 MsalTokenResponse msalTokenResponse =
                     await _oAuth2Client
                         .GetTokenAsync(tokenEndpointWithQueryParams,

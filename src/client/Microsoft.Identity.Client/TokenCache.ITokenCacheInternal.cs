@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +16,6 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client
             }
 
             Dictionary<string, string> wamAccountIds = GetWamAccountIds(requestParams, response);
-            Account account = null;
+            Account account;
             if (idToken != null)
             {
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem(
@@ -103,7 +103,6 @@ namespace Microsoft.Identity.Client
                 {
                     IsAdfs = isAdfsAuthority
                 };
-
 
                 msalAccountCacheItem = new MsalAccountCacheItem(
                              instanceDiscoveryMetadata.PreferredCache,
@@ -122,8 +121,10 @@ namespace Microsoft.Identity.Client
                     username,
                     instanceDiscoveryMetadata.PreferredNetwork, 
                     wamAccountIds);
-
+            requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entering token cache semaphore. ");
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
+            requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore. ");
+
             try
             {
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -144,8 +145,11 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheKey: suggestedWebCacheKey);
 
+                        Stopwatch sw = Stopwatch.StartNew();
+
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
+                        requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;                        
                     }
 
                     if (msalAccessTokenCacheItem != null)
@@ -214,7 +218,9 @@ namespace Microsoft.Identity.Client
                             tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheKey: suggestedWebCacheKey);
 
+                        Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                        requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
                     }
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
@@ -226,6 +232,7 @@ namespace Microsoft.Identity.Client
             finally
             {
                 _semaphoreSlim.Release();
+                requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
             }
         }
 
@@ -265,7 +272,7 @@ namespace Microsoft.Identity.Client
             string subject = idToken?.Subject;
             if (idToken?.Subject != null)
             {
-                requestParams.RequestContext.Logger.Info("Subject not present in Id token");
+                requestParams.RequestContext.Logger.Info("Subject not present in Id token. ");
             }
 
             ClientInfo clientInfo = response.ClientInfo != null ? ClientInfo.CreateFromJson(response.ClientInfo) : null;
@@ -310,7 +317,7 @@ namespace Microsoft.Identity.Client
             // no authority passed
             if (requestParams.AuthorityInfo?.CanonicalAuthority == null)
             {
-                logger.Warning("FindAccessToken: No authority provided. Skipping cache lookup ");
+                logger.Warning("FindAccessToken: No authority provided. Skipping cache lookup. ");
                 return null;
             }
 
@@ -331,8 +338,7 @@ namespace Microsoft.Identity.Client
             // no match
             if (finalList.Count == 0)
             {
-                logger.Verbose("No tokens found for matching authority, client_id, user and scopes.");
-                cacheInfoTelemetry = CacheInfoTelemetry.NoCachedAT;
+                logger.Verbose("No tokens found for matching authority, client_id, user and scopes. ");
                 return null;
             }
 
@@ -757,7 +763,7 @@ namespace Microsoft.Identity.Client
         }
 
         async Task<IEnumerable<MsalRefreshTokenCacheItem>> ITokenCacheInternal.GetAllRefreshTokensAsync(bool filterByClientId)
-        {
+        {            
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {

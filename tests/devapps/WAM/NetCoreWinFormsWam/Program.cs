@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Utils.Windows;
 
 namespace NetCoreWinFormsWAM
 {
@@ -14,6 +12,10 @@ namespace NetCoreWinFormsWAM
         [STAThread]
         static void Main()
         {
+            if (WindowsNativeUtils.IsElevatedUser())
+            {
+                WindowsNativeUtils.InitializeProcessSecurity();
+            }
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

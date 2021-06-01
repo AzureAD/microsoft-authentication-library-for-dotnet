@@ -55,6 +55,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
         public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com";
+        public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
 
         public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
@@ -67,6 +68,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";
         public const string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/common/";
         public const string AuthorityRegional = "https://" + ProductionPrefRegionalEnvironment + "/" + TenantId + "/";
+        public const string AuthorityRegionalInvalidRegion = "https://" + ProductionPrefInvalidRegionEnvironment + "/" + TenantId + "/";
         public const string AuthorityTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantId + "/";
         public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";
 
@@ -80,6 +82,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
 
         public const string B2CSignUpSignIn = "b2c_1_susi";
+        public const string B2CProfileWithDot = "b2c.someprofile";
         public const string B2CEditProfile = "b2c_1_editprofile";
         public const string B2CEnvironment = "sometenantid.b2clogin.com";
         public static readonly string B2CAuthority = $"https://login.microsoftonline.in/tfp/tenant/{B2CSignUpSignIn}/";
@@ -91,6 +94,8 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly string B2CLoginAuthorityBlackforest = $"https://sometenantid.b2clogin.de/tfp/sometenantid/{B2CSignUpSignIn}/";
         public static readonly string B2CSuSiHomeAccountIdentifer = $"{Uid}-{B2CSignUpSignIn}.{Utid}";
         public static readonly string B2CSuSiHomeAccountObjectId = $"{Uid}-{B2CSignUpSignIn}";
+        public static readonly string B2CProfileWithDotHomeAccountIdentifer = $"{Uid}-{B2CProfileWithDot}.{Utid}";
+        public static readonly string B2CProfileWithDotHomeAccountObjectId = $"{Uid}-{B2CProfileWithDot}";
         public static readonly string B2CEditProfileHomeAccountIdentifer = $"{Uid}-{B2CEditProfile}.{Utid}";
         public static readonly string B2CEditProfileHomeAccountObjectId = $"{Uid}-{B2CEditProfile}";
 
@@ -134,6 +139,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string RegionName = "REGION_NAME";
         public const string Region = "centralus";
+        public const string InvalidRegion = "invalidregion";
         public const int TimeoutInMs = 2000;
         public const string ImdsUrl = "http://169.254.169.254/metadata/instance/compute/location";
 

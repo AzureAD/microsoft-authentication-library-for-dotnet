@@ -96,24 +96,34 @@ namespace Microsoft.Identity.Client.OAuth2
 
             using (requestContext.CreateTelemetryHelper(httpEvent))
             {
-                if (method == HttpMethod.Post)
+                using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
                 {
-                    response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
-                                                .ConfigureAwait(false);
+                    if (method == HttpMethod.Post)
+                    {
+                        response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
+                                                    .ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        response = await _httpManager.SendGetAsync(
+                            endpointUri,
+                            _headers,
+                            requestContext.Logger,
+                            cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
+                    }
                 }
-                else
+
+                if (requestContext.ApiEvent != null)
                 {
-                    response = await _httpManager.SendGetAsync(
-                        endpointUri, 
-                        _headers, 
-                        requestContext.Logger,
-                        cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
+                    requestContext.ApiEvent.DurationInHttpInMs += _httpManager.LastRequestDurationInMs;
                 }
 
                 DecorateHttpEvent(method, requestContext, response, httpEvent);
 
                 if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
                 {
+                    requestContext.Logger.Verbose("[Oauth2Client] Processing error response ");
+
                     try
                     {
                         httpEvent.OauthErrorCode = MsalError.UnknownError;
@@ -200,7 +210,10 @@ namespace Microsoft.Identity.Client.OAuth2
 
             VerifyCorrelationIdHeaderInResponse(response.HeadersAsDictionary, requestContext);
 
-            return JsonHelper.DeserializeFromJson<T>(response.Body);
+            using (requestContext.Logger.LogBlockDuration("[OAuth2Client] Deserializing response"))
+            {
+                return JsonHelper.DeserializeFromJson<T>(response.Body);
+            }
         }
 
         private static void ThrowServerException(HttpResponse response, RequestContext requestContext)
