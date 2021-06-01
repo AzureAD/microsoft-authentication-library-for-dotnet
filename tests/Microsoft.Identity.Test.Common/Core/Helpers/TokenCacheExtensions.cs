@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             }
         }
 
-        public static void AddAccessTokenCacheItem(this ITokenCacheInternal tokenCache, MsalRefreshTokenCacheItem accessTokenItem)
+        public static void AddRefreshTokenCacheItem(this ITokenCacheInternal tokenCache, MsalRefreshTokenCacheItem accessTokenItem)
         {
             lock (_lock)
             {
