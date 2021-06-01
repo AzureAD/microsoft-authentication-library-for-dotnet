@@ -41,27 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 return sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             }
         }
-
-        public string Encrypt(string message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string Decrypt(string encryptedMessage)
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] Encrypt(byte[] message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] Decrypt(byte[] encryptedMessage)
-        {
-            throw new NotImplementedException();
-        }
-
+       
         /// <inheritdoc />
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {

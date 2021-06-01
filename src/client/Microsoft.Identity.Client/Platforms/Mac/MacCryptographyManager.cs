@@ -51,32 +51,9 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             }
         }
 
-        #region Not Implemented
-        public string Encrypt(string message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string Decrypt(string encryptedMessage)
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] Encrypt(byte[] message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] Decrypt(byte[] encryptedMessage)
-        {
-            throw new NotImplementedException();
-        }
-
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
             throw new NotImplementedException();
         }
-
-        #endregion
     }
 }
