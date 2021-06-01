@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Threading;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -18,6 +20,7 @@ namespace Microsoft.Identity.Client
             bool hasStateChanged,
             bool isAppCache, 
             bool hasTokens,
+            CancellationToken cancellationToken,
             string suggestedCacheKey = null)
         {
             TokenCache = tokenCacheSerializer;
@@ -27,6 +30,7 @@ namespace Microsoft.Identity.Client
             IsApplicationCache = isAppCache;
             HasTokens = hasTokens;
             SuggestedCacheKey = suggestedCacheKey;
+            CancellationToken = cancellationToken;
         }
 
         /// <summary>
@@ -77,12 +81,18 @@ namespace Microsoft.Identity.Client
         public string SuggestedCacheKey { get; }
 
         /// <summary>
-        /// 
+        /// Is true when at least one non-expired access token exists in the cache. 
         /// </summary>
-        /// <remarks>
-        /// If this flag is false in the OnAfterAccessAsync notification, the token cache can be deleted.        
-        /// MSAL takes into consideration access tokens expiration when computing this flag, but not refresh token expiration, which is not known to MSAL.7
+        /// <remarks>  
+        /// If this flag is false in the OnAfterAccessAsync notification, the *application* token cache - used by client_credentials flow / AcquireTokenForClient -  can be deleted.        
+        /// MSAL takes into consideration access tokens expiration when computing this flag, but not refresh token expiration, which is not known to MSAL.
         /// </remarks>
         public bool HasTokens { get; }
+
+        /// <summary>
+        /// The cancellation token that was passed to AcquireToken* flow via ExecuteAsync(CancellationToken). Can be passed
+        /// along to the custom token cache implementation.
+        /// </summary>
+        public CancellationToken CancellationToken { get; }
     }
 }

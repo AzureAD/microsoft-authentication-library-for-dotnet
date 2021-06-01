@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
@@ -43,6 +44,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                        hasStateChanged: false,
                                        true,
                                        hasTokens: true,
+                                       cancellationToken: CancellationToken.None,
                                        suggestedCacheKey: key);
             app.AppTokenCacheInternal.OnBeforeAccessAsync(args).GetAwaiter().GetResult();
         }     

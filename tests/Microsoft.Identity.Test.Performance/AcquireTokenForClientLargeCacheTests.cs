@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Identity.Client;
@@ -143,6 +144,7 @@ namespace Microsoft.Identity.Test.Performance
                                      hasStateChanged: false,
                                      true,
                                      hasTokens: true,
+                                     cancellationToken: CancellationToken.None,
                                      suggestedCacheKey: key);
             cca.AppTokenCacheInternal.OnBeforeAccessAsync(args).GetAwaiter().GetResult();
 
