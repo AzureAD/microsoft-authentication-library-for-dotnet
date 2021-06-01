@@ -1,13 +1,16 @@
 ﻿{
     "client_id": "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8",
-    "authorization_user_agent": "WEBVIEW",
+    "authorization_user_agent": "DEFAULT",
     "redirect_uri": "msauth://com.microsoft.identity.client/2RJuUvgnnEn0C0I0IOd1qHqOUMg%3D",
     "account_mode": "MULTIPLE",
     "broker_redirect_uri_registered": true,
     "authorities": [
         {
             "type": "AAD",
-            "authority_url": "https://login.microsoftonline.com/f645ad92e38d4d1ab510d1b09a74a8ca"
+            "authority_url": "https://login.microsoftonline.com/f645ad92e38d4d1ab510d1b09a74a8ca",
+            "audience": {
+                "type": "AzureADMultipleOrgs"
+            }
         }
     ]
 }
