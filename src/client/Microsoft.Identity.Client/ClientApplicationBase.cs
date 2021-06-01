@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public async Task RemoveAsync(IAccount account)
         {
-            await RemoveAsync(account).ConfigureAwait(false);
+            await RemoveAsync(account, default(CancellationToken)).ConfigureAwait(false);
         }
 
         // TODO: MSAL 5 - add cancellationToken to the interface
