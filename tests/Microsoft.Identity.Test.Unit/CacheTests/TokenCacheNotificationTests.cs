@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-                var accounts = app.GetAccountsAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                var accounts = await app.GetAccountsAsync(cancellationTokenSource.Token).ConfigureAwait(false);
                 AssertCancellationToken(cacheAccessRecorder, cancellationTokenSource);
                 cacheAccessRecorder.AssertAccessCounts(expectedReads: 1, expectedWrites: 0);
 
