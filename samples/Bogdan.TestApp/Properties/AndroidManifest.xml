@@ -22,8 +22,8 @@
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
         <data
-          android:host="com.microsoft.identity.client"
-          android:path="/2RJuUvgnnEn0C0I0IOd1qHqOUMg="
+          android:host="com.azuresamples.msalandroidapp"
+          android:path="/i0gj9MxJ7ABJtkaIyUBW4Xszw9Q="
           android:scheme="msauth" />
       </intent-filter>
     </activity>
