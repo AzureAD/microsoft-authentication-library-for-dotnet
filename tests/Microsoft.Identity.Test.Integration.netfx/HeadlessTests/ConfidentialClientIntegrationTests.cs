@@ -159,8 +159,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ExecuteAsync()
                .ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(authResult);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs >= 0);
+            MsalAssert.AssertAuthResult(authResult);            
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs == 0);
 
             appCacheRecorder.AssertAccessCounts(2, 1);
