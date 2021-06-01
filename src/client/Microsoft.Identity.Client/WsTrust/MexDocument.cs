@@ -230,22 +230,29 @@ namespace Microsoft.Identity.Client.WsTrust
 
         private IEnumerable<XElement> FindElements(XContainer mexDocument, XNamespace xNamespace, string element)
         {
-            IEnumerable<XElement> bindingElements = mexDocument.Elements().First().Elements(xNamespace + element);
+            IEnumerable<XElement> xmlElements = mexDocument.Elements()?.First()?.Elements(xNamespace + element);
 
-            //Unable to find metadata information in root node. Attempting to search document.
-            if (bindingElements.Count() == 0)
+            if (xmlElements == null)
             {
-                bindingElements = mexDocument.Elements().DescendantsAndSelf().Elements(xNamespace + element);
+                throw new MsalClientException(
+                MsalError.ParsingWsMetadataExchangeFailed,
+                MsalErrorMessage.ParsingMetadataDocumentFailed + $" Could not find XML data.");
+            }
 
-                if (bindingElements.Count() == 0)
+            if (!xmlElements.Any())
+            {
+                //Unable to find metadata information in root node. Attempting to search document.
+                xmlElements = mexDocument.Elements().DescendantsAndSelf().Elements(xNamespace + element);
+
+                if (!xmlElements.Any())
                 {
                     throw new MsalClientException(
                     MsalError.ParsingWsMetadataExchangeFailed,
-                    MsalErrorMessage.ParsingMetadataDocumentFailed + $" Could not parse {element} data.");
+                    MsalErrorMessage.ParsingMetadataDocumentFailed + $" Could not find element {element}.");
                 }
             }
 
-            return bindingElements;
+            return xmlElements;
         }
 
         private void AddPolicy(XElement policy, UserAuthType policyAuthType)
