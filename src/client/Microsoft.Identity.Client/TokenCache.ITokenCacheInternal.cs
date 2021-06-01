@@ -82,7 +82,10 @@ namespace Microsoft.Identity.Client
                                     instanceDiscoveryMetadata.PreferredCache,
                                     requestParams.AppConfig.ClientId,
                                     response,
-                                    homeAccountId);
+                                    homeAccountId)
+                {
+                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash
+                };
 
                 if (!_featureFlags.IsFociEnabled)
                 {

@@ -73,33 +73,37 @@
   },
   "RefreshToken": {
     "my-uid.my-utid-env_1-refreshtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3--": {
-      "home_account_id": "my-uid.my-utid",
-      "environment": "env_1",
-      "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
-      "secret": "access_token_secret",
-      "credential_type": "RefreshToken",
+        "home_account_id": "my-uid.my-utid",
+        "environment": "env_1",
+        "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
+        "secret": "access_token_secret",
+        "credential_type": "RefreshToken",
+        "user_assertion_hash": "assertion hash"
     },
     "my-uid.my-utid-env_2-refreshtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3--": {
-      "home_account_id": "my-uid.my-utid",
-      "environment": "env_2",
-      "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
-      "secret": "access_token_secret",
-      "credential_type": "RefreshToken",
+        "home_account_id": "my-uid.my-utid",
+        "environment": "env_2",
+        "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
+        "secret": "access_token_secret",
+        "credential_type": "RefreshToken",
+        "user_assertion_hash": "assertion hash"
     },
     "my-uid.my-utid-env_3-refreshtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3--": {
-      "home_account_id": "my-uid.my-utid",
-      "environment": "env_3",
-      "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
-      "secret": "access_token_secret",
-      "credential_type": "RefreshToken",
+        "home_account_id": "my-uid.my-utid",
+        "environment": "env_3",
+        "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
+        "secret": "access_token_secret",
+        "credential_type": "RefreshToken",
+        "user_assertion_hash": "assertion hash"
     },
     "my-uid.my-utid-env-refreshtoken-1--": {
-      "home_account_id": "my-uid.my-utid",
-      "environment": "env",
-      "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
-      "secret": "access_token_secret",
-      "credential_type": "RefreshToken",
-      "family_id": "1"
+        "home_account_id": "my-uid.my-utid",
+        "environment": "env",
+        "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
+        "secret": "access_token_secret",
+        "credential_type": "RefreshToken",
+        "user_assertion_hash": "assertion hash",
+        "family_id": "1"
     }
   },
   "IdToken": {
