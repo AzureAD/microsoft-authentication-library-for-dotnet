@@ -29,6 +29,12 @@
 
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="federationMetadata.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   
   
 </Project>

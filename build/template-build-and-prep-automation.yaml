@@ -43,6 +43,13 @@ steps:
     TargetFolder: '$(build.artifactstagingdirectory)/msalSrc'
 
 - task: CopyFiles@2
+  displayName: 'Stage MSAL src bin'
+  inputs:
+    SourceFolder: src\client
+    Contents: '**\bin\**\*'
+    TargetFolder: '$(build.artifactstagingdirectory)/msalSrc'
+
+- task: CopyFiles@2
   displayName: 'Stage MSAL tests'
   inputs:
     SourceFolder: tests

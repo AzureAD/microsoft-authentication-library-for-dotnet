@@ -70,14 +70,16 @@ namespace Microsoft.Identity.Client.WsTrust
         }
 
         public async Task<WsTrustResponse> PerformWsTrustMexExchangeAsync(
-            string federationMetadataUrl, string cloudAudienceUrn, UserAuthType userAuthType, string username, SecureString password)
+            string federationMetadataUrl, string cloudAudienceUrn, UserAuthType userAuthType, string username, SecureString password, string federationMetadataFilename)
         {
             MexDocument mexDocument;
 
             try
             {
                 mexDocument = await _serviceBundle.WsTrustWebRequestManager.GetMexDocumentAsync(
-                federationMetadataUrl, _requestContext).ConfigureAwait(false);
+                federationMetadataUrl,
+                _requestContext,
+                federationMetadataFilename).ConfigureAwait(false);
             }
             catch (XmlException ex)
             {
