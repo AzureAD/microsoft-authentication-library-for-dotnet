@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 return signedData;
             }
 #else
-            return CryptographyManager.SignWithCertificate(message, certificate);
+            return CryptographyManagerCommon.SignWithCertificate(message, certificate);
 #endif
         }
 

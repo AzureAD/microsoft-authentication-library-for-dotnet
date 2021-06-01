@@ -12,6 +12,7 @@ using Windows.Storage.Streams;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -124,7 +125,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
             // Used by Confidential Client, which is hidden on UWP
-            throw new NotImplementedException();
+            return CryptographyManagerCommon.SignWithCertificate(message, certificate);
         }
 
     }

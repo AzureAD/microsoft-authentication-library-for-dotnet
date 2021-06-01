@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                         ClientCredentialWrapper.MinKeySizeInBits));
             }
 
-            return CryptographyManager.SignWithCertificate(message, certificate);
+            return CryptographyManagerCommon.SignWithCertificate(message, certificate);
         }
     }
 }

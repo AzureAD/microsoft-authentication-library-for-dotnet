@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         /// <inheritdoc />
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-            return CryptographyManager.SignWithCertificate(message, certificate);
+            return CryptographyManagerCommon.SignWithCertificate(message, certificate);
         }
     }
 }

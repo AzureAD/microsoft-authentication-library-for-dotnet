@@ -8,7 +8,8 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
-    internal static class CryptographyManager
+#if !NET45
+    internal static class CryptographyManagerCommon
     {
         private static readonly ConcurrentDictionary<string, RSA> s_certificateToRsaMap = new ConcurrentDictionary<string, RSA>();
         private static readonly int s_maximumMapSize = 1000;
@@ -29,4 +30,5 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return signedData;
         }
     }
+#endif
 }

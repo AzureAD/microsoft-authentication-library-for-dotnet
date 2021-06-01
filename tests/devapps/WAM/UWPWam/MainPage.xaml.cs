@@ -130,8 +130,8 @@ namespace UWP_standalone
         }
 
         private async void ClearCacheAsync(object sender, RoutedEventArgs e)
-        {            
-            var pca = CreatePublicClient();            
+        {
+            var pca = CreatePublicClient();
 
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
@@ -201,6 +201,32 @@ namespace UWP_standalone
 
         }
 
+        private async void S2S_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string s_clientIdForConfidentialApp = Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID");
+                string s_confidentialClientSecret = Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET");
+
+                if (string.IsNullOrEmpty(s_clientIdForConfidentialApp) ||
+                    string.IsNullOrEmpty(s_confidentialClientSecret))
+                    throw new InvalidOperationException("Bad setup");
+
+                var cca = ConfidentialClientApplicationBuilder.Create(s_clientIdForConfidentialApp)
+                    .WithClientSecret(s_confidentialClientSecret)
+                    .Build();
+
+                var result = await cca.AcquireTokenForClient(new[] { "https://graph.microsoft.com/.default" }).ExecuteAsync().ConfigureAwait(false);
+                await DisplayResultAsync(result).ConfigureAwait(false);
+
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(false);
+                return;
+            }
+        }
+
         private async Task DisplayErrorAsync(Exception ex)
         {
             await DisplayMessageAsync(ex.ToString()).ConfigureAwait(false);
@@ -208,7 +234,7 @@ namespace UWP_standalone
 
         private async Task DisplayResultAsync(AuthenticationResult result)
         {
-            await DisplayMessageAsync($"Signed in User - {result.Account.Username}\nAccess token from {result.AuthenticationResultMetadata.TokenSource}: \n{result.AccessToken}").ConfigureAwait(false);
+            await DisplayMessageAsync($"Signed in User - {result?.Account?.Username}\nAccess token from {result.AuthenticationResultMetadata.TokenSource}: \n{result.AccessToken}").ConfigureAwait(false);
         }
 
 
@@ -220,5 +246,9 @@ namespace UWP_standalone
                        Log.Text = message;
                    });
         }
+
+
+
+
     }
 }

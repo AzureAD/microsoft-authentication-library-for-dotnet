@@ -21,6 +21,7 @@
 
         <TextBox x:Name="tbxUpn" Header="Account UPN prefix (leave empty for Account Picker)"  HorizontalAlignment="Left" Margin="615,157,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="205"/>
         <Button Content="Expire ATs" Margin="734,324,0,0" VerticalAlignment="Top" Click="ExpireAtsAsync"/>
+        <Button Content="S2S" Margin="770,105,0,0" VerticalAlignment="Top" Click="S2S_ClickAsync"/>
     </Grid>
 
 </Page>
