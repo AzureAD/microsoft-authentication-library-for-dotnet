@@ -571,7 +571,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void WithClientCapabilities()
         {
             var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithClientCapabilities(new[] {  "cp1", "cp2"})
+                .WithClientCapabilities(new[] { "cp1", "cp2" })
                 .Build();
 
             CollectionAssert.AreEquivalent(new[] { "cp1", "cp2" }, app.AppConfig.ClientCapabilities.ToList());
@@ -584,11 +584,11 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             {
                 Instance = "https://login.microsoftonline.com",
                 TenantId = "organizations",
-                ClientId = TestConstants.ClientId, 
-                ClientCapabilities = new[] { "cp1", "cp2"}
+                ClientId = TestConstants.ClientId,
+                ClientCapabilities = new[] { "cp1", "cp2" }
             };
 
-            var app = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)                
+            var app = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
                 .Build();
 
             CollectionAssert.AreEquivalent(new string[] { "cp1", "cp2" }, app.AppConfig.ClientCapabilities.ToList());
@@ -599,12 +599,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void AuthorityWithTenant()
         {
             var options = new PublicClientApplicationOptions();
-            options.ClientId = TestConstants.ClientId;            
+            options.ClientId = TestConstants.ClientId;
 
             var app1 = PublicClientApplicationBuilder
                 .CreateWithApplicationOptions(options)
-                .WithTenantId(TestConstants.TenantId)                            
-                .WithAuthority("https://login.microsoftonline.com/common")       
+                .WithTenantId(TestConstants.TenantId)
+                .WithAuthority("https://login.microsoftonline.com/common")
                .Build();
 
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app1.Authority);
@@ -629,13 +629,35 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             options2.TenantId = TestConstants.TenantId;
 
             var app4 = PublicClientApplicationBuilder
-                .CreateWithApplicationOptions(options)
-                .WithTenantId(TestConstants.TenantId)
+                .CreateWithApplicationOptions(options2)                
                 .WithAuthority("https://login.microsoftonline.com/common")
                .Build();
 
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app4.Authority);
 
+
+            var app5 = PublicClientApplicationBuilder
+                .CreateWithApplicationOptions(options)
+                .WithAuthority($"https://login.microsoftonline.com/{TestConstants.TenantId}")
+                .WithTenantId($"{TestConstants.TenantId}")
+               .Build();
+
+            Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app5.Authority);
+
+            var app6 = PublicClientApplicationBuilder
+             .CreateWithApplicationOptions(options2)
+             .WithAuthority($"https://login.microsoftonline.com/{TestConstants.TenantId}")
+            .Build();
+
+            Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
+
+            var app7 = PublicClientApplicationBuilder
+                .CreateWithApplicationOptions(options2)
+                .WithAuthority($"https://login.microsoftonline.com/{TestConstants.TenantId}")
+                .WithTenantId($"{TestConstants.TenantId}")
+                .Build();
+
+            Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
         }
 
 #if NET5_WIN
@@ -655,7 +677,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var builder1 = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId);
-                    
+
 
             // broker is not available out of the box
             Assert.AreEqual(false, builder1.IsBrokerAvailable());
@@ -663,7 +685,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var builder2 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
                    .WithDesktopFeatures();
-                   
+
 
             // broker is not available out of the box
             Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), builder2.IsBrokerAvailable());
