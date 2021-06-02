@@ -1,3 +1,22 @@
+4.32.0
+==========
+### New Features:
+**Improved search of metadata in the federation metadata XML during WS-Trust flows**. See issue [#2665](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2665)
+**Added cancellation token to TokenCacheNotificationArgs**, to allow apps to send cancellation token to Redis. See issue [#2551](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2551)
+**FindAccessToken now logs the number of access tokens**. See issue [#2417](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2417)
+**Updated the regional telemetry schema**. See issue [#2622](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2622)
+**MSAL now exposes AuthenticationResult.TokenType**. See issue [#2637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2637)
+
+### Bug Fixes:
+**Fixed a bug where WithTenant is ignored**. See issue [#2543](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2543)
+**WAM now supports UWP race conditions**. See issue [#2616](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2616)
+**Handle multiple work accounts on same machine with WAM**. See issue [#2615](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2615)
+**Fix B2C failure when user flows/policies have a name containing a `.`. See issue [#2444](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2444)
+**Handle the scenario where TokenType is null**. See issue [#2636](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2636)
+**Handle Unity Windows Standalone il2cpp: NotSupportedException**. See issue [#2586](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2586)
+**MSAL Xamarin Android now opens EDGE browser for authentication with OpenWithChromeEdgeBrowserAsync**. See issue [#2399](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2399)
+**Handle WAM failure after account picker shows up on Win Server 2016**. See issue [#2572](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2572)
+
 4.31.0
 ==========
 ### New Features:
