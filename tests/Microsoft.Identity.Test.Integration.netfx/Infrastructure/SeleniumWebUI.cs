@@ -124,12 +124,15 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         return GetMessageToShowInBroswerAfterAuth(uri);
                     },
                     tcpCancellationToken.Token);
+                listenForAuthCodeTask.Start();
 
                 var seleniumAutomationTask = Task.Factory.StartNew(() =>
                     {
                         _seleniumAutomationLogic(driver);
                         _logger.Info("Selenium automation finished");
                     });
+
+                Trace.WriteLine($"Before WhenAny: seleniumAutomationTask {seleniumAutomationTask.Status} listenForAuthCodeTask {listenForAuthCodeTask.Status}");
 
                 // There is no guarantee over which task will finish first - TCP listener or Selenium automation
                 // as the TCP listener has some post processing to do (extracting the url etc.) 
