@@ -244,10 +244,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-
         [DeploymentItem(@"Resources\TestMex.xml")]
+        [DeploymentItem(@"Resources\TestMex3rdParty.xml")]
         [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
-        public async Task AcquireTokenByIntegratedWindowsAuthTestAsync()
+        [DataRow("TestMex.xml")]
+        [DataRow("TestMex3rdParty.xml")]
+        public async Task AcquireTokenByIntegratedWindowsAuth3rdPartyIDPTestAsync(string federationMetadataFilePath)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -258,8 +260,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
                 mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParameters;
                 mockTokenRequestHttpHandler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
-                string federationMetadata = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex.xml"));
+                string federationMetadata = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath(federationMetadataFilePath));
 
+                //Using 3rd party federation metadata
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
