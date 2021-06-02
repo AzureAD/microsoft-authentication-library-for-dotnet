@@ -12,7 +12,9 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -128,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 });
         }
 
-        private MockHttpMessageHandler AddMockHandlerAadSuccess(MockHttpManager httpManager, string authority)
+        private MockHttpMessageHandler AddMockHandlerAadSuccess(MockHttpManager httpManager, string authority, IDictionary<string, string> expectedRequestHeaders = null)
         {
             var handler = new MockHttpMessageHandler
             {
@@ -139,7 +141,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         {"grant_type", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"},
                         {"scope", "openid offline_access profile r1/scope1 r1/scope2"}
                     },
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                ExpectedRequestHeaders = expectedRequestHeaders
             };
             httpManager.AddMockHandler(handler);
 
@@ -223,7 +226,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                 "\"account_type\":\"Bogus\"}")
                         }
                     });
-
+                
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
@@ -254,10 +257,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
+                var expectedRequestHeaders = new Dictionary<string, string> { { Constants.CCSRoutingHintHeader, CoreHelpers.GetCCSUpnHeader(TestConstants.s_user.Username) } };
 
                 MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
-                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
+                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant, expectedRequestHeaders);
                 mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParameters;
                 mockTokenRequestHttpHandler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
                 string federationMetadata = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath(federationMetadataFilePath));
@@ -302,6 +306,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
+                
                 MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
                 mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParameters;
                 mockTokenRequestHttpHandler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
