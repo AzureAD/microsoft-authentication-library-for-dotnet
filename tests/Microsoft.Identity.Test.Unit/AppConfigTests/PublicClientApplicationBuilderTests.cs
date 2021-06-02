@@ -629,8 +629,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             options2.TenantId = TestConstants.TenantId;
 
             var app4 = PublicClientApplicationBuilder
-                .CreateWithApplicationOptions(options)
-                .WithTenantId(TestConstants.TenantId)
+                .CreateWithApplicationOptions(options2)                
                 .WithAuthority("https://login.microsoftonline.com/common")
                .Build();
 
@@ -639,12 +638,18 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             var app5 = PublicClientApplicationBuilder
                 .CreateWithApplicationOptions(options)
-                .WithTenantId(TestConstants.TenantId)
                 .WithAuthority($"https://login.microsoftonline.com/{TestConstants.TenantId}")
                 .WithTenantId($"{TestConstants.TenantId}")
                .Build();
 
-            Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app4.Authority);
+            Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app5.Authority);
+
+            var app6 = PublicClientApplicationBuilder
+             .CreateWithApplicationOptions(options2)
+             .WithAuthority($"https://login.microsoftonline.com/{TestConstants.TenantId}")
+            .Build();
+
+            Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
 
         }
 
