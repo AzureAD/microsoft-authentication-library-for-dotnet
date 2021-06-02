@@ -512,7 +512,8 @@ namespace Microsoft.Identity.Client
                     Config.AuthorityInfo.AuthorityType == AuthorityType.Aad)
                 {
                     AadAuthority aadAuthority = Authority.CreateAuthority(Config.AuthorityInfo) as AadAuthority;
-                    if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant())
+                    if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() && 
+                        !string.Equals(aadAuthority.TenantId, Config.TenantId))
                     {
                         throw new MsalClientException(MsalError.AuthorityTenantSpecifiedTwice, "You specified a tenant twice - once in WithAuthority() and once using WithTenant().");
                     }
