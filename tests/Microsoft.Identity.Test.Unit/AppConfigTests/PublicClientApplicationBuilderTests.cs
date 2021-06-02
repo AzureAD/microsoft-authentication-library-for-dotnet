@@ -651,6 +651,13 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
 
+            var app7 = PublicClientApplicationBuilder
+                .CreateWithApplicationOptions(options2)
+                .WithAuthority($"https://login.microsoftonline.com/{TestConstants.TenantId}")
+                .WithTenantId($"{TestConstants.TenantId}")
+                .Build();
+
+            Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
         }
 
 #if NET5_WIN
