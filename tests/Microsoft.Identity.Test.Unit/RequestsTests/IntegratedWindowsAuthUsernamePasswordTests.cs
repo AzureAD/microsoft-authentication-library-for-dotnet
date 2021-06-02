@@ -255,11 +255,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var expectedRequestHeaders = new Dictionary<string, string> { { Constants.OidCCSHeader, CoreHelpers.GetCCSUpnHeader(TestConstants.s_user.Username) } };
+                var expectedRequestHeaders = new Dictionary<string, string> { { Constants.CCSRoutingHintHeader, CoreHelpers.GetCCSUpnHeader(TestConstants.s_user.Username) } };
 
                 MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
-                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
+                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant, expectedRequestHeaders);
                 mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParameters;
                 mockTokenRequestHttpHandler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
                 string federationMetadata = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex.xml"));
@@ -304,7 +304,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
                 
-                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant, expectedRequestHeaders);
+                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
                 mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParameters;
                 mockTokenRequestHttpHandler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
 

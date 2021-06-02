@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client.Internal
                 //It consists of either the ObjectId.TenantId or the upn of the account signign in.
                 //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
                 string OidCCSHeader = CoreHelpers.GetCCSUpnHeader(_interactiveParameters.LoginHint);
-                authorizationRequestParameters[Constants.OidCCSHeader] = OidCCSHeader;
+                authorizationRequestParameters[Constants.CCSRoutingHintHeader] = OidCCSHeader;
             }
 
             if (_requestParams.RequestContext.CorrelationId != Guid.Empty)

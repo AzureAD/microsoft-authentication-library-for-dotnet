@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (!string.IsNullOrEmpty(_interactiveParameters.LoginHint))
             {
-                _tokenClient.AddHeaderToClient(Constants.OidCCSHeader, CoreHelpers.GetCCSUpnHeader(_interactiveParameters.LoginHint));
+                _tokenClient.AddHeaderToClient(Constants.CCSRoutingHintHeader, CoreHelpers.GetCCSUpnHeader(_interactiveParameters.LoginHint));
             }
             return _tokenClient.SendTokenRequestAsync(GetBodyParameters());
         }

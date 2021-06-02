@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public const string UserRealmMsaDomainName = "live.com";
 
-        public const string OidCCSHeader = "X-AnchorMailbox";
+        public const string CCSRoutingHintHeader = "X-AnchorMailbox";
 
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {

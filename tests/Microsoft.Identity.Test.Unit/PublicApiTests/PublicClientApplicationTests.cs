@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.ServiceBundle.ConfigureMockWebUI();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
                 var extraExpectedHeaders = TestConstants.ExtraHttpHeader;
-                extraExpectedHeaders.Add(Constants.OidCCSHeader, CoreHelpers.GetCCSUpnHeader(TestConstants.s_user.Username));
+                extraExpectedHeaders.Add(Constants.CCSRoutingHintHeader, CoreHelpers.GetCCSUpnHeader(TestConstants.s_user.Username));
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant, null, null, false, null, extraExpectedHeaders);
 
                 Guid correlationId = Guid.NewGuid();

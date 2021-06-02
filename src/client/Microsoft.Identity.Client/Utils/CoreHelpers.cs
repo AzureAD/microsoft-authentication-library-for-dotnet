@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static string GetCCSUpnHeader(string upn)
         {
-            return string.IsNullOrEmpty(upn)? string.Empty : $@"upn:{upn}";
+            return string.IsNullOrEmpty(upn)? string.Empty : $@"UPN:{upn}";
         }
     }
 }

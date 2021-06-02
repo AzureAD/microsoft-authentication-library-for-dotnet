@@ -184,6 +184,8 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 foreach (KeyValuePair<string, string> pair in _requestParams.ExtraHttpHeaders)
                 {
+                    if (!string.IsNullOrEmpty(pair.Key) &&
+                        !string.IsNullOrEmpty(pair.Value))
                     _oAuth2Client.AddHeader(pair.Key, pair.Value);
                 }
             }
