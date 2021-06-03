@@ -18,7 +18,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
-    [DeploymentItem(@"Resources\local-imds-response.json")]
     public class ConfidentialClientWithRegionTests : TestBase
     {
        

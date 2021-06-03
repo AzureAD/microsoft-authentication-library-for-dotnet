@@ -143,6 +143,7 @@ namespace Microsoft.Identity.Client
                             hasStateChanged: true,
                             tokenCacheInternal.IsApplicationCache,
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                            requestParams.RequestContext.UserCancellationToken,
                             suggestedCacheKey: suggestedWebCacheKey);
 
                         Stopwatch sw = Stopwatch.StartNew();
@@ -216,6 +217,7 @@ namespace Microsoft.Identity.Client
                             hasStateChanged: true,
                             tokenCacheInternal.IsApplicationCache,
                             tokenCacheInternal.HasTokensNoLocks(),
+                            requestParams.RequestContext.UserCancellationToken,
                             suggestedCacheKey: suggestedWebCacheKey);
 
                         Stopwatch sw = Stopwatch.StartNew();
@@ -835,6 +837,7 @@ namespace Microsoft.Identity.Client
                             true,
                             tokenCacheInternal.IsApplicationCache,
                             tokenCacheInternal.HasTokensNoLocks(),
+                            requestContext.UserCancellationToken,
                             account.HomeAccountId.Identifier);
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -858,6 +861,7 @@ namespace Microsoft.Identity.Client
                             true,
                             tokenCacheInternal.IsApplicationCache,
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                            requestContext.UserCancellationToken,
                             account.HomeAccountId.Identifier);
 
                         await tokenCacheInternal.OnAfterAccessAsync(afterAccessArgs).ConfigureAwait(false);

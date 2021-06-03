@@ -174,6 +174,26 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
             }
+
+            AddExtraHttpHeaders();
+        }
+
+        private void AddExtraHttpHeaders()
+        {
+            if (_requestParams.ExtraHttpHeaders != null)
+            {
+                foreach (KeyValuePair<string, string> pair in _requestParams.ExtraHttpHeaders)
+                {
+                    if (!string.IsNullOrEmpty(pair.Key) &&
+                        !string.IsNullOrEmpty(pair.Value))
+                    _oAuth2Client.AddHeader(pair.Key, pair.Value);
+                }
+            }
+        }
+
+        public void AddHeaderToClient(string name, string value)
+        {
+            _oAuth2Client.AddHeader(name, value);
         }
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, Core.ICoreLogger logger)

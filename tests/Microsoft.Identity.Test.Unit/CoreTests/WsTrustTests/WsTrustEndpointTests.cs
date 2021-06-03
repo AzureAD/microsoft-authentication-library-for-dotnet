@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 "xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd\" " +
                 "xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\">" +
                 "<s:Header><wsa:Action s:mustUnderstand=\"1\">http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue</wsa:Action>" +
-                "<wsa:messageID>urn:uuid:b052e0d8-349c-4d73-9ddb-0782043a440e</wsa:messageID>" +
+                "<wsa:MessageID>urn:uuid:b052e0d8-349c-4d73-9ddb-0782043a440e</wsa:MessageID>" +
                 "<wsa:ReplyTo><wsa:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa:Address>" +
                 "</wsa:ReplyTo><wsa:To s:mustUnderstand=\"1\">https://windowsorusernamepasswordendpointurl/</wsa:To>" +
                 "</s:Header><s:Body><wst:RequestSecurityToken xmlns:wst=\"http://schemas.xmlsoap.org/ws/2005/02/trust\">" +
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 "xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd\" " +
                 "xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\">" +
                 "<s:Header><wsa:Action s:mustUnderstand=\"1\">http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue</wsa:Action>" +
-                "<wsa:messageID>urn:uuid:b052e0d8-349c-4d73-9ddb-0782043a440e</wsa:messageID>" +
+                "<wsa:MessageID>urn:uuid:b052e0d8-349c-4d73-9ddb-0782043a440e</wsa:MessageID>" +
                 "<wsa:ReplyTo><wsa:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa:Address>" +
                 "</wsa:ReplyTo><wsa:To s:mustUnderstand=\"1\">https://windowsorusernamepasswordendpointurl/</wsa:To>" +
                 "</s:Header><s:Body><wst:RequestSecurityToken xmlns:wst=\"http://docs.oasis-open.org/ws-sx/ws-trust/200512\">" +
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 "xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd\" " +
                 "xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\">" +
                 "<s:Header><wsa:Action s:mustUnderstand=\"1\">http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue</wsa:Action>" +
-                "<wsa:messageID>urn:uuid:b052e0d8-349c-4d73-9ddb-0782043a440e</wsa:messageID>" +
+                "<wsa:MessageID>urn:uuid:b052e0d8-349c-4d73-9ddb-0782043a440e</wsa:MessageID>" +
                 "<wsa:ReplyTo><wsa:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa:Address>" +
                 "</wsa:ReplyTo><wsa:To s:mustUnderstand=\"1\">https://windowsorusernamepasswordendpointurl/</wsa:To>" +
                 "<wsse:Security s:mustUnderstand=\"1\" xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">" +
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 "xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd\" " +
                 "xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\">" +
                 "<s:Header><wsa:Action s:mustUnderstand=\"1\">http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue</wsa:Action>" +
-                "<wsa:messageID>urn:uuid:b052e0d8-349c-4d73-9ddb-0782043a440e</wsa:messageID>" +
+                "<wsa:MessageID>urn:uuid:b052e0d8-349c-4d73-9ddb-0782043a440e</wsa:MessageID>" +
                 "<wsa:ReplyTo><wsa:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa:Address>" +
                 "</wsa:ReplyTo><wsa:To s:mustUnderstand=\"1\">https://windowsorusernamepasswordendpointurl/</wsa:To>" +
                 "<wsse:Security s:mustUnderstand=\"1\" xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">" +

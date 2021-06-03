@@ -793,6 +793,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string AuthorityTypeMismatch = "authority_type_mismatch";
 
+        /// <summary>
+        /// <para>What happens?</para>You specified a tenant twice - once in WithAuthority() and once using WithTenant()
+        /// <para>Mitigation</para>Specify the tenant once.
+        /// </summary>
+        public const string AuthorityTenantSpecifiedTwice = "authority_tenant_specified_twice";
 
         /// <summary>
         /// <para>What happens?</para>You have configured your own instance metadata using both an Uri and a string. Only one is supported.

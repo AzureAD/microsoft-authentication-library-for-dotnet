@@ -63,7 +63,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                           userRealmResponse.CloudAudienceUrn,
                                           UserAuthType.UsernamePassword,
                                           _usernamePasswordParameters.Username,
-                                          _usernamePasswordParameters.Password).ConfigureAwait(false);
+                                          _usernamePasswordParameters.Password,
+                                          _usernamePasswordParameters.FederationMetadata).ConfigureAwait(false);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
                 return new UserAssertion(
@@ -130,6 +131,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             dict[OAuth2Parameter.Scope] = unionScope.AsSingleString();
 
             return dict;
+        }
+
+        protected override KeyValuePair<string, string>? GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
+        {
+            return GetCCSUpnHeader(_usernamePasswordParameters.Username);
         }
     }
 }

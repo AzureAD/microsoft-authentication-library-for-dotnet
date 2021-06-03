@@ -189,6 +189,12 @@ namespace Microsoft.Identity.Client.Internal
             if (!string.IsNullOrWhiteSpace(_interactiveParameters.LoginHint))
             {
                 authorizationRequestParameters[OAuth2Parameter.LoginHint] = _interactiveParameters.LoginHint;
+
+                //The CCS header is used by the CCS service to help route requests to resources in Azure during requests to speed up authentication.
+                //It consists of either the ObjectId.TenantId or the upn of the account signign in.
+                //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
+                string OidCCSHeader = CoreHelpers.GetCCSUpnHeader(_interactiveParameters.LoginHint);
+                authorizationRequestParameters[Constants.CCSRoutingHintHeader] = OidCCSHeader;
             }
 
             if (_requestParams.RequestContext.CorrelationId != Guid.Empty)

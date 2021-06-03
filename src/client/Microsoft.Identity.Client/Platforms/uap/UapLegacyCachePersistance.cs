@@ -8,12 +8,21 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Windows.Security.Cryptography.DataProtection;
+using Windows.Security.Cryptography;
+using Windows.Storage.Streams;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
+    /// <summary>
+    /// Important: this uses ApplicationDataContainer which is thread safe, but it has limitations 
+    /// related to the key data size, which is why MSAL caching does not use it.
+    /// </summary>
     internal class UapLegacyCachePersistence : ILegacyCachePersistence
     {
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
+        private const string ProtectionDescriptor = "LOCAL=user";
 
         private const string CacheValue = "CacheValue";
         private const string CacheValueSegmentCount = "CacheValueSegmentCount";
@@ -64,7 +73,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         internal void SetCacheValue(IPropertySet containerValues, byte[] value)
         {
-            byte[] encryptedValue = _cryptographyManager.Encrypt(value);
+            byte[] encryptedValue = Encrypt(value);
             containerValues[CacheValueLength] = encryptedValue.Length;
             if (encryptedValue.Length == 0)
             {
@@ -112,7 +121,31 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
 
             Array.Copy((byte[])containerValues[CacheValue + (segmentCount - 1)], 0, encryptedValue, (segmentCount - 1) * MaxCompositeValueLength, encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
-            return _cryptographyManager.Decrypt(encryptedValue);
+            return Decrypt(encryptedValue);
+        }
+
+        private byte[] Encrypt(byte[] message)
+        {
+            if (message == null)
+            {
+                return new byte[] { };
+            }
+
+            DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
+            IBuffer protectedBuffer = dataProtectionProvider.ProtectAsync(message.AsBuffer()).AsTask().GetAwaiter().GetResult();
+            return protectedBuffer.ToArray(0, (int)protectedBuffer.Length);
+        }
+
+        private byte[] Decrypt(byte[] encryptedMessage)
+        {
+            if (encryptedMessage == null)
+            {
+                return null;
+            }
+
+            DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
+            IBuffer buffer = dataProtectionProvider.UnprotectAsync(encryptedMessage.AsBuffer()).AsTask().GetAwaiter().GetResult();
+            return buffer.ToArray(0, (int)buffer.Length);
         }
     }
 }

@@ -44,6 +44,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
+        protected override KeyValuePair<string, string>? GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
+        {
+            return GetCCSUpnHeader(_integratedWindowsAuthParameters.Username);
+        }
+
         private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()
         {
             if (AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
@@ -62,7 +67,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     userRealmResponse.CloudAudienceUrn,
                     UserAuthType.IntegratedAuth,
                     _integratedWindowsAuthParameters.Username,
-                    null).ConfigureAwait(false);
+                    null,
+                    _integratedWindowsAuthParameters.FederationMetadata).ConfigureAwait(false);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
                 return new UserAssertion(

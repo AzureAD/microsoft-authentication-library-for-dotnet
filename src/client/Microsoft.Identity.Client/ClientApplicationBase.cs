@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using System.Threading;
 
 namespace Microsoft.Identity.Client
 {
@@ -98,7 +99,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            return await GetAccountsInternalAsync(ApiIds.GetAccounts).ConfigureAwait(false);
+            return await GetAccountsAsync(default(CancellationToken)).ConfigureAwait(false);
+        }
+
+        // TODO: MSAL 5 - add cancellationToken to the interface
+        /// <summary>
+        /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
+        /// </summary>
+        public async Task<IEnumerable<IAccount>> GetAccountsAsync(CancellationToken cancellationToken = default)
+        {
+            return await GetAccountsInternalAsync(ApiIds.GetAccounts, null, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -109,16 +119,44 @@ namespace Microsoft.Identity.Client
         /// </param>
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
         {
+            return await GetAccountsAsync(userFlow, default(CancellationToken)).ConfigureAwait(false);
+        }
+
+        // TODO: MSAL 5 - add cancellationToken to the interface
+        /// <summary>
+        /// Get the <see cref="IAccount"/> collection by its identifier among the accounts available in the token cache,
+        /// based on the user flow. This is for Azure AD B2C scenarios.
+        /// </summary>
+        /// <param name="userFlow">The identifier is the user flow being targeted by the specific B2C authority/>.
+        /// </param>
+        /// <param name="cancellationToken">Cancellation token </param>
+        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow, CancellationToken cancellationToken = default)
+        {
             if (string.IsNullOrWhiteSpace(userFlow))
             {
                 throw new ArgumentException($"{nameof(userFlow)} should not be null or whitespace", nameof(userFlow));
             }
 
-            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountsByUserFlow).ConfigureAwait(false);
+            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountsByUserFlow, null, cancellationToken).ConfigureAwait(false);
 
             return accounts.Where(acc =>
                 acc.HomeAccountId.ObjectId.EndsWith(
                     userFlow, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // TODO: MSAL 5 - add cancellationToken to the interface
+        /// <summary>
+        /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
+        /// </summary>
+        /// <param name="accountId">Account identifier. The identifier is typically the
+        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
+        /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
+        /// </param>
+        /// <param name="cancellationToken">Cancellation token </param>
+        public async Task<IAccount> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
+        {
+            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountById, accountId, cancellationToken).ConfigureAwait(false);
+            return accounts.SingleOrDefault();
         }
 
         /// <summary>
@@ -130,8 +168,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         public async Task<IAccount> GetAccountAsync(string accountId)
         {
-            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountById, accountId).ConfigureAwait(false);            
-            return accounts.SingleOrDefault();
+            return await GetAccountAsync(accountId, default(CancellationToken)).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -140,7 +177,19 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public async Task RemoveAsync(IAccount account)
         {
-            RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
+            await RemoveAsync(account, default(CancellationToken)).ConfigureAwait(false);
+        }
+
+        // TODO: MSAL 5 - add cancellationToken to the interface
+
+        /// <summary>
+        /// Removes all tokens in the cache for the specified account.
+        /// </summary>
+        /// <param name="account">Instance of the account that needs to be removed</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        public async Task RemoveAsync(IAccount account, CancellationToken cancellationToken = default)
+        {
+            RequestContext requestContext = CreateRequestContext(Guid.NewGuid(), cancellationToken);            
 
             if (account != null && UserTokenCacheInternal != null)
             {
@@ -149,15 +198,17 @@ namespace Microsoft.Identity.Client
 
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
                 await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
             }
         }
 
-        private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(ApiIds apiId, string homeAccountIdFilter = null)
+        private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(ApiIds apiId, string homeAccountIdFilter, CancellationToken cancellationToken)
         {
             Guid correlationId = Guid.NewGuid();
-            RequestContext requestContext = CreateRequestContext(correlationId);
+            RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
             requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId.ToString());
             requestContext.ApiEvent.ApiId = apiId;
 
@@ -179,7 +230,7 @@ namespace Microsoft.Identity.Client
                 authParameters);
 
             var accountsFromCache = await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
-            var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter, cacheSessionManager).ConfigureAwait(false);
+            var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter, cacheSessionManager, cancellationToken).ConfigureAwait(false);
             accountsFromCache = accountsFromCache ?? Enumerable.Empty<IAccount>();
             accountsFromBroker = accountsFromBroker ?? Enumerable.Empty<IAccount>();
 
@@ -192,7 +243,8 @@ namespace Microsoft.Identity.Client
 
         private async Task<IEnumerable<IAccount>> GetAccountsFromBrokerAsync(
             string homeAccountIdFilter,
-            ICacheSessionManager cacheSessionManager)
+            ICacheSessionManager cacheSessionManager, 
+            CancellationToken cancellationToken)
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
@@ -214,7 +266,7 @@ namespace Microsoft.Identity.Client
                             StringComparison.OrdinalIgnoreCase));
                 }
 
-                brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts).ConfigureAwait(false);
+                brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts, cancellationToken).ConfigureAwait(false);
                 return brokerAccounts;
             }
 
@@ -222,7 +274,7 @@ namespace Microsoft.Identity.Client
         }
 
         // Not all brokers return the accounts only for the given env
-        private async Task<IEnumerable<IAccount>> FilterBrokerAccountsByEnvAsync(IEnumerable<IAccount> brokerAccounts)
+        private async Task<IEnumerable<IAccount>> FilterBrokerAccountsByEnvAsync(IEnumerable<IAccount> brokerAccounts, CancellationToken cancellationToken)
         {
             ServiceBundle.DefaultLogger.Verbose($"Filtering broker accounts by env. Before filtering: " + brokerAccounts.Count());
 
@@ -233,7 +285,7 @@ namespace Microsoft.Identity.Client
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                 AuthorityInfo,
                 allEnvs,
-                CreateRequestContext(Guid.NewGuid())).ConfigureAwait(false);
+                CreateRequestContext(Guid.NewGuid(), cancellationToken)).ConfigureAwait(false);
 
 
             brokerAccounts = brokerAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
@@ -269,9 +321,9 @@ namespace Microsoft.Identity.Client
         // This implementation should ONLY be called for cases where we aren't participating in
         // MATS telemetry but still need a requestcontext/logger, such as "GetAccounts()".
         // For service calls, the request context should be created in the **Executor classes as part of request execution.
-        private RequestContext CreateRequestContext(Guid correlationId)
+        private RequestContext CreateRequestContext(Guid correlationId, CancellationToken cancellationToken)
         {
-            return new RequestContext(ServiceBundle, correlationId);
+            return new RequestContext(ServiceBundle, correlationId, cancellationToken);
         }
 
 #endregion

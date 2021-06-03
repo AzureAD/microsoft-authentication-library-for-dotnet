@@ -46,6 +46,18 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Enables MSAL to read the federation metadata for a WS-Trust exchange from the provided input instead of acquiring it from an endpoint.
+        /// This is only applicable for managed ADFS accounts. See https://aka.ms/MsalFederationMetadata.
+        /// </summary>
+        /// <param name="federationMetadata">Federation metadata in the form of XML.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenByIntegratedWindowsAuthParameterBuilder WithFederationMetadata(string federationMetadata)
+        {
+            Parameters.FederationMetadata = federationMetadata;
+            return this;
+        }
+
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             return PublicClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);

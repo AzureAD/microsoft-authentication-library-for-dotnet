@@ -25,6 +25,8 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        public static Dictionary<string, string> ExtraHttpHeader = new Dictionary<string, string>() { { "SomeExtraHeadderKey", "SomeExtraHeadderValue" } };
+
         public const string ScopeStr = "r1/scope1 r1/scope2";
         public const string ScopeStrFormat = "r{0}/scope1 r{0}/scope2";
         public static readonly string[] s_graphScopes = new[] { "user.read" };
@@ -41,6 +43,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string Utid2 = "my-utid2";
         public const string Common = "common";
         public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
+        public const string TenantId2 = "aaaaaaab-aaaa-aaaa-bbbb-aaaaaaaaaaaa";
         public const string AadTenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
         public const string MsaTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad";
         public const string AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/751a212b-4003-416e-b600-e1f48e40db9f/";

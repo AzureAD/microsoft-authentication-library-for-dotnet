@@ -126,6 +126,7 @@ namespace Microsoft.Identity.Client.Cache
                                        hasStateChanged: false,
                                        TokenCacheInternal.IsApplicationCache,
                                        hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                       _requestParams.RequestContext.UserCancellationToken,
                                        suggestedCacheKey: key);
 
                                     stopwatch.Start();
@@ -141,6 +142,7 @@ namespace Microsoft.Identity.Client.Cache
                                        hasStateChanged: false,
                                        TokenCacheInternal.IsApplicationCache,
                                        hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                       _requestParams.RequestContext.UserCancellationToken,
                                        suggestedCacheKey: key);
 
                                     stopwatch.Reset();

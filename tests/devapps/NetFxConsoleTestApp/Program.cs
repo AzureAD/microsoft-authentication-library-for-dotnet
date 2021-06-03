@@ -447,7 +447,8 @@ namespace NetFx
                                 null,
                                 true,
                                 false,
-                                true);
+                                true,
+                                CancellationToken.None);
 
                             await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
 

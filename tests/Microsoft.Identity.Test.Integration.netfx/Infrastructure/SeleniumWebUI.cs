@@ -125,16 +125,23 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     },
                     tcpCancellationToken.Token);
 
+                //_ = Task.Run(async () => await listenForAuthCodeTask.ConfigureAwait(false));                
+
                 var seleniumAutomationTask = Task.Factory.StartNew(() =>
                     {
                         _seleniumAutomationLogic(driver);
                         _logger.Info("Selenium automation finished");
                     });
 
+                Trace.WriteLine($"Before WhenAny: seleniumAutomationTask {seleniumAutomationTask.Status} listenForAuthCodeTask {listenForAuthCodeTask.Status}");
+
                 // There is no guarantee over which task will finish first - TCP listener or Selenium automation
                 // as the TCP listener has some post processing to do (extracting the url etc.) 
                 await Task.WhenAny(seleniumAutomationTask, listenForAuthCodeTask)
                     .ConfigureAwait(false);
+
+                Trace.WriteLine($"After WhenAny: seleniumAutomationTask {seleniumAutomationTask.Status} listenForAuthCodeTask {listenForAuthCodeTask.Status}");
+
 
                 // No need to wait to post a nice message in the browser
                 if (authCodeUri != null)
@@ -181,6 +188,13 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 }
 
                 innerSource.Cancel();
+
+                if (listenForAuthCodeTask.IsCanceled)
+                {
+                    throw new OperationCanceledException();
+
+                }
+
                 throw new InvalidOperationException(
                     $"Unknown exception: selenium status: {seleniumAutomationTask.Status} TCP listener status: {listenForAuthCodeTask.Status}. " +
                     $"Possible cause - the redirect Uri used is not the one configured." +

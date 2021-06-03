@@ -79,7 +79,8 @@ namespace Microsoft.Identity.Client.WsTrust
 
         private void ReadPolicies(XContainer mexDocument)
         {
-            IEnumerable<XElement> policyElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsp + "Policy");
+            IEnumerable<XElement> policyElements = FindElements(mexDocument, XmlNamespace.Wsp, "Policy");
+
             foreach (XElement policy in policyElements)
             {
                 XElement exactlyOnePolicy = policy.Elements(XmlNamespace.Wsp + "ExactlyOne").FirstOrDefault();
@@ -135,7 +136,8 @@ namespace Microsoft.Identity.Client.WsTrust
 
         private void ReadPolicyBindings(XContainer mexDocument)
         {
-            IEnumerable<XElement> bindingElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "binding");
+            IEnumerable<XElement> bindingElements = FindElements(mexDocument, XmlNamespace.Wsdl, "binding");    
+
             foreach (XElement binding in bindingElements)
             {
                 IEnumerable<XElement> policyReferences = binding.Elements(XmlNamespace.Wsp + "PolicyReference");
@@ -194,7 +196,8 @@ namespace Microsoft.Identity.Client.WsTrust
 
         private void SetPolicyEndpointAddresses(XContainer mexDocument)
         {
-            XElement serviceElement = mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "service").First();
+            XElement serviceElement = FindElements(mexDocument, XmlNamespace.Wsdl, "service").First();
+
             IEnumerable<XElement> portElements = serviceElement.Elements(XmlNamespace.Wsdl + "port");
             foreach (XElement port in portElements)
             {
@@ -223,6 +226,33 @@ namespace Microsoft.Identity.Client.WsTrust
                     _bindings[portBindingNameSegments[1]].Url = new Uri(endpointAddress.Value);
                 }
             }
+        }
+
+        private IEnumerable<XElement> FindElements(XContainer mexDocument, XNamespace xNamespace, string element)
+        {
+            IEnumerable<XElement> xmlElements = mexDocument.Elements()?.First()?.Elements(xNamespace + element);
+
+            if (xmlElements == null)
+            {
+                throw new MsalClientException(
+                MsalError.ParsingWsMetadataExchangeFailed,
+                MsalErrorMessage.ParsingMetadataDocumentFailed + $" Could not find XML data.");
+            }
+
+            if (!xmlElements.Any())
+            {
+                //Unable to find metadata information in root node. Attempting to search document.
+                xmlElements = mexDocument.Elements().DescendantsAndSelf().Elements(xNamespace + element);
+
+                if (!xmlElements.Any())
+                {
+                    throw new MsalClientException(
+                    MsalError.ParsingWsMetadataExchangeFailed,
+                    MsalErrorMessage.ParsingMetadataDocumentFailed + $" Could not find element {element}.");
+                }
+            }
+
+            return xmlElements;
         }
 
         private void AddPolicy(XElement policy, UserAuthType policyAuthType)

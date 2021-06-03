@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -179,6 +181,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
         {
+            HttpSnifferClientFactory factory = null;
             IPublicClientApplication pca;
             if (directToAdfs)
             {
@@ -195,7 +198,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     .Create(labResponse.App.AppId)
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .WithAuthority(labResponse.Lab.Authority + "common")
-                    .WithTestLogging()
+                    .WithTestLogging(out factory)
                     .Build();
             }
 
@@ -223,6 +226,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             userCacheAccess.AssertAccessCounts(2, 2);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
 
+            if (factory?.RequestsAndResponses != null)
+            {
+                factory.RequestsAndResponses.Clear();
+            }
+
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
                 .AcquireTokenInteractive(s_scopes)
@@ -232,10 +240,16 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(2, 3);
+            AssertCCSRoutingInformationIsSent(factory, labResponse);
 
             account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(3, 3);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
+
+            if (factory?.RequestsAndResponses != null)
+            {
+                factory.RequestsAndResponses.Clear();
+            }
 
             Trace.WriteLine("Part 4 - Acquire a token silently");
             result = await pca
@@ -243,10 +257,49 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
+            Trace.WriteLine("Part 5 - Acquire a token silently with force refresh");
+            result = await pca
+                .AcquireTokenSilent(s_scopes, account)
+                .WithForceRefresh(true)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
+            AssertCCSRoutingInformationIsSent(factory, labResponse);
 
             return result;
+        }
+
+        private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
+        {
+            if (labResponse.User.FederationProvider != FederationProvider.None)
+            {
+                return;
+            }
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
+            x.Item2.StatusCode == HttpStatusCode.OK);
+
+            var CCSHeader = req.Headers.Single(h => h.Key == Constants.CCSRoutingHintHeader).Value.FirstOrDefault();
+
+            if (!String.IsNullOrEmpty(CCSHeader))
+            {
+                ValidateCCSHeader(CCSHeader, labResponse);
+            }
+        }
+
+        private void ValidateCCSHeader(string CCSHeader, LabResponse labResponse)
+        {
+            if (CCSHeader.Contains("upn"))
+            {
+                Assert.AreEqual(CoreHelpers.GetCCSUpnHeader(labResponse.User.Upn), CCSHeader);
+            }
+            else
+            {
+                var userObjectId = labResponse.User.ObjectId;
+                var userTenantID = labResponse.User.TenantId;
+                Assert.AreEqual(CoreHelpers.GetCCSClientInfoheader(userObjectId.ToString(), userTenantID), CCSHeader);
+            }
         }
 
         private async Task RunPromptTestForUserAsync(LabResponse labResponse, Prompt prompt, bool useLoginHint)

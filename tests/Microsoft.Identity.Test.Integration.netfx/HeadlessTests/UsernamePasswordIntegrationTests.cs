@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security;
@@ -9,7 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -81,6 +84,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ROPC_ADFSv4Federated_WithMetadata_Async()
+        {
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
+            string federationMetadata = File.ReadAllText(@"federationMetadata.xml").ToString();
+            await RunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -246,7 +257,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.Fail("Bad exception or no exception thrown");
         }
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse)
+        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
         {
             var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
@@ -259,6 +270,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
                 .WithCorrelationId(CorrelationId)
+                .WithFederationMetadata(federationMetadata)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -268,6 +280,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
             AssertTelemetryHeaders(factory, false, labResponse);
+            AssertCCSRoutingInformationIsSent(factory, labResponse);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
@@ -275,6 +288,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
+        }
+
+        private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
+        {
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == labResponse.Lab.Authority + "organizations/oauth2/v2.0/token" &&
+            x.Item2.StatusCode == HttpStatusCode.OK);
+
+            var CCSHeader = req.Headers.Single(h => h.Key == Constants.CCSRoutingHintHeader).Value.FirstOrDefault();
+
+            Assert.AreEqual(CoreHelpers.GetCCSUpnHeader(labResponse.User.Upn), CCSHeader);
         }
 
         private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, LabResponse labResponse)
