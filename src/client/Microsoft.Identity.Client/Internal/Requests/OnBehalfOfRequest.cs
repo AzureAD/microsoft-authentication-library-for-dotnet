@@ -59,6 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 
+                    Metrics.TotalAccessTokensFromCache++;
                     return new AuthenticationResult(
                         msalAccessTokenItem,
                         msalIdTokenItem,

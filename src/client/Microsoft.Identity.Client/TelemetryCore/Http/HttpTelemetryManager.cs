@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Concurrent;
 using System.Text;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
@@ -115,8 +114,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             var platformConfig = new StringBuilder();
             platformConfig.Append(ConvertFromStringToBitwise(isTokenCacheSerialized) + ",");
             platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled) + ",");
-            platformConfig.Append(Metrics.TotalTokensObtainedByMsal + ",");
-            platformConfig.Append(Metrics.TotalTokensObtainedByMsalViaCache);
+            
+            platformConfig.Append(Metrics.TotalDurationInMs + ",");
+            platformConfig.Append(Metrics.TotalAccessTokensFromIdP + ",");
+            platformConfig.Append(Metrics.TotalAccessTokensFromCache);
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion}" +
                 $"|{apiId},{cacheInfo},{regionUsed},{regionSource},{regionOutcome}" +
