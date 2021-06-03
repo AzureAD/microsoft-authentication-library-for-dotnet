@@ -43,9 +43,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 // look for access token in the cache first.
                 // no access token is found, then it means token does not exist
-                // or new assertion has been passed. We should not use Refresh Token
-                // for the user because the new incoming token may have updated claims
-                // like MFA etc.
+                // or new assertion has been passed. 
+                // Look for a refresh token, if refresh token is found perform refresh token flow.
+                // If a refresh token is not found, fetch new access token for OBO
                 using (logger.LogBlockDuration("[OBO Request] Looking in the cache for an access token"))
                 {
                     msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
@@ -85,16 +85,61 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // No AT in the cache or AT needs to be refreshed
             try
             {
-                using (logger.LogBlockDuration("[OBO request] Fetching OBO token from ESTS"))
-                {
-                    var result = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
-                    return result;
-                }
+                return await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (MsalServiceException e)
             {
                 return HandleTokenRefreshError(e, msalAccessTokenItem);
             }
+        }
+
+        private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)
+        {
+            // Look for a refresh token
+            MsalRefreshTokenCacheItem appRefreshToken = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
+
+            // If a refresh token is not found, fetch a new access token
+            if (appRefreshToken == null)
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose("[OBO request] No Refresh Token was found in the cache. Fetching OBO token from ESTS");
+
+                var result = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                return result;
+            }
+
+            var msalTokenResponse = await RefreshAccessTokenAsync(appRefreshToken, cancellationToken)
+                .ConfigureAwait(false);
+            
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+        }
+
+        private async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, CancellationToken cancellationToken)
+        {
+            AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
+            await AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
+
+            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
+                                    .ConfigureAwait(false);
+
+            if (msalTokenResponse.RefreshToken == null)
+            {
+                msalTokenResponse.RefreshToken = msalRefreshTokenItem.Secret;
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead. ");
+            }
+
+            return msalTokenResponse;
+        }
+
+        private Dictionary<string, string> GetBodyParameters(string refreshTokenSecret)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                [OAuth2Parameter.GrantType] = OAuth2GrantType.RefreshToken,
+                [OAuth2Parameter.RefreshToken] = refreshTokenSecret
+            };
+
+            return dict;
         }
 
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)

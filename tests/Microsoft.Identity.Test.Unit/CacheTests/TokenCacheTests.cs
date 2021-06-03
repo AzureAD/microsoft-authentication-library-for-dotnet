@@ -731,6 +731,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 cache.Accessor.SaveAccessToken(atItem);
 
+                var rtItem = new MsalRefreshTokenCacheItem(
+                    TestConstants.SovereignNetworkEnvironment,
+                    TestConstants.ClientId,
+                    "someRT",
+                    _clientInfo,
+                    null,
+                    _homeAccountId);
+
+                string rtKey = rtItem.GetKey().ToString();
+                rtItem.Secret = rtKey;
+                rtItem.UserAssertionHash = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
+
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
@@ -740,9 +752,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 ((TokenCache)cache).AfterAccess = AfterAccessNoChangeNotification;
                 var item = cache.FindAccessTokenAsync(authParams).Result;
+                var item1 = cache.FindRefreshTokenAsync(authParams).Result;
 
                 Assert.IsNotNull(item);
                 Assert.AreEqual(atKey, item.Secret);
+
+                Assert.IsNotNull(item1);
+                Assert.AreEqual(rtKey, item1.Secret);
             }
         }
 

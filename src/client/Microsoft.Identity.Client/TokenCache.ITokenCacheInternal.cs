@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -403,7 +404,7 @@ namespace Microsoft.Identity.Client
             string requestTenantId = requestParams.Authority.TenantId;
             bool filterByTenantId = true;
 
-            if (requestParams.UserAssertion != null) // OBO
+            if (requestParams.RequestContext.ApiEvent.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
             {
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
                                 !string.IsNullOrEmpty(item.UserAssertionHash) &&
@@ -576,6 +577,15 @@ namespace Microsoft.Identity.Client
 
             IEnumerable<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens();
 
+            if (requestParams.RequestContext.ApiEvent.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
+            {
+                allRts = allRts.FilterWithLogging(item =>
+                            !string.IsNullOrEmpty(item.UserAssertionHash) &&
+                            item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                            requestParams.RequestContext.Logger,
+                            "Filter by UserAssertionHash");
+            }
+
             var metadata =
                 await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                     requestParams.AuthorityInfo,
@@ -601,6 +611,7 @@ namespace Microsoft.Identity.Client
                 return candidateRt;
 
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
+            // requestParams.RequestContext.ApiEvent.ApiId //OBO
 
             // ADAL legacy cache does not store FRTs
             if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled &&
