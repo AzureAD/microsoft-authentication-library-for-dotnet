@@ -404,7 +404,7 @@ namespace Microsoft.Identity.Client
             string requestTenantId = requestParams.Authority.TenantId;
             bool filterByTenantId = true;
 
-            if (requestParams.RequestContext.ApiEvent.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
+            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
             {
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
                                 !string.IsNullOrEmpty(item.UserAssertionHash) &&
@@ -577,7 +577,7 @@ namespace Microsoft.Identity.Client
 
             IEnumerable<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens();
 
-            if (requestParams.RequestContext.ApiEvent.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
+            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
                 allRts = allRts.FilterWithLogging(item =>
                             !string.IsNullOrEmpty(item.UserAssertionHash) &&
