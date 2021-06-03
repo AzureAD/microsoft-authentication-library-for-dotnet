@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache and of the same
-        /// instance (authority host) as <see cref="Authority"/> 
+        /// environment (authority host) as <see cref="Authority"/> 
         /// </summary>
         /// <param name="identifier">Account identifier. The value of the identifier will probably have been stored value from the
         /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
