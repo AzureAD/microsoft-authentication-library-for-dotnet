@@ -1,6 +1,7 @@
 4.32.0
 ==========
 ### New Features:
+** Add Kerberos ticket support **, see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2602
 **Added cancellation token to TokenCacheNotificationArgs**, to allow apps to send cancellation token to Redis. See issue [#2551](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2551)
 **FindAccessToken now logs the number of access tokens**. See issue [#2417](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2417)
 **MSAL now exposes AuthenticationResult.TokenType**. See issue [#2637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2637)
