@@ -23,7 +23,7 @@
         <category android:name="android.intent.category.BROWSABLE" />
         <data
           android:host="com.azuresamples.msalandroidapp"
-          android:path="/i0gj9MxJ7ABJtkaIyUBW4Xszw9Q="
+          android:path="/EHyvOdXj4uLXJXDaOMy5lwANmp0="
           android:scheme="msauth" />
       </intent-filter>
     </activity>

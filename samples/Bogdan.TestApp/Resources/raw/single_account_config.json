@@ -1,6 +1,6 @@
 ﻿{
     "client_id": "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8",
-    "redirect_uri": "msauth://com.azuresamples.msalandroidapp/2RJuUvgnnEn0C0I0IOd1qHqOUMg%3D",
+    "redirect_uri": "msauth://com.azuresamples.msalandroidapp/EHyvOdXj4uLXJXDaOMy5lwANmp0%3D",
     "broker_redirect_uri_registered": true,
     "account_mode": "MULTIPLE",
     "authorities": [
