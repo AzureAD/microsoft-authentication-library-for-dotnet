@@ -525,16 +525,20 @@ namespace Microsoft.Identity.Client
             // In case we're sharing the cache with an MSAL that does not implement env aliasing,
             // it's possible (but unlikely), that we have multiple ATs from the same alias family.
             // To overcome some of these use cases, try to filter just by preferred cache alias
-            var filteredByPreferredAlias = filteredItems.Where(
-                at => at.Environment.Equals(instanceMetadata.PreferredCache, StringComparison.OrdinalIgnoreCase));
+            var filteredByPreferredAlias = filteredItems.FilterWithLogging(
+                item => item.Environment.Equals(instanceMetadata.PreferredCache, StringComparison.OrdinalIgnoreCase),
+                requestParams.RequestContext.Logger,
+                $"Filtering by preferred environment {instanceMetadata.PreferredCache}");
 
             if (filteredByPreferredAlias.Any())
             {
                 return filteredByPreferredAlias;
             }
 
-            return filteredItems.Where(
-                item => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(item.Environment));
+            return filteredItems.FilterWithLogging(
+                item => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(item.Environment),
+                requestParams.RequestContext.Logger,
+                $"Filtering by environment");
         }
 
         private MsalAccessTokenCacheItem FilterByKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
