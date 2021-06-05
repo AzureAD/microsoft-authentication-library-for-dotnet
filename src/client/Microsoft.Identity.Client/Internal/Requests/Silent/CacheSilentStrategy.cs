@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     logger.Info("Returning access token found in cache. RefreshOn exists ? "
                         + cachedAccessTokenItem.RefreshOn.HasValue);
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-                    Metrics.TotalAccessTokensFromCache++;
+                    Metrics.IncrementTotalAccessTokensFromCache();
                     return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 }
                 else if (cachedAccessTokenItem == null)
@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
             var msalTokenResponse = await _silentRequest.SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
                                     .ConfigureAwait(false);
-            Metrics.TotalAccessTokensFromIdP++;
+            Metrics.IncrementTotalAccessTokensFromIdP();
             if (msalTokenResponse.RefreshToken == null)
             {
                 msalTokenResponse.RefreshToken = msalRefreshTokenItem.Secret;

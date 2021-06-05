@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             ValidateResponseFromBroker(msalTokenResponse);
-            Metrics.TotalAccessTokensFromIdP++;
+            Metrics.IncrementTotalAccessTokensFromIdP();
             return msalTokenResponse;
         }
 

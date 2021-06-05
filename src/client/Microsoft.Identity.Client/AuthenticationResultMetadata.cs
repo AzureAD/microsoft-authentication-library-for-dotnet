@@ -39,20 +39,5 @@ namespace Microsoft.Identity.Client
         /// Time, in milliseconds, MSAL spent for HTTP communication during this request.
         /// </summary>
         public long DurationInHttpInMs { get; set; }
-
-        /// <summary>
-        /// Total tokens obtained by MSAL from the identity provider.
-        /// </summary>
-        public long TotalAccessTokensFromIdP { get; set; }
-
-        /// <summary>
-        /// Total tokens obtained by MSAL from cache.
-        /// </summary>
-        public long TotalAccessTokensFromCache { get; set; }
-
-        /// <summary>
-        /// Total time, in milliseconds, spent in MSAL for all requests.
-        /// </summary>
-        public long TotalDurationInMs { get; set; }
     }
 }

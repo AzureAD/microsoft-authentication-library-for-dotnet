@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             cancellationToken.ThrowIfCancellationRequested();
             MsalTokenResponse tokenResponse = await GetTokenResponseAsync(cancellationToken)
                 .ConfigureAwait(false);
-            Metrics.TotalAccessTokensFromIdP++;
+            Metrics.IncrementTotalAccessTokensFromIdP();
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(tokenResponse)
                 .ConfigureAwait(false);
         }

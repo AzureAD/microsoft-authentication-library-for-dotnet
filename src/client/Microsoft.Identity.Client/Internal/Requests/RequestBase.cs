@@ -126,10 +126,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
                         authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
                         authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
-                        Metrics.TotalDurationInMs += authenticationResult.AuthenticationResultMetadata.DurationTotalInMs;
-                        authenticationResult.AuthenticationResultMetadata.TotalDurationInMs = Metrics.TotalDurationInMs;
-                        authenticationResult.AuthenticationResultMetadata.TotalAccessTokensFromIdP = Metrics.TotalAccessTokensFromIdP;
-                        authenticationResult.AuthenticationResultMetadata.TotalAccessTokensFromCache = Metrics.TotalAccessTokensFromCache;
+                        Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
                         return authenticationResult;
                     }
                     catch (MsalException ex)
@@ -298,7 +295,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 scopes,
                 tokenEndpoint,
                 cancellationToken);
-            Metrics.TotalAccessTokensFromIdP++;
+            Metrics.IncrementTotalAccessTokensFromIdP();
             return tokenResponse;
         }
 
