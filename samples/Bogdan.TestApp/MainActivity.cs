@@ -25,6 +25,7 @@ namespace App1
     {
         private const string RedirectUriScheme = "msauth";
         private TextView _textView;
+        private Button _showPopupMenu;
 
         private IMultipleAccountPublicClientApplication _ipca;
         private MultipleAccountPublicClientApplication _spca;
@@ -61,7 +62,11 @@ namespace App1
             signOutBtn.Click += SignOutBtn_Click;
 
             _textView = FindViewById<EditText>(Resource.Id.txtView);
-            LogMessage("MainActivity::Created");
+
+            _showPopupMenu = FindViewById<Button>(Resource.Id.testCaseBtn);
+            _showPopupMenu.Click += ShowPopupMenu_Click;
+
+                LogMessage("MainActivity::Created");
 
             // Create PCA
             int resourceId = Resource.Raw.single_account_config;
@@ -85,9 +90,86 @@ namespace App1
 
         }
 
+        private void ShowPopupMenu_Click(object sender, EventArgs e)
+        {
+            PopupMenu menu = new PopupMenu(this, _showPopupMenu);
+
+            // Call inflate directly on the menu:
+            menu.Inflate(Resource.Menu.popup_menu);
+            menu.MenuItemClick += Menu_MenuItemClick;
+            menu.Show();
+        }
+
+        private void Menu_MenuItemClick(object sender, PopupMenu.MenuItemClickEventArgs e)
+        {
+            _textView.Text = "";
+            LogMessage("MainActivity.SignInBtn.Click");
+
+            _spca = (MultipleAccountPublicClientApplication)_ipca;
+            if (_spca == null)
+            {
+                LogMessage("PCA not yet initialized!");
+                return;
+            }
+
+            _spca.GetAccounts(new MultipleAccountApplicationCurrentAccountCallback(
+                onAccountChangedAction: (p0, p1) => LogMessage(""),
+                onAccountLoaded: (p0) => LogMessage("AccountLoaded is called"),
+                onException: (p0) => LogMessage("Error")
+                ));
+            switch (e.Item.ItemId)
+            {
+                case App1.Resource.Id.Item5430:
+                    TestCase_5430();
+                    break;
+
+                case App1.Resource.Id.Item6672:
+                    TestCase_6672();
+                    break;
+
+                case App1.Resource.Id.Item6681:
+                    TestCase_6681();
+                    break;
+
+                case App1.Resource.Id.Item6682:
+                    TestCase_6682();
+                    break;
+
+                case App1.Resource.Id.Item6683:
+                    TestCase_6683();
+                    break;
+
+                case App1.Resource.Id.Item6692:
+                    TestCase_6692();
+                    break;
+
+                case App1.Resource.Id.Item795986:
+                    TestCase_795986();
+                    break;
+
+                case App1.Resource.Id.Item795992:
+                    TestCase_795992();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
         private void SignOutBtn_Click(object sender, EventArgs e)
         {
-            _ipca.RemoveAccount(_account);
+            _ipca.RemoveAccount(_account,
+                new SignOutCallback(
+                    onSuccessAction: () =>
+                    {
+                        LogMessage("Signout success!!!");
+                        _account = null;
+                    },
+                    onErrorAction: (MsalException ex) =>
+                    {
+                        LogMessage(ex.ToString());
+                    }));
+
             LogMessage("Signed out!");
         }
 
@@ -152,6 +234,347 @@ namespace App1
             //                $" tenant {result.TenantId} - " +
             //                $" token {result.AccessToken} ");
             //        }));
+        }
+
+        private void TestCase_5430()
+        {
+            // var scopes = new[] { "User.Read" };
+            var scopes = new[] { "https://microsoft.sharepoint-df.com//.default" };
+            string loginHint = "";
+            Prompt prompt = Prompt.WhenRequired;
+            string resource = "https://microsoft.sharepoint-df.com//.default";
+
+            AcquireTokenParameters.Builder tokenParamsBuilder = new AcquireTokenParameters.Builder()
+                                           .StartAuthorizationFromActivity(this)
+                                           .WithPrompt(prompt);
+            if (!string.IsNullOrEmpty(loginHint))
+            {
+                tokenParamsBuilder.WithLoginHint(loginHint);
+            }
+
+            tokenParamsBuilder.WithScopes(scopes);
+
+            // tokenParamsBuilder.WithResource(resource);
+            tokenParamsBuilder.WithCallback(new InteractiveAuthCallback(
+                    onCancelAction: () => LogMessage("Auth cancelled"),
+                    onErrorAction: (ex) => LogMessage(ex.ToString()),
+                    onSuccessAction: (result) =>
+                    {
+                        _account = result.Account;
+                        LogMessage(
+                            $"Success!! Token for {result.Account.Username}," +
+                            $" tenant {result.TenantId} - " +
+                            $" token {result.AccessToken} ");
+                    }));
+
+            AcquireTokenParameters tokenParams = (AcquireTokenParameters)tokenParamsBuilder.Build();
+
+            this.RunOnUiThread(() =>
+            {
+                _spca.AcquireToken(tokenParams);
+            });
+        }
+
+        void TestCase_6672()
+        {
+            // var scopes = new[] { "User.Read" };
+            // var scopes = new[] { "https://microsoft.sharepoint-df.com//.default" };
+            var scopes = new[] { "https://graph.microsoft.com/.default" }; // https://graph.microsoft.com
+            string loginHint = "";
+            Prompt prompt = Prompt.WhenRequired; // use YourAlias@microsoft.com
+            string resource = "https://microsoft.sharepoint-df.com//.default";
+
+            AcquireTokenParameters.Builder tokenParamsBuilder = new AcquireTokenParameters.Builder()
+                                           .StartAuthorizationFromActivity(this)
+                                           .WithPrompt(prompt);
+            if (!string.IsNullOrEmpty(loginHint))
+            {
+                tokenParamsBuilder.WithLoginHint(loginHint);
+            }
+
+            tokenParamsBuilder.WithScopes(scopes);
+
+            // tokenParamsBuilder.WithResource(resource);
+            tokenParamsBuilder.WithCallback(new InteractiveAuthCallback(
+                    onCancelAction: () => LogMessage("Auth cancelled"),
+                    onErrorAction: (ex) => LogMessage(ex.ToString()),
+                    onSuccessAction: (result) =>
+                    {
+                        _account = result.Account;
+                        LogMessage(
+                            $"Success!! Token for {result.Account.Username}," +
+                            $" tenant {result.TenantId} - " +
+                            $" token {result.AccessToken} ");
+                    }));
+
+            AcquireTokenParameters tokenParams = (AcquireTokenParameters)tokenParamsBuilder.Build();
+
+            this.RunOnUiThread(() =>
+            {
+                _spca.AcquireToken(tokenParams);
+            });
+
+        }
+
+        void TestCase_6681()
+        {
+            // var scopes = new[] { "User.Read" };
+            // var scopes = new[] { "https://microsoft.sharepoint-df.com//.default" };
+            var scopes = new[] { "https://graph.microsoft.com/.default" }; // https://graph.microsoft.com
+            string loginHint = "YourAlias@microsoft.com";
+            Prompt prompt = Prompt.Login; // use YourAlias@microsoft.com
+            string resource = "https://microsoft.sharepoint-df.com//.default";
+
+            AcquireTokenParameters.Builder tokenParamsBuilder = new AcquireTokenParameters.Builder()
+                                           .StartAuthorizationFromActivity(this)
+                                           .WithPrompt(prompt);
+
+            if (!string.IsNullOrEmpty(loginHint))
+            {
+                tokenParamsBuilder.WithLoginHint(loginHint);
+            }
+
+            tokenParamsBuilder.WithScopes(scopes);
+
+            // tokenParamsBuilder.WithResource(resource);
+            tokenParamsBuilder.WithCallback(new InteractiveAuthCallback(
+                    onCancelAction: () => LogMessage("Auth cancelled"),
+                    onErrorAction: (ex) => LogMessage(ex.ToString()),
+                    onSuccessAction: (result) =>
+                    {
+                        _account = result.Account;
+                        LogMessage(
+                            $"Success!! Token for {result.Account.Username}," +
+                            $" tenant {result.TenantId} - " +
+                            $" token {result.AccessToken} ");
+                    }));
+
+            AcquireTokenParameters tokenParams = (AcquireTokenParameters)tokenParamsBuilder.Build();
+
+            this.RunOnUiThread(() =>
+            {
+                _spca.AcquireToken(tokenParams);
+            });
+        }
+
+        void TestCase_6682()
+        {
+            // var scopes = new[] { "User.Read" };
+            // var scopes = new[] { "https://microsoft.sharepoint-df.com//.default" };
+            var scopes = new[] { "https://graph.microsoft.com/.default" }; // https://graph.microsoft.com
+            string loginHint = "YourAlias@microsoft.com";
+            Prompt prompt = Prompt.SelectAccount; // use YourAlias@microsoft.com
+            string resource = "https://microsoft.sharepoint-df.com//.default";
+
+            AcquireTokenParameters.Builder tokenParamsBuilder = new AcquireTokenParameters.Builder()
+                                           .StartAuthorizationFromActivity(this)
+                                           .WithPrompt(prompt);
+
+            if (!string.IsNullOrEmpty(loginHint))
+            {
+                tokenParamsBuilder.WithLoginHint(loginHint);
+            }
+
+            tokenParamsBuilder.WithScopes(scopes);
+
+            // tokenParamsBuilder.WithResource(resource);
+            tokenParamsBuilder.WithCallback(new InteractiveAuthCallback(
+                    onCancelAction: () => LogMessage("Auth cancelled"),
+                    onErrorAction: (ex) => LogMessage(ex.ToString()),
+                    onSuccessAction: (result) =>
+                    {
+                        _account = result.Account;
+                        LogMessage(
+                            $"Success!! Token for {result.Account.Username}," +
+                            $" tenant {result.TenantId} - " +
+                            $" token {result.AccessToken} ");
+                    }));
+
+            AcquireTokenParameters tokenParams = (AcquireTokenParameters)tokenParamsBuilder.Build();
+
+            this.RunOnUiThread(() =>
+            {
+                _spca.AcquireToken(tokenParams);
+            });
+
+        }
+
+        void TestCase_6683()
+        {
+            // var scopes = new[] { "User.Read" };
+            // var scopes = new[] { "https://microsoft.sharepoint-df.com//.default" };
+            var scopes = new[] { "https://graph.microsoft.com/.default" }; // https://graph.microsoft.com
+            string loginHint = "YourAlias@microsoft.com";
+            Prompt prompt = Prompt.Login; // use YourAlias@microsoft.com
+            string resource = "https://microsoft.sharepoint-df.com//.default";
+
+            AcquireTokenParameters.Builder tokenParamsBuilder = new AcquireTokenParameters.Builder()
+                                           .StartAuthorizationFromActivity(this)
+                                           .WithPrompt(prompt);
+
+            if (!string.IsNullOrEmpty(loginHint))
+            {
+                tokenParamsBuilder.WithLoginHint(loginHint);
+            }
+
+            tokenParamsBuilder.WithScopes(scopes);
+
+            // tokenParamsBuilder.WithResource(resource);
+            tokenParamsBuilder.WithCallback(new InteractiveAuthCallback(
+                    onCancelAction: () => LogMessage("Auth cancelled"),
+                    onErrorAction: (ex) => LogMessage(ex.ToString()),
+                    onSuccessAction: (result) =>
+                    {
+                        _account = result.Account;
+                        LogMessage(
+                            $"Success!! Token for {result.Account.Username}," +
+                            $" tenant {result.TenantId} - " +
+                            $" token {result.AccessToken} ");
+                    }));
+
+            AcquireTokenParameters tokenParams = (AcquireTokenParameters)tokenParamsBuilder.Build();
+
+            this.RunOnUiThread(() =>
+            {
+                _spca.AcquireToken(tokenParams);
+            });
+        }
+
+        private void TestCase_6692()
+        {
+            // use non-joined account. 
+            // Expected - prompt for the user
+            // var scopes = new[] { "User.Read" };
+            // var scopes = new[] { "https://microsoft.sharepoint-df.com//.default" };
+            var scopes = new[] { "https://graph.microsoft.com/.default" }; // https://graph.microsoft.com
+            string loginHint = "";
+            Prompt prompt = Prompt.Login; // use IDLAB@msidlab4.onmicrosoft.com
+            string resource = "https://microsoft.sharepoint-df.com//.default";
+
+            AcquireTokenParameters.Builder tokenParamsBuilder = new AcquireTokenParameters.Builder()
+                                           .StartAuthorizationFromActivity(this)
+                                           .WithPrompt(prompt);
+
+            if (!string.IsNullOrEmpty(loginHint))
+            {
+                tokenParamsBuilder.WithLoginHint(loginHint);
+            }
+
+            tokenParamsBuilder.WithScopes(scopes);
+
+            // tokenParamsBuilder.WithResource(resource);
+            tokenParamsBuilder.WithCallback(new InteractiveAuthCallback(
+                    onCancelAction: () => LogMessage("Auth cancelled"),
+                    onErrorAction: (ex) => LogMessage(ex.ToString()),
+                    onSuccessAction: (result) =>
+                    {
+                        _account = result.Account;
+                        LogMessage(
+                            $"Success!! Token for {result.Account.Username}," +
+                            $" tenant {result.TenantId} - " +
+                            $" token {result.AccessToken} ");
+                    }));
+
+            AcquireTokenParameters tokenParams = (AcquireTokenParameters)tokenParamsBuilder.Build();
+
+            this.RunOnUiThread(() =>
+            {
+                _spca.AcquireToken(tokenParams);
+            });
+
+        }
+
+        void TestCase_795986()
+        {
+            // use non-joined account. 
+            // Expected - prompt for the user
+            // var scopes = new[] { "User.Read" };
+            // var scopes = new[] { "https://microsoft.sharepoint-df.com//.default" };
+            var scopes = new[] { "https://graph.microsoft.com/.default" }; // https://graph.microsoft.com
+            string loginHint = "YourAlias@microsoft.com";
+            Prompt prompt = Prompt.Login; // use IDLAB@msidlab4.onmicrosoft.com
+            string resource = "https://microsoft.sharepoint-df.com//.default";
+
+            AcquireTokenParameters.Builder tokenParamsBuilder = new AcquireTokenParameters.Builder()
+                                           .StartAuthorizationFromActivity(this)
+                                           .WithPrompt(prompt);
+
+            if (!string.IsNullOrEmpty(loginHint))
+            {
+                tokenParamsBuilder.WithLoginHint(loginHint);
+            }
+
+            tokenParamsBuilder.WithScopes(scopes);
+
+            // tokenParamsBuilder.WithResource(resource);
+            tokenParamsBuilder.WithCallback(new InteractiveAuthCallback(
+                    onCancelAction: () => LogMessage("Auth cancelled"),
+                    onErrorAction: (ex) => LogMessage(ex.ToString()),
+                    onSuccessAction: (result) =>
+                    {
+                        _account = result.Account;
+                        LogMessage(
+                            $"Success!! Token for {result.Account.Username}," +
+                            $" tenant {result.TenantId} - " +
+                            $" token {result.AccessToken} ");
+                    }));
+
+            AcquireTokenParameters tokenParams = (AcquireTokenParameters)tokenParamsBuilder.Build();
+
+            this.RunOnUiThread(() =>
+            {
+                _spca.AcquireToken(tokenParams);
+            });
+        }
+
+        void TestCase_795992()
+        {
+            // use non-joined account. 
+            // Expected - prompt for the user
+            // var scopes = new[] { "User.Read" };
+            // var scopes = new[] { "https://microsoft.sharepoint-df.com//.default" };
+            var scopes = new[] { "https://graph.microsoft.com/.default" }; // https://graph.microsoft.com
+            string loginHint = "";
+            Prompt prompt = Prompt.SelectAccount; // use IDLAB@msidlab4.onmicrosoft.com
+            string resource = "https://microsoft.sharepoint-df.com//.default";
+
+            AcquireTokenParameters.Builder tokenParamsBuilder = new AcquireTokenParameters.Builder()
+                                           .StartAuthorizationFromActivity(this)
+                                           .WithPrompt(prompt);
+
+            if (!string.IsNullOrEmpty(loginHint))
+            {
+                tokenParamsBuilder.WithLoginHint(loginHint);
+            }
+
+            tokenParamsBuilder.WithScopes(scopes);
+
+            // tokenParamsBuilder.WithResource(resource);
+            _ = tokenParamsBuilder.WithCallback(new InteractiveAuthCallback(
+                    onCancelAction: () => LogMessage("Auth cancelled"),
+                    onErrorAction: (ex) => LogMessage(ex.ToString()),
+                    onSuccessAction: (result) =>
+                    {
+                        _account = result.Account;
+                        LogMessage(
+                            $"Success!! Token for {result.Account.Username}," +
+                            $" tenant {result.TenantId} - " +
+                            $" token {result.AccessToken} ");
+
+                        Task.Factory.StartNew(() =>
+                        {
+                            string authority = @"https://login.microsoftonline.com/common";
+                            var resultSilent = _spca.AcquireTokenSilent(scopes, _account, authority);
+                            LogMessage(resultSilent.AccessToken);
+                        });
+                    }));
+
+            AcquireTokenParameters tokenParams = (AcquireTokenParameters)tokenParamsBuilder.Build();
+
+            this.RunOnUiThread(() =>
+            {
+                _spca.AcquireToken(tokenParams);
+            });
         }
 
         private void SilentBtn_Click(object sender, EventArgs e)

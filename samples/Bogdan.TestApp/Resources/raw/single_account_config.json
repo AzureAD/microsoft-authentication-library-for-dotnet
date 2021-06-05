@@ -1,15 +1,15 @@
 ﻿{
-    "client_id": "31156476-e2b3-4aef-9bb5-10cc0a55107d",
-    "authorization_user_agent": "WEBVIEW",
-    "redirect_uri": "msauth://com.azuresamples.msalandroidapp/i0gj9MxJ7ABJtkaIyUBW4Xszw9Q%3D",
-    "account_mode": "MULTIPLE",
+    "client_id": "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8",
+    "redirect_uri": "msauth://com.azuresamples.msalandroidapp/EHyvOdXj4uLXJXDaOMy5lwANmp0%3D",
     "broker_redirect_uri_registered": true,
-    //"logcat_enabled": true,
-    //"log_level": "verbose",
+    "account_mode": "MULTIPLE",
     "authorities": [
         {
             "type": "AAD",
-            "authority_url": "https://login.microsoftonline.com/f645ad92e38d4d1ab510d1b09a74a8ca"
+            "audience": {
+                "type": "AzureADandPersonalMicrosoftAccount"
+            },
+            "default": true
         }
     ]
 }

@@ -58,7 +58,7 @@
   <ItemGroup>
     <None Include="Jars\AboutJars.txt" />
     <None Include="Additions\AboutAdditions.txt" />
-    <LibraryProjectZip Include="Jars\msal-2.0.6.aar" />
+    <LibraryProjectZip Include="Jars\msal-2.0.12.aar" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedReferenceJar Include="Jars\gson-2.8.6.jar" />
@@ -73,7 +73,7 @@
     <ProjectReference Include="..\Microsoft.Identity.Common.XamarinAndroid.AndroidX\Microsoft.Identity.Common.XamarinAndroid.AndroidX.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <JavaDocJar Include="Jars\msal-2.0.2-javadoc.jar" />
+    <JavaDocJar Include="Jars\msal-2.0.12-javadoc.jar" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Additions\ISingleAccountPublicClientApplication.cs">

@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <_JavaCPAar Include="Jars/msal-2.0.6.aar" />
+    <_JavaCPAar Include="Jars/msal-2.0.12.aar" />
     <_JavaCPAar Include="..\Microsoft.Identity.Common.XamarinAndroid.AndroidX\Jars\common-3.0.9.aar" />
     <_JavaCPAarRefs Include="@(_JavaCPAar->'$(IntermediateOutputPath)\ref\%(Filename).jar')" />
   </ItemGroup>
