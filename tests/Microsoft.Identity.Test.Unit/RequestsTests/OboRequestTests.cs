@@ -70,6 +70,48 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        public async Task AcquireTokenByOboMissMatchUserAssertionsAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
+
+                var cca = ConfidentialClientApplicationBuilder
+                                                         .Create(TestConstants.ClientId)
+                                                         .WithClientSecret(TestConstants.ClientSecret)
+                                                         .WithAuthority(TestConstants.AuthorityCommonTenant)
+                                                         .WithHttpManager(httpManager)
+                                                         .BuildConcrete();
+
+                UserAssertion userAssertion = new UserAssertion(TestConstants.FormattedAccessToken);
+                var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual("some-access-token", result.AccessToken);
+
+                //Update user assertions
+                UpdateUserAssertions(cca);
+
+                MockHttpMessageHandler mockTokenRequestHttpHandlerRefresh = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
+
+                //Access and refresh tokens are have a different user assertion so MSAL should perform OBO.
+                result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual("some-access-token", result.AccessToken);
+                Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+            }
+        }
+
+        private void UpdateUserAssertions(ConfidentialClientApplication app)
+        {
+            TokenCacheHelper.UpdateAccessTokenAssertions(app.UserTokenCacheInternal);
+            TokenCacheHelper.UpdateRefreshTokenAssertions(app.UserTokenCacheInternal);
+        }
+
+        [TestMethod]
         public async Task AcquireTokenByOboAccessTokenInCacheTestAsync()
         {
             using (var httpManager = new MockHttpManager())

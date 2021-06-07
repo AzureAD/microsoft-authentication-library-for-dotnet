@@ -780,47 +780,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private void UpdateUserAssertions(ConfidentialClientApplication app)
         {
-            UpdateAccessTokenAssertions(app.UserTokenCacheInternal);
-            UpdateRefreshTokenAssertions(app.UserTokenCacheInternal);
-        }
-
-        private async void UpdateAccessTokenAssertions(ITokenCacheInternal tokenCache)
-        {
-            var atItems = await tokenCache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
-            UpdateUserAssertion<MsalAccessTokenCacheItem>(atItems);
-
-            foreach(var atItem in atItems)
-            {
-                tokenCache.AddAccessTokenCacheItem(atItem);
-            }
-        }
-
-        private async void UpdateRefreshTokenAssertions(ITokenCacheInternal tokenCache)
-        {
-            var rtItems = await tokenCache.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
-            UpdateUserAssertion<MsalRefreshTokenCacheItem>(rtItems);
-
-            foreach (var rtItem in rtItems)
-            {
-                tokenCache.AddRefreshTokenCacheItem(rtItem);
-            }
-        }
-
-        private void UpdateUserAssertion<T>(IEnumerable<T> cacheItems)
-        {
-            foreach(T cacheItem in cacheItems)
-            {
-                var props = cacheItem.GetType().GetProperties(System.Reflection.BindingFlags.NonPublic
-                                                              | System.Reflection.BindingFlags.Instance);
-
-                foreach (var prop in props)
-                {
-                    if (prop.Name.Contains("UserAssertionHash"))
-                    {
-                        prop.SetValue(cacheItem, "SomeAsssertion");
-                    }
-                }
-            }
+            TokenCacheHelper.UpdateAccessTokenAssertions(app.UserTokenCacheInternal);
+            TokenCacheHelper.UpdateRefreshTokenAssertions(app.UserTokenCacheInternal);
         }
 
         [TestMethod]

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
@@ -266,6 +267,45 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             atItem.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow);
             tokenCache.AddAccessTokenCacheItem(atItem);
+        }
+
+        public static async void UpdateAccessTokenAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
+        {
+            var atItems = await tokenCache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
+            UpdateCacheitemProperties<MsalAccessTokenCacheItem>(atItems, "UserAssertionHash", assertion);
+
+            foreach (var atItem in atItems)
+            {
+                tokenCache.AddAccessTokenCacheItem(atItem);
+            }
+        }
+
+        public static async void UpdateRefreshTokenAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
+        {
+            var rtItems = await tokenCache.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
+            UpdateCacheitemProperties<MsalRefreshTokenCacheItem>(rtItems, "UserAssertionHash", assertion);
+
+            foreach (var rtItem in rtItems)
+            {
+                tokenCache.AddRefreshTokenCacheItem(rtItem);
+            }
+        }
+
+        private static void UpdateCacheitemProperties<T>(IEnumerable<T> cacheItems, string property, string newValue)
+        {
+            foreach (T cacheItem in cacheItems)
+            {
+                var props = cacheItem.GetType().GetProperties(System.Reflection.BindingFlags.NonPublic
+                                                              | System.Reflection.BindingFlags.Instance);
+
+                foreach (var prop in props)
+                {
+                    if (prop.Name.Contains(property))
+                    {
+                        prop.SetValue(cacheItem, newValue);
+                    }
+                }
+            }
         }
     }
 }
