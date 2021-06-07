@@ -622,7 +622,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void GetAccessTokenNoUserAssertionInCacheTest()
+        public void GetAccessAndRefreshTokenNoUserAssertionInCacheTest()
         {
             using (var harness = CreateTestHarness())
             {
@@ -643,8 +643,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // set it as the value of the access token.
                 string atKey = atItem.GetKey().ToString();
                 atItem.Secret = atKey;
-
                 cache.Accessor.SaveAccessToken(atItem);
+
+                var rtItem = new MsalRefreshTokenCacheItem(
+                    TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.ClientId,
+                    null,
+                    _clientInfo,
+                    null,
+                    _homeAccountId);
+
+                string rtKey = rtItem.GetKey().ToString();
+                rtItem.Secret = rtKey;
+                cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
@@ -665,7 +676,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void GetAccessTokenUserAssertionMismatchInCacheTest()
+        public void GetAccessAndRefreshTokenUserAssertionMismatchInCacheTest()
         {
             using (var harness = CreateTestHarness())
             {
@@ -686,10 +697,21 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // set it as the value of the access token.
                 string atKey = atItem.GetKey().ToString();
                 atItem.Secret = atKey;
-
                 atItem.UserAssertionHash = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
-
                 cache.Accessor.SaveAccessToken(atItem);
+
+                var rtItem = new MsalRefreshTokenCacheItem(
+                    TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.ClientId,
+                    null,
+                    _clientInfo,
+                    null,
+                    _homeAccountId);
+
+                string rtKey = rtItem.GetKey().ToString();
+                rtItem.Secret = rtKey;
+                rtItem.UserAssertionHash = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
+                cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
@@ -698,11 +720,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     apiId: ApiEvent.ApiIds.AcquireTokenOnBehalfOf);
                 authParams.UserAssertion = new UserAssertion(atItem.UserAssertionHash + "-random");
 
-                var item = cache.FindAccessTokenAsync(authParams).Result;
+                var itemAT = cache.FindAccessTokenAsync(authParams).Result;
+                var itemRT = cache.FindRefreshTokenAsync(authParams).Result;
 
                 // cache lookup should fail because there was userassertion hash did not match the one
                 // stored in token cache item.
-                Assert.IsNull(item);
+                Assert.IsNull(itemAT);
+                Assert.IsNull(itemRT);
             }
         }
 
@@ -755,14 +779,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 authParams.UserAssertion = new UserAssertion(atKey);
 
                 ((TokenCache)cache).AfterAccess = AfterAccessNoChangeNotification;
-                var item = cache.FindAccessTokenAsync(authParams).Result;
-                var item1 = cache.FindRefreshTokenAsync(authParams).Result;
+                var itemAT = cache.FindAccessTokenAsync(authParams).Result;
+                var itemRT = cache.FindRefreshTokenAsync(authParams).Result;
 
-                Assert.IsNotNull(item);
-                Assert.AreEqual(atKey, item.Secret);
+                Assert.IsNotNull(itemAT);
+                Assert.AreEqual(atKey, itemAT.Secret);
 
-                Assert.IsNotNull(item1);
-                Assert.AreEqual(rtKey, item1.Secret);
+                Assert.IsNotNull(itemRT);
+                Assert.AreEqual(rtKey, itemRT.Secret);
             }
         }
 

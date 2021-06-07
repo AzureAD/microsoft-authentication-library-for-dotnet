@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, finalList);
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem = (MsalAccessTokenCacheItem)GetSingleResult(requestParams, finalList);
             msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
             msalAccessTokenCacheItem = FilterByExpiry(msalAccessTokenCacheItem, requestParams);
 
@@ -499,9 +499,9 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        private static MsalAccessTokenCacheItem GetSingleResult(
+        private static MsalCredentialCacheItemBase GetSingleResult(
             AuthenticationRequestParameters requestParams,
-            IReadOnlyList<MsalAccessTokenCacheItem> filteredItems)
+            IReadOnlyList<MsalCredentialCacheItemBase> filteredItems)
         {
             // if only one cached token found
             if (filteredItems.Count == 1)
@@ -577,15 +577,6 @@ namespace Microsoft.Identity.Client
 
             IEnumerable<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens();
 
-            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
-            {
-                allRts = allRts.FilterWithLogging(item =>
-                            !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                            item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
-                            requestParams.RequestContext.Logger,
-                            "Filter by UserAssertionHash");
-            }
-
             var metadata =
                 await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                     requestParams.AuthorityInfo,
@@ -594,24 +585,22 @@ namespace Microsoft.Identity.Client
                 .ConfigureAwait(false);
             var aliases = metadata.Aliases;
 
-            IEnumerable<MsalRefreshTokenCacheKey> candidateRtKeys = aliases.Select(
-                    al => new MsalRefreshTokenCacheKey(
-                        al,
-                        requestParams.AppConfig.ClientId,
-                        requestParams.Account?.HomeAccountId?.Identifier,
-                        familyId));
+            allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
+            allRts = allRts.Where(
+                item => aliases.ContainsOrdinalIgnoreCase(item.Environment));
 
-            MsalRefreshTokenCacheItem candidateRt = allRts.FirstOrDefault(
-                rt => candidateRtKeys.Any(
-                    candidateKey => object.Equals(rt.GetKey(), candidateKey)));
+            IReadOnlyList<MsalRefreshTokenCacheItem> finalList = allRts.ToList();
+            requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (finalList.Count() != 0));
 
-            requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (candidateRt != null));
+            if (finalList.Count() > 0)
+            {
+                MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = (MsalRefreshTokenCacheItem)GetSingleResult(requestParams, finalList);
 
-            if (candidateRt != null)
-                return candidateRt;
+                return msalRefreshTokenCacheItem;
+            }
 
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
-            // requestParams.RequestContext.ApiEvent.ApiId //OBO
+            
 
             // ADAL legacy cache does not store FRTs
             if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled &&
@@ -627,6 +616,43 @@ namespace Microsoft.Identity.Client
             }
 
             return null;
+        }
+
+        private static IEnumerable<MsalRefreshTokenCacheItem> FilterRtsByHomeAccountIdOrAssertion(
+            AuthenticationRequestParameters requestParams,
+            IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems,
+            string familyId)
+        {
+            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
+            {
+                rtCacheItems = rtCacheItems.FilterWithLogging(item =>
+                                !string.IsNullOrEmpty(item.UserAssertionHash) &&
+                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by user assertion id");
+            }
+            else
+            {
+                rtCacheItems = rtCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
+                                requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by home account id");
+            }
+
+            rtCacheItems = rtCacheItems.FilterWithLogging(item => item.ClientId.Equals(
+                                requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by client id");
+
+            if (!familyId.IsNullOrEmpty())
+            {
+                rtCacheItems = rtCacheItems.FilterWithLogging(item => item.FamilyId.Equals(
+                                familyId, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by home account id");
+            }
+
+            return rtCacheItems;
         }
 
         async Task<bool?> ITokenCacheInternal.IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId)
