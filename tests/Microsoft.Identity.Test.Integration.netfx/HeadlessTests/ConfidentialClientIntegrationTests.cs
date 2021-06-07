@@ -254,15 +254,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(
                 GetExpectedCacheKey(clientID, Authority.CreateAuthority(confidentialClientAuthority, false).TenantId),
                 appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
-
-            var confidentialApp2 = ConfidentialClientApplicationBuilder
-               .Create(clientID)
-               .WithClientSecret(secret)
-               .WithTestLogging()
-               .Build();
+            
 
             // Call again to ensure token cache is hit
-            authResult = await confidentialApp2.AcquireTokenForClient(s_keyvaultScope)
+            authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
                 .WithAuthority(confidentialClientAuthority)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);          
