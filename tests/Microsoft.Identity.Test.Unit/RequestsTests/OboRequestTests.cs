@@ -52,25 +52,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             return handler;
         }
 
-        private void AddMockHandlerDefaultUserRealmDiscovery_ManagedUser(MockHttpManager httpManager)
-        {
-            // user realm discovery
-            httpManager.AddMockHandler(
-                new MockHttpMessageHandler
-                {
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                    {
-                        Content = new StringContent(
-                            "{\"ver\":\"1.0\"," +
-                            "\"account_type\":\"Managed\"," +
-                            "\"domain_name\":\"some_domain.onmicrosoft.com\"," +
-                            "\"cloud_audience_urn\":\"urn:federation:MicrosoftOnline\"," +
-                            "\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                    }
-                });
-        }
-
         private MockHttpMessageHandler AddMockHandlerAadSuccess(MockHttpManager httpManager, string authority)
         {
             var handler = new MockHttpMessageHandler
@@ -118,7 +99,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual("some-access-token", result.AccessToken);
             }
         }
-
     
     }
 }

@@ -107,39 +107,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return result;
             }
 
-            var msalTokenResponse = await RefreshAccessTokenAsync(appRefreshToken, cancellationToken)
+            var msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(appRefreshToken, cancellationToken, this, AuthenticationRequestParameters)
                 .ConfigureAwait(false);
             
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
-        }
-
-        private async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, CancellationToken cancellationToken)
-        {
-            AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
-            await AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
-
-            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
-                                    .ConfigureAwait(false);
-
-            if (msalTokenResponse.RefreshToken == null)
-            {
-                msalTokenResponse.RefreshToken = msalRefreshTokenItem.Secret;
-                AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead. ");
-            }
-
-            return msalTokenResponse;
-        }
-
-        private Dictionary<string, string> GetBodyParameters(string refreshTokenSecret)
-        {
-            var dict = new Dictionary<string, string>
-            {
-                [OAuth2Parameter.GrantType] = OAuth2GrantType.RefreshToken,
-                [OAuth2Parameter.RefreshToken] = refreshTokenSecret
-            };
-
-            return dict;
         }
 
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
