@@ -237,13 +237,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(clientID)
-                .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientSecret(secret)
                 .WithTestLogging()
                 .Build();
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
             var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithAuthority(confidentialClientAuthority)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -254,11 +254,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(
                 GetExpectedCacheKey(clientID, Authority.CreateAuthority(confidentialClientAuthority, false).TenantId),
                 appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithAuthority(confidentialClientAuthority)
                 .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false);          
 
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(2, 1);

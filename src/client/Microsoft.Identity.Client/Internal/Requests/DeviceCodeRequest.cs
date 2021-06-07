@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            var client = new OAuth2Client(ServiceBundle.DefaultLogger, ServiceBundle.HttpManager);
+            var client = new OAuth2Client(ServiceBundle.ApplicationLogger, ServiceBundle.HttpManager);
 
             var deviceCodeScopes = new HashSet<string>();
             deviceCodeScopes.UnionWith(AuthenticationRequestParameters.Scope);

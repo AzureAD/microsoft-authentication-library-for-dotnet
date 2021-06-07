@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             Config = config;
 
-            DefaultLogger = new MsalLogger(
+            ApplicationLogger = new MsalLogger(
                 Guid.Empty,
                 config.ClientName,
                 config.ClientVersion,
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal
                 config.IsDefaultPlatformLoggingEnabled,
                 config.LoggingCallback);
 
-            PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
+            PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(ApplicationLogger);
             HttpManager = config.HttpManager ?? new HttpManager(
                 config.HttpClientFactory ?? 
                 PlatformProxy.CreateDefaultHttpClientFactory());
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal
         /// This logger does not contain a correlation ID and should be used only when the correlation ID is not available
         /// i.e. before a request exists
         /// </summary>
-        public ICoreLogger DefaultLogger { get; }
+        public ICoreLogger ApplicationLogger { get; }
 
         /// <inheritdoc />
         public IHttpManager HttpManager { get; }
