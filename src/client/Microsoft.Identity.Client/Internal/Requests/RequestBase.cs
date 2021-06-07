@@ -50,37 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
         }
 
-        private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
-        {
-            string messageWithPii = string.Format(
-                CultureInfo.InvariantCulture,
-                "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t",
-                authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
-                authenticationRequestParameters.Scope.AsSingleString(),
-                authenticationRequestParameters.AppConfig.ClientId,
-                GetType().Name);
-
-            string messageWithoutPii = string.Format(
-                CultureInfo.InvariantCulture,
-                "=== Token Acquisition ({0}) started:\n\t",
-                GetType().Name);
-
-            if (authenticationRequestParameters.AuthorityInfo != null &&
-                KnownMetadataProvider.IsKnownEnvironment(authenticationRequestParameters.AuthorityInfo?.Host))
-            {
-                messageWithoutPii += string.Format(
-                    CultureInfo.CurrentCulture,
-                    "\n\tAuthority Host: {0}",
-                    authenticationRequestParameters.AuthorityInfo?.Host);
-            }
-
-            authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
-
-            if (authenticationRequestParameters.IsConfidentialClient && !CacheManager.TokenCacheInternal.IsTokenCacheSerialized())
-            {
-                authenticationRequestParameters.RequestContext.Logger.Error("The default token cache provided by MSAL is not designed to be performant when used in confidential client applications. Please use token cache serialization. See https://aka.ms/msal-net-cca-token-cache-serialization.");
-            }
-        }
+      
 
         /// <summary>
         /// Return a custom set of scopes to override the default MSAL logic of merging
@@ -338,23 +308,65 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return new KeyValuePair<string, string>?(new KeyValuePair<string, string>(Constants.CCSRoutingHintHeader, OidCCSHeader));
         }
 
+        private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
+        {
+            if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
+            {
+                int appHashCode = authenticationRequestParameters.AppConfig.GetHashCode();
+                string scopes = authenticationRequestParameters.Scope.AsSingleString();
+                string messageWithPii = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tAppHashCode: {4}",
+                    authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
+                    scopes,
+                    authenticationRequestParameters.AppConfig.ClientId,
+                    GetType().Name,
+                    appHashCode);
+
+                string messageWithoutPii = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "=== Token Acquisition ({0}) started:\n\t Scopes: {1} AppHashCode: {2}",
+                    GetType().Name,
+                    scopes,
+                    appHashCode);
+
+                if (authenticationRequestParameters.AuthorityInfo != null &&
+                    KnownMetadataProvider.IsKnownEnvironment(authenticationRequestParameters.AuthorityInfo?.Host))
+                {
+                    messageWithoutPii += string.Format(
+                        CultureInfo.CurrentCulture,
+                        "\n\tAuthority Host: {0}",
+                        authenticationRequestParameters.AuthorityInfo?.Host);
+                }
+
+                authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
+            }
+
+            if (authenticationRequestParameters.IsConfidentialClient &&
+                !CacheManager.TokenCacheInternal.IsTokenCacheSerialized())
+            {
+                authenticationRequestParameters.RequestContext.Logger.Error("The default token cache provided by MSAL is not designed to be performant when used in confidential client applications. Please use token cache serialization. See https://aka.ms/msal-net-cca-token-cache-serialization.");
+            }
+        }
+
         private void LogReturnedToken(AuthenticationResult result)
         {
             if (result.AccessToken != null && 
                 AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
+                int appHashCode = AuthenticationRequestParameters.AppConfig.GetHashCode();
+                string scopes = string.Join(" ", result.Scopes);
                 Uri canonicalAuthority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
                     $"Fetched access token from host {canonicalAuthority.Host}. Endpoint {canonicalAuthority}. ",
                     $"Fetched access token from host {canonicalAuthority.Host}. ");
 
-                AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} and Scopes {1} from {2}",
-                        result.ExpiresOn, 
-                        string.Join(" ", result.Scopes),
-                        result.AuthenticationResultMetadata.TokenSource));
+                AuthenticationRequestParameters.RequestContext.Logger.Info("\n\t=== Token Acquisition finished successfully:");
+                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(                
+                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes} " +
+                            $"source {result.AuthenticationResultMetadata.TokenSource} from {canonicalAuthority} appHashCode {appHashCode}",
+                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes} " +
+                            $"source {result.AuthenticationResultMetadata.TokenSource} from {canonicalAuthority.Host} appHashCode {appHashCode}");
             }
         }
 

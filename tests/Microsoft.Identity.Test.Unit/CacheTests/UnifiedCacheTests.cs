@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 // make sure Msal stored RT in Adal cache
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCacheDictionary =
-                    AdalCacheOperations.Deserialize(app.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence.LoadCache());
+                    AdalCacheOperations.Deserialize(app.ServiceBundle.ApplicationLogger, app.UserTokenCacheInternal.LegacyPersistence.LoadCache());
 
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
@@ -214,19 +214,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                           .WithHttpManager(harness.HttpManager)
                           .BuildConcrete();
 
-                CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, TestConstants.s_scope.ToString());
+                CreateAdalCache(harness.ServiceBundle.ApplicationLogger, app.UserTokenCacheInternal.LegacyPersistence, TestConstants.s_scope.ToString());
 
                 var adalUsers =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
-                        harness.ServiceBundle.DefaultLogger,
+                        harness.ServiceBundle.ApplicationLogger,
                         app.UserTokenCacheInternal.LegacyPersistence,
                         TestConstants.ClientId);
 
-                CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, "user.read");
+                CreateAdalCache(harness.ServiceBundle.ApplicationLogger, app.UserTokenCacheInternal.LegacyPersistence, "user.read");
 
                 AdalUsersForMsal adalUsers2 =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
-                        harness.ServiceBundle.DefaultLogger,
+                        harness.ServiceBundle.ApplicationLogger,
                         app.UserTokenCacheInternal.LegacyPersistence,
                         TestConstants.ClientId);
 
@@ -261,19 +261,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                           .WithTelemetry(new TraceTelemetryConfig())
                           .BuildConcrete();
 
-                CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, TestConstants.s_scope.ToString());
+                CreateAdalCache(harness.ServiceBundle.ApplicationLogger, app.UserTokenCacheInternal.LegacyPersistence, TestConstants.s_scope.ToString());
 
                 var adalUsers =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
-                        harness.ServiceBundle.DefaultLogger,
+                        harness.ServiceBundle.ApplicationLogger,
                         app.UserTokenCacheInternal.LegacyPersistence,
                         TestConstants.ClientId);
 
-                CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, "user.read");
+                CreateAdalCache(harness.ServiceBundle.ApplicationLogger, app.UserTokenCacheInternal.LegacyPersistence, "user.read");
 
                 var adalUsers2 =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
-                        harness.ServiceBundle.DefaultLogger,
+                        harness.ServiceBundle.ApplicationLogger,
                         app.UserTokenCacheInternal.LegacyPersistence,
                         TestConstants.ClientId);
 

@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
         private bool _usesDefaultSerialization = false;
         private volatile bool _hasStateChanged;
 
-        private ICoreLogger Logger => ServiceBundle.DefaultLogger;
+        private ICoreLogger Logger => ServiceBundle.ApplicationLogger;
 
         internal IServiceBundle ServiceBundle { get; }
         internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
