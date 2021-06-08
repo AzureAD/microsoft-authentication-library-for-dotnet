@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public class ConfidentialClientWithRegionTests : TestBase
     {
-       
+
         [TestMethod]
         [Description("Test for regional auth with successful instance discovery.")]
         public async Task FetchRegionFromLocalImdsCallAsync()
@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
+                Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.AzureRegionAutoDetected);
 
                 // try again, result will be from cache
                 result = await app
@@ -52,7 +53,8 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionAutodetectionSource.Cache, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.AzureRegionAutoDetected);
 
                 // try again, with force refresh, region should be from cache
                 httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
@@ -65,7 +67,8 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionAutodetectionSource.Cache, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.AzureRegionAutoDetected);
 
                 // try again, create a new app, result should still be from cache 
                 IConfidentialClientApplication app2 = CreateCca(
@@ -81,12 +84,13 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionAutodetectionSource.Cache, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.AzureRegionAutoDetected);
             }
         }
 
         [TestMethod]
-        [Description("Tokens between regional and non-regional are interchangable.")]
+        [Description("Tokens between regional and non-regional are interchangeable.")]
         public async Task TokensAreInterchangable_Regional_To_NonRegional_Async()
         {
             using (var httpManager = new MockHttpManager())
@@ -113,6 +117,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
+                Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.AzureRegionAutoDetected);
 
                 // when switching to non-region, token is found in the cache
                 result = await appWithoutRegion
@@ -123,14 +128,14 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(null, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionAutodetectionSource.None, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.None, result.ApiEvent.RegionOutcome);
-
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.AzureRegionAutoDetected);
             }
         }
 
         [TestMethod]
         [Ignore] //  https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2512
-        [Description("Tokens between non-regional and regional are interchangable.")]
+        [Description("Tokens between non-regional and regional are interchangeable.")]
         public async Task TokensAreInterchangable_NonRegional_To_Regional_Async()
         {
             using (var httpManager = new MockHttpManager())
@@ -153,7 +158,8 @@ namespace Microsoft.Identity.Test.Unit
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsTrue(string.IsNullOrEmpty(result.AuthenticationResultMetadata.AzureRegionAutoDetected));
 
                 httpManager.AddRegionDiscoveryMockHandler("uscentral");
 
@@ -163,7 +169,8 @@ namespace Microsoft.Identity.Test.Unit
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("uscentral", result.AuthenticationResultMetadata.AzureRegionAutoDetected);
             }
         }
 
@@ -188,12 +195,11 @@ namespace Microsoft.Identity.Test.Unit
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
 
+                    Assert.IsNotNull(result.AccessToken);
                     Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                     Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, result.ApiEvent.RegionAutodetectionSource);
                     Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
-
-                    Assert.IsNotNull(result.AccessToken);
-
+                    Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.AzureRegionAutoDetected);
                 }
                 finally
                 {
@@ -228,6 +234,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(null, result.ApiEvent.RegionUsed);
                     Assert.AreEqual((int)RegionAutodetectionSource.FailedAutoDiscovery, result.ApiEvent.RegionAutodetectionSource);
                     Assert.AreEqual((int)RegionOutcome.FallbackToGlobal, result.ApiEvent.RegionOutcome);
+                    Assert.IsTrue(string.IsNullOrEmpty(result.AuthenticationResultMetadata.AzureRegionAutoDetected));
                 }
                 catch (MsalServiceException)
                 {
@@ -257,15 +264,15 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.UserProvidedValid, result.ApiEvent.RegionOutcome);
-
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.AzureRegionAutoDetected);
 
                 result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
