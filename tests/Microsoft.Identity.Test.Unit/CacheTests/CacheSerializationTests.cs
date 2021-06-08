@@ -57,8 +57,20 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             };
         }
 
-        private MsalRefreshTokenCacheItem CreateRefreshTokenItem()
+        private MsalRefreshTokenCacheItem CreateRefreshTokenItem(bool isFrt = false)
         {
+            if (isFrt)
+            {
+                return new MsalRefreshTokenCacheItem
+                {
+                    ClientId = TestConstants.ClientId,
+                    Environment = "env",
+                    HomeAccountId = TestConstants.HomeAccountId,
+                    Secret = "access_token_secret",
+                    RawClientInfo = string.Empty
+                };
+            }
+
             return new MsalRefreshTokenCacheItem
             {
                 ClientId = TestConstants.ClientId,
@@ -139,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
 
             // Create an FRT
-            var frt = CreateRefreshTokenItem();
+            var frt = CreateRefreshTokenItem(true);
             frt.FamilyId = "1";
             accessor.SaveRefreshToken(frt);
 

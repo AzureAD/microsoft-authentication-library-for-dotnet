@@ -102,7 +102,6 @@
         "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
         "secret": "access_token_secret",
         "credential_type": "RefreshToken",
-        "user_assertion_hash": "assertion hash",
         "family_id": "1"
     }
   },
