@@ -155,6 +155,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.AzureRegionAutoDetected);
             return result;
         }
 
