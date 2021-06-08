@@ -4,7 +4,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains metadata of the authentication result.
+    /// Contains metadata of the authentication result. <see cref="Metrics"/> for additional MSAL-wide metrics.
     /// </summary>
     public class AuthenticationResultMetadata
     {

@@ -19,17 +19,29 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Total tokens obtained by MSAL from the identity provider.
         /// </summary>
-        public static long TotalAccessTokensFromIdP => _totalAccessTokensFromIdP;
+        public static long TotalAccessTokensFromIdP
+        {
+            get => _totalAccessTokensFromIdP;
+            internal set => _totalAccessTokensFromIdP = value;
+        }
 
         /// <summary>
         /// Total tokens obtained by MSAL from cache.
         /// </summary>
-        public static long TotalAccessTokensFromCache => _totalAccessTokensFromCache;
+        public static long TotalAccessTokensFromCache
+        {
+            get => _totalAccessTokensFromCache;
+            internal set => _totalAccessTokensFromCache = value;
+        }
 
         /// <summary>
         /// Total time, in milliseconds, spent in MSAL for all requests.  Aggregate of <see cref="AuthenticationResultMetadata.DurationInCacheInMs"/>.
         /// </summary>
-        public static long TotalDurationInMs => _totalDurationInMs;
+        public static long TotalDurationInMs
+        {
+            get => _totalDurationInMs;
+            internal set => _totalDurationInMs = value;
+        }
 
         internal static void IncrementTotalAccessTokensFromIdP()
         {
