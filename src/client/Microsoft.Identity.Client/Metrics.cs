@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Total time, in milliseconds, spent in MSAL for all requests.  Aggregate of <see cref="AuthenticationResultMetadata.DurationInCacheInMs"/>.
+        /// Total time, in milliseconds, spent in MSAL for all requests.  Aggregate of <see cref="AuthenticationResultMetadata.DurationTotalInMs"/>.
         /// </summary>
         public static long TotalDurationInMs
         {
