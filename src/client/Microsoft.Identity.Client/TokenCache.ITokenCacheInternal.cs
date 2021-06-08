@@ -655,16 +655,20 @@ namespace Microsoft.Identity.Client
                                 "Filtering by home account id");
             }
 
-            rtCacheItems = rtCacheItems.FilterWithLogging(item => item.ClientId.Equals(
-                            requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
-                            requestParams.RequestContext.Logger,
-                            "Filtering by client id");
-
-            rtCacheItems = rtCacheItems.FilterWithLogging(item => 
+            rtCacheItems = rtCacheItems.FilterWithLogging(item =>
                             string.Equals(item.FamilyId ?? string.Empty,
                             familyId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
                             requestParams.RequestContext.Logger,
                             "Filtering by family id");
+
+            // If family id have a value that means we are looking for a refresh token for foci.
+            if (familyId.IsNullOrEmpty())
+            {
+                rtCacheItems = rtCacheItems.FilterWithLogging(item => item.ClientId.Equals(
+                            requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
+                            requestParams.RequestContext.Logger,
+                            "Filtering by client id");
+            }
 
             return rtCacheItems;
         }
