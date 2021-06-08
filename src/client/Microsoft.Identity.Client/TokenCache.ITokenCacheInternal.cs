@@ -616,7 +616,6 @@ namespace Microsoft.Identity.Client
             }
 
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
-            
 
             // ADAL legacy cache does not store FRTs
             if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled &&
