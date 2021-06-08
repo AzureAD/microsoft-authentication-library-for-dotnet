@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Performance
 
             AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefCacheEnvironment);
 
-            LegacyTokenCacheHelper.PopulateLegacyCache(serviceBundle.DefaultLogger, _cache.LegacyPersistence, TokenCacheSize);
+            LegacyTokenCacheHelper.PopulateLegacyCache(serviceBundle.ApplicationLogger, _cache.LegacyPersistence, TokenCacheSize);
             TokenCacheHelper.AddRefreshTokensToCache(_cache.Accessor, TokenCacheSize);
         }
 

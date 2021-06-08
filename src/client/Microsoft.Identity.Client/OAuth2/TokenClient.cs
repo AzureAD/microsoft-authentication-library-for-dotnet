@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _serviceBundle = _requestParams.RequestContext.ServiceBundle;
 
             _oAuth2Client = new OAuth2Client(
-               _serviceBundle.DefaultLogger,
+               _serviceBundle.ApplicationLogger,
                _serviceBundle.HttpManager);
         }
 

@@ -234,10 +234,10 @@ namespace Microsoft.Identity.Client
             accountsFromCache = accountsFromCache ?? Enumerable.Empty<IAccount>();
             accountsFromBroker = accountsFromBroker ?? Enumerable.Empty<IAccount>();
 
-            ServiceBundle.DefaultLogger.Info($"Found {accountsFromCache.Count()} cache accounts and {accountsFromBroker.Count()} broker accounts");
+            ServiceBundle.ApplicationLogger.Info($"Found {accountsFromCache.Count()} cache accounts and {accountsFromBroker.Count()} broker accounts");
             IEnumerable<IAccount> cacheAndBrokerAccounts = MergeAccounts(accountsFromCache, accountsFromBroker);
 
-            ServiceBundle.DefaultLogger.Info($"Returning {cacheAndBrokerAccounts.Count()} accounts");
+            ServiceBundle.ApplicationLogger.Info($"Returning {cacheAndBrokerAccounts.Count()} accounts");
             return cacheAndBrokerAccounts;
         }
 
@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Client
         // Not all brokers return the accounts only for the given env
         private async Task<IEnumerable<IAccount>> FilterBrokerAccountsByEnvAsync(IEnumerable<IAccount> brokerAccounts, CancellationToken cancellationToken)
         {
-            ServiceBundle.DefaultLogger.Verbose($"Filtering broker accounts by env. Before filtering: " + brokerAccounts.Count());
+            ServiceBundle.ApplicationLogger.Verbose($"Filtering broker accounts by env. Before filtering: " + brokerAccounts.Count());
 
             ISet<string> allEnvs = new HashSet<string>(
                 brokerAccounts.Select(aci => aci.Environment),
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Client
 
             brokerAccounts = brokerAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 
-            ServiceBundle.DefaultLogger.Verbose($"After filtering: " + brokerAccounts.Count());
+            ServiceBundle.ApplicationLogger.Verbose($"After filtering: " + brokerAccounts.Count());
 
             return brokerAccounts;
         }
@@ -309,7 +309,7 @@ namespace Microsoft.Identity.Client
                 }
                 else
                 {
-                    ServiceBundle.DefaultLogger.InfoPii(
+                    ServiceBundle.ApplicationLogger.InfoPii(
                         "Account merge eliminated broker account with id: " + account.HomeAccountId,
                         "Account merge eliminated an account");
                 }

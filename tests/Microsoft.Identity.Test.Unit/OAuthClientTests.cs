@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Test.Unit
                   });
 
                 OAuth2Client client = new OAuth2Client(
-                    harness.ServiceBundle.DefaultLogger,
+                    harness.ServiceBundle.ApplicationLogger,
                     harness.HttpManager);
 
                 Exception ex = await AssertException.TaskThrowsAsync<Exception>(

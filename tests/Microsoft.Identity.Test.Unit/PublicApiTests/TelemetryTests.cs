@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             TestCommon.ResetInternalStaticCaches();
             _myReceiver = new MyReceiver();
             _serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: ClientId);
-            _logger = _serviceBundle.DefaultLogger;
+            _logger = _serviceBundle.ApplicationLogger;
             _platformProxy = _serviceBundle.PlatformProxy;
             _crypto = _platformProxy.CryptographyManager;
             _telemetryManager = new TelemetryManager(_serviceBundle.Config, _platformProxy, _myReceiver.HandleTelemetryEvents);
@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void PiiLoggingEnabledTrue_ApiEventFieldsHashedTest()
         {
             var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, enablePiiLogging: true);
-            _logger = serviceBundle.DefaultLogger;
+            _logger = serviceBundle.ApplicationLogger;
 
             var correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try
