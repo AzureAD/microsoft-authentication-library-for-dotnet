@@ -271,7 +271,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             tokenCache.AddAccessTokenCacheItem(atItem);
         }
 
-        public static async void UpdateAccessTokenAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
+        public static void UpdateUserAssertions(ConfidentialClientApplication app)
+        {
+            TokenCacheHelper.UpdateAccessTokenUserAssertions(app.UserTokenCacheInternal);
+            TokenCacheHelper.UpdateRefreshTokenUserAssertions(app.UserTokenCacheInternal);
+        }
+
+        public static async void UpdateAccessTokenUserAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
         {
             var atItems = await tokenCache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
             UpdateCacheitemProperties(atItems, "UserAssertionHash", assertion);
@@ -282,7 +288,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
         }
 
-        public static async void UpdateRefreshTokenAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
+        public static async void UpdateRefreshTokenUserAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
         {
             var rtItems = await tokenCache.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
             UpdateCacheitemProperties(rtItems, "UserAssertionHash", assertion);

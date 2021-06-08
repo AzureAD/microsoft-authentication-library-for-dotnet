@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual("some-access-token", result.AccessToken);
 
                 //Update user assertions
-                UpdateUserAssertions(cca);
+                TokenCacheHelper.UpdateUserAssertions(cca);
 
                 MockHttpMessageHandler mockTokenRequestHttpHandlerRefresh = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
 
@@ -103,12 +103,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual("some-access-token", result.AccessToken);
                 Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
             }
-        }
-
-        private void UpdateUserAssertions(ConfidentialClientApplication app)
-        {
-            TokenCacheHelper.UpdateAccessTokenAssertions(app.UserTokenCacheInternal);
-            TokenCacheHelper.UpdateRefreshTokenAssertions(app.UserTokenCacheInternal);
         }
 
         [TestMethod]

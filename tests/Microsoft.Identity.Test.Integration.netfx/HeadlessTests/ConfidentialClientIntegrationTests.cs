@@ -764,7 +764,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
             TokenCacheHelper.ExpireAccessTokens(confidentialApp2.UserTokenCacheInternal);
-            UpdateUserAssertions(confidentialApp2);
+            TokenCacheHelper.UpdateUserAssertions(confidentialApp2);
 
             //Should perform OBO flow since the access token and the refresh token contains the wrong user assertion hash
             authResult = await confidentialApp2.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
@@ -777,12 +777,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
-        }
-
-        private void UpdateUserAssertions(ConfidentialClientApplication app)
-        {
-            TokenCacheHelper.UpdateAccessTokenAssertions(app.UserTokenCacheInternal);
-            TokenCacheHelper.UpdateRefreshTokenAssertions(app.UserTokenCacheInternal);
         }
 
         [TestMethod]
