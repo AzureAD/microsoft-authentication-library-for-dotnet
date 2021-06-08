@@ -96,7 +96,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
                         authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
-                        authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;                        
+                        authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
+
+                        authenticationResult.AuthenticationResultMetadata.AzureRegionAutoDetected = Region.RegionManager.AutoDiscoveredRegion;
                         return authenticationResult;
                     }
                     catch (MsalException ex)

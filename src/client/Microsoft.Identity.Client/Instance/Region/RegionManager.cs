@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Region
         private readonly IHttpManager _httpManager;
         private readonly int _imdsCallTimeoutMs;
 
-        private static string s_autoDiscoveredRegion;
+        internal static string AutoDiscoveredRegion;
         private static bool s_failedAutoDiscovery = false;
 
         public RegionManager(
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Region
             if (shouldClearStaticCache)
             {
                 s_failedAutoDiscovery = false;
-                s_autoDiscoveredRegion = null;
+                AutoDiscoveredRegion = null;
             }
         }
 
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Region
 
             // MSAL always performs region auto-discovery, even if the user configured an actual region
             // in order to detect inconsistencies and report via telemetry
-            var discoveredRegion = await DiscoverAndCacheAsync(azureRegionConfig, logger, requestContext.UserCancellationToken).ConfigureAwait(false);
+            var discoveredRegion = await DiscoverAndCacheAsync(logger, requestContext.UserCancellationToken).ConfigureAwait(false);
 
             RecordTelemetry(requestContext.ApiEvent, azureRegionConfig, discoveredRegion);
 
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Region
                  apiEvent.RegionOutcome == (int)(default(RegionOutcome)));
         }
 
-        private async Task<RegionInfo> DiscoverAndCacheAsync(string azureRegionConfig, ICoreLogger logger, CancellationToken requestCancellationToken)
+        private async Task<RegionInfo> DiscoverAndCacheAsync(ICoreLogger logger, CancellationToken requestCancellationToken)
         {
             if (s_failedAutoDiscovery == true)
             {
@@ -144,16 +144,16 @@ namespace Microsoft.Identity.Client.Region
             }
 
             if (s_failedAutoDiscovery == false &&
-                !string.IsNullOrEmpty(s_autoDiscoveredRegion))
+                !string.IsNullOrEmpty(AutoDiscoveredRegion))
             {
-                logger.Info($"[Region discovery] Auto-discovery already ran and found {s_autoDiscoveredRegion}.");
-                return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache);
+                logger.Info($"[Region discovery] Auto-discovery already ran and found {AutoDiscoveredRegion}.");
+                return new RegionInfo(AutoDiscoveredRegion, RegionAutodetectionSource.Cache);
             }
 
             var result = await DiscoverAsync(logger, requestCancellationToken).ConfigureAwait(false);
 
             s_failedAutoDiscovery = result.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery;
-            s_autoDiscoveredRegion = result.Region;
+            AutoDiscoveredRegion = result.Region;
 
             return result;
         }
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Client.Region
 
             HttpResponse response = await _httpManager.SendGetAsync(imdsErrorUri, headers, logger, retry: false, GetCancellationToken(userCancellationToken)).ConfigureAwait(false);
 
-            // When IMDS endpoint is called without the api version query param, bad request response comes back with latest version.
+            // When IMDS endpoint is called without the api version query parameter, bad request response comes back with latest version.
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 LocalImdsErrorResponse errorResponse = JsonHelper.DeserializeFromJson<LocalImdsErrorResponse>(response.Body);

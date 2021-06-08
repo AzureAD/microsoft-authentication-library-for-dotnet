@@ -39,5 +39,10 @@ namespace Microsoft.Identity.Client
         /// Time (in ms) MSAL spent for HTTP communication.
         /// </summary>
         public long DurationInHttpInMs { get; set; }
+
+        /// <summary>
+        /// Azure region which was auto-detected.
+        /// </summary>
+        public string AzureRegionAutoDetected { get; set; }
     }
 }
