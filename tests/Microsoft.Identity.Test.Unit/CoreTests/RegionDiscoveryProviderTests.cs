@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 Guid.NewGuid(),
                 _userCancellationTokenSource.Token);
             _apiEvent = new ApiEvent(
-                _harness.ServiceBundle.DefaultLogger,
+                _harness.ServiceBundle.ApplicationLogger,
                 _harness.ServiceBundle.PlatformProxy.CryptographyManager,
                 Guid.NewGuid().AsMatsCorrelationId());
             _testRequestContext.ApiEvent = _apiEvent;

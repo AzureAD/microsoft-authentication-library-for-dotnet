@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
@@ -467,9 +468,7 @@ namespace Microsoft.Identity.Client
             if (string.IsNullOrWhiteSpace(Config.ClientId))
             {
                 throw new MsalClientException(MsalError.NoClientId, MsalErrorMessage.NoClientIdWasSpecified);
-            }
-
-            CreateAuthorityInfoFromEnums();
+            }         
 
             //ADFS does not require client id to be in the form of a GUID.
             if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
@@ -499,25 +498,41 @@ namespace Microsoft.Identity.Client
 
         internal ApplicationConfiguration BuildConfiguration()
         {
+            ResolveAuthority();
             Validate();
             return Config;
         }
 
         #region Authority
-        private void CreateAuthorityInfoFromEnums()
+        private void ResolveAuthority()
         {
             if (Config.AuthorityInfo != null)
             {
-                return;
+                if (!string.IsNullOrEmpty(Config.TenantId) &&
+                    Config.AuthorityInfo.AuthorityType == AuthorityType.Aad)
+                {
+                    AadAuthority aadAuthority = Authority.CreateAuthority(Config.AuthorityInfo) as AadAuthority;
+                    if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() && 
+                        !string.Equals(aadAuthority.TenantId, Config.TenantId))
+                    {
+                        throw new MsalClientException(
+                            MsalError.AuthorityTenantSpecifiedTwice, 
+                            "You specified a different tenant - once in WithAuthority() and once using WithTenant().");
+                    }
+
+                    Config.AuthorityInfo = Authority.CreateAuthorityWithTenant(Config.AuthorityInfo, Config.TenantId).AuthorityInfo;
+                }
             }
+            else
+            {
+                string authorityInstance = GetAuthorityInstance();
+                string authorityAudience = GetAuthorityAudience();
 
-            string authorityInstance = GetAuthorityInstance();
-            string authorityAudience = GetAuthorityAudience();
-
-            Config.AuthorityInfo = new AuthorityInfo(
-                    AuthorityType.Aad,
-                    new Uri($"{authorityInstance}/{authorityAudience}").ToString(),
-                    Config.ValidateAuthority);
+                Config.AuthorityInfo = new AuthorityInfo(
+                        AuthorityType.Aad,
+                        new Uri($"{authorityInstance}/{authorityAudience}").ToString(),
+                        Config.ValidateAuthority);
+            }
         }
 
         private string GetAuthorityAudience()

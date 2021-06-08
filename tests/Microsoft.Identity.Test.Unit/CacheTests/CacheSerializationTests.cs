@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
@@ -491,7 +492,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache = notificationArgs.TokenCache.SerializeMsalV3();
             });
 
-            var notification = new TokenCacheNotificationArgs(tokenCache, null, null, false, false, true);
+            var notification = new TokenCacheNotificationArgs(tokenCache, null, null, false, false, true, CancellationToken.None);
             await (tokenCache as ITokenCacheInternal).OnBeforeAccessAsync(notification).ConfigureAwait(false);
             await (tokenCache as ITokenCacheInternal).OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);

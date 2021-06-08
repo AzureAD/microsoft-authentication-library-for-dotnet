@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -11,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Advanced;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
@@ -93,12 +95,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             IConfidentialClientApplication cca;
             string redirectUri = SeleniumWebUI.FindFreeLocalhostRedirectUri();
 
+            HttpSnifferClientFactory factory;
+
             cca = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
                 .WithAuthority(authority)
                 .WithCertificate(cert)
                 .WithRedirectUri(redirectUri)
-                .WithTestLogging()
+                .WithTestLogging(out factory)
                 .Build();
 
             var cacheAccess = (cca as ConfidentialClientApplication).UserTokenCache.RecordAccess();
@@ -112,7 +116,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             {
                 authUriBuilder.WithPkce(out codeVerifier);
             }
-
 
             Uri authUri = await authUriBuilder.ExecuteAsync()
                 .ConfigureAwait(false);
@@ -136,9 +139,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var authorizationResult = AuthorizationResult.FromUri(authCodeUri.AbsoluteUri);
             Assert.AreEqual(AuthorizationStatus.Success, authorizationResult.Status);
 
+            factory.RequestsAndResponses.Clear();
+
             Trace.WriteLine("Part 3 - Get a token using the auth code, just like a website");
             var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
                 .WithPkceCodeVerifier(codeVerifier)
+                .WithExtraHttpHeaders(TestConstants.ExtraHttpHeader)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -153,7 +159,20 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 result.Account.HomeAccountId.Identifier,
                 cacheAccess.LastBeforeWriteNotificationArgs.SuggestedCacheKey);
 
+            AssertExtraHTTPHeadersAreSent(factory);
+
             return result;
+        }
+
+        private void AssertExtraHTTPHeadersAreSent(HttpSnifferClientFactory factory)
+        {
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
+            x.Item2.StatusCode == HttpStatusCode.OK);
+
+            var ExtraHttpHeader = req.Headers.Single(h => h.Key == TestConstants.ExtraHttpHeader.Keys.FirstOrDefault());
+
+            Assert.AreEqual(TestConstants.ExtraHttpHeader.Keys.FirstOrDefault(), ExtraHttpHeader.Key);
+            Assert.AreEqual(TestConstants.ExtraHttpHeader.Values.FirstOrDefault(), ExtraHttpHeader.Value.FirstOrDefault());
         }
     }
 }

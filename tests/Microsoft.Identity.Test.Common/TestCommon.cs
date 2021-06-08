@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Test.Common
             requestContext = requestContext ?? new RequestContext(serviceBundle, Guid.NewGuid())
             {
                 ApiEvent = new Client.TelemetryCore.Internal.Events.ApiEvent(
-                    serviceBundle.DefaultLogger,
+                    serviceBundle.ApplicationLogger,
                     serviceBundle.PlatformProxy.CryptographyManager,
                     Guid.NewGuid().ToString())
             };
