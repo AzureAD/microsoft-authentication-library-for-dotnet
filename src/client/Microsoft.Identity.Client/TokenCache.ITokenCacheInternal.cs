@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem = (MsalAccessTokenCacheItem)GetSingleResult(requestParams, finalList);
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleAccessTokenResult(requestParams, finalList);
             msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
             msalAccessTokenCacheItem = FilterByExpiry(msalAccessTokenCacheItem, requestParams);
 
@@ -499,6 +499,16 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
+        private static MsalAccessTokenCacheItem GetSingleAccessTokenResult(AuthenticationRequestParameters requestParams, IReadOnlyList<MsalAccessTokenCacheItem> filteredItems)
+        {
+            return (MsalAccessTokenCacheItem) GetSingleResult(requestParams, filteredItems);
+        }
+
+        private static MsalRefreshTokenCacheItem GetSingleRefreshTokenResult(AuthenticationRequestParameters requestParams, IReadOnlyList<MsalRefreshTokenCacheItem> filteredItems)
+        {
+            return (MsalRefreshTokenCacheItem) GetSingleResult(requestParams, filteredItems);
+        }
+
         private static MsalCredentialCacheItemBase GetSingleResult(
             AuthenticationRequestParameters requestParams,
             IReadOnlyList<MsalCredentialCacheItemBase> filteredItems)
@@ -594,7 +604,7 @@ namespace Microsoft.Identity.Client
 
             if (finalList.Count() > 0)
             {
-                MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = (MsalRefreshTokenCacheItem)GetSingleResult(requestParams, finalList);
+                MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = GetSingleRefreshTokenResult(requestParams, finalList);
 
                 return msalRefreshTokenCacheItem;
             }
@@ -640,17 +650,15 @@ namespace Microsoft.Identity.Client
             }
 
             rtCacheItems = rtCacheItems.FilterWithLogging(item => item.ClientId.Equals(
-                                requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
-                                requestParams.RequestContext.Logger,
-                                "Filtering by client id");
+                            requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
+                            requestParams.RequestContext.Logger,
+                            "Filtering by client id");
 
-            if (!familyId.IsNullOrEmpty())
-            {
-                rtCacheItems = rtCacheItems.FilterWithLogging(item => item.FamilyId.Equals(
-                                familyId, StringComparison.OrdinalIgnoreCase),
-                                requestParams.RequestContext.Logger,
-                                "Filtering by home account id");
-            }
+            rtCacheItems = rtCacheItems.FilterWithLogging(item => 
+                            string.Equals(item.FamilyId ?? string.Empty,
+                            familyId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
+                            requestParams.RequestContext.Logger,
+                            "Filtering by family id");
 
             return rtCacheItems;
         }
