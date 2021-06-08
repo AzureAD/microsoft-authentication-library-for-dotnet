@@ -65,16 +65,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (!string.IsNullOrEmpty(_clientInfo))
             {
-                var decodedClientInfo = Base64UrlHelpers.DecodeToString(_clientInfo);
-
-                var clientInfo = JsonHelper.DeserializeFromJson<ClientInfo>(decodedClientInfo);
-
-                _tokenClient.AddHeaderToClient(Constants.CCSRoutingHintHeader, CoreHelpers.GetCCSClientInfoheader(clientInfo.UniqueObjectIdentifier, clientInfo.UniqueTenantIdentifier));
+                AddCCSClientInfoHeaderToTokenClient();
             }
             else if (!string.IsNullOrEmpty(_interactiveParameters.LoginHint))
             {
                 _tokenClient.AddHeaderToClient(Constants.CCSRoutingHintHeader, CoreHelpers.GetCCSUpnHeader(_interactiveParameters.LoginHint));
             }
+        }
+
+        private void AddCCSClientInfoHeaderToTokenClient()
+        {
+            var decodedClientInfo = Base64UrlHelpers.DecodeToString(_clientInfo);
+            var clientInfo = JsonHelper.DeserializeFromJson<ClientInfo>(decodedClientInfo);
+
+            _tokenClient.AddHeaderToClient(Constants.CCSRoutingHintHeader,
+                                           CoreHelpers.GetCCSClientInfoheader(clientInfo.UniqueObjectIdentifier, 
+                                                                              clientInfo.UniqueTenantIdentifier));
         }
     }
 }

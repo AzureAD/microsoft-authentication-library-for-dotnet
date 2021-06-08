@@ -300,7 +300,5 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
         }
-
-   
     }
 }

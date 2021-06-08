@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static string GetCCSClientInfoheader(string userObjectId, string userTenantID)
         {
-            return (string.IsNullOrEmpty(userObjectId) || string.IsNullOrEmpty(userTenantID)) ? string.Empty : $@"oid:{userObjectId}@{userTenantID}";
+            return (string.IsNullOrEmpty(userObjectId) || string.IsNullOrEmpty(userTenantID)) ? string.Empty : $@"Oid:{userObjectId}@{userTenantID}";
         }
 
         internal static string GetCCSUpnHeader(string upn)

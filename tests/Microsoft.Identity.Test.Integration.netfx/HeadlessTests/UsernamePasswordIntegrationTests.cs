@@ -292,11 +292,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
         {
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == labResponse.Lab.Authority + "organizations/oauth2/v2.0/token" &&
-            x.Item2.StatusCode == HttpStatusCode.OK);
-
-            var CCSHeader = req.Headers.Single(h => h.Key == Constants.CCSRoutingHintHeader).Value.FirstOrDefault();
-
+            string CCSHeader = TestCommon.GetCCSHeader(factory);
             Assert.AreEqual(CoreHelpers.GetCCSUpnHeader(labResponse.User.Upn), CCSHeader);
         }
 

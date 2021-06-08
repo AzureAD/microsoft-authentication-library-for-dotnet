@@ -277,10 +277,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             {
                 return;
             }
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
-            x.Item2.StatusCode == HttpStatusCode.OK);
 
-            var CCSHeader = req.Headers.Single(h => h.Key == Constants.CCSRoutingHintHeader).Value.FirstOrDefault();
+            var CCSHeader = TestCommon.GetCCSHeader(factory);
 
             if (!String.IsNullOrEmpty(CCSHeader))
             {
