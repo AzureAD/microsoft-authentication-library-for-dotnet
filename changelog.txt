@@ -1,7 +1,7 @@
 4.32.1
 ==========
 ### Bug Fixes:
-**When doing `client_credentials` with an authority specified at the request level, the region is used and not the public cloud as the authority, which results in a cache miss**. See issue [#2686](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686) for details.
+**When doing a client credential flow with an authority specified at the request level, the region is used and not the public cloud as the authority, which results in a cache miss**. See issue [#2686](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686) for details.
 
 ### Fundamentals:
 **Improved logging for cache performance**. See issues/PRs [#2690](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2690), [#2688](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2688), [#2680](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2680), and [#2678](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2678).
