@@ -23,8 +23,6 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public class AuthorityAliasesTests : TestBase
     {
-      
-
         [TestMethod]
         [Description("Test authority migration")]
         public async Task AuthorityMigrationTestAsync()
@@ -48,10 +46,13 @@ namespace Microsoft.Identity.Test.Unit
                     .Create(TestConstants.ClientId)
                           .WithAuthority(authorityUri, true)
                           .WithHttpManager(httpManager)
-                          .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
+                          //.WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
                           .WithTelemetry(new TraceTelemetryConfig())
                           .WithDebugLoggingCallback()
                           .BuildConcrete();
+
+                InMemoryTokenCache cache = new InMemoryTokenCache();
+                cache.Bind(app.UserTokenCache);
 
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"),
@@ -67,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                 });
 
-                AuthenticationResult result = app.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync(CancellationToken.None).Result;
+                AuthenticationResult result = await app.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
 
                 // make sure that all cache entities are stored with "preferred_cache" environment
                 // (it is taken from metadata in instance discovery response)
@@ -76,7 +77,17 @@ namespace Microsoft.Identity.Test.Unit
                 // silent request targeting at, should return at from cache for any environment alias
                 foreach (var envAlias in TestConstants.s_prodEnvAliases)
                 {
-                    result = await app
+                    var app2 = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                          .WithAuthority($"https://{envAlias}/common", true)
+                          .WithHttpManager(httpManager)
+                          .WithTelemetry(new TraceTelemetryConfig())
+                          .WithDebugLoggingCallback()
+                          .BuildConcrete();
+
+                    cache.Bind(app2.UserTokenCache);
+
+                    result = await app2
                         .AcquireTokenSilent(
                             TestConstants.s_scope,
                             app.GetAccountsAsync().Result.First())
@@ -108,7 +119,17 @@ namespace Microsoft.Identity.Test.Unit
 
                     try
                     {
-                        result = await app
+                        var app3 = PublicClientApplicationBuilder
+                               .Create(TestConstants.ClientId)
+                                     .WithAuthority($"https://{envAlias}/common", true)
+                                     .WithHttpManager(httpManager)
+                                     .WithTelemetry(new TraceTelemetryConfig())
+                                     .WithDebugLoggingCallback()
+                                     .BuildConcrete();
+
+                        cache.Bind(app3.UserTokenCache);
+
+                        result = await app3
                             .AcquireTokenSilent(
                                 TestConstants.s_scopeForAnotherResource,
                                 (await app.GetAccountsAsync().ConfigureAwait(false)).First())

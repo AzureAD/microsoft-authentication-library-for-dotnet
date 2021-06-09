@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
+            ValidateSameHost(requestAuthorityInfo, configAuthorityInfo);
 
             switch (configAuthorityInfo.AuthorityType)
             {
@@ -70,7 +71,6 @@ namespace Microsoft.Identity.Client.Instance
 
                     if (requestAuthorityInfo != null)
                     {
-                        CheckB2CAuthorityHost(requestAuthorityInfo, configAuthorityInfo);
                         return new B2CAuthority(requestAuthorityInfo);
                     }
                     return new B2CAuthority(configAuthorityInfo);
@@ -181,11 +181,30 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         internal abstract AuthorityEndpoints GetHardcodedEndpoints();
 
-        private static void CheckB2CAuthorityHost(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
+        private static void ValidateSameHost(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
         {
-            if (configAuthorityInfo.Host != requestAuthorityInfo.Host)
+            if (requestAuthorityInfo != null &&
+                !string.Equals(requestAuthorityInfo.Host, configAuthorityInfo.Host, StringComparison.OrdinalIgnoreCase))
             {
-                throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
+                if (requestAuthorityInfo.AuthorityType == AuthorityType.B2C)
+                {
+                    throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
+                }
+
+                if (configAuthorityInfo.IsDefaultAuthority)
+                {
+                    throw new MsalClientException(
+                        MsalError.AuthorityHostMismatch,
+                        $"You did not define an authority at the application level, so it defaults to the https://login.microsoftonline.com/common. " +
+                        $"\n\rHowever, the request is for a different cloud {requestAuthorityInfo.Host}. This is not supported - the app and the request must target the same cloud. " +
+                        $"\n\r\n\r Add .WithAuthority(\"https://{requestAuthorityInfo.Host}/common\") in the app builder. " +
+                        $"\n\rSee https://aka.ms/msal-net-authority-override for details");
+                }
+
+                throw new MsalClientException(
+                    MsalError.AuthorityHostMismatch,                    
+                    $"\n\r The application is configured for cloud {configAuthorityInfo.Host} and the request for a different cloud - {requestAuthorityInfo.Host}. This is not supported - the app and the request must target the same cloud. " +
+                    $"\n\rSee https://aka.ms/msal-net-authority-override for details");
             }
         }
 

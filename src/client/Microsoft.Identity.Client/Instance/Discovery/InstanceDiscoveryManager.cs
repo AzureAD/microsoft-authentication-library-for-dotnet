@@ -111,7 +111,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
             AuthorityInfo authorityInfo,
-            RequestContext requestContext)
+            RequestContext requestContext, 
+            bool forceValidation = false)
         {
 
             Uri authorityUri = new Uri(authorityInfo.CanonicalAuthority);
@@ -121,10 +122,18 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             {
                 case AuthorityType.Aad:
 
-                    var entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??
-                                await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
-                                await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
-
+                    var entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger);
+                    
+                    if (entry == null && forceValidation)
+                    {
+                        // only the network provider does validation
+                        await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
+                    }
+                    
+                    entry = entry ??
+                        await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
+                        await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
+                                     
                     if (entry == null)
                     {
                         string message = "[Instance Discovery] Instance metadata for this authority could neither be fetched nor found. MSAL will continue regardless. SSO might be broken if authority aliases exist. ";

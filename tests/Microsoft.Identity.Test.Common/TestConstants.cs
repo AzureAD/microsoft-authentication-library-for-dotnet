@@ -58,6 +58,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com";
         public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
+        public const string PPEEnvironment = "login.windows-ppe.net";
+
 
         public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
         public const string AuthorityNotKnownTenanted = "https://sts.access.edu/" + Utid + "/";
@@ -71,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityRegional = "https://" + ProductionPrefRegionalEnvironment + "/" + TenantId + "/";
         public const string AuthorityRegionalInvalidRegion = "https://" + ProductionPrefInvalidRegionEnvironment + "/" + TenantId + "/";
         public const string AuthorityTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantId + "/";
-        public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";
+        public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";        
 
         public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
         public const string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/organizations/";
@@ -81,6 +83,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityGuidTenant2 = "https://" + ProductionPrefNetworkEnvironment + "/987654321/";
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
         public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
+        public const string ADFSAuthority2 = "https://someAdfs.com/adfs/";
 
         public const string B2CSignUpSignIn = "b2c_1_susi";
         public const string B2CProfileWithDot = "b2c.someprofile";
