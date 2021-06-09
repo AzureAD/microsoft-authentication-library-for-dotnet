@@ -660,7 +660,7 @@ namespace Microsoft.Identity.Client
                             requestParams.RequestContext.Logger,
                             "Filtering by family id");
 
-            // If family id have a value that means we are looking for a refresh token for foci.
+            // If family id has a value, it means we are looking for a refresh token for foci.
             if (familyId.IsNullOrEmpty())
             {
                 rtCacheItems = rtCacheItems.FilterWithLogging(item => item.ClientId.Equals(
