@@ -292,8 +292,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
         {
-            string CCSHeader = TestCommon.GetCCSHeader(factory);
-            Assert.AreEqual(CoreHelpers.GetCCSUpnHeader(labResponse.User.Upn), CCSHeader);
+            var CCSHeader = TestCommon.GetCCSHeaderFromSnifferFactory(factory);
+            Assert.AreEqual($"X-AnchorMailbox:UPN:{labResponse.User.Upn}", $"{CCSHeader.Key}:{CCSHeader.Value.FirstOrDefault()}");
         }
 
         private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, LabResponse labResponse)

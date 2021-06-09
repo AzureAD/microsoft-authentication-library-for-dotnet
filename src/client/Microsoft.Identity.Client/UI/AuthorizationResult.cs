@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.UI
 
             if (uriParams.ContainsKey(TokenResponseClaim.ClientInfo))
             {
-                result.Client_info = uriParams[TokenResponseClaim.ClientInfo];
+                result.ClientInfo = uriParams[TokenResponseClaim.ClientInfo];
             }
 
             if (uriParams.ContainsKey(TokenResponseClaim.Code))
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client.UI
         [JsonProperty]
         public string CloudInstanceHost { get; set; }
 
-        public string Client_info { get; set; }
+        public string ClientInfo { get; set; }
 
         /// <summary>
         /// A string that is added to each Authorization Request and is expected to be sent back along with the

@@ -134,7 +134,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthorizationResult authResult = result.Item1;
             string authCode = authResult.Code;
             string pkceCodeVerifier = result.Item2;
-            string clientInfo = authResult.Client_info;
 
             if (BrokerInteractiveRequestComponent.IsBrokerRequiredAuthCode(authCode, out string brokerInstallUri))
             {
@@ -149,7 +148,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     _interactiveParameters,
                     authCode,
                     pkceCodeVerifier,
-                    clientInfo);
+                    authResult.ClientInfo);
 
             return await authCodeExchangeComponent.FetchTokensAsync(cancellationToken)
                 .ConfigureAwait(false);

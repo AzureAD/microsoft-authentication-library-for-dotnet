@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -179,6 +180,36 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNull(authResult.IdToken);
         }
 
+        [TestMethod]
+        public async Task ValidateCCSHeadersForInteractiveAuthCodeFlowAsync()
+        {
+            HttpSnifferClientFactory factory = null;
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+
+            var pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithDefaultRedirectUri()
+               .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+               .WithTestLogging(out factory)
+               .Build();
+
+            AuthenticationResult authResult = await pca
+               .AcquireTokenInteractive(s_scopes)
+               .WithPrompt(Prompt.SelectAccount)
+               .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount))
+               .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
+               .ConfigureAwait(false);
+
+
+            var CCSHeader = TestCommon.GetCCSHeaderFromSnifferFactory(factory);
+            var userObjectId = labResponse.User.ObjectId;
+            var userTenantID = labResponse.User.TenantId;
+            Assert.AreEqual($"X-AnchorMailbox:Oid:{userObjectId}@{userTenantID}", $"{CCSHeader.Key}:{CCSHeader.Value.FirstOrDefault()}");
+
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+        }
+
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
         {
             HttpSnifferClientFactory factory = null;
@@ -278,25 +309,26 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 return;
             }
 
-            var CCSHeader = TestCommon.GetCCSHeader(factory);
+            var CCSHeader = TestCommon.GetCCSHeaderFromSnifferFactory(factory);
 
-            if (!String.IsNullOrEmpty(CCSHeader))
+            if (!String.IsNullOrEmpty(CCSHeader.Value?.FirstOrDefault()))
             {
                 ValidateCCSHeader(CCSHeader, labResponse);
             }
         }
 
-        private void ValidateCCSHeader(string CCSHeader, LabResponse labResponse)
+        private void ValidateCCSHeader(KeyValuePair<string, IEnumerable<string>> CCSHeader, LabResponse labResponse)
         {
-            if (CCSHeader.Contains("upn"))
+            var ccsHeaderValue = CCSHeader.Value.FirstOrDefault();
+            if (ccsHeaderValue.Contains("upn"))
             {
-                Assert.AreEqual(CoreHelpers.GetCCSUpnHeader(labResponse.User.Upn), CCSHeader);
+                Assert.AreEqual($"X-AnchorMailbox:UPN:{labResponse.User.Upn}", $"{CCSHeader.Key}:{ccsHeaderValue}");
             }
             else
             {
                 var userObjectId = labResponse.User.ObjectId;
                 var userTenantID = labResponse.User.TenantId;
-                Assert.AreEqual(CoreHelpers.GetCCSClientInfoheader(userObjectId.ToString(), userTenantID), CCSHeader);
+                Assert.AreEqual($"X-AnchorMailbox:Oid:{userObjectId}@{userTenantID}", $"{CCSHeader.Key}:{ccsHeaderValue}");
             }
         }
 

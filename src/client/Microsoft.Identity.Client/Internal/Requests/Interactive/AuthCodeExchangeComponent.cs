@@ -75,8 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void AddCCSClientInfoHeaderToTokenClient()
         {
-            var decodedClientInfo = Base64UrlHelpers.DecodeToString(_clientInfo);
-            var clientInfo = JsonHelper.DeserializeFromJson<ClientInfo>(decodedClientInfo);
+            var clientInfo = ClientInfo.CreateFromJson(_clientInfo);
 
             _tokenClient.AddHeaderToClient(Constants.CCSRoutingHintHeader,
                                            CoreHelpers.GetCCSClientInfoheader(clientInfo.UniqueObjectIdentifier, 

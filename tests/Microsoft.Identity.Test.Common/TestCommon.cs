@@ -117,17 +117,17 @@ namespace Microsoft.Identity.Test.Common
             };
         }
 
-        public static string GetCCSHeader(HttpSnifferClientFactory factory)
+        public static KeyValuePair<string, IEnumerable<string>> GetCCSHeaderFromSnifferFactory(HttpSnifferClientFactory factory)
         {
             if (factory.RequestsAndResponses.Any())
             {
                 var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
                 x.Item2.StatusCode == HttpStatusCode.OK);
 
-                return req.Headers.Single(h => h.Key == Constants.CCSRoutingHintHeader).Value.FirstOrDefault();
+                return req.Headers.Single(h => h.Key == Constants.CCSRoutingHintHeader);
             }
 
-            return string.Empty;
+            throw new MsalClientException("Could not find CCS Header in sniffer factory.");
         }
     }
 }
