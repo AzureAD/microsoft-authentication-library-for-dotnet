@@ -35,6 +35,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
+                .WithAuthority("https://login.windows.net/" + labResponse.Lab.TenantId + "/")
                 .WithTestLogging()
                 .Build();
 
