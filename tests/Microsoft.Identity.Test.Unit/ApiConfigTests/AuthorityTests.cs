@@ -13,9 +13,9 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
     {
         private static readonly AuthorityInfo s_commonAuthority =
             AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true);
-        static string s = $@"https://{TestConstants.PPEEnvironment}/{TestConstants.TenantId}";
+        static string s_ppeCommonUri = $@"https://{TestConstants.PPEEnvironment}/{TestConstants.TenantId}";
         private static readonly AuthorityInfo s_ppeAuthority =
-          AuthorityInfo.FromAuthorityUri(s, true);
+          AuthorityInfo.FromAuthorityUri(s_ppeCommonUri, true);
         private static readonly AuthorityInfo s_utidAuthority =
             AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityUtidTenant, true);
         private static readonly AuthorityInfo s_utid2Authority =
