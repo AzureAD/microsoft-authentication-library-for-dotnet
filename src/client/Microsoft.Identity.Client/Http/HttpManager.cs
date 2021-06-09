@@ -210,8 +210,6 @@ namespace Microsoft.Identity.Client.Http
             ICoreLogger logger,
             CancellationToken cancellationToken = default)
         {
-            HttpClient client = GetHttpClient();
-
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
             {
                 requestMessage.Method = method;
@@ -222,6 +220,8 @@ namespace Microsoft.Identity.Client.Http
                     $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. ");
 
                 Stopwatch sw = Stopwatch.StartNew();
+
+                HttpClient client = GetHttpClient();
 
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
