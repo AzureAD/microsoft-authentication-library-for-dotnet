@@ -280,10 +280,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static async void UpdateAccessTokenUserAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
         {
             var atItems = await tokenCache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
-            UpdateCacheitemProperties(atItems, "UserAssertionHash", assertion);
 
             foreach (var atItem in atItems)
             {
+                atItem.UserAssertionHash = assertion;
                 tokenCache.AddAccessTokenCacheItem(atItem);
             }
         }
@@ -291,28 +291,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static async void UpdateRefreshTokenUserAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
         {
             var rtItems = await tokenCache.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
-            UpdateCacheitemProperties(rtItems, "UserAssertionHash", assertion);
 
             foreach (var rtItem in rtItems)
             {
+                rtItem.UserAssertionHash = assertion;
                 tokenCache.AddRefreshTokenCacheItem(rtItem);
-            }
-        }
-
-        private static void UpdateCacheitemProperties(IEnumerable<MsalCredentialCacheItemBase> cacheItems, string property, string newValue)
-        {
-            foreach (MsalCredentialCacheItemBase cacheItem in cacheItems)
-            {
-                var props = cacheItem.GetType().GetProperties(System.Reflection.BindingFlags.NonPublic
-                                                              | System.Reflection.BindingFlags.Instance);
-
-                foreach (var prop in props)
-                {
-                    if (prop.Name.Contains(property))
-                    {
-                        prop.SetValue(cacheItem, newValue);
-                    }
-                }
             }
         }
     }

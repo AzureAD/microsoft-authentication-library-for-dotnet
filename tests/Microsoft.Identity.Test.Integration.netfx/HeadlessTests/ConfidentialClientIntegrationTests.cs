@@ -708,11 +708,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult, user);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            await confidentialApp.GetAccountsAsync().ConfigureAwait(false);
-#pragma warning restore CS0618 // Type or member is obsolete
-            Assert.IsNull(userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
-
             //Run OBO again. Should get token from cache
             authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
                 .ExecuteAsync(CancellationToken.None)
