@@ -13,6 +13,9 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
     {
         private static readonly AuthorityInfo s_commonAuthority =
             AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true);
+        static string s = $@"https://{TestConstants.PPEEnvironment}/{TestConstants.TenantId}";
+        private static readonly AuthorityInfo s_ppeAuthority =
+          AuthorityInfo.FromAuthorityUri(s, true);
         private static readonly AuthorityInfo s_utidAuthority =
             AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityUtidTenant, true);
         private static readonly AuthorityInfo s_utid2Authority =
@@ -67,11 +70,38 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [TestMethod]
-        // Regression https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1606
         public void DefaultAuthorityDifferentTypeTest()
         {
-            Authority result = Authority.CreateAuthorityForRequest(s_commonAuthority, s_b2cAuthority, null);
-            Assert.AreEqual(s_b2cAuthority.CanonicalAuthority, result.AuthorityInfo.CanonicalAuthority);
+            var ex = Assert.ThrowsException<MsalClientException>(
+                () => Authority.CreateAuthorityForRequest(s_commonAuthority, s_b2cAuthority, null));
+
+            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        public void DifferentHosts()
+        {
+            var ex = Assert.ThrowsException<MsalClientException>(
+                () => Authority.CreateAuthorityForRequest(s_commonAuthority, s_ppeAuthority, null));
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.ErrorCode);
+
+            var ex2 = Assert.ThrowsException<MsalClientException>(
+              () => Authority.CreateAuthorityForRequest(s_ppeAuthority, s_commonAuthority, null));
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex2.ErrorCode);
+
+            var ex3 = Assert.ThrowsException<MsalClientException>(
+             () => Authority.CreateAuthorityForRequest(
+                 AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority, true),
+                 AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority2, true),
+                 null));
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex3.ErrorCode);
+
+            var ex4 = Assert.ThrowsException<MsalClientException>(
+               () => Authority.CreateAuthorityForRequest(
+                   AuthorityInfo.FromAuthorityUri(TestConstants.B2CAuthority, true),
+                   AuthorityInfo.FromAuthorityUri(TestConstants.B2CCustomDomain, true),
+                   null));
+            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex4.ErrorCode);
         }
 
         [TestMethod]
