@@ -46,7 +46,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // no access token is found, then it means token does not exist
                 // or new assertion has been passed. 
                 // Look for a refresh token, if refresh token is found perform refresh token flow.
-                // If a refresh token is not found, fetch new access token for OBO
+                // If a refresh token is not found, then it means refresh token does not exist or new assertion has been passed.
+                // Fetch new access token for OBO
                 using (logger.LogBlockDuration("[OBO Request] Looking in the cache for an access token"))
                 {
                     msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);

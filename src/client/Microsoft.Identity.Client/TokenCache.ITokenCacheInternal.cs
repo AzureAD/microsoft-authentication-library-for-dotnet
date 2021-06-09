@@ -437,8 +437,8 @@ namespace Microsoft.Identity.Client
             }
 
             // Only AcquireTokenSilent has an IAccount in the request that can be used for filtering
-            if (requestParams.ApiId != TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient &&
-                requestParams.ApiId != TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
+            if (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient &&
+                requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
                                 requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
