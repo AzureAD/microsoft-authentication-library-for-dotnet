@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                ConfidentialClientApplication cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), false)
                                                               .WithRedirectUri(TestConstants.RedirectUri)
                                                               .WithClientSecret(TestConstants.ClientSecret)
@@ -37,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit
                                                               .BuildConcrete();
 
                 // Act - AcquireTokenForClient
-                var result = await cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
@@ -68,28 +71,8 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
 
-                PublicClientApplication pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), false)
-                                            .WithHttpManager(harness.HttpManager)
-                                            .BuildConcrete();
-
-                InMemoryTokenCache memoryTokenCache = new InMemoryTokenCache(withOperationDelay: true, shouldClearExistingCache: false);
-                memoryTokenCache.Bind(pca.UserTokenCache);
-
-                pca.ServiceBundle.ConfigureMockWebUI(
-                    AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
-
-                var result = await pca
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
-                Assert.AreEqual(1, Metrics.TotalAccessTokensFromIdP);
-                Assert.AreEqual(0, Metrics.TotalAccessTokensFromCache);
-                Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+                PublicClientApplication pca = CreatePca(harness.HttpManager);
+                await TestAcquireTokenInteractive_Async(pca, expectedTokensFromIdp: 1, expectedTokensFromCache: 0).ConfigureAwait(false);
             }
         }
 
@@ -98,31 +81,76 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (var harness = CreateTestHarness())
             {
-                PublicClientApplication pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), false)
-                                            .WithHttpManager(harness.HttpManager)
-                                            .BuildConcrete();
-
-                TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
-                InMemoryTokenCache memoryTokenCache = new InMemoryTokenCache(withOperationDelay: true, shouldClearExistingCache: false);
-                memoryTokenCache.Bind(pca.UserTokenCache);
-
-                var result = await pca.AcquireTokenSilent(
-                    TestConstants.s_scope.ToArray(),
-                    TestConstants.DisplayableId)
-                    .WithAuthority(pca.Authority, false)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationInHttpInMs == 0);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
-                Assert.AreEqual(0, Metrics.TotalAccessTokensFromIdP);
-                Assert.AreEqual(1, Metrics.TotalAccessTokensFromCache);
-                Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+                PublicClientApplication pca = CreatePca(harness.HttpManager, populateUserCache: true);
+                await TestAcquireTokenSilent_Async(pca, expectedTokensFromIdp: 0, expectedTokensFromCache: 1).ConfigureAwait(false);
             }
+        }
+
+        [TestMethod]
+        public async Task MetricsUpdatedSucessfully_AcquireTokenInteractiveAndSilent_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                PublicClientApplication pca = CreatePca(harness.HttpManager);
+                await TestAcquireTokenInteractive_Async(pca, expectedTokensFromIdp: 1, expectedTokensFromCache: 0).ConfigureAwait(false);
+                await TestAcquireTokenSilent_Async(pca, expectedTokensFromIdp: 1, expectedTokensFromCache: 1).ConfigureAwait(false);
+            }
+        }
+
+        private PublicClientApplication CreatePca(MockHttpManager httpManager, bool populateUserCache = false)
+        {
+            PublicClientApplication pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), false)
+                            .WithHttpManager(httpManager)
+                            .BuildConcrete();
+            
+            if (populateUserCache)
+            {
+                TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
+            }
+            InMemoryTokenCache memoryTokenCache = new InMemoryTokenCache(withOperationDelay: true, shouldClearExistingCache: false);
+            memoryTokenCache.Bind(pca.UserTokenCache);
+
+            return pca;
+        }
+
+        private async Task TestAcquireTokenInteractive_Async(PublicClientApplication pca, int expectedTokensFromIdp, int expectedTokensFromCache)
+        {
+            pca.ServiceBundle.ConfigureMockWebUI(
+                AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
+
+            AuthenticationResult result = await pca
+                .AcquireTokenInteractive(TestConstants.s_scope)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
+            Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
+            Assert.AreEqual(expectedTokensFromIdp, Metrics.TotalAccessTokensFromIdP);
+            Assert.AreEqual(expectedTokensFromCache, Metrics.TotalAccessTokensFromCache);
+            Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+        }
+
+        private async Task TestAcquireTokenSilent_Async(PublicClientApplication pca, int expectedTokensFromIdp, int expectedTokensFromCache)
+        {
+            AuthenticationResult result = await pca.AcquireTokenSilent(
+                TestConstants.s_scope.ToArray(),
+                TestConstants.DisplayableId)
+                .WithAuthority(pca.Authority, false)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
+            Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
+            Assert.AreEqual(expectedTokensFromIdp, Metrics.TotalAccessTokensFromIdP);
+            Assert.AreEqual(expectedTokensFromCache, Metrics.TotalAccessTokensFromCache);
+            Assert.IsTrue(Metrics.TotalDurationInMs > 0);
         }
     }
 }
