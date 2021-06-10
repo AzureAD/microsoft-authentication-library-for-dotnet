@@ -6,8 +6,11 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Kerberos;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -55,6 +58,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
+            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following: 
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
@@ -63,5 +67,68 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
         }
+
+        #region Azure AD Kerberos Feature Tests
+        [TestMethod]
+        public async Task Kerberos_ROPC_B2C_Async()
+        {
+            var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
+            await KerberosRunB2CHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        private async Task KerberosRunB2CHappyPathTestAsync(LabResponse labResponse)
+        {
+            // Test with Id Token
+            AuthenticationResult authResult = await GetAuthenticationResultFromB2CAsync(
+                labResponse,
+                KerberosTicketContainer.IdToken).ConfigureAwait(false);
+
+            KerberosSupplementalTicket ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
+                authResult,
+                KerberosTicketContainer.IdToken,
+                labResponse.User.Upn);
+            Assert.IsNotNull(ticket);
+            TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
+
+            // Test with Access Token
+            authResult = await GetAuthenticationResultFromB2CAsync(
+                labResponse,
+                KerberosTicketContainer.AccessToken).ConfigureAwait(false);
+
+            ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
+                authResult,
+                KerberosTicketContainer.AccessToken,
+                labResponse.User.Upn);
+            Assert.IsNotNull(ticket);
+            TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
+        }
+
+        private async Task<AuthenticationResult> GetAuthenticationResultFromB2CAsync(
+            LabResponse labResponse,
+            KerberosTicketContainer container)
+        {
+            SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
+
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithB2CAuthority(_b2CROPCAuthority)
+                .WithTestLogging()
+                .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, container)
+                .Build();
+
+            AuthenticationResult authResult = await msalPublicClient
+                .AcquireTokenByUsernamePassword(s_b2cScopes, labResponse.User.Upn, securePassword)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+
+            return authResult;
+        }
+
+        #endregion
     }
 }

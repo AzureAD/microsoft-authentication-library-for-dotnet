@@ -5,11 +5,13 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
@@ -121,6 +123,106 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
+            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
         }
+
+        #region Azure AD Kerberos Feature Tests
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        public async Task KerberosDeviceCodeFlowTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", KerberosTicketContainer.IdToken).ConfigureAwait(false);
+            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
+        }
+
+        // same code path between .net fwk and .net core, so run only once
+#if DESKTOP
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [TestCategory(TestCategories.Arlington)]
+        public async Task KerberosArlingtonDeviceCodeFlowTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", KerberosTicketContainer.IdToken).ConfigureAwait(false);
+            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [TestCategory(TestCategories.ADFS)]
+        public async Task KerberosDeviceCodeFlowAdfsTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+
+            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user", KerberosTicketContainer.IdToken).ConfigureAwait(false);
+            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [TestCategory(TestCategories.Arlington)]
+        public async Task KerberosArlingtonDeviceCodeFlowAdfsTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
+            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user", KerberosTicketContainer.IdToken).ConfigureAwait(false);
+            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [TestCategory(TestCategories.MSA)]
+        [Ignore] // Failing sporadically https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1045664 
+        public async Task KerberosDeviceCodeFlowMsaTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
+
+            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user", KerberosTicketContainer.IdToken).ConfigureAwait(false);
+            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
+        }
+#endif
+
+        private async Task KerberosAcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType, KerberosTicketContainer ticketContainer)
+        {
+            Trace.WriteLine($"Calling KerberosAcquireTokenWithDeviceCodeFlowAsync with {0}", userType);
+            var builder = PublicClientApplicationBuilder.Create(labResponse.App.AppId)
+                .WithTestLogging()
+                .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer);
+
+            switch (labResponse.User.AzureEnvironment)
+            {
+                case AzureEnvironment.azureusgovernment:
+                    builder.WithAuthority(labResponse.Lab.Authority + labResponse.Lab.TenantId);
+                    break;
+                default:
+                    break;
+            }
+
+            var pca = builder.Build();
+            var userCacheAccess = pca.UserTokenCache.RecordAccess();
+
+            var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
+            {
+                SeleniumExtensions.PerformDeviceCodeLogin(deviceCodeResult, labResponse.User, TestContext, false);
+                return Task.FromResult(0);
+            }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+            Trace.WriteLine("Running asserts");
+
+            userCacheAccess.AssertAccessCounts(0, 1);
+            Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
+
+            KerberosSupplementalTicket ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
+                result,
+                ticketContainer,
+                labResponse.User.Upn);
+            Assert.IsNotNull(ticket);
+            TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
+        }
+
+        #endregion
     }
 }

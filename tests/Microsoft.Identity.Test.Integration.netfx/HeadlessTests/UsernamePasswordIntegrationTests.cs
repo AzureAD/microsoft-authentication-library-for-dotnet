@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -125,6 +126,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
+            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
         }
 
         #endregion
@@ -267,6 +269,24 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(labResponse.Lab.Authority, "organizations")
                 .Build();
 
+            AuthenticationResult authResult
+                = await GetAuthenticationResultWithAssertAsync(labResponse, factory, msalPublicClient, federationMetadata).ConfigureAwait(false);
+            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
+            // If test fails with "user needs to consent to the application, do an interactive request" error,
+            // Do the following:
+            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
+            // string password = ((LabUser)user).GetPassword();
+            // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
+            // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
+            // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
+        }
+
+        private async Task<AuthenticationResult> GetAuthenticationResultWithAssertAsync(
+            LabResponse labResponse,
+            HttpSnifferClientFactory factory,
+            IPublicClientApplication msalPublicClient,
+            string federationMetadata)
+        {
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
                 .WithCorrelationId(CorrelationId)
@@ -281,13 +301,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
             AssertTelemetryHeaders(factory, false, labResponse);
             AssertCCSRoutingInformationIsSent(factory, labResponse);
-            // If test fails with "user needs to consent to the application, do an interactive request" error,
-            // Do the following:
-            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
-            // string password = ((LabUser)user).GetPassword();
-            // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
-            // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
-            // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
+
+            return authResult;
         }
 
         private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
@@ -341,6 +356,148 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.AreEqual(InvalidGrantError, httpTelemetryRecorder.ErrorCode.FirstOrDefault());
             }
         }
+
+        #region Azure AD Kerberos Feature Tests
+        [TestMethod]
+        public async Task Kerberos_ROPC_AAD_Async()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Arlington)]
+        public async Task Kerberos_ARLINGTON_ROPC_AAD_Async()
+        {
+            var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Arlington)]
+        public async Task Kerberos_ARLINGTON_ROPC_ADFS_Async()
+        {
+            var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
+            await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Kerberos_ROPC_ADFSv4Federated_Async()
+        {
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
+            await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Kerberos_ROPC_ADFSv4Federated_WithMetadata_Async()
+        {
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
+            string federationMetadata = File.ReadAllText(@"federationMetadata.xml").ToString();
+            await KerberosRunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Kerberos_ROPC_ADFSv3Federated_Async()
+        {
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
+            await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.ADFS)]
+        public async Task KerberosAcquireTokenFromAdfsUsernamePasswordAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+
+            // Test with Id Token.
+            AuthenticationResult authResult
+                = await GetAuthenticationResultFromAdfsUsernamePasswordAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
+            TestCommon.GetValidatedKerberosTicketFromToken(authResult.IdToken, labResponse.User.Upn);
+            TestCommon.ValidateNoKerberosTicketFromToken(authResult.AccessToken);
+
+            // Test with Access Token.
+            authResult
+                = await GetAuthenticationResultFromAdfsUsernamePasswordAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
+            TestCommon.ValidateNoKerberosTicketFromToken(authResult.IdToken);
+            TestCommon.GetValidatedKerberosTicketFromToken(authResult.AccessToken, labResponse.User.Upn);
+        }
+
+        private async Task<AuthenticationResult> GetAuthenticationResultFromAdfsUsernamePasswordAsync(
+            LabResponse labResponse,
+            KerberosTicketContainer container)
+        {
+            SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
+
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(Adfs2019LabConstants.PublicClientId)
+                .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                .WithTestLogging()
+                .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, container)
+                .Build();
+
+            AuthenticationResult authResult = await msalPublicClient
+                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+
+            return authResult;
+        }
+
+        private async Task KerberosRunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
+        {
+            var factory = new HttpSnifferClientFactory();
+
+            // Test with Id token
+            var idTokenPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithTestLogging()
+                .WithHttpClientFactory(factory)
+                .WithAuthority(labResponse.Lab.Authority, "organizations")
+                .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, KerberosTicketContainer.IdToken)
+                .Build();
+
+            AuthenticationResult authResult = await GetAuthenticationResultWithAssertAsync(
+                labResponse,
+                factory,
+                idTokenPublicClient,
+                federationMetadata).ConfigureAwait(false);
+
+            KerberosSupplementalTicket ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
+                authResult,
+                KerberosTicketContainer.IdToken,
+                labResponse.User.Upn);
+            Assert.IsNotNull(ticket);
+            TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
+
+            // Test with Access Token
+            var accessTokenPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithTestLogging()
+                .WithHttpClientFactory(factory)
+                .WithAuthority(labResponse.Lab.Authority, "organizations")
+                .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, KerberosTicketContainer.AccessToken)
+                .Build();
+
+            authResult = await GetAuthenticationResultWithAssertAsync(
+                labResponse,
+                factory,
+                accessTokenPublicClient,
+                federationMetadata).ConfigureAwait(false);
+
+            ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
+                authResult,
+                KerberosTicketContainer.AccessToken,
+                labResponse.User.Upn);
+            Assert.IsNotNull(ticket);
+            TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
+        }
+
+        #endregion
     }
 }
 #endif
