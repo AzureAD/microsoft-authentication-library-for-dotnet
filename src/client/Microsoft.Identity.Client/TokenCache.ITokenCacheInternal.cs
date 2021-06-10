@@ -412,7 +412,7 @@ namespace Microsoft.Identity.Client
                                 !string.IsNullOrEmpty(item.UserAssertionHash) &&
                                 item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
-                                "Filtering by user assertion id");
+                                $"Filtering by user assertion: {requestParams.UserAssertion.AssertionHash}");
 
                 // OBO calls FindAccessTokenAsync directly, but we are not able to resolve the authority 
                 // unless the developer has configured a tenanted authority. If they have configured /common
@@ -632,7 +632,7 @@ namespace Microsoft.Identity.Client
                                 !string.IsNullOrEmpty(item.UserAssertionHash) &&
                                 item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
-                                "Filtering by user assertion id");
+                                $"Filtering by user assertion: {requestParams.UserAssertion.AssertionHash}");
             }
             else
             {
