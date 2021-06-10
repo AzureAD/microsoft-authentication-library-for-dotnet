@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleAccessTokenResult(requestParams, finalList);
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, finalList);
             msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
             msalAccessTokenCacheItem = FilterByExpiry(msalAccessTokenCacheItem, requestParams);
 
@@ -501,19 +501,9 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        private static MsalAccessTokenCacheItem GetSingleAccessTokenResult(AuthenticationRequestParameters requestParams, IReadOnlyList<MsalAccessTokenCacheItem> filteredItems)
-        {
-            return (MsalAccessTokenCacheItem) GetSingleResult(requestParams, filteredItems);
-        }
-
-        private static MsalRefreshTokenCacheItem GetSingleRefreshTokenResult(AuthenticationRequestParameters requestParams, IReadOnlyList<MsalRefreshTokenCacheItem> filteredItems)
-        {
-            return (MsalRefreshTokenCacheItem) GetSingleResult(requestParams, filteredItems);
-        }
-
-        private static MsalCredentialCacheItemBase GetSingleResult(
+        private static MsalAccessTokenCacheItem GetSingleResult(
             AuthenticationRequestParameters requestParams,
-            IReadOnlyList<MsalCredentialCacheItemBase> filteredItems)
+            IReadOnlyList<MsalAccessTokenCacheItem> filteredItems)
         {
             // if only one cached token found
             if (filteredItems.Count == 1)
@@ -610,9 +600,7 @@ namespace Microsoft.Identity.Client
 
             if (finalList.Count() > 0)
             {
-                MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = GetSingleRefreshTokenResult(requestParams, finalList);
-
-                return msalRefreshTokenCacheItem;
+                return finalList.FirstOrDefault();
             }
 
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
@@ -654,7 +642,7 @@ namespace Microsoft.Identity.Client
                                 "Filtering by home account id");
             }
 
-            bool filterByFamilyId = string.IsNullOrEmpty(familyId);
+            bool filterByFamilyId = !string.IsNullOrEmpty(familyId);
 
             // If family id has a value, it means we are looking for a refresh token for foci.
             if (filterByFamilyId)
