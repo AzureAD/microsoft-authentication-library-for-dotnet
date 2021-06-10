@@ -655,6 +655,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNull(userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
         }
 
+        //Since this test performs a large number of operations it should not be rerun on other clouds.
         private async Task RunOnBehalfOfTestWithTokenCacheAsync(LabResponse labResponse)
         {
             LabUser user = labResponse.User;
@@ -675,11 +676,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //TODO: acquire scenario specific client ids from the lab response
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
+            var factory = new HttpSnifferClientFactory();
 
             var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID)
                                                                  .WithAuthority(authority)
                                                                  .WithRedirectUri(TestConstants.RedirectUri)
                                                                  .WithTestLogging()
+                                                                 .WithHttpClientFactory(factory)
                                                                  .Build();
 
             var builder = msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword);
@@ -715,6 +718,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
@@ -730,6 +734,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
@@ -753,6 +758,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
@@ -768,6 +774,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
