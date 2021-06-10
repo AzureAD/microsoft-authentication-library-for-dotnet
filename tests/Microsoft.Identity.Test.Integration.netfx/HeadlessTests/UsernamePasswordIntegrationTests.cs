@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
             AssertTelemetryHeaders(factory, false, labResponse);
-            AssertCCSRoutingInformationIsSent(factory, labResponse);
+            AssertCcsRoutingInformationIsSent(factory, labResponse);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
@@ -290,10 +290,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
         }
 
-        private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
+        private void AssertCcsRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
         {
-            var CCSHeader = TestCommon.GetCCSHeaderFromSnifferFactory(factory);
-            Assert.AreEqual($"X-AnchorMailbox:UPN:{labResponse.User.Upn}", $"{CCSHeader.Key}:{CCSHeader.Value.FirstOrDefault()}");
+            var CcsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
+            Assert.AreEqual($"X-AnchorMailbox:UPN:{labResponse.User.Upn}", $"{CcsHeader.Key}:{CcsHeader.Value.FirstOrDefault()}");
         }
 
         private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, LabResponse labResponse)

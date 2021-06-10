@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public Task<MsalTokenResponse> FetchTokensAsync(CancellationToken cancellationToken)
         {
-            AddCCSHeadersToTokenClient();
+            AddCcsHeadersToTokenClient();
             return _tokenClient.SendTokenRequestAsync(GetBodyParameters());
         }
 
@@ -61,25 +61,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return dict;
         }
 
-        private void AddCCSHeadersToTokenClient()
+        private void AddCcsHeadersToTokenClient()
         {
             if (!string.IsNullOrEmpty(_clientInfo))
             {
-                AddCCSClientInfoHeaderToTokenClient();
+                var clientInfo = ClientInfo.CreateFromJson(_clientInfo);
+
+                _tokenClient.AddHeaderToClient(Constants.CcsRoutingHintHeader,
+                                               CoreHelpers.GetCcsClientInfoheader(clientInfo.UniqueObjectIdentifier,
+                                                                                  clientInfo.UniqueTenantIdentifier));
             }
             else if (!string.IsNullOrEmpty(_interactiveParameters.LoginHint))
             {
-                _tokenClient.AddHeaderToClient(Constants.CCSRoutingHintHeader, CoreHelpers.GetCCSUpnHeader(_interactiveParameters.LoginHint));
+                _tokenClient.AddHeaderToClient(Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHeader(_interactiveParameters.LoginHint));
             }
-        }
-
-        private void AddCCSClientInfoHeaderToTokenClient()
-        {
-            var clientInfo = ClientInfo.CreateFromJson(_clientInfo);
-
-            _tokenClient.AddHeaderToClient(Constants.CCSRoutingHintHeader,
-                                           CoreHelpers.GetCCSClientInfoheader(clientInfo.UniqueObjectIdentifier, 
-                                                                              clientInfo.UniqueTenantIdentifier));
         }
     }
 }

@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
-        public async Task ValidateCCSHeadersForInteractiveAuthCodeFlowAsync()
+        public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
             HttpSnifferClientFactory factory = null;
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -201,10 +201,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                .ConfigureAwait(false);
 
 
-            var CCSHeader = TestCommon.GetCCSHeaderFromSnifferFactory(factory);
+            var CcsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
             var userObjectId = labResponse.User.ObjectId;
             var userTenantID = labResponse.User.TenantId;
-            Assert.AreEqual($"X-AnchorMailbox:Oid:{userObjectId}@{userTenantID}", $"{CCSHeader.Key}:{CCSHeader.Value.FirstOrDefault()}");
+            Assert.AreEqual($"X-AnchorMailbox:Oid:{userObjectId}@{userTenantID}", $"{CcsHeader.Key}:{CcsHeader.Value.FirstOrDefault()}");
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(2, 3);
-            AssertCCSRoutingInformationIsSent(factory, labResponse);
+            AssertCcsRoutingInformationIsSent(factory, labResponse);
 
             account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(3, 3);
@@ -297,38 +297,38 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
-            AssertCCSRoutingInformationIsSent(factory, labResponse);
+            AssertCcsRoutingInformationIsSent(factory, labResponse);
 
             return result;
         }
 
-        private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
+        private void AssertCcsRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
         {
             if (labResponse.User.FederationProvider != FederationProvider.None)
             {
                 return;
             }
 
-            var CCSHeader = TestCommon.GetCCSHeaderFromSnifferFactory(factory);
+            var CcsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
 
-            if (!String.IsNullOrEmpty(CCSHeader.Value?.FirstOrDefault()))
+            if (!String.IsNullOrEmpty(CcsHeader.Value?.FirstOrDefault()))
             {
-                ValidateCCSHeader(CCSHeader, labResponse);
+                ValidateCcsHeader(CcsHeader, labResponse);
             }
         }
 
-        private void ValidateCCSHeader(KeyValuePair<string, IEnumerable<string>> CCSHeader, LabResponse labResponse)
+        private void ValidateCcsHeader(KeyValuePair<string, IEnumerable<string>> CcsHeader, LabResponse labResponse)
         {
-            var ccsHeaderValue = CCSHeader.Value.FirstOrDefault();
+            var ccsHeaderValue = CcsHeader.Value.FirstOrDefault();
             if (ccsHeaderValue.Contains("upn"))
             {
-                Assert.AreEqual($"X-AnchorMailbox:UPN:{labResponse.User.Upn}", $"{CCSHeader.Key}:{ccsHeaderValue}");
+                Assert.AreEqual($"X-AnchorMailbox:UPN:{labResponse.User.Upn}", $"{CcsHeader.Key}:{ccsHeaderValue}");
             }
             else
             {
                 var userObjectId = labResponse.User.ObjectId;
                 var userTenantID = labResponse.User.TenantId;
-                Assert.AreEqual($"X-AnchorMailbox:Oid:{userObjectId}@{userTenantID}", $"{CCSHeader.Key}:{ccsHeaderValue}");
+                Assert.AreEqual($"X-AnchorMailbox:Oid:{userObjectId}@{userTenantID}", $"{CcsHeader.Key}:{ccsHeaderValue}");
             }
         }
 

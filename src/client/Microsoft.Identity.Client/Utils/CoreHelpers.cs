@@ -238,12 +238,12 @@ namespace Microsoft.Identity.Client.Utils
             messageBuilder.Append(value);
         }
 
-        internal static string GetCCSClientInfoheader(string userObjectId, string userTenantID)
+        internal static string GetCcsClientInfoheader(string userObjectId, string userTenantID)
         {
             return (string.IsNullOrEmpty(userObjectId) || string.IsNullOrEmpty(userTenantID)) ? string.Empty : $@"Oid:{userObjectId}@{userTenantID}";
         }
 
-        internal static string GetCCSUpnHeader(string upn)
+        internal static string GetCcsUpnHeader(string upn)
         {
             return string.IsNullOrEmpty(upn)? string.Empty : $@"UPN:{upn}";
         }
