@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal static class SilentRequestHelper
     {
-        internal static async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, CancellationToken cancellationToken, RequestBase request, AuthenticationRequestParameters authenticationRequestParameters)
+        internal static async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, RequestBase request, AuthenticationRequestParameters authenticationRequestParameters, CancellationToken cancellationToken)
         {
             authenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
             await authenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);

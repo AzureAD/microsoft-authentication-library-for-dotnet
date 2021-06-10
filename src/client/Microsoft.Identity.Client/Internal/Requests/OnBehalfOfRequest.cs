@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             CacheInfoTelemetry cacheInfoTelemetry;
-            if (!_onBehalfOfParameters.ForceRefresh)
+            if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 // look for access token in the cache first.
                 // no access token is found, then it means token does not exist
@@ -101,18 +101,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalRefreshTokenCacheItem appRefreshToken = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
 
             // If a refresh token is not found, fetch a new access token
-            if (appRefreshToken == null)
+            if (appRefreshToken != null)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Verbose("[OBO request] No Refresh Token was found in the cache. Fetching OBO token from ESTS");
+                var msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(appRefreshToken, this, AuthenticationRequestParameters, cancellationToken)
+                .ConfigureAwait(false);
 
-                var result = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
-                return result;
+                return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
 
-            var msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(appRefreshToken, cancellationToken, this, AuthenticationRequestParameters)
-                .ConfigureAwait(false);
-            
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            AuthenticationRequestParameters.RequestContext.Logger.Verbose("[OBO request] No Refresh Token was found in the cache. Fetching OBO token from ESTS");
+
+            var result = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+            return result;
         }
 
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)

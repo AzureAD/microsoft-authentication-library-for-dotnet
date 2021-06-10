@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 MsalRefreshTokenCacheItem appRefreshToken = await FindRefreshTokenOrFailAsync()
                     .ConfigureAwait(false);
 
-                msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(appRefreshToken, cancellationToken, _silentRequest, AuthenticationRequestParameters)
+                msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(appRefreshToken, _silentRequest, AuthenticationRequestParameters, cancellationToken)
                     .ConfigureAwait(false);
             }
             return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 try
                 {
-                    MsalTokenResponse frtTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(familyRefreshToken, cancellationToken, _silentRequest, AuthenticationRequestParameters)
+                    MsalTokenResponse frtTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(familyRefreshToken, _silentRequest, AuthenticationRequestParameters, cancellationToken)
                         .ConfigureAwait(false);
 
                     logger.Verbose("[FOCI] FRT refresh succeeded. ");
