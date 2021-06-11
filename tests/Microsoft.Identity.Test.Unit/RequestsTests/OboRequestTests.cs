@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                          .WithHttpManager(httpManager)
                                                          .BuildConcrete();
 
-                UserAssertion userAssertion = new UserAssertion(TestConstants.FormattedAccessToken);
+                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
                 var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                          .WithHttpManager(httpManager)
                                                          .BuildConcrete();
 
-                UserAssertion userAssertion = new UserAssertion(TestConstants.FormattedAccessToken);
+                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
                 var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                          .WithHttpManager(httpManager)
                                                          .BuildConcrete();
 
-                UserAssertion userAssertion = new UserAssertion(TestConstants.FormattedAccessToken);
+                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
                 var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
