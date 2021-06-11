@@ -642,13 +642,14 @@ namespace Microsoft.Identity.Client
                                 "Filtering by home account id");
             }
 
-            // If family id has a value, it means we are looking for a refresh token for foci.
+            // This will also filter for the case when familyId is null and exclude RTs with familyId in filtered list
             rtCacheItems = rtCacheItems.FilterWithLogging(item =>
                     string.Equals(item.FamilyId ?? string.Empty,
                     familyId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
                     requestParams.RequestContext.Logger,
                     "Filtering by family id");
 
+            // if there is a value in familyId, we are looking for FRT and hence ignore filter with clientId
             if (string.IsNullOrEmpty(familyId))
             {
                 rtCacheItems = rtCacheItems.FilterWithLogging(item => item.ClientId.Equals(

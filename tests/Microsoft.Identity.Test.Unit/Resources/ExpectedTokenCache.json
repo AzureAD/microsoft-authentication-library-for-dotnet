@@ -8,7 +8,7 @@
       "credential_type": "AccessToken",
       "realm": "the_tenant_id",
       "target": "r1/scope1 r1/scope2",
-      "user_assertion_hash": "assertion hash",
+      "user_assertion_hash": "assertion_hash",
       "cached_at": "34567",
       "expires_on": "12345",
       "extended_expires_on": "23456",
@@ -22,7 +22,7 @@
       "credential_type": "AccessToken",
       "realm": "the_tenant_id",
       "target": "r1/scope1 r1/scope2",
-      "user_assertion_hash": "assertion hash",
+      "user_assertion_hash": "assertion_hash",
       "cached_at": "34567",
       "expires_on": "12345",
       "extended_expires_on": "23456",
@@ -36,7 +36,7 @@
       "credential_type": "AccessToken",
       "realm": "the_tenant_id",
       "target": "r1/scope1 r1/scope2",
-      "user_assertion_hash": "assertion hash",
+      "user_assertion_hash": "assertion_hash",
       "cached_at": "34567",
       "expires_on": "12345",
       "extended_expires_on": "23456",
@@ -50,7 +50,7 @@
       "credential_type": "AccessToken",
       "realm": "the_tenant_id",
       "target": "r1/scope1 r1/scope2",
-      "user_assertion_hash": "assertion hash",
+      "user_assertion_hash": "assertion_hash",
       "cached_at": "34567",
       "expires_on": "12345",
       "extended_expires_on": "23456",
@@ -64,7 +64,7 @@
       "credential_type": "AccessToken",
       "realm": "the_tenant_id",
       "target": "r1/scope1 r1/scope2",
-      "user_assertion_hash": "assertion hash",
+      "user_assertion_hash": "assertion_hash",
       "cached_at": "34567",
       "expires_on": "12345",
       "extended_expires_on": "23456",
@@ -78,7 +78,7 @@
         "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
         "secret": "access_token_secret",
         "credential_type": "RefreshToken",
-        "user_assertion_hash": "assertion hash"
+        "user_assertion_hash": "assertion_hash"
     },
     "my-uid.my-utid-env_2-refreshtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3--": {
         "home_account_id": "my-uid.my-utid",
@@ -86,7 +86,7 @@
         "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
         "secret": "access_token_secret",
         "credential_type": "RefreshToken",
-        "user_assertion_hash": "assertion hash"
+        "user_assertion_hash": "assertion_hash"
     },
     "my-uid.my-utid-env_3-refreshtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3--": {
         "home_account_id": "my-uid.my-utid",
@@ -94,7 +94,7 @@
         "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
         "secret": "access_token_secret",
         "credential_type": "RefreshToken",
-        "user_assertion_hash": "assertion hash"
+        "user_assertion_hash": "assertion_hash"
     },
     "my-uid.my-utid-env-refreshtoken-1--": {
         "home_account_id": "my-uid.my-utid",
