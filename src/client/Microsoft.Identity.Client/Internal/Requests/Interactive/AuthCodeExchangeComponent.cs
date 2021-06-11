@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var clientInfo = ClientInfo.CreateFromJson(_clientInfo);
 
                 _tokenClient.AddHeaderToClient(Constants.CcsRoutingHintHeader,
-                                               CoreHelpers.GetCcsClientInfoheader(clientInfo.UniqueObjectIdentifier,
+                                               CoreHelpers.GetCcsClientInfoHeader(clientInfo.UniqueObjectIdentifier,
                                                                                   clientInfo.UniqueTenantIdentifier));
             }
             else if (!string.IsNullOrEmpty(_interactiveParameters.LoginHint))

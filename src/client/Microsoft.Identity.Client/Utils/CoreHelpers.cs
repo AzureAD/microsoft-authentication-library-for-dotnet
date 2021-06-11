@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Client.Utils
             messageBuilder.Append(value);
         }
 
-        internal static string GetCcsClientInfoheader(string userObjectId, string userTenantID)
+        internal static string GetCcsClientInfoHeader(string userObjectId, string userTenantID)
         {
             return (string.IsNullOrEmpty(userObjectId) || string.IsNullOrEmpty(userTenantID)) ? string.Empty : $@"Oid:{userObjectId}@{userTenantID}";
         }

@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     var userObjectId = AuthenticationRequestParameters.Account.HomeAccountId.ObjectId;
                     var userTenantID = AuthenticationRequestParameters.Account.HomeAccountId.TenantId;
-                    string OidCcsHeader = CoreHelpers.GetCcsClientInfoheader(userObjectId, userTenantID);
+                    string OidCcsHeader = CoreHelpers.GetCcsClientInfoHeader(userObjectId, userTenantID);
 
                     return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader);
                 }
