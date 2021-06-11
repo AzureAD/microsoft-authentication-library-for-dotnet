@@ -634,7 +634,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(new Uri(oboHost + authResult.TenantId), true)
                 .WithClientSecret(secret)
                 .WithTestLogging()
-                .BuildConcrete();
+                .Build();
 
             var userCacheRecorder = confidentialApp.UserTokenCache.RecordAccess();
 
