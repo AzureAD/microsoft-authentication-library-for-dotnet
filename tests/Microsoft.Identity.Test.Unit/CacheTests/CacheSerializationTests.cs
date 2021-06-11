@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
                 RawClientInfo = string.Empty,
-                UserAssertionHash = "assertion hash",
+                UserAssertionHash = "assertion_hash",
                 TokenType = StorageJsonValues.TokenTypeBearer
             };
         }
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 HomeAccountId = TestConstants.HomeAccountId,
                 Secret = "access_token_secret",
                 RawClientInfo = string.Empty,
-                UserAssertionHash = "assertion hash"
+                UserAssertionHash = "assertion_hash"
             };
         }
 

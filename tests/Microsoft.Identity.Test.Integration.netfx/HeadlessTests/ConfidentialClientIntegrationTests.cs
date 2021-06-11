@@ -716,6 +716,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
+            
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
@@ -739,6 +740,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            AssertLastHttpContent("refresh_token");
 
             //creating second app with no refresh tokens
             var atItems = await confidentialApp.UserTokenCacheInternal.GetAllAccessTokensAsync(true).ConfigureAwait(false);
@@ -747,6 +749,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(new Uri(oboHost + authResult.TenantId), true)
                 .WithClientSecret(secret)
                 .WithTestLogging()
+                .WithHttpClientFactory(factory)
                 .BuildConcrete();
 
             TokenCacheHelper.ExpireAndSaveAccessToken(confidentialApp2.UserTokenCacheInternal, atItems.FirstOrDefault());
@@ -763,6 +766,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            AssertLastHttpContent("on_behalf_of");
 
             TokenCacheHelper.ExpireAccessTokens(confidentialApp2.UserTokenCacheInternal);
             TokenCacheHelper.UpdateUserAssertions(confidentialApp2);
@@ -779,6 +783,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            AssertLastHttpContent("on_behalf_of");
+        }
+
+        private void AssertLastHttpContent(string content)
+        {
+            Assert.IsTrue(HttpSnifferClientFactory.LastHttpContentData.Contains(content));
+            HttpSnifferClientFactory.LastHttpContentData = string.Empty;
         }
 
         [TestMethod]
