@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -58,6 +57,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 AddBodyParamsAndHeaders(additionalBodyParameters, scopes);
                 AddThrottlingHeader();
+                AddCcsHeader();
 
                 _serviceBundle.ThrottlingManager.TryThrottle(_requestParams, _oAuth2Client.GetBodyParameters());
 
@@ -121,7 +121,6 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
 
-
             if (_requestParams.ClientCredential != null)
             {
                 Dictionary<string, string> ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
@@ -169,31 +168,45 @@ namespace Microsoft.Identity.Client.OAuth2
                     _serviceBundle.HttpTelemetryManager.GetLastRequestHeader());
             }
 
-            //Signaling that the client can perform PKey Auth on supported platforms
+            // Signaling that the client can perform PKey Auth on supported platforms
             if (DeviceAuthHelper.CanOSPerformPKeyAuth())
             {
                 _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
             }
-
-            AddExtraHttpHeaders();
         }
 
-        private void AddExtraHttpHeaders()
+        public void AddCcsHeader()
         {
-            if (_requestParams.ExtraHttpHeaders != null)
+            string ccsHeaderHint = string.Empty;
+            if (!string.IsNullOrEmpty(_requestParams.CcsRoutingHint))
             {
-                foreach (KeyValuePair<string, string> pair in _requestParams.ExtraHttpHeaders)
+                ccsHeaderHint = _requestParams.CcsRoutingHint;
+            }
+
+            else if(_requestParams?.Account?.HomeAccountId != null)
+            {
+                if (!string.IsNullOrEmpty(_requestParams.Account.HomeAccountId.Identifier))
                 {
-                    if (!string.IsNullOrEmpty(pair.Key) &&
-                        !string.IsNullOrEmpty(pair.Value))
-                    _oAuth2Client.AddHeader(pair.Key, pair.Value);
+                    ccsHeaderHint = CoreHelpers.GetCcsOidHint(
+                        _requestParams.Account.HomeAccountId.ObjectId,
+                        _requestParams.Account.HomeAccountId.TenantId);
                 }
             }
-        }
 
-        public void AddHeaderToClient(string name, string value)
-        {
-            _oAuth2Client.AddHeader(name, value);
+            else if (!string.IsNullOrEmpty(_requestParams?.Account?.Username))
+            {
+                ccsHeaderHint = CoreHelpers.GetCcsUpnHint(_requestParams.Account.Username);
+            }
+
+            else if (!string.IsNullOrEmpty(_requestParams.LoginHint))
+            {
+                ccsHeaderHint = CoreHelpers.GetCcsUpnHint(_requestParams.LoginHint);
+            }            
+
+            if (!string.IsNullOrEmpty(ccsHeaderHint))
+            {
+                _oAuth2Client.AddHeader(Constants.CcsRoutingHintHeader, ccsHeaderHint);
+            }
         }
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, Core.ICoreLogger logger)

@@ -44,11 +44,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
-        protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
-        {
-            return GetCcsUpnHeader(_integratedWindowsAuthParameters.Username);
-        }
-
         private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()
         {
             if (AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.Adfs)

@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -135,6 +136,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string authCode = authResult.Code;
             string pkceCodeVerifier = result.Item2;
 
+            _requestParams.CcsRoutingHint = CreateCcsHintFromClientInfo(authResult.ClientInfo);
+
             if (BrokerInteractiveRequestComponent.IsBrokerRequiredAuthCode(authCode, out string brokerInstallUri))
             {
                 return await RunBrokerWithInstallUriAsync(brokerInstallUri, cancellationToken).ConfigureAwait(false);
@@ -147,11 +150,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     _requestParams,
                     _interactiveParameters,
                     authCode,
-                    pkceCodeVerifier,
-                    authResult.ClientInfo);
+                    pkceCodeVerifier);
 
             return await authCodeExchangeComponent.FetchTokensAsync(cancellationToken)
                 .ConfigureAwait(false);
+        }
+
+        private string CreateCcsHintFromClientInfo(string clientInfoFromAuthCode)
+        {
+            if (!string.IsNullOrEmpty(clientInfoFromAuthCode))
+            {
+                var clientInfo = ClientInfo.CreateFromJson(clientInfoFromAuthCode);
+                return CoreHelpers.GetCcsOidHint(
+                    clientInfo.UniqueObjectIdentifier,
+                    clientInfo.UniqueTenantIdentifier);
+            }
+            return string.Empty;
         }
 
         private async Task<MsalTokenResponse> RunBrokerWithInstallUriAsync(string brokerInstallUri, CancellationToken cancellationToken)

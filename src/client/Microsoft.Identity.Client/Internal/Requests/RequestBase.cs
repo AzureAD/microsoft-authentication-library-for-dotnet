@@ -254,12 +254,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string scopes = GetOverridenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
             var tokenClient = new TokenClient(AuthenticationRequestParameters);
 
-            var CcsHeader = GetCcsHeader(additionalBodyParameters);
-            if (CcsHeader != null && !string.IsNullOrEmpty(CcsHeader.Value.Key))
-            {
-                tokenClient.AddHeaderToClient(CcsHeader.Value.Key, CcsHeader.Value.Value);
-            }
-
             return tokenClient.SendTokenRequestAsync(
                 additionalBodyParameters,
                 scopes,
@@ -267,34 +261,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cancellationToken);
         }
 
-        //The CCS header is used by the CCS service to help route requests to resources in Azure during requests to speed up authentication.
-        //It consists of either the ObjectId.TenantId or the upn of the account signign in.
-        //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
-        protected virtual KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
+        // The CCS header is used by the CCS service to help route requests to resources in Azure during requests to speed up authentication.
+        // It consists of either the ObjectId.TenantId or the upn of the account signign in.
+        // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
+        protected virtual KeyValuePair<string, string>? GetCcsHeader()
         {
             if (AuthenticationRequestParameters?.Account?.HomeAccountId != null)
             {
-                if (!String.IsNullOrEmpty(AuthenticationRequestParameters.Account.HomeAccountId.Identifier))
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Account.HomeAccountId.Identifier))
                 {
-                    var userObjectId = AuthenticationRequestParameters.Account.HomeAccountId.ObjectId;
-                    var userTenantID = AuthenticationRequestParameters.Account.HomeAccountId.TenantId;
-                    string OidCcsHeader = CoreHelpers.GetCcsClientInfoHeader(userObjectId, userTenantID);
+                    string OidCcsHeader = CoreHelpers.GetCcsOidHint(
+                        AuthenticationRequestParameters.Account.HomeAccountId.ObjectId,
+                        AuthenticationRequestParameters.Account.HomeAccountId.TenantId);
 
                     return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader);
                 }
 
-                if (!String.IsNullOrEmpty(AuthenticationRequestParameters.Account.Username))
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Account.Username))
                 {
                     return GetCcsUpnHeader(AuthenticationRequestParameters.Account.Username);
                 }
             }
-
-            if (additionalBodyParameters.ContainsKey(OAuth2Parameter.Username))
-            {
-                return GetCcsUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
-            }
             
-            if (!String.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
+            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
             {
                 return GetCcsUpnHeader (AuthenticationRequestParameters.LoginHint);
             }
@@ -304,7 +293,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected KeyValuePair<string, string>? GetCcsUpnHeader(string upnHeader)
         {
-            string OidCcsHeader = CoreHelpers.GetCcsUpnHeader(upnHeader);
+            string OidCcsHeader = CoreHelpers.GetCcsUpnHint(upnHeader);
             return new KeyValuePair<string, string>?(new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader));
         }
 

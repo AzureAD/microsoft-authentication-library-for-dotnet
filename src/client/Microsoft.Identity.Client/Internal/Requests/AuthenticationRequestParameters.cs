@@ -127,6 +127,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
         public bool SendX5C { get; set; }
 
+        private string _ccsRoutingHint;
+        /// <summary>
+        /// OID and Tenant ID of the signed-in user for CCS routing.
+        /// </summary>
+        public string CcsRoutingHint 
+        { 
+            set { _ccsRoutingHint = value; }
+            get { return !string.IsNullOrEmpty(_ccsRoutingHint) ? _ccsRoutingHint : _commonParameters.CcsRoutingHint; } 
+        }
+
         public string LoginHint
         {
             get
@@ -144,8 +154,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IAccount Account { get; set; }
 
         public string HomeAccountId { get; }
-
-        public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 
         public bool IsClientCredentialRequest => ApiId == ApiEvent.ApiIds.AcquireTokenForClient;
         public bool IsConfidentialClient

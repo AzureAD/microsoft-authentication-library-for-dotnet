@@ -6,13 +6,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -23,20 +18,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly string _authorizationCode;
         private readonly string _pkceCodeVerifier;
         private readonly TokenClient _tokenClient;
-        private readonly string _clientInfo;
 
         public AuthCodeExchangeComponent( 
             AuthenticationRequestParameters requestParams,
             AcquireTokenInteractiveParameters interactiveParameters,
             string authorizationCode,
-            string pkceCodeVerifier,
-            string clientInfo)
+            string pkceCodeVerifier)
         {
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
             _interactiveParameters = interactiveParameters ?? throw new ArgumentNullException(nameof(interactiveParameters));
             _authorizationCode = authorizationCode ?? throw new ArgumentNullException(nameof(authorizationCode));
             _pkceCodeVerifier = pkceCodeVerifier ?? throw new ArgumentNullException(nameof(pkceCodeVerifier));
-            _clientInfo = clientInfo;
 
             _tokenClient = new TokenClient(requestParams);
             _interactiveParameters.LogParameters(requestParams.RequestContext.Logger);
@@ -44,7 +36,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public Task<MsalTokenResponse> FetchTokensAsync(CancellationToken cancellationToken)
         {
-            AddCcsHeadersToTokenClient();
             return _tokenClient.SendTokenRequestAsync(GetBodyParameters());
         }
 
@@ -59,22 +50,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             };
 
             return dict;
-        }
-
-        private void AddCcsHeadersToTokenClient()
-        {
-            if (!string.IsNullOrEmpty(_clientInfo))
-            {
-                var clientInfo = ClientInfo.CreateFromJson(_clientInfo);
-
-                _tokenClient.AddHeaderToClient(Constants.CcsRoutingHintHeader,
-                                               CoreHelpers.GetCcsClientInfoHeader(clientInfo.UniqueObjectIdentifier,
-                                                                                  clientInfo.UniqueTenantIdentifier));
-            }
-            else if (!string.IsNullOrEmpty(_interactiveParameters.LoginHint))
-            {
-                _tokenClient.AddHeaderToClient(Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHeader(_interactiveParameters.LoginHint));
-            }
         }
     }
 }
