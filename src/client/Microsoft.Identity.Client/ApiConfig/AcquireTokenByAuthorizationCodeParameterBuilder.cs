@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -99,6 +100,23 @@ namespace Microsoft.Identity.Client
         public AcquireTokenByAuthorizationCodeParameterBuilder WithPkceCodeVerifier(string pkceCodeVerifier)
         {
             Parameters.PkceCodeVerifier = pkceCodeVerifier;
+            return this;
+        }
+
+        /// <summary>
+        /// To help with resiliency, AAD Cached Credential Service (CCS) operates as an AAD backup.
+        /// </summary>
+        /// <param name="ccsRoutingHint">The OID and tenant ID of the signed-in user.
+        /// <code>$"{oid}@{tenantd_id}"</code>
+        /// </param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithCcsRoutingHint(string ccsRoutingHint)
+        {
+            if (string.IsNullOrEmpty(ccsRoutingHint) || !ccsRoutingHint.Contains('@'))
+            {
+                throw new MsalClientException("The CcsRoutingHint must be of the format: oid@tenantd_id. See https://aka.ms/msal-net/ccsRouting. ");
+            }
+            CommonParameters.CcsRoutingHint = ccsRoutingHint;
             return this;
         }
     }

@@ -8,6 +8,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -72,6 +73,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             bool silentCallShouldSucceed,
             bool forceRefresh = false)
         {
+            var factory = new HttpSnifferClientFactory();
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             AuthenticationResult authResult;
 
@@ -107,6 +109,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
                 .WithTestLogging()
                 .WithClientSecret(_confidentialClientSecret)
+                .WithHttpClientFactory(factory)
                 .Build();
             s_inMemoryTokenCache.Bind(cca.UserTokenCache);
 
@@ -124,13 +127,68 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             else
             {
                 Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+
+                var (req, res) = factory.RequestsAndResponses.Skip(0).Single();
+                Assert.IsTrue(req.Headers.TryGetValues(Constants.CcsRoutingHintHeader, out var values));
             }
 
             MsalAssert.AssertAuthResult(authResult, user);
             Assert.IsNotNull(authResult.IdToken); // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1950
             Assert.IsTrue(authResult.Scopes.Any(s => string.Equals(s, s_scopes.Single(), StringComparison.OrdinalIgnoreCase)));
-
             return cca;
-        }      
+        }
+
+        [TestMethod]
+        public async Task OBO_CcsRoutingHint_Async()
+        {
+            var factory = new HttpSnifferClientFactory();
+            var user = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
+            AuthenticationResult authResult;
+
+            var pca = PublicClientApplicationBuilder
+                .Create(PublicClientID)
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .WithTestLogging()
+                .Build();
+            s_inMemoryTokenCache.Bind(pca.UserTokenCache);
+            try
+            {
+                authResult = await pca
+                    .AcquireTokenSilent(s_oboServiceScope, user.Upn)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+            }
+            catch (MsalUiRequiredException)
+            {
+                authResult = await pca
+                    .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, securePassword)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            }
+
+            MsalAssert.AssertAuthResult(authResult, user);
+            Assert.IsTrue(authResult.Scopes.Any(s => string.Equals(s, s_oboServiceScope.Single(), StringComparison.OrdinalIgnoreCase)));
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(OboConfidentialClientID)
+                .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
+                .WithTestLogging()
+                .WithHttpClientFactory(factory)
+                .WithClientSecret(_confidentialClientSecret)
+                .Build();
+            s_inMemoryTokenCache.Bind(cca.UserTokenCache);
+            
+            authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(authResult.AccessToken))
+                .WithCcsRoutingHint("597f86cd-13f3-44c0-bece-a1e77ba43228@f645ad92-e38d-4d1a-b510-d1b09a74a8ca")
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            var (req, res) = factory.RequestsAndResponses.Skip(0).Single();
+            Assert.IsTrue(req.Headers.TryGetValues(Constants.CcsRoutingHintHeader, out var values));
+            Assert.AreEqual("oid:597f86cd-13f3-44c0-bece-a1e77ba43228@f645ad92-e38d-4d1a-b510-d1b09a74a8ca", values.First());
+        }
     }
 }

@@ -69,22 +69,5 @@ namespace Microsoft.Identity.Client
 
             return this as T;
         }
-
-        /// <summary>
-        /// To help with resiliency, AAD Cached Credential Service (CCS) operates as an AAD backup.
-        /// </summary>
-        /// <param name="ccsRoutingHint">The OID and tenant ID of the signed-in user.
-        /// <code>$"{oid}@{tenantd_id}"</code>
-        /// </param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithCcsRoutingHint(string ccsRoutingHint)
-        {
-            if (string.IsNullOrEmpty(ccsRoutingHint) || !ccsRoutingHint.Contains('@'))
-            {
-                throw new MsalClientException("The CcsRoutingHint must be of the format: oid@tenantd_id. See https://aka.ms/msal-net/ccsRouting. ");
-            }
-            CommonParameters.CcsRoutingHint = ccsRoutingHint;
-            return this as T;
-        }
     }
 }

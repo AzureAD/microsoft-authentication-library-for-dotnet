@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _interactiveParameters = interactiveParameters ?? throw new ArgumentNullException(nameof(interactiveParameters));
             _authorizationCode = authorizationCode ?? throw new ArgumentNullException(nameof(authorizationCode));
             _pkceCodeVerifier = pkceCodeVerifier ?? throw new ArgumentNullException(nameof(pkceCodeVerifier));
-
             _tokenClient = new TokenClient(requestParams);
             _interactiveParameters.LogParameters(requestParams.RequestContext.Logger);
         }

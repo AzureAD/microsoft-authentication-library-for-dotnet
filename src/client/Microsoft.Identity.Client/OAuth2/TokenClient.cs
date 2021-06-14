@@ -57,7 +57,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 AddBodyParamsAndHeaders(additionalBodyParameters, scopes);
                 AddThrottlingHeader();
-                AddCcsHeader();
 
                 _serviceBundle.ThrottlingManager.TryThrottle(_requestParams, _oAuth2Client.GetBodyParameters());
 
@@ -173,14 +172,16 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
             }
+
+            AddCcsHeader(additionalBodyParameters);
         }
 
-        public void AddCcsHeader()
+        private void AddCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
             string ccsHeaderHint = string.Empty;
             if (!string.IsNullOrEmpty(_requestParams.CcsRoutingHint))
             {
-                ccsHeaderHint = _requestParams.CcsRoutingHint;
+                ccsHeaderHint = $"oid:{_requestParams.CcsRoutingHint}";
             }
 
             else if(_requestParams?.Account?.HomeAccountId != null)
@@ -196,6 +197,11 @@ namespace Microsoft.Identity.Client.OAuth2
             else if (!string.IsNullOrEmpty(_requestParams?.Account?.Username))
             {
                 ccsHeaderHint = CoreHelpers.GetCcsUpnHint(_requestParams.Account.Username);
+            }
+
+            else if (additionalBodyParameters.ContainsKey(OAuth2Parameter.Username))
+            {
+                ccsHeaderHint = CoreHelpers.GetCcsUpnHint(additionalBodyParameters[OAuth2Parameter.Username]);
             }
 
             else if (!string.IsNullOrEmpty(_requestParams.LoginHint))

@@ -196,6 +196,11 @@ namespace Microsoft.Identity.Client.Internal
                 authorizationRequestParameters[Constants.CcsRoutingHintHeader] = CoreHelpers.GetCcsUpnHint(_interactiveParameters.LoginHint);
             }
 
+            if (!string.IsNullOrWhiteSpace(_requestParams.CcsRoutingHint))
+            {
+                authorizationRequestParameters[Constants.CcsRoutingHintHeader] = $"oid:{_requestParams.CcsRoutingHint}";
+            }
+
             if (_requestParams.RequestContext.CorrelationId != Guid.Empty)
             {
                 authorizationRequestParameters[OAuth2Parameter.CorrelationId] =

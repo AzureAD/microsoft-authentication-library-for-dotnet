@@ -12,7 +12,6 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Advanced;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -27,6 +26,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -275,46 +275,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        [TestMethod]
-        public void AcquireTokenExtraHeadersTest()
-        {
-            using (var harness = CreateTestHarness())
-            {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
-
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                                            .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
-                                                                            .BuildConcrete();
-                app.ServiceBundle.ConfigureMockWebUI();
-                var userCacheAccess = app.UserTokenCache.RecordAccess();
-                var extraExpectedHeaders = TestConstants.ExtraHttpHeader;
-                extraExpectedHeaders.Add(Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHeader(TestConstants.s_user.Username));
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant, null, null, false, null, extraExpectedHeaders);
-
-                Guid correlationId = Guid.NewGuid();
-
-                AuthenticationResult result = app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .WithCorrelationId(correlationId)
-                    .WithExtraHttpHeaders(TestConstants.ExtraHttpHeader)
-                    .WithLoginHint(TestConstants.s_user.Username)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
-                Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
-                Assert.AreEqual(TestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
-                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
-                Assert.IsNull(userCacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey, "Don't suggest keys for public client");
-                Assert.IsNull(userCacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey, "Don't suggest keys for public client");
-                userCacheAccess.AssertAccessCounts(0, 1);
-            }
-        }
-
-        [TestMethod]
         public void AcquireTokenWithDefaultRedirectURITest()
         {
             using (var harness = CreateTestHarness())
@@ -670,7 +630,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             broker.GetAccountsAsync(
                 TestConstants.ClientId,
                 TestConstants.RedirectUri,
-                Arg.Any<AuthorityInfo>(), 
+                Arg.Any<AuthorityInfo>(),
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount, expectedAccount });
             broker.IsBrokerInstalledAndInvokable().Returns(false);
@@ -847,8 +807,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
-            var authoriy = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.AuthorityInfo, null);
-            Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authoriy.AuthorityInfo.CanonicalAuthority);
+            var authority = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.AuthorityInfo, null);
+            Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]

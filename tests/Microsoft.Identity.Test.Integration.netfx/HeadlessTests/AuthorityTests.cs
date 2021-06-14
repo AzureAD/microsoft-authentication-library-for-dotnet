@@ -11,6 +11,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -94,11 +95,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             LabUser user = labResponse.User;
-
+            var factory = new HttpSnifferClientFactory();
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithAuthority("https://bogus.microsoft.com/common", false)
                 .WithTestLogging()
+                .WithHttpClientFactory(factory)
                 .Build();
 
             Trace.WriteLine("Acquire a token using a not so common authority alias");

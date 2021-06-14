@@ -4,23 +4,18 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.Threading;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
@@ -692,6 +687,97 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task GetAuthorizationRequestUrl_IgnoreLoginHint_UseCcsRoutingHint_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app = CreateCca(httpManager);
+
+                var uri = await app
+                    .GetAuthorizationRequestUrl(TestConstants.s_scope)
+                    .WithLoginHint(TestConstants.DisplayableId)
+                    .WithCcsRoutingHint("oid@tid")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                AssertCcsHint(uri, "oid:oid@tid");
+            }
+        }
+
+        [TestMethod]
+        public async Task GetAuthorizationRequestUrl_UseCcsRoutingHint_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app = CreateCca(httpManager);
+
+                var uri = await app
+                    .GetAuthorizationRequestUrl(TestConstants.s_scope)
+                    .WithCcsRoutingHint("oid@tid")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                AssertCcsHint(uri, "oid:oid@tid");
+            }
+        }
+
+        [TestMethod]
+        public async Task GetAuthorizationRequestUrl_WithLoginHint_UseLoginHintForCcsRoutingHint_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app = CreateCca(httpManager);
+
+                var uri = await app
+                    .GetAuthorizationRequestUrl(TestConstants.s_scope)
+                    .WithLoginHint(TestConstants.DisplayableId)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                AssertCcsHint(uri, $"upn:{TestConstants.DisplayableId}");
+            }
+        }
+
+        [TestMethod]
+        public async Task GetAuthorizationRequestUrl_NoHint_NoCcsRoutingHint_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app = CreateCca(httpManager);
+
+                var uri = await app
+                    .GetAuthorizationRequestUrl(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(uri);
+                Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+                Assert.IsFalse(qp.ContainsKey(Constants.CcsRoutingHintHeader));
+            }
+        }
+
+        private static void AssertCcsHint(Uri uri, string ccsHint)
+        {
+            Assert.IsNotNull(uri);
+            Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+            Assert.IsTrue(qp.ContainsKey(Constants.CcsRoutingHintHeader));
+            Assert.AreEqual(ccsHint, qp[Constants.CcsRoutingHintHeader]);
+        }
+
+        private static ConfidentialClientApplication CreateCca(MockHttpManager httpManager)
+        {
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                          .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                          .WithRedirectUri(TestConstants.RedirectUri)
+                                                          .WithClientSecret(TestConstants.ClientSecret)
+                                                          .WithHttpManager(httpManager)
+                                                          .BuildConcrete();
+            return app;
+        }
+
+        [TestMethod]
         public async Task GetAuthorizationRequestUrlWithPKCETestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -736,6 +822,26 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithPkceCodeVerifier(codeVerifier)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task CcsRoutingHint_FormatIncorrect_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() => app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .WithPkceCodeVerifier(string.Empty)
+                    .WithCcsRoutingHint(TestConstants.TenantId)
+                    .ExecuteAsync()).ConfigureAwait(false);
+                Assert.AreEqual("The CcsRoutingHint must be of the format: oid@tenantd_id. See https://aka.ms/msal-net/ccsRouting. ", ex.ErrorCode);
             }
         }
 

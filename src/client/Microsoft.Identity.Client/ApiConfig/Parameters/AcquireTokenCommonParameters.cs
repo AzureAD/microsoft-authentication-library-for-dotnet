@@ -7,7 +7,6 @@ using System.Net.Http;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
-using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -28,11 +27,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
         
-        /// <summary>
-        /// OID and Tenant ID of the signed-in user for CCS routing.
-        /// </summary>
-        public string CcsRoutingHint { get; set; }
-
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
 
         public void AddApiTelemetryFeature(ApiTelemetryFeature feature)
@@ -55,5 +49,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         {
             return _apiTelemetry;
         }
+
+        /// <summary>
+        /// OID and Tenant ID of the signed-in user for CCS routing.
+        /// </summary>
+        public string CcsRoutingHint { get; set; }
     }
 }
