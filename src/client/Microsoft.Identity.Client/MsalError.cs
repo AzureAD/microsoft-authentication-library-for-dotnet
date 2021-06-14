@@ -52,6 +52,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string UserNullError = "user_null";
 
+        /// <summary>
+        /// This error code comes back from <see cref="IConfidentialClientApplication.AcquireTokenOnBehalfOf(System.Collections.Generic.IEnumerable{string}, UserAssertion)"/> 
+        /// calls when a null user assertion is passed as the <c>UserAssertion</c> parameter. 
+        /// <para>Mitigation</para>
+        /// Pass a valid value for user assertion
+        /// </summary>
+        public const string UserAssertionNullError = "user_assertion_null";
+
 
         /// <summary>
         /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when the 

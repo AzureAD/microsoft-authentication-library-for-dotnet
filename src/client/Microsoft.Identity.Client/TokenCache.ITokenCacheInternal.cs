@@ -598,7 +598,7 @@ namespace Microsoft.Identity.Client
             IReadOnlyList<MsalRefreshTokenCacheItem> finalList = allRts.ToList();
             requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (finalList.Count() != 0));
 
-            if (finalList.Count() > 0)
+            if (finalList.Count > 0)
             {
                 return finalList.FirstOrDefault();
             }
