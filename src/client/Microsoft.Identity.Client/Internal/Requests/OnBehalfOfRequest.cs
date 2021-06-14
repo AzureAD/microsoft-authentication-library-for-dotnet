@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             CacheInfoTelemetry cacheInfoTelemetry;
-            if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+            if (!_onBehalfOfParameters.ForceRefresh && !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 // look for access token in the cache first.
                 // no access token is found, then it means token does not exist
