@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly string _authorizationCode;
         private readonly string _pkceCodeVerifier;
         private readonly TokenClient _tokenClient;
-        private readonly string _clientInfo;
 
         public AuthCodeExchangeComponent( 
             AuthenticationRequestParameters requestParams,
