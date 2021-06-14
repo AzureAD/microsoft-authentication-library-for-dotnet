@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
                 throw new PlatformNotSupportedException(
                     "The Windows broker is not directly available on MSAL for .NET Framework" +
                     " To use it, please install the nuget package named Microsoft.Identity.Client.Desktop " +
-                    "and call the extension method .WithDesktopFeatures() first.");
+                    "and call the extension method .WithWindowsBroker() first.");
             }
 #endif
 
@@ -161,9 +161,11 @@ namespace Microsoft.Identity.Client
             if (Config.BrokerCreatorFunc == null && DesktopOsHelper.IsWindows())
             {
                 throw new PlatformNotSupportedException(
-                    "If you have a Windows application which targets net5 or net5-windows, please change the target to net5-windows10.0.17763.0, which provides support from Win7 to Win10. For details see https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md" +
-                    "If you have a cross-platform (Windows, Mac, Linux) application which targets net5, please dual target net5 and net5-windows10.0.17763.0. Your installer should deploy the net5 version on Mac and Linux and the net5-window10.0.17763.0 on Win7-Win10. For details see https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md" +
-                    "If you have a .NET Core 3.1 application, please install the nuget package named Microsoft.Identity.Client.Desktop and call the extension method .WithDesktopFeatures() first.");
+                    "If you have a Windows application which targets net5 or net5-windows, please change the target to net5-windows10.0.17763.0. \nYour app can still run on earlier versions of Windows such as Win7 if you add <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion> in the csproj.\n The broker (WAM) is available only on Win10 and this library will fallback to a browser on older systems. " +
+
+                    "\n\r\n\rIf you have a NET5 cross-platform (Windows, Mac, Linux) application, please dual target net5 and net5-windows10.0.17763.0. Your installer should deploy the net5 version on Mac and Linux and the net5-window10.0.17763.0 on Windows." +
+                    "\n\r\n\rIf you have a .NET Core 3.1 application, please install the nuget package named Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsBroker() first. " +
+                    "\n\rFor details see https://aka.ms/msal-net-wam and https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md ");
             }
 #endif
 

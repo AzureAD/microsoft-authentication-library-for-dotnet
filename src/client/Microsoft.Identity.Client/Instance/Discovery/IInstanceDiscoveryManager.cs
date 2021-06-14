@@ -19,7 +19,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
             AuthorityInfo authorityinfo,
-            RequestContext requestContext);
+            RequestContext requestContext, 
+            bool forceValidation=false);
 
     }
 }

@@ -36,6 +36,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
+                .WithAuthority("https://login.windows.net/" + labResponse.Lab.TenantId + "/")
                 .WithTestLogging()
                 .Build();
 
@@ -57,7 +58,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("Acquire a token silently using the common authority alias");
 
             authResult = await pca.AcquireTokenSilent(s_scopes, (await pca.GetAccountsAsync().ConfigureAwait(false)).First())
-                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .WithAuthority("https://login.windows.net/common")
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

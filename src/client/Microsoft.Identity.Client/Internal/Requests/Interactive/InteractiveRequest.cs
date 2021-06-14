@@ -150,7 +150,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     _requestParams,
                     _interactiveParameters,
                     authCode,
-                    pkceCodeVerifier);
+                    pkceCodeVerifier,
+                    authResult.ClientInfo);
 
             return await authCodeExchangeComponent.FetchTokensAsync(cancellationToken)
                 .ConfigureAwait(false);
