@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Reflection;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -113,6 +115,19 @@ namespace Microsoft.Identity.Test.Common
                 authority)
             {                
             };
+        }
+
+        public static KeyValuePair<string, IEnumerable<string>> GetCcsHeaderFromSnifferFactory(HttpSnifferClientFactory factory)
+        {
+            if (factory.RequestsAndResponses.Any())
+            {
+                var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
+                x.Item2.StatusCode == HttpStatusCode.OK);
+
+                return req.Headers.Single(h => h.Key == Constants.CcsRoutingHintHeader);
+            }
+
+            throw new MsalClientException("Could not find CCS Header in sniffer factory.");
         }
     }
 }
