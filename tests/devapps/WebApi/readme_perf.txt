@@ -1,4 +1,13 @@
-﻿Measurements taken on 4/30/2021, on my dev machine, assuming:
+﻿To run the perf tests, start this webapi, install a tool like https://github.com/codesenberg/bombardier and hit it with:
+
+bombardier -d 60s -l https://localhost:44355/FlatCache
+bombardier -d 60s -l https://localhost:44355/StaticDictionary
+bombardier -d 60s -l https://localhost:44355/Singleton
+bombardier -d 60s -l https://localhost:44355/WilsonLruCache
+bombardier -d 60s -l https://localhost:44355/Obo?refreshFlow=true
+bombardier -d 60s -l https://localhost:44355/Obo?refreshFlow=false
+
+Measurements taken on 4/30/2021, on my dev machine, assuming:
 
 - cache starts off empty (cold), or full (warm)
 - there are 500 tenants in total, each request goes to a random tenant
@@ -81,12 +90,24 @@ Static Wilson LRU cache with normal size limitation (max size ~2GB or 700k token
      95%    18.00ms   17.00ms
      99%   116.00ms   112.00ms
 
+OBO performance tests for refresh flow. Added with 4.33 release.
+----------------------------------------------------------------
 
+https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/tests/devapps/WebApi/Controllers/OboController.cs#L16
+Measurements taken on 6/15/2021, on dev machine:
 
+OBO tests with refreshFlow=false (Number of users: 300)
+-------------------------------------------------------
+     50%   222.52ms
+     75%   233.67ms
+     90%   242.84ms
+     95%   247.09ms
+     99%   264.20ms
 
-To run the perf tests, start this webapi, install a tool like https://github.com/codesenberg/bombardier and hit it with:
-
-bombardier -d 60s -l https://localhost:44355/FlatCache
-bombardier -d 60s -l https://localhost:44355/StaticDictionary
-bombardier -d 60s -l https://localhost:44355/Singleton
-bombardier -d 60s -l https://localhost:44355/WilsonLruCache
+OBO tests with refreshFlow=true (Number of users: 50)
+-------------------------------------------------------
+     50%   221.03ms
+     75%   228.00ms
+     90%   237.40ms
+     95%   243.70ms
+     99%   253.10ms

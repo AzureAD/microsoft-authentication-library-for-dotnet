@@ -13,7 +13,10 @@ namespace WebApi.Controllers
 {
     internal class OBOParallelRequestMockHandler : IHttpManager
     {
+        public OBOParallelRequestMockHandler(bool refreshFlow) => s_refreshFlow = refreshFlow;
+
         public long LastRequestDurationInMs => Settings.NetworkAccessPenaltyMs;
+        public static bool s_refreshFlow = false;
 
         public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ICoreLogger logger, bool retry = true, CancellationToken cancellationToken = default)
         {
@@ -36,8 +39,14 @@ namespace WebApi.Controllers
         public static string GetDefaultTokenResponse(string tenantId)
         {
             // add anywhere between 0 and 30 s to the expiration, just to emulate some of these tokens expiring
-            int expirationBaseline = 5 * 60; // 5 min
+            int expirationBaseline = 10 * 60; // 5 min
             int seconds = s_random.Next(30);
+
+            if (s_refreshFlow)
+            {
+                expirationBaseline = 2 * 60; // 2 min
+            }
+            
 
             int totalExpiration = expirationBaseline + seconds;
 
