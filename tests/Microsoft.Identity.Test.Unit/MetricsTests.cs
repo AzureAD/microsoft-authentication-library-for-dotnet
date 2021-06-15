@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             Metrics.TotalAccessTokensFromIdP = 0;
             Metrics.TotalAccessTokensFromCache = 0;
+            Metrics.TotalAccessTokensFromBroker = 0;
             Metrics.TotalDurationInMs = 0;
         }
 
@@ -39,6 +40,9 @@ namespace Microsoft.Identity.Test.Unit
                                                               .WithHttpManager(harness.HttpManager)
                                                               .BuildConcrete();
 
+                InMemoryTokenCache memoryTokenCache = new InMemoryTokenCache(withOperationDelay: true, shouldClearExistingCache: false);
+                memoryTokenCache.Bind(cca.AppTokenCache);
+
                 // Act - AcquireTokenForClient
                 AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
@@ -48,6 +52,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
                 Assert.AreEqual(1, Metrics.TotalAccessTokensFromIdP);
                 Assert.AreEqual(0, Metrics.TotalAccessTokensFromCache);
+                Assert.AreEqual(0, Metrics.TotalAccessTokensFromBroker);
 
                 // Act - AcquireTokenForClient returns result from cache
                 result = await cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -59,6 +64,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
                 Assert.AreEqual(1, Metrics.TotalAccessTokensFromIdP);
                 Assert.AreEqual(1, Metrics.TotalAccessTokensFromCache);
+                Assert.AreEqual(0, Metrics.TotalAccessTokensFromBroker);
                 Assert.IsTrue(Metrics.TotalDurationInMs > 0);
             }
         }
@@ -117,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit
             return pca;
         }
 
-        private async Task TestAcquireTokenInteractive_Async(PublicClientApplication pca, int expectedTokensFromIdp, int expectedTokensFromCache)
+        private async Task TestAcquireTokenInteractive_Async(PublicClientApplication pca, int expectedTokensFromIdp = 0, int expectedTokensFromCache = 0, int expectedTokensFromBroker = 0)
         {
             pca.ServiceBundle.ConfigureMockWebUI(
                 AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
@@ -132,10 +138,11 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
             Assert.AreEqual(expectedTokensFromIdp, Metrics.TotalAccessTokensFromIdP);
             Assert.AreEqual(expectedTokensFromCache, Metrics.TotalAccessTokensFromCache);
+            Assert.AreEqual(expectedTokensFromBroker, Metrics.TotalAccessTokensFromBroker);
             Assert.IsTrue(Metrics.TotalDurationInMs > 0);
         }
 
-        private async Task TestAcquireTokenSilent_Async(PublicClientApplication pca, int expectedTokensFromIdp, int expectedTokensFromCache)
+        private async Task TestAcquireTokenSilent_Async(PublicClientApplication pca, int expectedTokensFromIdp = 0, int expectedTokensFromCache = 0, int expectedTokensFromBroker = 0)
         {
             AuthenticationResult result = await pca.AcquireTokenSilent(
                 TestConstants.s_scope.ToArray(),
@@ -150,6 +157,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
             Assert.AreEqual(expectedTokensFromIdp, Metrics.TotalAccessTokensFromIdP);
             Assert.AreEqual(expectedTokensFromCache, Metrics.TotalAccessTokensFromCache);
+            Assert.AreEqual(expectedTokensFromBroker, Metrics.TotalAccessTokensFromBroker);
             Assert.IsTrue(Metrics.TotalDurationInMs > 0);
         }
     }

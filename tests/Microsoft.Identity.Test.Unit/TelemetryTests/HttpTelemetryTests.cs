@@ -297,6 +297,34 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
+        [TestMethod]
+        public async Task MetricsTelemetryTestAsync()
+        {
+            // Arrange
+            Metrics.TotalAccessTokensFromIdP = 34;
+            Metrics.TotalAccessTokensFromCache = 45;
+            Metrics.TotalAccessTokensFromBroker = 56;
+            Metrics.TotalDurationInMs = 123456;
+
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithHttpManager(_harness.HttpManager)
+                            .WithDefaultRedirectUri()
+                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
+                            .BuildConcrete();
+
+                // Act
+                var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
+
+                // Assert
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheInfoTelemetry.None, expectedMetrics: new ExpectedMetrics(34, 45, 56, 123456));
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
+            }
+        }
+
         private enum AcquireTokenSilentOutcome
         {
             SuccessFromCache,
@@ -484,7 +512,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             ApiIds apiId,
             CacheInfoTelemetry cacheInfo,
             bool isCacheSerialized = false,
-            bool isLegacyCacheEnabled = true)
+            bool isLegacyCacheEnabled = true,
+            ExpectedMetrics expectedMetrics = null)
         {
             string[] telemetryCategories = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single().Split('|');
@@ -492,7 +521,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(3, telemetryCategories.Length);
             Assert.AreEqual(1, telemetryCategories[0].Split(',').Length); // version
             Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.AreEqual(2, telemetryCategories[2].Split(',').Length); // platform_fields
+            Assert.AreEqual(6, telemetryCategories[2].Split(',').Length); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion, telemetryCategories[0]); // version
 
@@ -505,6 +534,14 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(isCacheSerialized ? "1" : "0", telemetryCategories[2].Split(',')[0]); // is_cache_serialized
 
             Assert.AreEqual(isLegacyCacheEnabled ? "1" : "0", telemetryCategories[2].Split(',')[1]); // is_legacy_cache_enabled
+
+            if (expectedMetrics != null)
+            {
+                Assert.AreEqual(expectedMetrics.ExpectedTotalAccessTokensFromIdP.ToString("D"), telemetryCategories[2].Split(',')[2]); // ExpectedTotalAccessTokensFromIdP
+                Assert.AreEqual(expectedMetrics.ExpectedTotalAccessTokensFromCache.ToString("D"), telemetryCategories[2].Split(',')[3]); // ExpectedTotalAccessTokensFromCache
+                Assert.AreEqual(expectedMetrics.ExpectedTotalAccessTokensFromBroker.ToString("D"), telemetryCategories[2].Split(',')[4]); // ExpectedTotalAccessTokensFromBroker
+                Assert.AreEqual(expectedMetrics.ExpectedTotalDurationInMs.ToString("D"), telemetryCategories[2].Split(',')[5]); // ExpectedTotalDurationInMs
+            }
         }
 
         private static void AssertPreviousTelemetry(
@@ -588,6 +625,27 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             accessor.SaveAccessToken(atItem);
 
             return atItem;
+        }
+
+        private class ExpectedMetrics
+        {
+            public int ExpectedTotalAccessTokensFromIdP;
+            public int ExpectedTotalAccessTokensFromCache;
+            public int ExpectedTotalAccessTokensFromBroker;
+            public int ExpectedTotalDurationInMs;
+
+            public ExpectedMetrics(
+                int expectedTotalAccessTokensFromIdP,
+                int expectedTotalAccessTokensFromCache,
+                int expectedTotalAccessTokensFromBroker,
+                int expectedTotalDurationInMs
+                )
+            {
+                ExpectedTotalAccessTokensFromIdP = expectedTotalAccessTokensFromIdP;
+                ExpectedTotalAccessTokensFromCache = expectedTotalAccessTokensFromCache;
+                ExpectedTotalAccessTokensFromBroker = expectedTotalAccessTokensFromBroker;
+                ExpectedTotalDurationInMs = expectedTotalDurationInMs;
+            }
         }
     }
 }

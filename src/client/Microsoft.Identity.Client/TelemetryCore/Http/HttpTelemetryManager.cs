@@ -115,9 +115,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             platformConfig.Append(ConvertFromStringToBitwise(isTokenCacheSerialized) + ",");
             platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled) + ",");
             
-            platformConfig.Append(Metrics.TotalDurationInMs + ",");
             platformConfig.Append(Metrics.TotalAccessTokensFromIdP + ",");
-            platformConfig.Append(Metrics.TotalAccessTokensFromCache);
+            platformConfig.Append(Metrics.TotalAccessTokensFromCache + ",");
+            platformConfig.Append(Metrics.TotalAccessTokensFromBroker + ",");
+            platformConfig.Append(Metrics.TotalDurationInMs);
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion}" +
                 $"|{apiId},{cacheInfo},{regionUsed},{regionSource},{regionOutcome}" +
