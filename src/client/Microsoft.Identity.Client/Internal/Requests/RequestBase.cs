@@ -240,10 +240,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
-            return SendTokenRequestAsync(
+            var tokenResponse = SendTokenRequestAsync(
                 AuthenticationRequestParameters.Endpoints.TokenEndpoint,
                 additionalBodyParameters,
                 cancellationToken);
+            Metrics.IncrementTotalAccessTokensFromIdP();
+            return tokenResponse;
         }
 
         protected Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -260,13 +262,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 tokenClient.AddHeaderToClient(CCSHeader.Value.Key, CCSHeader.Value.Value);
             }
 
-            var tokenResponse = tokenClient.SendTokenRequestAsync(
+            return tokenClient.SendTokenRequestAsync(
                 additionalBodyParameters,
                 scopes,
                 tokenEndpoint,
                 cancellationToken);
-            Metrics.IncrementTotalAccessTokensFromIdP();
-            return tokenResponse;
         }
 
         //The CCS header is used by the CCS service to help route requests to resources in Azure during requests to speed up authentication.

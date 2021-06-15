@@ -73,10 +73,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 try
                 {
-                    return await SendTokenRequestAsync(
+                    var tokenResponse = await SendTokenRequestAsync(
                                    AuthenticationRequestParameters.Endpoints.TokenEndpoint,
                                    GetBodyParameters(deviceCodeResult), cancellationToken)
                                .ConfigureAwait(false);
+                    Metrics.IncrementTotalAccessTokensFromIdP();
+                    return tokenResponse;
                 }
                 catch (MsalServiceException ex)
                 {
