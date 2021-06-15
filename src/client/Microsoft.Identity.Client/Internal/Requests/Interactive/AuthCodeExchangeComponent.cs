@@ -23,8 +23,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters requestParams,
             AcquireTokenInteractiveParameters interactiveParameters,
             string authorizationCode,
-            string pkceCodeVerifier,
-            string clientInfo)
+            string pkceCodeVerifier)
         {
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
             _interactiveParameters = interactiveParameters ?? throw new ArgumentNullException(nameof(interactiveParameters));

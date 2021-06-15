@@ -150,8 +150,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     _requestParams,
                     _interactiveParameters,
                     authCode,
-                    pkceCodeVerifier,
-                    authResult.ClientInfo);
+                    pkceCodeVerifier);
 
             return await authCodeExchangeComponent.FetchTokensAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -162,9 +161,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (!string.IsNullOrEmpty(clientInfoFromAuthCode))
             {
                 var clientInfo = ClientInfo.CreateFromJson(clientInfoFromAuthCode);
-                return CoreHelpers.GetCcsOidHint(
-                    clientInfo.UniqueObjectIdentifier,
-                    clientInfo.UniqueTenantIdentifier);
+                return $"{clientInfo?.UniqueObjectIdentifier}@{clientInfo?.UniqueTenantIdentifier}";
             }
             return string.Empty;
         }

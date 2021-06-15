@@ -24,7 +24,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
 
-
         private readonly ICoreLogger _logger;
 
         public BrokerInteractiveRequestComponent(
@@ -91,7 +90,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
                                                                      msalTokenResponse.CorrelationId,
                                                                      msalTokenResponse.HttpResponse);
             }
-
 
             _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
             throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
