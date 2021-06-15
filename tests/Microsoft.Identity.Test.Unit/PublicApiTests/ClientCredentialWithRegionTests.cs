@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public class ConfidentialClientWithRegionTests : TestBase
     {
-       
+
         [TestMethod]
         [Description("Test for regional auth with successful instance discovery.")]
         public async Task FetchRegionFromLocalImdsCallAsync()
@@ -235,6 +235,173 @@ namespace Microsoft.Identity.Test.Unit
                 }
             }
         }
+
+        [TestMethod]
+        // regression: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686
+        public async Task OtherCloudWithAuthorityValidationAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddRegionDiscoveryMockHandlerNotFound();
+
+
+                var discoveryHandler = MockHelpers.CreateInstanceDiscoveryMockHandler(
+                     "https://login.microsoftonline.com/common/discovery/instance",
+                     TestConstants.DiscoveryJsonResponse);
+
+                var tokenHttpCallHandler = new MockHttpMessageHandler()
+                {
+                    ExpectedUrl = "https://eastus.login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = CreateResponse(true)
+                };
+
+                httpManager.AddMockHandler(discoveryHandler);
+                httpManager.AddMockHandler(tokenHttpCallHandler);
+
+                var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority("https://login.windows-ppe.net/common", true)
+                                 .WithHttpManager(httpManager)
+                                 .WithAzureRegion("eastus")
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build();
+
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F17b189bc-2b81-4ec5-aa51-3e628cbc931b%2Foauth2%2Fv2.0%2Fauthorize",
+                    discoveryHandler.ActualRequestMessage.RequestUri.AbsoluteUri,
+                    "Authority validation is made on https://login.microsoftonline.com/ and it validates the auth_endpoint of the non-regional authority");
+
+                result = await app
+                   .AcquireTokenForClient(TestConstants.s_scope)
+                   .WithAuthority("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                   .ExecuteAsync()
+                   .ConfigureAwait(false);
+
+                Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+            }
+        }
+
+        [TestMethod]
+        // regression: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686
+        public async Task OtherCloud_WithValidation_Async()
+        {
+            try
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", "eastus");
+
+                await RunPpeTestAsync(validateAuthority: true, authorityIsValid: true).ConfigureAwait(false);
+                await RunPpeTestAsync(validateAuthority: true, authorityIsValid: false).ConfigureAwait(false);
+                await RunPpeTestAsync(validateAuthority: false, authorityIsValid: true).ConfigureAwait(false);
+                await RunPpeTestAsync(validateAuthority: false, authorityIsValid: false).ConfigureAwait(false);
+
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+            }
+           
+        }
+
+       
+        private static async Task RunPpeTestAsync(bool validateAuthority, bool authorityIsValid)
+        {
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                MockHttpMessageHandler discoveryHandler = null;
+                if (authorityIsValid)
+                {
+                    discoveryHandler = MockHelpers.CreateInstanceDiscoveryMockHandler(
+                         "https://login.microsoftonline.com/common/discovery/instance",
+                         TestConstants.DiscoveryJsonResponse);
+                }
+                else
+                {
+                    discoveryHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                        {
+                            Content = new StringContent(TestConstants.DiscoveryFailedResponse)
+                        }
+                    };
+                }
+                var tokenHttpCallHandler = new MockHttpMessageHandler()
+                {
+                    ExpectedUrl = "https://eastus.login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = CreateResponse(true)
+                };
+
+              
+                if (authorityIsValid || !validateAuthority) // no calls because authority validation will fail
+                {
+                    harness.HttpManager.AddMockHandler(discoveryHandler);
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+                }
+                else
+                {
+                    harness.HttpManager.AddMockHandler(discoveryHandler);                    
+                }
+
+                var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority("https://login.windows-ppe.net/common", validateAuthority)
+                                 .WithHttpManager(harness.HttpManager)
+                                 .WithAzureRegion("eastus")
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build();
+
+               if (!authorityIsValid && validateAuthority)
+                {
+                    var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => app
+                   .AcquireTokenForClient(TestConstants.s_scope)
+                   .WithAuthority("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                   .ExecuteAsync()).ConfigureAwait(false);
+
+                    Assert.AreEqual(MsalError.InvalidInstance, ex.ErrorCode);
+                    var qp = CoreHelpers.ParseKeyValueList(discoveryHandler.ActualRequestMessage.RequestUri.Query.Substring(1), '&', true, null);
+                    Assert.AreEqual("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/authorize", qp["authorization_endpoint"]);
+                }
+                else
+                {
+                    AuthenticationResult result = await app
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .WithAuthority("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
+                    Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(
+                        "https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F17b189bc-2b81-4ec5-aa51-3e628cbc931b%2Foauth2%2Fv2.0%2Fauthorize",
+                        discoveryHandler.ActualRequestMessage.RequestUri.AbsoluteUri,
+                        "Authority validation is made on https://login.microsoftonline.com/ and it validates the auth_endpoint of the non-regional authority");
+
+                    result = await app
+                       .AcquireTokenForClient(TestConstants.s_scope)
+                       .WithAuthority("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                       .ExecuteAsync()
+                       .ConfigureAwait(false);
+
+                    Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
+                    Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                }
+            }
+        }
+
+     
 
         [TestMethod]
         [Description("Test with a user configured region.")]

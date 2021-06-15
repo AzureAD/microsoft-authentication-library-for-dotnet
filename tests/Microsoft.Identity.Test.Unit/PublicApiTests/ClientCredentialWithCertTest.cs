@@ -365,6 +365,7 @@ namespace Microsoft.Identity.Test.Unit
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+                
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .WithSendX5C(true)

@@ -130,7 +130,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 .ConfigureAwait(false);
 
             _logger.Info("An authorization code was retrieved from the /authorize endpoint. ");
-            string authCode = result.Item1;
+            AuthorizationResult authResult = result.Item1;
+            string authCode = authResult.Code;
             string pkceCodeVerifier = result.Item2;
 
             if (BrokerInteractiveRequestComponent.IsBrokerRequiredAuthCode(authCode, out string brokerInstallUri))
@@ -145,7 +146,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     _requestParams,
                     _interactiveParameters,
                     authCode,
-                    pkceCodeVerifier);
+                    pkceCodeVerifier,
+                    authResult.ClientInfo);
 
             MsalTokenResponse idpTokenResponse = await authCodeExchangeComponent.FetchTokensAsync(cancellationToken)
                 .ConfigureAwait(false);

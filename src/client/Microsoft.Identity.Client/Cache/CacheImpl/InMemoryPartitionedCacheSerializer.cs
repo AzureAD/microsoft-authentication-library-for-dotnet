@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
         {
             if (CachePartition.TryGetValue(cacheKey, out byte[] blob))
             {
+                _logger.Verbose($"[InMemoryPartitionedTokenCache] ReadCacheBytes found cacheKey {cacheKey}");
                 return blob;
             }
 

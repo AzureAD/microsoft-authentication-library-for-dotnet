@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     [JsonObject]
     [Preserve(AllMembers = true)]
     internal sealed class InstanceDiscoveryMetadataEntry
-    {
+    {       
         [JsonProperty(PropertyName = "preferred_network")]
         public string PreferredNetwork { get; set; }
 
