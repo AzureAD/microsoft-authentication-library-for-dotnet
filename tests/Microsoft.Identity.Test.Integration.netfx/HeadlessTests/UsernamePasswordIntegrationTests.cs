@@ -33,8 +33,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         // HTTP Telemetry Constants
         private static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
-        private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheInfoTelemetry.None:D},,,|0,1";
-        private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheInfoTelemetry.None:D},,,|0,1";
+        private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheInfoTelemetry.None:D},,,|0,1,0,0,0,0";
+        private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheInfoTelemetry.None:D},,,|0,1,0,0,0,0";
         private readonly string XClientLastTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|0|||";
         private readonly string XClientLastTelemetryROPCFailure =
             $"{TelemetryConstants.HttpTelemetrySchemaVersion}|0|1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|";
@@ -110,7 +110,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var user = labResponse.User;
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
-
+            ResetMetrics();
+           
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(Adfs2019LabConstants.PublicClientId)
                 .WithAdfsAuthority(Adfs2019LabConstants.Authority)
@@ -140,6 +141,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
 
             SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
+            ResetMetrics();
 
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
@@ -213,6 +215,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             await RunAcquireTokenWithUsernameIncorrectPasswordAsync(msalPublicClient, labResponse.User.Upn).ConfigureAwait(false);
+            ResetMetrics();
 
             AuthenticationResult authResult = await msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
@@ -232,6 +235,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IPublicClientApplication msalPublicClient,
             string userName)
         {
+            ResetMetrics();
             SecureString incorrectSecurePassword = new SecureString();
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
@@ -259,6 +263,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
         {
+            ResetMetrics();
             var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
@@ -280,7 +285,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
             AssertTelemetryHeaders(factory, false, labResponse);
-            AssertCCSRoutingInformationIsSent(factory, labResponse);
+            AssertCcsRoutingInformationIsSent(factory, labResponse);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
@@ -290,7 +295,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
         }
 
-        private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
+        private void AssertCcsRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
         {
             var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == labResponse.Lab.Authority + "organizations/oauth2/v2.0/token" &&
             x.Item2.StatusCode == HttpStatusCode.OK);
@@ -340,6 +345,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.AreEqual(ApiIdAndCorrelationIdSection, httpTelemetryRecorder.ApiIdAndCorrelationIds.FirstOrDefault());
                 Assert.AreEqual(InvalidGrantError, httpTelemetryRecorder.ErrorCode.FirstOrDefault());
             }
+        }
+
+        private void ResetMetrics()
+        {
+            Metrics.TotalAccessTokensFromIdP = 0;
+            Metrics.TotalAccessTokensFromCache = 0;
+            Metrics.TotalAccessTokensFromBroker = 0;
+            Metrics.TotalDurationInMs = 0;
         }
     }
 }
