@@ -73,7 +73,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             bool silentCallShouldSucceed,
             bool forceRefresh = false)
         {
-            var factory = new HttpSnifferClientFactory();
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             AuthenticationResult authResult;
 
@@ -109,7 +108,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
                 .WithTestLogging()
                 .WithClientSecret(_confidentialClientSecret)
-                .WithHttpClientFactory(factory)
                 .Build();
             s_inMemoryTokenCache.Bind(cca.UserTokenCache);
 
@@ -127,9 +125,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             else
             {
                 Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
-
-                var (req, res) = factory.RequestsAndResponses.Skip(0).Single();
-                Assert.IsTrue(req.Headers.TryGetValues(Constants.CcsRoutingHintHeader, out var values));
             }
 
             MsalAssert.AssertAuthResult(authResult, user);
