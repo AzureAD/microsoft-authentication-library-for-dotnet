@@ -76,14 +76,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ARLINGTON_ROPC_ADFS_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse, isAad: true).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse, isAad: true).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -91,14 +91,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
             string federationMetadata = File.ReadAllText(@"federationMetadata.xml").ToString();
-            await RunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse, federationMetadata, isAad: true).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv3Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse, isAad: true).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -154,7 +154,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual(MsalError.RopcDoesNotSupportMsaAccounts, result.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.RopcDoesNotSupportMsaAccounts, result.Message);
-
         }
 
         [TestMethod]
@@ -257,7 +256,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.Fail("Bad exception or no exception thrown");
         }
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
+        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "", bool isAad = false)
         {
             var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
@@ -280,7 +279,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
             AssertTelemetryHeaders(factory, false, labResponse);
-            AssertCcsRoutingInformationIsSent(factory, labResponse);
+            if (!isAad)
+            {
+                Assert.AreEqual($"{Constants.CcsRoutingHintHeader}:upn:{labResponse.User.Upn}", $"{TestCommon.GetCcsHeaderFromSnifferFactory(factory).Key}:{TestCommon.GetCcsHeaderFromSnifferFactory(factory).Value.FirstOrDefault()}");
+            }
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
@@ -288,12 +290,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
-        }
-
-        private void AssertCcsRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
-        {
-            var ccsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
-            Assert.AreEqual($"{Constants.CcsRoutingHintHeader}:upn:{labResponse.User.Upn}", $"{ccsHeader.Key}:{ccsHeader.Value.FirstOrDefault()}");
         }
 
         private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, LabResponse labResponse)
