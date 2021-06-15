@@ -146,8 +146,10 @@ namespace Microsoft.Identity.Client
         public CacheData SerializeUnifiedAndAdalCache()
         {
             GuardOnMobilePlatforms();
+            this.ServiceBundle.ApplicationLogger.Info($"[ADAL Caching] Legacy SerializeUnifiedAndAdalCache being called. Getting semaphore {_semaphoreSlim.CurrentCount}.");
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             _semaphoreSlim.Wait();
+            this.ServiceBundle.ApplicationLogger.Info("[ADAL Caching] Acquired semaphore");
             try
             {
                 var serializedUnifiedCache = Serialize();
@@ -177,7 +179,11 @@ namespace Microsoft.Identity.Client
         public void DeserializeUnifiedAndAdalCache(CacheData cacheData)
         {
             GuardOnMobilePlatforms();
+            this.ServiceBundle.ApplicationLogger.Info($"[ADAL Caching] Legacy SerializeUnifiedAndAdalCache being called. Acquiring semaphore {_semaphoreSlim.CurrentCount}");
+
             _semaphoreSlim.Wait();
+            this.ServiceBundle.ApplicationLogger.Info("[ADAL Caching] Acquired semaphore");
+
             try
             {
                 Deserialize(cacheData.UnifiedState);

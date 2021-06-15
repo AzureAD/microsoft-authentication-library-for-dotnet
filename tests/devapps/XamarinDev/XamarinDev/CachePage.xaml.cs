@@ -25,28 +25,28 @@ namespace XamarinDev
             var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
 
             IDictionary<string, MsalAccessTokenCacheItem> accessTokens = new Dictionary<string, MsalAccessTokenCacheItem>();
-            foreach (var accessItem in (await tokenCache.GetAllAccessTokensAsync(true).ConfigureAwait(false)))
+            foreach (var accessItem in tokenCache.Accessor.GetAllAccessTokens())
             {
                 accessTokens.Add(accessItem.GetKey().ToString(), accessItem);
             }
             accessTokenCacheItems.ItemsSource = accessTokens;
 
             IDictionary<string, MsalRefreshTokenCacheItem> refreshTokens = new Dictionary<string, MsalRefreshTokenCacheItem>();
-            foreach (var refreshItem in (await tokenCache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)))
+            foreach (var refreshItem in tokenCache.Accessor.GetAllRefreshTokens())
             {
                 refreshTokens.Add(refreshItem.GetKey().ToString(), refreshItem);
             }
             refreshTokenCacheItems.ItemsSource = refreshTokens;
 
             IDictionary<string, MsalIdTokenCacheItem> idTokens = new Dictionary<string, MsalIdTokenCacheItem>();
-            foreach (var idItem in (await tokenCache.GetAllIdTokensAsync(true).ConfigureAwait(false)))
+            foreach (var idItem in tokenCache.Accessor.GetAllIdTokens())
             {
                 idTokens.Add(idItem.GetKey().ToString(), idItem);
             }
             idTokenCacheItems.ItemsSource = idTokens;
 
             IDictionary<string, MsalAccountCacheItem> accounts = new Dictionary<string, MsalAccountCacheItem>();
-            foreach (var accountItem in (await tokenCache.GetAllAccountsAsync().ConfigureAwait(false)))
+            foreach (var accountItem in tokenCache.Accessor.GetAllAccounts())
             {
                 accounts.Add(accountItem.GetKey().ToString(), accountItem);
             }

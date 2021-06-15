@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.Cache
                         TokenType = cacheEventType
                     };
 
-                    _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Waiting for cache semaphore");
+                    _requestParams.RequestContext.Logger.Verbose($"[Cache Session Manager] Enterering the cache semaphore. Count { TokenCacheInternal.Semaphore.CurrentCount}");
                     await TokenCacheInternal.Semaphore.WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
                     _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Entered cache semaphore");
 

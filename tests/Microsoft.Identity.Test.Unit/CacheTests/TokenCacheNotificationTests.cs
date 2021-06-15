@@ -11,6 +11,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -358,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var userTokenCacheInternal = Substitute.For<ITokenCacheInternal>();
-            var semaphore = new SemaphoreSlim(1, 1);
+            var semaphore = new OptionalSemaphoreSlim(true);
             userTokenCacheInternal.Semaphore.Returns(semaphore);
 
             var cca = ConfidentialClientApplicationBuilder
@@ -399,7 +400,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var appTokenCache = Substitute.For<ITokenCacheInternal>();
-            var semaphore = new SemaphoreSlim(1, 1);
+            var semaphore = new OptionalSemaphoreSlim(true);
             appTokenCache.Semaphore.Returns(semaphore);
 
             appTokenCache.FindAccessTokenAsync(default).ReturnsForAnyArgs(TokenCacheHelper.CreateAccessTokenItem());

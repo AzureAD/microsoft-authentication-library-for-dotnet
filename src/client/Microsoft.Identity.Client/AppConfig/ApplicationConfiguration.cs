@@ -44,6 +44,7 @@ namespace Microsoft.Identity.Client
         public string IosKeychainSecurityGroup { get; internal set; }
 
         public bool IsBrokerEnabled { get; internal set; }
+
         public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
 
         public Func<CoreUIParent, ApplicationConfiguration, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
@@ -95,8 +96,10 @@ namespace Microsoft.Identity.Client
         internal int ConfidentialClientCredentialCount;
 
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
+        public bool CacheSyncronizationEnabled { get; internal set; } = true;
 
-#region Region
+
+        #region Region
         public string AzureRegion { get; set; }
 #endregion
 

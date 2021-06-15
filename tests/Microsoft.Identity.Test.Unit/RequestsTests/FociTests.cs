@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Remove account from app B
                 await _appB.RemoveAsync(accB.Single()).ConfigureAwait(false);
 
-                var tokens = await _appA.UserTokenCacheInternal.GetAllRefreshTokensAsync(false).ConfigureAwait(false);
+                var tokens = _appA.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
 
                 Assert.IsTrue( 
                     !string.IsNullOrEmpty(tokens.Single().FamilyId),
@@ -252,8 +252,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Remove account from app B
                 await _appB.RemoveAsync(accB.Single()).ConfigureAwait(false);
 
-                var tokens = await _appB.UserTokenCacheInternal.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
-                var accounts = await _appB.UserTokenCacheInternal.GetAllAccountsAsync().ConfigureAwait(false);
+                var tokens = _appB.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
+                var accounts = _appB.UserTokenCacheInternal.Accessor.GetAllAccounts();
 
                 Assert.IsFalse(tokens.Any(), "Should not be any tokens");
                 Assert.IsFalse(accounts.Any(), "should not be any accounts");

@@ -253,11 +253,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             accessor.SaveAccount(accountCacheItem);
         }
 
-        public static async void ExpireAccessTokens(ITokenCacheInternal tokenCache)
+        public static void ExpireAccessTokens(ITokenCacheInternal tokenCache)
         {
-            var allAccessTokens = await tokenCache
-                .GetAllAccessTokensAsync(true)
-                .ConfigureAwait(true);
+            var allAccessTokens = tokenCache.Accessor.GetAllAccessTokens();
 
             foreach (MsalAccessTokenCacheItem atItem in allAccessTokens)
             {
@@ -277,20 +275,20 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             TokenCacheHelper.UpdateRefreshTokenUserAssertions(app.UserTokenCacheInternal);
         }
 
-        public static async void UpdateAccessTokenUserAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
+        public static void UpdateAccessTokenUserAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
         {
-            var atItems = await tokenCache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
+            var allAccessTokens = tokenCache.Accessor.GetAllAccessTokens();
 
-            foreach (var atItem in atItems)
+            foreach (var atItem in allAccessTokens)
             {
                 atItem.UserAssertionHash = assertion;
                 tokenCache.AddAccessTokenCacheItem(atItem);
             }
         }
 
-        public static async void UpdateRefreshTokenUserAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
+        public static void  UpdateRefreshTokenUserAssertions(ITokenCacheInternal tokenCache, string assertion = "SomeAssertion")
         {
-            var rtItems = await tokenCache.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
+            var rtItems = tokenCache.Accessor.GetAllRefreshTokens();            
 
             foreach (var rtItem in rtItems)
             {

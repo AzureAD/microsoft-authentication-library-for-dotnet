@@ -197,15 +197,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.IsNotNull(result);
 
-            await ValidateAtAsync(app.UserTokenCacheInternal).ConfigureAwait(false);
-            await ValidateRtAsync(app.UserTokenCacheInternal).ConfigureAwait(false);
-            await ValidateIdTokenAsync(app.UserTokenCacheInternal).ConfigureAwait(false);
-            await ValidateAccountAsync(app.UserTokenCacheInternal).ConfigureAwait(false);
+            ValidateAt(app.UserTokenCacheInternal);
+            ValidateRt(app.UserTokenCacheInternal);
+            ValidateIdToken(app.UserTokenCacheInternal);
+            ValidateAccount(app.UserTokenCacheInternal);
         }
 
-        private async Task ValidateAtAsync(ITokenCacheInternal cache)
+        private void ValidateAt(ITokenCacheInternal cache)
         {
-            var atList = (await cache.GetAllAccessTokensAsync(false).ConfigureAwait(false)).ToList();
+            var atList = cache.Accessor.GetAllAccessTokens().ToList();
             Assert.AreEqual(1, atList.Count);
 
             var actualPayload = JsonConvert.DeserializeObject<JObject>(atList.First().ToJsonString());
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     Assert.AreEqual(expectedPropValue, actualPropValue);
                 }
             }
-            var atCacheItem = (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First();
+            var atCacheItem = cache.Accessor.GetAllAccessTokens().First();
             var key = atCacheItem.GetKey();
 
             Assert.AreEqual(_expectedAtCacheKey, key.ToString());
@@ -242,13 +242,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, key.iOSType);
         }
 
-        private async Task ValidateRtAsync(ITokenCacheInternal cache)
+        private void ValidateRt(ITokenCacheInternal cache)
         {
             // TODO: NEED TO LOOK INTO HOW TO HANDLE THIS TEST
             //ValidateCacheEntityValue
             //    (ExpectedRtCacheValue, cache.GetAllRefreshTokenCacheItems(requestContext));
 
-            var rtCacheItem = (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First();
+            var rtCacheItem = cache.Accessor.GetAllRefreshTokens().First();
             var key = rtCacheItem.GetKey();
 
             Assert.AreEqual(_expectedRtCacheKey, key.ToString());
@@ -259,13 +259,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, key.iOSType);
         }
 
-        private async Task ValidateIdTokenAsync(ITokenCacheInternal cache)
+        private void ValidateIdToken(ITokenCacheInternal cache)
         {
             // TODO: NEED TO LOOK INTO HOW TO HANDLE THIS TEST
             //ValidateCacheEntityValue
             //    (ExpectedIdTokenCacheValue, cache.GetAllIdTokenCacheItems(requestContext));
 
-            var idTokenCacheItem = (await cache.GetAllIdTokensAsync(true).ConfigureAwait(false)).First();
+            var idTokenCacheItem = cache.Accessor.GetAllIdTokens().First();
             var key = idTokenCacheItem.GetKey();
 
             Assert.AreEqual(_expectedIdTokenCacheKey, key.ToString());
@@ -276,13 +276,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.IdToken, key.iOSType);
         }
 
-        private async Task ValidateAccountAsync(ITokenCacheInternal cache)
+        private void ValidateAccount(ITokenCacheInternal cache)
         {
             // TODO: NEED TO LOOK INTO HOW TO HANDLE THIS TEST
             //ValidateCacheEntityValue
             //    (ExpectedAccountCacheValue, cache.GetAllAccountCacheItems(requestContext));
 
-            var accountCacheItem = (await cache.GetAllAccountsAsync().ConfigureAwait(false)).First();
+            var accountCacheItem = cache.Accessor.GetAllAccounts().First();
             var key = accountCacheItem.GetKey();
 
             Assert.AreEqual(_expectedAccountCacheKey, key.ToString());

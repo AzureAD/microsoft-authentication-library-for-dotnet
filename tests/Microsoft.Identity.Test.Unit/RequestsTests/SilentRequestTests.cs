@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task ExpiredTokenRefreshFlowTestAsync()
+        public void ExpiredTokenRefreshFlowTest()
         {
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 };
 
                 // set access tokens as expired
-                foreach (var accessItem in (await harness.Cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)))
+                foreach (var accessItem in harness.Cache.Accessor.GetAllAccessTokens())
                 {
                     accessItem.ExpiresOnUnixTimestamp =
                         ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)

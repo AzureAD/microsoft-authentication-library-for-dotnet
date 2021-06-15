@@ -946,8 +946,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
-            Assert.AreEqual("refresh-token-2", (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First().Secret);
-            Assert.AreEqual("access-token-2", (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First().Secret);
+            Assert.AreEqual("refresh-token-2", (cache.Accessor.GetAllRefreshTokens()).First().Secret);
+            Assert.AreEqual("access-token-2", (cache.Accessor.GetAllAccessTokens()).First().Secret);
         }
 
         [TestMethod]
@@ -977,8 +977,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
-            Assert.AreEqual("refresh-token-2", (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First().Secret);
-            Assert.AreEqual("access-token-2", (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First().Secret);
+            Assert.AreEqual("refresh-token-2", (cache.Accessor.GetAllRefreshTokens()).First().Secret);
+            Assert.AreEqual("access-token-2", (cache.Accessor.GetAllAccessTokens()).First().Secret);
         }
 
         [TestMethod]
@@ -1006,8 +1006,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
-            Assert.AreEqual("refresh-token-2", (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First().Secret);
-            Assert.AreEqual("access-token-2", (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First().Secret);
+            Assert.AreEqual("refresh-token-2", (cache.Accessor.GetAllRefreshTokens()).First().Secret);
+            Assert.AreEqual("access-token-2", (cache.Accessor.GetAllAccessTokens()).First().Secret);
         }
 
         [TestMethod]
@@ -1086,7 +1086,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(2, cache.Accessor.GetAllAccessTokens().Count());
 
-            Assert.AreEqual("refresh-token-2", (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First().Secret);
+            Assert.AreEqual("refresh-token-2", (cache.Accessor.GetAllRefreshTokens()).First().Secret);
         }
 
 
@@ -1142,7 +1142,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
-            var atItem = (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First();
+            var atItem = (cache.Accessor.GetAllAccessTokens()).First();
             Assert.AreEqual(response.AccessToken, atItem.Secret);
             Assert.AreEqual(TestConstants.AuthorityTestTenant, atItem.Authority);
             Assert.AreEqual(TestConstants.ClientId, atItem.ClientId);
@@ -1151,7 +1151,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // todo add test for idToken serialization
             // Assert.AreEqual(response.IdToken, atItem.RawIdToken);
 
-            var rtItem = (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First();
+            var rtItem = (cache.Accessor.GetAllRefreshTokens()).First();
             Assert.AreEqual(response.RefreshToken, rtItem.Secret);
             Assert.AreEqual(TestConstants.ClientId, rtItem.ClientId);
             Assert.AreEqual(TestConstants.s_userIdentifier, rtItem.HomeAccountId);

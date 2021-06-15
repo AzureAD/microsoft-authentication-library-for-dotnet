@@ -1006,7 +1006,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                var accessTokens = await app.AppTokenCacheInternal.GetAllAccessTokensAsync(true).ConfigureAwait(false);
+                var accessTokens = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, TestConstants.s_scope))
                                          .ToList().FirstOrDefault();
@@ -1054,7 +1054,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenRetrievedFromNetCall, result.AccessToken);
 
                 // make sure token in Cache was updated
-                var accessTokens = await app.AppTokenCacheInternal.GetAllAccessTokensAsync(true).ConfigureAwait(false);
+                var accessTokens = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, TestConstants.s_scope))
                                          .ToList().FirstOrDefault();
