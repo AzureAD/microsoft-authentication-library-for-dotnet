@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             MsalTokenResponse response = await SendTokenRequestToBrokerAsync().ConfigureAwait(false);
+            Metrics.IncrementTotalAccessTokensFromBroker();
             return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
         }
 
@@ -63,7 +64,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             ValidateResponseFromBroker(msalTokenResponse);
-            Metrics.IncrementTotalAccessTokensFromIdP();
             return msalTokenResponse;
         }
 

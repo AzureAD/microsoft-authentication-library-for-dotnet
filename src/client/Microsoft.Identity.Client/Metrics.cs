@@ -12,6 +12,7 @@ namespace Microsoft.Identity.Client
     {
         private static long _totalAccessTokensFromIdP;
         private static long _totalAccessTokensFromCache;
+        private static long _totalAccessTokensFromBroker;
         private static long _totalDurationInMs;
 
         private Metrics() { }
@@ -35,6 +36,15 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Total tokens obtained by MSAL from broker.
+        /// </summary>
+        public static long TotalAccessTokensFromBroker
+        {
+            get => _totalAccessTokensFromBroker;
+            internal set => _totalAccessTokensFromBroker = value;
+        }
+
+        /// <summary>
         /// Total time, in milliseconds, spent in MSAL for all requests.  Aggregate of <see cref="AuthenticationResultMetadata.DurationTotalInMs"/>.
         /// </summary>
         public static long TotalDurationInMs
@@ -51,6 +61,11 @@ namespace Microsoft.Identity.Client
         internal static void IncrementTotalAccessTokensFromCache()
         {
             Interlocked.Increment(ref _totalAccessTokensFromCache);
+        }
+
+        internal static void IncrementTotalAccessTokensFromBroker()
+        {
+            Interlocked.Increment(ref _totalAccessTokensFromBroker);
         }
 
         internal static void IncrementTotalDurationInMs(long requestDurationInMs)
