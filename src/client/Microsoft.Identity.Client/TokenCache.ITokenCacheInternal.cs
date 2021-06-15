@@ -210,6 +210,13 @@ namespace Microsoft.Identity.Client
                     ITokenCacheInternal tokenCacheInternal = this;
                     if (tokenCacheInternal.IsTokenCacheSerialized())
                     {
+                        DateTime? cacheExpiry = null;
+
+                        if (requestParams.IsClientCredentialRequest)
+                        {
+                            cacheExpiry = CanculateSuggestedCacheKey();
+                        }
+
                         var args = new TokenCacheNotificationArgs(
                             this,
                             ClientId,
@@ -218,7 +225,8 @@ namespace Microsoft.Identity.Client
                             tokenCacheInternal.IsApplicationCache,
                             tokenCacheInternal.HasTokensNoLocks(),
                             requestParams.RequestContext.UserCancellationToken,
-                            suggestedCacheKey: suggestedWebCacheKey);
+                            suggestedCacheKey: suggestedWebCacheKey,
+                            suggestedCacheExpiry: cacheExpiry);
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -236,6 +244,17 @@ namespace Microsoft.Identity.Client
                 _semaphoreSlim.Release();
                 requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
             }
+        }
+
+        private DateTime? CanculateSuggestedCacheKey()
+        {
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true).ToList();
+            var unixCacheExpiry = tokenCacheItems.Max(item => item.ExpiresOnUnixTimestamp);
+
+            DateTime suggestedCacheExpiry = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            suggestedCacheExpiry = suggestedCacheExpiry.AddSeconds(Convert.ToDouble(unixCacheExpiry)).ToLocalTime();
+
+            return (DateTime?)suggestedCacheExpiry;
         }
 
         private string GetTenantId(IdToken idToken, AuthenticationRequestParameters requestParams)
