@@ -109,8 +109,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var user = labResponse.User;
 
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
-           
+            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;         
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(Adfs2019LabConstants.PublicClientId)
                 .WithAdfsAuthority(Adfs2019LabConstants.Authority)
