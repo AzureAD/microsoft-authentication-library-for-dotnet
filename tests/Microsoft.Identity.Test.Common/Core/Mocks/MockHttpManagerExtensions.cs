@@ -171,6 +171,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
+        public static MockHttpMessageHandler CreateSuccessfulClientCredentialTokenResponseWithExpiry(
+            this MockHttpManager httpManager, string expiresIn = "3599")
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                "{\"token_type\":\"Bearer\",\"expires_in\":\"" + expiresIn + "\",\"access_token\":\"header.payload.signature\"}")
+            };
+
+            httpManager.AddMockHandler(handler);
+
+            return handler;
+        }
+
         public static void AddFailingRequest(this MockHttpManager httpManager, Exception exceptionToThrow)
         {
             httpManager.AddMockHandler(

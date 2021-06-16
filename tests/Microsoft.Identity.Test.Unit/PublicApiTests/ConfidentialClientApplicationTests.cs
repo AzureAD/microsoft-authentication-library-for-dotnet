@@ -1094,25 +1094,38 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                long expectedTimeDiff = 1000;
+                httpManager.CreateSuccessfulClientCredentialTokenResponseWithExpiry(expectedTimeDiff.ToString());
+
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
-                int accessCount = 0;
                 app.AppTokenCache.SetAfterAccess((args) => 
                 {
-                    if (accessCount == 1)
+                    if (args.SuggestedCacheExpiry != null)
                     {
-                        Assert.AreEqual(args.SuggestedCacheExpiry.Value.ToUnixTimeSeconds(), 1623830061);
+                        var timeDiff = args.SuggestedCacheExpiry.Value.ToUnixTimeSeconds() - DateTimeOffset.Now.ToUnixTimeSeconds();
+                        Assert.IsTrue(timeDiff == expectedTimeDiff);
                     }
-                    accessCount++;
                 });
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
-                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
 
+                expectedTimeDiff = 10000;
+                httpManager.CreateSuccessfulClientCredentialTokenResponseWithExpiry(expectedTimeDiff.ToString());
+
+                result = await app.AcquireTokenForClient(new[] { "scope1.scope1" }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+
+                expectedTimeDiff = 100000;
+                httpManager.CreateSuccessfulClientCredentialTokenResponseWithExpiry(expectedTimeDiff.ToString());
+
+                result = await app.AcquireTokenForClient(new[] { "scope2.scope2" }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
             }
         }
 

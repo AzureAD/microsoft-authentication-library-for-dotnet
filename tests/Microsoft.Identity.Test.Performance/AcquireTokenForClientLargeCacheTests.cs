@@ -30,9 +30,9 @@ namespace Microsoft.Identity.Test.Performance
         ConfidentialClientApplication _ccaTokensDifferByTenant;
         private MsalTokenResponse _response;
         private AuthenticationRequestParameters _requestParams;
-        private RequestContext _requestContext;
+        private IServiceBundle _serviceBundle;
 
-        [Params(1000)]
+        [Params(3000)]
         public int TokenCacheSize { get; set; }
 
         [GlobalSetup]
@@ -55,10 +55,9 @@ namespace Microsoft.Identity.Test.Performance
 
             PopulateAppCache(_ccaTokensDifferByTenant, TokenDifference.ByTenant, TokenCacheSize);
 
-            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isLegacyCacheEnabled: false);
-            _requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            _serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isLegacyCacheEnabled: false);
             _response = TestConstants.CreateMsalTokenResponse(TestConstants.Utid);
-            _requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle, null, null, null, ApiIds.AcquireTokenForClient);
+            _requestParams = TestCommon.CreateAuthenticationRequestParameters(_serviceBundle, null, null, null, ApiIds.AcquireTokenForClient);
         }
 
         /// <summary>
