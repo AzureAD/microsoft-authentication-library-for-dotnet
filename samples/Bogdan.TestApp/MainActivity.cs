@@ -35,6 +35,9 @@ namespace App1
         MultipleAccountApplicationCreatedListener saacl;
         InteractiveAuthCallback cb;
 
+        INativeWrapper _nativeWrapper;
+        bool _useCSAPI = true;
+
 #pragma warning disable CA2000 // Dispose objects before losing scope
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -79,6 +82,9 @@ namespace App1
                     {
                         LogMessage("PCA created!");
                         _ipca = pca;
+                        _nativeWrapper = new AndroidWrapper();
+                        _nativeWrapper.Init(_ipca);
+                        ((AndroidWrapper)_nativeWrapper).Current = this;
                         LoadAccount();
                     },
                     onExceptionAction: (ex) =>
@@ -201,25 +207,17 @@ namespace App1
 
             // Doesn't work, no browser pop-up :(
             this.RunOnUiThread( () =>
-            _spca.AcquireToken(
-                /*activity */ this,
-                /*login_hint*//*"IDLAB@msidlab4.onmicrosoft.com",*/
-                new[] { "User.Read" },
-                new InteractiveAuthCallback(
-                    onCancelAction: () => LogMessage("Auth cancelled"),
-                    onErrorAction: (ex) => LogMessage(ex.ToString()),
-                    onSuccessAction: (result) =>
-                    {
-                        _account = result.Account;
-                        LogMessage(
-                            $"Success!! Token for {result.Account.Username}," +
-                            $" tenant {result.TenantId} - " +
-                            $" token {result.AccessToken} ");
-                    }))
-            );
+                        {
+                            if (_useCSAPI)
+                            {
+                                SignIn_CSharpFlavor();
+                            }
+                            else
+                            {
+                                SignIn_AndroidFlavor();
+                            }
+                        });
 
-
-            
             //_pca.AcquireToken(
             //    this, 
             //    new[] { "User.Read" },
@@ -234,6 +232,49 @@ namespace App1
             //                $" tenant {result.TenantId} - " +
             //                $" token {result.AccessToken} ");
             //        }));
+        }
+
+        private void SignIn_AndroidFlavor()
+        {
+            _spca.AcquireToken(
+                /*activity */ this,
+                /*login_hint*//*"IDLAB@msidlab4.onmicrosoft.com",*/
+                new[] { "User.Read" },
+                new InteractiveAuthCallback(
+                    onCancelAction: () => LogMessage("Auth cancelled"),
+                    onErrorAction: (ex) => LogMessage(ex.ToString()),
+                    onSuccessAction: (result) =>
+                    {
+                        _account = result.Account;
+                        LogMessage(
+                            $"Success!! Token for {result.Account.Username}," +
+                            $" tenant {result.TenantId} - " +
+                            $" token {result.AccessToken} ");
+                    }));
+        }
+
+        /// <summary>
+        /// Here is how developers will use the API in CSharp style async/await
+        /// </summary>
+        private async void SignIn_CSharpFlavor()
+        {
+            try
+            {
+                var result = await _nativeWrapper.AcquireTokenInteractiveAsync(new[] { "User.Read" }).ConfigureAwait(false);
+                _account = result.Account;
+                LogMessage(
+                    $"Success!! Token for {result.Account.Username}," +
+                    $" tenant {result.TenantId} - " +
+                    $" token {result.AccessToken} ");
+            }
+            catch (TaskCanceledException ex)
+            {
+                LogMessage("Auth cancelled");
+            }
+            catch (Exception ex)
+            {
+                LogMessage(ex.ToString());
+            }
         }
 
         private void TestCase_5430()
