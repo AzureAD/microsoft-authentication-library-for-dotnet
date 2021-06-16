@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                ConfidentialClientApplication app = 
+                ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithAuthority(TestConstants.AuthorityUtid2Tenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                
+
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
                 Assert.AreEqual(2, app.InMemoryPartitionedCacheSerializer.CachePartition.Count);
                 Assert.IsTrue(app.InMemoryPartitionedCacheSerializer.CachePartition.Keys.Any(k => k.Contains(TestConstants.Utid)));
@@ -203,7 +203,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task ClientCreds_DefaultSerialization_Async()
         {
             using (var httpManager = new MockHttpManager())
-            {                
+            {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 ConfidentialClientApplication app =
@@ -1033,6 +1033,44 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
             }
+        }
+
+        [TestMethod]
+        // Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1193
+        public async Task GetAuthorizationRequestUrl_ReturnsUri_Async()
+        {
+            string[] s_userReadScope = { "User.Read" };
+
+            var cca = ConfidentialClientApplicationBuilder
+                   .Create(TestConstants.ClientId)
+                   .WithClientSecret("secret")
+                   .WithRedirectUri(TestConstants.RedirectUri)
+                   .Build();
+
+            var uri1 = await cca.GetAuthorizationRequestUrl(s_userReadScope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            var uri2 = await cca.GetAuthorizationRequestUrl(s_userReadScope).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(uri1.Host, uri2.Host);
+            Assert.AreEqual(uri1.LocalPath, uri2.LocalPath);
+
+            var uriParams1 = uri1.ParseQueryString();
+            var uriParams2 = uri2.ParseQueryString();
+
+            CollectionAssert.AreEquivalent(
+                "offline_access openid profile User.Read".Split(' '),
+                uriParams1["scope"].Split(' '));
+            CollectionAssert.AreEquivalent(
+                "offline_access openid profile User.Read".Split(' '),
+                uriParams2["scope"].Split(' '));
+            CoreAssert.AreEqual("code", uriParams1["response_type"], uriParams2["response_type"]);
+            CoreAssert.AreEqual(TestConstants.ClientId, uriParams1["client_id"], uriParams2["client_id"]);
+            CoreAssert.AreEqual(TestConstants.RedirectUri, uriParams1["redirect_uri"], uriParams2["redirect_uri"]);
+            CoreAssert.AreEqual("select_account", uriParams1["prompt"], uriParams2["prompt"]);
+
+            Assert.AreEqual(uriParams1["x-client-CPU"], uriParams2["x-client-CPU"]);
+            Assert.AreEqual(uriParams1["x-client-OS"], uriParams2["x-client-OS"]);
+            Assert.AreEqual(uriParams1["x-client-Ver"], uriParams2["x-client-Ver"]);
+            Assert.AreEqual(uriParams1["x-client-SKU"], uriParams2["x-client-SKU"]);
         }
 
         [TestMethod]
