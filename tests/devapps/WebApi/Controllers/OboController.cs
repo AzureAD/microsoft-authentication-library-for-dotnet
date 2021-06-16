@@ -22,7 +22,7 @@ namespace WebApi.Controllers
 
         static TraceSource s_traceSource = new TraceSource("OBO.Test", SourceLevels.Verbose);
         static InMemoryPartitionedCacheSerializer s_inMemoryPartitionedCacheSerializer =
-                 new InMemoryPartitionedCacheSerializer(new NullLogger());
+                 new InMemoryPartitionedCacheSerializer(new NullLogger(), cacheAccessPenaltyMs: Settings.CacheAccessPenaltyMs);
 
         Random _random = new Random();
 
