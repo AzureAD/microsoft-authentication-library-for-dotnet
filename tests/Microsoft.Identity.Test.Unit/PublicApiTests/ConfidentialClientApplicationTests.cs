@@ -1080,6 +1080,42 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             PublicClientApplicationTests.CheckBuilderCommonMethods(byRefreshTokenBuilder);
         }
 
+        [TestMethod]
+        public async Task ConfidentialClientSuggestedExpiryAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
+                int accessCount = 0;
+                app.AppTokenCache.SetAfterAccess((args) => 
+                {
+                    if (accessCount == 1)
+                    {
+                        Assert.AreEqual(args.SuggestedCacheExpiry.Value.ToUnixTimeSeconds(), 1623830061);
+                    }
+                    accessCount++;
+                });
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+
+            }
+        }
+
         private void BeforeCacheAccess(TokenCacheNotificationArgs args)
         {
             args.TokenCache.DeserializeMsalV3(_serializedCache);

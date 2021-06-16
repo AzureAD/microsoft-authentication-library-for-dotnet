@@ -9,10 +9,15 @@ using BenchmarkDotNet.Attributes;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
+using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Test.Performance
 {
@@ -23,6 +28,9 @@ namespace Microsoft.Identity.Test.Performance
     {
         ConfidentialClientApplication _ccaTokensDifferByScope;
         ConfidentialClientApplication _ccaTokensDifferByTenant;
+        private MsalTokenResponse _response;
+        private AuthenticationRequestParameters _requestParams;
+        private RequestContext _requestContext;
 
         [Params(1000)]
         public int TokenCacheSize { get; set; }
@@ -46,6 +54,11 @@ namespace Microsoft.Identity.Test.Performance
                 .BuildConcrete();
 
             PopulateAppCache(_ccaTokensDifferByTenant, TokenDifference.ByTenant, TokenCacheSize);
+
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isLegacyCacheEnabled: false);
+            _requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            _response = TestConstants.CreateMsalTokenResponse(TestConstants.Utid);
+            _requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle, null, null, null, ApiIds.AcquireTokenForClient);
         }
 
         /// <summary>
@@ -61,7 +74,7 @@ namespace Microsoft.Identity.Test.Performance
 
             await _ccaTokensDifferByTenant.AcquireTokenForClient(new[] { "scope" })
               .WithForceRefresh(false)
-              .WithAuthority($"https://login.microsoft.com/{tenant}")
+              .WithAuthority($"https://login.microsoftonline.com/{tenant}")
               .ExecuteAsync()
               .ConfigureAwait(false);
         }
@@ -78,9 +91,19 @@ namespace Microsoft.Identity.Test.Performance
 
             await _ccaTokensDifferByScope.AcquireTokenForClient(new[] { scope })
               .WithForceRefresh(false)
-              .WithAuthority($"https://login.microsoft.com/tid")
+              .WithAuthority($"https://login.microsoftonline.com/tid")
               .ExecuteAsync()
               .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [Benchmark(Description = "Token cache expiry - O(n)")]
+        public async Task CaclulateTokenCacheExpiryTestTestAsync()
+        {
+            await _ccaTokensDifferByScope.AppTokenCacheInternal.SaveTokenResponseAsync(_requestParams, _response).ConfigureAwait(false);
         }
 
         private enum TokenDifference

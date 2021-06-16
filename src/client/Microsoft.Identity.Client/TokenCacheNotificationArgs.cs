@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
             bool hasTokens,
             CancellationToken cancellationToken,
             string suggestedCacheKey = null,
-            DateTime? suggestedCacheExpiry = null)
+            DateTimeOffset? suggestedCacheExpiry = null)
         {
             TokenCache = tokenCacheSerializer;
             ClientId = clientId;
@@ -105,6 +105,6 @@ namespace Microsoft.Identity.Client
         /// is triggered from the <code>AcquireTokenForClient</code> method. In all other cases it's <code>null</code>, as there is a refresh token, and therefore the
         /// access tokens are refreshable.
         /// </Summary> 
-        public DateTime? SuggestedCacheExpiry { get; private set; }
+        public DateTimeOffset? SuggestedCacheExpiry { get; private set; }
     }
 }

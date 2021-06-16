@@ -210,11 +210,11 @@ namespace Microsoft.Identity.Client
                     ITokenCacheInternal tokenCacheInternal = this;
                     if (tokenCacheInternal.IsTokenCacheSerialized())
                     {
-                        DateTime? cacheExpiry = null;
+                        DateTimeOffset? cacheExpiry = null;
 
                         if (requestParams.IsClientCredentialRequest)
                         {
-                            cacheExpiry = CanculateSuggestedCacheKey();
+                            cacheExpiry = CanculateSuggestedCacheExpiry();
                         }
 
                         var args = new TokenCacheNotificationArgs(
@@ -246,15 +246,11 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private DateTime? CanculateSuggestedCacheKey()
+        private DateTimeOffset? CanculateSuggestedCacheExpiry()
         {
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true).ToList();
             var unixCacheExpiry = tokenCacheItems.Max(item => item.ExpiresOnUnixTimestamp);
-
-            DateTime suggestedCacheExpiry = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            suggestedCacheExpiry = suggestedCacheExpiry.AddSeconds(Convert.ToDouble(unixCacheExpiry)).ToLocalTime();
-
-            return (DateTime?)suggestedCacheExpiry;
+            return (DateTimeOffset?)CoreHelpers.UnixTimestampStringToDateTime(unixCacheExpiry);
         }
 
         private string GetTenantId(IdToken idToken, AuthenticationRequestParameters requestParams)
