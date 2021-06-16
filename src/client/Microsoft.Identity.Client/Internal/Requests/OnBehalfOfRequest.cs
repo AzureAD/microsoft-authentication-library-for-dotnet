@@ -109,10 +109,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
 
-            AuthenticationRequestParameters.RequestContext.Logger.Verbose("[OBO request] No Refresh Token was found in the cache. Fetching OBO token from ESTS");
+            AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] No Refresh Token was found in the cache. Fetching OBO token from ESTS");
 
-            var result = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
-            return result;
+            return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
