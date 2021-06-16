@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Performance
         private AuthenticationRequestParameters _requestParams;
         private IServiceBundle _serviceBundle;
 
-        [Params(3000)]
+        [Params(1000)]
         public int TokenCacheSize { get; set; }
 
         [GlobalSetup]
@@ -96,9 +96,8 @@ namespace Microsoft.Identity.Test.Performance
         }
 
         /// <summary>
-        /// 
+        /// This is a test to validate the performance impact of calculating the TokenCacheNotificationArgs.SuggestedCacheExpiry when saving an access token.
         /// </summary>
-        /// <returns></returns>
         [Benchmark(Description = "Token cache expiry - O(n)")]
         public async Task CaclulateTokenCacheExpiryTestTestAsync()
         {
