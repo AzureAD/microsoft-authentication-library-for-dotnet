@@ -96,18 +96,36 @@ OBO performance tests for refresh flow. Added with 4.33 release.
 https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/tests/devapps/WebApi/Controllers/OboController.cs#L16
 Measurements taken on 6/15/2021, on dev machine:
 
-OBO tests with refreshFlow=false (Number of users: 300)
--------------------------------------------------------
-     50%   222.52ms
-     75%   233.67ms
-     90%   242.84ms
-     95%   247.09ms
-     99%   264.20ms
+OBO tests with refreshFlow=false (Number of users: 300 and Expiration time: 10 mins)
+------------------------------------------------------------------------------------
+ 
+Statistics        Avg      Stdev        Max
+  Reqs/sec      6432.13    3085.99   42327.69
+  Latency       19.82ms    11.78ms   790.22ms
+  Latency Distribution
+     50%    18.41ms
+     75%    22.53ms
+     90%    28.79ms
+     95%    34.00ms
+     99%    48.84ms
+  HTTP codes:
+    1xx - 0, 2xx - 378128, 3xx - 0, 4xx - 0, 5xx - 0
+    others - 0
+  Throughput:     2.10MB/s
 
-OBO tests with refreshFlow=true (Number of users: 50)
--------------------------------------------------------
-     50%   221.03ms
-     75%   228.00ms
-     90%   237.40ms
-     95%   243.70ms
-     99%   253.10ms
+OBO tests with refreshFlow=true (Number of users: 50 and Expiration time: 2 mins)
+---------------------------------------------------------------------------------
+
+Statistics        Avg      Stdev        Max
+  Reqs/sec      6951.61    2641.41   22523.88
+  Latency       18.25ms    13.11ms      0.86s
+  Latency Distribution
+     50%    17.41ms
+     75%    20.00ms
+     90%    24.12ms
+     95%    28.04ms
+     99%    37.53ms
+  HTTP codes:
+    1xx - 0, 2xx - 410626, 3xx - 0, 4xx - 0, 5xx - 0
+    others - 0
+  Throughput:     2.28MB/s

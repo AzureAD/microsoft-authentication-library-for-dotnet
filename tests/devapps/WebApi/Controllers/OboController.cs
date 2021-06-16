@@ -24,7 +24,7 @@ namespace WebApi.Controllers
         static InMemoryPartitionedCacheSerializer s_inMemoryPartitionedCacheSerializer =
                  new InMemoryPartitionedCacheSerializer(new NullLogger());
 
-        Random s_random = new Random();
+        Random _random = new Random();
 
         static OBOParallelRequestMockHandler s_httpManager = new OBOParallelRequestMockHandler(false);
         static OBOParallelRequestMockHandler s_httpManagerRefreshFlow = new OBOParallelRequestMockHandler(true);
@@ -62,7 +62,7 @@ namespace WebApi.Controllers
 
             ConfidentialClientApplication cca = local_cca;
 
-            var user = $"user_{s_random.Next(refreshFlow ? Settings.NumberOfUsersRefreshFlow : Settings.NumberOfUsers)}";
+            var user = $"user_{_random.Next(refreshFlow ? Settings.NumberOfUsersRefreshFlow : Settings.NumberOfUsers)}";
 
             s_inMemoryPartitionedCacheSerializer.Initialize(cca.UserTokenCache as TokenCache);
 
@@ -76,17 +76,6 @@ namespace WebApi.Controllers
             sw.Stop();
 
             TraceResult(res, user, sw.ElapsedMilliseconds);
-
-            // Log the very bad requests
-            if (res.AuthenticationResultMetadata.DurationTotalInMs > 2 * 1000 || sw.ElapsedMilliseconds > 2 * 1000)
-            {
-                s_traceSource.TraceEvent(TraceEventType.Error, 1, "##### FOUND!! " + requestId);
-
-
-                System.IO.File.WriteAllText($"c:\\temp\\obo_{requestId}.txt", sb.ToString());
-                System.IO.File.WriteAllText($"c:\\temp\\obo2_{requestId}.txt", sb2.ToString());
-
-            }
 
             return res.AuthenticationResultMetadata.DurationTotalInMs;
         }
