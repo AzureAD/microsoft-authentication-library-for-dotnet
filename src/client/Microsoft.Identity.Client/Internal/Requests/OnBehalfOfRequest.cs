@@ -40,13 +40,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             CacheInfoTelemetry cacheInfoTelemetry;
-            if (!_onBehalfOfParameters.ForceRefresh)
+            if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 // look for access token in the cache first.
                 // no access token is found, then it means token does not exist
-                // or new assertion has been passed. We should not use Refresh Token
-                // for the user because the new incoming token may have updated claims
-                // like MFA etc.
+                // or new assertion has been passed. 
+                // Look for a refresh token, if refresh token is found perform refresh token flow.
+                // If a refresh token is not found, then it means refresh token does not exist or new assertion has been passed.
+                // Fetch new access token for OBO
                 using (logger.LogBlockDuration("[OBO Request] Looking in the cache for an access token"))
                 {
                     msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
@@ -87,16 +88,31 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // No AT in the cache or AT needs to be refreshed
             try
             {
-                using (logger.LogBlockDuration("[OBO request] Fetching OBO token from ESTS"))
-                {
-                    var result = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
-                    return result;
-                }
+                return await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (MsalServiceException e)
             {
                 return HandleTokenRefreshError(e, msalAccessTokenItem);
             }
+        }
+
+        private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)
+        {
+            // Look for a refresh token
+            MsalRefreshTokenCacheItem appRefreshToken = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
+
+            // If a refresh token is not found, fetch a new access token
+            if (appRefreshToken != null)
+            {
+                var msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(appRefreshToken, this, AuthenticationRequestParameters, cancellationToken)
+                .ConfigureAwait(false);
+
+                return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            }
+
+            AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] No Refresh Token was found in the cache. Fetching OBO token from ESTS");
+
+            return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)

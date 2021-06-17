@@ -51,11 +51,11 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
             }
         }
 
-        private void OnBeforeAccess(TokenCacheNotificationArgs args)
+        private async void OnBeforeAccess(TokenCacheNotificationArgs args)
         {
             if (!string.IsNullOrEmpty(args.SuggestedCacheKey))
             {
-                byte[] tokenCacheBytes = ReadCacheBytes(args.SuggestedCacheKey);
+                byte[] tokenCacheBytes = await ReadCacheBytesAsync(args.SuggestedCacheKey).ConfigureAwait(false);
                 args.TokenCache.DeserializeMsalV3(tokenCacheBytes, shouldClearExistingCache: true);
             }
         }    
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
         /// </summary>
         /// <param name="cacheKey">Cache key.</param>
         /// <returns>Read bytes.</returns>
-        protected abstract byte[] ReadCacheBytes(string cacheKey);
+        protected abstract Task<byte[]> ReadCacheBytesAsync(string cacheKey);
 
         /// <summary>
         /// Method to be implemented by concrete cache serializers to remove an entry from the cache.

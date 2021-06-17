@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Common
                 commonParameters,
                 requestContext,
                 authority)
-            {                
+            {
             };
         }
 

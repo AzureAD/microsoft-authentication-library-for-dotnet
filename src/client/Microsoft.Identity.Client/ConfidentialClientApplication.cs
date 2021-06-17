@@ -123,6 +123,12 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             UserAssertion userAssertion)
         {
+            if (userAssertion == null)
+            {
+                ServiceBundle.ApplicationLogger.Error("User assertion for OBO request should not be null");
+                throw new MsalClientException(MsalError.UserAssertionNullError);
+            }
+
             return AcquireTokenOnBehalfOfParameterBuilder.Create(
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes,

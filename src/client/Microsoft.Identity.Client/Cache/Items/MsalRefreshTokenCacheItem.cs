@@ -52,6 +52,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         public string FamilyId { get; set; }
 
+        internal string UserAssertionHash { get; set; }
+
         /// <summary>
         /// Family Refresh Tokens, can be used for all clients part of the family
         /// </summary>
@@ -76,6 +78,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var item = new MsalRefreshTokenCacheItem();
             item.FamilyId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
+            item.UserAssertionHash = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash);
 
             item.PopulateFieldsFromJObject(j);
 
@@ -86,6 +89,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var json = base.ToJObject();
             SetItemIfValueNotNull(json, StorageJsonKeys.FamilyId, FamilyId);
+            SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, UserAssertionHash);
             return json;
         }
 
