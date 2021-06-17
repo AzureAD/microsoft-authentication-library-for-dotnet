@@ -176,6 +176,9 @@ namespace Microsoft.Identity.Client.OAuth2
             AddCcsHeader(additionalBodyParameters);
         }
 
+        // The CCS header is used by the CCS service to help route requests to resources in Azure to speed up authentication.
+        // It consists of either the {ObjectId}@{TenantId} or the upn of the current user.
+        // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
         private void AddCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
             string ccsHeaderHint = string.Empty;
