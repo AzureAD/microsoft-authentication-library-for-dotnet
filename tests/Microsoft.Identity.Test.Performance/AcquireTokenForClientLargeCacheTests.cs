@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Performance
 
             await _ccaTokensDifferByTenant.AcquireTokenForClient(new[] { "scope" })
               .WithForceRefresh(false)
-              .WithAuthority($"https://login.microsoft.com/{tenant}")
+              .WithAuthority($"https://login.microsoftonline.com/{tenant}")
               .ExecuteAsync()
               .ConfigureAwait(false);
         }
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Test.Performance
 
             await _ccaTokensDifferByScope.AcquireTokenForClient(new[] { scope })
               .WithForceRefresh(false)
-              .WithAuthority($"https://login.microsoft.com/tid")
+              .WithAuthority($"https://login.microsoftonline.com/tid")
               .ExecuteAsync()
               .ConfigureAwait(false);
         }

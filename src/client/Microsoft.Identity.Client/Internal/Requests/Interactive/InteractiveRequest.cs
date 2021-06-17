@@ -8,7 +8,6 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
@@ -106,16 +105,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 _logger.Info("Broker is configured. Starting broker flow without knowing the broker installation app link. ");
 
-                MsalTokenResponse tokenResponse = await FetchTokensFromBrokerAsync(
+                MsalTokenResponse brokerTokenResponse = await FetchTokensFromBrokerAsync(
                     null, // we don't have an installation URI yet
                     cancellationToken)
                     .ConfigureAwait(false);
 
                 // if we don't get back a result, then continue with the WebUi 
-                if (tokenResponse != null)
+                if (brokerTokenResponse != null)
                 {
                     _logger.Info("Broker attempt completed successfully. ");
-                    return tokenResponse;
+                    Metrics.IncrementTotalAccessTokensFromBroker();
+                    return brokerTokenResponse;
                 }
 
                 _logger.Info("Broker attempt did not complete, most likely because the broker is not installed. Attempting to use a browser / web UI. ");
@@ -152,8 +152,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     authCode,
                     pkceCodeVerifier);
 
-            return await authCodeExchangeComponent.FetchTokensAsync(cancellationToken)
+            MsalTokenResponse idpTokenResponse = await authCodeExchangeComponent.FetchTokensAsync(cancellationToken)
                 .ConfigureAwait(false);
+            Metrics.IncrementTotalAccessTokensFromIdP();
+            return idpTokenResponse;
         }
 
         private string CreateCcsHintFromClientInfo(string clientInfoFromAuthCode)
@@ -178,6 +180,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cancellationToken).ConfigureAwait(false);
 
             _logger.Info("Broker attempt completed successfully " + (tokenResponse != null));
+            Metrics.IncrementTotalAccessTokensFromBroker();
             return tokenResponse;
         }
     }

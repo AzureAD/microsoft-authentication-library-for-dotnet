@@ -14,11 +14,18 @@ namespace Microsoft.Identity.Test.Common
 
         public IList<(HttpRequestMessage, HttpResponseMessage)> RequestsAndResponses { get; }
 
+        public static string LastHttpContentData { get; set; }
+
         public HttpSnifferClientFactory()
         {
             RequestsAndResponses = new List<(HttpRequestMessage, HttpResponseMessage)>();
 
-            var recordingHandler = new RecordingHandler((req, res) => { 
+            var recordingHandler = new RecordingHandler((req, res) => {
+                if (req.Content != null)
+                {
+                    req.Content.LoadIntoBufferAsync().GetAwaiter().GetResult();
+                    LastHttpContentData = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                }
                 RequestsAndResponses.Add((req, res));
                 Trace.WriteLine($"[MSAL][HTTP Request]: {req}");
                 Trace.WriteLine($"[MSAL][HTTP Response]: {res}");

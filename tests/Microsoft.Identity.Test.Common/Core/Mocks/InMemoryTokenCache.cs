@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
@@ -8,17 +9,33 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     public class InMemoryTokenCache
     {
         private byte[] _cacheData;
-        /// <summary>
-        /// Path to the token cache
-        /// </summary>
+        private bool _shouldClearExistingCache;
+        private bool _withOperationDelay;
+        private const int OperationDelayInMs = 1000;
+
+        public InMemoryTokenCache(bool withOperationDelay = false, bool shouldClearExistingCache = true)
+        {
+            // Helps when testing cache operation metrics
+            _withOperationDelay = withOperationDelay;
+            _shouldClearExistingCache = shouldClearExistingCache;
+        }
 
         public void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            args.TokenCache.DeserializeMsalV3(_cacheData, true);
+            if (_withOperationDelay)
+            {
+                Task.Delay(OperationDelayInMs).GetAwaiter().GetResult();
+            }
+            args.TokenCache.DeserializeMsalV3(_cacheData, _shouldClearExistingCache);
         }
 
         public void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
+            if (_withOperationDelay)
+            {
+                Task.Delay(OperationDelayInMs).GetAwaiter().GetResult();
+            }
+
             // if the access operation resulted in a cache update
             if (args.HasStateChanged)
             {

@@ -95,7 +95,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory, 1);
             AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.ForceRefresh:D},centralus,2,1|0,1", 1);
-           
         }
 
         private void AssertTelemetry(HttpSnifferClientFactory factory, string currentTelemetryHeader, int placement = 0)

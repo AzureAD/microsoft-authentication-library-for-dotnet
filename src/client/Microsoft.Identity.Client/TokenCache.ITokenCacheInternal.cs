@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -82,7 +83,10 @@ namespace Microsoft.Identity.Client
                                     instanceDiscoveryMetadata.PreferredCache,
                                     requestParams.AppConfig.ClientId,
                                     response,
-                                    homeAccountId);
+                                    homeAccountId)
+                {
+                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash
+                };
 
                 if (!_featureFlags.IsFociEnabled)
                 {
@@ -402,13 +406,13 @@ namespace Microsoft.Identity.Client
             string requestTenantId = requestParams.Authority.TenantId;
             bool filterByTenantId = true;
 
-            if (requestParams.UserAssertion != null) // OBO
+            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
             {
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
                                 !string.IsNullOrEmpty(item.UserAssertionHash) &&
                                 item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
-                                "Filtering by user assertion id");
+                                $"Filtering by user assertion: {requestParams.UserAssertion.AssertionHash}");
 
                 // OBO calls FindAccessTokenAsync directly, but we are not able to resolve the authority 
                 // unless the developer has configured a tenanted authority. If they have configured /common
@@ -433,8 +437,8 @@ namespace Microsoft.Identity.Client
             }
 
             // Only AcquireTokenSilent has an IAccount in the request that can be used for filtering
-            if (requestParams.ApiId != TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient &&
-                requestParams.ApiId != TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
+            if (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient &&
+                requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
                                 requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
@@ -594,21 +598,17 @@ namespace Microsoft.Identity.Client
                 .ConfigureAwait(false);
             var aliases = metadata.Aliases;
 
-            IEnumerable<MsalRefreshTokenCacheKey> candidateRtKeys = aliases.Select(
-                    al => new MsalRefreshTokenCacheKey(
-                        al,
-                        requestParams.AppConfig.ClientId,
-                        requestParams.Account?.HomeAccountId?.Identifier,
-                        familyId));
+            allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
+            allRts = allRts.Where(
+                item => aliases.ContainsOrdinalIgnoreCase(item.Environment));
 
-            MsalRefreshTokenCacheItem candidateRt = allRts.FirstOrDefault(
-                rt => candidateRtKeys.Any(
-                    candidateKey => object.Equals(rt.GetKey(), candidateKey)));
+            IReadOnlyList<MsalRefreshTokenCacheItem> finalList = allRts.ToList();
+            requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (finalList.Count() != 0));
 
-            requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (candidateRt != null));
-
-            if (candidateRt != null)
-                return candidateRt;
+            if (finalList.Count > 0)
+            {
+                return finalList.FirstOrDefault();
+            }
 
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
 
@@ -626,6 +626,46 @@ namespace Microsoft.Identity.Client
             }
 
             return null;
+        }
+
+        private static IEnumerable<MsalRefreshTokenCacheItem> FilterRtsByHomeAccountIdOrAssertion(
+            AuthenticationRequestParameters requestParams,
+            IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems,
+            string familyId)
+        {
+            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
+            {
+                rtCacheItems = rtCacheItems.FilterWithLogging(item =>
+                                !string.IsNullOrEmpty(item.UserAssertionHash) &&
+                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                $"Filtering by user assertion: {requestParams.UserAssertion.AssertionHash}");
+            }
+            else
+            {
+                rtCacheItems = rtCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
+                                requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by home account id");
+            }
+
+            // This will also filter for the case when familyId is null and exclude RTs with familyId in filtered list
+            rtCacheItems = rtCacheItems.FilterWithLogging(item =>
+                    string.Equals(item.FamilyId ?? string.Empty,
+                    familyId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
+                    requestParams.RequestContext.Logger,
+                    "Filtering by family id");
+
+            // if there is a value in familyId, we are looking for FRT and hence ignore filter with clientId
+            if (string.IsNullOrEmpty(familyId))
+            {
+                rtCacheItems = rtCacheItems.FilterWithLogging(item => item.ClientId.Equals(
+                            requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
+                            requestParams.RequestContext.Logger,
+                            "Filtering by client id");
+            } 
+
+            return rtCacheItems;
         }
 
         async Task<bool?> ITokenCacheInternal.IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId)

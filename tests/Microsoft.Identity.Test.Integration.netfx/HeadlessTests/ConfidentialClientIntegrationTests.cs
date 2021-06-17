@@ -16,14 +16,14 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Json.Utilities;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -458,6 +458,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        public async Task WebAPIAccessingGraphOnBehalfOfUserWithCacheTestAsync()
+        {
+            await RunOnBehalfOfTestWithTokenCacheAsync(await LabUserHelper.GetSpecificUserAsync("IDLAB@msidlab4.onmicrosoft.com").ConfigureAwait(false)).ConfigureAwait(false);
+        }
+
+        [TestMethod]
         [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonWebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
@@ -652,6 +658,143 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await confidentialApp.GetAccountsAsync().ConfigureAwait(false);
 #pragma warning restore CS0618 // Type or member is obsolete
             Assert.IsNull(userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+        }
+
+        //Since this test performs a large number of operations it should not be rerun on other clouds.
+        private async Task RunOnBehalfOfTestWithTokenCacheAsync(LabResponse labResponse)
+        {
+            LabUser user = labResponse.User;
+            string oboHost;
+            string secret;
+            string authority;
+            string publicClientID;
+            string confidentialClientID;
+            string[] oboScope;
+
+            oboHost = PublicCloudHost;
+            secret = _keyVault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
+            authority = TestConstants.AuthorityOrganizationsTenant;
+            publicClientID = PublicCloudPublicClientIDOBO;
+            confidentialClientID = PublicCloudConfidentialClientIDOBO;
+            oboScope = s_publicCloudOBOServiceScope;
+            
+            //TODO: acquire scenario specific client ids from the lab response
+
+            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
+            var factory = new HttpSnifferClientFactory();
+
+            var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID)
+                                                                 .WithAuthority(authority)
+                                                                 .WithRedirectUri(TestConstants.RedirectUri)
+                                                                 .WithTestLogging()
+                                                                 .WithHttpClientFactory(factory)
+                                                                 .Build();
+
+            var builder = msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword);
+
+            builder.WithAuthority(authority);
+
+            var authResult = await builder.ExecuteAsync().ConfigureAwait(false);
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(confidentialClientID)
+                .WithAuthority(new Uri(oboHost + authResult.TenantId), true)
+                .WithClientSecret(secret)
+                .WithTestLogging()
+                .BuildConcrete();
+
+            var userCacheRecorder = confidentialApp.UserTokenCache.RecordAccess();
+
+            UserAssertion userAssertion = new UserAssertion(authResult.AccessToken);
+
+            string atHash = userAssertion.AssertionHash;
+
+            authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult, user);
+            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+
+            //Run OBO again. Should get token from cache
+            authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+
+            //Expire access tokens
+            TokenCacheHelper.ExpireAccessTokens(confidentialApp.UserTokenCacheInternal);
+
+            //Run OBO again. Should do token refresh since the AT is expired
+            authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            AssertLastHttpContent("refresh_token");
+
+            //creating second app with no refresh tokens
+            var atItems = await confidentialApp.UserTokenCacheInternal.GetAllAccessTokensAsync(true).ConfigureAwait(false);
+            var confidentialApp2 = ConfidentialClientApplicationBuilder
+                .Create(confidentialClientID)
+                .WithAuthority(new Uri(oboHost + authResult.TenantId), true)
+                .WithClientSecret(secret)
+                .WithTestLogging()
+                .WithHttpClientFactory(factory)
+                .BuildConcrete();
+
+            TokenCacheHelper.ExpireAndSaveAccessToken(confidentialApp2.UserTokenCacheInternal, atItems.FirstOrDefault());
+
+            //Should perform OBO flow since the access token is expired and the refresh token does not exist
+            authResult = await confidentialApp2.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            AssertLastHttpContent("on_behalf_of");
+
+            TokenCacheHelper.ExpireAccessTokens(confidentialApp2.UserTokenCacheInternal);
+            TokenCacheHelper.UpdateUserAssertions(confidentialApp2);
+
+            //Should perform OBO flow since the access token and the refresh token contains the wrong user assertion hash
+            authResult = await confidentialApp2.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            AssertLastHttpContent("on_behalf_of");
+        }
+
+        private void AssertLastHttpContent(string content)
+        {
+            Assert.IsTrue(HttpSnifferClientFactory.LastHttpContentData.Contains(content));
+            HttpSnifferClientFactory.LastHttpContentData = string.Empty;
         }
 
         [TestMethod]
