@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -89,17 +90,21 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// To help with resiliency, AAD Cached Credential Service (CCS) operates as an AAD backup.
         /// </summary>
-        /// <param name="ccsRoutingHint">The OID and tenant ID of the signed-in user.
-        /// <code>$"{oid}@{tenantd_id}"</code>
-        /// </param>
+        /// <param name="userObjectIdentifier">GUID which is unique to the user, parsed from the client_info.</param>
+        /// <param name="tenantIdentifier">GUID format of the tenant ID, parsed from the client_info.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenOnBehalfOfParameterBuilder WithCcsRoutingHint(string ccsRoutingHint)
+        public AcquireTokenOnBehalfOfParameterBuilder WithCcsRoutingHint(string userObjectIdentifier, string tenantIdentifier)
         {
-            if (string.IsNullOrEmpty(ccsRoutingHint) || !ccsRoutingHint.Contains('@'))
+            if (string.IsNullOrEmpty(userObjectIdentifier))
             {
-                throw new MsalClientException("The CcsRoutingHint must be of the format: oid@tenantd_id. See https://aka.ms/msal-net/ccsRouting. ");
+                throw new ArgumentException(MsalErrorMessage.CcsRoutingHintMissing, nameof(userObjectIdentifier));
             }
-            CommonParameters.CcsRoutingHint = ccsRoutingHint;
+            if (string.IsNullOrEmpty(tenantIdentifier))
+            {
+                throw new ArgumentException(MsalErrorMessage.CcsRoutingHintMissing, nameof(tenantIdentifier));
+            }
+
+            CommonParameters.CcsRoutingHint = $"{userObjectIdentifier}@{tenantIdentifier}";
             return this;
         }
 

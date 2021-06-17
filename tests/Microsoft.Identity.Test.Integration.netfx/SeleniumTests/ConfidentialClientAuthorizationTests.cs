@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 3 - Get a token using the auth code, just like a website");
             var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
                 .WithPkceCodeVerifier(codeVerifier)
-                .WithCcsRoutingHint($"{TestConstants.OnPremiseHomeObjectId}@{TestConstants.TenantId}")
+                .WithCcsRoutingHint(TestConstants.OnPremiseHomeObjectId, TestConstants.TenantId)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

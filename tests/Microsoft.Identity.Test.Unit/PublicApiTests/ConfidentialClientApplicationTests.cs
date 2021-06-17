@@ -696,7 +696,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var uri = await app
                     .GetAuthorizationRequestUrl(TestConstants.s_scope)
                     .WithLoginHint(TestConstants.DisplayableId)
-                    .WithCcsRoutingHint("oid@tid")
+                    .WithCcsRoutingHint("oid", "tid")
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -713,7 +713,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var uri = await app
                     .GetAuthorizationRequestUrl(TestConstants.s_scope)
-                    .WithCcsRoutingHint("oid@tid")
+                    .WithCcsRoutingHint("oid", "tid")
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -826,7 +826,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task CcsRoutingHint_FormatIncorrect_TestAsync()
+        [DataRow(null, TestConstants.TenantId)]
+        [DataRow(TestConstants.OnPremiseUniqueId, null)]
+        [DataRow(null, null)]
+        [DataRow("", "")]
+        public async Task CcsRoutingHint_CcsHintIncorrect_ThrowsAsync(string oid, string tid)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -837,11 +841,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() => app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                await Assert.ThrowsExceptionAsync<ArgumentException>(() => app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
                     .WithPkceCodeVerifier(string.Empty)
-                    .WithCcsRoutingHint(TestConstants.TenantId)
+                    .WithCcsRoutingHint(oid, tid)
                     .ExecuteAsync()).ConfigureAwait(false);
-                Assert.AreEqual("The CcsRoutingHint must be of the format: oid@tenantd_id. See https://aka.ms/msal-net/ccsRouting. ", ex.ErrorCode);
             }
         }
 
