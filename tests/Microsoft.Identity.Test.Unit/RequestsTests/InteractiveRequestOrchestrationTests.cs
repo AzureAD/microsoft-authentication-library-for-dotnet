@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -59,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Arrange - important for test
                 requestParams.AppConfig.IsBrokerEnabled = false;
-                var authCodeResult = new Tuple<string, string>("some_auth_code", "pkce_verifier");
+                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code= "some_auth_code" }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
 
@@ -189,7 +190,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     .Returns((MsalTokenResponse)null);
                 
                 // web UI can deal with this
-                var authCodeResult = new Tuple<string, string>("some_auth_code", "pkce_verifier");
+                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code = "some_auth_code" }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
                 _authCodeExchangeComponentOverride.FetchTokensAsync(CancellationToken.None)
@@ -253,7 +254,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 requestParams.AppConfig.IsBrokerEnabled = false;
 
                 // web UI starts the flow, but the auth code shows Evo needs the broker
-                var authCodeResult = new Tuple<string, string>(AuthCodeWithAppLink, "pkce_verifier");
+                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code = AuthCodeWithAppLink }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
 
@@ -299,7 +300,5 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
         }
-
-   
     }
 }

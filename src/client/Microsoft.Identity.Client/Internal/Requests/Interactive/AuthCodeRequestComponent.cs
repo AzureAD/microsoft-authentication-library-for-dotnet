@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal
             _serviceBundle = _requestParams.RequestContext.ServiceBundle;
         }
 
-        public async Task<Tuple<string, string>> FetchAuthCodeAndPkceVerifierAsync(
+        public async Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceVerifierAsync(
             CancellationToken cancellationToken)
         {
             var webUi = CreateWebAuthenticationDialog();
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal
             return result.Item1;
         }
 
-        private async Task<Tuple<string, string>> FetchAuthCodeAndPkceInternalAsync(
+        private async Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceInternalAsync(
             IWebUI webUi,
             CancellationToken cancellationToken)
         {
@@ -83,9 +83,8 @@ namespace Microsoft.Identity.Client.Internal
 
                 VerifyAuthorizationResult(authorizationResult, state);
 
-                return new Tuple<string, string>(authorizationResult.Code, codeVerifier);
+                return new Tuple<AuthorizationResult, string>(authorizationResult, codeVerifier);
             }
-
         }
 
         private Tuple<Uri, string> CreateAuthorizationUriWithCodeChallenge(
@@ -120,6 +119,7 @@ namespace Microsoft.Identity.Client.Internal
                 requestParameters[OAuth2Parameter.State] = state;
             }
 
+            requestParameters[OAuth2Parameter.ClientInfo] = "1";
             UriBuilder builder = CreateInteractiveRequestParameters(requestParameters);
 
             return new Tuple<Uri, string, string>(builder.Uri, state, codeVerifier);
@@ -193,8 +193,8 @@ namespace Microsoft.Identity.Client.Internal
                 //The CCS header is used by the CCS service to help route requests to resources in Azure during requests to speed up authentication.
                 //It consists of either the ObjectId.TenantId or the upn of the account signign in.
                 //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
-                string OidCCSHeader = CoreHelpers.GetCCSUpnHeader(_interactiveParameters.LoginHint);
-                authorizationRequestParameters[Constants.CCSRoutingHintHeader] = OidCCSHeader;
+                string OidCcsHeader = CoreHelpers.GetCcsUpnHeader(_interactiveParameters.LoginHint);
+                authorizationRequestParameters[Constants.CcsRoutingHintHeader] = OidCcsHeader;
             }
 
             if (_requestParams.RequestContext.CorrelationId != Guid.Empty)

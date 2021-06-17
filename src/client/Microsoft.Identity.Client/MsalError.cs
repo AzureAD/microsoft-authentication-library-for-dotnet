@@ -535,6 +535,13 @@ namespace Microsoft.Identity.Client
         public const string B2CAuthorityHostMismatch = "B2C_authority_host_mismatch";
 
         /// <summary>
+        /// The cloud (authority url host) defined at the application level cannot be different than the cloud at the request level.
+        /// <para>What happens?</para>You did not define an authority at the application level, so it defaults to the public cloud (login.microsoft.com), but the authority at the request level is for a different cloud. Only the tenant can be changed at the request level.
+        /// <para>Mitigation</para>Add .WithAuthority("https://login.windows-ppe.net/common) at the application level and specify the tenant at the request level: .WithAuthority("https://login.windows-ppe.net/1234-567-890-12345678). 
+        /// </summary>
+        public const string AuthorityHostMismatch = "authority_host_mismatch";       
+
+        /// <summary>
         /// Duplicate query parameter was found in extraQueryParameters.
         /// <para>What happens?</para> You have used <c>extraQueryParameter</c> of overrides
         /// of token acquisition operations in public client and confidential client application and are passing a parameter which is already present in the
@@ -975,7 +982,6 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para> For troubleshooting details, see https://aka.ms/msal-net-webview2 .
         /// </summary>
         public const string WebView2LoaderNotFound = "webview2loader_not_found";
-
         /// <summary>
         /// <para>What happens?</para>You configured both Regional Authority and Authority Validation. Authority validation is not currently supported for regional authorities.
         /// <para>Mitigation</para>Set the validateAuthority flag to false to use Azure Regional authority. Do not disable authority validation if you read the authority from an untrusted source, 

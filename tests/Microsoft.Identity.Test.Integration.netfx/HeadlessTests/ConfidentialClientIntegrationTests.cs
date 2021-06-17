@@ -177,13 +177,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(PublicCloudConfidentialClientID)
+                .WithAuthority(PublicCloudTestAuthority)
                 .WithCertificate(cert)
                 .Build();
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
             authResult = await confidentialApp
                 .AcquireTokenForClient(s_keyvaultScope)
-                .WithAuthority(PublicCloudTestAuthority, true) // authority can also be specified at request level
+                .WithAuthority(PublicCloudTestAuthority, true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -198,7 +199,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
                .AcquireTokenForClient(s_keyvaultScope)
-               .WithAuthority(PublicCloudTestAuthority, true) // authority can also be specified at request level
+               .WithAuthority(PublicCloudTestAuthority, true)
                .ExecuteAsync(CancellationToken.None)
                .ConfigureAwait(false);
 
@@ -233,11 +234,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                            s_arlingtonCCASecret).ConfigureAwait(false);
         }
 
-        public async Task RunTestWithClientSecretAsync(string clientID, string confidentialClientAuthority, string secret)
+        public async Task RunTestWithClientSecretAsync(
+            string clientID,
+            string confidentialClientAuthority,
+            string secret)
         {
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(clientID)
                 .WithClientSecret(secret)
+                .WithAuthority(confidentialClientAuthority)
                 .WithTestLogging()
                 .Build();
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
@@ -871,6 +876,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var _confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(OBOServicePpeClientID)
+                .WithAuthority(PPEAuthenticationAuthority)
                 .WithCertificate(cert)
                 .Build();
 

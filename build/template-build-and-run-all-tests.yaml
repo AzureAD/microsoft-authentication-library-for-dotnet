@@ -18,6 +18,8 @@ jobs: #Build and stage projects
   pool:
       name: Azure Pipelines
       vmImage: macos-10.15
+  variables:
+      runCodesignValidationInjection: false
 
   steps:
   - template: template-build-ios-automation.yaml
@@ -29,6 +31,8 @@ jobs: #Build and stage projects
       demands:
       - msbuild
       - visualstudio
+  variables:
+      runCodesignValidationInjection: false
 
   steps:
   - template: template-build-android-automation.yaml
@@ -40,6 +44,8 @@ jobs: #Build and stage projects
       demands:
       - msbuild
       - visualstudio
+  variables:
+      runCodesignValidationInjection: false
 
   steps:
   - template: template-build-and-run-cachecompat-tests.yaml
@@ -57,6 +63,8 @@ jobs: #Build and stage projects
       demands:
       - msbuild
       - visualstudio
+  variables:
+      runCodesignValidationInjection: false
 
   steps:
   - template: template-desktop-unit-and-automation.yaml
@@ -68,6 +76,8 @@ jobs: #Build and stage projects
   - 'BuildAndroidAppCenterApp'
   pool:
     vmImage: 'windows-latest'
+  variables:
+    runCodesignValidationInjection: false
 
   steps:
   - template: template-android-appcenter-tests.yaml
@@ -81,6 +91,8 @@ jobs: #Build and stage projects
   - 'BuildiOSAppCenterApp'
   pool:
     vmImage: 'windows-latest'
+  variables:
+    runCodesignValidationInjection: false
 
   steps:
   - template: template-ios-appcenter-tests.yaml
@@ -97,6 +109,8 @@ jobs: #Build and stage projects
   pool:
       name: DevEx Win8 Automation
       demands: VisualStudio2019 -equals 2019
+  variables:
+      runCodesignValidationInjection: false
 
   steps:
   # Install KeyVault secrets

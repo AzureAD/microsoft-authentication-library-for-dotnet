@@ -61,6 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 
+                    Metrics.IncrementTotalAccessTokensFromCache();
                     return new AuthenticationResult(
                         msalAccessTokenItem,
                         msalIdTokenItem,
@@ -143,7 +144,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return dict;
         }
 
-        protected override KeyValuePair<string, string>? GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
+        protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
             return null;
         }

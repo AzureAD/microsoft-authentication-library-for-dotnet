@@ -519,6 +519,8 @@ namespace Microsoft.Identity.Client
 
         private async Task<IEnumerable<MsalAccessTokenCacheItem>> FilterByEnvironmentAsync(AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> filteredItems)
         {
+            var logger = requestParams.RequestContext.Logger;
+            
             // at this point we need env aliases, try to get them without a discovery call
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                                      requestParams.AuthorityInfo,
@@ -536,6 +538,11 @@ namespace Microsoft.Identity.Client
 
             if (filteredByPreferredAlias.Any())
             {
+                if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    logger.Verbose($"Filtered by preferred alias returning {filteredByPreferredAlias.Count()} tokens");
+                }
+
                 return filteredByPreferredAlias;
             }
 
