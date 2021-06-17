@@ -19,13 +19,13 @@ namespace App1
     /// This is a wrapper for Android
     /// It can be further extended to support Android only scanarios
     /// </summary>
-    public class AndroidWrapper : INativeWrapper
+    public class AndroidWrapper : IAndroidWrapper
     {
         /// <summary>
         /// This is set programatically for PoC
         /// It can be just get property that will retreive the current activity
         /// </summary>
-        public Activity Current { get; set; } 
+        public Activity CurrentActivity { get; set; } 
 
         // PCA
         IMultipleAccountPublicClientApplication _mpca;
@@ -63,8 +63,7 @@ namespace App1
                 },
                 onErrorAction: (ex) =>
                 {
-                    // throw any excpetion
-                    throw ex;
+                    tcsResult.SetException(ex);
                 },
                 onSuccessAction: (result) =>
                 {
@@ -73,7 +72,7 @@ namespace App1
                 });
 
             // now call the method to acquire token
-            _mpca.AcquireToken(Current, scopes, interactiveCallback);
+            _mpca.AcquireToken(CurrentActivity, scopes, interactiveCallback);
             return tcsResult.Task;
         }
 

@@ -82,9 +82,7 @@ namespace App1
                     {
                         LogMessage("PCA created!");
                         _ipca = pca;
-                        _nativeWrapper = new AndroidWrapper();
-                        _nativeWrapper.Init(_ipca);
-                        ((AndroidWrapper)_nativeWrapper).Current = this;
+                        InitWrapper();
                         LoadAccount();
                     },
                     onExceptionAction: (ex) =>
@@ -94,6 +92,16 @@ namespace App1
 
             LogMessage("Finished OnInit");
 
+        }
+
+        /// <summary>
+        /// Initializes the AndroidWrapper
+        /// </summary>
+        private void InitWrapper()
+        {
+            _nativeWrapper = new AndroidWrapper();
+            _nativeWrapper.Init(_ipca);
+            ((AndroidWrapper)_nativeWrapper).CurrentActivity = this;
         }
 
         private void ShowPopupMenu_Click(object sender, EventArgs e)
