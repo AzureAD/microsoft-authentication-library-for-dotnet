@@ -37,15 +37,15 @@ namespace Microsoft.Identity.Client.Cache
 
         void DeleteAccount(MsalAccountCacheKey cacheKey);
 
-        IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens();
+        IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens();
 
-        IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens();
+        IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens();
 
-        IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens();
+        IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens();
 
-        IEnumerable<MsalAccountCacheItem> GetAllAccounts();
+        IReadOnlyList<MsalAccountCacheItem> GetAllAccounts();
 
-        IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata();
+        IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata();
 
 
 #if iOS
