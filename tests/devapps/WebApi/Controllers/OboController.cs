@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Internal.Logger;
+using WebApi.Misc;
 
 namespace WebApi.Controllers
 {
@@ -21,8 +22,7 @@ namespace WebApi.Controllers
         }
 
         static TraceSource s_traceSource = new TraceSource("OBO.Test", SourceLevels.Verbose);
-        static InMemoryPartitionedCacheSerializer s_inMemoryPartitionedCacheSerializer =
-                 new InMemoryPartitionedCacheSerializer(new NullLogger(), cacheAccessPenaltyMs: Settings.CacheAccessPenaltyMs);
+        static DistributedCacheWithDelay s_distributedCacheWithDelay = new DistributedCacheWithDelay(Settings.CacheAccessPenaltyMs);
 
         Random _random = new Random();
 
@@ -64,7 +64,7 @@ namespace WebApi.Controllers
 
             var user = $"user_{_random.Next(refreshFlow ? Settings.NumberOfUsersRefreshFlow : Settings.NumberOfUsers)}";
 
-            s_inMemoryPartitionedCacheSerializer.Initialize(cca.UserTokenCache as TokenCache);
+            s_distributedCacheWithDelay.Initialize(cca.UserTokenCache as TokenCache);
 
             string fakeUpstreamToken = $"upstream_token_{user}";
 
