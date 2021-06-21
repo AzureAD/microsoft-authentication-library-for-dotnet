@@ -1,9 +1,9 @@
 4.33.0
 ==========
 ### New Features
-**OBO now performs refresh token flow** eliminating AcquireTokenSilent/ GetAccounts from OBO scenario. See issue [#2623](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2623)
-**Added monitoring flags for global stats**. See issue [#2646](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2646)
-**MSAL now provide routing information to CCS**. See issue [#2525](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525)
+**On-Behalf-Of flow logic now performs refresh token flow** eliminating the need to call `AcquireTokenSilent` and `GetAccounts` in OBO scenarios. See issue [#2623](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2623).
+**Added monitoring flags for global stats**. See issue [#2646](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2646).
+**MSAL.NET adds CCS routing information for interactive requests using client info.**. See issue [#2525](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525) and PR [#2687](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2687).
 
 4.32.1
 ==========
