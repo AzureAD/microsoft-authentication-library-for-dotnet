@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
             _logger.Verbose($"[InMemoryPartitionedTokenCache] RemoveKeyAsync cacheKey {cacheKey} success {removed}");
         }
 
-        protected override async void WriteCacheBytes(string cacheKey, byte[] bytes)
+        protected override void WriteCacheBytes(string cacheKey, byte[] bytes)
         {
             // As per https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2?redirectedfrom=MSDN&view=net-5.0#remarks
             // the indexer is ok to store a key/value pair unconditionally
