@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Cache
                     };
 
                     _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Waiting for cache semaphore");
-                    await TokenCacheInternal.Semaphore.WaitAsync().ConfigureAwait(false);
+                    await TokenCacheInternal.Semaphore.WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
                     _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Entered cache semaphore");
 
                     Stopwatch stopwatch = new Stopwatch();

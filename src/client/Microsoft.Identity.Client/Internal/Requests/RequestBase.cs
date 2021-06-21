@@ -313,24 +313,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
         {
             if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
-            {
-                int appHashCode = authenticationRequestParameters.AppConfig.GetHashCode();
+            {                
                 string scopes = authenticationRequestParameters.Scope.AsSingleString();
                 string messageWithPii = string.Format(
                     CultureInfo.InvariantCulture,
-                    "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tAppHashCode: {4}",
+                    "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t",
                     authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
                     scopes,
                     authenticationRequestParameters.AppConfig.ClientId,
-                    GetType().Name,
-                    appHashCode);
+                    GetType().Name);
 
                 string messageWithoutPii = string.Format(
                     CultureInfo.InvariantCulture,
-                    "=== Token Acquisition ({0}) started:\n\t Scopes: {1} AppHashCode: {2}",
+                    "=== Token Acquisition ({0}) started:\n\t Scopes: {1}",
                     GetType().Name,
-                    scopes,
-                    appHashCode);
+                    scopes);
 
                 if (authenticationRequestParameters.AuthorityInfo != null &&
                     KnownMetadataProvider.IsKnownEnvironment(authenticationRequestParameters.AuthorityInfo?.Host))
