@@ -320,6 +320,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams)
         {
             var logger = requestParams.RequestContext.Logger;
+
             // no authority passed
             if (requestParams.AuthorityInfo?.CanonicalAuthority == null)
             {
@@ -329,26 +330,29 @@ namespace Microsoft.Identity.Client
 
             // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
             // as this method is NOT locked by the semaphore
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true).ToList();            
+            IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
+            if (tokenCacheItems.Count == 0)
+            {
+                logger.Verbose("No access tokens found in the cache. Skipping filtering. ");
+                requestParams.RequestContext.ApiEvent.CacheInfo = (int)CacheInfoTelemetry.NoCachedAT;
+                return null;
+            }
 
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByScopes(requestParams, tokenCacheItems);
-            tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);
-
-            // perf: take a snapshot as calling Count(), Any() etc. on the IEnumerable evaluates it each time
-            IReadOnlyList<MsalAccessTokenCacheItem> finalList = tokenCacheItems.ToList();
+            tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);                       
 
             CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
 
             // no match
-            if (finalList.Count == 0)
+            if (tokenCacheItems.Count == 0)
             {
                 logger.Verbose("No tokens found for matching authority, client_id, user and scopes. ");
                 return null;
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, finalList);
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, tokenCacheItems);
             msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
             msalAccessTokenCacheItem = FilterByExpiry(msalAccessTokenCacheItem, requestParams);
 
@@ -362,11 +366,17 @@ namespace Microsoft.Identity.Client
             return msalAccessTokenCacheItem; 
         }
 
-        private static IEnumerable<MsalAccessTokenCacheItem> FilterByScopes(
+        private static IReadOnlyList<MsalAccessTokenCacheItem> FilterByScopes(
             AuthenticationRequestParameters requestParams,
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
+            IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems)
         {
             var logger = requestParams.RequestContext.Logger;
+            if (tokenCacheItems.Count == 0)
+            {
+                logger.Verbose("Not filtering by scopes, because there are no candidates");
+                return tokenCacheItems;
+            }
+
             var requestScopes = requestParams.Scope.Where(s =>
                 !OAuth2Value.ReservedScopes.Contains(s));
 
@@ -387,7 +397,9 @@ namespace Microsoft.Identity.Client
             return tokenCacheItems;
         }
 
-        private static IEnumerable<MsalAccessTokenCacheItem> FilterByTokenType(AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
+        private static IReadOnlyList<MsalAccessTokenCacheItem> FilterByTokenType(
+            AuthenticationRequestParameters requestParams, 
+            IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems)
         {
             tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
                             string.Equals(
@@ -399,20 +411,21 @@ namespace Microsoft.Identity.Client
             return tokenCacheItems;
         }
 
-        private static IEnumerable<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(
+        private static IReadOnlyList<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(
             AuthenticationRequestParameters requestParams,
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
+            IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems)
         {
             string requestTenantId = requestParams.Authority.TenantId;
             bool filterByTenantId = true;
 
             if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
             {
-                tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
-                                !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
-                                requestParams.RequestContext.Logger,
-                                $"Filtering by user assertion: {requestParams.UserAssertion.AssertionHash}");
+                tokenCacheItems = 
+                    tokenCacheItems.FilterWithLogging(item =>
+                        !string.IsNullOrEmpty(item.UserAssertionHash) &&
+                        item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                        requestParams.RequestContext.Logger,
+                        $"Filtering AT by user assertion: {requestParams.UserAssertion.AssertionHash}");
 
                 // OBO calls FindAccessTokenAsync directly, but we are not able to resolve the authority 
                 // unless the developer has configured a tenanted authority. If they have configured /common
@@ -427,7 +440,7 @@ namespace Microsoft.Identity.Client
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
                     string.Equals(item.TenantId ?? string.Empty, requestTenantId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
                     requestParams.RequestContext.Logger,
-                    "Filtering by tenant id");
+                    "Filtering AT by tenant id");
             }
             else
             {
@@ -443,7 +456,7 @@ namespace Microsoft.Identity.Client
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
                                 requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
-                                "Filtering by home account id");
+                                "Filtering AT by home account id");
             }
 
             return tokenCacheItems;
@@ -511,15 +524,23 @@ namespace Microsoft.Identity.Client
                 return filteredItems[0];
             }
 
-            requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes. ");
+            requestParams.RequestContext.Logger.Error("Multiple access tokens found for matching authority, client_id, user and scopes. ");
             throw new MsalClientException(
                 MsalError.MultipleTokensMatchedError,
                 MsalErrorMessage.MultipleTokensMatched);
         }
 
-        private async Task<IEnumerable<MsalAccessTokenCacheItem>> FilterByEnvironmentAsync(AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> filteredItems)
+        private async Task<IReadOnlyList<MsalAccessTokenCacheItem>> FilterByEnvironmentAsync(
+            AuthenticationRequestParameters requestParams, 
+            IReadOnlyList<MsalAccessTokenCacheItem> filteredItems)
         {
             var logger = requestParams.RequestContext.Logger;
+
+            if (filteredItems.Count == 0)
+            {
+                logger.Verbose("Not filtering AT by env, because there are no candidates");
+                return filteredItems;
+            }
             
             // at this point we need env aliases, try to get them without a discovery call
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
@@ -534,13 +555,13 @@ namespace Microsoft.Identity.Client
             var filteredByPreferredAlias = filteredItems.FilterWithLogging(
                 item => item.Environment.Equals(instanceMetadata.PreferredCache, StringComparison.OrdinalIgnoreCase),
                 requestParams.RequestContext.Logger,
-                $"Filtering by preferred environment {instanceMetadata.PreferredCache}");
+                $"Filtering AT by preferred environment {instanceMetadata.PreferredCache}");
 
-            if (filteredByPreferredAlias.Any())
+            if (filteredByPreferredAlias.Count > 0)
             {
                 if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    logger.Verbose($"Filtered by preferred alias returning {filteredByPreferredAlias.Count()} tokens");
+                    logger.Verbose($"Filtered AT by preferred alias returning {filteredByPreferredAlias.Count} tokens");
                 }
 
                 return filteredByPreferredAlias;
@@ -549,7 +570,7 @@ namespace Microsoft.Identity.Client
             return filteredItems.FilterWithLogging(
                 item => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(item.Environment),
                 requestParams.RequestContext.Logger,
-                $"Filtering by environment");
+                $"Filtering AT by environment");
         }
 
         private MsalAccessTokenCacheItem FilterByKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
@@ -588,35 +609,49 @@ namespace Microsoft.Identity.Client
             if (requestParams.Authority == null)
                 return null;
 
-            IEnumerable<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens();
-
-            var metadata =
-                await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                    requestParams.AuthorityInfo,
-                    allRts.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
-                    requestParams.RequestContext)
-                .ConfigureAwait(false);
-            var aliases = metadata.Aliases;
-
-            allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
-            allRts = allRts.Where(
-                item => aliases.ContainsOrdinalIgnoreCase(item.Environment));
-
-            IReadOnlyList<MsalRefreshTokenCacheItem> finalList = allRts.ToList();
-            requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (finalList.Count() != 0));
-
-            if (finalList.Count > 0)
+            IReadOnlyList<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens();
+            if (allRts.Count != 0)
             {
-                return finalList.FirstOrDefault();
+                var metadata =
+                    await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                        requestParams.AuthorityInfo,
+                        allRts.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
+                        requestParams.RequestContext)
+                    .ConfigureAwait(false);
+                var aliases = metadata.Aliases;
+
+                allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
+                allRts = allRts.Where(
+                    item => aliases.ContainsOrdinalIgnoreCase(item.Environment)).ToList();
+
+                IReadOnlyList<MsalRefreshTokenCacheItem> finalList = allRts.ToList();
+                requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (finalList.Count != 0));
+
+                if (finalList.Count > 0)
+                {
+                    return finalList.FirstOrDefault();
+                }
+            }
+            else
+            {
+                requestParams.RequestContext.Logger.Verbose("No RTs found in the MSAL cache ");
             }
 
-            requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
+            requestParams.RequestContext.Logger.Verbose("Checking ADAL cache for matching RT. ");
 
             // ADAL legacy cache does not store FRTs
             if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled &&
                 requestParams.Account != null &&
                 string.IsNullOrEmpty(familyId))
             {
+                var metadata =
+                  await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                      requestParams.AuthorityInfo,
+                      allRts.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
+                      requestParams.RequestContext)
+                  .ConfigureAwait(false);
+                var aliases = metadata.Aliases;
+
                 return CacheFallbackOperations.GetRefreshToken(
                     Logger,
                     LegacyCachePersistence,
@@ -628,9 +663,9 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        private static IEnumerable<MsalRefreshTokenCacheItem> FilterRtsByHomeAccountIdOrAssertion(
+        private static IReadOnlyList<MsalRefreshTokenCacheItem> FilterRtsByHomeAccountIdOrAssertion(
             AuthenticationRequestParameters requestParams,
-            IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems,
+            IReadOnlyList<MsalRefreshTokenCacheItem> rtCacheItems,
             string familyId)
         {
             if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
@@ -639,14 +674,14 @@ namespace Microsoft.Identity.Client
                                 !string.IsNullOrEmpty(item.UserAssertionHash) &&
                                 item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
-                                $"Filtering by user assertion: {requestParams.UserAssertion.AssertionHash}");
+                                $"Filtering RT by user assertion: {requestParams.UserAssertion.AssertionHash}");
             }
             else
             {
                 rtCacheItems = rtCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
                                 requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
-                                "Filtering by home account id");
+                                "Filtering RT by home account id");
             }
 
             // This will also filter for the case when familyId is null and exclude RTs with familyId in filtered list
@@ -654,7 +689,7 @@ namespace Microsoft.Identity.Client
                     string.Equals(item.FamilyId ?? string.Empty,
                     familyId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
                     requestParams.RequestContext.Logger,
-                    "Filtering by family id");
+                    "Filtering RT by family id");
 
             // if there is a value in familyId, we are looking for FRT and hence ignore filter with clientId
             if (string.IsNullOrEmpty(familyId))
@@ -662,7 +697,7 @@ namespace Microsoft.Identity.Client
                 rtCacheItems = rtCacheItems.FilterWithLogging(item => item.ClientId.Equals(
                             requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
                             requestParams.RequestContext.Logger,
-                            "Filtering by client id");
+                            "Filtering RT by client id");
             } 
 
             return rtCacheItems;
@@ -719,11 +754,11 @@ namespace Microsoft.Identity.Client
             var environment = requestParameters.AuthorityInfo.Host;
             bool filterByClientId = !_featureFlags.IsFociEnabled;
 
-            IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);
-            IEnumerable<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
+            IReadOnlyList<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);
+            IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
-                logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache. ");
+                logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
 
             // Multi-cloud support - must filter by env.
             ISet<string> allEnvironmentsInCache = new HashSet<string>(
@@ -747,11 +782,11 @@ namespace Microsoft.Identity.Client
                 allEnvironmentsInCache,
                 requestParameters.RequestContext).ConfigureAwait(false);
 
-            rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment));
-            accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+            rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment)).ToList();
+            accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment)).ToList();
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
-                logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache after environment filtering. ");
+                logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
             foreach (MsalRefreshTokenCacheItem rtItem in rtCacheItems)
@@ -931,7 +966,7 @@ namespace Microsoft.Identity.Client
 
         bool ITokenCacheInternal.HasTokensNoLocks()
         {
-            return _accessor.GetAllRefreshTokens().Any() ||
+            return _accessor.GetAllRefreshTokens().Count > 0 ||
                 _accessor.GetAllAccessTokens().Any(at => !IsAtExpired(at));
         }
 
