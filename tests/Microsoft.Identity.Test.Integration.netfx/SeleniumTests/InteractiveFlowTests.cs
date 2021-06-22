@@ -357,44 +357,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
 #if DESKTOP // no point in running these tests on NetCore - the code path is similar
-
-        [TestMethod]
-        [TestCategory(TestCategories.Arlington)]
-        public async Task Kerberos_Arlington_Interactive_AADAsync()
-        {
-            // Arrange
-            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken, false).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken, false).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.MSA)]
-        public async Task Kerberos_Interactive_MsaUser_Async()
-        {
-            // Arrange
-            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
-
-        [TestMethod]
-        public async Task Kerberos_Interactive_AdfsV3_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task Kerberos_Interactive_AdfsV2_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV2, true).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
         [TestMethod]
         public async Task Kerberos_Interactive_AdfsV4_FederatedAsync()
         {
@@ -403,45 +365,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        public async Task Kerberos_InteractiveConsentPromptAsync()
-        {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-
-            await KerberosRunPromptTestForUserAsync(labResponse, Prompt.Consent, true, KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosRunPromptTestForUserAsync(labResponse, Prompt.Consent, false, KerberosTicketContainer.IdToken).ConfigureAwait(false);
-
-            await KerberosRunPromptTestForUserAsync(labResponse, Prompt.Consent, true, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-            await KerberosRunPromptTestForUserAsync(labResponse, Prompt.Consent, false, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task Kerberos_Interactive_AdfsV2019_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.Arlington)]
-        public async Task Kerberos_Arlington_Interactive_AdfsV2019_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken, false).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken, false).ConfigureAwait(false);
-        }
-
 #endif
-
-        [TestMethod]
-        [TestCategory(TestCategories.ADFS)]
-        public async Task Kerberos_Interactive_AdfsV2019_DirectAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken, true).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken, true).ConfigureAwait(false);
-        }
 
         private async Task<AuthenticationResult> KerberosRunTestForUserAsync(LabResponse labResponse, KerberosTicketContainer ticketContainer, bool directToAdfs = false)
         {
@@ -454,6 +378,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
                     .WithAdfsAuthority(Adfs2019LabConstants.Authority)
                     .WithTestLogging()
+                    .WithTenantId(labResponse.Lab.TenantId)
+                    .WithClientId(TestConstants.KerberosTestApplicationId)
                     .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer)
                     .Build();
             }
@@ -464,6 +390,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .WithAuthority(labResponse.Lab.Authority + "common")
                     .WithTestLogging(out factory)
+                    .WithTenantId(labResponse.Lab.TenantId)
+                    .WithClientId(TestConstants.KerberosTestApplicationId)
                     .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer)
                     .Build();
             }

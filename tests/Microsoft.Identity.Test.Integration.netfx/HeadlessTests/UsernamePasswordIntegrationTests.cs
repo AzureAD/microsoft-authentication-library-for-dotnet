@@ -270,7 +270,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             AuthenticationResult authResult
-                = await GetAuthenticationResultWithAssertAsync(labResponse, factory, msalPublicClient, federationMetadata).ConfigureAwait(false);
+                = await GetAuthenticationResultWithAssertAsync(
+                    labResponse,
+                    factory,
+                    msalPublicClient,
+                    federationMetadata,
+                    CorrelationId).ConfigureAwait(false);
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
@@ -285,11 +290,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             LabResponse labResponse,
             HttpSnifferClientFactory factory,
             IPublicClientApplication msalPublicClient,
-            string federationMetadata)
+            string federationMetadata,
+            Guid testCorrelationId)
         {
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
-                .WithCorrelationId(CorrelationId)
+                .WithCorrelationId(testCorrelationId)
                 .WithFederationMetadata(federationMetadata)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
@@ -366,22 +372,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [TestCategory(TestCategories.Arlington)]
-        public async Task Kerberos_ARLINGTON_ROPC_AAD_Async()
-        {
-            var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.Arlington)]
-        public async Task Kerberos_ARLINGTON_ROPC_ADFS_Async()
-        {
-            var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [TestMethod]
         public async Task Kerberos_ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -396,68 +386,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await KerberosRunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        public async Task Kerberos_ROPC_ADFSv3Federated_Async()
-        {
-            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
-            await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.ADFS)]
-        public async Task KerberosAcquireTokenFromAdfsUsernamePasswordAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
-
-            // Test with Id Token.
-            AuthenticationResult authResult
-                = await GetAuthenticationResultFromAdfsUsernamePasswordAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            TestCommon.GetValidatedKerberosTicketFromToken(authResult.IdToken, labResponse.User.Upn);
-            TestCommon.ValidateNoKerberosTicketFromToken(authResult.AccessToken);
-
-            // Test with Access Token.
-            authResult
-                = await GetAuthenticationResultFromAdfsUsernamePasswordAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-            TestCommon.ValidateNoKerberosTicketFromToken(authResult.IdToken);
-            TestCommon.GetValidatedKerberosTicketFromToken(authResult.AccessToken, labResponse.User.Upn);
-        }
-
-        private async Task<AuthenticationResult> GetAuthenticationResultFromAdfsUsernamePasswordAsync(
-            LabResponse labResponse,
-            KerberosTicketContainer container)
-        {
-            SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
-
-            var msalPublicClient = PublicClientApplicationBuilder
-                .Create(Adfs2019LabConstants.PublicClientId)
-                .WithAdfsAuthority(Adfs2019LabConstants.Authority)
-                .WithTestLogging()
-                .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, container)
-                .Build();
-
-            AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.IsNotNull(authResult);
-            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNotNull(authResult.IdToken);
-
-            return authResult;
-        }
-
         private async Task KerberosRunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
         {
-            var factory = new HttpSnifferClientFactory();
-
             // Test with Id token
+            var factory = new HttpSnifferClientFactory();
             var idTokenPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithTestLogging()
                 .WithHttpClientFactory(factory)
                 .WithAuthority(labResponse.Lab.Authority, "organizations")
+                .WithClientId(TestConstants.KerberosTestApplicationId)
                 .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, KerberosTicketContainer.IdToken)
                 .Build();
 
@@ -465,8 +403,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 labResponse,
                 factory,
                 idTokenPublicClient,
-                federationMetadata).ConfigureAwait(false);
-
+                federationMetadata,
+                Guid.NewGuid()).ConfigureAwait(false);
             KerberosSupplementalTicket ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
                 authResult,
                 KerberosTicketContainer.IdToken,
@@ -475,11 +413,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
 
             // Test with Access Token
+            factory = new HttpSnifferClientFactory();
             var accessTokenPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithTestLogging()
                 .WithHttpClientFactory(factory)
                 .WithAuthority(labResponse.Lab.Authority, "organizations")
+                .WithClientId(TestConstants.KerberosTestApplicationId)
                 .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, KerberosTicketContainer.AccessToken)
                 .Build();
 
@@ -487,8 +427,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 labResponse,
                 factory,
                 accessTokenPublicClient,
-                federationMetadata).ConfigureAwait(false);
-
+                federationMetadata,
+                Guid.NewGuid()).ConfigureAwait(false);
             ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
                 authResult,
                 KerberosTicketContainer.AccessToken,

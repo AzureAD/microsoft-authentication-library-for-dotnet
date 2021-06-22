@@ -136,57 +136,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
         }
 
-        // same code path between .net fwk and .net core, so run only once
-#if DESKTOP
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.Arlington)]
-        public async Task KerberosArlingtonDeviceCodeFlowTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.ADFS)]
-        public async Task KerberosDeviceCodeFlowAdfsTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
-
-            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user", KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.Arlington)]
-        public async Task KerberosArlingtonDeviceCodeFlowAdfsTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user", KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.MSA)]
-        [Ignore] // Failing sporadically https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1045664 
-        public async Task KerberosDeviceCodeFlowMsaTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-
-            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user", KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-#endif
-
         private async Task KerberosAcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType, KerberosTicketContainer ticketContainer)
         {
             Trace.WriteLine($"Calling KerberosAcquireTokenWithDeviceCodeFlowAsync with {0}", userType);
             var builder = PublicClientApplicationBuilder.Create(labResponse.App.AppId)
                 .WithTestLogging()
+                .WithTenantId(labResponse.Lab.TenantId)
+                .WithClientId(TestConstants.KerberosTestApplicationId)
                 .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer);
 
             switch (labResponse.User.AzureEnvironment)
