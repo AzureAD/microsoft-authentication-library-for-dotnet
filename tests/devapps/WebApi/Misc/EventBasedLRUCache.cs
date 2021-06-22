@@ -376,11 +376,11 @@ namespace WebApi.Misc
             _cache = cache;
         }
 
-        protected override Task<byte[]> ReadCacheBytesAsync(string cacheKey)
+        protected override byte[] ReadCacheBytes(string cacheKey)
         {
             if (_cache.TryGetValue(cacheKey, out byte[] val))
             {
-                return Task.FromResult(val);
+                return val;
             }
             return null;
         }

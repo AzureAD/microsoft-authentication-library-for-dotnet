@@ -14,23 +14,16 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
         : AbstractPartitionedCacheSerializer
     {
         internal /* internal for test only */ ConcurrentDictionary<string, byte[]> CachePartition { get; }
-        internal /* internal for test only */ int CacheAccessPenaltyMs { get; }
         private readonly ICoreLogger _logger;
 
-        public InMemoryPartitionedCacheSerializer(ICoreLogger logger, ConcurrentDictionary<string, byte[]> dictionary = null, int cacheAccessPenaltyMs = 0)
+        public InMemoryPartitionedCacheSerializer(ICoreLogger logger, ConcurrentDictionary<string, byte[]> dictionary = null)
         {
             CachePartition = dictionary ?? new ConcurrentDictionary<string, byte[]>();
-            CacheAccessPenaltyMs = cacheAccessPenaltyMs;
             _logger = logger;
         }
 
-        protected override async Task<byte[]> ReadCacheBytesAsync(string cacheKey)
+        protected override byte[] ReadCacheBytes(string cacheKey)
         {
-            if (CacheAccessPenaltyMs > 0)
-            {
-                await Task.Delay(CacheAccessPenaltyMs).ConfigureAwait(false);
-            }
-
             if (CachePartition.TryGetValue(cacheKey, out byte[] blob))
             {
                 _logger.Verbose($"[InMemoryPartitionedTokenCache] ReadCacheBytes found cacheKey {cacheKey}");
@@ -48,13 +41,8 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
             _logger.Verbose($"[InMemoryPartitionedTokenCache] RemoveKeyAsync cacheKey {cacheKey} success {removed}");
         }
 
-        protected override async void WriteCacheBytes(string cacheKey, byte[] bytes)
+        protected override void WriteCacheBytes(string cacheKey, byte[] bytes)
         {
-            if (CacheAccessPenaltyMs > 0)
-            {
-                await Task.Delay(CacheAccessPenaltyMs).ConfigureAwait(false);
-            }
-
             // As per https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2?redirectedfrom=MSDN&view=net-5.0#remarks
             // the indexer is ok to store a key/value pair unconditionally
             if (_logger.IsLoggingEnabled(LogLevel.Verbose))
