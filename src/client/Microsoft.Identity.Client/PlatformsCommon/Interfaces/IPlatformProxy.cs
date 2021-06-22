@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.UI;
 
@@ -19,7 +17,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
     internal interface IPlatformProxy
     {
         /// <summary>
-        /// Gets the device model. On some TFMs this is not returned for security reasonons.
+        /// Gets the device model. On some TFMs this is not returned for security reasons.
         /// </summary>
         /// <returns>device model or null</returns>
         string GetDeviceModel();
@@ -29,7 +27,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         string GetProcessorArchitecture();
 
         /// <summary>
-        /// Gets the upn of the user currently logged into the OS
+        /// Gets the UPN of the user currently logged into the OS
         /// </summary>
         /// <returns></returns>
         Task<string> GetUserPrincipalNameAsync();
@@ -53,11 +51,21 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         string GetDeviceId();
 
         /// <summary>
-        /// Gets the default redirect uri for the platform, which sometimes includes the clientId
+        /// Gets the default redirect URI for the platform, which sometimes includes the clientId
         /// </summary>
         string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false);
 
+        /// <summary>
+        /// Returns the MSAL platform, e.g. MSAL.NetCore, MSAL.Desktop.
+        /// </summary>
+        /// <returns></returns>
         string GetProductName();
+
+        /// <summary>
+        /// Returns the framework runtime version on which the app is running, e.g. .NET Core 3.1.3, .NET Framework 4.8.
+        /// </summary>
+        /// <returns>Runtime version</returns>
+        string GetRuntimeVersion();
 
         ILegacyCachePersistence CreateLegacyCachePersistence();
 
@@ -84,7 +92,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         void /* for test */ SetFeatureFlags(IFeatureFlags featureFlags);
 
         /// <summary>
-        /// Go to a Url using the OS default browser. 
+        /// Go to a URL using the OS default browser. 
         /// </summary>
         Task StartDefaultOsBrowserAsync(string url);
 

@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class MsalLogger : ICoreLogger
     {
-        private readonly IPlatformLogger _platformLogger;
+        private readonly IPlatformProxy _platformProxy;
         private readonly LogCallback _loggingCallback;
         private readonly LogLevel _minLogLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _minLogLevel = logLevel;
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
 
-            _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
+            _platformProxy = PlatformProxyFactory.CreatePlatformProxy(null);
             ClientName = clientName ?? string.Empty;
             ClientVersion = clientVersion ?? string.Empty;
 
@@ -171,35 +171,34 @@ namespace Microsoft.Identity.Client.Internal.Logger
             return "Unknown SKU";
         });
 
-        private static Lazy<string> s_versionLazy = new Lazy<string>(() => MsalIdHelper.GetMsalVersion());
+        private static Lazy<string> s_msalVersionLazy = new Lazy<string>(() => MsalIdHelper.GetMsalVersion());
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
             if (IsLoggingEnabled(logLevel))
-            {               
-
+            {
                 bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
                 // If we have a message with PII, and PII logging is enabled, use the PII message, else use the scrubbed message.
                 bool isLoggingPii = messageWithPiiExists && PiiLoggingEnabled;
                 string messageToLog = isLoggingPii ? messageWithPii : messageScrubbed;
 
-                string log = $"{isLoggingPii} MSAL {s_versionLazy.Value} {s_skuLazy.Value} {s_osLazy.Value} [{DateTime.UtcNow.ToString("MM/dd HH:mm:ss.ff")}{_correlationId}]{ClientInformation} {messageToLog}";                    
+                string log = $"{isLoggingPii} MSAL {s_msalVersionLazy.Value} {s_skuLazy.Value} {_platformProxy.GetRuntimeVersion()} {s_osLazy.Value} [{DateTime.UtcNow.ToString("MM/dd HH:mm:ss.ff")}{_correlationId}]{ClientInformation} {messageToLog}";
 
                 if (_isDefaultPlatformLoggingEnabled)
                 {
                     switch (logLevel)
                     {
                         case LogLevel.Error:
-                            _platformLogger.Error(log);
+                            _platformProxy.PlatformLogger.Error(log);
                             break;
                         case LogLevel.Warning:
-                            _platformLogger.Warning(log);
+                            _platformProxy.PlatformLogger.Warning(log);
                             break;
                         case LogLevel.Info:
-                            _platformLogger.Information(log);
+                            _platformProxy.PlatformLogger.Information(log);
                             break;
                         case LogLevel.Verbose:
-                            _platformLogger.Verbose(log);
+                            _platformProxy.PlatformLogger.Verbose(log);
                             break;
                     }
                 }

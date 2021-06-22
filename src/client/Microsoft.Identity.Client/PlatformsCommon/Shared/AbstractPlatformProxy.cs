@@ -7,7 +7,6 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
@@ -25,6 +24,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private readonly Lazy<IPlatformLogger> _platformLogger;
         private readonly Lazy<string> _processorArchitecture;
         private readonly Lazy<string> _productName;
+        private readonly Lazy<string> _runtimeVersion;
 
         protected AbstractPlatformProxy(ICoreLogger logger)
         {
@@ -38,7 +38,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             _productName = new Lazy<string>(InternalGetProductName);
             _cryptographyManager = new Lazy<ICryptographyManager>(InternalGetCryptographyManager);
             _platformLogger = new Lazy<IPlatformLogger>(InternalGetPlatformLogger);
-        }      
+            _runtimeVersion = new Lazy<string>(InternalGetRuntimeVersion);
+        }
 
         protected IFeatureFlags OverloadFeatureFlags { get; set; }
 
@@ -49,7 +50,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return appConfig.WebUiFactoryCreator != null ?
               appConfig.WebUiFactoryCreator() :
-              CreateWebUiFactory();            
+              CreateWebUiFactory();
         }
 
         /// <inheritdoc />
@@ -101,6 +102,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <inheritdoc />
+        public string GetRuntimeVersion()
+        {
+            return _runtimeVersion.Value;
+        }
+
+        /// <inheritdoc />
         public abstract ILegacyCachePersistence CreateLegacyCachePersistence();
 
         /// <inheritdoc />
@@ -112,11 +119,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <inheritdoc />
         public IPlatformLogger PlatformLogger => _platformLogger.Value;
 
-
         protected abstract IWebUIFactory CreateWebUiFactory();
         protected abstract IFeatureFlags CreateFeatureFlags();
-
-
 
         protected abstract string InternalGetDeviceModel();
         protected abstract string InternalGetOperatingSystem();
@@ -127,6 +131,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected abstract string InternalGetProductName();
         protected abstract ICryptographyManager InternalGetCryptographyManager();
         protected abstract IPlatformLogger InternalGetPlatformLogger();
+
+        // RuntimeInformation.FrameworkDescription is available on all platforms except .NET Framework 4.7 and lower.
+        protected virtual string InternalGetRuntimeVersion() => DesktopOsHelper.GetRuntimeVersion();
 
         public virtual ICacheSerializationProvider CreateTokenCacheBlobStorage()
         {
@@ -155,7 +162,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
-            return appConfig.BrokerCreatorFunc != null ? 
+            return appConfig.BrokerCreatorFunc != null ?
                 appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
                 new NullBroker();
         }
