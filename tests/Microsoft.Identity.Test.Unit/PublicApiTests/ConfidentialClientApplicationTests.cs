@@ -1094,13 +1094,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
-                long expectedTimeDiff = 32800;
-                long shortExpectedTimeDiff = 30800;
+                string expectedTimeDiff = "32800";
+                string shortExpectedTimeDiff = "30800";
 
                 //Since the timeDiff is calculated using the DateTimeOffset.Now, there may be a slight variation of a few seconds depending on test environment.
-                int allowedTimeVariation = 10;
+                int allowedTimeVariation = 15;
 
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, expectedTimeDiff.ToString());
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, expectedTimeDiff);
 
                 TokenCacheHelper.PopulateDefaultAppTokenCache(app);
                 app.AppTokenCache.SetAfterAccess((args) => 
@@ -1109,7 +1109,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     {
                         Assert.IsNotNull(args.SuggestedCacheExpiry);
                         var timeDiff = args.SuggestedCacheExpiry.Value.ToUnixTimeSeconds() - DateTimeOffset.Now.ToUnixTimeSeconds();
-                        Assert.IsTrue(Enumerable.Range((int)expectedTimeDiff - allowedTimeVariation, (int)expectedTimeDiff).Contains((int)expectedTimeDiff) );
+
+                        CoreAssert.AreEqual(
+                            CoreHelpers.UnixTimestampStringToDateTime(expectedTimeDiff),
+                            CoreHelpers.UnixTimestampStringToDateTime(timeDiff.ToString()),
+                            TimeSpan.FromSeconds(allowedTimeVariation));
                     }
                 });
 
@@ -1119,14 +1123,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(TestConstants.DefaultAccessToken, result.AccessToken);
 
                 //Using a shorter expiry should not change the SuggestedCacheExpiry. Should be 2 tokens in cache
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, shortExpectedTimeDiff.ToString());
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, shortExpectedTimeDiff);
                 result = await app.AcquireTokenForClient(new[] { "scope1.scope1" }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(TestConstants.DefaultAccessToken, result.AccessToken);
 
                 //Using longer cache expiry should update the SuggestedCacheExpiry with 3 tokens in cache
-                expectedTimeDiff = 10000;
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, expectedTimeDiff.ToString());
+                expectedTimeDiff = "40000";
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, expectedTimeDiff);
                 result = await app.AcquireTokenForClient(new[] { "scope2.scope2" }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(TestConstants.DefaultAccessToken, result.AccessToken);

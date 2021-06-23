@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             var handler = new MockHttpMessageHandler()
             {
                 ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token, expiresIn)
             };
 
             httpManager.AddMockHandler(handler);

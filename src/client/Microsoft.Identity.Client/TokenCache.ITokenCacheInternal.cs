@@ -246,11 +246,11 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private DateTimeOffset? CalculateSuggestedCacheExpiry()
+        private DateTimeOffset CalculateSuggestedCacheExpiry()
         {
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
             var unixCacheExpiry = tokenCacheItems.Max(item => item.ExpiresOnUnixTimestamp);
-            return (DateTimeOffset?)CoreHelpers.UnixTimestampStringToDateTime(unixCacheExpiry);
+            return (DateTimeOffset)CoreHelpers.UnixTimestampStringToDateTime(unixCacheExpiry);
         }
 
         private string GetTenantId(IdToken idToken, AuthenticationRequestParameters requestParams)

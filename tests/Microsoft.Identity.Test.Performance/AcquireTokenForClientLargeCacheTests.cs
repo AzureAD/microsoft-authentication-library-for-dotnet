@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Performance
         private AuthenticationRequestParameters _requestParams;
         private IServiceBundle _serviceBundle;
 
-        [Params(1000)]
+        [Params(10000)]
         public int TokenCacheSize { get; set; }
 
         [GlobalSetup]
@@ -52,12 +52,6 @@ namespace Microsoft.Identity.Test.Performance
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .BuildConcrete();
-
-            PopulateAppCache(_ccaTokensDifferByTenant, TokenDifference.ByTenant, TokenCacheSize);
-
-            _serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isLegacyCacheEnabled: false);
-            _response = TestConstants.CreateMsalTokenResponse(TestConstants.Utid);
-            _requestParams = TestCommon.CreateAuthenticationRequestParameters(_serviceBundle, null, null, null, ApiIds.AcquireTokenForClient);
         }
 
         /// <summary>
@@ -93,15 +87,6 @@ namespace Microsoft.Identity.Test.Performance
               .WithAuthority($"https://login.microsoftonline.com/tid")
               .ExecuteAsync()
               .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// This is a test to validate the performance impact of calculating the TokenCacheNotificationArgs.SuggestedCacheExpiry when saving an access token.
-        /// </summary>
-        [Benchmark(Description = "Token cache expiry - O(n)")]
-        public async Task CaclulateTokenCacheExpiryTestTestAsync()
-        {
-            await _ccaTokensDifferByScope.AppTokenCacheInternal.SaveTokenResponseAsync(_requestParams, _response).ConfigureAwait(false);
         }
 
         private enum TokenDifference
