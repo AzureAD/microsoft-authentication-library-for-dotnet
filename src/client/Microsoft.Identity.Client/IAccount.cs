@@ -33,5 +33,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>Can be null, for example if this account was migrated to MSAL.NET from ADAL.NET v3's token cache</remarks>
         AccountId HomeAccountId { get; }
+
+        /// <summary>
+        /// The same account can exist in its home tenant and also as a guest in multiple other tenants. 
+        /// <c>TenantProfiles</c> maps a tenant ID to its associated tenant profile (that is, information of this account in that tenant).
+        /// </summary>
+        /// <remarks>Only tenants for which a token was acquired will be available in <c>TenantProfiles</c> property</remarks>
+        IDictionary<string, TenantProfile> TenantProfiles { get; }
    }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ROPC_AAD_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse, authorityType: AuthorityType.Aad).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -69,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ARLINGTON_ROPC_AAD_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse, authorityType: AuthorityType.Aad).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -258,7 +259,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.Fail("Bad exception or no exception thrown");
         }
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
+        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "", AuthorityType authorityType = AuthorityType.Adfs)
         {
             var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
@@ -275,6 +276,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     msalPublicClient,
                     federationMetadata,
                     CorrelationId).ConfigureAwait(false);
+
+            if (authorityType == AuthorityType.Aad)
+            {
+                AssertTenantProfiles(authResult.Account.TenantProfiles, authResult.TenantId);
+            }
+
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
@@ -305,15 +312,38 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
             AssertTelemetryHeaders(factory, false, labResponse);
-            AssertCCSRoutingInformationIsSent(factory, labResponse);
+            AssertCcsRoutingInformationIsSent(factory, labResponse);
+            // If test fails with "user needs to consent to the application, do an interactive request" error,
+            // Do the following:
+            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
+            // string password = ((LabUser)user).GetPassword();
+            // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
+            // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
+            // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
+            if (authorityType == AuthorityType.Aad)
+            {
+                AssertTenantProfiles(authResult.Account.TenantProfiles, authResult.TenantId);
+
+            }
 
             return authResult;
         }
 
-        private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
+        private void AssertCcsRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
         {
             var CcsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
             Assert.AreEqual($"x-anchormailbox:upn:{labResponse.User.Upn}", $"{CcsHeader.Key}:{CcsHeader.Value.FirstOrDefault()}");
+        }
+
+        private void AssertTenantProfiles(IDictionary<string, ITenantProfile> tenantProfiles, string tenantId)
+        {
+            Assert.IsNotNull(tenantProfiles);
+            Assert.IsTrue(tenantProfiles.Count > 0);
+
+            ITenantProfile tenantProfile = tenantProfiles[tenantId];
+            Assert.IsNotNull(tenantProfile);
+            Assert.IsNotNull(tenantProfile.ClaimsPrincipal);
+            Assert.IsNotNull(tenantProfile.ClaimsPrincipal.FindFirst(claim => claim.Type == "tid" && claim.Value == tenantId));
         }
 
         private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, LabResponse labResponse)

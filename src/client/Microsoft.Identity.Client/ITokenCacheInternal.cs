@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
@@ -37,6 +38,8 @@ namespace Microsoft.Identity.Client
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(
             AuthenticationRequestParameters requestParams,
             string familyId = null);
+
+        Task<IDictionary<string, TenantProfile>> GetTenantProfilesAsync(AuthenticationRequestParameters requestParameters, string homeAccountId);
 
         #endregion
 
