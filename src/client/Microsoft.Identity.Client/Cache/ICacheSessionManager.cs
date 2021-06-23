@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -24,5 +25,6 @@ namespace Microsoft.Identity.Client.Cache
         Task<bool?> IsAppFociMemberAsync(string familyId);
         
         Task<IEnumerable<IAccount>> GetAccountsAsync();
+        Task<IDictionary<string, TenantProfile>> GetTenantProfilesAsync(string homeAccountId);
     }
 }

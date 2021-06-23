@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
@@ -18,6 +20,7 @@ namespace Microsoft.Identity.Client
     public partial class AuthenticationResult
     {
         private readonly IAuthenticationScheme _authenticationScheme;
+        private readonly ICacheSessionManager _cacheManager;
 
         /// <summary>
         /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.
@@ -117,9 +120,11 @@ namespace Microsoft.Identity.Client
             IAuthenticationScheme authenticationScheme,
             Guid correlationID,
             TokenSource tokenSource, 
-            ApiEvent apiEvent)
+            ApiEvent apiEvent,
+            ICacheSessionManager cacheManager)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
+            _cacheManager = cacheManager ?? null;
             string homeAccountId =
                 msalAccessTokenCacheItem?.HomeAccountId ??
                 msalIdTokenCacheItem?.HomeAccountId;
@@ -128,18 +133,31 @@ namespace Microsoft.Identity.Client
 
             if (homeAccountId != null)
             {
+                // This method call is to an async method from this constructor but the network call in the method will ideally never happen.
+                var tenantProfiles = Task.Run(async () => await _cacheManager.GetTenantProfilesAsync(homeAccountId).ConfigureAwait(false)).GetAwaiter().GetResult();
+
                 string username = null;
                 if (msalIdTokenCacheItem != null)
                 {
                     username = msalIdTokenCacheItem.IsAdfs ?
                         msalIdTokenCacheItem?.IdToken.Upn :
                         msalIdTokenCacheItem?.IdToken?.PreferredUsername;
+
+                    if (tenantProfiles != null)
+                    {
+                        tenantProfiles[msalIdTokenCacheItem.TenantId] = new TenantProfile(
+                            msalIdTokenCacheItem.IdToken.ObjectId,
+                            msalIdTokenCacheItem.TenantId,
+                            msalIdTokenCacheItem.Secret,
+                            AccountId.ParseFromString(msalIdTokenCacheItem.HomeAccountId).TenantId.Equals(msalIdTokenCacheItem.TenantId));
+                    }
                 }
 
                 Account = new Account(
                     homeAccountId,
                     username,
-                    environment);
+                    environment,
+                    tenantProfiles: tenantProfiles);
             }
 
             if (msalAccessTokenCacheItem != null)

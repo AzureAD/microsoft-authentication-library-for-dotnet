@@ -139,7 +139,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 TokenSource.Cache,
-                AuthenticationRequestParameters.RequestContext.ApiEvent);
+                AuthenticationRequestParameters.RequestContext.ApiEvent,
+                CacheManager);
         }
 
         private void ThrowIfNoScopesOnB2C()

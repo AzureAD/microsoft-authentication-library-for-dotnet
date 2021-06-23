@@ -77,31 +77,31 @@
   },
   "IdToken": {
     "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486-login.partner.microsoftonline.cn-idtoken-872cd9fa-d31f-45e0-9eab-6e460a02d1f1-9e5e17b6-6e3d-4515-8895-0e7756474486-": {
-      "home_account_id": "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486",
-      "environment": "login.partner.microsoftonline.cn",
-      "client_info": "eyJ1aWQiOiI4ZDZhYzY0Mi0xN2Y2LTRkZDgtODFlMi1iZjViZGI5YTYwZDciLCJ1dGlkIjoiOWU1ZTE3YjYtNmUzZC00NTE1LTg4OTUtMGU3NzU2NDc0NDg2In0",
-      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
-      "secret": "secret",
-      "credential_type": "IdToken",
-      "realm": "9e5e17b6-6e3d-4515-8895-0e7756474486"
+        "home_account_id": "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486",
+        "environment": "login.partner.microsoftonline.cn",
+        "client_info": "eyJ1aWQiOiI4ZDZhYzY0Mi0xN2Y2LTRkZDgtODFlMi1iZjViZGI5YTYwZDciLCJ1dGlkIjoiOWU1ZTE3YjYtNmUzZC00NTE1LTg4OTUtMGU3NzU2NDc0NDg2In0",
+        "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+        "secret": "someheader.eyJhdWQiOiAiZTg1NGE0YTctNmMzNC00NDljLWIyMzctZmM3YTI4MDkzZDg0IiwiaXNzIjogImh0dHBzOi8vbG9naW4ubWljcm9zb2Z0b25saW5lLmNvbS82YzNkNTFkZC1mMGU1LTQ5NTktYjRlYS1hODBjNGUzNmZlNWUvdjIuMC8iLCJpYXQiOiAxNDU1ODMzODI4LCJuYmYiOiAxNDU1ODMzODI4LCJleHAiOiAxNDU1ODM3NzI4LCJpcGFkZHIiOiAiMTMxLjEwNy4xNTkuMTE3IiwibmFtZSI6ICJNYXJycnJyaW8gQm9zc3kiLCJvaWQiOiAib2lkIiwicHJlZmVycmVkX3VzZXJuYW1lIjogInVzZXJuYW1lIiwic3ViIjogIks0X1NHR3hLcVcxU3hVQW1oZzZDMUY2VlBpRnpjeC1RZDgwZWhJRWRGdXMiLCJ0aWQiOiAiOWU1ZTE3YjYtNmUzZC00NTE1LTg4OTUtMGU3NzU2NDc0NDg2IiwidmVyIjogIjIuMCJ9.somesignature",
+        "credential_type": "IdToken",
+        "realm": "9e5e17b6-6e3d-4515-8895-0e7756474486"
     },
     "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4-login.microsoftonline.de-idtoken-872cd9fa-d31f-45e0-9eab-6e460a02d1f1-469fdeb4-d4fd-4fde-991e-308a78e4bea4-": {
-      "home_account_id": "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4",
-      "environment": "login.microsoftonline.de",
-      "client_info": "eyJ1aWQiOiI2YWZjODMzZi00OWMwLTRmZDUtYjY4NS0yOTk4YTZjYzhkOGQiLCJ1dGlkIjoiNDY5ZmRlYjQtZDRmZC00ZmRlLTk5MWUtMzA4YTc4ZTRiZWE0In0",
-      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
-      "secret": "secret",
-      "credential_type": "IdToken",
-      "realm": "469fdeb4-d4fd-4fde-991e-308a78e4bea4"
+        "home_account_id": "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4",
+        "environment": "login.microsoftonline.de",
+        "client_info": "eyJ1aWQiOiI2YWZjODMzZi00OWMwLTRmZDUtYjY4NS0yOTk4YTZjYzhkOGQiLCJ1dGlkIjoiNDY5ZmRlYjQtZDRmZC00ZmRlLTk5MWUtMzA4YTc4ZTRiZWE0In0",
+        "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+        "secret": "someheader.eyJhdWQiOiAiZTg1NGE0YTctNmMzNC00NDljLWIyMzctZmM3YTI4MDkzZDg0IiwiaXNzIjogImh0dHBzOi8vbG9naW4ubWljcm9zb2Z0b25saW5lLmNvbS82YzNkNTFkZC1mMGU1LTQ5NTktYjRlYS1hODBjNGUzNmZlNWUvdjIuMC8iLCJpYXQiOiAxNDU1ODMzODI4LCJuYmYiOiAxNDU1ODMzODI4LCJleHAiOiAxNDU1ODM3NzI4LCJpcGFkZHIiOiAiMTMxLjEwNy4xNTkuMTE3IiwibmFtZSI6ICJNYXJycnJyaW8gQm9zc3kiLCJvaWQiOiAib2lkIiwicHJlZmVycmVkX3VzZXJuYW1lIjogInVzZXJuYW1lIiwic3ViIjogIks0X1NHR3hLcVcxU3hVQW1oZzZDMUY2VlBpRnpjeC1RZDgwZWhJRWRGdXMiLCJ0aWQiOiAiNDY5ZmRlYjQtZDRmZC00ZmRlLTk5MWUtMzA4YTc4ZTRiZWE0IiwidmVyIjogIjIuMCJ9.somesignature",
+        "credential_type": "IdToken",
+        "realm": "469fdeb4-d4fd-4fde-991e-308a78e4bea4"
     },
     "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-idtoken-0615b6ca-88d4-4884-8729-b178178f7c27-49f548d0-12b7-4169-a390-bb5304d24462-": {
-      "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
-      "environment": "login.windows.net",
-      "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
-      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
-      "secret": "secret",
-      "credential_type": "IdToken",
-      "realm": "49f548d0-12b7-4169-a390-bb5304d24462"
+        "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+        "environment": "login.windows.net",
+        "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+        "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+        "secret": "someheader.eyJhdWQiOiAiZTg1NGE0YTctNmMzNC00NDljLWIyMzctZmM3YTI4MDkzZDg0IiwiaXNzIjogImh0dHBzOi8vbG9naW4ubWljcm9zb2Z0b25saW5lLmNvbS82YzNkNTFkZC1mMGU1LTQ5NTktYjRlYS1hODBjNGUzNmZlNWUvdjIuMC8iLCJpYXQiOiAxNDU1ODMzODI4LCJuYmYiOiAxNDU1ODMzODI4LCJleHAiOiAxNDU1ODM3NzI4LCJpcGFkZHIiOiAiMTMxLjEwNy4xNTkuMTE3IiwibmFtZSI6ICJNYXJycnJyaW8gQm9zc3kiLCJvaWQiOiAib2lkIiwicHJlZmVycmVkX3VzZXJuYW1lIjogInVzZXJuYW1lIiwic3ViIjogIks0X1NHR3hLcVcxU3hVQW1oZzZDMUY2VlBpRnpjeC1RZDgwZWhJRWRGdXMiLCJ0aWQiOiAiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIiwidmVyIjogIjIuMCJ9.somesignature",
+        "credential_type": "IdToken",
+        "realm": "49f548d0-12b7-4169-a390-bb5304d24462"
     }
   },
   "Account": {

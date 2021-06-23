@@ -13,6 +13,8 @@ namespace Microsoft.Identity.Client
     /// </summary>
     internal sealed class Account : IAccount
     {
+        private readonly IDictionary<string, TenantProfile> _tenantProfiles;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -20,12 +22,15 @@ namespace Microsoft.Identity.Client
         /// <param name="username">UPN style , can be null</param>
         /// <param name="environment">Identity provider for this account, e.g. <c>login.microsoftonline.com</c></param>
         /// <param name="wamAccountIds">Map of (client_id, wam_account_id)</param>
-        public Account(string homeAccountId, string username, string environment,IDictionary<string, string> wamAccountIds = null)
+        /// <param name="tenantProfiles">Map of (tenant_id, tenant_profile)</param>
+        public Account(string homeAccountId, string username, string environment, IDictionary<string, string> wamAccountIds = null, 
+            IDictionary<string, TenantProfile> tenantProfiles = null)
         {
             Username = username;
             Environment = environment;
             HomeAccountId = AccountId.ParseFromString(homeAccountId);
             WamAccountIds = wamAccountIds;
+            _tenantProfiles = tenantProfiles;
         }        
 
         public string Username { get; }
@@ -33,6 +38,14 @@ namespace Microsoft.Identity.Client
         public string Environment { get; }
 
         public AccountId HomeAccountId { get; }
+
+        public IDictionary<string, TenantProfile> TenantProfiles 
+        { 
+            get
+            {
+                return _tenantProfiles;
+            }
+        }
        
 
         internal IDictionary<string, string> WamAccountIds

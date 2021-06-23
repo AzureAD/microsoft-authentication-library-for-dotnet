@@ -903,6 +903,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                 var account = accounts.Single(a => a.HomeAccountId.TenantId == tenant1);
+                var tenantProfiles = account.TenantProfiles;
+                
                 AuthenticationResult response = await
                     pca.AcquireTokenSilent(new[] { "User.Read" }, account)
                     .WithAuthority(tenantedAuthority1)
@@ -911,6 +913,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.AreEqual(tenant1, response.TenantId);
+                AssertTenantProfiles(tenantProfiles, tenant1, tenant2);
+                AssertTenantProfiles(response.Account.TenantProfiles, tenant1, tenant2);
 
                 // Act
                 accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -924,6 +928,26 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert
                 Assert.AreEqual(tenant2, response.TenantId);
             }
+        }
+
+        private void AssertTenantProfiles(IDictionary<string, TenantProfile> tenantProfiles, string tenant1, string tenant2)
+        {
+            var tenantProfile1 = tenantProfiles[tenant1];
+            var tenantProfile2 = tenantProfiles[tenant2];
+
+            Assert.AreEqual(2, tenantProfiles.Count);
+
+            Assert.AreEqual(tenant1, tenantProfile1.TenantId);
+            Assert.AreEqual(tenant2, tenantProfile2.TenantId);
+
+            Assert.IsTrue(tenantProfile1.IsHomeTenant);
+            Assert.IsFalse(tenantProfile2.IsHomeTenant);
+
+            Assert.IsNotNull(tenantProfile1.ClaimsPrincipal);
+            Assert.IsTrue(tenantProfile1.ClaimsPrincipal.Claims.Count() > 0);
+
+            Assert.IsNotNull(tenantProfile2.ClaimsPrincipal);
+            Assert.IsTrue(tenantProfile2.ClaimsPrincipal.Claims.Count() > 0);
         }
 
         /// <summary>
@@ -959,6 +983,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.AreEqual(tenant1, response.TenantId);
+                AssertTenantProfiles(account.TenantProfiles, tenant1, tenant2);
 
                 // Arrange
                 PublicClientApplication pca2 = CreatePcaFromFileWithAuthority(httpManager, tenantedAuthority2);
