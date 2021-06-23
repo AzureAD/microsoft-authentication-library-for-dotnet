@@ -171,19 +171,19 @@ namespace Microsoft.Identity.Client.Internal.Logger
             return "Unknown SKU";
         });
 
-        private static Lazy<string> s_versionLazy = new Lazy<string>(() => MsalIdHelper.GetMsalVersion());
+        private static Lazy<string> s_msalVersionLazy = new Lazy<string>(() => MsalIdHelper.GetMsalVersion());
+        private static Lazy<string> s_runtimeVersionLazy = new Lazy<string>(() => PlatformProxyFactory.CreatePlatformProxy(null).GetRuntimeVersion());
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
             if (IsLoggingEnabled(logLevel))
-            {               
-
+            {
                 bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
                 // If we have a message with PII, and PII logging is enabled, use the PII message, else use the scrubbed message.
                 bool isLoggingPii = messageWithPiiExists && PiiLoggingEnabled;
                 string messageToLog = isLoggingPii ? messageWithPii : messageScrubbed;
 
-                string log = $"{isLoggingPii} MSAL {s_versionLazy.Value} {s_skuLazy.Value} {s_osLazy.Value} [{DateTime.UtcNow.ToString("MM/dd HH:mm:ss.ff")}{_correlationId}]{ClientInformation} {messageToLog}";                    
+                string log = $"{isLoggingPii} MSAL {s_msalVersionLazy.Value} {s_skuLazy.Value} {s_runtimeVersionLazy.Value} {s_osLazy.Value} [{DateTime.UtcNow:MM/dd HH:mm:ss.ff}{_correlationId}]{ClientInformation} {messageToLog}";
 
                 if (_isDefaultPlatformLoggingEnabled)
                 {

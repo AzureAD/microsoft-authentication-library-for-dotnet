@@ -2,11 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
 
 #if SUPPORTS_WIN32 && !WINDOWS_APP
@@ -151,7 +148,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return s_win10OrServerEquivalentLazy.Value;
         }
-
       
         public static bool IsUserInteractive()
         {
