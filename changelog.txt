@@ -1,3 +1,10 @@
+4.33.0
+==========
+### New Features
+**On-Behalf-Of flow logic now performs refresh token flow** eliminating the need to call `AcquireTokenSilent` and `GetAccounts` in OBO scenarios. See issue [#2623](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2623).
+**Added monitoring flags for global stats**. See issue [#2646](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2646).
+**MSAL.NET adds CCS routing information for interactive requests using client info.**. See issue [#2525](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525) and PR [#2687](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2687).
+
 4.32.1
 ==========
 ### Bug Fixes:
@@ -14,6 +21,7 @@
 **FindAccessToken now logs the number of access tokens**. See issue [#2417](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2417)
 **MSAL now exposes AuthenticationResult.TokenType**. See issue [#2637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2637)
 **Introduce WithFederationMetadata option for IWA and Username/Password flows, allowing developers to inject the federation metadata XML document**. See issue [#2152](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2152)
+**MSAL.NET now provides routing information to Cached Credential Service (CCS)**. See issue [#2525](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525)
 
 ### Bug Fixes:
 **Improved search of metadata in the federation metadata XML during WS-Trust flows**. See issue [#2665](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2665)

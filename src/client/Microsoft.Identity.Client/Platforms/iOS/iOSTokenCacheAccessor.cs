@@ -118,28 +118,28 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             Remove(cacheKey);
         }
 
-        public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
+        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
             return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken)
                 .Select(x => MsalAccessTokenCacheItem.FromJsonString(x))
                 .ToList();
         }
 
-        public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
+        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
             return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken)
                 .Select(x => MsalRefreshTokenCacheItem.FromJsonString(x))
                 .ToList();
         }
 
-        public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
+        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens()
         {
             return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.IdToken)
                 .Select(x => MsalIdTokenCacheItem.FromJsonString(x))
                 .ToList();
         }
 
-        public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
+        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts()
         {
             return GetPayloadAsString(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()])
                 .Select(x => MsalAccountCacheItem.FromJsonString(x))
@@ -358,7 +358,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             throw new NotImplementedException();
         }
 
-        public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        public IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
             throw new NotImplementedException();
         }

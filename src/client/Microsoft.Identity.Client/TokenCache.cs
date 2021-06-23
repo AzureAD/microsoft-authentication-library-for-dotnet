@@ -232,27 +232,27 @@ namespace Microsoft.Identity.Client
             return accounts;
         }
 
-        private IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokensWithNoLocks(bool filterByClientId)
+        private IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokensWithNoLocks(bool filterByClientId)
         {
             var refreshTokens = _accessor.GetAllRefreshTokens();
             return filterByClientId
-                ? refreshTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
+                ? refreshTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : refreshTokens;
         }
 
-        private IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId)
+        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId)
         {
             var accessTokens = _accessor.GetAllAccessTokens();
             return filterByClientId
-                ? accessTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
+                ? accessTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : accessTokens;
         }
 
-        private IEnumerable<MsalIdTokenCacheItem> GetAllIdTokensWithNoLocks(bool filterByClientId)
+        private IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokensWithNoLocks(bool filterByClientId)
         {
             var idTokens = _accessor.GetAllIdTokens();
             return filterByClientId
-                ? idTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
+                ? idTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : idTokens;
         }
 
