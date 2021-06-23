@@ -133,7 +133,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected abstract IPlatformLogger InternalGetPlatformLogger();
 
         // RuntimeInformation.FrameworkDescription is available on all platforms except .NET Framework 4.7 and lower.
-        protected virtual string InternalGetRuntimeVersion() => DesktopOsHelper.GetRuntimeVersion();
+        protected virtual string InternalGetRuntimeVersion()
+        {
+#if !DESKTOP
+            return System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+#else
+            return string.Empty; // For DESKTOP this should not be hit, since NetDesktopPlatformProxy will take over
+#endif
+        }
 
         public virtual ICacheSerializationProvider CreateTokenCacheBlobStorage()
         {

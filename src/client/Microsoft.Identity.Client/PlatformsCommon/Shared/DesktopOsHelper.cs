@@ -21,8 +21,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             () => IsWin10Internal());
         private static Lazy<string> s_winVersionLazy = new Lazy<string>(
             () => GetWindowsVersionStringInternal());
-        private static Lazy<string> s_runtimeVersionLazy = new Lazy<string>(
-            () => GetRuntimeVersionInternal());
 
         public static bool IsWindows()
         {
@@ -151,53 +149,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return s_win10OrServerEquivalentLazy.Value;
         }
-
-        private static string GetRuntimeVersionInternal()
-        {
-#if DESKTOP
-            // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#query-the-registry-using-code
-            try
-            {
-                string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
-                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(subkey))
-                {
-                    if (ndpKey?.GetValue("Release") != null)
-                    {
-                        int releaseKey = (int)ndpKey.GetValue("Release");
-                        if (releaseKey >= 528040)
-                            return "4.8 or later";
-                        if (releaseKey >= 461808)
-                            return "4.7.2";
-                        if (releaseKey >= 461308)
-                            return "4.7.1";
-                        if (releaseKey >= 460798)
-                            return "4.7";
-                        if (releaseKey >= 394802)
-                            return "4.6.2";
-                        if (releaseKey >= 394254)
-                            return "4.6.1";
-                        if (releaseKey >= 393295)
-                            return "4.6";
-                        if (releaseKey >= 379893)
-                            return "4.5.2";
-                        if (releaseKey >= 378675)
-                            return "4.5.1";
-                        if (releaseKey >= 378389)
-                            return "4.5";
-                    }
-                }
-                return string.Empty;
-            }
-            catch
-            {
-                return string.Empty;
-            }
-#else
-            return RuntimeInformation.FrameworkDescription;
-#endif
-        }
-
-        public static string GetRuntimeVersion() => s_runtimeVersionLazy.Value;
       
         public static bool IsUserInteractive()
         {

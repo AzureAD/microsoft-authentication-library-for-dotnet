@@ -8,21 +8,19 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
+using Microsoft.Identity.Client.Platforms.net45.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Win32;
-using Microsoft.Identity.Client.AuthScheme.PoP;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.net45.Http;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -173,6 +171,47 @@ namespace Microsoft.Identity.Client.Platforms.net45
         protected override string InternalGetProductName()
         {
             return "MSAL.Desktop";
+        }
+
+        protected override string InternalGetRuntimeVersion()
+        {
+            // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#query-the-registry-using-code
+            try
+            {
+                string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
+                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(subkey))
+                {
+                    if (ndpKey?.GetValue("Release") != null)
+                    {
+                        int releaseKey = (int)ndpKey.GetValue("Release");
+                        if (releaseKey >= 528040)
+                            return "4.8 or later";
+                        if (releaseKey >= 461808)
+                            return "4.7.2";
+                        if (releaseKey >= 461308)
+                            return "4.7.1";
+                        if (releaseKey >= 460798)
+                            return "4.7";
+                        if (releaseKey >= 394802)
+                            return "4.6.2";
+                        if (releaseKey >= 394254)
+                            return "4.6.1";
+                        if (releaseKey >= 393295)
+                            return "4.6";
+                        if (releaseKey >= 379893)
+                            return "4.5.2";
+                        if (releaseKey >= 378675)
+                            return "4.5.1";
+                        if (releaseKey >= 378389)
+                            return "4.5";
+                    }
+                }
+                return string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
         /// <inheritdoc />

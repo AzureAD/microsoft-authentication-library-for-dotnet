@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class MsalLogger : ICoreLogger
     {
-        private readonly IPlatformProxy _platformProxy;
+        private readonly IPlatformLogger _platformLogger;
         private readonly LogCallback _loggingCallback;
         private readonly LogLevel _minLogLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _minLogLevel = logLevel;
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
 
-            _platformProxy = PlatformProxyFactory.CreatePlatformProxy(null);
+            _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
             ClientName = clientName ?? string.Empty;
             ClientVersion = clientVersion ?? string.Empty;
 
@@ -172,6 +172,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         });
 
         private static Lazy<string> s_msalVersionLazy = new Lazy<string>(() => MsalIdHelper.GetMsalVersion());
+        private static Lazy<string> s_runtimeVersionLazy = new Lazy<string>(() => PlatformProxyFactory.CreatePlatformProxy(null).GetRuntimeVersion());
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
@@ -182,23 +183,23 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 bool isLoggingPii = messageWithPiiExists && PiiLoggingEnabled;
                 string messageToLog = isLoggingPii ? messageWithPii : messageScrubbed;
 
-                string log = $"{isLoggingPii} MSAL {s_msalVersionLazy.Value} {s_skuLazy.Value} {_platformProxy.GetRuntimeVersion()} {s_osLazy.Value} [{DateTime.UtcNow.ToString("MM/dd HH:mm:ss.ff")}{_correlationId}]{ClientInformation} {messageToLog}";
+                string log = $"{isLoggingPii} MSAL {s_msalVersionLazy.Value} {s_skuLazy.Value} {s_runtimeVersionLazy.Value} {s_osLazy.Value} [{DateTime.UtcNow:MM/dd HH:mm:ss.ff}{_correlationId}]{ClientInformation} {messageToLog}";
 
                 if (_isDefaultPlatformLoggingEnabled)
                 {
                     switch (logLevel)
                     {
                         case LogLevel.Error:
-                            _platformProxy.PlatformLogger.Error(log);
+                            _platformLogger.Error(log);
                             break;
                         case LogLevel.Warning:
-                            _platformProxy.PlatformLogger.Warning(log);
+                            _platformLogger.Warning(log);
                             break;
                         case LogLevel.Info:
-                            _platformProxy.PlatformLogger.Information(log);
+                            _platformLogger.Information(log);
                             break;
                         case LogLevel.Verbose:
-                            _platformProxy.PlatformLogger.Verbose(log);
+                            _platformLogger.Verbose(log);
                             break;
                     }
                 }
