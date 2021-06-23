@@ -114,22 +114,22 @@ namespace Microsoft.Identity.Client.Platforms.Android
             editor.Apply();
         }
 
-        public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
+        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
             return _accessTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
+        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
             return _refreshTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalRefreshTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
+        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens()
         {
             return _idTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalIdTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
+        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts()
         {
             return _accountSharedPreference.All.Values.Cast<string>().Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
         }
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             throw new NotImplementedException();
         }
 
-        public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        public IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
             throw new NotImplementedException();
         }

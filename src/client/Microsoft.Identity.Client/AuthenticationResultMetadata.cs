@@ -4,7 +4,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains metadata of the authentication result.
+    /// Contains metadata of the authentication result. <see cref="Metrics"/> for additional MSAL-wide metrics.
     /// </summary>
     public class AuthenticationResultMetadata
     {
@@ -24,19 +24,19 @@ namespace Microsoft.Identity.Client
         public TokenSource TokenSource { get; }
 
         /// <summary>
-        /// Total time (in ms) spent to service this request, in ms. Includes time spent making Http Requests <see cref="DurationInHttpInMs"/>, time spent
+        /// Time, in milliseconds, spent to service this request. Includes time spent making HTTP requests <see cref="DurationInHttpInMs"/>, time spent
         /// in token cache callbacks <see cref="DurationInCacheInMs"/>, time spent in MSAL and context switching.
         /// </summary>
         public long DurationTotalInMs { get; set; }
 
         /// <summary>
-        /// Time (in ms) MSAL spent in reading and writing to the token cache, i.e. in the OnBeforeAccess, OnAfterAccess etc. callbacks. 
+        /// Time, in milliseconds, MSAL spent during this request reading and writing to the token cache, i.e. in the OnBeforeAccess, OnAfterAccess, etc. callbacks. 
         /// Does not include internal MSAL logic for searching through the cache once loaded.
         /// </summary>
         public long DurationInCacheInMs { get; set; }
 
         /// <summary>
-        /// Time (in ms) MSAL spent for HTTP communication.
+        /// Time, in milliseconds, MSAL spent for HTTP communication during this request.
         /// </summary>
         public long DurationInHttpInMs { get; set; }
     }

@@ -1,21 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using System.Diagnostics;
+using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -96,7 +95,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
                         authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
-                        authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;                        
+                        authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
+                        Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
                         return authenticationResult;
                     }
                     catch (MsalException ex)
@@ -240,10 +240,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
-            return SendTokenRequestAsync(
+            var tokenResponse = SendTokenRequestAsync(
                 AuthenticationRequestParameters.Endpoints.TokenEndpoint,
                 additionalBodyParameters,
                 cancellationToken);
+            Metrics.IncrementTotalAccessTokensFromIdP();
+            return tokenResponse;
         }
 
         protected Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -254,10 +256,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string scopes = GetOverridenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
             var tokenClient = new TokenClient(AuthenticationRequestParameters);
 
-            var CCSHeader = GetCCSHeader(additionalBodyParameters);
-            if (CCSHeader != null && !string.IsNullOrEmpty(CCSHeader.Value.Key))
+            var CcsHeader = GetCcsHeader(additionalBodyParameters);
+            if (CcsHeader != null && !string.IsNullOrEmpty(CcsHeader.Value.Key))
             {
-                tokenClient.AddHeaderToClient(CCSHeader.Value.Key, CCSHeader.Value.Value);
+                tokenClient.AddHeaderToClient(CcsHeader.Value.Key, CcsHeader.Value.Value);
             }
 
             return tokenClient.SendTokenRequestAsync(
@@ -270,7 +272,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         //The CCS header is used by the CCS service to help route requests to resources in Azure during requests to speed up authentication.
         //It consists of either the ObjectId.TenantId or the upn of the account signign in.
         //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
-        protected virtual KeyValuePair<string, string>? GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
+        protected virtual KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
             if (AuthenticationRequestParameters?.Account?.HomeAccountId != null)
             {
@@ -278,57 +280,54 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     var userObjectId = AuthenticationRequestParameters.Account.HomeAccountId.ObjectId;
                     var userTenantID = AuthenticationRequestParameters.Account.HomeAccountId.TenantId;
-                    string OidCCSHeader = CoreHelpers.GetCCSClientInfoheader(userObjectId, userTenantID);
+                    string OidCcsHeader = CoreHelpers.GetCcsClientInfoHeader(userObjectId, userTenantID);
 
-                    return new KeyValuePair<string, string>(Constants.CCSRoutingHintHeader, OidCCSHeader);
+                    return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader);
                 }
 
                 if (!String.IsNullOrEmpty(AuthenticationRequestParameters.Account.Username))
                 {
-                    return GetCCSUpnHeader(AuthenticationRequestParameters.Account.Username);
+                    return GetCcsUpnHeader(AuthenticationRequestParameters.Account.Username);
                 }
             }
 
             if (additionalBodyParameters.ContainsKey(OAuth2Parameter.Username))
             {
-                return GetCCSUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
+                return GetCcsUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
             }
             
             if (!String.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
             {
-                return GetCCSUpnHeader (AuthenticationRequestParameters.LoginHint);
+                return GetCcsUpnHeader (AuthenticationRequestParameters.LoginHint);
             }
 
             return new KeyValuePair<string, string>();
         }
 
-        protected KeyValuePair<string, string>? GetCCSUpnHeader(string upnHeader)
+        protected KeyValuePair<string, string>? GetCcsUpnHeader(string upnHeader)
         {
-            string OidCCSHeader = CoreHelpers.GetCCSUpnHeader(upnHeader);
-            return new KeyValuePair<string, string>?(new KeyValuePair<string, string>(Constants.CCSRoutingHintHeader, OidCCSHeader));
+            string OidCcsHeader = CoreHelpers.GetCcsUpnHeader(upnHeader);
+            return new KeyValuePair<string, string>?(new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader));
         }
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
         {
             if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
-            {
-                int appHashCode = authenticationRequestParameters.AppConfig.GetHashCode();
+            {                
                 string scopes = authenticationRequestParameters.Scope.AsSingleString();
                 string messageWithPii = string.Format(
                     CultureInfo.InvariantCulture,
-                    "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tAppHashCode: {4}",
+                    "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t",
                     authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
                     scopes,
                     authenticationRequestParameters.AppConfig.ClientId,
-                    GetType().Name,
-                    appHashCode);
+                    GetType().Name);
 
                 string messageWithoutPii = string.Format(
                     CultureInfo.InvariantCulture,
-                    "=== Token Acquisition ({0}) started:\n\t Scopes: {1} AppHashCode: {2}",
+                    "=== Token Acquisition ({0}) started:\n\t Scopes: {1}",
                     GetType().Name,
-                    scopes,
-                    appHashCode);
+                    scopes);
 
                 if (authenticationRequestParameters.AuthorityInfo != null &&
                     KnownMetadataProvider.IsKnownEnvironment(authenticationRequestParameters.AuthorityInfo?.Host))

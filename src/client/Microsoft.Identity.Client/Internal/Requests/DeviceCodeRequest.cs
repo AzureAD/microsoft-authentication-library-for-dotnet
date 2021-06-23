@@ -73,10 +73,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 try
                 {
-                    return await SendTokenRequestAsync(
+                    var tokenResponse = await SendTokenRequestAsync(
                                    AuthenticationRequestParameters.Endpoints.TokenEndpoint,
                                    GetBodyParameters(deviceCodeResult), cancellationToken)
                                .ConfigureAwait(false);
+                    Metrics.IncrementTotalAccessTokensFromIdP();
+                    return tokenResponse;
                 }
                 catch (MsalServiceException ex)
                 {
@@ -107,7 +109,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return dict;
         }
 
-        protected override KeyValuePair<string, string>? GetCCSHeader(IDictionary<string, string> additionalBodyParameters)
+        protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
             return null;
         }

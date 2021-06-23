@@ -1,4 +1,13 @@
-﻿Measurements taken on 4/30/2021, on my dev machine, assuming:
+﻿To run the perf tests, start this webapi, install a tool like https://github.com/codesenberg/bombardier and hit it with:
+
+bombardier -d 60s -l https://localhost:44355/FlatCache
+bombardier -d 60s -l https://localhost:44355/StaticDictionary
+bombardier -d 60s -l https://localhost:44355/Singleton
+bombardier -d 60s -l https://localhost:44355/WilsonLruCache
+bombardier -d 60s -l https://localhost:44355/Obo?refreshFlow=true
+bombardier -d 60s -l https://localhost:44355/Obo?refreshFlow=false
+
+Measurements taken on 4/30/2021, on my dev machine, assuming:
 
 - cache starts off empty (cold), or full (warm)
 - there are 500 tenants in total, each request goes to a random tenant
@@ -81,12 +90,45 @@ Static Wilson LRU cache with normal size limitation (max size ~2GB or 700k token
      95%    18.00ms   17.00ms
      99%   116.00ms   112.00ms
 
+OBO performance tests for refresh flow. Added with 4.33 release.
+----------------------------------------------------------------
 
+https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/tests/devapps/WebApi/Controllers/OboController.cs#L16
+Measurements taken on 6/15/2021, on dev machine:
 
+OBO tests with refreshFlow=false (Number of users: 300, Expiration time: 10 mins, Cache access penalty: 100ms)
+------------------------------------------------------------------------------------
+The strategy here is to set a high expiration time so the 1st 300 requests goes to Identity Provider and rest gets a response from the AT cache.
 
-To run the perf tests, start this webapi, install a tool like https://github.com/codesenberg/bombardier and hit it with:
+Statistics        Avg      Stdev        Max
+  Reqs/sec       580.59    1253.94   32019.21
+  Latency      229.72ms    28.89ms      1.12s
+  Latency Distribution
+     50%   224.10ms
+     75%   234.11ms
+     90%   242.66ms
+     95%   247.53ms
+     99%   260.50ms
+  HTTP codes:
+    1xx - 0, 2xx - 32706, 3xx - 0, 4xx - 0, 5xx - 0
+    others - 0
+  Throughput:   190.64KB/s
 
-bombardier -d 60s -l https://localhost:44355/FlatCache
-bombardier -d 60s -l https://localhost:44355/StaticDictionary
-bombardier -d 60s -l https://localhost:44355/Singleton
-bombardier -d 60s -l https://localhost:44355/WilsonLruCache
+OBO tests with refreshFlow=true (Number of users: 50, Expiration time: 2 mins, Cache access penalty: 100ms)
+---------------------------------------------------------------------------------
+The strategy here is to set a low expiration time and low number of users. Since while we get the AT from the cache we ignore the one that have less than 5 mins of expiry all the
+requests after the initial requests for 50 users will hit the refresh flow.
+
+Statistics        Avg      Stdev        Max
+  Reqs/sec       609.93    1769.33   54508.18
+  Latency      227.40ms    20.26ms   766.14ms
+  Latency Distribution
+     50%   224.59ms
+     75%   233.71ms
+     90%   239.89ms
+     95%   244.04ms
+     99%   253.50ms
+  HTTP codes:
+    1xx - 0, 2xx - 33022, 3xx - 0, 4xx - 0, 5xx - 0
+    others - 0
+  Throughput:   192.70KB/s

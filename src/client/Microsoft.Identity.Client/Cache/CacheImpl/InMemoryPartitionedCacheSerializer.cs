@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
     internal class InMemoryPartitionedCacheSerializer
         : AbstractPartitionedCacheSerializer
     {
-        internal /* internal for test only */ ConcurrentDictionary<string, byte[]> CachePartition { get; }        
+        internal /* internal for test only */ ConcurrentDictionary<string, byte[]> CachePartition { get; }
         private readonly ICoreLogger _logger;
 
         public InMemoryPartitionedCacheSerializer(ICoreLogger logger, ConcurrentDictionary<string, byte[]> dictionary = null)

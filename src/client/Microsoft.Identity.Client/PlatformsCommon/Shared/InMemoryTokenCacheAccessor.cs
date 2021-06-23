@@ -154,27 +154,27 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #endregion
 
         #region Get All Values
-        public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
+        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
-            return _accessTokenCacheDictionary.Select(kv => kv.Value);
+            return _accessTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
-        public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
+        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
             return _refreshTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
-        public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
+        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens()
         {
             return _idTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
-        public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
+        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts()
         {
             return _accountCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
-        public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        public IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
             return _appMetadataDictionary.Select(kv => kv.Value).ToList();
         }

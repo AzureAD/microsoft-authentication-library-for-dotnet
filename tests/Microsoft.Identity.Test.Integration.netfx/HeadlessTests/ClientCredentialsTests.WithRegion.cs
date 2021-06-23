@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,10 +24,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class RegionalAuthIntegrationTests
     {
-        private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
-
-        private const string PublicCloudConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
-        private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
         private KeyVaultSecretsProvider _keyVault;
         private Dictionary<string, string> _dict = new Dictionary<string, string>
         {
@@ -37,11 +34,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string GlobalHost = "login.microsoftonline.com";
         private IConfidentialClientApplication _confidentialClientApplication;
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-        }
 
         [TestInitialize]
         public void TestInitialize()
@@ -65,10 +57,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
-            _confidentialClientApplication = BuildCCA(factory);
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            _confidentialClientApplication = BuildCCA(settings, factory);
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-            AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
+            AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
             AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},centralus,3,4|0,1");
@@ -79,10 +72,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
-            _confidentialClientApplication = BuildCCA(factory, "invalid");
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            _confidentialClientApplication = BuildCCA(settings, factory, true, "invalid");
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-            AuthenticationResult result = await GetAuthenticationResultAsync().ConfigureAwait(false); // regional endpoint
+            AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             Assert.AreEqual(
               "https://invalid.login.microsoft.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token?allowestsrnonmsi=true",
@@ -90,12 +84,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},invalid,3,3|0,1");
 
-            _confidentialClientApplication = BuildCCA(factory, TestConstants.Region);
-            result = await GetAuthenticationResultAsync(withForceRefresh: true).ConfigureAwait(false); // regional endpoint
+            _confidentialClientApplication = BuildCCA(settings, factory, true, TestConstants.Region);
+            result = await GetAuthenticationResultAsync(settings.AppScopes, withForceRefresh: true).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory, 1);
             AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.ForceRefresh:D},centralus,2,1|0,1", 1);
-           
         }
 
         private void AssertTelemetry(HttpSnifferClientFactory factory, string currentTelemetryHeader, int placement = 0)
@@ -125,13 +118,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
            AuthenticationResult result)
         {
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-        }       
+        }
 
-        private IConfidentialClientApplication BuildCCA(HttpSnifferClientFactory factory, string region = ConfidentialClientApplication.AttemptRegionDiscovery)
+        private IConfidentialClientApplication BuildCCA(
+            IConfidentialAppSettings settings,
+            HttpSnifferClientFactory factory,
+            bool useClaims = false,
+            string region = ConfidentialClientApplication.AttemptRegionDiscovery)
         {
-            var builder = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
-                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, GetClaims()))
-                .WithAuthority(PublicCloudTestAuthority)
+            var builder = ConfidentialClientApplicationBuilder.Create(settings.ClientId);
+            if (useClaims)
+            {
+                builder.WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(settings.ClientId, GetClaims(settings)));
+            }
+            else
+            {
+                builder.WithCertificate(settings.GetCertificate());
+            }
+
+            builder.WithAuthority($@"https://{settings.Environment}/{settings.TenantId}")
                 .WithTestLogging()
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(factory);
@@ -145,9 +150,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         private async Task<AuthenticationResult> GetAuthenticationResultAsync(
+            string[] scope,
             bool withForceRefresh = false)
         {
-            var result = await _confidentialClientApplication.AcquireTokenForClient(s_keyvaultScope)
+            var result = await _confidentialClientApplication.AcquireTokenForClient(scope)
                             .WithExtraQueryParameters(_dict)
                             .WithForceRefresh(withForceRefresh)
                             .ExecuteAsync()
@@ -165,32 +171,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             return (long)diff.TotalSeconds;
         }
 
-        private static IDictionary<string, string> GetClaims(bool useDefaultClaims = true)
+        private static IDictionary<string, string> GetClaims(IConfidentialAppSettings settings)
         {
-            if (useDefaultClaims)
-            {
-                DateTime validFrom = DateTime.UtcNow;
-                var nbf = ConvertToTimeT(validFrom);
-                var exp = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(TestConstants.JwtToAadLifetimeInSeconds));
+            DateTime validFrom = DateTime.UtcNow;
+            var nbf = ConvertToTimeT(validFrom);
+            var exp = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(TestConstants.JwtToAadLifetimeInSeconds));
 
-                return new Dictionary<string, string>()
+            return new Dictionary<string, string>()
                 {
-                { "aud", TestConstants.ClientCredentialAudience },
+                { "aud", $"https://{settings.Environment}/{settings.TenantId}/v2.0" },
                 { "exp", exp.ToString(CultureInfo.InvariantCulture) },
-                { "iss", PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
+                { "iss", settings.ClientId },
                 { "jti", Guid.NewGuid().ToString() },
                 { "nbf", nbf.ToString(CultureInfo.InvariantCulture) },
-                { "sub", PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
+                { "sub", settings.ClientId },
                 { "ip", "192.168.2.1" }
                 };
-            }
-            else
-            {
-                return new Dictionary<string, string>()
-                {
-                    { "ip", "192.168.2.1" }
-                };
-            }
+
         }
 
         private static string GetSignedClientAssertionUsingMsalInternal(string clientId, IDictionary<string, string> claims)
@@ -198,7 +195,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #if NET_CORE
             var manager = new Client.Platforms.netcore.NetCoreCryptographyManager();
 #else
-            var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
+                    var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
 #endif
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);

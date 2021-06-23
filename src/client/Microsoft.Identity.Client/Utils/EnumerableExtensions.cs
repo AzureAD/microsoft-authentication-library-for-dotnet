@@ -30,22 +30,22 @@ namespace Microsoft.Identity.Client.Utils
             return set.Any(el => el.Equals(toLookFor, System.StringComparison.OrdinalIgnoreCase));
         }
 
-        internal static IEnumerable<T> FilterWithLogging<T>(
-            this IEnumerable<T> list,
+        internal static IReadOnlyList<T> FilterWithLogging<T>(
+            this IReadOnlyList<T> list,
             Func<T, bool> predicate,
             ICoreLogger logger,
             string logPrefix)
         {
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
             {
-                logger.Verbose($"{logPrefix} - item count before: {list.Count()} ");
+                logger.Verbose($"{logPrefix} - item count before: {list.Count} ");
             }
 
-            list = list.Where(predicate);
+            list = list.Where(predicate).ToList();
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
             {
-                logger.Verbose($"{logPrefix} - item count after: {list.Count()} ");
+                logger.Verbose($"{logPrefix} - item count after: {list.Count} ");
             }
 
             return list;
