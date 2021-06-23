@@ -373,15 +373,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        public async Task Kerberos_ROPC_ADFSv4Federated_WithMetadata_Async()
-        {
-            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
-            string federationMetadata = File.ReadAllText(@"federationMetadata.xml").ToString();
-            await KerberosRunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
-        }
-
-        private async Task KerberosRunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
+        private async Task KerberosRunHappyPathTestAsync(LabResponse labResponse)
         {
             // Test with Id token
             var factory = new HttpSnifferClientFactory();
@@ -398,7 +390,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 labResponse,
                 factory,
                 idTokenPublicClient,
-                federationMetadata,
+                "",
                 Guid.NewGuid()).ConfigureAwait(false);
             KerberosSupplementalTicket ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
                 authResult,
@@ -422,7 +414,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 labResponse,
                 factory,
                 accessTokenPublicClient,
-                federationMetadata,
+                "",
                 Guid.NewGuid()).ConfigureAwait(false);
             ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
                 authResult,

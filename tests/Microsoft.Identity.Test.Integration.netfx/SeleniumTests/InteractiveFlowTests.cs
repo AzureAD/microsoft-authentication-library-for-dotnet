@@ -380,42 +380,17 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestMethod]
         public async Task Kerberos_Interactive_AADAsync()
         {
-            // Arrange
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
             await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
         }
 
-#if DESKTOP // no point in running these tests on NetCore - the code path is similar
-        [TestMethod]
-        public async Task Kerberos_Interactive_AdfsV4_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
-#endif
-
-        private async Task<AuthenticationResult> KerberosRunTestForUserAsync(LabResponse labResponse, KerberosTicketContainer ticketContainer, bool directToAdfs = false)
+        private async Task<AuthenticationResult> KerberosRunTestForUserAsync(
+            LabResponse labResponse,
+            KerberosTicketContainer ticketContainer)
         {
             HttpSnifferClientFactory factory = null;
-            IPublicClientApplication pca;
-            if (directToAdfs)
-            {
-                pca = PublicClientApplicationBuilder
-                    .Create(Adfs2019LabConstants.PublicClientId)
-                    .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
-                    .WithAdfsAuthority(Adfs2019LabConstants.Authority)
-                    .WithTestLogging()
-                    .WithTenantId(labResponse.Lab.TenantId)
-                    .WithClientId(TestConstants.KerberosTestApplicationId)
-                    .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer)
-                    .Build();
-            }
-            else
-            {
-                pca = PublicClientApplicationBuilder
+            IPublicClientApplication pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .WithAuthority(labResponse.Lab.Authority + "common")
@@ -424,14 +399,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     .WithClientId(TestConstants.KerberosTestApplicationId)
                     .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer)
                     .Build();
-            }
 
             var userCacheAccess = pca.UserTokenCache.RecordAccess();
 
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
             AuthenticationResult result = await pca
                 .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false, directToAdfs))
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false, false))
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
@@ -464,7 +438,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
                 .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin, true, directToAdfs))
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin, true, false))
                 .WithPrompt(Prompt.ForceLogin)
                 .WithLoginHint(labResponse.User.Upn)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
@@ -516,40 +490,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
 
             return result;
-        }
-
-        private async Task KerberosRunPromptTestForUserAsync(LabResponse labResponse, Prompt prompt, bool useLoginHint, KerberosTicketContainer ticketContainer)
-        {
-            var pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
-               .WithDefaultRedirectUri()
-               .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-               .WithTestLogging()
-               .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer)
-               .Build();
-
-            AcquireTokenInteractiveParameterBuilder builder = pca
-               .AcquireTokenInteractive(s_scopes)
-               .WithPrompt(prompt)
-               .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, prompt, useLoginHint));
-
-            if (useLoginHint)
-            {
-                builder = builder.WithLoginHint(labResponse.User.Upn);
-            }
-
-            AuthenticationResult result = await builder
-               .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
-               .ConfigureAwait(false);
-
-            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-
-            KerberosSupplementalTicket ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
-                result,
-                ticketContainer,
-                labResponse.User.Upn);
-            Assert.IsNotNull(ticket);
-            TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
         }
 
         #endregion
