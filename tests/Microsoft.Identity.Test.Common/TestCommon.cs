@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Unit;
 using NSubstitute;
+using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Test.Common
 {
@@ -91,11 +92,13 @@ namespace Microsoft.Identity.Test.Common
             IServiceBundle serviceBundle,
             Authority authority = null,
             HashSet<string> scopes = null,
-            RequestContext requestContext = null)
+            RequestContext requestContext = null,
+            ApiIds apiID = ApiIds.None)
         {
             var commonParameters = new AcquireTokenCommonParameters
             {
                 Scopes = scopes ?? TestConstants.s_scope,
+                ApiId = apiID
             };
 
             authority = authority ?? Authority.CreateAuthority(TestConstants.AuthorityTestTenant);

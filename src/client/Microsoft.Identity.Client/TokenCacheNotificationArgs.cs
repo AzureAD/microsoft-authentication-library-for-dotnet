@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Threading;
 
 namespace Microsoft.Identity.Client
@@ -21,7 +22,8 @@ namespace Microsoft.Identity.Client
             bool isAppCache, 
             bool hasTokens,
             CancellationToken cancellationToken,
-            string suggestedCacheKey = null)
+            string suggestedCacheKey = null,
+            DateTimeOffset? suggestedCacheExpiry = null)
         {
             TokenCache = tokenCacheSerializer;
             ClientId = clientId;
@@ -31,6 +33,7 @@ namespace Microsoft.Identity.Client
             HasTokens = hasTokens;
             SuggestedCacheKey = suggestedCacheKey;
             CancellationToken = cancellationToken;
+            SuggestedCacheExpiry = suggestedCacheExpiry;
         }
 
         /// <summary>
@@ -94,5 +97,14 @@ namespace Microsoft.Identity.Client
         /// along to the custom token cache implementation.
         /// </summary>
         public CancellationToken CancellationToken { get; }
+
+        /// <Summary>
+        /// Suggested value of the expiry, to help determining the cache eviction time. 
+        /// This value is <b>only</b> set on the <code>OnAfterAccess</code> delegate, on a cache write
+        /// operation (that is when <code>args.HasStateChanged</code> is <code>true</code>) and when the cache write 
+        /// is triggered from the <code>AcquireTokenForClient</code> method. In all other cases it's <code>null</code>, as there is a refresh token, and therefore the
+        /// access tokens are refreshable.
+        /// </Summary> 
+        public DateTimeOffset? SuggestedCacheExpiry { get; private set; }
     }
 }
