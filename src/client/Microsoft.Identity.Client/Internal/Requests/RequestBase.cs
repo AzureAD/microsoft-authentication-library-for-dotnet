@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// input scopes with reserved scopes (openid, profile etc.)
         /// Leave as is / return null otherwise
         /// </summary>
-        protected virtual SortedSet<string> GetOverridenScopes(ISet<string> inputScopes)
+        protected virtual SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {
             return null;
         }
@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
-            string scopes = GetOverridenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
+            string scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
             var tokenClient = new TokenClient(AuthenticationRequestParameters);
 
             var CcsHeader = GetCcsHeader(additionalBodyParameters);
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     var userObjectId = AuthenticationRequestParameters.Account.HomeAccountId.ObjectId;
                     var userTenantID = AuthenticationRequestParameters.Account.HomeAccountId.TenantId;
-                    string OidCcsHeader = CoreHelpers.GetCcsClientInfoHeader(userObjectId, userTenantID);
+                    string OidCcsHeader = CoreHelpers.GetCcsClientInfoHint(userObjectId, userTenantID);
 
                     return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader);
                 }
@@ -306,8 +306,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected KeyValuePair<string, string>? GetCcsUpnHeader(string upnHeader)
         {
-            string OidCcsHeader = CoreHelpers.GetCcsUpnHeader(upnHeader);
-            return new KeyValuePair<string, string>?(new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader));
+            string OidCcsHeader = CoreHelpers.GetCcsUpnHint(upnHeader);
+            return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader) as KeyValuePair<string, string>?;
         }
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)

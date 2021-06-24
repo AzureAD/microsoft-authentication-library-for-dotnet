@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Security;
@@ -19,9 +18,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -290,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.ServiceBundle.ConfigureMockWebUI();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
                 var extraExpectedHeaders = TestConstants.ExtraHttpHeader;
-                extraExpectedHeaders.Add(Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHeader(TestConstants.s_user.Username));
+                extraExpectedHeaders.Add(Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHint(TestConstants.s_user.Username));
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant, null, null, false, null, extraExpectedHeaders);
 
                 Guid correlationId = Guid.NewGuid();
@@ -847,8 +844,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
-            var authoriy = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.AuthorityInfo, null);
-            Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authoriy.AuthorityInfo.CanonicalAuthority);
+            var authority = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.AuthorityInfo, null);
+            Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]

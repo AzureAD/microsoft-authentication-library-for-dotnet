@@ -5,9 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Advanced;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -94,6 +97,32 @@ namespace Microsoft.Identity.Client
         public GetAuthorizationRequestUrlParameterBuilder WithPkce(out string codeVerifier)
         {
             Parameters.CodeVerifier = codeVerifier = ServiceBundle.PlatformProxy.CryptographyManager.GenerateCodeVerifier();
+            return this;
+        }
+
+        /// <summary>
+        /// To help with resiliency, AAD Cached Credential Service (CCS) operates as an AAD backup.
+        /// </summary>
+        /// <param name="userObjectIdentifier">GUID which is unique to the user, parsed from the client_info.</param>
+        /// <param name="tenantIdentifier">GUID format of the tenant ID, parsed from the client_info.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public GetAuthorizationRequestUrlParameterBuilder WithCcsRoutingHint(string userObjectIdentifier, string tenantIdentifier)
+        {
+            if (string.IsNullOrEmpty(userObjectIdentifier))
+            {
+                throw new ArgumentException(MsalErrorMessage.CcsRoutingHintMissing, nameof(userObjectIdentifier));
+            }
+            if (string.IsNullOrEmpty(tenantIdentifier))
+            {
+                throw new ArgumentException(MsalErrorMessage.CcsRoutingHintMissing, nameof(tenantIdentifier));
+            }
+
+            var ccsRoutingHeader = new Dictionary<string, string>()
+            {
+                { Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsClientInfoHint(userObjectIdentifier, tenantIdentifier) }
+            };
+
+            this.WithExtraHttpHeaders(ccsRoutingHeader);
             return this;
         }
 

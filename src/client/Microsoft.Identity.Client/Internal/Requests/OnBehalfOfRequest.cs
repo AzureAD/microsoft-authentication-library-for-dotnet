@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,12 +9,14 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class OnBehalfOfRequest : RequestBase
     {
         private readonly AcquireTokenOnBehalfOfParameters _onBehalfOfParameters;
+        private string _ccsRoutingHint;
 
         public OnBehalfOfRequest(
             IServiceBundle serviceBundle,
@@ -104,6 +105,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // If a refresh token is not found, fetch a new access token
             if (appRefreshToken != null)
             {
+                var clientInfo = ClientInfo.CreateFromJson(appRefreshToken.RawClientInfo);
+                _ccsRoutingHint = CoreHelpers.GetCcsClientInfoHint(clientInfo.UniqueObjectIdentifier,
+                                                                                  clientInfo.UniqueTenantIdentifier);
+
                 var msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(appRefreshToken, this, AuthenticationRequestParameters, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -146,7 +151,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
-            return null;
+            return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, _ccsRoutingHint) as KeyValuePair<string, string>?;
         }
     }
 }

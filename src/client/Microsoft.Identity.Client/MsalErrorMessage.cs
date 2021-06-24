@@ -391,5 +391,7 @@ namespace Microsoft.Identity.Client
                 CultureInfo.InvariantCulture,
                 "Failure setting process security to enable WAM Account Picker in an elevated process ({0}). For troubleshooting details, see https://aka.ms/msal-net-wam .",
                 errorCode);
+
+        public static string CcsRoutingHintMissing = "Either the userObjectIdentifier or tenantIdenifier are missing. Both are needed to create the ccs routing hint. See https://aka.ms/msal-net/ccsRouting. ";
     }
 }

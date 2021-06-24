@@ -16,10 +16,11 @@ namespace DesktopTestApp
         public PublicClientHandler(string clientId, LogCallback logCallback)
         {
             ApplicationId = clientId;
-            PublicClientApplication = PublicClientApplicationBuilder.Create(ApplicationId)
+            PublicClientApplication = PublicClientApplicationBuilder.Create("PublicClientId")
                 .WithClientName(_clientName)
-                .WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
+                .WithRedirectUri("http://localhost:8080")
                 .WithLogging(logCallback, LogLevel.Verbose, true)
+                .WithAdfsAuthority("https://fs.msidlab8.com/adfs")
 #if ARIA_TELEMETRY_ENABLED
                 .WithTelemetry((new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
 #endif
@@ -111,10 +112,10 @@ namespace DesktopTestApp
                 .AcquireTokenSilent(scopes, CurrentUser)
                 .WithForceRefresh(forceRefresh);
 
-            if (!string.IsNullOrWhiteSpace(AuthorityOverride))
-            {
-                builder = builder.WithAuthority(AuthorityOverride);
-            }
+            //if (!string.IsNullOrWhiteSpace(AuthorityOverride))
+            //{
+                builder = builder.WithAdfsAuthority("https://fs.msidlab8.com/adfs");
+            //}
 
             return await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -143,14 +144,14 @@ namespace DesktopTestApp
         public void CreateOrUpdatePublicClientApp(string interactiveAuthority, string applicationId)
         {
             var builder = PublicClientApplicationBuilder
-                .Create(ApplicationId)
+                .Create("PublicClientId")
                 .WithClientName(_clientName);
 
-            if (!string.IsNullOrWhiteSpace(interactiveAuthority))
-            {
+            //if (!string.IsNullOrWhiteSpace(interactiveAuthority))
+            //{
                 // Use the override authority provided
-                builder = builder.WithAuthority(new Uri(interactiveAuthority), true);
-            }
+                builder = builder.WithAdfsAuthority("https://fs.msidlab8.com/adfs").WithRedirectUri("http://localhost:8080");
+            //}
 
             PublicClientApplication = builder.BuildConcrete();
 
