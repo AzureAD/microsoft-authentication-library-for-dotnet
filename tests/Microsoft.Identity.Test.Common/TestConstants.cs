@@ -349,6 +349,13 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
       ""token_type"":""Bearer"",
       ""username"":""some_user@contoso.com""
    }";
+
+        // constants for Azure AD Kerberos Features
+        public const string KerberosTestApplicationId = "682992e9-c9c6-49c9-a819-3fbca2dd5111";
+        public const string KerberosServicePrincipalName = "HTTP/msal-kerberos-test.msidlab4.com";
+        public const string KerberosServicePrincipalNameEscaped = "HTTP**msal-kerberos-test.msidlab4.com";
+        public const string AzureADKerberosRealmName = "KERBEROS.MICROSOFTONLINE.COM";
+        public const int KerberosMinMessageBufferLength = 256;
     }
 
     internal static class Adfs2019LabConstants

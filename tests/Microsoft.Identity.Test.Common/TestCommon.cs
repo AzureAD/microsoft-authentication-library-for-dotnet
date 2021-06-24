@@ -3,9 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Text;
+
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
@@ -13,10 +16,14 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Unit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using NSubstitute;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
@@ -119,7 +126,6 @@ namespace Microsoft.Identity.Test.Common
             {
             };
         }
-
         public static KeyValuePair<string, IEnumerable<string>> GetCcsHeaderFromSnifferFactory(HttpSnifferClientFactory factory)
         {
             if (factory.RequestsAndResponses.Any())
@@ -131,6 +137,109 @@ namespace Microsoft.Identity.Test.Common
             }
 
             throw new MsalClientException("Could not find CCS Header in sniffer factory.");
+        }
+
+        /// <summary>
+        /// Get a Kerberos Ticket contained in the given <see cref="AuthenticationResult"/> object.
+        /// </summary>
+        /// <param name="authResult">An <see cref="AuthenticationResult"/> object to get Kerberos Ticket from.</param>
+        /// <param name="container">The <see cref="KerberosTicketContainer"/> indicating the token where the Kerberos Ticket stored.</param>"
+        /// <param name="userUpn">UPN of the client.</param>
+        /// <returns>A <see cref="KerberosSupplementalTicket"/> if there's valid one.</returns>
+        public static KerberosSupplementalTicket GetValidatedKerberosTicketFromAuthenticationResult(AuthenticationResult authResult,
+            KerberosTicketContainer container,
+            string userUpn)
+        {
+            if (container == KerberosTicketContainer.IdToken)
+            {
+                ValidateNoKerberosTicketFromToken(authResult.AccessToken);
+                return GetValidatedKerberosTicketFromToken(authResult.IdToken, userUpn);
+            }
+
+            ValidateNoKerberosTicketFromToken(authResult.IdToken);
+            return GetValidatedKerberosTicketFromToken(authResult.AccessToken, userUpn);
+        }
+
+        /// <summary>
+        /// Get a Kerberos Ticket contained in the given token.
+        /// </summary>
+        /// <param name="token">Token to be validated.</param>
+        /// <param name="userUpn">UPN of the client.</param>
+        /// <returns>A <see cref="KerberosSupplementalTicket"/> if there's valid one.</returns>
+        public static KerberosSupplementalTicket GetValidatedKerberosTicketFromToken(string token, string userUpn)
+        {
+            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(token);
+
+            Assert.IsNotNull(ticket, "Kerberos Ticket is not found.");
+            Assert.IsTrue(string.IsNullOrEmpty(ticket.ErrorMessage), "Kerberos Ticket creation failed with: " + ticket.ErrorMessage);
+            Assert.IsFalse(string.IsNullOrEmpty(ticket.KerberosMessageBuffer), "Kerberos Ticket data is not found.");
+            Assert.IsTrue(ticket.KerberosMessageBuffer.Length > TestConstants.KerberosMinMessageBufferLength, "Received Kerberos Ticket data is too short.");
+            Assert.AreEqual(KerberosKeyTypes.Aes256CtsHmacSha196, ticket.KeyType, "Kerberos key type is not matched.");
+            Assert.AreEqual(TestConstants.KerberosServicePrincipalName, ticket.ServicePrincipalName, true, CultureInfo.InvariantCulture, "Service principal name is not matched.");
+            Assert.AreEqual(userUpn, ticket.ClientName, true, CultureInfo.InvariantCulture, "Client name is not matched.");
+
+            return ticket;
+        }
+
+        /// <summary>
+        /// Validates Windows Ticket Cache interface for the given <see cref="KerberosSupplementalTicket"/> Kerberos Ticket.
+        /// </summary>
+        /// <param name="ticket">A <see cref="KerberosSupplementalTicket"/> object to be checked.</param>
+        public static void ValidateKerberosWindowsTicketCacheOperation(KerberosSupplementalTicket ticket)
+        {
+            if (DesktopOsHelper.IsWindows())
+            {
+                // First, save the given Kerberos Ticket (with KRB-CRED format) into the Windows Ticket Cache.
+                // Windows Ticket Cache decrypts the given Kerberos Ticket with KRB-CRED format, re-encrypt with it's
+                // credential and save it as AP-REQ format.
+                KerberosSupplementalTicketManager.SaveToWindowsTicketCache(ticket);
+
+                // Read-back saved Ticket data.
+                byte[] ticketBytes
+                    = KerberosSupplementalTicketManager.GetKerberosTicketFromWindowsTicketCache(ticket.ServicePrincipalName);
+                Assert.IsNotNull(ticketBytes);
+
+                // To validate public field of AP-REQ format Kerberos Ticket, convert binary ticket data as a printable string format.
+                StringBuilder sb = new StringBuilder();
+                foreach (byte ch in ticketBytes)
+                {
+                    if (ch >= 32 && ch < 127)
+                    {
+                        sb.Append((char)ch);
+                    }
+                    else
+                    {
+                        sb.Append('*');
+                    }
+                }
+                string ticketAsString = sb.ToString();
+
+                // Check the Azure AD Kerberos Realm string exists.
+                Assert.IsTrue(ticketAsString.IndexOf(TestConstants.AzureADKerberosRealmName) >= 0);
+
+                // Check the ticket has matched Kerberos Service Principal Name.
+                Assert.IsTrue(ticketAsString.IndexOf(TestConstants.KerberosServicePrincipalNameEscaped, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+        }
+
+        /// <summary>
+        /// Validates there were no Kerberos Ticket with the given <see cref="AuthenticationResult"/> object.
+        /// </summary>
+        /// <param name="authResult">An <see cref="AuthenticationResult"/> object to be checked.</param>
+        public static void ValidateNoKerberosTicketFromAuthenticationResult(AuthenticationResult authResult)
+        {
+            ValidateNoKerberosTicketFromToken(authResult.IdToken);
+            ValidateNoKerberosTicketFromToken(authResult.AccessToken);
+        }
+
+        /// <summary>
+        /// Validates there were no valid Kerberos Ticket contained in the given token.
+        /// </summary>
+        /// <param name="token">Token to be validated.</param>
+        public static void ValidateNoKerberosTicketFromToken(string token)
+        {
+            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(token);
+            Assert.IsNull(ticket, "Kerberos Ticket exists.");
         }
     }
 }
