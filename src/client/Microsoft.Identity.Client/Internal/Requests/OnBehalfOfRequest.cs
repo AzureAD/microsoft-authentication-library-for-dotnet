@@ -151,6 +151,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
+            if (string.IsNullOrEmpty(_ccsRoutingHint))
+            {
+                return null;
+            }
+
             return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, _ccsRoutingHint) as KeyValuePair<string, string>?;
         }
     }
