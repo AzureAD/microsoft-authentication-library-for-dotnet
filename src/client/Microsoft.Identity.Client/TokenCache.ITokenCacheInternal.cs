@@ -214,6 +214,13 @@ namespace Microsoft.Identity.Client
                     ITokenCacheInternal tokenCacheInternal = this;
                     if (tokenCacheInternal.IsTokenCacheSerialized())
                     {
+                        DateTimeOffset? cacheExpiry = null;
+
+                        if (!_accessor.GetAllRefreshTokens().Any())
+                        {
+                            cacheExpiry = CalculateSuggestedCacheExpiry();
+                        }
+
                         var args = new TokenCacheNotificationArgs(
                             this,
                             ClientId,
@@ -222,7 +229,8 @@ namespace Microsoft.Identity.Client
                             tokenCacheInternal.IsApplicationCache,
                             tokenCacheInternal.HasTokensNoLocks(),
                             requestParams.RequestContext.UserCancellationToken,
-                            suggestedCacheKey: suggestedWebCacheKey);
+                            suggestedCacheKey: suggestedWebCacheKey,
+                            suggestedCacheExpiry: cacheExpiry);
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -240,6 +248,13 @@ namespace Microsoft.Identity.Client
                 _semaphoreSlim.Release();
                 requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
             }
+        }
+
+        private DateTimeOffset CalculateSuggestedCacheExpiry()
+        {
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
+            var unixCacheExpiry = tokenCacheItems.Max(item => item.ExpiresOnUnixTimestamp);
+            return (DateTimeOffset)CoreHelpers.UnixTimestampStringToDateTime(unixCacheExpiry);
         }
 
         private string GetTenantId(IdToken idToken, AuthenticationRequestParameters requestParams)
