@@ -9,13 +9,9 @@ using BenchmarkDotNet.Attributes;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Unit;
-using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Test.Performance
 {
@@ -26,11 +22,8 @@ namespace Microsoft.Identity.Test.Performance
     {
         ConfidentialClientApplication _ccaTokensDifferByScope;
         ConfidentialClientApplication _ccaTokensDifferByTenant;
-        private MsalTokenResponse _response;
-        private AuthenticationRequestParameters _requestParams;
-        private IServiceBundle _serviceBundle;
 
-        [Params(1000, 10000)]
+        [Params(10000)]
         public int TokenCacheSize { get; set; }
 
         [GlobalSetup]
