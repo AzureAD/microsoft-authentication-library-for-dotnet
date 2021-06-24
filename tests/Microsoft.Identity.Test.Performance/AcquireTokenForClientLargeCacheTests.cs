@@ -23,8 +23,8 @@ namespace Microsoft.Identity.Test.Performance
         ConfidentialClientApplication _ccaTokensDifferByScope;
         ConfidentialClientApplication _ccaTokensDifferByTenant;
 
-        [Params(1000, 10000, 100000)]
-        public int TokenCacheSize { get; set; }
+        [Params(1000, 10000)]
+        public int TokenCacheSize;
 
         [GlobalSetup]
         public void GlobalSetup()
