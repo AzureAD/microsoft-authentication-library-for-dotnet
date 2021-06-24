@@ -9,15 +9,9 @@ using BenchmarkDotNet.Attributes;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
-using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Test.Performance
 {
@@ -28,9 +22,6 @@ namespace Microsoft.Identity.Test.Performance
     {
         ConfidentialClientApplication _ccaTokensDifferByScope;
         ConfidentialClientApplication _ccaTokensDifferByTenant;
-        private MsalTokenResponse _response;
-        private AuthenticationRequestParameters _requestParams;
-        private IServiceBundle _serviceBundle;
 
         [Params(10000)]
         public int TokenCacheSize { get; set; }
@@ -56,7 +47,7 @@ namespace Microsoft.Identity.Test.Performance
 
         /// <summary>
         /// Scenario where app token cache has a large number of tokes, each token for a different tenant. This is a common
-        /// multi-tenant scenario for which MSAL is optimized. In this case, the cache operations are O(1)
+        /// multi-tenant scenario for which MSAL is optimized. In this case, the cache operations are O(1).
         /// </summary>
         /// <returns></returns>
         [Benchmark(Description = "Different tenants - O(1)")]
@@ -101,7 +92,6 @@ namespace Microsoft.Identity.Test.Performance
             string key = "";
             for (int i = 0; i < size; i++)
             {
-
                 string tenantId = "tid";
                 string scope = "scope";
 
@@ -137,8 +127,12 @@ namespace Microsoft.Identity.Test.Performance
                 }
 
                 accessor.SaveAccessToken(atItem);
-                byte[] bytes = new TokenCacheJsonSerializer(accessor).Serialize(null);
-                cca.InMemoryPartitionedCacheSerializer.CachePartition[key] = bytes;
+
+                if (tokenDifference == TokenDifference.ByTenant || (tokenDifference == TokenDifference.ByScope && i == size - 1))
+                {
+                    byte[] bytes = new TokenCacheJsonSerializer(accessor).Serialize(null);
+                    cca.InMemoryPartitionedCacheSerializer.CachePartition[key] = bytes;
+                }
             }
 
             // force a cache read, otherwise MSAL won't have the tokens in memory
@@ -153,9 +147,6 @@ namespace Microsoft.Identity.Test.Performance
                                      cancellationToken: CancellationToken.None,
                                      suggestedCacheKey: key);
             cca.AppTokenCacheInternal.OnBeforeAccessAsync(args).GetAwaiter().GetResult();
-
-
         }
-
     }
 }
