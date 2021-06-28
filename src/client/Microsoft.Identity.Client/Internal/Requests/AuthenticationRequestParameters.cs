@@ -148,6 +148,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 
         public bool IsClientCredentialRequest => ApiId == ApiEvent.ApiIds.AcquireTokenForClient;
+
         public bool IsConfidentialClient
         {
             get
@@ -160,6 +161,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
         public UserAssertion UserAssertion { get; set; }
+
+        public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
 
         #endregion
 

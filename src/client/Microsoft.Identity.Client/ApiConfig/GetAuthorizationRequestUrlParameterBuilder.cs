@@ -62,6 +62,7 @@ namespace Microsoft.Identity.Client
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithLoginHint);
             Parameters.LoginHint = loginHint;
+
             return this;
         }
 
@@ -117,12 +118,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException(MsalErrorMessage.CcsRoutingHintMissing, nameof(tenantIdentifier));
             }
 
-            var ccsRoutingHeader = new Dictionary<string, string>()
-            {
-                { Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsClientInfoHint(userObjectIdentifier, tenantIdentifier) }
-            };
-
-            this.WithExtraHttpHeaders(ccsRoutingHeader);
+            Parameters.CcsRoutingHint = new KeyValuePair<string, string>(userObjectIdentifier, tenantIdentifier) as KeyValuePair<string, string>?;
             return this;
         }
 
