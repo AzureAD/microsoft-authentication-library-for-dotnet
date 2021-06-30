@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// To help with resiliency, AAD Cached Credential Service (CCS) operates as an AAD backup.
-        /// /// This will provide CCS with a routing hint to help improve performance during authentication.
+        /// This will provide CCS with a routing hint to help improve performance during authentication.
         /// </summary>
         /// <param name="userObjectIdentifier">GUID which is unique to the user, parsed from the client_info.</param>
         /// <param name="tenantIdentifier">GUID format of the tenant ID, parsed from the client_info.</param>
