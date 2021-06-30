@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// A legacy option available only to old Microsoft applications. Should be avoided where possible.
+        /// Support is experimental.
         /// </summary>
         public bool MsaPassthrough { get; set; } = false;
 
