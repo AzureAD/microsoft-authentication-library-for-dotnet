@@ -26,7 +26,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 Prompt = Prompt.SelectAccount,
                 UseEmbeddedWebView = WebViewPreference.NotSpecified,
                 CodeVerifier = CodeVerifier
-
             };
         }
 
