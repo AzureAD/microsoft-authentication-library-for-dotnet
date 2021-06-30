@@ -169,6 +169,14 @@ namespace Microsoft.Identity.Client
             }
 #endif
 
+#if NET461 || WINDOWS_APP || NET5_WIN
+            if (!Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithBroker)));
+            }
+#endif
 
             Config.IsBrokerEnabled = enableBroker;
             return this;

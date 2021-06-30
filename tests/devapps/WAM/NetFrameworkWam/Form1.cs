@@ -70,6 +70,7 @@ namespace NetDesktopWinForms
             var pca = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
+                .WithExperimentalFeatures(true)
                 .WithDesktopFeatures()
                 .WithBroker(this.useBrokerChk.Checked)
                 // there is no need to construct the PCA with this redirect URI, 

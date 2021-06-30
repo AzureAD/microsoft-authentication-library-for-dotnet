@@ -72,6 +72,7 @@ namespace NetCoreWinFormsWAM
             var pca = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
+                .WithExperimentalFeatures(true)
 #if !NET5_0
                 .WithDesktopFeatures()
 #endif
