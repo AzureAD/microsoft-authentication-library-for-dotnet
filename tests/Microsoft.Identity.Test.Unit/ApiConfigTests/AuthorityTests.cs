@@ -89,6 +89,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
               () => Authority.CreateAuthorityForRequest(s_ppeAuthority, s_commonAuthority, null));
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex2.ErrorCode);
 
+            Authority.CreateAuthorityForRequest("", "", );
+
             var ex3 = Assert.ThrowsException<MsalClientException>(
              () => Authority.CreateAuthorityForRequest(
                  AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority, true),

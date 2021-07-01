@@ -3,6 +3,8 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -47,17 +49,18 @@ namespace Microsoft.Identity.Client.Instance
         ///
         /// </summary>
         public static Authority CreateAuthorityForRequest(
-            AuthorityInfo configAuthorityInfo,
+            RequestContext requestContext,
             AuthorityInfo requestAuthorityInfo,
             string requestHomeAccountTenantId = null)
         {
+            var configAuthorityInfo = requestContext.ServiceBundle.Config.AuthorityInfo;
             if (configAuthorityInfo == null)
             {
                 throw new ArgumentNullException(nameof(configAuthorityInfo));
             }
 
             ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
-            ValidateSameHost(requestAuthorityInfo, configAuthorityInfo);
+            ValidateSameHost(requestAuthorityInfo, configAuthorityInfo, requestContext.ServiceBundle.InstanceDiscoveryManager);
 
             switch (configAuthorityInfo.AuthorityType)
             {
@@ -181,11 +184,14 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         internal abstract AuthorityEndpoints GetHardcodedEndpoints();
 
-        private static void ValidateSameHost(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
+        private static void ValidateSameHost(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo, RequestContext requestContext)
         {
             if (requestAuthorityInfo != null &&
                 !string.Equals(requestAuthorityInfo.Host, configAuthorityInfo.Host, StringComparison.OrdinalIgnoreCase))
             {
+                var instanceDiscoveryManager = requestContext.ServiceBundle.InstanceDiscoveryManager;
+                var result = instanceDiscoveryManager.GetMetadataEntryAsync(requestAuthorityInfo, requestContext);
+
                 if (requestAuthorityInfo.AuthorityType == AuthorityType.B2C)
                 {
                     throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
