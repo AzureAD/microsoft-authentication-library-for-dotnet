@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         {
             _webView2.CoreWebView2InitializationCompleted += WebView2Control_CoreWebView2InitializationCompleted;
             _webView2.NavigationStarting += WebView2Control_NavigationStarting;
-            _webView2.AcceleratorKeyPressed += _webView2_AcceleratorKeyPressed;
+            _webView2.KeyDown += _webView2_KeyDown;
 
             // Starts the navigation
             _webView2.Source = _startUri;
@@ -208,8 +208,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             }
         }
 
-        // Don't allow accelerator keys (ALT + back, ALT + forward etc.)
-        private void _webView2_AcceleratorKeyPressed(object sender, CoreWebView2AcceleratorKeyPressedEventArgs e)
+        // Don't allow accelerator keys (ALT + back, ALT + forward, CTRL + P, etc.)
+        private void _webView2_KeyDown(object sender, KeyEventArgs e)
         {
             _logger.Info("[WebView2Control] Accelerator key disabled");
             e.Handled = true;
