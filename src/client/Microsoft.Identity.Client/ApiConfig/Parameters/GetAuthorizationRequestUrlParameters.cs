@@ -14,6 +14,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IEnumerable<string> ExtraScopesToConsent { get; set; }
         public string LoginHint { get; set; }
         public string CodeVerifier { get; set; }
+        public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
 
         public AcquireTokenInteractiveParameters ToInteractiveParameters()
         {

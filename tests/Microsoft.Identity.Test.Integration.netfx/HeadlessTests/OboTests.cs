@@ -8,8 +8,8 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -105,13 +105,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = ConfidentialClientApplicationBuilder
                 .Create(OboConfidentialClientID)
                 .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
-                .WithTestLogging()
+                .WithTestLogging(out HttpSnifferClientFactory factory)
                 .WithClientSecret(_confidentialClientSecret)
                 .Build();
             s_inMemoryTokenCache.Bind(cca.UserTokenCache);
 
             authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(authResult.AccessToken))
                 .WithForceRefresh(forceRefresh)
+                .WithCcsRoutingHint("597f86cd-13f3-44c0-bece-a1e77ba43228", "f645ad92-e38d-4d1a-b510-d1b09a74a8ca")
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -129,8 +130,24 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult, user);
             Assert.IsNotNull(authResult.IdToken); // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1950
             Assert.IsTrue(authResult.Scopes.Any(s => string.Equals(s, s_scopes.Single(), StringComparison.OrdinalIgnoreCase)));
+            AssertExtraHTTPHeadersAreSent(factory);
 
             return cca;
-        }      
+        }
+
+        private void AssertExtraHTTPHeadersAreSent(HttpSnifferClientFactory factory)
+        {
+            //Validate CCS Routing header
+            if (!factory.RequestsAndResponses.Any())
+            {
+                return;
+            }
+
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
+            x.Item2.StatusCode == HttpStatusCode.OK);
+
+            Assert.IsTrue(req.Headers.TryGetValues(Constants.CcsRoutingHintHeader, out var values));
+            Assert.AreEqual("oid:597f86cd-13f3-44c0-bece-a1e77ba43228@f645ad92-e38d-4d1a-b510-d1b09a74a8ca", values.First());
+        }
     }
 }

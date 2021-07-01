@@ -5,11 +5,9 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,8 +21,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
         private readonly string _optionalBrokerInstallUrl; // can be null
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
-
-
         private readonly ICoreLogger _logger;
 
         public BrokerInteractiveRequestComponent(
@@ -91,7 +87,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
                                                                      msalTokenResponse.CorrelationId,
                                                                      msalTokenResponse.HttpResponse);
             }
-
 
             _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
             throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
