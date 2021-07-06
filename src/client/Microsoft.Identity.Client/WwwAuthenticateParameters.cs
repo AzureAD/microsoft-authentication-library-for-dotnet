@@ -20,19 +20,21 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// Resource for which to request scopes.
+        /// This is the App ID URI of the API that returned the WWW-Authenticate header.
         /// </summary>
         public string Resource { get; set; }
 
         /// <summary>
         /// Scopes to request.
+        /// If it's not provided by the web API, it's computed from the Resource.
         /// </summary>
         public string[] Scopes
         {
             get
             {
-                if (scopes != null)
+                if (_scopes != null)
                 {
-                    return scopes;
+                    return _scopes;
                 }
                 else if (!string.IsNullOrEmpty(Resource))
                 {
@@ -45,11 +47,11 @@ namespace Microsoft.Identity.Client
             }
             set
             {
-                scopes = value;
+                _scopes = value;
             }
         }
 
-        private string[] scopes;
+        private string[] _scopes;
 
         /// <summary>
         /// Authority from which to request an access token.
@@ -57,7 +59,7 @@ namespace Microsoft.Identity.Client
         public string Authority { get; set; }
 
         /// <summary>
-        /// Requested claims.
+        /// Claims demanded by the web API.
         /// </summary>
         public string Claims { get; set; }
 
@@ -68,7 +70,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Dictionary of raw parameters in the WWW-Authenticate header (extracted from the WWW-Authenticate header
-        /// string value, without any processing. This allows support for APIs which are not mappable easily to the standard
+        /// string value, without any processing). This allows support for APIs which are not mappable easily to the standard
         /// or framework specific (SAL, Microsoft.Identity.Web).
         /// </summary>
         public IDictionary<string, string> RawParameters { get; private set; }
@@ -78,7 +80,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
         /// <param name="scheme">Authentication scheme. Default is "Bearer".</param>
-        /// <returns></returns>
+        /// <returns>The parameters requested by the web API.</returns>
         public static WwwAuthenticateParameters ExtractWwwAuthenticateParametersFromHeaders(
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
@@ -98,7 +100,7 @@ namespace Microsoft.Identity.Client
         /// Extract parameters from the WWW-Authenticate string.
         /// </summary>
         /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
-        /// <returns>Dictionary of parameters (name/value).</returns>
+        /// <returns>The parameters requested by the web API.</returns>
         public static WwwAuthenticateParameters ExtractParametersFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
         {
             if (string.IsNullOrWhiteSpace(wwwAuthenticateValue))
@@ -114,10 +116,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analysis the response
+        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
         /// </summary>
-        /// <param name="resourceUri">Uri of the resouce</param>
-        /// <returns>WwwAuthenticateParameters extracted from response to the un-authenticated call.</returns>
+        /// <param name="resourceUri">Uri of the resource.</param>
+        /// <returns>WWW-Authenticate Parameters extracted from response to the un-authenticated call.</returns>
         public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri)
         {
             // call this endpoint and see what the header says and return that
@@ -130,6 +132,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Extracts the claim challenge from HTTP header.
+        /// Used, for example, for CA auth context.
         /// </summary>
         /// <param name="httpResponseHeaders">The HTTP response headers.</param>
         /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
