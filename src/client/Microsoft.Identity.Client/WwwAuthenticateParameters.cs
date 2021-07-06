@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Dictionary of raw parameters in the WWW-Authenticate header (extracted from the WWW-Authenticate header
         /// string value, without any processing). This allows support for APIs which are not mappable easily to the standard
-        /// or framework specific (SAL, Microsoft.Identity.Web).
+        /// or framework specific (Microsoft.Identity.Model, Microsoft.Identity.Web).
         /// </summary>
         public IDictionary<string, string> RawParameters { get; private set; }
 
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Extract parameters from the WWW-Authenticate string.
+        /// Creates parameters from the WWW-Authenticate string.
         /// </summary>
         /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
         /// <returns>The parameters requested by the web API.</returns>
@@ -146,13 +146,13 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Extracts the claim challenge from HTTP header.
+        /// Gets the claim challenge from HTTP header.
         /// Used, for example, for CA auth context.
         /// </summary>
         /// <param name="httpResponseHeaders">The HTTP response headers.</param>
         /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
         /// <returns></returns>
-        public static string ExtractClaimChallengeFromResponseHeaders(
+        public static string GetClaimChallengeFromResponseHeaders(
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
         {
