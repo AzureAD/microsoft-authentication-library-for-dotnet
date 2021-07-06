@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client;
+using System.Collections.Generic;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -25,6 +26,8 @@ namespace Microsoft.Identity.Test.Unit
         const string DecodedClaims = "{\"id_token\":{\"auth_time\":{\"essential\":true},\"acr\":{\"values\":[\"urn:mace:incommon:iap:silver\"]}}}";
         const string DecodedClaimsHeader = "{\\\"id_token\\\":{\\\"auth_time\\\":{\\\"essential\\\":true},\\\"acr\\\":{\\\"values\\\":[\\\"urn:mace:incommon:iap:silver\\\"]}}}";
         const string SomeClaims = "some_claims";
+        const string ClaimsKey = "claims";
+        const string ErrorKey = "error";
 
         [TestMethod]
         [DataRow("client_id=00000003-0000-0000-c000-000000000000", "authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\"")]
@@ -75,6 +78,12 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsTrue(authParams.RawParameters.ContainsKey(resourceHeaderKey));
             Assert.IsTrue(authParams.RawParameters.ContainsKey(authorizationUriHeaderKey));
             Assert.IsTrue(authParams.RawParameters.ContainsKey(Realm));
+            Assert.AreEqual(string.Empty, authParams[Realm]);
+            Assert.AreEqual(GraphGuid, authParams[resourceHeaderKey]);
+            Assert.ThrowsException<KeyNotFoundException>(
+                () => authParams[ErrorKey]);
+            Assert.ThrowsException<KeyNotFoundException>(
+                () => authParams[ClaimsKey]);
         }
 
         [TestMethod]
@@ -90,17 +99,20 @@ namespace Microsoft.Identity.Test.Unit
             var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
 
             // Assert
-            string claimsKey = "claims";
-            string errorKey = "error";
+            string errorValue = "insufficient_claims";
             Assert.IsTrue(authParams.RawParameters.TryGetValue(AuthorizationUriKey, out string authorizationUri));
             Assert.AreEqual(AuthorizationValue, authorizationUri);
+            Assert.AreEqual(AuthorizationValue, authParams[AuthorizationUriKey]);
             Assert.IsTrue(authParams.RawParameters.ContainsKey(Realm));
             Assert.IsTrue(authParams.RawParameters.TryGetValue(Realm, out string realmValue));
             Assert.AreEqual(string.Empty, realmValue);
-            Assert.IsTrue(authParams.RawParameters.TryGetValue(claimsKey, out string claimsValue));
+            Assert.AreEqual(string.Empty, authParams[Realm]);
+            Assert.IsTrue(authParams.RawParameters.TryGetValue(ClaimsKey, out string claimsValue));
             Assert.AreEqual(claims, claimsValue);
-            Assert.IsTrue(authParams.RawParameters.TryGetValue(errorKey, out string errorValue));
-            Assert.AreEqual("insufficient_claims", errorValue);
+            Assert.AreEqual(claimsValue, authParams[ClaimsKey]);
+            Assert.IsTrue(authParams.RawParameters.TryGetValue(ErrorKey, out string errorValueParam));
+            Assert.AreEqual(errorValue, errorValueParam);
+            Assert.AreEqual(errorValue, authParams[ErrorKey]);
         }
 
         [TestMethod]
@@ -139,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit
             HttpResponseMessage httpResponse = CreateClaimsHttpResponse(DecodedClaimsHeader);
 
             // Act
-            string extractedClaims = WwwAuthenticateParameters.ExtractClaimChallengeFromResponseHeaders(httpResponse.Headers);
+            string extractedClaims = WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(httpResponse.Headers);
 
             // Assert
             Assert.AreEqual(DecodedClaimsHeader, extractedClaims);
@@ -152,7 +164,7 @@ namespace Microsoft.Identity.Test.Unit
             HttpResponseMessage httpResponse = CreateClaimsHttpResponse(EncodedClaims);
 
             // Act
-            string extractedClaims = WwwAuthenticateParameters.ExtractClaimChallengeFromResponseHeaders(httpResponse.Headers);
+            string extractedClaims = WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(httpResponse.Headers);
 
             // Assert
             Assert.AreEqual(DecodedClaims, extractedClaims);
@@ -165,12 +177,12 @@ namespace Microsoft.Identity.Test.Unit
             HttpResponseMessage httpResponse = CreateErrorHttpResponse();
 
             // Act & Assert
-            Assert.IsNull(WwwAuthenticateParameters.ExtractClaimChallengeFromResponseHeaders(httpResponse.Headers));
+            Assert.IsNull(WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(httpResponse.Headers));
         }
 
         private static HttpResponseMessage CreateClaimsHttpResponse(string claims)
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)401)
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             {
             };
             httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"insufficient_claims\", claims=\"{claims}\"");
@@ -179,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit
 
         private static HttpResponseMessage CreateErrorHttpResponse()
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)401)
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized)
             {
             };
             httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"some_error\", claims=\"{DecodedClaimsHeader}\"");
@@ -188,7 +200,7 @@ namespace Microsoft.Identity.Test.Unit
 
         private static HttpResponseMessage CreateHttpResponseHeaders(string resourceHeaderKey, string authorizationUriHeaderKey)
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)401)
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized)
             {
             };
             httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", {resourceHeaderKey}=\"{GraphGuid}\", {authorizationUriHeaderKey}=\"{AuthorizationValue}\"");

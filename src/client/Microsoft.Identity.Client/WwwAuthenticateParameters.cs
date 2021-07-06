@@ -69,13 +69,6 @@ namespace Microsoft.Identity.Client
         public string Error { get; set; }
 
         /// <summary>
-        /// Dictionary of raw parameters in the WWW-Authenticate header (extracted from the WWW-Authenticate header
-        /// string value, without any processing). This allows support for APIs which are not mappable easily to the standard
-        /// or framework specific (Microsoft.Identity.Model, Microsoft.Identity.Web).
-        /// </summary>
-        public IDictionary<string, string> RawParameters { get; private set; }
-
-        /// <summary>
         /// Return the <see cref="RawParameters"/> of key <paramref name="key"/>.
         /// </summary>
         /// <param name="key">Name of the raw parameter to retrieve.</param>
@@ -89,6 +82,13 @@ namespace Microsoft.Identity.Client
                 return RawParameters[key];
             }
         }
+
+        /// <summary>
+        /// Dictionary of raw parameters in the WWW-Authenticate header (extracted from the WWW-Authenticate header
+        /// string value, without any processing). This allows support for APIs which are not mappable easily to the standard
+        /// or framework specific (Microsoft.Identity.Model, Microsoft.Identity.Web).
+        /// </summary>
+        internal IDictionary<string, string> RawParameters { get; private set; }
 
         /// <summary>
         /// Create WWW-Authenticate parameters from the HttpResponseHeaders.
