@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private static InMemoryTokenCache s_staticCache = new InMemoryTokenCache();
         private const string LabAccessConfidentialClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string LabAccessPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
-        private const string LabAccessThumbPrint = "3051A5BE699BC4596EE47E9FEBBF48DBA85BE67B";
+        private const string LabAccessThumbPrint = "A7F68F87199F412451BF0FB364A3358A949D2CA8";
         private const string DataFileName = "data.txt";
         private static LabAccessAuthenticationType s_defaultAuthType = LabAccessAuthenticationType.ClientCertificate;
         private static string s_secret;
