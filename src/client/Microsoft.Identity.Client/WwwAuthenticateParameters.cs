@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client
 
             IDictionary<string, string> parameters = SplitWithQuotes(wwwAuthenticateValue, ',')
                 .Select(v => ExtractKeyValuePair(v.Trim()))
-                .ToDictionary(pair => pair.Key, pair => pair.Value);
+                .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
 
             return CreateWwwAuthenticateParameters(parameters);
         }
@@ -288,7 +288,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException(nameof(assignment), $"{assignment} isn't of the form a=b");
             }
 
-            return new KeyValuePair<string, string>(segments[0].ToLowerInvariant(), segments[1]);
+            return new KeyValuePair<string, string>(segments[0], segments[1]);
         }
 
         /// <summary>
