@@ -86,5 +86,37 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var expectedKey = $"{this._serviceBundle.Config.ClientId}_{tenantId}_AppTokenCache";
             Assert.AreEqual(expectedKey, actualKey);
         }
+
+        [TestMethod]
+        public void TestCacheKeyForRemoveAccount()
+        {
+            // Arrange
+            const string tenantId = TestConstants.AadTenantId;
+            var appTokenCache = new TokenCache(this._serviceBundle, isApplicationTokenCache: true);
+            var requestContext = new RequestContext(this._serviceBundle, Guid.NewGuid());
+            var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: tenantId, validateAuthority: false);
+            var acquireTokenCommonParameters = new AcquireTokenCommonParameters
+            {
+                ApiId = ApiEvent.ApiIds.RemoveAccount,
+                AuthorityOverride = tenantAuthority
+            };
+
+            var parameters = new AuthenticationRequestParameters(
+                this._serviceBundle,
+                appTokenCache,
+                acquireTokenCommonParameters,
+                requestContext,
+                Authority.CreateAuthority(tenantAuthority),
+                TestConstants.HomeAccountId);
+
+
+            // Act
+            var actualKey = SuggestedWebCacheKeyFactory.GetKeyFromRequest(parameters);
+
+            // Assert
+            Assert.IsNotNull(actualKey);
+            var expectedKey = parameters.HomeAccountId;
+            Assert.AreEqual(expectedKey, actualKey);
+        }
     }
 }
