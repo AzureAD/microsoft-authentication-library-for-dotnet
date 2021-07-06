@@ -76,6 +76,21 @@ namespace Microsoft.Identity.Client
         public IDictionary<string, string> RawParameters { get; private set; }
 
         /// <summary>
+        /// Return the <see cref="RawParameters"/> of key <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">Name of the raw parameter to retrieve.</param>
+        /// <returns>The raw parameter if it exists,
+        /// or throws a <see cref="System.Collections.Generic.KeyNotFoundException"/> otherwise.
+        /// </returns>
+        public string this[string key]
+        {
+            get
+            {
+                return RawParameters[key];
+            }
+        }
+
+        /// <summary>
         /// Create WWW-Authenticate parameters from the HttpResponseHeaders.
         /// </summary>
         /// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
