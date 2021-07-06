@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Test.Unit
         const string Realm = "realm";
         const string EncodedClaims = "eyJpZF90b2tlbiI6eyJhdXRoX3RpbWUiOnsiZXNzZW50aWFsIjp0cnVlfSwiYWNyIjp7InZhbHVlcyI6WyJ1cm46bWFjZTppbmNvbW1vbjppYXA6c2lsdmVyIl19fX0=";
         const string DecodedClaims = "{\"id_token\":{\"auth_time\":{\"essential\":true},\"acr\":{\"values\":[\"urn:mace:incommon:iap:silver\"]}}}";
+        const string DecodedClaimsHeader = "{\\\"id_token\\\":{\\\"auth_time\\\":{\\\"essential\\\":true},\\\"acr\\\":{\\\"values\\\":[\\\"urn:mace:incommon:iap:silver\\\"]}}}";
         const string SomeClaims = "some_claims";
 
         [TestMethod]
@@ -34,13 +35,16 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("resource=00000003-0000-0000-c000-000000000000", "authorization=\"https://login.microsoftonline.com/common/oauth2/authorize\"")]
         public void CreateWwwAuthenticateResponse(string resource, string authorizationUri)
         {
+            // Arrange
             HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)401)
             {
             };
             httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", {resource}, {authorizationUri}");
 
-            var authParams = WwwAuthenticateParameters.ExtractWwwAuthenticateParametersFromHeaders(httpResponse.Headers);
+            // Act
+            var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
 
+            // Assert
             Assert.AreEqual(GraphGuid, authParams.Resource);
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
             Assert.AreEqual($"{GraphGuid}/.default", authParams.Scopes.FirstOrDefault());
@@ -61,23 +65,31 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow(ResourceKey, AuthorityKey)]
         public void CreateRawParameters(string resourceHeaderKey, string authorizationUriHeaderKey)
         {
+            // Arrange
             HttpResponseMessage httpResponse = CreateHttpResponseHeaders(resourceHeaderKey, authorizationUriHeaderKey);
 
-            var authParams = WwwAuthenticateParameters.ExtractWwwAuthenticateParametersFromHeaders(httpResponse.Headers);
+            // Act
+            var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
 
+            // Assert
             Assert.IsTrue(authParams.RawParameters.ContainsKey(resourceHeaderKey));
             Assert.IsTrue(authParams.RawParameters.ContainsKey(authorizationUriHeaderKey));
             Assert.IsTrue(authParams.RawParameters.ContainsKey(Realm));
         }
 
         [TestMethod]
-        [DataRow(SomeClaims)]
+        [DataRow(DecodedClaimsHeader)]
         [DataRow(EncodedClaims)]
+        [DataRow(SomeClaims)]
         public void CreateRawParameters_ClaimsAndErrorReturned(string claims)
         {
+            // Arrange
             HttpResponseMessage httpResponse = CreateClaimsHttpResponse(claims);
-            var authParams = WwwAuthenticateParameters.ExtractWwwAuthenticateParametersFromHeaders(httpResponse.Headers);
 
+            // Act
+            var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
+
+            // Assert
             string claimsKey = "claims";
             string errorKey = "error";
             Assert.IsTrue(authParams.RawParameters.TryGetValue(AuthorizationUriKey, out string authorizationUri));
@@ -100,6 +112,7 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("resource=00000003-0000-0000-c000-000000000000", "authorization=\"https://login.microsoftonline.com/common/oauth2/authorize\"")]
         public void CreateWwwAuthenticateParamsFromWwwAuthenticateHeader(string clientId, string authorizationUri)
         {
+            // Arrange
             HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)401)
             {
             };
@@ -107,8 +120,10 @@ namespace Microsoft.Identity.Test.Unit
 
             var wwwAuthenticateResponse = httpResponse.Headers.WwwAuthenticate.FirstOrDefault().Parameter;
 
-            var authParams = WwwAuthenticateParameters.ExtractParametersFromWwwAuthenticateHeaderValue(wwwAuthenticateResponse);
+            // Act
+            var authParams = WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateResponse);
             
+            // Assert
             Assert.AreEqual(GraphGuid, authParams.Resource);
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
             Assert.AreEqual($"{GraphGuid}/.default", authParams.Scopes.FirstOrDefault());
@@ -120,21 +135,37 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public void ExtractClaimChallengeFromHeader()
         {
-            HttpResponseMessage httpResponse = CreateClaimsHttpResponse(SomeClaims);
+            // Arrange
+            HttpResponseMessage httpResponse = CreateClaimsHttpResponse(DecodedClaimsHeader);
 
-            string extractedClaims = WwwAuthenticateParameters.ExtractClaimChallengeFromHttpHeader(httpResponse.Headers);
+            // Act
+            string extractedClaims = WwwAuthenticateParameters.ExtractClaimChallengeFromResponseHeaders(httpResponse.Headers);
 
-            Assert.AreEqual(SomeClaims, extractedClaims);
+            // Assert
+            Assert.AreEqual(DecodedClaimsHeader, extractedClaims);
         }
 
         [TestMethod]
         public void ExtractEncodedClaimChallengeFromHeader()
         {
+            // Arrange
             HttpResponseMessage httpResponse = CreateClaimsHttpResponse(EncodedClaims);
 
-            string extractedClaims = WwwAuthenticateParameters.ExtractClaimChallengeFromHttpHeader(httpResponse.Headers);
+            // Act
+            string extractedClaims = WwwAuthenticateParameters.ExtractClaimChallengeFromResponseHeaders(httpResponse.Headers);
 
+            // Assert
             Assert.AreEqual(DecodedClaims, extractedClaims);
+        }
+
+        [TestMethod]
+        public void ExtractClaimChallengeFromHeader_IncorrectError_ReturnNull()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = CreateErrorHttpResponse();
+
+            // Act & Assert
+            Assert.IsNull(WwwAuthenticateParameters.ExtractClaimChallengeFromResponseHeaders(httpResponse.Headers));
         }
 
         private static HttpResponseMessage CreateClaimsHttpResponse(string claims)
@@ -143,6 +174,15 @@ namespace Microsoft.Identity.Test.Unit
             {
             };
             httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"insufficient_claims\", claims=\"{claims}\"");
+            return httpResponse;
+        }
+
+        private static HttpResponseMessage CreateErrorHttpResponse()
+        {
+            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)401)
+            {
+            };
+            httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"some_error\", claims=\"{DecodedClaimsHeader}\"");
             return httpResponse;
         }
 

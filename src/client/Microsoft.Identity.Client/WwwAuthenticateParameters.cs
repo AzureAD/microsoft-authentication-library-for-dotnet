@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client
         /// Scopes to request.
         /// If it's not provided by the web API, it's computed from the Resource.
         /// </summary>
-        public string[] Scopes
+        public IEnumerable<string> Scopes
         {
             get
             {
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private string[] _scopes;
+        private IEnumerable<string> _scopes;
 
         /// <summary>
         /// Authority from which to request an access token.
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client
         /// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
         /// <param name="scheme">Authentication scheme. Default is "Bearer".</param>
         /// <returns>The parameters requested by the web API.</returns>
-        public static WwwAuthenticateParameters ExtractWwwAuthenticateParametersFromHeaders(
+        public static WwwAuthenticateParameters CreateFromResponseHeaders(
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
         {
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client
                 // TODO: could it be Pop too?
                 AuthenticationHeaderValue bearer = httpResponseHeaders.WwwAuthenticate.First(v => string.Equals(v.Scheme, scheme, StringComparison.OrdinalIgnoreCase));
                 string wwwAuthenticateValue = bearer.Parameter;
-                return ExtractParametersFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
+                return CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
             }
 
             return CreateWwwAuthenticateParameters(new Dictionary<string, string>());
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
         /// <returns>The parameters requested by the web API.</returns>
-        public static WwwAuthenticateParameters ExtractParametersFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
+        public static WwwAuthenticateParameters CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
         {
             if (string.IsNullOrWhiteSpace(wwwAuthenticateValue))
             {
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
         /// </summary>
-        /// <param name="resourceUri">Uri of the resource.</param>
+        /// <param name="resourceUri">URI of the resource.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the un-authenticated call.</returns>
         public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri)
         {
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client
             HttpClient httpClient = new HttpClient();
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, resourceUri);
             HttpResponseMessage httpResponseMessage = await httpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
-            var wwwAuthParam = ExtractWwwAuthenticateParametersFromHeaders(httpResponseMessage.Headers);
+            var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers);
             return wwwAuthParam;
         }
 
@@ -137,17 +137,17 @@ namespace Microsoft.Identity.Client
         /// <param name="httpResponseHeaders">The HTTP response headers.</param>
         /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
         /// <returns></returns>
-        public static string ExtractClaimChallengeFromHttpHeader(
+        public static string ExtractClaimChallengeFromResponseHeaders(
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
         {
-            WwwAuthenticateParameters parameters = ExtractWwwAuthenticateParametersFromHeaders(
+            WwwAuthenticateParameters parameters = CreateFromResponseHeaders(
                 httpResponseHeaders,
                 scheme);
 
             try
             {
-                // read the header and checks if it conatins error with insufficient_claims value.
+                // read the header and checks if it contains an error with insufficient_claims value.
                 if (null != parameters.Error && "insufficient_claims" == parameters.Error)
                 {
                     if (null != parameters.Claims)
@@ -236,10 +236,11 @@ namespace Microsoft.Identity.Client
 
             int startIndex = 0;
             bool insideString = false;
+            int nestingLevel = 0;
             string item;
             for (int i = 0; i < input.Length; i++)
             {
-                if (input[i] == delimiter && !insideString)
+                if (input[i] == delimiter && !insideString && nestingLevel == 0)
                 {
                     item = input.Substring(startIndex, i - startIndex);
                     if (!string.IsNullOrWhiteSpace(item.Trim()))
@@ -252,6 +253,14 @@ namespace Microsoft.Identity.Client
                 else if (input[i] == '"')
                 {
                     insideString = !insideString;
+                }
+                else if (input[i] == '{')
+                {
+                    nestingLevel++;
+                }
+                else if (input[i] == '}')
+                {
+                    nestingLevel--;
                 }
             }
 
