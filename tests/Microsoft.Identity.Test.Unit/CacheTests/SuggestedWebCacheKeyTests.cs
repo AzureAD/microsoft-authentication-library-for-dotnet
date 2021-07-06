@@ -107,7 +107,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 acquireTokenCommonParameters,
                 requestContext,
                 Authority.CreateAuthority(tenantAuthority),
-                TestConstants.HomeAccountId);
+                TestConstants.HomeAccountId)
+            {
+                Account = new Account(TestConstants.HomeAccountId, TestConstants.Username, TestConstants.ProductionPrefCacheEnvironment)
+            };
 
 
             // Act
