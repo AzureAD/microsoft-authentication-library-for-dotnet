@@ -16,6 +16,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <returns><see cref="X509Certificate2"/> with <paramref name="thumbprint"/>, or null if no matching certificate was found</returns>
         public static X509Certificate2 FindCertificateByThumbprint(string thumbprint)
         {
+            // Hack to enable the builds:
+            if (thumbprint == "97D8C9DB3C84874D0363DCA540778461B2291780")
+            {
+                thumbprint = "378938210C976692D7F523B8C4FFBB645D17CE92";
+            }
+
             foreach (StoreLocation storeLocation in Enum.GetValues(typeof(StoreLocation)))
             {
                 var certificate = FindCertificateByThumbprint(thumbprint, storeLocation, StoreName.My);
@@ -38,6 +44,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <returns><see cref="X509Certificate2"/> with <paramref name="thumbprint"/>, or null if no matching certificate was found</returns>
         public static X509Certificate2 FindCertificateByThumbprint(string thumbprint, StoreLocation location, StoreName name)
         {
+            // Hack to enable the builds:
+            if (thumbprint == "97D8C9DB3C84874D0363DCA540778461B2291780")
+            {
+                thumbprint = "378938210C976692D7F523B8C4FFBB645D17CE92";
+            }
+
             // Don't validate certs, since the test root isn't installed.
             const bool validateCerts = false;
 
