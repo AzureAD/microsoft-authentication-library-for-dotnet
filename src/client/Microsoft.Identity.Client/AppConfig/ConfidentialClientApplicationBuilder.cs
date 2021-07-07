@@ -185,7 +185,8 @@ namespace Microsoft.Identity.Client
         /// Instructs MSAL.NET to use an Azure regional token service.
         /// </summary>
         /// <param name="azureRegion">Either the string with the region (preferred) or        
-        /// use <see cref="ConfidentialClientApplication.AttemptRegionDiscovery"/> and MSAL.NET will attempt to auto-detect the region.                
+        /// use <see cref="ConfidentialClientApplication.AttemptRegionDiscovery"/> and MSAL.NET will attempt to auto-detect the region,
+        /// or <c>null</c> to use the global endpoint.               
         /// </param>
         /// <remarks>
         /// Region names as per https://azure.microsoft.com/en-ca/global-infrastructure/geographies/.
@@ -203,11 +204,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public ConfidentialClientApplicationBuilder WithAzureRegion(string azureRegion = ConfidentialClientApplication.AttemptRegionDiscovery)
         {
-            if (string.IsNullOrEmpty(azureRegion))
-            {
-                throw new ArgumentNullException(nameof(azureRegion));
-            }
-
             Config.AzureRegion = azureRegion;
 
             return this;
