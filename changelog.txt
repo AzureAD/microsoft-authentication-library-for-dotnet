@@ -6,7 +6,7 @@
 ### New Features
 **MSAL can now extract elements contained in wwwAuthenticate headers** to enable customers to more easily handle Continuous Access Evaluation and Conditional Access authentication context scenarios. See issue [#2679](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2679)
 **WAM support is now generally available in MSAL.NET.** `WithExperimentalFeatures()` is no longer required to authenticate with WAM. See https://aka.ms/msal-net-wam for more details
-**MSAL enables Cache eviction more easily by exposing SuggestedCacheExpiry** which helps determining the cache eviction time. See issue [#2486](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2486)
+**MSAL enables easier cache eviction by exposing `SuggestedCacheExpiry`** which helps determining the cache eviction time. See issue [#2486](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2486)
 **MSAL now adds runtime information to logs** enabling easier diagnosing of authenticaiton issues on all platforms. See issue [2559](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2559)
 
 4.33.0
