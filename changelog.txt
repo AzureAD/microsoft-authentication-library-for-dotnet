@@ -1,7 +1,7 @@
 4.34.0
 ==========
 ### Bug Fixes:
-**MSAL now has WithCcsRoutingHint(...)** to enable developers to more easily provide the CCS Routing hint during authentication. See issue [2725](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2725)
+**MSAL now has `WithCcsRoutingHint()`** to enable developers to more easily provide the CCS routing hint during authentication. See issue [2725](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2725)
 
 ### New Features
 **MSAL can now extract elements contained in wwwAuthenticate headers** to enable customers to more easily handle Continuous Access Evaluation and Conditional Access authentication context scenarios. See issue [#2679](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2679)
