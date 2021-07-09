@@ -218,7 +218,7 @@ namespace TestApp
 
         private static X509Certificate2 ReadCertificate()
         {
-            string thumbprint = "97D8C9DB3C84874D0363DCA540778461B2291780";
+            string thumbprint = "378938210C976692D7F523B8C4FFBB645D17CE92";
 
             X509Certificate2 cert = null;
 

@@ -16,8 +16,7 @@ namespace Microsoft.Identity.Test.Integration.Win8
         public void WamOnWin8()
         {
             var pcaBuilder = PublicClientApplicationBuilder
-               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
-               .WithExperimentalFeatures();
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3");
 #if !NET5_WIN
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif

@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 namespace Microsoft.Identity.Client.Desktop
 {
     /// <summary>
+    /// WAM related extensions.
     /// </summary>
     public static class WamExtension
     {
@@ -16,13 +17,6 @@ namespace Microsoft.Identity.Client.Desktop
         /// </summary>
         public static PublicClientApplicationBuilder WithWindowsBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
-            if (!builder.Config.ExperimentalFeaturesEnabled)
-            {
-                throw new MsalClientException(
-                    MsalError.ExperimentalFeature,
-                    MsalErrorMessage.ExperimentalFeature(nameof(WithWindowsBroker)));
-            }
-
             builder.Config.IsBrokerEnabled = enableBroker;
             AddSupportForWam(builder);
             return builder;

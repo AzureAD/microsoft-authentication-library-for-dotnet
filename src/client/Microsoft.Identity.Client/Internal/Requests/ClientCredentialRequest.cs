@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.IsConfidentialClient = true;
         }
 
-        protected override SortedSet<string> GetOverridenScopes(ISet<string> inputScopes)
+        protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {           
             // Client credentials should not add the reserved scopes
             // "openid", "profile" and "offline_access" 

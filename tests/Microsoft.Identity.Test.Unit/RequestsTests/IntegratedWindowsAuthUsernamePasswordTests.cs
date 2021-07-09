@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var expectedRequestHeaders = new Dictionary<string, string> { { Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHeader(TestConstants.s_user.Username) } };
+                var expectedRequestHeaders = new Dictionary<string, string> { { Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHint(TestConstants.s_user.Username) } };
 
                 MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
