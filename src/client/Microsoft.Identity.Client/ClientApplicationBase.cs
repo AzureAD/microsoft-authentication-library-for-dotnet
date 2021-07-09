@@ -81,8 +81,8 @@ namespace Microsoft.Identity.Client
             RequestContext requestContext,
             ITokenCacheInternal cache)
         {
-            var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
-               requestContext.ServiceBundle.Config.AuthorityInfo,
+            var authority = Instance.Authority.CreateAuthorityForRequest(
+               requestContext,
                commonParameters.AuthorityOverride);
 
             return new AuthenticationRequestParameters(
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client
             requestContext.ApiEvent.ApiId = apiId;
 
             var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
-              requestContext.ServiceBundle.Config.AuthorityInfo,
+              requestContext,
               null);
 
             var authParameters = new AuthenticationRequestParameters(

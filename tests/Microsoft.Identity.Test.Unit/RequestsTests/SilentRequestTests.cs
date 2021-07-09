@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var requestContext = new RequestContext(ServiceBundle, Guid.NewGuid());
 
                 var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
-                    requestContext.ServiceBundle.Config.AuthorityInfo,
+                    requestContext,
                     commonParameters.AuthorityOverride);
 
                 var parameters = new AuthenticationRequestParameters(

@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
             // AcquireTokenSilent must not use "common" or "organizations". Instead, use the home tenant id.
             var tenantedAuthority = Authority.CreateAuthorityForRequest(
-                AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.AuthorityInfo,
+                AuthenticationRequestParameters.RequestContext,
                 AuthenticationRequestParameters.AuthorityOverride,
                 account?.HomeAccountId?.TenantId);
 

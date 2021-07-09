@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid());
 
                 var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
-                    requestContext.ServiceBundle.Config.AuthorityInfo, null);                    
+                    requestContext, null);                    
 
                 AuthenticationRequestParameters reqParams = new AuthenticationRequestParameters(
                     mocks.ServiceBundle,

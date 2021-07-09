@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
-            ValidateSameHost(requestAuthorityInfo, configAuthorityInfo, requestContext.ServiceBundle.InstanceDiscoveryManager);
+            ValidateSameHost(requestAuthorityInfo, requestContext);
 
             switch (configAuthorityInfo.AuthorityType)
             {
@@ -184,17 +184,21 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         internal abstract AuthorityEndpoints GetHardcodedEndpoints();
 
-        private static void ValidateSameHost(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo, RequestContext requestContext)
+        private static void ValidateSameHost(AuthorityInfo requestAuthorityInfo, RequestContext requestContext)
         {
+            var configAuthorityInfo = requestContext.ServiceBundle.Config.AuthorityInfo;
+
             if (requestAuthorityInfo != null &&
                 !string.Equals(requestAuthorityInfo.Host, configAuthorityInfo.Host, StringComparison.OrdinalIgnoreCase))
             {
-                var instanceDiscoveryManager = requestContext.ServiceBundle.InstanceDiscoveryManager;
-                var result = instanceDiscoveryManager.GetMetadataEntryAsync(requestAuthorityInfo, requestContext);
-
                 if (requestAuthorityInfo.AuthorityType == AuthorityType.B2C)
                 {
                     throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
+                }
+
+                if (IsAuthorityAliased(requestContext, requestAuthorityInfo))
+                {
+                    return;
                 }
 
                 if (configAuthorityInfo.IsDefaultAuthority)
@@ -212,6 +216,22 @@ namespace Microsoft.Identity.Client.Instance
                     $"\n\r The application is configured for cloud {configAuthorityInfo.Host} and the request for a different cloud - {requestAuthorityInfo.Host}. This is not supported - the app and the request must target the same cloud. " +
                     $"\n\rSee https://aka.ms/msal-net-authority-override for details");
             }
+        }
+
+        private static bool IsAuthorityAliased(RequestContext requestContext, AuthorityInfo requestAuthorityInfo)
+        {
+            var instanceDiscoveryManager = requestContext.ServiceBundle.InstanceDiscoveryManager;
+            var result = instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.AuthorityInfo, requestContext).Result;
+
+            foreach (string alias in result.Aliases)
+            {
+                if (string.Equals(alias, requestAuthorityInfo.Host))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         internal static string GetEnvironment(string authority)
