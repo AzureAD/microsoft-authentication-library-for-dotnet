@@ -94,8 +94,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.Inconclusive("Needs to run on win10 or equivalent");
             }
             var pcaBuilder = PublicClientApplicationBuilder
-               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
-               .WithExperimentalFeatures();
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3");
 #if !NET5_WIN
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif

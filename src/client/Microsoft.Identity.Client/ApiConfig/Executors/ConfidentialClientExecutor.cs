@@ -107,6 +107,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             requestParameters.Account = authorizationRequestUrlParameters.Account;
             requestParameters.LoginHint = authorizationRequestUrlParameters.LoginHint;
+            requestParameters.CcsRoutingHint = authorizationRequestUrlParameters.CcsRoutingHint;
 
             if (!string.IsNullOrWhiteSpace(authorizationRequestUrlParameters.RedirectUri))
             {

@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var CcsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
             var userObjectId = labResponse.User.ObjectId;
             var userTenantID = labResponse.User.TenantId;
-            Assert.AreEqual($"X-AnchorMailbox:Oid:{userObjectId}@{userTenantID}", $"{CcsHeader.Key}:{CcsHeader.Value.FirstOrDefault()}");
+            Assert.AreEqual($"x-anchormailbox:oid:{userObjectId}@{userTenantID}", $"{CcsHeader.Key}:{CcsHeader.Value.FirstOrDefault()}");
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);

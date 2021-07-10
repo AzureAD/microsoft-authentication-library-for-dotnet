@@ -68,12 +68,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var clientInfo = ClientInfo.CreateFromJson(_clientInfo);
 
                 _tokenClient.AddHeaderToClient(Constants.CcsRoutingHintHeader,
-                                               CoreHelpers.GetCcsClientInfoHeader(clientInfo.UniqueObjectIdentifier,
+                                               CoreHelpers.GetCcsClientInfoHint(clientInfo.UniqueObjectIdentifier,
                                                                                   clientInfo.UniqueTenantIdentifier));
             }
             else if (!string.IsNullOrEmpty(_interactiveParameters.LoginHint))
             {
-                _tokenClient.AddHeaderToClient(Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHeader(_interactiveParameters.LoginHint));
+                _tokenClient.AddHeaderToClient(Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHint(_interactiveParameters.LoginHint));
             }
         }
     }
