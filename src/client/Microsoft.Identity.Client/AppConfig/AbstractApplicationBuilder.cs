@@ -52,9 +52,9 @@ namespace Microsoft.Identity.Client
         /// Allows developers to configure their own valid authorities. A json string similar to https://aka.ms/aad-instance-discovery should be provided.
         /// MSAL uses this information to: 
         /// <list type="bullet">
-        /// <item>Call REST APIs on the environment specified in the preferred_network</item>
-        /// <item>Identify an environment under which to save tokens and accounts in the cache</item>
-        /// <item>Use the environment aliases to match tokens issued to other authorities</item>
+        /// <item><description>Call REST APIs on the environment specified in the preferred_network</description></item>
+        /// <item><description>Identify an environment under which to save tokens and accounts in the cache</description></item>
+        /// <item><description>Use the environment aliases to match tokens issued to other authorities</description></item>
         /// </list>
         /// For more details see https://aka.ms/msal-net-custom-instance-metadata
         /// </summary>
@@ -91,9 +91,9 @@ namespace Microsoft.Identity.Client
         /// Allows developers to configure their own valid authorities. A json string similar to https://aka.ms/aad-instance-discovery should be provided.
         /// MSAL uses this information to: 
         /// <list type="bullet">
-        /// <item>Call REST APIs on the environment specified in the preferred_network</item>
-        /// <item>Identify an environment under which to save tokens and accounts in the cache</item>
-        /// <item>Use the environment aliases to match tokens issued to other authorities</item>
+        /// <item><description>Call REST APIs on the environment specified in the preferred_network</description></item>
+        /// <item><description>Identify an environment under which to save tokens and accounts in the cache</description></item>
+        /// <item><description>Use the environment aliases to match tokens issued to other authorities</description></item>
         /// </list>
         /// For more details see https://aka.ms/msal-net-custom-instance-metadata
         /// </summary>
@@ -128,9 +128,9 @@ namespace Microsoft.Identity.Client
         /// Lets an organization setup their own service to handle instance discovery, which enables better caching for microservice/service environments.
         /// A Uri that returns a response similar to https://aka.ms/aad-instance-discovery should be provided. MSAL uses this information to: 
         /// <list type="bullet">
-        /// <item>Call REST APIs on the environment specified in the preferred_network</item>
-        /// <item>Identify an environment under which to save tokens and accounts in the cache</item>
-        /// <item>Use the environment aliases to match tokens issued to other authorities</item>
+        /// <item><description>Call REST APIs on the environment specified in the preferred_network</description></item>
+        /// <item><description>Identify an environment under which to save tokens and accounts in the cache</description></item>
+        /// <item><description>Use the environment aliases to match tokens issued to other authorities</description></item>
         /// </list>
         /// For more details see https://aka.ms/msal-net-custom-instance-metadata
         /// </summary>
@@ -153,9 +153,9 @@ namespace Microsoft.Identity.Client
         /// Lets an organization setup their own service to handle instance discovery, which enables better caching for microservice/service environments.
         /// A Uri that returns a response similar to https://aka.ms/aad-instance-discovery should be provided. MSAL uses this information to: 
         /// <list type="bullet">
-        /// <item>Call REST APIs on the environment specified in the preferred_network</item>
-        /// <item>Identify an environment under which to save tokens and accounts in the cache</item>
-        /// <item>Use the environment aliases to match tokens issued to other authorities</item>
+        /// <item><description>Call REST APIs on the environment specified in the preferred_network</description></item>
+        /// <item><description>Identify an environment under which to save tokens and accounts in the cache</description></item>
+        /// <item><description>Use the environment aliases to match tokens issued to other authorities</description></item>
         /// </list>
         /// For more details see https://aka.ms/msal-net-custom-instance-metadata
         /// </summary>

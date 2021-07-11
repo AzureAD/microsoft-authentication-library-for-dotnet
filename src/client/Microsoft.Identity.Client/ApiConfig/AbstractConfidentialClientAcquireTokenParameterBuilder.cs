@@ -49,12 +49,13 @@ namespace Microsoft.Identity.Client
         ///  See https://aka.ms/msal-net-pop
         /// </summary>
         /// <param name="popAuthenticationConfiguration">Configuration properties used to construct a proof of possession request.</param>
+        /// <returns>The builder.</returns>
         /// <remarks>
         /// <list type="bullet">
-        /// <item> An Authentication header is automatically added to the request</item>
-        /// <item> The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters). </item>
-        /// <item> MSAL creates, reads and stores a key in memory that will be cycled every 8 hours.</item>
-        /// <item>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</item>
+        /// <item><description>An Authentication header is automatically added to the request</description></item>
+        /// <item><description>The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters).</description></item>
+        /// <item><description>MSAL creates, reads and stores a key in memory that will be cycled every 8 hours.</description></item>
+        /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
         /// </list>
         /// </remarks>
         public T WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
