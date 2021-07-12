@@ -68,6 +68,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     continue;
                 }
 
+                //the login-us.microsoftonline.com environment has the same ending as login.microsoftonline.com
+                //so a check for login-us is needed to ensure we are in the correct environment
                 if (    !entry.PreferredNetwork.Contains("login-us") &&
                         ((entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".com")) ||
                         (entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".net")))
@@ -87,8 +89,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 {
                     _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
                 }
-
-                originalEnvironmentCached = true;
+                else if (entry.PreferredNetwork.Contains("login-us") &&
+                        ((entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".com")) ||
+                        (entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".net")))
+                   )
+                {
+                    _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
+                }
+                    originalEnvironmentCached = true;
             }
         }
 
