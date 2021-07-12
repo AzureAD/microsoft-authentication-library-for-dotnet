@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 4 - Remove Account");
 
             await cca.RemoveAsync(result.Account).ConfigureAwait(false);
-            cacheAccess.AssertAccessCounts(1, 2); 
+            cacheAccess.AssertAccessCounts(0, 2); 
 
             AssertCacheKey(cacheAccess, result.Account.HomeAccountId.Identifier);
 
