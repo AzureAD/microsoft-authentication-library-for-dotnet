@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
 
             var discoveryResponse = await FetchAllDiscoveryMetadataAsync(authority, requestContext).ConfigureAwait(false);
-            CacheInstanceDiscoveryMetadata(discoveryResponse);
+            CacheInstanceDiscoveryMetadata(discoveryResponse, environment);
 
             cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
             logger.Verbose($"[Instance Discovery] After hitting the discovery endpoint, the network provider found an entry for {environment} ? {cachedEntry != null}. ");
@@ -52,14 +52,43 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             return cachedEntry;
         }
 
-        private void CacheInstanceDiscoveryMetadata(InstanceDiscoveryResponse instanceDiscoveryResponse)
+        private void CacheInstanceDiscoveryMetadata(InstanceDiscoveryResponse instanceDiscoveryResponse, string originalEnvironment)
         {
+            bool originalEnvironmentCached = false;
+
             foreach (InstanceDiscoveryMetadataEntry entry in instanceDiscoveryResponse.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
                 foreach (string aliasedEnvironment in entry.Aliases ?? Enumerable.Empty<string>())
                 {
                     _networkCacheMetadataProvider.AddMetadata(aliasedEnvironment, entry);
                 }
+
+                if (originalEnvironmentCached)
+                {
+                    continue;
+                }
+
+                if (    !entry.PreferredNetwork.Contains("login-us") &&
+                        ((entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".com")) ||
+                        (entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".net")))
+                   )
+                {
+                    _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
+                }
+                else if ((entry.PreferredNetwork.EndsWith(".cn") && originalEnvironment.EndsWith(".cn")))
+                {
+                    _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
+                }
+                else if ((entry.PreferredNetwork.EndsWith(".de") && originalEnvironment.EndsWith(".de")))
+                {
+                    _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
+                }
+                else if ((entry.PreferredNetwork.EndsWith(".us") && originalEnvironment.EndsWith(".us")))
+                {
+                    _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
+                }
+
+                originalEnvironmentCached = true;
             }
         }
 
