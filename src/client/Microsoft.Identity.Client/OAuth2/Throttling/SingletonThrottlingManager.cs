@@ -15,8 +15,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
     /// 
     /// Throttling occurs in the following conditions:
     /// <list type="bullet">
-    /// <item>After receiving an RetryAfter header</item>
-    /// <item>After receiving 429, 5xx HTTP status.</item>    
+    /// <item><description>After receiving an RetryAfter header</description></item>
+    /// <item><description>After receiving 429, 5xx HTTP status.</description></item>    
     /// </list>
     /// This class manages the throttling providers and is itself a provider
     /// </summary>

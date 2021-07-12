@@ -36,10 +36,10 @@ namespace Microsoft.Identity.Client
         /// <param name="assertion">Assertion representing the user.</param>
         /// <param name="assertionType">Type of the assertion representing the user. Accepted types are currently:
         /// <list type="bullet">
-        /// <item>urn:ietf:params:oauth:grant-type:jwt-bearer<term></term><description>JWT bearer token. Passing this is equivalent to using
+        /// <item><term>urn:ietf:params:oauth:grant-type:jwt-bearer</term><description>JWT bearer token. Passing this is equivalent to using
         /// the other (simpler) constructor</description></item>
-        /// <item>urn:ietf:params:oauth:grant-type:saml1_1-bearer<term></term><description>SAML 1.1 bearer token</description></item>
-        /// <item>urn:ietf:params:oauth:grant-type:jwt-bearer<term></term><description>SAML 2 bearer token</description></item>
+        /// <item><term>urn:ietf:params:oauth:grant-type:saml1_1-bearer</term><description>SAML 1.1 bearer token</description></item>
+        /// <item><term>urn:ietf:params:oauth:grant-type:jwt-bearer</term><description>SAML 2 bearer token</description></item>
         /// </list></param>
         public UserAssertion(string assertion, string assertionType)
         {
