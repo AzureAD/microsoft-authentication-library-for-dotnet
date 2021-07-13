@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
 
@@ -17,12 +19,23 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Constructor 
         /// </summary>
-        public TenantProfile(string oid, string tenantId, string idToken, bool isHomeTenant)
+        public TenantProfile(string oid, string tenantId, ClaimsPrincipal claimsPrincipal, bool isHomeTenant) // all public objects must expose constructs for developers to be able to test 
         {
             Oid = oid;
-            TenantId = tenantId;            
+            TenantId = tenantId;
+            ClaimsPrincipal = claimsPrincipal;
             IsHomeTenant = isHomeTenant;
-            ClaimsPrincipal = GetClaimsFromIdToken(idToken);
+        }
+
+        internal TenantProfile(MsalIdTokenCacheItem msalIdTokenCacheItem)
+        {
+            Oid = msalIdTokenCacheItem.IdToken.ObjectId;
+            TenantId = msalIdTokenCacheItem.TenantId;
+            ClaimsPrincipal = msalIdTokenCacheItem.IdToken.ClaimsPrincipal;
+            IsHomeTenant = string.Equals(
+                AccountId.ParseFromString(msalIdTokenCacheItem.HomeAccountId).TenantId,
+                msalIdTokenCacheItem.TenantId, 
+                StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -49,44 +62,5 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool IsHomeTenant { get; }
 
-        private ClaimsPrincipal GetClaimsFromIdToken(string idToken) // TODO: maybe we shold be passed the ClaimsPricipal?
-        {
-            if (string.IsNullOrEmpty(idToken))
-            {
-                return null;
-            }
-
-            string[] idTokenSegments = idToken.Split(new[] { '.' });
-
-            if (idTokenSegments.Length < 3)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidJwtError,
-                    MsalErrorMessage.IDTokenInvalidJwtFormat);
-            }
-
-            try
-            {
-                IDictionary<string, string> idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, string>>(
-                    Base64UrlHelpers.DecodeToString(idTokenSegments[1]));
-
-                IList<Claim> claims = new List<Claim>();
-                foreach (KeyValuePair<string, string> claim in idTokenClaims)
-                {
-                    claims.Add(new Claim(claim.Key, claim.Value));
-                }
-
-                return new ClaimsPrincipal(new ClaimsIdentity(claims));
-            }
-            catch (JsonException exc)
-            {
-                throw new MsalClientException(
-                    MsalError.JsonParseError,
-                    MsalErrorMessage.FailedToParseIDToken,
-                    exc);
-            }
-        }
-    }
-
-    
+    }    
 }
