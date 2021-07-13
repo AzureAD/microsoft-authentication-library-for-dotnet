@@ -182,5 +182,35 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(expectedEnvironment, new Uri(kvp.Key.Authority).Host);
             }
         }
+
+        [TestMethod]
+        public void AuthorityNotIncludedInAliasesTestAsync()
+        {
+            //Make sure MSAL is able to create an entry for instance discovery when the configured environment is not present in the 
+            //instance discovery metadata. This is for non-public cloud scenarios. See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2701
+
+            using (var harness = base.CreateTestHarness())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(TestConstants.AuthorityCommonPpeAuthority), true)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+                app.ServiceBundle.ConfigureMockWebUI();
+
+                //Adding one instance discovery response to ensure the cache is hit for the subsiquent requests.
+                //If MSAL tries to do an additional request this test will fail.
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonPpeAuthority);
+
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
+                Assert.IsNotNull(result);
+                Assert.IsTrue(harness.HttpManager.QueueSize == 0);
+            }
+        }
     }
 }

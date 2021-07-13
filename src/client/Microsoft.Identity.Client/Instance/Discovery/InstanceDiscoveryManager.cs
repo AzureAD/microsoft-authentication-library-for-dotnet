@@ -140,6 +140,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                         requestContext.Logger.WarningPii(message + "Authority: " + authorityInfo.CanonicalAuthority, message);
 
                         entry = CreateEntryForSingleAuthority(authorityUri);
+                        _networkCacheMetadataProvider.AddMetadata(environment, entry);
                     }
 
                     return entry;

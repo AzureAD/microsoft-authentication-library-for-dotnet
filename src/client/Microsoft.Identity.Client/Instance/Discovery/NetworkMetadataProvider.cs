@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
 
             var discoveryResponse = await FetchAllDiscoveryMetadataAsync(authority, requestContext).ConfigureAwait(false);
-            CacheInstanceDiscoveryMetadata(discoveryResponse, environment);
+            CacheInstanceDiscoveryMetadata(discoveryResponse);
 
             cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
             logger.Verbose($"[Instance Discovery] After hitting the discovery endpoint, the network provider found an entry for {environment} ? {cachedEntry != null}. ");
@@ -52,53 +52,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             return cachedEntry;
         }
 
-        private void CacheInstanceDiscoveryMetadata(InstanceDiscoveryResponse instanceDiscoveryResponse, string originalEnvironment)
+        private void CacheInstanceDiscoveryMetadata(InstanceDiscoveryResponse instanceDiscoveryResponse)
         {
-            bool originalEnvironmentCached = false;
-
             foreach (InstanceDiscoveryMetadataEntry entry in instanceDiscoveryResponse.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
                 foreach (string aliasedEnvironment in entry.Aliases ?? Enumerable.Empty<string>())
                 {
                     _networkCacheMetadataProvider.AddMetadata(aliasedEnvironment, entry);
                 }
-
-                if (originalEnvironmentCached)
-                {
-                    continue;
-                }
-
-                //Need to ensure the entry is added to the proper cloud to avoid caching the wrong cloud aliases data.
-                //Example: Caching aliased environments that end with .cn with a key that end in .com or .de
-                //the login-us.microsoftonline.com environment has the same ending as login.microsoftonline.com
-                //so a check for login-us is needed to ensure we are in the correct cloud
-                if (    !entry.PreferredNetwork.Contains("login-us") &&
-                        ((entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".com")) ||
-                        (entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".net")))
-                   )
-                {
-                    _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
-                }
-                else if ((entry.PreferredNetwork.EndsWith(".cn") && originalEnvironment.EndsWith(".cn")))
-                {
-                    _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
-                }
-                else if ((entry.PreferredNetwork.EndsWith(".de") && originalEnvironment.EndsWith(".de")))
-                {
-                    _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
-                }
-                else if ((entry.PreferredNetwork.EndsWith(".us") && originalEnvironment.EndsWith(".us")))
-                {
-                    _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
-                }
-                else if (entry.PreferredNetwork.Contains("login-us") &&
-                        ((entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".com")) ||
-                        (entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".net")))
-                   )
-                {
-                    _networkCacheMetadataProvider.AddMetadata(originalEnvironment, entry);
-                }
-                    originalEnvironmentCached = true;
             }
         }
 
