@@ -68,8 +68,10 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     continue;
                 }
 
+                //Need to ensure the entry is added to the proper cloud to avoid caching the wrong cloud aliases data.
+                //Example: Caching aliased environments that end with .cn with a key that end in .com or .de
                 //the login-us.microsoftonline.com environment has the same ending as login.microsoftonline.com
-                //so a check for login-us is needed to ensure we are in the correct environment
+                //so a check for login-us is needed to ensure we are in the correct cloud
                 if (    !entry.PreferredNetwork.Contains("login-us") &&
                         ((entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".com")) ||
                         (entry.PreferredNetwork.EndsWith(".com") && originalEnvironment.EndsWith(".net")))
