@@ -111,13 +111,9 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public GetAuthorizationRequestUrlParameterBuilder WithCcsRoutingHint(string userObjectIdentifier, string tenantIdentifier)
         {
-            if (string.IsNullOrEmpty(userObjectIdentifier))
+            if (string.IsNullOrEmpty(userObjectIdentifier) || string.IsNullOrEmpty(tenantIdentifier))
             {
-                throw new ArgumentException(MsalErrorMessage.CcsRoutingHintMissing, nameof(userObjectIdentifier));
-            }
-            if (string.IsNullOrEmpty(tenantIdentifier))
-            {
-                throw new ArgumentException(MsalErrorMessage.CcsRoutingHintMissing, nameof(tenantIdentifier));
+                return this;
             }
 
             Parameters.CcsRoutingHint = new KeyValuePair<string, string>(userObjectIdentifier, tenantIdentifier) as KeyValuePair<string, string>?;
