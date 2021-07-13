@@ -37,7 +37,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void Constructor_ClaimsArePopulatedForIdToken()
         {
-            TenantProfile tenantProfile = new TenantProfile("oid", TestConstants.Utid, MockHelpers.CreateIdToken("oid", "some_name", TestConstants.Utid), true);
+            string idToken = MockHelpers.CreateIdToken("oid", "some_name", TestConstants.Utid);
+            TenantProfile tenantProfile = new TenantProfile("oid", TestConstants.Utid, IdToken.Parse(idToken).ClaimsPrincipal, true);
 
             var claims = tenantProfile.ClaimsPrincipal.Claims;
 
@@ -55,13 +56,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNull(tenantProfile.ClaimsPrincipal);
         }
 
-        [TestMethod]
-        public void Constructor_ExceptionThrownForInvalidIdToken()
-        {
-            var ex = Assert.ThrowsException<MsalClientException>(
-                () => new TenantProfile("oid", TestConstants.Utid, "invalid_idToken", false));
-
-            Assert.AreEqual(MsalError.InvalidJwtError, ex.ErrorCode);
-        }
+       
     }
 }

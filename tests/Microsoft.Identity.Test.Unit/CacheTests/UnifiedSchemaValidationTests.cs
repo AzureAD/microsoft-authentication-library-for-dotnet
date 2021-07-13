@@ -30,45 +30,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private const string B2CTenantId = "ba6c0d94-a8da-45b2-83ae-33871f9c2dd8";
         private const string Scopes = "tasks.read user.read openid profile offline_access";
         private const string RedirectUri = "msalb6c69a37-df96-4db0-9088-2ab96e1d8215://auth";
-
-        public const string AadRawClientInfo = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0";
-        public const string MsaRawClientInfo = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ";
-        public const string B2CRawClientInfo = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9";
-
-        private MsalTokenResponse CreateAadTestTokenResponse()
-        {
-            string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Calendars.Read openid profile Tasks.Read User.Read email\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.\",\"client_info\":\"" + AadRawClientInfo + "\"}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
-
-        private MsalTokenResponse CreateMsaTestTokenResponse()
-        {
-            string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Tasks.Read User.Read openid profile\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJ2ZXIiOiIyLjAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vOTE4ODA0MGQtNmM2Ny00YzViLWIxMTItMzZhMzA0YjY2ZGFkL3YyLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwiYXVkIjoiYjZjNjlhMzctZGY5Ni00ZGIwLTkwODgtMmFiOTZlMWQ4MjE1IiwiZXhwIjoxNTM4ODg1MjU0LCJpYXQiOjE1Mzg3OTg1NTQsIm5iZiI6MTUzODc5ODU1NCwibmFtZSI6IlRlc3QgVXNlcm5hbWUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtc2Fsc2RrdGVzdEBvdXRsb29rLmNvbSIsIm9pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInRpZCI6IjkxODgwNDBkLTZjNjctNGM1Yi1iMTEyLTM2YTMwNGI2NmRhZCIsImFpbyI6IkRXZ0tubCFFc2ZWa1NVOGpGVmJ4TTZQaFphUjJFeVhzTUJ5bVJHU1h2UkV1NGkqRm1CVTFSQmw1aEh2TnZvR1NHbHFkQkpGeG5kQXNBNipaM3FaQnIwYzl2YUlSd1VwZUlDVipTWFpqdzghQiIsImFsZyI6IkhTMjU2In0.\",\"client_info\":\"" + MsaRawClientInfo + "\"}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
-
-        private MsalTokenResponse CreateB2CTestTokenResponse()
-        {
-            string jsonResponse = "{\"access_token\":\"<removed_at>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIn0.\",\"token_type\":\"Bearer\",\"not_before\":1538801260,\"expires_in\":3600,\"ext_expires_in\":262800,\"expires_on\":1538804860,\"resource\":\"14df2240-96cc-4f42-a133-ef0807492869\",\"client_info\":\"" + B2CRawClientInfo + "\",\"scope\":\"https://iosmsalb2c.onmicrosoft.com/webapitest/user.read\",\"refresh_token\":\"<removed_rt>\",\"refresh_token_expires_in\":1209600}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
-
-        private MsalTokenResponse CreateB2CTestTokenResponseWithTenantId()
-        {
-            string jsonResponse = "{\"access_token\":\"<removed_at>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIiwidGlkIjoiYmE2YzBkOTQtYThkYS00NWIyLTgzYWUtMzM4NzFmOWMyZGQ4IiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20ifQ.\",\"token_type\":\"Bearer\",\"not_before\":1538801260,\"expires_in\":3600,\"ext_expires_in\":262800,\"expires_on\":1538804860,\"resource\":\"14df2240-96cc-4f42-a133-ef0807492869\",\"client_info\":\"" + B2CRawClientInfo + "\",\"scope\":\"https://iosmsalb2c.onmicrosoft.com/webapitest/user.read\",\"refresh_token\":\"<removed_rt>\",\"refresh_token_expires_in\":1209600}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
-
-        private MsalTokenResponse CreateAadTestTokenResponseWithFoci()
-        {
-            string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Calendars.Read openid profile Tasks.Read User.Read email\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.\",\"client_info\":\"" + AadRawClientInfo + "\",\"foci\":\"1\"}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
+       
 
         // Our json schemas are flat.  This will NOT work for deeply nested json values.  You could check Assert.IsTrue(JToken.DeepEquals()) if you need that.
         private void AssertAreJsonStringsEquivalent(string expectedJson, string actualJson)
@@ -97,11 +59,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccessToken_WhenMSSTSResponse_WithAADAccount()
         {
-            string homeAccountId = ClientInfo.CreateFromJson(AadRawClientInfo).ToAccountIdentifier();
+            string homeAccountId = ClientInfo.CreateFromJson(TestConstants.AadRawClientInfo).ToAccountIdentifier();
             var credential = new MsalAccessTokenCacheItem(
                 MsalEnvironment,
                 ClientId,
-                CreateAadTestTokenResponse(),
+                TestConstants.CreateAadTestTokenResponse(),
                 AadTenantId,
                 homeAccountId);
 
@@ -147,12 +109,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForIDToken_WhenMSSTSResponse_WithAADAccount()
         {
-            string homeAccountId = ClientInfo.CreateFromJson(AadRawClientInfo).ToAccountIdentifier();
+            string homeAccountId = ClientInfo.CreateFromJson(TestConstants.AadRawClientInfo).ToAccountIdentifier();
 
             var credential = new MsalIdTokenCacheItem(
                 MsalEnvironment,
                 ClientId,
-                CreateAadTestTokenResponse(),
+                TestConstants.CreateAadTestTokenResponse(),
                 AadTenantId,
                 homeAccountId);
 
@@ -186,7 +148,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForRefreshToken_WhenMSSTSResponse_WithAADAccount()
         {
-            var response = CreateAadTestTokenResponse();
+            var response = TestConstants.CreateAadTestTokenResponse();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalRefreshTokenCacheItem(
@@ -224,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithAADAccount()
         {
-            var response = CreateAadTestTokenResponse();
+            var response = TestConstants.CreateAadTestTokenResponse();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
             var idToken = IdToken.Parse(response.IdToken);
 
@@ -268,7 +230,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccessToken_WhenMSSTSResponse_WithMSAAccount()
         {
-            var response = CreateMsaTestTokenResponse();
+            var response = TestConstants.CreateMsaTestTokenResponse();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalAccessTokenCacheItem(
@@ -320,7 +282,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForIDToken_WhenMSSTSResponse_WithMSAAccount()
         {
-            var response = CreateMsaTestTokenResponse();
+            var response = TestConstants.CreateMsaTestTokenResponse();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalIdTokenCacheItem(
@@ -360,7 +322,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForRefreshToken_WhenMSSTSResponse_WithMSAAccount()
         {
-            var response = CreateMsaTestTokenResponse();
+            var response = TestConstants.CreateMsaTestTokenResponse();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalRefreshTokenCacheItem(
@@ -398,13 +360,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccessToken_WhenMSSTSResponse_WithB2CAccount()
         {
-            var response = CreateB2CTestTokenResponse();
+            var response = TestConstants.CreateB2CTestTokenResponse();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalAccessTokenCacheItem(
                 MsalEnvironment,
                 B2CClientId,
-                CreateB2CTestTokenResponse(),
+                TestConstants.CreateB2CTestTokenResponse(),
                 B2CTenantId,
                 homeAccountId);
 
@@ -450,7 +412,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForIDToken_WhenMSSTSResponse_WithB2CAccount()
         {
-            var response = CreateB2CTestTokenResponse();
+            var response = TestConstants.CreateB2CTestTokenResponse();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalIdTokenCacheItem(
@@ -490,7 +452,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForRefreshToken_WhenMSSTSResponse_WithB2CAccount()
         {
-            var response = CreateB2CTestTokenResponse();
+            var response = TestConstants.CreateB2CTestTokenResponse();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalRefreshTokenCacheItem(
@@ -529,7 +491,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithB2CAccount()
         {
 
-            var response = CreateB2CTestTokenResponse();
+            var response = TestConstants.CreateB2CTestTokenResponse();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalAccountCacheItem(
@@ -574,7 +536,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccessToken_WhenMSSTSResponse_WithB2CAccountAndTenantId()
         {
-            var response = CreateB2CTestTokenResponse();
+            var response = TestConstants.CreateB2CTestTokenResponse();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalAccessTokenCacheItem(
@@ -625,7 +587,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForIDToken_WhenMSSTSResponse_WithB2CAccountAndTenantId()
         {
-            var response = CreateB2CTestTokenResponseWithTenantId();
+            var response = TestConstants.CreateB2CTestTokenResponseWithTenantId();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalIdTokenCacheItem(
@@ -665,13 +627,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForRefreshToken_WhenMSSTSResponse_WithB2CAccountAndTenantId()
         {
-            var response = CreateB2CTestTokenResponseWithTenantId();
+            var response = TestConstants.CreateB2CTestTokenResponseWithTenantId();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalRefreshTokenCacheItem(
                 MsalEnvironment, 
-                B2CClientId, 
-                CreateB2CTestTokenResponseWithTenantId(),
+                B2CClientId,
+                TestConstants.CreateB2CTestTokenResponseWithTenantId(),
                 homeAccountId);
 
             var expectedJsonObject = new JObject
@@ -703,7 +665,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithB2CAccountAndTenantId()
         {
-            var response = CreateB2CTestTokenResponseWithTenantId();
+            var response = TestConstants.CreateB2CTestTokenResponseWithTenantId();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalAccountCacheItem(
@@ -748,7 +710,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccessToken_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
-            var response = CreateAadTestTokenResponseWithFoci();
+            var response = TestConstants.CreateAadTestTokenResponseWithFoci();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalAccessTokenCacheItem(
@@ -800,7 +762,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForIDToken_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
-            var response = CreateAadTestTokenResponseWithFoci();
+            var response = TestConstants.CreateAadTestTokenResponseWithFoci();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalIdTokenCacheItem(
@@ -843,7 +805,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Ignore]
         public void TestSchemaComplianceForRefreshToken_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
-            var credential = new MsalRefreshTokenCacheItem(MsalEnvironment, ClientId, CreateAadTestTokenResponseWithFoci(), AadTenantId);
+            var credential = new MsalRefreshTokenCacheItem(MsalEnvironment, ClientId, TestConstants.CreateAadTestTokenResponseWithFoci(), AadTenantId);
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "<removed_rt>",
@@ -874,7 +836,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForFamilyRefreshToken_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
-            var response = CreateAadTestTokenResponseWithFoci();
+            var response = TestConstants.CreateAadTestTokenResponseWithFoci();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalRefreshTokenCacheItem(
@@ -913,7 +875,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
-            var response = CreateAadTestTokenResponseWithFoci();
+            var response = TestConstants.CreateAadTestTokenResponseWithFoci();
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalAccountCacheItem(

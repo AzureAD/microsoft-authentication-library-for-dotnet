@@ -312,19 +312,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
             AssertTelemetryHeaders(factory, false, labResponse);
-            AssertCcsRoutingInformationIsSent(factory, labResponse);
-            // If test fails with "user needs to consent to the application, do an interactive request" error,
-            // Do the following:
-            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
-            // string password = ((LabUser)user).GetPassword();
-            // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
-            // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
-            // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
-            if (authorityType == AuthorityType.Aad)
-            {
-                AssertTenantProfiles(authResult.Account.TenantProfiles, authResult.TenantId);
-
-            }
+            AssertCcsRoutingInformationIsSent(factory, labResponse);                        
 
             return authResult;
         }
@@ -335,12 +323,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual($"x-anchormailbox:upn:{labResponse.User.Upn}", $"{CcsHeader.Key}:{CcsHeader.Value.FirstOrDefault()}");
         }
 
-        private void AssertTenantProfiles(IDictionary<string, ITenantProfile> tenantProfiles, string tenantId)
+        private void AssertTenantProfiles(IDictionary<string, TenantProfile> tenantProfiles, string tenantId)
         {
             Assert.IsNotNull(tenantProfiles);
             Assert.IsTrue(tenantProfiles.Count > 0);
 
-            ITenantProfile tenantProfile = tenantProfiles[tenantId];
+            TenantProfile tenantProfile = tenantProfiles[tenantId];
             Assert.IsNotNull(tenantProfile);
             Assert.IsNotNull(tenantProfile.ClaimsPrincipal);
             Assert.IsNotNull(tenantProfile.ClaimsPrincipal.FindFirst(claim => claim.Type == "tid" && claim.Value == tenantId));

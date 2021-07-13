@@ -145,11 +145,7 @@ namespace Microsoft.Identity.Client
 
                     if (tenantProfiles != null)
                     {
-                        tenantProfiles[msalIdTokenCacheItem.TenantId] = new TenantProfile(
-                            msalIdTokenCacheItem.IdToken.ObjectId,
-                            msalIdTokenCacheItem.TenantId,
-                            msalIdTokenCacheItem.Secret,
-                            AccountId.ParseFromString(msalIdTokenCacheItem.HomeAccountId).TenantId.Equals(msalIdTokenCacheItem.TenantId));
+                        tenantProfiles[msalIdTokenCacheItem.TenantId] = new TenantProfile(msalIdTokenCacheItem);
                     }
                 }
 

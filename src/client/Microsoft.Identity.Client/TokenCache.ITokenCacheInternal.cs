@@ -937,7 +937,7 @@ namespace Microsoft.Identity.Client
             AccountId homeAccountId = AccountId.ParseFromString(msalIdTokenCacheItem.HomeAccountId);
             bool isHomeTenant = homeAccountId.TenantId.Equals(msalIdTokenCacheItem.TenantId);
             
-            return new TenantProfile(msalIdTokenCacheItem.IdToken.ObjectId, msalIdTokenCacheItem.TenantId, msalIdTokenCacheItem.Secret, isHomeTenant);
+            return new TenantProfile(msalIdTokenCacheItem);
         }
 
         async Task<IEnumerable<MsalRefreshTokenCacheItem>> ITokenCacheInternal.GetAllRefreshTokensAsync(bool filterByClientId)

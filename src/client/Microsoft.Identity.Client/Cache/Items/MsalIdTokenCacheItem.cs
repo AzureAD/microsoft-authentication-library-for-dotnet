@@ -53,12 +53,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
     
-        internal bool IsAdfs { get; set; }
+        internal bool IsAdfs { get; set; } // TODO: get rid of this 
         internal string TenantId { get; set; }
-
-        internal string Authority =>
-                                    IsAdfs ? string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, "adfs") :
-                                    string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
 
         private readonly Lazy<IdToken> idTokenLazy;
 
