@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ROPC_AAD_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse, authorityType: AuthorityType.Aad).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ARLINGTON_ROPC_AAD_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse, authorityType: AuthorityType.Aad).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.Fail("Bad exception or no exception thrown");
         }
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "", AuthorityType authorityType = AuthorityType.Adfs)
+        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
         {
             var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
@@ -277,9 +277,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     federationMetadata,
                     CorrelationId).ConfigureAwait(false);
 
-            if (authorityType == AuthorityType.Aad)
+            if (AuthorityInfo.FromAuthorityUri(labResponse.Lab.Authority + "/" + labResponse.Lab.TenantId, false).AuthorityType == AuthorityType.Aad)
             {
                 AssertTenantProfiles(authResult.Account.GetTenantProfiles(), authResult.TenantId);
+            }
+            else
+            {
+                Assert.IsNull(authResult.Account.GetTenantProfiles());
             }
 
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
@@ -323,12 +327,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual($"x-anchormailbox:upn:{labResponse.User.Upn}", $"{CcsHeader.Key}:{CcsHeader.Value.FirstOrDefault()}");
         }
 
-        private void AssertTenantProfiles(IDictionary<string, TenantProfile> tenantProfiles, string tenantId)
+        private void AssertTenantProfiles(IEnumerable<TenantProfile> tenantProfiles, string tenantId)
         {
             Assert.IsNotNull(tenantProfiles);
-            Assert.IsTrue(tenantProfiles.Count > 0);
+            Assert.IsTrue(tenantProfiles.Count() > 0);
 
-            TenantProfile tenantProfile = tenantProfiles[tenantId];
+            TenantProfile tenantProfile = tenantProfiles.Single(tp => tp.TenantId == tenantId);
             Assert.IsNotNull(tenantProfile);
             Assert.IsNotNull(tenantProfile.ClaimsPrincipal);
             Assert.IsNotNull(tenantProfile.ClaimsPrincipal.FindFirst(claim => claim.Type == "tid" && claim.Value == tenantId));

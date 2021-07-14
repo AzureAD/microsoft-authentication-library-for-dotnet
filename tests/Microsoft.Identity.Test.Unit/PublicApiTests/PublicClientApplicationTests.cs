@@ -933,12 +933,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        private void AssertTenantProfiles(IDictionary<string, TenantProfile> tenantProfiles, string tenant1, string tenant2)
+        private void AssertTenantProfiles(IEnumerable<TenantProfile> tenantProfiles, string tenant1, string tenant2)
         {
-            var tenantProfile1 = tenantProfiles[tenant1];
-            var tenantProfile2 = tenantProfiles[tenant2];
+            var tenantProfile1 = tenantProfiles.Single(tp => tp.TenantId == tenant1);
+            var tenantProfile2 = tenantProfiles.Single(tp => tp.TenantId == tenant2);
 
-            Assert.AreEqual(2, tenantProfiles.Count);
+            Assert.AreEqual(2, tenantProfiles.Count());
 
             Assert.AreEqual(tenant1, tenantProfile1.TenantId);
             Assert.AreEqual(tenant2, tenantProfile2.TenantId);

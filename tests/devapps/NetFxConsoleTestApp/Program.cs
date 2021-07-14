@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,8 +93,6 @@ namespace NetFx
             Console.ResetColor();
             Console.BackgroundColor = ConsoleColor.Black;
             var pca = CreatePca();
-
-           
 
             await RunConsoleAppLogicAsync(pca).ConfigureAwait(false);
         }
@@ -257,12 +256,24 @@ namespace NetFx
                             IntPtr x = GetConsoleWindow();
                             var interactiveBuilder = pca
                                 .AcquireTokenInteractive(s_scopes);
-                                
-                                                       
-                            //interactiveBuilder = interactiveBuilder.WithAccount(account2);
+                            
 
-                            result = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
-                            await CallApiAsync(pca, result).ConfigureAwait(false);
+                            AuthenticationResult authResult = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
+                            ClaimsPrincipal idTokenClaims = authResult.ClaimsPrincipal;
+
+                            var accounts2 = await pca.GetAccountsAsync().ConfigureAwait(false);
+                            foreach (var acc in accounts2)
+                            {
+                                Console.WriteLine($"Account for {acc.Username}");
+                                foreach (var tp in acc.GetTenantProfiles())
+                                {
+                                    Console.WriteLine($"Tenant Profile in tenant {tp.TenantId} " +
+                                        $"is home tenant? {tp.IsHomeTenant} " +
+                                        $"claims {tp.ClaimsPrincipal.Claims.Count()}");
+                                }
+                            }
+
+                            await CallApiAsync(pca, authResult).ConfigureAwait(false);
 
                             break;
                         case '$':
@@ -412,8 +423,8 @@ namespace NetFx
                             break;
 
                         case 'c':
-                            var accounts2 = await pca.GetAccountsAsync().ConfigureAwait(false);
-                            foreach (var acc in accounts2)
+                            var accounts3 = await pca.GetAccountsAsync().ConfigureAwait(false);
+                            foreach (var acc in accounts3)
                             {
                                 await pca.RemoveAsync(acc).ConfigureAwait(false);
                             }
