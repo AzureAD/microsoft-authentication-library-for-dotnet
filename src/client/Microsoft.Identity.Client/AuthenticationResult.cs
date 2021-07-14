@@ -149,8 +149,8 @@ namespace Microsoft.Identity.Client
                 TokenType = msalAccessTokenCacheItem.TokenType;
             }
 
-            UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
-            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
+            UniqueId = msalIdTokenCacheItem?.ParseIdToken()?.GetUniqueId();
+            TenantId = msalIdTokenCacheItem?.ParseIdToken()?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
