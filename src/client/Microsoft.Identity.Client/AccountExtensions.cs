@@ -16,17 +16,12 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>        
         /// The same account can exist in its home tenant and also as a guest in multiple other tenants. 
-        /// <c>TenantProfiles</c> maps a tenant ID to its associated tenant profile. <see cref="TenantProfile"/> is derived from the ID token for that tenant.
+        /// <see cref="TenantProfile"/> is derived from the ID token for that tenant.
         /// </summary>
         /// <remarks>Only tenants for which a token was acquired will be available in <c>TenantProfiles</c> property</remarks>
-        public static IDictionary<string, TenantProfile> GetTenantProfiles(this IAccount account)
+        public static IEnumerable<TenantProfile> GetTenantProfiles(this IAccount account)
         {
-            if (account is Account accountObj)
-            {
-                return accountObj.TenantProfiles;
-            }
-
-            return null;
+            return (account as Account)?.TenantProfiles?.Values;
         }
     }
 }

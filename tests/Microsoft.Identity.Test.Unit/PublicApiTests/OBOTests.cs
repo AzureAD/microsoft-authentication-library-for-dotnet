@@ -47,11 +47,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(tenant1, result1.TenantId);
                 Assert.AreEqual(tenant2, result2.TenantId);
 
-                Assert.AreEqual(2, result1.Account.GetTenantProfiles().Count);
-                Assert.AreEqual(2, result2.Account.GetTenantProfiles().Count);
+                Assert.AreEqual(2, result1.Account.GetTenantProfiles().Count());
+                Assert.AreEqual(2, result2.Account.GetTenantProfiles().Count());
                 Assert.AreEqual(result1.Account.HomeAccountId, result2.Account.HomeAccountId);
-                Assert.IsNotNull(result1.Account.GetTenantProfiles().Single(t => t.Value.TenantId == tenant1));
-                Assert.IsNotNull(result1.Account.GetTenantProfiles().Single(t => t.Value.TenantId == tenant2));
+                Assert.IsNotNull(result1.Account.GetTenantProfiles().Single(t => t.TenantId == tenant1));
+                Assert.IsNotNull(result1.Account.GetTenantProfiles().Single(t => t.TenantId == tenant2));
 
                 Assert.AreEqual(tenant1, result1.ClaimsPrincipal.FindFirst("tid").Value);
                 Assert.AreEqual(tenant2, result2.ClaimsPrincipal.FindFirst("tid").Value);

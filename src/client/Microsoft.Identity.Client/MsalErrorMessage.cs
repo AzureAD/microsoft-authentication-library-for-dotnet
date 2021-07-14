@@ -165,8 +165,7 @@ namespace Microsoft.Identity.Client
 
         public const string NonHttpsRedirectNotSupported = "Non-HTTPS URL redirect is not supported in webview. ";
 
-        public const string IDTokenMustHaveTwoParts = "ID Token must contain at least 2 parts. ";
-        public const string IDTokenInvalidJwtFormat = "ID Token must have a valid JWT format which contains atleast 3 parts. ";
+        public const string IDTokenMustHaveTwoParts = "ID Token must have a valid JWT format which contains atleast 3 parts. ";
         public const string FailedToParseIDToken = "Failed to parse the returned id token. ";
 
         public const string InvalidAuthorityOpenId = "invalid authority while getting the open id config endpoint. ";
