@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             if (authorityType == AuthorityType.Aad)
             {
-                AssertTenantProfiles(authResult.Account.TenantProfiles, authResult.TenantId);
+                AssertTenantProfiles(authResult.Account.GetTenantProfiles(), authResult.TenantId);
             }
 
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);

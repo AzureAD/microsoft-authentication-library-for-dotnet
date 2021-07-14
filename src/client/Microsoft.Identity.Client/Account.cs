@@ -13,8 +13,6 @@ namespace Microsoft.Identity.Client
     /// </summary>
     internal sealed class Account : IAccount
     {
-        private readonly IDictionary<string, TenantProfile> _tenantProfiles;
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -45,12 +43,7 @@ namespace Microsoft.Identity.Client
 
         public IDictionary<string, TenantProfile> TenantProfiles { get; }
       
-       
-
-        internal IDictionary<string, string> WamAccountIds
-        {
-            get;
-        }
+        internal IDictionary<string, string> WamAccountIds { get; }
 
         public override string ToString()
         {

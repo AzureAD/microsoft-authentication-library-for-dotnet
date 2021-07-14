@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Client
     public partial class AuthenticationResult
     {
         private readonly IAuthenticationScheme _authenticationScheme;
-        
+
         /// <summary>
         /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.
         /// App developers should <b>never</b> new-up <see cref="AuthenticationResult"/> in product code.
@@ -37,6 +38,7 @@ namespace Microsoft.Identity.Client
         /// <param name="correlationId">The correlation id of the authentication request</param>
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
+        /// <param name="claimsPrincipal">Claims from the ID token</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -49,7 +51,8 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             Guid correlationId,
             string tokenType = "Bearer",
-            AuthenticationResultMetadata authenticationResultMetadata = null)
+            AuthenticationResultMetadata authenticationResultMetadata = null, 
+            ClaimsPrincipal claimsPrincipal = null)
         {
             AccessToken = accessToken;
             IsExtendedLifeTimeToken = isExtendedLifeTimeToken;
@@ -129,6 +132,8 @@ namespace Microsoft.Identity.Client
                 msalIdTokenCacheItem?.HomeAccountId;
             string environment = msalAccessTokenCacheItem?.Environment ??
                 msalIdTokenCacheItem?.Environment;
+
+            ClaimsPrincipal = msalIdTokenCacheItem?.ParseIdToken().ClaimsPrincipal;
 
             if (homeAccountId != null)
             {
@@ -230,6 +235,11 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="CreateAuthorizationHeader"/> for getting an HTTP authorization header from an AuthenticationResult.
         /// </summary>
         public string TokenType { get; }
+
+        /// <summary>
+        /// All the claims present in the ID token.
+        /// </summary>
+        public ClaimsPrincipal ClaimsPrincipal { get; }
 
         internal ApiEvent ApiEvent { get; }
 
