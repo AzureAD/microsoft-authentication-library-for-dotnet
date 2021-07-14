@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client
             IsHomeTenant = isHomeTenant;
         }
 
-        internal TenantProfile(MsalIdTokenCacheItem msalIdTokenCacheItem)
+        internal TenantProfile(MsalIdTokenCacheItem msalIdTokenCacheItem) //TODO lazy
         {
             Oid = msalIdTokenCacheItem.IdToken.ObjectId;
             TenantId = msalIdTokenCacheItem.TenantId;

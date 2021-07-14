@@ -23,14 +23,18 @@ namespace Microsoft.Identity.Client
         /// <param name="environment">Identity provider for this account, e.g. <c>login.microsoftonline.com</c></param>
         /// <param name="wamAccountIds">Map of (client_id, wam_account_id)</param>
         /// <param name="tenantProfiles">Map of (tenant_id, tenant_profile)</param>
-        public Account(string homeAccountId, string username, string environment, IDictionary<string, string> wamAccountIds = null, 
+        public Account(
+            string homeAccountId, 
+            string username, 
+            string environment, 
+            IDictionary<string, string> wamAccountIds = null, 
             IDictionary<string, TenantProfile> tenantProfiles = null)
         {
             Username = username;
             Environment = environment;
             HomeAccountId = AccountId.ParseFromString(homeAccountId);
             WamAccountIds = wamAccountIds;
-            _tenantProfiles = tenantProfiles;
+            TenantProfiles = tenantProfiles;
         }        
 
         public string Username { get; }
@@ -39,13 +43,8 @@ namespace Microsoft.Identity.Client
 
         public AccountId HomeAccountId { get; }
 
-        public IDictionary<string, TenantProfile> TenantProfiles 
-        { 
-            get
-            {
-                return _tenantProfiles;
-            }
-        }
+        public IDictionary<string, TenantProfile> TenantProfiles { get; }
+      
        
 
         internal IDictionary<string, string> WamAccountIds

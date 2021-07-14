@@ -53,7 +53,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
     
-        internal bool IsAdfs { get; set; } // TODO: get rid of this 
         internal string TenantId { get; set; }
 
         private readonly Lazy<IdToken> idTokenLazy;
@@ -101,6 +100,11 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             return ToJObject()
                 .ToString();
+        }
+
+        internal string GetUsername()
+        {
+            return IdToken?.PreferredUsername ?? IdToken?.Upn;
         }
     }
 }
