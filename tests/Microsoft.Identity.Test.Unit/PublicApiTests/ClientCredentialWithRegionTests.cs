@@ -237,6 +237,25 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        public void WithAzureRegionThrowsOnNullArg()
+        {
+            AssertException.Throws<ArgumentNullException>(
+                () => ConfidentialClientApplicationBuilder
+                             .Create(TestConstants.ClientId)
+                             .WithAzureRegion(null)
+                             .WithClientSecret(TestConstants.ClientSecret)
+                             .Build());
+
+            AssertException.Throws<ArgumentNullException>(
+               () => ConfidentialClientApplicationBuilder
+                            .Create(TestConstants.ClientId)
+                            .WithAzureRegion(string.Empty)
+                            .WithClientSecret(TestConstants.ClientSecret)
+                            .Build());
+
+        }
+
+        [TestMethod]
         // regression: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686
         public async Task OtherCloudWithAuthorityValidationAsync()
         {
@@ -310,10 +329,10 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", null);
             }
-           
+
         }
 
-       
+
         private static async Task RunPpeTestAsync(bool validateAuthority, bool authorityIsValid)
         {
             using (var harness = new MockHttpAndServiceBundle())
@@ -344,7 +363,7 @@ namespace Microsoft.Identity.Test.Unit
                     ResponseMessage = CreateResponse(true)
                 };
 
-              
+
                 if (authorityIsValid || !validateAuthority) // no calls because authority validation will fail
                 {
                     harness.HttpManager.AddMockHandler(discoveryHandler);
@@ -352,7 +371,7 @@ namespace Microsoft.Identity.Test.Unit
                 }
                 else
                 {
-                    harness.HttpManager.AddMockHandler(discoveryHandler);                    
+                    harness.HttpManager.AddMockHandler(discoveryHandler);
                 }
 
                 var app = ConfidentialClientApplicationBuilder
@@ -363,7 +382,7 @@ namespace Microsoft.Identity.Test.Unit
                                  .WithClientSecret(TestConstants.ClientSecret)
                                  .Build();
 
-               if (!authorityIsValid && validateAuthority)
+                if (!authorityIsValid && validateAuthority)
                 {
                     var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => app
                    .AcquireTokenForClient(TestConstants.s_scope)
@@ -401,7 +420,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-     
+
 
         [TestMethod]
         [Description("Test with a user configured region.")]

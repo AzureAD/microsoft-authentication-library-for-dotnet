@@ -78,19 +78,19 @@ namespace Microsoft.Identity.Client
         /// <list type="table">
         /// <listheader>
         /// <term>Platform</term>
-        /// <term>Default Reply URI</term>
+        /// <Description>Default Reply URI</Description>
         /// </listheader>
         /// <item>
         /// <term>.NET desktop</term>
-        /// <term><c>https://login.microsoftonline.com/common/oauth2/nativeclient</c></term>
+        /// <Description><c>https://login.microsoftonline.com/common/oauth2/nativeclient</c></Description>
         /// </item>
         /// <item>
         /// <term>UWP</term>
-        /// <term>value of <c>WebAuthenticationBroker.GetCurrentApplicationCallbackUri()</c></term>
+        /// <Description>value of <c>WebAuthenticationBroker.GetCurrentApplicationCallbackUri()</c></Description>
         /// </item>
         /// <item>
         /// <term>For system browser on .NET Core</term>
-        /// <term><c>http://localhost</c></term>
+        /// <Description><c>http://localhost</c></Description>
         /// </item>
         /// </list>
         /// NOTE:There will be an update to the default redirect URI in the future to accommodate for system browsers on the 
