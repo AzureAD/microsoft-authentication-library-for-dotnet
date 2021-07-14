@@ -11,12 +11,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
     internal abstract class AbstractExecutor
     {
-        private readonly ClientApplicationBase _clientApplicationBase;
-
-        protected AbstractExecutor(IServiceBundle serviceBundle, ClientApplicationBase clientApplicationBase)
+        protected AbstractExecutor(IServiceBundle serviceBundle)
         {
             ServiceBundle = serviceBundle;
-            _clientApplicationBase = clientApplicationBase;
         }
 
         public IServiceBundle ServiceBundle { get; }

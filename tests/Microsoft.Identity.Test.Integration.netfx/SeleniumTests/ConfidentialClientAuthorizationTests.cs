@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common", true).ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, string authority, bool usePkce = false)
+        private async Task RunTestForUserAsync(LabResponse labResponse, string authority, bool usePkce = false)
         {
             var cert = await s_secretProvider.GetCertificateWithPrivateMaterialAsync(
                 CertificateName, KeyVaultInstance.MsalTeam).ConfigureAwait(false);
@@ -149,19 +149,31 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ConfigureAwait(false);
 
             cacheAccess.AssertAccessCounts(0, 1);
-            Assert.AreEqual(
-                result.Account.HomeAccountId.Identifier,
-                cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
-            Assert.AreEqual(
-                result.Account.HomeAccountId.Identifier,
-                cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
-            Assert.AreEqual(
-                result.Account.HomeAccountId.Identifier,
-                cacheAccess.LastBeforeWriteNotificationArgs.SuggestedCacheKey);
+            AssertCacheKey(cacheAccess, result.Account.HomeAccountId.Identifier);
 
             AssertExtraHTTPHeadersAreSent(factory);
 
-            return result;
+            Trace.WriteLine("Part 4 - Remove Account");
+
+            await cca.RemoveAsync(result.Account).ConfigureAwait(false);
+            cacheAccess.AssertAccessCounts(0, 2); 
+
+            AssertCacheKey(cacheAccess, result.Account.HomeAccountId.Identifier);
+
+
+        }
+
+        private static void AssertCacheKey(TokenCacheAccessRecorder cacheAccess, string expectedKey)
+        {
+            Assert.AreEqual(
+                expectedKey,
+                cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                expectedKey,
+                cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                expectedKey,
+                cacheAccess.LastBeforeWriteNotificationArgs.SuggestedCacheKey);
         }
 
         private void AssertExtraHTTPHeadersAreSent(HttpSnifferClientFactory factory)

@@ -15,7 +15,8 @@ namespace Microsoft.Identity.Client.Cache
                 return key;
             }
 
-            if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent)
+            if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent ||
+                requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.RemoveAccount)
             {
                 return requestParameters.Account?.HomeAccountId?.Identifier;
             }
