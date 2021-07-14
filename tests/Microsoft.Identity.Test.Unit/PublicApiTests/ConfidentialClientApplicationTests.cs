@@ -761,12 +761,37 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        public async Task DoNotUseNullCcsRoutingHint_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app = CreateCca(httpManager);
+
+                var uri = await app
+                    .GetAuthorizationRequestUrl(TestConstants.s_scope)
+                    .WithCcsRoutingHint("", "")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                AssertCcsHint(uri, "");
+            }
+        }
+
         private static void AssertCcsHint(Uri uri, string ccsHint)
         {
             Assert.IsNotNull(uri);
             Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
-            Assert.IsTrue(qp.ContainsKey(Constants.CcsRoutingHintHeader));
-            Assert.AreEqual(ccsHint, qp[Constants.CcsRoutingHintHeader]);
+
+            if (!string.IsNullOrEmpty(ccsHint))
+            {
+                Assert.IsTrue(qp.ContainsKey(Constants.CcsRoutingHintHeader));
+                Assert.AreEqual(ccsHint, qp[Constants.CcsRoutingHintHeader]);
+            }
+            else
+            {
+                Assert.IsTrue(!qp.ContainsKey(Constants.CcsRoutingHintHeader));
+            }
         }
 
         private static ConfidentialClientApplication CreateCca(MockHttpManager httpManager)
