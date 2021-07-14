@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
         public string TenantId => _msalIdTokenCacheItem.ParseIdToken().TenantId;
 
         /// <summary>
-        /// All the claims present in the ID Token.
+        /// All the claims present in the ID Token associated with this profile.
         /// </summary>
         public ClaimsPrincipal ClaimsPrincipal => _msalIdTokenCacheItem.ParseIdToken().ClaimsPrincipal;
 

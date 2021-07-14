@@ -125,6 +125,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result.AccessToken);
+                Assert.IsNull(result.ClaimsPrincipal);
 
                 //Check app cache
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
