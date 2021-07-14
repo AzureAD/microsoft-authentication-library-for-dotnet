@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        private MockHttpMessageHandler AddMockHandlerAadSuccess(MockHttpManager httpManager, string authority, IDictionary<string, string> unexpectedHeaders = null)
+        private MockHttpMessageHandler AddMockHandlerAadSuccess(MockHttpManager httpManager, string authority, IList<string> unexpectedHeaders = null)
         {
             var handler = new MockHttpMessageHandler
             {
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var extraUnexpectedHeaders = new Dictionary<string, string>() { { Constants.CcsRoutingHintHeader, "" } };
+                var extraUnexpectedHeaders = new List<string>() { { Constants.CcsRoutingHintHeader} };
                 AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant, extraUnexpectedHeaders);
 
                 var cca = ConfidentialClientApplicationBuilder
@@ -160,6 +160,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                       .WithCcsRoutingHint("")
                                       .WithCcsRoutingHint("", "")
                                       .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual("some-access-token", result.AccessToken);
+
+                result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                      .WithCcsRoutingHint("")
+                      .WithCcsRoutingHint("", "")
+                      .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);

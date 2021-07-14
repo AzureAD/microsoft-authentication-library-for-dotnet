@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public IDictionary<string, string> ExpectedQueryParams { get; set; }
         public IDictionary<string, string> ExpectedPostData { get; set; }
         public IDictionary<string, string> ExpectedRequestHeaders { get; set; }
-        public IDictionary<string, string> UnexpectedRequestHeaders { get; set; }
+        public IList<string> UnexpectedRequestHeaders { get; set; }
 
         public HttpMethod ExpectedMethod { get; set; }
         
@@ -114,11 +114,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             if (UnexpectedRequestHeaders != null)
             {
-                foreach (var kvp in UnexpectedRequestHeaders)
+                foreach (var item in UnexpectedRequestHeaders)
                 {
                     Assert.IsTrue(
-                        !request.Headers.Any(h => string.Equals(h.Key, kvp.Key, StringComparison.OrdinalIgnoreCase))
-                        , $"Not expecting a request header with key={kvp.Key} but it was found in the actual request: {request}");
+                        !request.Headers.Any(h => string.Equals(h.Key, item, StringComparison.OrdinalIgnoreCase))
+                        , $"Not expecting a request header with key={item} but it was found in the actual request: {request}");
                 }
             }
 
