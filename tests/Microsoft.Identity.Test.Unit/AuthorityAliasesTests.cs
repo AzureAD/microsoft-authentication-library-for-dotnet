@@ -209,7 +209,6 @@ namespace Microsoft.Identity.Test.Unit
                     .Result;
 
                 Assert.IsNotNull(result);
-                Assert.IsTrue(harness.HttpManager.QueueSize == 0);
             }
         }
     }
