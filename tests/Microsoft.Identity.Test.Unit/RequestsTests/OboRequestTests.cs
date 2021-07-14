@@ -145,8 +145,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var unextraExpectedHeaders = new Dictionary<string, string>() { { Constants.CcsRoutingHintHeader, "" } };
-                AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant, unextraExpectedHeaders);
+                var extraUnexpectedHeaders = new Dictionary<string, string>() { { Constants.CcsRoutingHintHeader, "" } };
+                AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant, extraUnexpectedHeaders);
 
                 var cca = ConfidentialClientApplicationBuilder
                                                          .Create(TestConstants.ClientId)
