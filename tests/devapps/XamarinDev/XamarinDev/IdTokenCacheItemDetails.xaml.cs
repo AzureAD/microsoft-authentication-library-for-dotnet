@@ -18,7 +18,7 @@ namespace XamarinDev
 
             clientIdLabel.Text = msalIdTokenCacheItem.ClientId;
 
-            authorityLabel.Text = msalIdTokenCacheItem.Authority;
+            authorityLabel.Text = msalIdTokenCacheItem.Environment + "/" + msalIdTokenCacheItem.TenantId ?? "common";
             environmentLabel.Text = msalIdTokenCacheItem.Environment;
             tenantIdLabel.Text = msalIdTokenCacheItem.TenantId;
 
