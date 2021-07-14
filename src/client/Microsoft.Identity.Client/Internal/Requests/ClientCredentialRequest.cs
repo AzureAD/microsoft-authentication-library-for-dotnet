@@ -53,11 +53,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return new AuthenticationResult(
                         cachedAccessTokenItem,
                         null,
+                        null,
                         AuthenticationRequestParameters.AuthenticationScheme,
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
                         TokenSource.Cache,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent,
-                        CacheManager);
+                        AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
 
                 cacheInfoTelemetry = (cachedAccessTokenItem == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.RefreshIn;
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (MsalServiceException e)
             {
-                return HandleTokenRefreshError(e, cachedAccessTokenItem);
+                return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem).ConfigureAwait(false);
             }
         }
 

@@ -20,8 +20,7 @@ namespace Microsoft.Identity.Client
     public partial class AuthenticationResult
     {
         private readonly IAuthenticationScheme _authenticationScheme;
-        private readonly ICacheSessionManager _cacheManager;
-
+        
         /// <summary>
         /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.
         /// App developers should <b>never</b> new-up <see cref="AuthenticationResult"/> in product code.
@@ -116,15 +115,15 @@ namespace Microsoft.Identity.Client
 
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem,
+            MsalIdTokenCacheItem msalIdTokenCacheItem, 
+            IDictionary<string, TenantProfile> tenantProfiles,
             IAuthenticationScheme authenticationScheme,
             Guid correlationID,
             TokenSource tokenSource, 
-            ApiEvent apiEvent,
-            ICacheSessionManager cacheManager)
+            ApiEvent apiEvent)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
-            _cacheManager = cacheManager ?? null;
+            
             string homeAccountId =
                 msalAccessTokenCacheItem?.HomeAccountId ??
                 msalIdTokenCacheItem?.HomeAccountId;
@@ -133,25 +132,9 @@ namespace Microsoft.Identity.Client
 
             if (homeAccountId != null)
             {
-                // This method call is to an async method from this constructor but the network call in the method will ideally never happen.
-                var tenantProfiles = Task.Run(async () => await _cacheManager.GetTenantProfilesAsync(homeAccountId).ConfigureAwait(false)).GetAwaiter().GetResult();
-
-                string username = null;
-                if (msalIdTokenCacheItem != null)
-                {
-                    username = msalIdTokenCacheItem.IsAdfs ?
-                        msalIdTokenCacheItem?.IdToken.Upn :
-                        msalIdTokenCacheItem?.IdToken?.PreferredUsername;
-
-                    if (tenantProfiles != null)
-                    {
-                        tenantProfiles[msalIdTokenCacheItem.TenantId] = new TenantProfile(msalIdTokenCacheItem);
-                    }
-                }
-
                 Account = new Account(
                     homeAccountId,
-                    username,
+                    msalIdTokenCacheItem?.GetUsername(),
                     environment,
                     tenantProfiles: tenantProfiles);
             }
