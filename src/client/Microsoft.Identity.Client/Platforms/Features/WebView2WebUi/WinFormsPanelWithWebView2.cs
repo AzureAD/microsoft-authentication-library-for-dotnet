@@ -2,18 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
@@ -28,7 +21,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         private readonly Uri _startUri;
         private readonly Uri _endUri;
         private WebView2 _webView2;
-        private const string webView2UserDataFolder = "%UserProfile%/.msal/webview2/data";
+        private const string WebView2UserDataFolder = "%UserProfile%/.msal/webview2/data";
 
         private AuthorizationResult _result;
 
@@ -68,16 +61,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
 
             _webView2.CreationProperties = new CoreWebView2CreationProperties()
             {
-                UserDataFolder = Environment.ExpandEnvironmentVariables(webView2UserDataFolder)
+                UserDataFolder = Environment.ExpandEnvironmentVariables(WebView2UserDataFolder)
             };
-
         }
 
         public AuthorizationResult DisplayDialogAndInterceptUri()
         {
             _webView2.CoreWebView2InitializationCompleted += WebView2Control_CoreWebView2InitializationCompleted;
             _webView2.NavigationStarting += WebView2Control_NavigationStarting;
-            _webView2.KeyDown += _webView2_KeyDown;
 
             // Starts the navigation
             _webView2.Source = _startUri;
@@ -105,7 +96,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             }
         }
 
-     
+
         private void PlaceOnTop(object sender, EventArgs e)
         {
             // If we don't have an owner we need to make sure that the pop up browser
@@ -124,7 +115,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         /// <param name="action"></param>
         private void InvokeHandlingOwnerWindow(Action action)
         {
-            // We only support WindowsForms (since our dialog is winforms based)
+            // We only support WindowsForms (since our dialog is Win Forms based)
             if (_ownerWindow != null && _ownerWindow is Control winFormsControl)
             {
                 winFormsControl.Invoke(action);
@@ -189,7 +180,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 ShowInTaskbar = null == _ownerWindow;
 
                 webBrowserPanel.ResumeLayout(false);
-                ResumeLayout(false);                
+                ResumeLayout(false);
             });
 
             this.Shown += PlaceOnTop;
@@ -199,7 +190,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         {
             if (CheckForEndUrl(new Uri(e.Uri)))
             {
-                _logger.Verbose("[WebView2Control] Redirect uri reached. Stopping the interactive view");
+                _logger.Verbose("[WebView2Control] Redirect URI reached. Stopping the interactive view");
                 e.Cancel = true;
             }
             else
@@ -208,14 +199,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             }
         }
 
-        // Don't allow accelerator keys (ALT + back, ALT + forward, CTRL + P, etc.)
-        private void _webView2_KeyDown(object sender, KeyEventArgs e)
-        {
-            _logger.Info("[WebView2Control] Accelerator key disabled");
-            e.Handled = true;
-        }
-
-
         private bool CheckForEndUrl(Uri url)
         {
             bool readyToClose = false;
@@ -223,7 +206,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             if (url.Authority.Equals(_endUri.Authority, StringComparison.OrdinalIgnoreCase) &&
                 url.AbsolutePath.Equals(_endUri.AbsolutePath))
             {
-                _logger.Info("Redirect Uri was reached. Stopping webview navigation...");
+                _logger.Info("Redirect Uri was reached. Stopping WebView navigation...");
                 _result = AuthorizationResult.FromUri(url.OriginalString);
                 readyToClose = true;
             }
@@ -234,7 +217,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 !url.Scheme.Equals("javascript", StringComparison.OrdinalIgnoreCase))
             {
 
-                _logger.Error($"Redirection to non-HTTPS scheme ({url.Scheme}) found! Webview will fail...");
+                _logger.Error($"Redirection to non-HTTPS scheme ({url.Scheme}) found! WebView will fail...");
 
                 _result = AuthorizationResult.FromStatus(
                     AuthorizationStatus.ErrorHttp,
@@ -262,6 +245,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             _webView2.CoreWebView2.Settings.IsScriptEnabled = true;
             _webView2.CoreWebView2.Settings.IsZoomControlEnabled = false;
             _webView2.CoreWebView2.Settings.IsStatusBarEnabled = true;
+            _webView2.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
 
             if (_embeddedWebViewOptions.Title == null)
             {
