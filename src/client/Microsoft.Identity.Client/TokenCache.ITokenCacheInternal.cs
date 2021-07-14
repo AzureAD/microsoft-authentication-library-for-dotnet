@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client
                             msalRefreshTokenCacheItem,
                             msalIdTokenCacheItem,
                             authorityWithPreferredCache.AuthorityInfo.CanonicalAuthority,
-                            msalIdTokenCacheItem.IdToken.ObjectId,
+                            msalIdTokenCacheItem.ParseIdToken().ObjectId,
                             response.Scope);
                     }
                 }

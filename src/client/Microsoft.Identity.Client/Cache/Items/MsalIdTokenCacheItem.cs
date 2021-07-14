@@ -57,9 +57,9 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         private readonly Lazy<IdToken> idTokenLazy;
 
-        internal IdToken IdToken
+        internal IdToken ParseIdToken()
         {
-            get => idTokenLazy.Value;
+            return idTokenLazy.Value;
         }
 
         internal MsalIdTokenCacheKey GetKey()
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string GetUsername()
         {
-            return IdToken?.PreferredUsername ?? IdToken?.Upn;
+            return ParseIdToken()?.PreferredUsername ?? ParseIdToken()?.Upn;
         }
     }
 }
