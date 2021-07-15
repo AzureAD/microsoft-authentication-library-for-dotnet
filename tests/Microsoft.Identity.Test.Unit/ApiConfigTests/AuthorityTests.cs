@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
     {
         private static readonly AuthorityInfo s_commonAuthority =
             AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true);
-        static string s_ppeCommonUri = $@"https://{TestConstants.PPEEnvironment}/{TestConstants.TenantId}";
+        static string s_ppeCommonUri = $@"https://{TestConstants.PpeEnvironment}/{TestConstants.TenantId}";
         private static readonly AuthorityInfo s_ppeAuthority =
           AuthorityInfo.FromAuthorityUri(s_ppeCommonUri, true);
         private static readonly AuthorityInfo s_utidAuthority =

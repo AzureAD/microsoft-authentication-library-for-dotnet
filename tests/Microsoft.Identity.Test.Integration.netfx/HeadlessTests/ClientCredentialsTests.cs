@@ -148,13 +148,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
-
-            // bug: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2701
-            if (settings.Cloud != Cloud.PPE)
-            {
                 Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs == 0);
-            }
-
+            
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);

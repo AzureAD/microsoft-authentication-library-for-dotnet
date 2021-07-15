@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com";
         public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
-        public const string PPEEnvironment = "login.windows-ppe.net";
+        public const string PpeEnvironment = "login.windows-ppe.net";
 
 
         public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
@@ -73,7 +73,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityRegional = "https://" + ProductionPrefRegionalEnvironment + "/" + TenantId + "/";
         public const string AuthorityRegionalInvalidRegion = "https://" + ProductionPrefInvalidRegionEnvironment + "/" + TenantId + "/";
         public const string AuthorityTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantId + "/";
-        public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";        
+        public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";
+        public const string AuthorityCommonPpeAuthority = "https://" + PpeEnvironment + "/common/";
 
         public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
         public const string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/organizations/";

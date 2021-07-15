@@ -269,7 +269,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(customPortAuthority);
-                harness.HttpManager.AddInstanceDiscoveryMockHandler(customPortAuthority);
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
