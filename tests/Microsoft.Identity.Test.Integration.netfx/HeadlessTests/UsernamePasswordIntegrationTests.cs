@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     federationMetadata,
                     CorrelationId).ConfigureAwait(false);
 
-            if (AuthorityInfo.FromAuthorityUri(labResponse.Lab.Authority, false).AuthorityType == AuthorityType.Aad)
+            if (AuthorityInfo.FromAuthorityUri(labResponse.Lab.Authority + "/" + labResponse.Lab.TenantId, false).AuthorityType == AuthorityType.Aad)
             {
                 AssertTenantProfiles(authResult.Account.GetTenantProfiles(), authResult.TenantId);
             }
