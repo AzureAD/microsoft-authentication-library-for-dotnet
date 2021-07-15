@@ -112,36 +112,32 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
             _testRequestContext.ServiceBundle.Config.HttpManager = _harness.HttpManager;
             _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_commonAuthority;
-            var ex = Assert.ThrowsException<AggregateException>(
-                () =>
-                Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_ppeAuthority, null).Result);
-            Assert.IsTrue(ex.InnerException is MsalClientException);
-            Assert.AreEqual(MsalError.AuthorityHostMismatch, (ex.InnerException as MsalClientException).ErrorCode);
+            var ex = Assert.ThrowsExceptionAsync<MsalClientException>(
+                async () =>
+                await Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_ppeAuthority, null).ConfigureAwait(false));
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.Result.ErrorCode);
 
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
             _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_ppeAuthority;
-            var ex2 = Assert.ThrowsException<AggregateException>(
-              () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority, null).Result);
-            Assert.IsTrue(ex.InnerException is MsalClientException);
-            Assert.AreEqual(MsalError.AuthorityHostMismatch, (ex2.InnerException as MsalClientException).ErrorCode);
+            var ex2 = Assert.ThrowsExceptionAsync<MsalClientException>(
+              async () => await Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority, null).ConfigureAwait(false));
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.Result.ErrorCode);
 
             _testRequestContext.ServiceBundle.Config.AuthorityInfo = AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority, true);
-            var ex3 = Assert.ThrowsException<AggregateException>(
-             () => Authority.CreateAuthorityForRequestAsync(
+            var ex3 = Assert.ThrowsExceptionAsync<MsalClientException>(
+             async () => await Authority.CreateAuthorityForRequestAsync(
                  _testRequestContext,
                  AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority2, true),
-                 null).Result);
-            Assert.IsTrue(ex.InnerException is MsalClientException);
-            Assert.AreEqual(MsalError.AuthorityHostMismatch, (ex3.InnerException as MsalClientException).ErrorCode);
+                 null).ConfigureAwait(false));
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.Result.ErrorCode);
 
             _testRequestContext.ServiceBundle.Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(TestConstants.B2CAuthority, true);
-            var ex4 = Assert.ThrowsException<AggregateException>(
-               () => Authority.CreateAuthorityForRequestAsync(
+            var ex4 = Assert.ThrowsExceptionAsync<MsalClientException>(
+               async () => await Authority.CreateAuthorityForRequestAsync(
                    _testRequestContext,
                    AuthorityInfo.FromAuthorityUri(TestConstants.B2CCustomDomain, true),
-                   null).Result);
-            Assert.IsTrue(ex.InnerException is MsalClientException);
-            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, (ex4.InnerException as MsalClientException).ErrorCode);
+                   null).ConfigureAwait(false));
+            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex.Result.ErrorCode);
         }
 
         [TestMethod]
