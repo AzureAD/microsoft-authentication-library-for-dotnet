@@ -24,9 +24,7 @@ namespace XamarinDev
 
             userIdentifierLabel.Text = msalIdTokenCacheItem.HomeAccountId;
 
-            secretLabel.Text = StringShortenerConverter.GetShortStr(msalIdTokenCacheItem.Secret, 100);
-
-            idTokenLabel.Text = JsonHelper.SerializeToJson(msalIdTokenCacheItem.IdToken);
+            secretLabel.Text = StringShortenerConverter.GetShortStr(msalIdTokenCacheItem.Secret, 100);            
 
             rawClientInfoLabel.Text = msalIdTokenCacheItem.RawClientInfo;
 
