@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_ppeAuthority;
             var ex2 = Assert.ThrowsExceptionAsync<MsalClientException>(
               async () => await Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority, null).ConfigureAwait(false));
-            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.Result.ErrorCode);
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex2.Result.ErrorCode);
 
             _testRequestContext.ServiceBundle.Config.AuthorityInfo = AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority, true);
             var ex3 = Assert.ThrowsExceptionAsync<MsalClientException>(
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                  _testRequestContext,
                  AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority2, true),
                  null).ConfigureAwait(false));
-            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.Result.ErrorCode);
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex3.Result.ErrorCode);
 
             _testRequestContext.ServiceBundle.Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(TestConstants.B2CAuthority, true);
             var ex4 = Assert.ThrowsExceptionAsync<MsalClientException>(
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                    _testRequestContext,
                    AuthorityInfo.FromAuthorityUri(TestConstants.B2CCustomDomain, true),
                    null).ConfigureAwait(false));
-            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex.Result.ErrorCode);
+            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex4.Result.ErrorCode);
         }
 
         [TestMethod]
