@@ -100,10 +100,10 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public void DefaultAuthorityDifferentTypeTest()
         {
             _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_commonAuthority;
-            var ex = Assert.ThrowsException<AggregateException>(
-                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority, null).Result);
+            var ex = Assert.ThrowsExceptionAsync<MsalClientException>(
+                async () => await Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority, null).ConfigureAwait(false));
 
-            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, (ex.InnerException as MsalClientException).ErrorCode);
+            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex.Result.ErrorCode);
         }
 
         [TestMethod]
