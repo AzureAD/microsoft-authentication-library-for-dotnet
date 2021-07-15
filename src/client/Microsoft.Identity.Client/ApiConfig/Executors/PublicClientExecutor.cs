@@ -28,10 +28,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            AuthenticationRequestParameters requestParams = _publicClientApplication.CreateRequestParameters(
+            AuthenticationRequestParameters requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _publicClientApplication.UserTokenCacheInternal);
+                _publicClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
 
             requestParams.LoginHint = interactiveParameters.LoginHint;
             requestParams.Account = interactiveParameters.Account;
@@ -49,10 +49,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            var requestParams = _publicClientApplication.CreateRequestParameters(
+            var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _publicClientApplication.UserTokenCacheInternal);
+                _publicClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
 
             var handler = new DeviceCodeRequest(
                 ServiceBundle,
@@ -69,10 +69,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            var requestParams = _publicClientApplication.CreateRequestParameters(
+            var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _publicClientApplication.UserTokenCacheInternal);
+                _publicClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
 
             var handler = new IntegratedWindowsAuthRequest(
                 ServiceBundle,
@@ -89,10 +89,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            var requestParams = _publicClientApplication.CreateRequestParameters(
+            var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _publicClientApplication.UserTokenCacheInternal);
+                _publicClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
 
             var handler = new UsernamePasswordRequest(
                 ServiceBundle,

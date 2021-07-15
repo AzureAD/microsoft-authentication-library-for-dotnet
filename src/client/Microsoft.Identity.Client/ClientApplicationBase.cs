@@ -76,14 +76,14 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal virtual AuthenticationRequestParameters CreateRequestParameters(
+        internal virtual async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
             ITokenCacheInternal cache)
         {
-            var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
-               requestContext.ServiceBundle.Config.AuthorityInfo,
-               commonParameters.AuthorityOverride);
+            var authority = await Instance.Authority.CreateAuthorityForRequestAsync(
+               requestContext,
+               commonParameters.AuthorityOverride).ConfigureAwait(false);
 
             return new AuthenticationRequestParameters(
                 ServiceBundle,
@@ -212,9 +212,9 @@ namespace Microsoft.Identity.Client
             requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId.ToString());
             requestContext.ApiEvent.ApiId = apiId;
 
-            var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequest(
-              requestContext.ServiceBundle.Config.AuthorityInfo,
-              null);
+            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+              requestContext,
+              null).ConfigureAwait(false);
 
             var authParameters = new AuthenticationRequestParameters(
                    ServiceBundle,
