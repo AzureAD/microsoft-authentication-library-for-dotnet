@@ -224,15 +224,7 @@ namespace Microsoft.Identity.Client.Instance
             var instanceDiscoveryManager = requestContext.ServiceBundle.InstanceDiscoveryManager;
             var result = await instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.AuthorityInfo, requestContext).ConfigureAwait(false);
 
-            foreach (string alias in result.Aliases)
-            {
-                if (string.Equals(alias, requestAuthorityInfo.Host))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return result.Aliases.Any(alias => alias.Equals(requestAuthorityInfo.Host));
         }
 
         internal static string GetEnvironment(string authority)
