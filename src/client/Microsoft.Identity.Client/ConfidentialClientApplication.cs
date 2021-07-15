@@ -192,13 +192,12 @@ namespace Microsoft.Identity.Client
         // multi-tenant apps that do not serialize their cache.
         internal InMemoryPartitionedCacheSerializer InMemoryPartitionedCacheSerializer { get; }
 
-
-        internal override AuthenticationRequestParameters CreateRequestParameters(
+        internal override async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
             ITokenCacheInternal cache)
         {
-            AuthenticationRequestParameters requestParams = base.CreateRequestParameters(commonParameters, requestContext, cache);
+            AuthenticationRequestParameters requestParams = await base.CreateRequestParametersAsync(commonParameters, requestContext, cache).ConfigureAwait(false);
             requestParams.ClientCredential = ServiceBundle.Config.ClientCredential;
             return requestParams;
         }

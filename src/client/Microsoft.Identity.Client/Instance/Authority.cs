@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Client.Instance
         /// - if the authority is defined at app level, and the request level authority of is of different type, throw an exception
         ///
         /// </summary>
-        public static Authority CreateAuthorityForRequest(
+        public static async Task<Authority> CreateAuthorityForRequestAsync(
             RequestContext requestContext,
             AuthorityInfo requestAuthorityInfo,
             string requestHomeAccountTenantId = null)
@@ -60,7 +61,7 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
-            ValidateSameHost(requestAuthorityInfo, requestContext);
+            await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
 
             switch (configAuthorityInfo.AuthorityType)
             {
@@ -184,7 +185,7 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         internal abstract AuthorityEndpoints GetHardcodedEndpoints();
 
-        private static void ValidateSameHost(AuthorityInfo requestAuthorityInfo, RequestContext requestContext)
+        private static async Task ValidateSameHostAsync(AuthorityInfo requestAuthorityInfo, RequestContext requestContext)
         {
             var configAuthorityInfo = requestContext.ServiceBundle.Config.AuthorityInfo;
 
@@ -195,8 +196,8 @@ namespace Microsoft.Identity.Client.Instance
                 {
                     throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
                 }
-
-                if (IsAuthorityAliased(requestContext, requestAuthorityInfo))
+                var authorityAliased = await IsAuthorityAliasedAsync(requestContext, requestAuthorityInfo).ConfigureAwait(false);
+                if (authorityAliased)
                 {
                     return;
                 }
@@ -218,10 +219,10 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
 
-        private static bool IsAuthorityAliased(RequestContext requestContext, AuthorityInfo requestAuthorityInfo)
+        private static async Task<bool> IsAuthorityAliasedAsync(RequestContext requestContext, AuthorityInfo requestAuthorityInfo)
         {
             var instanceDiscoveryManager = requestContext.ServiceBundle.InstanceDiscoveryManager;
-            var result = instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.AuthorityInfo, requestContext).Result;
+            var result = await instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.AuthorityInfo, requestContext).ConfigureAwait(false);
 
             foreach (string alias in result.Aliases)
             {

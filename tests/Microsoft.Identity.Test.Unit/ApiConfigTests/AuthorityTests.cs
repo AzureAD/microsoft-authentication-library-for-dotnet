@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
@@ -86,11 +87,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [TestMethod]
-        public void AuthorityMismatchTest()
+        public void AuthorityMismatchTestAsync()
         {
-            _testRequestContext.ServiceBundle.Config.SetAuthorityInfoForTest(s_utidAuthority);
-            var ex = AssertException.Throws<MsalClientException>(() =>
-                Authority.CreateAuthorityForRequest(_testRequestContext, s_b2cAuthority, null));
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_utidAuthority;
+            var ex =  AssertException.Throws<MsalClientException>(
+                                             () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority, null));
 
             Assert.AreEqual(MsalError.AuthorityTypeMismatch, ex.ErrorCode);
         }
@@ -98,11 +99,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public void DefaultAuthorityDifferentTypeTest()
         {
-            _testRequestContext.ServiceBundle.Config.SetAuthorityInfoForTest(s_commonAuthority);
-            var ex = Assert.ThrowsException<MsalClientException>(
-                () => Authority.CreateAuthorityForRequest(_testRequestContext, s_b2cAuthority, null));
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_commonAuthority;
+            var ex = Assert.ThrowsException<AggregateException>(
+                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority, null).Result);
 
-            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex.ErrorCode);
+            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, (ex.InnerException as MsalClientException).ErrorCode);
         }
 
         [TestMethod]
@@ -110,38 +111,49 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
             _testRequestContext.ServiceBundle.Config.HttpManager = _harness.HttpManager;
-            _testRequestContext.ServiceBundle.Config.SetAuthorityInfoForTest(s_commonAuthority);
-            var ex = Assert.ThrowsException<MsalClientException>(
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_commonAuthority;
+            var ex = Assert.ThrowsException<AggregateException>(
                 () =>
-                Authority.CreateAuthorityForRequest(_testRequestContext, s_ppeAuthority, null));
-            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.ErrorCode);
+                Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_ppeAuthority, null).Result);
+            Assert.IsTrue(ex.InnerException is MsalClientException);
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, (ex.InnerException as MsalClientException).ErrorCode);
 
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-            _testRequestContext.ServiceBundle.Config.SetAuthorityInfoForTest(s_ppeAuthority);
-            var ex2 = Assert.ThrowsException<MsalClientException>(
-              () => Authority.CreateAuthorityForRequest(_testRequestContext, s_commonAuthority, null));
-            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex2.ErrorCode);
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_ppeAuthority;
+            var ex2 = Assert.ThrowsException<AggregateException>(
+              () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority, null).Result);
+            Assert.IsTrue(ex.InnerException is MsalClientException);
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, (ex2.InnerException as MsalClientException).ErrorCode);
 
-            _testRequestContext.ServiceBundle.Config.SetAuthorityInfoForTest(AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority, true));
-            var ex3 = Assert.ThrowsException<MsalClientException>(
-             () => Authority.CreateAuthorityForRequest(
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo = AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority, true);
+            var ex3 = Assert.ThrowsException<AggregateException>(
+             () => Authority.CreateAuthorityForRequestAsync(
                  _testRequestContext,
                  AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority2, true),
-                 null));
-            Assert.AreEqual(MsalError.AuthorityHostMismatch, ex3.ErrorCode);
+                 null).Result);
+            Assert.IsTrue(ex.InnerException is MsalClientException);
+            Assert.AreEqual(MsalError.AuthorityHostMismatch, (ex3.InnerException as MsalClientException).ErrorCode);
 
-            _testRequestContext.ServiceBundle.Config.SetAuthorityInfoForTest(AuthorityInfo.FromAuthorityUri(TestConstants.B2CAuthority, true));
-            var ex4 = Assert.ThrowsException<MsalClientException>(
-               () => Authority.CreateAuthorityForRequest(
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(TestConstants.B2CAuthority, true);
+            var ex4 = Assert.ThrowsException<AggregateException>(
+               () => Authority.CreateAuthorityForRequestAsync(
                    _testRequestContext,
                    AuthorityInfo.FromAuthorityUri(TestConstants.B2CCustomDomain, true),
-                   null));
-            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex4.ErrorCode);
+                   null).Result);
+            Assert.IsTrue(ex.InnerException is MsalClientException);
+            Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, (ex4.InnerException as MsalClientException).ErrorCode);
+        }
 
-            //Checking for aliased authority. Should not throw exception
-            _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-            _testRequestContext.ServiceBundle.Config.SetAuthorityInfoForTest(s_commonNetAuthority);
-            var authority = Authority.CreateAuthorityForRequest(_testRequestContext, s_commonAuthority);
+        [TestMethod]
+        public async Task DifferentHostsWithAliasedAuthorityAsync()
+        {
+            //Checking for aliased authority. Should not throw exception whan a developer configures an authority on the application
+            //but uses a different authority that is a known alias of the previously configured one.
+            //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2736
+            _harness.HttpManager.AddInstanceDiscoveryMockHandler(TestConstants.PrefCacheAuthorityCommonTenant);
+            _testRequestContext.ServiceBundle.Config.HttpManager = _harness.HttpManager;
+            _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_commonNetAuthority;
+            var authority = await Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority).ConfigureAwait(false);
             Assert.AreEqual(s_commonNetAuthority.CanonicalAuthority, authority.AuthorityInfo.CanonicalAuthority);
         }
 
@@ -163,8 +175,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             string resultTid,
             RequestContext requestContext)
         {
-            requestContext.ServiceBundle.Config.SetAuthorityInfoForTest(config);
-            var resultAuthority = Authority.CreateAuthorityForRequest(requestContext, request, accountTid);
+            requestContext.ServiceBundle.Config.AuthorityInfo = config;
+            var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, request, accountTid).Result;
             Assert.AreEqual(resultTid, resultAuthority.TenantId);
         }
     }

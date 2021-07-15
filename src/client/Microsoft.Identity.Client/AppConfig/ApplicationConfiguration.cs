@@ -134,11 +134,6 @@ namespace Microsoft.Identity.Client
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
-
-        public void SetAuthorityInfoForTest(AuthorityInfo authorityInfo)
-        {
-            AuthorityInfo = authorityInfo;
-        }
 #endregion
 
     }
