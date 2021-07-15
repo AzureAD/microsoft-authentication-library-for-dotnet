@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,13 +24,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        private MockHttpMessageHandler AddMockHandlerAadSuccess(MockHttpManager httpManager, string authority)
+        private MockHttpMessageHandler AddMockHandlerAadSuccess(MockHttpManager httpManager, string authority, IList<string> unexpectedHeaders = null)
         {
             var handler = new MockHttpMessageHandler
             {
                 ExpectedUrl = authority + "oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                UnexpectedRequestHeaders = unexpectedHeaders
             };
             httpManager.AddMockHandler(handler);
 
@@ -131,6 +135,41 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.Cache);
+                Assert.AreEqual("some-access-token", result.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenByOboNullCcsTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var extraUnexpectedHeaders = new List<string>() { { Constants.CcsRoutingHintHeader} };
+                AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant, extraUnexpectedHeaders);
+
+                var cca = ConfidentialClientApplicationBuilder
+                                                         .Create(TestConstants.ClientId)
+                                                         .WithClientSecret(TestConstants.ClientSecret)
+                                                         .WithAuthority(TestConstants.AuthorityCommonTenant)
+                                                         .WithHttpManager(httpManager)
+                                                         .BuildConcrete();
+
+                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+                var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                                      .WithCcsRoutingHint("")
+                                      .WithCcsRoutingHint("", "")
+                                      .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual("some-access-token", result.AccessToken);
+
+                result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                      .WithCcsRoutingHint("")
+                      .WithCcsRoutingHint("", "")
+                      .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
             }
         }

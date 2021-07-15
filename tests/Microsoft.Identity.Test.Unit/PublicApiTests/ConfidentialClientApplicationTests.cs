@@ -761,12 +761,37 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        public async Task DoNotUseNullCcsRoutingHint_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app = CreateCca(httpManager);
+
+                var uri = await app
+                    .GetAuthorizationRequestUrl(TestConstants.s_scope)
+                    .WithCcsRoutingHint("", "")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                AssertCcsHint(uri, "");
+            }
+        }
+
         private static void AssertCcsHint(Uri uri, string ccsHint)
         {
             Assert.IsNotNull(uri);
             Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
-            Assert.IsTrue(qp.ContainsKey(Constants.CcsRoutingHintHeader));
-            Assert.AreEqual(ccsHint, qp[Constants.CcsRoutingHintHeader]);
+
+            if (!string.IsNullOrEmpty(ccsHint))
+            {
+                Assert.IsTrue(qp.ContainsKey(Constants.CcsRoutingHintHeader));
+                Assert.AreEqual(ccsHint, qp[Constants.CcsRoutingHintHeader]);
+            }
+            else
+            {
+                Assert.IsTrue(!qp.ContainsKey(Constants.CcsRoutingHintHeader));
+            }
         }
 
         private static ConfidentialClientApplication CreateCca(MockHttpManager httpManager)
@@ -780,54 +805,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                           .WithHttpManager(httpManager)
                                                           .BuildConcrete();
             return app;
-        }
-
-        [TestMethod]
-        [DataRow(null, TestConstants.TenantId)]
-        [DataRow(TestConstants.OnPremiseUniqueId, null)]
-        [DataRow(null, null)]
-        [DataRow("", "")]
-        public async Task CcsRoutingHint_ClientInfoHintIncorrect_ThrowsAsync(string oid, string tid)
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                              .WithRedirectUri(TestConstants.RedirectUri)
-                                                              .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
-                                                              .BuildConcrete();
-
-                await Assert.ThrowsExceptionAsync<ArgumentException>(() => app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                    .WithPkceCodeVerifier(string.Empty)
-                    .WithCcsRoutingHint(oid, tid)
-                    .ExecuteAsync()).ConfigureAwait(false);
-            }
-        }
-
-        [TestMethod]
-        [DataRow(null)]
-        [DataRow("")]
-        public async Task CcsRoutingHint_UpnHintIncorrect_ThrowsAsync(string upn)
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                              .WithRedirectUri(TestConstants.RedirectUri)
-                                                              .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
-                                                              .BuildConcrete();
-
-                await Assert.ThrowsExceptionAsync<ArgumentException>(() => app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                    .WithPkceCodeVerifier(string.Empty)
-                    .WithCcsRoutingHint(upn)
-                    .ExecuteAsync()).ConfigureAwait(false);
-
-                await Assert.ThrowsExceptionAsync<ArgumentException>(() => app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.DefaultAccessToken))
-                    .WithCcsRoutingHint(upn)
-                    .ExecuteAsync()).ConfigureAwait(false);
-            }
         }
 
         [TestMethod]
