@@ -44,6 +44,13 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 Guid.NewGuid());
         }
 
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            _harness.Dispose();
+            base.TestCleanup();
+        }
+
         [TestMethod]
         public void VerifyAuthorityTest()
         {
@@ -87,11 +94,12 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [TestMethod]
-        public void AuthorityMismatchTestAsync()
+        public async Task AuthorityMismatchTestAsync()
         {
             _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_utidAuthority;
-            var ex =  AssertException.Throws<MsalClientException>(
-                                             () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority, null));
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority, null))
+                .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.AuthorityTypeMismatch, ex.ErrorCode);
         }
