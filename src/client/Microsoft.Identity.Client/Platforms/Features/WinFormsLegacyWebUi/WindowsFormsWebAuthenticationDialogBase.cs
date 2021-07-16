@@ -195,9 +195,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             if (url.Authority.Equals(_desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
                 url.AbsolutePath.Equals(_desiredCallbackUri.AbsolutePath))
             {
+                var authCode = _webBrowser.Document.All["code"]?.GetAttribute("value");
                 RequestContext.Logger.Info("Redirect Uri was reached. Stopping webview navigation...");
-                Result = AuthorizationResult.FromUri(url.OriginalString);
-                readyToClose = true;
+                //Result = AuthorizationResult.FromUri(url.OriginalString);
+                //readyToClose = true;
             }
 
             if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
@@ -209,15 +210,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                     AuthorizationStatus.ErrorHttp,
                     MsalError.NonHttpsRedirectNotSupported,
                     MsalErrorMessage.NonHttpsRedirectNotSupported);
-                readyToClose = true;
+                //readyToClose = true;
             }
 
-            if (readyToClose)
-            {
-                StopWebBrowser();
-                // in this handler object could be already disposed, so it should be the last method
-                OnClosingUrl();
-            }
+            //if (readyToClose)
+            //{
+            //    StopWebBrowser();
+            //    // in this handler object could be already disposed, so it should be the last method
+            //    OnClosingUrl();
+            //}
 
             return readyToClose;
         }
@@ -381,7 +382,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             string messageUnknown = string.Format(CultureInfo.InvariantCulture, formatUnknown, statusCode);
             return new MsalClientException(MsalError.AuthenticationUiFailedError, messageUnknown);
         }
-     
+
         /// <summary>
         /// </summary>
         internal static class NativeMethods
