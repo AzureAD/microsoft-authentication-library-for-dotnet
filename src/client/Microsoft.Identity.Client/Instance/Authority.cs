@@ -173,6 +173,7 @@ namespace Microsoft.Identity.Client.Instance
 
         #endregion Builders
 
+        #region Abstract
         internal abstract string TenantId { get; }
 
         /// <summary>
@@ -181,10 +182,10 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         internal abstract string GetTenantedAuthority(string tenantId);
 
-        /// <summary>
-        /// Gets the authority endpoints based on the host and tenant id. Does not rely on OIDC discovery.
-        /// </summary>
-        internal abstract AuthorityEndpoints GetHardcodedEndpoints();
+        internal abstract string GetTokenEndpoint();
+        internal abstract string GetAuthorizationEndpoint();
+        internal abstract string GetDeviceCodeEndpoint();
+        #endregion
 
         private static async Task ValidateSameHostAsync(AuthorityInfo requestAuthorityInfo, RequestContext requestContext)
         {
@@ -232,5 +233,8 @@ namespace Microsoft.Identity.Client.Instance
         {
             return new Uri(authority).Host;
         }
+
+
+    
     }
 }

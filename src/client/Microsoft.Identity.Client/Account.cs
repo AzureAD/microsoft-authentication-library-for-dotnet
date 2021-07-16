@@ -44,6 +44,7 @@ namespace Microsoft.Identity.Client
         /// <summary>        
         /// The same account can exist in its home tenant and also as a guest in multiple other tenants. 
         /// A <see cref="TenantProfile"/> is derived from the ID token for that tenant.
+        /// </summary>
         public IEnumerable<TenantProfile> TenantProfiles { get; }      
 
         internal IDictionary<string, string> WamAccountIds { get; }

@@ -59,9 +59,11 @@ namespace Microsoft.Identity.Client.Internal
                 config.CustomInstanceDiscoveryMetadataUri);
 
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
-            ThrottlingManager = SingletonThrottlingManager.GetInstance();
-            AuthorityEndpointResolutionManager = new AuthorityResolutionManager(shouldClearCaches);
+            ThrottlingManager = SingletonThrottlingManager.GetInstance();            
             DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();
+
+            if (shouldClearCaches)
+                AuthorityManager.ClearValidationCache();
         }
 
         /// <summary>
@@ -80,9 +82,6 @@ namespace Microsoft.Identity.Client.Internal
 
         /// <inheritdoc />
         public IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
-
-        /// <inheritdoc />
-        public IAuthorityResolutionManager AuthorityEndpointResolutionManager { get; }
 
         /// <inheritdoc />
         public IPlatformProxy PlatformProxy { get; private set; }

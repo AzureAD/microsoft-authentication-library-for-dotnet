@@ -26,7 +26,6 @@ namespace Microsoft.Identity.Client.Internal
         IInstanceDiscoveryManager InstanceDiscoveryManager { get; }
         IPlatformProxy PlatformProxy { get; }
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
-        IAuthorityResolutionManager AuthorityEndpointResolutionManager { get; }
         IDeviceAuthManager DeviceAuthManager { get; }
         IThrottlingProvider ThrottlingManager { get; }
 

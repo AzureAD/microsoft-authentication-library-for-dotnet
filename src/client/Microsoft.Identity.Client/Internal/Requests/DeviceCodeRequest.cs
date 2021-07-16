@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.Scope, deviceCodeScopes.AsSingleString());
             client.AddBodyParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.ClaimsAndClientCapabilities);
 
-            var builder = new UriBuilder(AuthenticationRequestParameters.Endpoints.DeviceCodeEndpoint);
+            var builder = new UriBuilder(AuthenticationRequestParameters.Authority.GetDeviceCodeEndpoint());
             builder.AppendQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters);
 
             var response = await client.ExecuteRequestAsync<DeviceCodeResponse>(
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 try
                 {
                     var tokenResponse = await SendTokenRequestAsync(
-                                   AuthenticationRequestParameters.Endpoints.TokenEndpoint,
+                                   AuthenticationRequestParameters.Authority.GetTokenEndpoint(),
                                    GetBodyParameters(deviceCodeResult), cancellationToken)
                                .ConfigureAwait(false);
                     Metrics.IncrementTotalAccessTokensFromIdP();
