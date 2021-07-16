@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ICryptographyManager cryptographyManager,
             ClientCredentialWrapper clientCredential,
             string clientId,
-            AuthorityEndpoints endpoints,
+            Authority authority,
             bool sendX5C)
         {
             using (logger.LogMethodDuration())
@@ -60,11 +60,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     }
                     else
                     {
+                        string tokenEndpoint = authority.GetTokenEndpoint();
                         if ((clientCredential.CachedAssertion == null || clientCredential.ValidTo != 0)
                             && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertion
                             && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertionDelegate)
                         {
-                            if (!ValidateClientAssertion(clientCredential, endpoints.SelfSignedJwtAudience, sendX5C))
+                            if (!ValidateClientAssertion(clientCredential, tokenEndpoint, sendX5C))
                             {
                                 logger.Info(LogMessages.ClientAssertionDoesNotExistOrNearExpiry);
 
@@ -72,17 +73,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                                 if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.ClientCertificateWithClaims)
                                 {
-                                    jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints.SelfSignedJwtAudience, clientCredential.ClaimsToSign, clientCredential.AppendDefaultClaims);
+                                    jwtToken = new JsonWebToken(cryptographyManager, clientId, tokenEndpoint, clientCredential.ClaimsToSign, clientCredential.AppendDefaultClaims);
                                 }
                                 else
                                 {
-                                    jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints.SelfSignedJwtAudience);
+                                    jwtToken = new JsonWebToken(cryptographyManager, clientId, tokenEndpoint);
                                 }
 
                                 clientCredential.CachedAssertion = jwtToken.Sign(clientCredential, sendX5C);
                                 clientCredential.ValidTo = jwtToken.ValidTo;
                                 clientCredential.ContainsX5C = sendX5C;
-                                clientCredential.Audience = endpoints.SelfSignedJwtAudience;
+                                clientCredential.Audience = tokenEndpoint;
                             }
                             else
                             {

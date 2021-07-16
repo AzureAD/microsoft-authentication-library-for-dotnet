@@ -68,23 +68,34 @@ namespace Microsoft.Identity.Client.Instance
             return AuthorityInfo.CanonicalAuthority;
         }
 
-        internal override AuthorityEndpoints GetHardcodedEndpoints()
+        internal override string GetTokenEndpoint()
         {
             string tokenEndpoint = string.Format(
                     CultureInfo.InvariantCulture,
                     TokenEndpointTemplate,
                     AuthorityInfo.CanonicalAuthority);
 
+            return tokenEndpoint;
+        }
+
+        internal override string GetAuthorizationEndpoint()
+        {
             string authorizationEndpoint = string.Format(CultureInfo.InvariantCulture,
-                    AuthorizationEndpointTemplate,
-                    AuthorityInfo.CanonicalAuthority);
+                  AuthorizationEndpointTemplate,
+                  AuthorityInfo.CanonicalAuthority);
+
+            return authorizationEndpoint;
+        }
+
+        internal override string GetDeviceCodeEndpoint()
+        {
 
             string deviceEndpoint = string.Format(
                 CultureInfo.InvariantCulture,
                 DeviceCodeEndpointTemplate,
                 AuthorityInfo.CanonicalAuthority);
 
-            return new AuthorityEndpoints(authorizationEndpoint, tokenEndpoint, deviceEndpoint);
+            return deviceEndpoint;
         }
     }
 }

@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Internal
             CheckForDuplicateQueryParameters(_requestParams.ExtraQueryParameters, requestParameters);
 
             string qp = requestParameters.ToQueryParameter();
-            var builder = new UriBuilder(new Uri(_requestParams.Endpoints.AuthorizationEndpoint));
+            var builder = new UriBuilder(new Uri(_requestParams.Authority.GetAuthorizationEndpoint()));
             builder.AppendQueryParameters(qp);
             return builder;
         }

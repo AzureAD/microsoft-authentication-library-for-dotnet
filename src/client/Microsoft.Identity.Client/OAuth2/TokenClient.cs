@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Endpoints.TokenEndpoint;
+                string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Authority.GetTokenEndpoint();
                 string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
 
                 AddBodyParamsAndHeaders(additionalBodyParameters, scopes);
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     _serviceBundle.PlatformProxy.CryptographyManager,
                     _requestParams.ClientCredential,
                     _requestParams.AppConfig.ClientId,
-                    _requestParams.Endpoints,
+                    _requestParams.Authority,
                     _requestParams.SendX5C);
 
                 foreach (var entry in ccBodyParameters)

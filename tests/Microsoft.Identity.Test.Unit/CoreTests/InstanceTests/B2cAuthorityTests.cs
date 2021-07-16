@@ -28,11 +28,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
 
-                var resolver = new AuthorityResolutionManager();
-                var endpoints = resolver.ResolveEndpoints(
-                    instance,
-                    null,
-                    new RequestContext(serviceBundle, Guid.NewGuid()));
                 Assert.Fail("test should have failed");
             }
             catch (Exception exc)
@@ -70,64 +65,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/", true)
                 };
 
-                var serviceBundle = ServiceBundle.Create(appConfig);
-
                 Authority instance = Authority.CreateAuthority(
                     "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/");
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
-                var resolver = new AuthorityResolutionManager();
-                var endpoints = resolver.ResolveEndpoints(
-                    instance,
-                    null,
-                    new RequestContext(serviceBundle, Guid.NewGuid()));
                     
 
                 Assert.AreEqual(
                     "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/authorize",
-                    endpoints.AuthorizationEndpoint);
+                    instance.GetAuthorizationEndpoint());
                 Assert.AreEqual(
                     "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token",
-                    endpoints.TokenEndpoint);
-                Assert.AreEqual("https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token",
-                    endpoints.SelfSignedJwtAudience);
-            }
-        }
-
-        [TestMethod]
-        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1038
-        public void B2CMicrosoftOnlineCreateAuthority()
-        {
-            using (var harness = CreateTestHarness())
-            {
-                // add mock response for tenant endpoint discovery
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://login.microsoftonline.com/tfp/mytenant.com/my-policy/v2.0/.well-known/openid-configuration",
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-B2C.json")))
-                    });
-
-                Authority instance = Authority.CreateAuthority(
-                    "https://login.microsoftonline.com/tfp/mytenant.com/my-policy/");
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
-
-                var resolver = new AuthorityResolutionManager();
-                var endpoints = resolver.ResolveEndpoints(
-                    instance,
-                    null,
-                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()));
-
-                Assert.AreEqual(
-                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/authorize",
-                    endpoints.AuthorizationEndpoint);
-                Assert.AreEqual(
-                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/token",
-                    endpoints.TokenEndpoint);
-                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", endpoints.SelfSignedJwtAudience);
+                    instance.GetTokenEndpoint());                
             }
         }
 

@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CancellationToken cancellationToken)
         {
             var tokenResponse = SendTokenRequestAsync(
-                AuthenticationRequestParameters.Endpoints.TokenEndpoint,
+                AuthenticationRequestParameters.Authority.GetTokenEndpoint(),
                 additionalBodyParameters,
                 cancellationToken);
             Metrics.IncrementTotalAccessTokensFromIdP();
