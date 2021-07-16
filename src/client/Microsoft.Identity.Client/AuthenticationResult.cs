@@ -66,6 +66,7 @@ namespace Microsoft.Identity.Client
             CorrelationId = correlationId;
             TokenType = tokenType;
             AuthenticationResultMetadata = authenticationResultMetadata;
+            ClaimsPrincipal = claimsPrincipal;
         }
 
         /// <summary>
@@ -119,7 +120,7 @@ namespace Microsoft.Identity.Client
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
             MsalIdTokenCacheItem msalIdTokenCacheItem, 
-            IDictionary<string, TenantProfile> tenantProfiles,
+            IEnumerable<TenantProfile> tenantProfiles,
             IAuthenticationScheme authenticationScheme,
             Guid correlationID,
             TokenSource tokenSource, 
@@ -133,7 +134,7 @@ namespace Microsoft.Identity.Client
             string environment = msalAccessTokenCacheItem?.Environment ??
                 msalIdTokenCacheItem?.Environment;
 
-            ClaimsPrincipal = msalIdTokenCacheItem?.ParseIdToken().ClaimsPrincipal;
+            ClaimsPrincipal = msalIdTokenCacheItem?.IdToken.ClaimsPrincipal;
 
             if (homeAccountId != null)
             {
@@ -154,8 +155,8 @@ namespace Microsoft.Identity.Client
                 TokenType = msalAccessTokenCacheItem.TokenType;
             }
 
-            UniqueId = msalIdTokenCacheItem?.ParseIdToken()?.GetUniqueId();
-            TenantId = msalIdTokenCacheItem?.ParseIdToken()?.TenantId;
+            UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
+            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
             CorrelationId = correlationID;
             ApiEvent = apiEvent;

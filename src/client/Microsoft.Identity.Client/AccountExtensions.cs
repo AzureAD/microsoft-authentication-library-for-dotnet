@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>Only tenants for which a token was acquired will be available in <c>TenantProfiles</c> property</remarks>
         public static IEnumerable<TenantProfile> GetTenantProfiles(this IAccount account)
         {
-            return (account as Account)?.TenantProfiles?.Values;
+            return (account as Account)?.TenantProfiles;
         }
     }
 }

@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client
             string username, 
             string environment, 
             IDictionary<string, string> wamAccountIds = null, 
-            IDictionary<string, TenantProfile> tenantProfiles = null)
+            IEnumerable<TenantProfile> tenantProfiles = null)
         {
             Username = username;
             Environment = environment;
@@ -41,8 +41,11 @@ namespace Microsoft.Identity.Client
 
         public AccountId HomeAccountId { get; }
 
-        public IDictionary<string, TenantProfile> TenantProfiles { get; }
-      
+        /// <summary>        
+        /// The same account can exist in its home tenant and also as a guest in multiple other tenants. 
+        /// A <see cref="TenantProfile"/> is derived from the ID token for that tenant.
+        public IEnumerable<TenantProfile> TenantProfiles { get; }      
+
         internal IDictionary<string, string> WamAccountIds { get; }
 
         public override string ToString()
