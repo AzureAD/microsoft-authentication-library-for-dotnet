@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.Region
         {
             string region = Environment.GetEnvironmentVariable("REGION_NAME");
 
-            if (!string.IsNullOrEmpty(region))
+            if (!string.IsNullOrEmpty(region) && !region.Contains(" "))
             {
                 logger.Info($"[Region discovery] Region found in environment variable: {region}.");
                 return new RegionInfo(region, RegionAutodetectionSource.EnvVariable);
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Client.Region
                         .ConfigureAwait(false); // Call again with updated version
                 }
 
-                if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
+                if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty() && !response.Body.Contains(" "))
                 {
                     region = response.Body;
 
