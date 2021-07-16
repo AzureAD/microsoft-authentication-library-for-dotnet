@@ -21,9 +21,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             public void NavigateError(object pDisp, ref object url, ref object frame, ref object statusCode,
                 ref bool cancel)
             {
-                string uriString = (url == null) ? "" : ((string) url);
-                string frameString = (frame == null) ? "" : ((string) frame);
-                int statusCodeInt = (statusCode == null) ? 0 : ((int) statusCode);
+                string uriString = (url == null) ? "" : ((string)url);
+                string frameString = (frame == null) ? "" : ((string)frame);
+                int statusCodeInt = (statusCode == null) ? 0 : ((int)statusCode);
 
 #pragma warning disable 618 // WebBrowserNavigateErrorEventArgs is marked obsolete
                 WebBrowserNavigateErrorEventArgs e = new WebBrowserNavigateErrorEventArgs(uriString, frameString,
@@ -41,6 +41,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             public void BeforeNavigate2(object pDisp, ref object urlObject, ref object flags, ref object targetFrameName,
                 ref object postData, ref object headers, ref bool cancel)
             {
+                if (postData != null)
+                {
+                    var post = System.Text.Encoding.Default.GetString((byte[])postData);
+                }
                 // TODO: Navigating event from public class could be called for internal object.
                 //       Current implementation of System.Windows.Forms.WebBrowser doesn't allow you to track who issues this event this control or IFrame,
                 //       internal IFrame will have different pDisp, so we need filter events from internal IFrames by analyzing this field:
