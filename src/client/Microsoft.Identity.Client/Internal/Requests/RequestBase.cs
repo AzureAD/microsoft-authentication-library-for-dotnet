@@ -387,7 +387,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return new AuthenticationResult(
                     cachedAccessTokenItem,
                     idToken,
-                    tenantProfiles,
+                    tenantProfiles?.Values,
                     AuthenticationRequestParameters.AuthenticationScheme,
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache,

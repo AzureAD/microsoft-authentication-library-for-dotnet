@@ -2,11 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client
 {
@@ -29,26 +26,26 @@ namespace Microsoft.Identity.Client
         /// This ID uniquely identifies the user across applications - two different applications signing in the same user will receive the same value in the oid claim. 
         /// The user will have a different object ID in each tenant - they're considered different accounts, even though the user logs into each account with the same credentials. 
         /// </summary>
-        public string Oid => _msalIdTokenCacheItem.ParseIdToken().ObjectId;
+        public string Oid => _msalIdTokenCacheItem?.IdToken.ObjectId;
 
         /// <summary>
         /// Represents the tenant that the user is signing in to. 
         /// For work and school accounts, the GUID is the immutable tenant ID of the organization that the user is signing in to.
         /// For sign-ins to the personal Microsoft account tenant (services like Xbox, Teams for Life, or Outlook), the value is 9188040d-6c67-4c5b-b112-36a304b66dad. 
         /// </summary>
-        public string TenantId => _msalIdTokenCacheItem.ParseIdToken().TenantId;
+        public string TenantId => _msalIdTokenCacheItem?.IdToken.TenantId;
 
         /// <summary>
         /// All the claims present in the ID Token associated with this profile.
         /// </summary>
-        public ClaimsPrincipal ClaimsPrincipal => _msalIdTokenCacheItem.ParseIdToken().ClaimsPrincipal;
+        public ClaimsPrincipal ClaimsPrincipal => _msalIdTokenCacheItem?.IdToken.ClaimsPrincipal;
 
         /// <summary>
         /// Returns <c>true</c> if this profile is associated with the user's home tenant.
         /// </summary>
         public bool IsHomeTenant => string.Equals(
-                AccountId.ParseFromString(_msalIdTokenCacheItem.HomeAccountId).TenantId,
-                _msalIdTokenCacheItem.ParseIdToken().TenantId,
+                AccountId.ParseFromString(_msalIdTokenCacheItem?.HomeAccountId).TenantId,
+                _msalIdTokenCacheItem?.IdToken.TenantId,
                 StringComparison.OrdinalIgnoreCase);
 
     }    

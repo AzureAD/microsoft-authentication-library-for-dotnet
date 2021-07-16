@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             return new AuthenticationResult(
                 cachedAccessTokenItem,
                 msalIdTokenItem,
-                tenantProfiles,
+                tenantProfiles?.Values,
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 TokenSource.Cache,

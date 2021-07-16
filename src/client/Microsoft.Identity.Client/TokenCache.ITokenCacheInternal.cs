@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
                     username,
                     instanceDiscoveryMetadata.PreferredNetwork,
                     wamAccountIds,
-                    tenantProfiles);
+                    tenantProfiles?.Values);
             requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entering token cache semaphore. ");
             await _semaphoreSlim.WaitAsync(requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
             requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore. ");
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client
                             msalRefreshTokenCacheItem,
                             msalIdTokenCacheItem,
                             authorityWithPreferredCache.AuthorityInfo.CanonicalAuthority,
-                            msalIdTokenCacheItem.ParseIdToken().ObjectId,
+                            msalIdTokenCacheItem.IdToken.ObjectId,
                             response.Scope);
                     }
                 }
@@ -823,7 +823,7 @@ namespace Microsoft.Identity.Client
                             account.PreferredUsername,
                             environment, // Preserve the env passed in by the user
                             account.WamAccountIds,
-                            tenantProfiles);
+                            tenantProfiles?.Values);
 
                         break;
                     }

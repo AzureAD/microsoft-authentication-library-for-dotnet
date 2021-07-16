@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Cache
 
                 //Using scope instead of resource because that value does not exist. STS should return it.
                 AdalTokenCacheKey key = new AdalTokenCacheKey(authority, scope, rtItem.ClientId, TokenSubjectType.User,
-                uniqueId, idItem.ParseIdToken().PreferredUsername);
+                uniqueId, idItem.IdToken.PreferredUsername);
                 AdalResultWrapper wrapper = new AdalResultWrapper()
                 {
                     Result = new AdalResult()
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Cache
                         UserInfo = new AdalUserInfo()
                         {
                             UniqueId = uniqueId,
-                            DisplayableId = idItem.ParseIdToken().PreferredUsername
+                            DisplayableId = idItem.IdToken.PreferredUsername
                         }
                     },
                     RefreshToken = rtItem.Secret,

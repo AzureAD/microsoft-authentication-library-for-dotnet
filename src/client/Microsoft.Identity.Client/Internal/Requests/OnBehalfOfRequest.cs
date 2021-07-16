@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return new AuthenticationResult(
                         msalAccessTokenItem,
                         msalIdTokenItem,
-                        tenantProfiles,
+                        tenantProfiles?.Values,
                         AuthenticationRequestParameters.AuthenticationScheme,
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
                         TokenSource.Cache,
