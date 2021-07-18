@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         /// </summary>
         public string TargetFrameName { get; }
 
-        // url as a string, as in case of error it could be invalid url
+        // URL as a string, as in case of error it could be invalid URL
         /// <summary>
         /// </summary>
         public string Url { get; }

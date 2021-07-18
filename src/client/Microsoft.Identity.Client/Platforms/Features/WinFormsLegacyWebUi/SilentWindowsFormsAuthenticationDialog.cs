@@ -47,13 +47,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         /// </summary>
         private void SuppressBrowserSubDialogs()
         {
-            var webBrowser2 = (NativeWrapper.IWebBrowser2) WebBrowser.ActiveXInstance;
+            var webBrowser2 = (NativeWrapper.IWebBrowser2)WebBrowser.ActiveXInstance;
             webBrowser2.Silent = true;
         }
 
         /// <summary>
         /// </summary>
-        protected override void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
+        protected override void WebBrowserBeforeNavigateHandler(object sender, WebBrowserBeforeNavigateEventArgs e)
         {
             if (null == timer)
             {
@@ -73,12 +73,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             // Reset the expiry time so that it isn't relevant until the next document complete.
             navigationExpiry = DateTime.MaxValue;
 
-            base.WebBrowserNavigatingHandler(sender, e);
+            base.WebBrowserBeforeNavigateHandler(sender, e);
         }
 
         private static Timer CreateStartedTimer(Action onTickAction, int interval)
         {
-            Timer timer = new Timer {Interval = interval};
+            Timer timer = new Timer { Interval = interval };
             timer.Tick += (notUsedsender, notUsedEventArgs) => onTickAction();
             timer.Start();
             return timer;

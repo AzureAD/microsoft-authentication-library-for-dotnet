@@ -63,10 +63,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
         /// <summary>
         /// </summary>
-        protected override void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
+        protected override void WebBrowserBeforeNavigateHandler(object sender, WebBrowserBeforeNavigateEventArgs e)
         {
             SetBrowserZoom();
-            base.WebBrowserNavigatingHandler(sender, e);
+            base.WebBrowserBeforeNavigateHandler(sender, e);
         }
 
         /// <summary>

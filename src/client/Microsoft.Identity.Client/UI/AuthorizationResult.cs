@@ -43,35 +43,10 @@ namespace Microsoft.Identity.Client.UI
                    MsalErrorMessage.AuthorizationServerInvalidResponse);
             }
 
-            Dictionary<string, string> uriParams = CoreHelpers.ParseKeyValueList(resultData.Substring(1), '&',
-                true, null);
+            Dictionary<string, string> uriParams = CoreHelpers.ParseKeyValueList(
+                resultData.Substring(1), '&', true, null);
 
-            if (uriParams.ContainsKey(TokenResponseClaim.Error))
-            {
-                return FromStatus(AuthorizationStatus.ProtocolError,
-                    uriParams[TokenResponseClaim.Error],
-                    uriParams.ContainsKey(TokenResponseClaim.ErrorDescription)
-                            ? uriParams[TokenResponseClaim.ErrorDescription]
-                        : null);
-            }
-
-            var result = new AuthorizationResult();
-            result.Status = AuthorizationStatus.Success;
-
-            if (uriParams.ContainsKey(OAuth2Parameter.State))
-            {
-                result.State = uriParams[OAuth2Parameter.State];
-            }
-
-            if (uriParams.ContainsKey(TokenResponseClaim.CloudInstanceHost))
-            {
-                result.CloudInstanceHost = uriParams[TokenResponseClaim.CloudInstanceHost];
-            }
-
-            if (uriParams.ContainsKey(TokenResponseClaim.ClientInfo))
-            {
-                result.ClientInfo = uriParams[TokenResponseClaim.ClientInfo];
-            }
+            var result = FromParsedValues(uriParams);
 
             if (uriParams.ContainsKey(TokenResponseClaim.Code))
             {
@@ -87,6 +62,72 @@ namespace Microsoft.Identity.Client.UI
                    AuthorizationStatus.UnknownError,
                    MsalError.AuthenticationFailed,
                    MsalErrorMessage.AuthorizationServerInvalidResponse);
+            }
+
+            return result;
+        }
+#if !UAP10_0 && !NETSTANDARD1_3
+        public static AuthorizationResult FromPostData(byte[] postData)
+        {
+            if (postData == null)
+            {
+                return FromStatus(AuthorizationStatus.UnknownError,
+                   MsalError.AuthenticationFailed,
+                   MsalErrorMessage.AuthorizationServerInvalidResponse);
+            }
+
+            var post = System.Text.Encoding.Default.GetString(postData);
+
+            Dictionary<string, string> uriParams = CoreHelpers.ParseKeyValueList(
+                post, '&', true, null);
+
+            var result = FromParsedValues(uriParams);
+
+            if (uriParams.ContainsKey(TokenResponseClaim.Code))
+            {
+                result.Code = uriParams[TokenResponseClaim.Code];
+            }
+            else
+            {
+                return FromStatus(
+                   AuthorizationStatus.UnknownError,
+                   MsalError.AuthenticationFailed,
+                   MsalErrorMessage.AuthorizationServerInvalidResponse);
+            }
+
+            return result;
+        }
+#endif
+
+        private static AuthorizationResult FromParsedValues(Dictionary<string, string> parameters)
+        {
+            if (parameters.ContainsKey(TokenResponseClaim.Error))
+            {
+                return FromStatus(AuthorizationStatus.ProtocolError,
+                    parameters[TokenResponseClaim.Error],
+                    parameters.ContainsKey(TokenResponseClaim.ErrorDescription)
+                            ? parameters[TokenResponseClaim.ErrorDescription]
+                        : null);
+            }
+
+            var result = new AuthorizationResult
+            {
+                Status = AuthorizationStatus.Success
+            };
+
+            if (parameters.ContainsKey(OAuth2Parameter.State))
+            {
+                result.State = parameters[OAuth2Parameter.State];
+            }
+
+            if (parameters.ContainsKey(TokenResponseClaim.CloudInstanceHost))
+            {
+                result.CloudInstanceHost = parameters[TokenResponseClaim.CloudInstanceHost];
+            }
+
+            if (parameters.ContainsKey(TokenResponseClaim.ClientInfo))
+            {
+                result.ClientInfo = parameters[TokenResponseClaim.ClientInfo];
             }
 
             return result;
