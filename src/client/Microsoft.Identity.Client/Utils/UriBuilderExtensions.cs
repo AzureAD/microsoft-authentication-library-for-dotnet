@@ -38,6 +38,18 @@ namespace Microsoft.Identity.Client.Utils
             AppendQueryParameters(builder, string.Join("&", list));
         }
 
+        public static void AppendOrReplaceQueryParameter(this UriBuilder builder, string key, string value)
+        {
+            if (builder == null || string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+            {
+                return;
+            }
+
+            var queryParams = CoreHelpers.ParseKeyValueList(builder.Query, '&', true, null);
+            queryParams[key] = value;
+            builder.Query = queryParams.ToQueryParameter();
+        }
+
         public static string GetHttpsUriWithOptionalPort(string host, string tenant, string path, int port)
         {
             var builder = new UriBuilder("https", host);

@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             {
                 webBrowserEvent = new CustomWebBrowserEvent(this);
                 webBrowserEventCookie = new AxHost.ConnectionPointCookie(activeXInstance, webBrowserEvent,
-                    typeof (NativeWrapper.DWebBrowserEvents2));
+                    typeof(NativeWrapper.DWebBrowserEvents2));
             }
         }
 
@@ -66,9 +66,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         }
 #pragma warning restore 618
 
+        protected virtual void OnBeforeNavigate(WebBrowserBeforeNavigateEventArgs e)
+        {
+            BeforeNavigate?.Invoke(this, e);
+        }
+
         public event WebBrowserNavigateErrorEventHandler NavigateError;
 
-        [ComVisible(true), ComDefaultInterface(typeof (NativeWrapper.IDocHostUIHandler))]
+        public event WebBrowserBeforeNavigateEventHandler BeforeNavigate;
+
+        [ComVisible(true), ComDefaultInterface(typeof(NativeWrapper.IDocHostUIHandler))]
         protected class CustomSite : WebBrowserSite, NativeWrapper.IDocHostUIHandler, ICustomQueryInterface
         {
             private const int NotImplemented = -2147467263;
@@ -85,9 +92,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             public CustomQueryInterfaceResult GetInterface(ref Guid iid, out IntPtr ppv)
             {
                 ppv = IntPtr.Zero;
-                if (iid == typeof (NativeWrapper.IDocHostUIHandler).GUID)
+                if (iid == typeof(NativeWrapper.IDocHostUIHandler).GUID)
                 {
-                    ppv = Marshal.GetComInterfaceForObject(this, typeof (NativeWrapper.IDocHostUIHandler),
+                    ppv = Marshal.GetComInterfaceForObject(this, typeof(NativeWrapper.IDocHostUIHandler),
                         CustomQueryInterfaceMode.Ignore);
                     return CustomQueryInterfaceResult.Handled;
                 }
@@ -213,8 +220,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 {
                     if (ModifierKeys == Keys.Shift || ModifierKeys == Keys.Alt || ModifierKeys == Keys.Control)
                     {
-                        int num = ((int) msg.wParam) | (int) ModifierKeys;
-                        Shortcut s = (Shortcut) num;
+                        int num = ((int)msg.wParam) | (int)ModifierKeys;
+                        Shortcut s = (Shortcut)num;
                         if (shortcutDisallowedList.Contains(s))
                         {
                             return S_OK;
@@ -243,4 +250,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
     /// </summary>
     internal delegate void WebBrowserNavigateErrorEventHandler(object sender, WebBrowserNavigateErrorEventArgs e);
 #pragma warning restore 618
+    /// <summary>
+    /// </summary>
+    internal delegate void WebBrowserBeforeNavigateEventHandler(object sender, WebBrowserBeforeNavigateEventArgs e);
 }

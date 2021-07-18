@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
@@ -28,6 +28,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             CancellationToken cancellationToken)
         {
             AuthorizationResult authorizationResult = null;
+
+            var authUriBuilder = new UriBuilder(authorizationUri);
+            authUriBuilder.AppendOrReplaceQueryParameter("response_mode", "form_post");
+            authorizationUri = authUriBuilder.Uri;
 
             var sendAuthorizeRequest = new Action(() =>
             {

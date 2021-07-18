@@ -17,10 +17,10 @@ namespace Microsoft.Identity.Client.UI
             CancellationToken cancellationToken);
 
         /// <summary>
-        /// Extra validations on the redirect uri, for example system web views cannot work with the urn:oob... uri because
+        /// Extra validations on the redirect URI, for example system web views cannot work with the urn:oob... URI because
         /// there is no way of knowing which app to get back to.
-        /// WebUIs can update the uri, for example use http://localhost:1234 instead of http://localhost
-        /// Throws if uri is invalid
+        /// WebUIs can update the URI, for example use http://localhost:1234 instead of http://localhost.
+        /// Throws, if URI is invalid.
         /// </summary>
         Uri UpdateRedirectUri(Uri redirectUri);
     }
