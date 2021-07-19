@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithAuthority(TestConstants.AuthorityUtidTenant)
-                                                              .WithCacheSyncronization(useCacheSyncronization)
+                                                              .WithCacheSynchronization(useCacheSyncronization)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 

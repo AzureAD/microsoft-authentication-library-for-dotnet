@@ -67,6 +67,9 @@ namespace Microsoft.Identity.Client
 
         internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache, ICacheSerializationProvider optionalDefaultSerializer = null)
         {
+            if (serviceBundle == null) 
+                throw new ArgumentNullException(nameof(serviceBundle));   
+
             // useRealSemaphore= false for MyApps and potentially for all apps when using non-singleton MSAL
             _semaphoreSlim =  new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSyncronizationEnabled); 
 
