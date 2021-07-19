@@ -123,38 +123,40 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [Description("Test unified token cache")]
-        public async Task AAD_CacheFormatValidationTestAsync()
+        public void AAD_CacheFormatValidationTest()
         {
             using (var harness = CreateTestHarness())
             {
                 IntitTestData(ResourceHelper.GetTestResourceRelativePath("AADTestData.txt"));
                 Init(harness.HttpManager);
-                await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
+
+                RunCacheFormatValidation(harness);
             }
         }
 
         [TestMethod]
         [Description("Test unified token cache")]
-        public async Task MSA_CacheFormatValidationTestAsync()
+        public void MSA_CacheFormatValidationTest()
         {
             using (var harness = CreateTestHarness())
             {
                 IntitTestData(ResourceHelper.GetTestResourceRelativePath("MSATestData.txt"));
                 Init(harness.HttpManager);
-                await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
+
+                RunCacheFormatValidation(harness);
             }
         }
 
         [TestMethod]
         [Description("Test unified token cache")]
         [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1037
-        public async Task B2C_NoTenantId_CacheFormatValidationTestAsync()
+        public void B2C_NoTenantId_CacheFormatValidationTest()
         {
             using (var harness = CreateTestHarness())
             {
                 TestCommon.ResetInternalStaticCaches();
                 IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CNoTenantIdTestData.txt"));
-                await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
+                RunCacheFormatValidation(harness);
             }
         }
 
@@ -163,16 +165,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Ignore]
         // it is not yet decided what version of tenant id should be used
         // test data generated based on GUID, Msal uses tenantId from passed in authotiry
-        public async Task B2C_WithTenantId_CacheFormatValidationTestAsync()
+        public void B2C_WithTenantId_CacheFormatValidationTest()
         {
             using (var harness = CreateTestHarness())
             {
                 IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CWithTenantIdTestData.txt"));
-                await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
+                RunCacheFormatValidation(harness);
             }
         }
 
-        private async Task RunCacheFormatValidationAsync(MockHttpAndServiceBundle harness)
+        private void RunCacheFormatValidation(MockHttpAndServiceBundle harness)
         {
             PublicClientApplication app = PublicClientApplicationBuilder
                                           .Create(_clientId)
