@@ -60,6 +60,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
             _harness?.Dispose();
             _regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, true);
+            _httpManager.Dispose();            
             base.TestCleanup();
         }
 
