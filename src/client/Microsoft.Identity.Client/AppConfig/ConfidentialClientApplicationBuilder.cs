@@ -224,9 +224,9 @@ namespace Microsoft.Identity.Client
         /// True by default, but subject to change.
         /// Not recommended for apps that call RemoveAsync
         /// </remarks>
-        public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSyncronization)
+        public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
         {          
-            Config.CacheSyncronizationEnabled = enableCacheSyncronization;
+            Config.CacheSynchronizationEnabled = enableCacheSynchronization;
 
             return this;
         }

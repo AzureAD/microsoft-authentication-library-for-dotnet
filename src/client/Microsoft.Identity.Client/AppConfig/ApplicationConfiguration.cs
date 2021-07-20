@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
         internal int ConfidentialClientCredentialCount;
 
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
-        public bool CacheSyncronizationEnabled { get; internal set; } = true;
+        public bool CacheSynchronizationEnabled { get; internal set; } = true;
 
 
         #region Region
