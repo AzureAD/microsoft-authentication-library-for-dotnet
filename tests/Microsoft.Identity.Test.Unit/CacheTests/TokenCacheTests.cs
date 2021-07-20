@@ -1022,7 +1022,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 MsalTokenResponse response = new MsalTokenResponse();
 
-                response.IdToken = MockHelpers.CreateIdToken(String.Empty, TestConstants.FabrikamDisplayableId, null);
+                response.IdToken = MockHelpers.CreateIdToken(string.Empty, TestConstants.FabrikamDisplayableId, null);
                 response.ClientInfo = null;
                 response.AccessToken = "access-token";
                 response.ExpiresIn = 3599;

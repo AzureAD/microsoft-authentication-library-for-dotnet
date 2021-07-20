@@ -7,6 +7,7 @@
 
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
     <UseWindowsForms>true</UseWindowsForms>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -54,7 +55,7 @@
     <Reference Include="System.Windows.Forms" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" LinkBase="Features/WebView2WebUi" />
 
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.705.50" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">

@@ -3,6 +3,10 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -46,18 +50,19 @@ namespace Microsoft.Identity.Client.Instance
         /// - if the authority is defined at app level, and the request level authority of is of different type, throw an exception
         ///
         /// </summary>
-        public static Authority CreateAuthorityForRequest(
-            AuthorityInfo configAuthorityInfo,
+        public static async Task<Authority> CreateAuthorityForRequestAsync(
+            RequestContext requestContext,
             AuthorityInfo requestAuthorityInfo,
             string requestHomeAccountTenantId = null)
         {
+            var configAuthorityInfo = requestContext.ServiceBundle.Config.AuthorityInfo;
             if (configAuthorityInfo == null)
             {
                 throw new ArgumentNullException(nameof(configAuthorityInfo));
             }
 
             ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
-            ValidateSameHost(requestAuthorityInfo, configAuthorityInfo);
+            await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
 
             switch (configAuthorityInfo.AuthorityType)
             {
@@ -168,6 +173,7 @@ namespace Microsoft.Identity.Client.Instance
 
         #endregion Builders
 
+        #region Abstract
         internal abstract string TenantId { get; }
 
         /// <summary>
@@ -176,19 +182,26 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         internal abstract string GetTenantedAuthority(string tenantId);
 
-        /// <summary>
-        /// Gets the authority endpoints based on the host and tenant id. Does not rely on OIDC discovery.
-        /// </summary>
-        internal abstract AuthorityEndpoints GetHardcodedEndpoints();
+        internal abstract string GetTokenEndpoint();
+        internal abstract string GetAuthorizationEndpoint();
+        internal abstract string GetDeviceCodeEndpoint();
+        #endregion
 
-        private static void ValidateSameHost(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
+        private static async Task ValidateSameHostAsync(AuthorityInfo requestAuthorityInfo, RequestContext requestContext)
         {
+            var configAuthorityInfo = requestContext.ServiceBundle.Config.AuthorityInfo;
+
             if (requestAuthorityInfo != null &&
                 !string.Equals(requestAuthorityInfo.Host, configAuthorityInfo.Host, StringComparison.OrdinalIgnoreCase))
             {
                 if (requestAuthorityInfo.AuthorityType == AuthorityType.B2C)
                 {
                     throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
+                }
+                var authorityAliased = await IsAuthorityAliasedAsync(requestContext, requestAuthorityInfo).ConfigureAwait(false);
+                if (authorityAliased)
+                {
+                    return;
                 }
 
                 if (configAuthorityInfo.IsDefaultAuthority)
@@ -208,9 +221,20 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
 
+        private static async Task<bool> IsAuthorityAliasedAsync(RequestContext requestContext, AuthorityInfo requestAuthorityInfo)
+        {
+            var instanceDiscoveryManager = requestContext.ServiceBundle.InstanceDiscoveryManager;
+            var result = await instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.AuthorityInfo, requestContext).ConfigureAwait(false);
+
+            return result.Aliases.Any(alias => alias.Equals(requestAuthorityInfo.Host));
+        }
+
         internal static string GetEnvironment(string authority)
         {
             return new Uri(authority).Host;
         }
+
+
+    
     }
 }

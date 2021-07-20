@@ -182,10 +182,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
             var atItem = tuple.Item1;
             var idtItem = tuple.Item2;
+            var account = tuple.Item3;
 
             return new AuthenticationResult(
                 atItem, 
                 idtItem, 
+                account.TenantProfiles,
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 msalTokenResponse.TokenSource, 
@@ -241,7 +243,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CancellationToken cancellationToken)
         {
             var tokenResponse = SendTokenRequestAsync(
-                AuthenticationRequestParameters.Endpoints.TokenEndpoint,
+                AuthenticationRequestParameters.Authority.GetTokenEndpoint(),
                 additionalBodyParameters,
                 cancellationToken);
             Metrics.IncrementTotalAccessTokensFromIdP();
@@ -369,8 +371,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        internal AuthenticationResult HandleTokenRefreshError(MsalServiceException e, MsalAccessTokenCacheItem cachedAccessTokenItem)
-        {
+        internal async Task<AuthenticationResult> HandleTokenRefreshErrorAsync(MsalServiceException e, MsalAccessTokenCacheItem cachedAccessTokenItem)
+        {            
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             bool isAadUnavailable = e.IsAadUnavailable();
             logger.Warning($"Fetching a new AT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
@@ -378,9 +380,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (cachedAccessTokenItem != null && isAadUnavailable)
             {
                 logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
+
+                var idToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
+                var tenantProfiles = await CacheManager.GetTenantProfilesAsync(cachedAccessTokenItem.HomeAccountId).ConfigureAwait(false);
+
                 return new AuthenticationResult(
                     cachedAccessTokenItem,
-                    null,
+                    idToken,
+                    tenantProfiles?.Values,
                     AuthenticationRequestParameters.AuthenticationScheme,
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache,

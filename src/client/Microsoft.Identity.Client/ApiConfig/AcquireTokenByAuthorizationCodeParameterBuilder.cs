@@ -114,13 +114,9 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenByAuthorizationCodeParameterBuilder WithCcsRoutingHint(string userObjectIdentifier, string tenantIdentifier)
         {
-            if (string.IsNullOrEmpty(userObjectIdentifier))
+            if (string.IsNullOrEmpty(userObjectIdentifier) || string.IsNullOrEmpty(tenantIdentifier))
             {
-                throw new ArgumentException(MsalErrorMessage.CcsRoutingHintMissing, nameof(userObjectIdentifier));
-            }
-            if (string.IsNullOrEmpty(tenantIdentifier))
-            {
-                throw new ArgumentException(MsalErrorMessage.CcsRoutingHintMissing, nameof(tenantIdentifier));
+                return this;
             }
 
             var ccsRoutingHeader = new Dictionary<string, string>() 
@@ -142,7 +138,7 @@ namespace Microsoft.Identity.Client
         {
             if (string.IsNullOrEmpty(userName))
             {
-                throw new ArgumentException(MsalErrorMessage.CcsRoutingHintMissing, nameof(userName));
+                return this;
             }
 
             var ccsRoutingHeader = new Dictionary<string, string>()

@@ -30,10 +30,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            var requestParameters = _clientApplicationBase.CreateRequestParameters(
+            var requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _clientApplicationBase.UserTokenCacheInternal);
+                _clientApplicationBase.UserTokenCacheInternal).ConfigureAwait(false);
 
             requestParameters.SendX5C = silentParameters.SendX5C;
 
@@ -56,10 +56,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
             }
 
-            var requestParameters = _clientApplicationBase.CreateRequestParameters(
+            var requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _clientApplicationBase.UserTokenCacheInternal);
+                _clientApplicationBase.UserTokenCacheInternal).ConfigureAwait(false);
 
             requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
 

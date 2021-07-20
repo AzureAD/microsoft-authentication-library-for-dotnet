@@ -45,15 +45,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
 
-                var resolver = new AuthorityResolutionManager();
-                var endpoints = resolver.ResolveEndpoints(
-                    instance,
-                    null,
-                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()));
-
-                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/authorize", endpoints.AuthorizationEndpoint);
-                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", endpoints.TokenEndpoint);
-                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
+                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", instance.GetTokenEndpoint());
             }
         }
 
@@ -94,11 +87,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority, validateAuthority: true);
                 try
                 {
-                    var resolver = new AuthorityResolutionManager();
-
-                    await resolver.ValidateAuthorityAsync(
-                        instance,
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid())).ConfigureAwait(false);
+                    AuthorityManager am = new AuthorityManager(new RequestContext(harness.ServiceBundle, Guid.NewGuid()), instance);
+                    await am.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
                     Assert.Fail("validation should have failed here");
                 }
                 catch (Exception exc)
@@ -269,7 +259,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(customPortAuthority);
-                harness.HttpManager.AddInstanceDiscoveryMockHandler(customPortAuthority);
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)

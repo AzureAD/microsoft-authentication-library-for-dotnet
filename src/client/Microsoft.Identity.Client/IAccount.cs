@@ -33,5 +33,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>Can be null, for example if this account was migrated to MSAL.NET from ADAL.NET v3's token cache</remarks>
         AccountId HomeAccountId { get; }
+       
    }
 }

@@ -18,15 +18,13 @@ namespace XamarinDev
 
             clientIdLabel.Text = msalIdTokenCacheItem.ClientId;
 
-            authorityLabel.Text = msalIdTokenCacheItem.Authority;
+            authorityLabel.Text = msalIdTokenCacheItem.Environment + "/" + msalIdTokenCacheItem.TenantId ?? "common";
             environmentLabel.Text = msalIdTokenCacheItem.Environment;
             tenantIdLabel.Text = msalIdTokenCacheItem.TenantId;
 
             userIdentifierLabel.Text = msalIdTokenCacheItem.HomeAccountId;
 
-            secretLabel.Text = StringShortenerConverter.GetShortStr(msalIdTokenCacheItem.Secret, 100);
-
-            idTokenLabel.Text = JsonHelper.SerializeToJson(msalIdTokenCacheItem.IdToken);
+            secretLabel.Text = StringShortenerConverter.GetShortStr(msalIdTokenCacheItem.Secret, 100);            
 
             rawClientInfoLabel.Text = msalIdTokenCacheItem.RawClientInfo;
 

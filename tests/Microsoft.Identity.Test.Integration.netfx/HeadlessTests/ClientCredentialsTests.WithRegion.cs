@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [Ignore] //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2781
         public async Task InvalidRegion_GoesToInvalidAuthority_Async()
         {
             // Arrange

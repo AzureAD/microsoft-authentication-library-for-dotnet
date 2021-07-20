@@ -52,6 +52,12 @@ namespace Microsoft.Identity.Client.Cache
             return await TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse).ConfigureAwait(false);
         }
 
+        public async Task<IDictionary<string, TenantProfile>> GetTenantProfilesAsync(string homeAccountId)
+        {
+            await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.ID).ConfigureAwait(false);
+            return await TokenCacheInternal.GetTenantProfilesAsync(_requestParams, homeAccountId).ConfigureAwait(false);
+        }
+
         public async Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalIdTokenCacheKey idTokenCacheKey)
         {
             await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.ID).ConfigureAwait(false);

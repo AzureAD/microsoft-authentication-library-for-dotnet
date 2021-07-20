@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public Authority Authority => AuthorityManager.Authority;
 
         public AuthorityInfo AuthorityInfo => AuthorityManager.Authority.AuthorityInfo;
-        public AuthorityEndpoints Endpoints => AuthorityManager.GetEndpoints(LoginHint);
+        
         public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
         #endregion

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -110,7 +111,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var user = labResponse.User;
 
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;         
+            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(Adfs2019LabConstants.PublicClientId)
                 .WithAdfsAuthority(Adfs2019LabConstants.Authority)
@@ -206,7 +207,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             LabResponse labResponse)
         {
             var factory = new HttpSnifferClientFactory();
-            
+
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithAuthority(Authority)
@@ -275,6 +276,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     msalPublicClient,
                     federationMetadata,
                     CorrelationId).ConfigureAwait(false);
+
+            if (AuthorityInfo.FromAuthorityUri(labResponse.Lab.Authority + "/" + labResponse.Lab.TenantId, false).AuthorityType == AuthorityType.Aad)
+            {
+                AssertTenantProfiles(authResult.Account.GetTenantProfiles(), authResult.TenantId);
+            }
+            else
+            {
+                Assert.IsNull(authResult.Account.GetTenantProfiles());
+            }
+
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
@@ -305,15 +316,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
             AssertTelemetryHeaders(factory, false, labResponse);
-            AssertCCSRoutingInformationIsSent(factory, labResponse);
+            AssertCcsRoutingInformationIsSent(factory, labResponse);                        
 
             return authResult;
         }
 
-        private void AssertCCSRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
+        private void AssertCcsRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
         {
             var CcsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
             Assert.AreEqual($"x-anchormailbox:upn:{labResponse.User.Upn}", $"{CcsHeader.Key}:{CcsHeader.Value.FirstOrDefault()}");
+        }
+
+        private void AssertTenantProfiles(IEnumerable<TenantProfile> tenantProfiles, string tenantId)
+        {
+            Assert.IsNotNull(tenantProfiles);
+            Assert.IsTrue(tenantProfiles.Count() > 0);
+
+            TenantProfile tenantProfile = tenantProfiles.Single(tp => tp.TenantId == tenantId);
+            Assert.IsNotNull(tenantProfile);
+            Assert.IsNotNull(tenantProfile.ClaimsPrincipal);
+            Assert.IsNotNull(tenantProfile.ClaimsPrincipal.FindFirst(claim => claim.Type == "tid" && claim.Value == tenantId));
         }
 
         private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, LabResponse labResponse)

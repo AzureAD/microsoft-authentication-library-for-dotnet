@@ -47,6 +47,7 @@ namespace Microsoft.Identity.Client
             var tenantId = GetTenantId(idToken, requestParams);
 
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
+            bool isAadAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Aad;
             string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
             string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
             string homeAccountId = GetHomeAccountId(requestParams, response, idToken);
@@ -54,7 +55,7 @@ namespace Microsoft.Identity.Client
 
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
-            var instanceDiscoveryMetadata = await ServiceBundle.InstanceDiscoveryManager
+            InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata = await ServiceBundle.InstanceDiscoveryManager
                                 .GetMetadataEntryAsync(
                                     requestParams.Authority.AuthorityInfo,
                                     requestParams.RequestContext)
@@ -95,6 +96,8 @@ namespace Microsoft.Identity.Client
             }
 
             Dictionary<string, string> wamAccountIds = GetWamAccountIds(requestParams, response);
+            var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);           
+
             Account account;
             if (idToken != null)
             {
@@ -103,10 +106,7 @@ namespace Microsoft.Identity.Client
                     requestParams.AppConfig.ClientId,
                     response,
                     tenantId,
-                    homeAccountId)
-                {
-                    IsAdfs = isAdfsAuthority
-                };
+                    homeAccountId);
 
                 msalAccountCacheItem = new MsalAccountCacheItem(
                              instanceDiscoveryMetadata.PreferredCache,
@@ -116,6 +116,13 @@ namespace Microsoft.Identity.Client
                              preferredUsername,
                              tenantId,
                              wamAccountIds);
+
+                // Add the newly obtained id token to the list of profiles
+                if (isAadAuthority && tenantProfiles != null)
+                {
+                    TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
+                    tenantProfiles[msalIdTokenCacheItem.TenantId] = tenantProfile;
+                }
             }
 
             #endregion
@@ -123,8 +130,9 @@ namespace Microsoft.Identity.Client
             account = new Account(
                     homeAccountId,
                     username,
-                    instanceDiscoveryMetadata.PreferredNetwork, 
-                    wamAccountIds);
+                    instanceDiscoveryMetadata.PreferredNetwork,
+                    wamAccountIds,
+                    tenantProfiles?.Values);
             requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entering token cache semaphore. ");
             await _semaphoreSlim.WaitAsync(requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
             requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore. ");
@@ -154,7 +162,7 @@ namespace Microsoft.Identity.Client
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
-                        requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;                        
+                        requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
                     }
 
                     if (msalAccessTokenCacheItem != null)
@@ -262,7 +270,7 @@ namespace Microsoft.Identity.Client
             // If the input authority was tenanted, use that tenant over the IdToken.Tenant
             // otherwise, this will result in cache misses
             return Authority.CreateAuthorityWithTenant(
-                requestParams.Authority.AuthorityInfo, 
+                requestParams.Authority.AuthorityInfo,
                 idToken?.TenantId).TenantId;
         }
 
@@ -356,7 +364,7 @@ namespace Microsoft.Identity.Client
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByScopes(requestParams, tokenCacheItems);
-            tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);                       
+            tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);
 
             CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
 
@@ -378,7 +386,7 @@ namespace Microsoft.Identity.Client
 
             requestParams.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
 
-            return msalAccessTokenCacheItem; 
+            return msalAccessTokenCacheItem;
         }
 
         private static IReadOnlyList<MsalAccessTokenCacheItem> FilterByScopes(
@@ -396,16 +404,17 @@ namespace Microsoft.Identity.Client
                 !OAuth2Value.ReservedScopes.Contains(s));
 
             tokenCacheItems = tokenCacheItems.FilterWithLogging(
-                item => {
+                item =>
+                {
                     bool accepted = ScopeHelper.ScopeContains(item.ScopeSet, requestScopes);
-                    
+
                     if (logger.IsLoggingEnabled(LogLevel.Verbose))
                     {
                         logger.Verbose($"Access token with scopes {string.Join(" ", item.ScopeSet)} " +
                             $"passes scope filter? {accepted} ");
                     }
                     return accepted;
-                    },
+                },
                 logger,
                 "Filtering by scopes");
 
@@ -413,7 +422,7 @@ namespace Microsoft.Identity.Client
         }
 
         private static IReadOnlyList<MsalAccessTokenCacheItem> FilterByTokenType(
-            AuthenticationRequestParameters requestParams, 
+            AuthenticationRequestParameters requestParams,
             IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems)
         {
             tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
@@ -435,7 +444,7 @@ namespace Microsoft.Identity.Client
 
             if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
             {
-                tokenCacheItems = 
+                tokenCacheItems =
                     tokenCacheItems.FilterWithLogging(item =>
                         !string.IsNullOrEmpty(item.UserAssertionHash) &&
                         item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
@@ -546,7 +555,7 @@ namespace Microsoft.Identity.Client
         }
 
         private async Task<IReadOnlyList<MsalAccessTokenCacheItem>> FilterByEnvironmentAsync(
-            AuthenticationRequestParameters requestParams, 
+            AuthenticationRequestParameters requestParams,
             IReadOnlyList<MsalAccessTokenCacheItem> filteredItems)
         {
             var logger = requestParams.RequestContext.Logger;
@@ -556,7 +565,7 @@ namespace Microsoft.Identity.Client
                 logger.Verbose("Not filtering AT by env, because there are no candidates");
                 return filteredItems;
             }
-            
+
             // at this point we need env aliases, try to get them without a discovery call
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                                      requestParams.AuthorityInfo,
@@ -713,7 +722,7 @@ namespace Microsoft.Identity.Client
                             requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
                             requestParams.RequestContext.Logger,
                             "Filtering RT by client id");
-            } 
+            }
 
             return rtCacheItems;
         }
@@ -752,11 +761,7 @@ namespace Microsoft.Identity.Client
             return appMetadata.FamilyId == familyId;
         }
 
-        MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey)
-        {
-            var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
-            return idToken;
-        }
+
 
         /// <remarks>
         /// Get accounts should not make a network call, if possible. This can be achieved if
@@ -768,6 +773,7 @@ namespace Microsoft.Identity.Client
             var logger = requestParameters.RequestContext.Logger;
             var environment = requestParameters.AuthorityInfo.Host;
             bool filterByClientId = !_featureFlags.IsFociEnabled;
+            bool isAadAuthority = requestParameters.AuthorityInfo.AuthorityType == AuthorityType.Aad;
 
             IReadOnlyList<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);
             IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
@@ -792,7 +798,7 @@ namespace Microsoft.Identity.Client
                 allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnviroments());
             }
 
-            var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+            InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                 requestParameters.AuthorityInfo,
                 allEnvironmentsInCache,
                 requestParameters.RequestContext).ConfigureAwait(false);
@@ -810,11 +816,14 @@ namespace Microsoft.Identity.Client
                 {
                     if (RtMatchesAccount(rtItem, account))
                     {
+                        var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParameters, account.HomeAccountId).ConfigureAwait(false);
+
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
                             account.PreferredUsername,
                             environment, // Preserve the env passed in by the user
-                            account.WamAccountIds);  
+                            account.WamAccountIds,
+                            tenantProfiles?.Values);
 
                         break;
                     }
@@ -829,7 +838,7 @@ namespace Microsoft.Identity.Client
                     adalUsersResult,
                     clientInfoToAccountMap);
             }
-            
+
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
             if (requestParameters.AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
             {
@@ -864,9 +873,46 @@ namespace Microsoft.Identity.Client
 
             return accounts;
         }
+       
+        MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey)
+        {
+            var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
+            return idToken;
+        }
+
+        async Task<IDictionary<string, TenantProfile>> ITokenCacheInternal.GetTenantProfilesAsync(AuthenticationRequestParameters requestParameters, string homeAccountId)
+        {
+            if (requestParameters.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+            {
+                return null;
+            }
+
+
+            var idTokenCacheItems = GetAllIdTokensWithNoLocks(true);
+
+            ISet<string> allEnvironmentsInCache = new HashSet<string>(
+                idTokenCacheItems.Select(aci => aci.Environment),
+                StringComparer.OrdinalIgnoreCase);
+
+            InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                requestParameters.AuthorityInfo,
+                allEnvironmentsInCache,
+                requestParameters.RequestContext).ConfigureAwait(false);
+
+            idTokenCacheItems = idTokenCacheItems.Where(idToken => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(idToken.Environment)).ToList();
+            idTokenCacheItems = idTokenCacheItems.Where(idToken => homeAccountId.Equals(idToken.HomeAccountId)).ToList();
+
+            Dictionary<string, TenantProfile> tenantProfiles = new Dictionary<string, TenantProfile>();
+            foreach (MsalIdTokenCacheItem idTokenCacheItem in idTokenCacheItems)
+            {
+                tenantProfiles[idTokenCacheItem.TenantId] = new TenantProfile(idTokenCacheItem);
+            }
+
+            return tenantProfiles;
+        }
 
         async Task<IEnumerable<MsalRefreshTokenCacheItem>> ITokenCacheInternal.GetAllRefreshTokensAsync(bool filterByClientId)
-        {            
+        {
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {

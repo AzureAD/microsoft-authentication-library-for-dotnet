@@ -57,6 +57,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (msalAccessTokenItem != null && !msalAccessTokenItem.NeedsRefresh())
                 {
                     var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
+                    var tenantProfiles = await CacheManager.GetTenantProfilesAsync(msalAccessTokenItem.HomeAccountId).ConfigureAwait(false); 
+
                     logger.Info(
                         "[OBO Request] Found a valid access token in the cache. ID token also found? " + (msalIdTokenItem != null));
 
@@ -66,6 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return new AuthenticationResult(
                         msalAccessTokenItem,
                         msalIdTokenItem,
+                        tenantProfiles?.Values,
                         AuthenticationRequestParameters.AuthenticationScheme,
                         AuthenticationRequestParameters.RequestContext.CorrelationId,
                         TokenSource.Cache,
@@ -93,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (MsalServiceException e)
             {
-                return HandleTokenRefreshError(e, msalAccessTokenItem);
+                return await HandleTokenRefreshErrorAsync(e, msalAccessTokenItem).ConfigureAwait(false);
             }
         }
 

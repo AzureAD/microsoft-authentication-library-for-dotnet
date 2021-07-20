@@ -5,7 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
@@ -35,6 +38,7 @@ namespace Microsoft.Identity.Client
         /// <param name="correlationId">The correlation id of the authentication request</param>
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
+        /// <param name="claimsPrincipal">Claims from the ID token</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -47,7 +51,8 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             Guid correlationId,
             string tokenType = "Bearer",
-            AuthenticationResultMetadata authenticationResultMetadata = null)
+            AuthenticationResultMetadata authenticationResultMetadata = null, 
+            ClaimsPrincipal claimsPrincipal = null)
         {
             AccessToken = accessToken;
             IsExtendedLifeTimeToken = isExtendedLifeTimeToken;
@@ -61,6 +66,7 @@ namespace Microsoft.Identity.Client
             CorrelationId = correlationId;
             TokenType = tokenType;
             AuthenticationResultMetadata = authenticationResultMetadata;
+            ClaimsPrincipal = claimsPrincipal;
         }
 
         /// <summary>
@@ -113,33 +119,30 @@ namespace Microsoft.Identity.Client
 
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem,
+            MsalIdTokenCacheItem msalIdTokenCacheItem, 
+            IEnumerable<TenantProfile> tenantProfiles,
             IAuthenticationScheme authenticationScheme,
             Guid correlationID,
             TokenSource tokenSource, 
             ApiEvent apiEvent)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
+            
             string homeAccountId =
                 msalAccessTokenCacheItem?.HomeAccountId ??
                 msalIdTokenCacheItem?.HomeAccountId;
             string environment = msalAccessTokenCacheItem?.Environment ??
                 msalIdTokenCacheItem?.Environment;
 
+            ClaimsPrincipal = msalIdTokenCacheItem?.IdToken.ClaimsPrincipal;
+
             if (homeAccountId != null)
             {
-                string username = null;
-                if (msalIdTokenCacheItem != null)
-                {
-                    username = msalIdTokenCacheItem.IsAdfs ?
-                        msalIdTokenCacheItem?.IdToken.Upn :
-                        msalIdTokenCacheItem?.IdToken?.PreferredUsername;
-                }
-
                 Account = new Account(
                     homeAccountId,
-                    username,
-                    environment);
+                    msalIdTokenCacheItem?.GetUsername(),
+                    environment,
+                    tenantProfiles: tenantProfiles);
             }
 
             if (msalAccessTokenCacheItem != null)
@@ -233,6 +236,11 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="CreateAuthorizationHeader"/> for getting an HTTP authorization header from an AuthenticationResult.
         /// </summary>
         public string TokenType { get; }
+
+        /// <summary>
+        /// All the claims present in the ID token.
+        /// </summary>
+        public ClaimsPrincipal ClaimsPrincipal { get; }
 
         internal ApiEvent ApiEvent { get; }
 

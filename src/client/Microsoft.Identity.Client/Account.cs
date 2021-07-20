@@ -20,12 +20,19 @@ namespace Microsoft.Identity.Client
         /// <param name="username">UPN style , can be null</param>
         /// <param name="environment">Identity provider for this account, e.g. <c>login.microsoftonline.com</c></param>
         /// <param name="wamAccountIds">Map of (client_id, wam_account_id)</param>
-        public Account(string homeAccountId, string username, string environment,IDictionary<string, string> wamAccountIds = null)
+        /// <param name="tenantProfiles">Map of (tenant_id, tenant_profile)</param>
+        public Account(
+            string homeAccountId, 
+            string username, 
+            string environment, 
+            IDictionary<string, string> wamAccountIds = null, 
+            IEnumerable<TenantProfile> tenantProfiles = null)
         {
             Username = username;
             Environment = environment;
             HomeAccountId = AccountId.ParseFromString(homeAccountId);
             WamAccountIds = wamAccountIds;
+            TenantProfiles = tenantProfiles;
         }        
 
         public string Username { get; }
@@ -33,12 +40,14 @@ namespace Microsoft.Identity.Client
         public string Environment { get; }
 
         public AccountId HomeAccountId { get; }
-       
 
-        internal IDictionary<string, string> WamAccountIds
-        {
-            get;
-        }
+        /// <summary>        
+        /// The same account can exist in its home tenant and also as a guest in multiple other tenants. 
+        /// A <see cref="TenantProfile"/> is derived from the ID token for that tenant.
+        /// </summary>
+        public IEnumerable<TenantProfile> TenantProfiles { get; }      
+
+        internal IDictionary<string, string> WamAccountIds { get; }
 
         public override string ToString()
         {

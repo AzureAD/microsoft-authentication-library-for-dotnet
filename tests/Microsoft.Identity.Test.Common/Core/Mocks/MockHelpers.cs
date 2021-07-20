@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage(string token = "header.payload.signature", string expiry = "3599")
         {
             return CreateSuccessResponseMessage(
-                "{\"token_type\":\"Bearer\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\"}");
+                "{\"token_type\":\"Bearer\",\"expires_in\":\"" + expiry + "\",\"client_info\":\"" + CreateClientInfo() + "\",\"access_token\":\"" + token + "\"}");                
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope, bool foci = false)
