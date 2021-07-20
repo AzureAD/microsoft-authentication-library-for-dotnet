@@ -46,15 +46,15 @@ namespace Microsoft.Identity.Client.UI
             Dictionary<string, string> uriParams = CoreHelpers.ParseKeyValueList(
                 resultData.Substring(1), '&', true, null);
 
-            var result = FromParsedValues(uriParams);
+            var authResult = FromParsedValues(uriParams);
 
             if (uriParams.ContainsKey(TokenResponseClaim.Code))
             {
-                result.Code = uriParams[TokenResponseClaim.Code];
+                authResult.Code = uriParams[TokenResponseClaim.Code];
             }
             else if (webAuthenticationResult.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
             {
-                result.Code = webAuthenticationResult;
+                authResult.Code = webAuthenticationResult;
             }
             else
             {
@@ -64,9 +64,9 @@ namespace Microsoft.Identity.Client.UI
                    MsalErrorMessage.AuthorizationServerInvalidResponse);
             }
 
-            return result;
+            return authResult;
         }
-#if !UAP10_0 && !NETSTANDARD1_3
+
         public static AuthorizationResult FromPostData(byte[] postData)
         {
             if (postData == null)
@@ -75,8 +75,11 @@ namespace Microsoft.Identity.Client.UI
                    MsalError.AuthenticationFailed,
                    MsalErrorMessage.AuthorizationServerInvalidResponse);
             }
-
-            var post = System.Text.Encoding.Default.GetString(postData);
+#if !UAP10_0 && !NETSTANDARD1_3
+            var post = System.Text.Encoding.Default.GetString(postData).TrimEnd('\0');
+#else
+            var post = System.Text.Encoding.UTF8.GetString(postData).TrimEnd('\0');
+#endif
 
             Dictionary<string, string> uriParams = CoreHelpers.ParseKeyValueList(
                 post, '&', true, null);
@@ -97,7 +100,6 @@ namespace Microsoft.Identity.Client.UI
 
             return result;
         }
-#endif
 
         private static AuthorizationResult FromParsedValues(Dictionary<string, string> parameters)
         {
