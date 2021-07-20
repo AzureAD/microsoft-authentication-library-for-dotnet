@@ -105,8 +105,8 @@ namespace Microsoft.Identity.Client.Region
             if (isAutoDiscoveryRequested)
             {
                 apiEvent.RegionUsed = discoveredRegion.Region;
-                apiEvent.RegionOutcome = discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery ? 
-                    (int)RegionOutcome.FallbackToGlobal : 
+                apiEvent.RegionOutcome = discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery ?
+                    (int)RegionOutcome.FallbackToGlobal :
                     (int)RegionOutcome.AutodetectSuccess;
             }
             else
@@ -120,8 +120,8 @@ namespace Microsoft.Identity.Client.Region
 
                 if (!string.IsNullOrEmpty(discoveredRegion.Region))
                 {
-                    apiEvent.RegionOutcome = string.Equals(discoveredRegion.Region, azureRegionConfig, StringComparison.OrdinalIgnoreCase) ? 
-                        (int)RegionOutcome.UserProvidedValid : 
+                    apiEvent.RegionOutcome = string.Equals(discoveredRegion.Region, azureRegionConfig, StringComparison.OrdinalIgnoreCase) ?
+                        (int)RegionOutcome.UserProvidedValid :
                         (int)RegionOutcome.UserProvidedInvalid;
                 }
             }
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Region
 
         private bool IsTelemetryRecorded(ApiEvent apiEvent)
         {
-            return 
+            return
                 !(string.IsNullOrEmpty(apiEvent.RegionUsed) &&
                  apiEvent.RegionAutodetectionSource == (int)(default(RegionAutodetectionSource)) &&
                  apiEvent.RegionOutcome == (int)(default(RegionOutcome)));
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.Region
         {
             string region = Environment.GetEnvironmentVariable("REGION_NAME");
 
-            if (!string.IsNullOrEmpty(region))
+            if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
             {
                 logger.Info($"[Region discovery] Region found in environment variable: {region}.");
                 return new RegionInfo(region, RegionAutodetectionSource.EnvVariable);
@@ -175,13 +175,16 @@ namespace Microsoft.Identity.Client.Region
                     { "Metadata", "true" }
                 };
 
-                HttpResponse response = await _httpManager.SendGetAsync(BuildImdsUri(DefaultApiVersion), headers, logger, retry: false, GetCancellationToken(requestCancellationToken))
+                Uri imdsUri = BuildImdsUri(DefaultApiVersion);
+
+                HttpResponse response = await _httpManager.SendGetAsync(imdsUri, headers, logger, retry: false, GetCancellationToken(requestCancellationToken))
                     .ConfigureAwait(false);
 
                 // A bad request occurs when the version in the IMDS call is no longer supported.
                 if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
                     string apiVersion = await GetImdsUriApiVersionAsync(logger, headers, requestCancellationToken).ConfigureAwait(false); // Get the latest version
+                    imdsUri = BuildImdsUri(apiVersion);
                     response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger, retry: false, GetCancellationToken(requestCancellationToken))
                         .ConfigureAwait(false); // Call again with updated version
                 }
@@ -190,11 +193,16 @@ namespace Microsoft.Identity.Client.Region
                 {
                     region = response.Body;
 
-                    logger.Info($"[Region discovery] Call to local IMDS succeeded. Region: {region}.");
-                    return new RegionInfo(region, RegionAutodetectionSource.Imds);
+                    if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
+                    {
+                        logger.Info($"[Region discovery] Call to local IMDS succeeded. Region: {region}.");
+                        return new RegionInfo(region, RegionAutodetectionSource.Imds);
+                    }
                 }
-
-                logger.Warning($"[Region discovery] Call to local IMDS failed with status code {response.StatusCode} or an empty response.");
+                else
+                {
+                    logger.Warning($"[Region discovery] Call to local IMDS failed with status code {response.StatusCode} or an empty response.");
+                }
 
             }
             catch (Exception e)
@@ -210,6 +218,23 @@ namespace Microsoft.Identity.Client.Region
             }
 
             return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery);
+        }
+
+        private static bool ValidateRegion(string region, string source, ICoreLogger logger)
+        {
+            if (string.IsNullOrEmpty(region))
+            {
+                logger.Verbose($"[Region discovery] Region from {source} not detected");
+                return false;
+            }
+
+            if (!Uri.IsWellFormedUriString($"https://{region}.login.microsoft.com", UriKind.Absolute))
+            {
+                logger.Error($"[Region discovery] Region from {source} was found but it's invalid: {region}");
+                return false;
+            }
+
+            return true;
         }
 
         private async Task<string> GetImdsUriApiVersionAsync(ICoreLogger logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
