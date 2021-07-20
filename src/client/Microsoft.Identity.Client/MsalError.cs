@@ -313,6 +313,11 @@ namespace Microsoft.Identity.Client
         public const string ParsingWsTrustResponseFailed = "parsing_wstrust_response_failed";
 
         /// <summary>
+        /// This can occur if there is an configuration issue in the ADFS environment where this is authenticating. See https://aka.ms/msal-net-iwa-troubleshooting for more details
+        /// </summary>
+        public const string IntegratedWindowsAuthenticaitonFailed = "integrated_windows_authenticaiton_failed";
+
+        /// <summary>
         /// <para>What happens</para>
         /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
         /// The user is not recognized as a managed user, or a federated user. Azure AD was not

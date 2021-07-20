@@ -38,9 +38,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
             var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-            var msalTokenResponse = await SendTokenRequestAsync(
-                                            GetAdditionalBodyParameters(userAssertion), cancellationToken)
-                                        .ConfigureAwait(false);
+
+            MsalTokenResponse msalTokenResponse;
+            try
+            {
+                msalTokenResponse = await SendTokenRequestAsync(
+                                                GetAdditionalBodyParameters(userAssertion), cancellationToken)
+                                            .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new MsalClientException(
+                    MsalError.IntegratedWindowsAuthenticaitonFailed,
+                    "There was an error during integrated windows authenticaiton. This may occur if there is an issue with your ADFS configuration."
+                    + " See https://aka.ms/msal-net-iwa-troubleshooting for more details. Error Message: " + ex.Message,
+                    ex);
+            }
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
