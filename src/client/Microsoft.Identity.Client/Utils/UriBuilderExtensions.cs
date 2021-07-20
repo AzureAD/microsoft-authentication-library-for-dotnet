@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Utils
                 return;
             }
 
-            var queryParams = CoreHelpers.ParseKeyValueList(builder.Query, '&', true, null);
+            var queryParams = CoreHelpers.ParseKeyValueList(builder.Query.Substring(1), '&', true, null);
             queryParams[key] = value;
             builder.Query = queryParams.ToQueryParameter();
         }
