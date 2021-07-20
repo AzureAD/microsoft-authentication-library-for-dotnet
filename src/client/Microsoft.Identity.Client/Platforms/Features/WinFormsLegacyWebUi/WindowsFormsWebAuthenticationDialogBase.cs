@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 url.AbsolutePath.Equals(_desiredCallbackUri.AbsolutePath))
             {
                 RequestContext.Logger.Info("[Legacy WebView] Redirect URI was reached. Stopping WebView navigation...");
-                Result = postData != null ? AuthorizationResult.FromPostData(postData) : AuthorizationResult.FromUri(url.OriginalString);
+                Result = AuthorizationResult.FromPostData(postData);
                 readyToClose = true;
             }
 
