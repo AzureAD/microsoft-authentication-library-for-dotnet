@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalClientException(
                     MsalError.IntegratedWindowsAuthenticaitonFailed,
-                    "There was an error during integrated windows authenticaiton. This may occur if there is an issue with your ADFS configuration."
+                    "Failure to acquire a token with integrated windows authentication. This may occur if there is an issue with your ADFS configuration."
                     + " See https://aka.ms/msal-net-iwa-troubleshooting for more details. Error Message: " + ex.Message,
                     ex);
             }
