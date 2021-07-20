@@ -14,6 +14,31 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed partial class TokenCacheNotificationArgs
     {
+        /// <summary>
+        /// This constructor is for test purposes only. It allows apps to unit test their MSAL token cache implementation code.
+        /// </summary>
+        public TokenCacheNotificationArgs(
+            ITokenCacheSerializer tokenCache, 
+            string clientId, 
+            IAccount account, 
+            bool hasStateChanged, 
+            bool isApplicationCache, 
+            string suggestedCacheKey, 
+            bool hasTokens,
+            DateTimeOffset? suggestedCacheExpiry,
+            CancellationToken cancellationToken)
+        {
+            TokenCache = tokenCache;
+            ClientId = clientId;
+            Account = account;
+            HasStateChanged = hasStateChanged;
+            IsApplicationCache = isApplicationCache;
+            SuggestedCacheKey = suggestedCacheKey;
+            HasTokens = hasTokens;
+            CancellationToken = cancellationToken;
+            SuggestedCacheExpiry = suggestedCacheExpiry;
+        }
+
         internal TokenCacheNotificationArgs(
             ITokenCacheSerializer tokenCacheSerializer,
             string clientId,
