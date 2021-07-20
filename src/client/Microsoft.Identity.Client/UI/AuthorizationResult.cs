@@ -46,25 +46,7 @@ namespace Microsoft.Identity.Client.UI
             Dictionary<string, string> uriParams = CoreHelpers.ParseKeyValueList(
                 resultData.Substring(1), '&', true, null);
 
-            var authResult = FromParsedValues(uriParams);
-
-            if (uriParams.ContainsKey(TokenResponseClaim.Code))
-            {
-                authResult.Code = uriParams[TokenResponseClaim.Code];
-            }
-            else if (webAuthenticationResult.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
-            {
-                authResult.Code = webAuthenticationResult;
-            }
-            else
-            {
-                return FromStatus(
-                   AuthorizationStatus.UnknownError,
-                   MsalError.AuthenticationFailed,
-                   MsalErrorMessage.AuthorizationServerInvalidResponse);
-            }
-
-            return authResult;
+            return FromParsedValues(uriParams, webAuthenticationResult);
         }
 
         public static AuthorizationResult FromPostData(byte[] postData)
@@ -101,7 +83,7 @@ namespace Microsoft.Identity.Client.UI
             return result;
         }
 
-        private static AuthorizationResult FromParsedValues(Dictionary<string, string> parameters)
+        private static AuthorizationResult FromParsedValues(Dictionary<string, string> parameters, string url = null)
         {
             if (parameters.ContainsKey(TokenResponseClaim.Error))
             {
@@ -112,27 +94,43 @@ namespace Microsoft.Identity.Client.UI
                         : null);
             }
 
-            var result = new AuthorizationResult
+            var authResult = new AuthorizationResult
             {
                 Status = AuthorizationStatus.Success
             };
 
             if (parameters.ContainsKey(OAuth2Parameter.State))
             {
-                result.State = parameters[OAuth2Parameter.State];
+                authResult.State = parameters[OAuth2Parameter.State];
             }
 
             if (parameters.ContainsKey(TokenResponseClaim.CloudInstanceHost))
             {
-                result.CloudInstanceHost = parameters[TokenResponseClaim.CloudInstanceHost];
+                authResult.CloudInstanceHost = parameters[TokenResponseClaim.CloudInstanceHost];
             }
 
             if (parameters.ContainsKey(TokenResponseClaim.ClientInfo))
             {
-                result.ClientInfo = parameters[TokenResponseClaim.ClientInfo];
+                authResult.ClientInfo = parameters[TokenResponseClaim.ClientInfo];
             }
 
-            return result;
+            if (parameters.ContainsKey(TokenResponseClaim.Code))
+            {
+                authResult.Code = parameters[TokenResponseClaim.Code];
+            }
+            else if (!string.IsNullOrEmpty(url) && url.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
+            {
+                authResult.Code = url;
+            }
+            else
+            {
+                return FromStatus(
+                   AuthorizationStatus.UnknownError,
+                   MsalError.AuthenticationFailed,
+                   MsalErrorMessage.AuthorizationServerInvalidResponse);
+            }
+
+            return authResult;
         }
 
         internal static AuthorizationResult FromStatus(AuthorizationStatus status)
