@@ -21,8 +21,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(SchemaVersion);
-                logger.Info(string.Format(CultureInfo.CurrentCulture, "Serializing token cache with {0} items. ",
-                    tokenCacheDictionary.Count));
+                logger.Info($"[AdalCacheOperations] Serializing token cache with {tokenCacheDictionary.Count} items. ");
 
                 writer.Write(tokenCacheDictionary.Count);
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in tokenCacheDictionary)
@@ -59,7 +58,7 @@ namespace Microsoft.Identity.Client.Cache
                 int blobSchemaVersion = reader.ReadInt32();
                 if (blobSchemaVersion != SchemaVersion)
                 {
-                    logger.Warning("The version of the persistent state of the cache does not match the current schema, so skipping deserialization. ");
+                    logger.Warning("[AdalCacheOperations] The version of the persistent state of the cache does not match the current schema, so skipping deserialization. ");
                     return dictionary;
                 }
 
@@ -77,7 +76,7 @@ namespace Microsoft.Identity.Client.Cache
                     dictionary[key] = resultEx;
                 }
 
-                logger.Info(string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache. ", count));
+                logger.Info($"[AdalCacheOperations] Deserialized {dictionary.Count} items to ADAL token cache. ");
             }
 
             return dictionary;

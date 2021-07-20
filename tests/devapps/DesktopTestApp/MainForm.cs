@@ -403,17 +403,17 @@ namespace DesktopTestApp
             Trace.WriteLine("Accounts: " + acc.Count());
 
             cachePageTableLayout.RowCount = 0;
-            var allRefreshTokens = await _publicClientHandler
+            var allRefreshTokens = _publicClientHandler
                 .PublicClientApplication
                 .UserTokenCacheInternal
-                .GetAllRefreshTokensAsync(true)
-                .ConfigureAwait(true);
+                .Accessor
+                .GetAllRefreshTokens();
 
-            var allAccessTokens = await _publicClientHandler
+            var allAccessTokens = _publicClientHandler
                 .PublicClientApplication
                 .UserTokenCacheInternal
-                .GetAllAccessTokensAsync(true)
-                .ConfigureAwait(true);
+                .Accessor
+                .GetAllAccessTokens();
 
             foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
             {

@@ -38,9 +38,7 @@ namespace Microsoft.Identity.Client
         private readonly IFeatureFlags _featureFlags;
         private readonly ITokenCacheAccessor _accessor;
         private bool _usesDefaultSerialization = false;
-        private volatile bool _hasStateChanged;
-
-        private ICoreLogger Logger => ServiceBundle.ApplicationLogger;
+        private volatile bool _hasStateChanged;        
 
         internal IServiceBundle ServiceBundle { get; }
         internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
@@ -54,11 +52,9 @@ namespace Microsoft.Identity.Client
 
         bool ITokenCacheInternal.UsesDefaultSerialization => _usesDefaultSerialization;
 
-
-        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
-
-        SemaphoreSlim ITokenCacheInternal.Semaphore => _semaphoreSlim;
-
+        private readonly OptionalSemaphoreSlim _semaphoreSlim;
+        OptionalSemaphoreSlim ITokenCacheInternal.Semaphore => _semaphoreSlim;
+        
         /// <summary>
         /// Constructor of a token cache. This constructor is left for compatibility with MSAL 2.x.
         /// The recommended way to get a cache is by using <see cref="IClientApplicationBase.UserTokenCache"/>
@@ -71,6 +67,12 @@ namespace Microsoft.Identity.Client
 
         internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache, ICacheSerializationProvider optionalDefaultSerializer = null)
         {
+            if (serviceBundle == null) 
+                throw new ArgumentNullException(nameof(serviceBundle));   
+
+            // useRealSemaphore= false for MyApps and potentially for all apps when using non-singleton MSAL
+            _semaphoreSlim =  new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled); 
+
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             _accessor = proxy.CreateTokenCacheAccessor();
             _featureFlags = proxy.GetFeatureFlags();
@@ -261,10 +263,10 @@ namespace Microsoft.Identity.Client
             return allRefreshTokens.Any(rt => rt.IsFRT);
         }
 
-        private void RemoveAdalUser(IAccount account)
+        private void RemoveAdalUser(IAccount account, ICoreLogger logger)
         {
             CacheFallbackOperations.RemoveAdalUser(
-                Logger,
+                logger,
                 LegacyCachePersistence,
                 ClientId,
                 account.Username,

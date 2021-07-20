@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AssertLastHttpContent("refresh_token");
 
             //creating second app with no refresh tokens
-            var atItems = await confidentialApp.UserTokenCacheInternal.GetAllAccessTokensAsync(true).ConfigureAwait(false);
+            var atItems = confidentialApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
             var confidentialApp2 = ConfidentialClientApplicationBuilder
                 .Create(confidentialClientID)
                 .WithAuthority(new Uri(oboHost + authResult.TenantId), true)

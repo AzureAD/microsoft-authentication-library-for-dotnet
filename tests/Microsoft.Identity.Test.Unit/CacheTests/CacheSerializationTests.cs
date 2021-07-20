@@ -494,7 +494,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string jsonContent = File.ReadAllText(jsonFilePath);
             byte[] cache = Encoding.UTF8.GetBytes(jsonContent);
 
-            var tokenCache = new TokenCache(null, true);
+            var tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle(), true);
             tokenCache.SetBeforeAccess(notificationArgs =>
             {
                 notificationArgs.TokenCache.DeserializeMsalV3(cache);
@@ -637,23 +637,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         #endregion // JSON SERIALIZATION TESTS
-
-        [TestMethod]
-        [Ignore("Waiting on python to update target to be space-delimited strings instead of array")]
-        [DeploymentItem(@"Resources\cachecompat_python.bin")]
-        public void TestPythonCacheSerializationInterop()
-        {
-            var accessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
-            var s = new TokenCacheJsonSerializer(accessor);
-            string pythonBinFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_python.bin");
-            byte[] bytes = File.ReadAllBytes(pythonBinFilePath);
-            s.Deserialize(bytes, false);
-
-            Assert.AreEqual(0, accessor.GetAllAccessTokens().Count());
-            Assert.AreEqual(0, accessor.GetAllRefreshTokens().Count());
-            Assert.AreEqual(0, accessor.GetAllIdTokens().Count());
-            Assert.AreEqual(0, accessor.GetAllAccounts().Count());
-        }
+       
 
         [TestMethod]
         [DeploymentItem(@"Resources\cachecompat_dotnet_dictionary.bin")]

@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         private byte[] _cacheData;
         private bool _shouldClearExistingCache;
         private bool _withOperationDelay;
-        private const int OperationDelayInMs = 1000;
+        private const int OperationDelayInMs = 100;
 
         public InMemoryTokenCache(bool withOperationDelay = false, bool shouldClearExistingCache = true)
         {

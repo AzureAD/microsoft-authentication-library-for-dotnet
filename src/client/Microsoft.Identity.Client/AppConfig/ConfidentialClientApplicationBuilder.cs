@@ -213,6 +213,24 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+
+        /// <summary>
+        /// When set to <c>true</c>, MSAL will lock cache access at the <see cref="ConfidentialClientApplication"/> level, i.e.
+        /// the block of code between BeforeAccessAsync and AfterAccessAsync callbacks will be syncronized. 
+        /// Apps can set this flag to <c>false</c> to enable an optimistic cache locking strategy, which may result in better performance, especially 
+        /// when ConfidentialClientApplication objects are reused.
+        /// </summary>
+        /// <remarks>
+        /// True by default, but subject to change.
+        /// Not recommended for apps that call RemoveAsync
+        /// </remarks>
+        public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
+        {          
+            Config.CacheSynchronizationEnabled = enableCacheSynchronization;
+
+            return this;
+        }
+
         internal ConfidentialClientApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {
             Config.AppTokenCacheInternalForTest = tokenCacheInternal;

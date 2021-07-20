@@ -123,38 +123,40 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [Description("Test unified token cache")]
-        public async Task AAD_CacheFormatValidationTestAsync()
+        public void AAD_CacheFormatValidationTest()
         {
             using (var harness = CreateTestHarness())
             {
                 IntitTestData(ResourceHelper.GetTestResourceRelativePath("AADTestData.txt"));
                 Init(harness.HttpManager);
-                await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
+
+                RunCacheFormatValidation(harness);
             }
         }
 
         [TestMethod]
         [Description("Test unified token cache")]
-        public async Task MSA_CacheFormatValidationTestAsync()
+        public void MSA_CacheFormatValidationTest()
         {
             using (var harness = CreateTestHarness())
             {
                 IntitTestData(ResourceHelper.GetTestResourceRelativePath("MSATestData.txt"));
                 Init(harness.HttpManager);
-                await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
+
+                RunCacheFormatValidation(harness);
             }
         }
 
         [TestMethod]
         [Description("Test unified token cache")]
         [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1037
-        public async Task B2C_NoTenantId_CacheFormatValidationTestAsync()
+        public void B2C_NoTenantId_CacheFormatValidationTest()
         {
             using (var harness = CreateTestHarness())
             {
                 TestCommon.ResetInternalStaticCaches();
                 IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CNoTenantIdTestData.txt"));
-                await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
+                RunCacheFormatValidation(harness);
             }
         }
 
@@ -163,16 +165,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Ignore]
         // it is not yet decided what version of tenant id should be used
         // test data generated based on GUID, Msal uses tenantId from passed in authotiry
-        public async Task B2C_WithTenantId_CacheFormatValidationTestAsync()
+        public void B2C_WithTenantId_CacheFormatValidationTest()
         {
             using (var harness = CreateTestHarness())
             {
                 IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CWithTenantIdTestData.txt"));
-                await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
+                RunCacheFormatValidation(harness);
             }
         }
 
-        private async Task RunCacheFormatValidationAsync(MockHttpAndServiceBundle harness)
+        private void RunCacheFormatValidation(MockHttpAndServiceBundle harness)
         {
             PublicClientApplication app = PublicClientApplicationBuilder
                                           .Create(_clientId)
@@ -197,15 +199,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.IsNotNull(result);
 
-            await ValidateAtAsync(app.UserTokenCacheInternal).ConfigureAwait(false);
-            await ValidateRtAsync(app.UserTokenCacheInternal).ConfigureAwait(false);
-            await ValidateIdTokenAsync(app.UserTokenCacheInternal).ConfigureAwait(false);
-            await ValidateAccountAsync(app.UserTokenCacheInternal).ConfigureAwait(false);
+            ValidateAt(app.UserTokenCacheInternal);
+            ValidateRt(app.UserTokenCacheInternal);
+            ValidateIdToken(app.UserTokenCacheInternal);
+            ValidateAccount(app.UserTokenCacheInternal);
         }
 
-        private async Task ValidateAtAsync(ITokenCacheInternal cache)
+        private void ValidateAt(ITokenCacheInternal cache)
         {
-            var atList = (await cache.GetAllAccessTokensAsync(false).ConfigureAwait(false)).ToList();
+            var atList = cache.Accessor.GetAllAccessTokens().ToList();
             Assert.AreEqual(1, atList.Count);
 
             var actualPayload = JsonConvert.DeserializeObject<JObject>(atList.First().ToJsonString());
@@ -230,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     Assert.AreEqual(expectedPropValue, actualPropValue);
                 }
             }
-            var atCacheItem = (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First();
+            var atCacheItem = cache.Accessor.GetAllAccessTokens().First();
             var key = atCacheItem.GetKey();
 
             Assert.AreEqual(_expectedAtCacheKey, key.ToString());
@@ -242,13 +244,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, key.iOSType);
         }
 
-        private async Task ValidateRtAsync(ITokenCacheInternal cache)
+        private void ValidateRt(ITokenCacheInternal cache)
         {
             // TODO: NEED TO LOOK INTO HOW TO HANDLE THIS TEST
             //ValidateCacheEntityValue
             //    (ExpectedRtCacheValue, cache.GetAllRefreshTokenCacheItems(requestContext));
 
-            var rtCacheItem = (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First();
+            var rtCacheItem = cache.Accessor.GetAllRefreshTokens().First();
             var key = rtCacheItem.GetKey();
 
             Assert.AreEqual(_expectedRtCacheKey, key.ToString());
@@ -259,13 +261,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, key.iOSType);
         }
 
-        private async Task ValidateIdTokenAsync(ITokenCacheInternal cache)
+        private void ValidateIdToken(ITokenCacheInternal cache)
         {
             // TODO: NEED TO LOOK INTO HOW TO HANDLE THIS TEST
             //ValidateCacheEntityValue
             //    (ExpectedIdTokenCacheValue, cache.GetAllIdTokenCacheItems(requestContext));
 
-            var idTokenCacheItem = (await cache.GetAllIdTokensAsync(true).ConfigureAwait(false)).First();
+            var idTokenCacheItem = cache.Accessor.GetAllIdTokens().First();
             var key = idTokenCacheItem.GetKey();
 
             Assert.AreEqual(_expectedIdTokenCacheKey, key.ToString());
@@ -276,13 +278,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.IdToken, key.iOSType);
         }
 
-        private async Task ValidateAccountAsync(ITokenCacheInternal cache)
+        private void ValidateAccount(ITokenCacheInternal cache)
         {
             // TODO: NEED TO LOOK INTO HOW TO HANDLE THIS TEST
             //ValidateCacheEntityValue
             //    (ExpectedAccountCacheValue, cache.GetAllAccountCacheItems(requestContext));
 
-            var accountCacheItem = (await cache.GetAllAccountsAsync().ConfigureAwait(false)).First();
+            var accountCacheItem = cache.Accessor.GetAllAccounts().First();
             var key = accountCacheItem.GetKey();
 
             Assert.AreEqual(_expectedAccountCacheKey, key.ToString());
