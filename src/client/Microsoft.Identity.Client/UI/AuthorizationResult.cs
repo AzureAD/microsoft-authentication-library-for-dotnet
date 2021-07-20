@@ -66,21 +66,7 @@ namespace Microsoft.Identity.Client.UI
             Dictionary<string, string> uriParams = CoreHelpers.ParseKeyValueList(
                 post, '&', true, null);
 
-            var result = FromParsedValues(uriParams);
-
-            if (uriParams.ContainsKey(TokenResponseClaim.Code))
-            {
-                result.Code = uriParams[TokenResponseClaim.Code];
-            }
-            else
-            {
-                return FromStatus(
-                   AuthorizationStatus.UnknownError,
-                   MsalError.AuthenticationFailed,
-                   MsalErrorMessage.AuthorizationServerInvalidResponse);
-            }
-
-            return result;
+            return FromParsedValues(uriParams);
         }
 
         private static AuthorizationResult FromParsedValues(Dictionary<string, string> parameters, string url = null)
