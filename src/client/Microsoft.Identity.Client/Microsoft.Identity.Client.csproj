@@ -49,10 +49,13 @@
     <!-- Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <DisableExtraReferences>true</DisableExtraReferences>
     <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
     <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup  Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -61,7 +64,6 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
   </PropertyGroup>
 
   <Import Project="../../../build/platform_and_feature_flags.props" />
@@ -282,11 +284,5 @@
     </None>
   </ItemGroup>
 
- <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-  </PropertyGroup>
+
 </Project>

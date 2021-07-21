@@ -40,8 +40,11 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
-
-
+  
+  <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
   </PropertyGroup>
@@ -68,14 +71,6 @@
 
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-  </ItemGroup>
-
-  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-  </PropertyGroup>
+  </ItemGroup>  
 
 </Project>

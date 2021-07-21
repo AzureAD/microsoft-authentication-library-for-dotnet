@@ -9,8 +9,12 @@
     <DelaySign>false</DelaySign>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <IsPackable>false</IsPackable>
+    <IsPackable>false</IsPackable>    
   </PropertyGroup>
+
+  <ItemGroup Label="For ContinuousIntegrationBuild support">
+    <SourceRoot Include="$(MSBuildThisFileDirectory)/"/> <!-- defines repository top level dir-->
+  </ItemGroup>
   <ItemGroup>
     <!-- PrivateAssets="All" is on these packages to ensure they're development dependencies
          and aren't included as transitionary dependencies to package consumers.
