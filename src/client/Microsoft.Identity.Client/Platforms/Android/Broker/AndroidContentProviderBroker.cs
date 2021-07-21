@@ -309,10 +309,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             ContentResolver resolver = GetContentResolver();
 
-            _logger.Info($"Executeting content resolver operation: {operation}");
+            var contentResolverUri = GetContentProviderUriForOperation(Enum.GetName(typeof(ContentResolverOperation), operation));
+            _logger.Info($"Executing content resolver operation: {operation} URI: {contentResolverUri}");
 
             ICursor resultCursor = null;
-            await Task.Run(() => resultCursor = resolver.Query(AndroidUri.Parse(GetContentProviderUriForOperation(Enum.GetName(typeof(ContentResolverOperation), operation))),
+
+            await Task.Run(() => resultCursor = resolver.Query(AndroidUri.Parse(contentResolverUri),
                                                             !string.IsNullOrEmpty(_negotiatedBrokerProtocolKey) ? new string[] { _negotiatedBrokerProtocolKey } : null,
                                                             operationParameters,
                                                             null,
@@ -321,7 +323,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             if (resultCursor == null)
             {
                 _logger.Error($"[Android broker] An error occurred during the content provider operation {operation}.");
-                throw new MsalClientException(MsalError.CannotInvokeBroker, $"[Android broker] Could not communicate with broker via content provider. Operation: {operation}");
+                throw new MsalClientException(MsalError.CannotInvokeBroker, "[Android broker] Could not communicate with broker via content provider."
+                    + $"Operation: {operation} URI: {contentResolverUri}");
             }
 
             var resultBundle = resultCursor.Extras;
@@ -329,7 +332,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (resultBundle != null)
             {
-                _logger.Info($"Content resolver operation completed succesfully. Operation: {operation}");
+                _logger.Verbose($"Content resolver operation completed succesfully. Operation: {operation} URI: {contentResolverUri}");
             }
 
             return resultBundle;
