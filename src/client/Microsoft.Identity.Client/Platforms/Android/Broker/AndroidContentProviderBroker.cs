@@ -309,8 +309,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             ContentResolver resolver = GetContentResolver();
 
+            var contentResolverUri = GetContentProviderUriForOperation(Enum.GetName(typeof(ContentResolverOperation), operation));
+            _logger.Info($"[Android broker] Executing content resolver operation: {operation} URI: {contentResolverUri}");
+
             ICursor resultCursor = null;
-            await Task.Run(() => resultCursor = resolver.Query(AndroidUri.Parse(GetContentProviderUriForOperation(Enum.GetName(typeof(ContentResolverOperation), operation))),
+
+            await Task.Run(() => resultCursor = resolver.Query(AndroidUri.Parse(contentResolverUri),
                                                             !string.IsNullOrEmpty(_negotiatedBrokerProtocolKey) ? new string[] { _negotiatedBrokerProtocolKey } : null,
                                                             operationParameters,
                                                             null,
@@ -318,12 +322,20 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (resultCursor == null)
             {
-                _logger.Error("[Android broker] An error occurred during the content provider operation.");
-                throw new MsalClientException(MsalError.CannotInvokeBroker, "[Android broker] Could not communicate with broker via content provider.");
+                _logger.Error($"[Android broker] An error occurred during the content provider operation {operation}.");
+                throw new MsalClientException(MsalError.CannotInvokeBroker, "[Android broker] Could not communicate with broker via content provider."
+                    + $"Operation: {operation} URI: {contentResolverUri}");
             }
 
             var resultBundle = resultCursor.Extras;
+
             resultCursor.Close();
+            resultCursor.Dispose();
+
+            if (resultBundle != null)
+            {
+                _logger.Verbose($"[Android broker] Content resolver operation completed succesfully. Operation: {operation} URI: {contentResolverUri}");
+            }
 
             return resultBundle;
         }
