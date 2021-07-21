@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           InstanceDiscoveryResponse userProvidedInstanceDiscoveryResponse = null,
           Uri userProvidedInstanceDiscoveryUri = null) :
             this(
-                httpManager,                
+                httpManager,
                 shouldClearCaches,
                 userProvidedInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProvidedInstanceDiscoveryResponse) : null,
                 userProvidedInstanceDiscoveryUri,
@@ -111,10 +111,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
             AuthorityInfo authorityInfo,
-            RequestContext requestContext, 
+            RequestContext requestContext,
             bool forceValidation = false)
         {
-
             Uri authorityUri = new Uri(authorityInfo.CanonicalAuthority);
             string environment = authorityInfo.Host;
 
@@ -123,17 +122,32 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 case AuthorityType.Aad:
 
                     var entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger);
-                    
+
                     if (entry == null && forceValidation)
                     {
                         // only the network provider does validation
                         await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
                     }
-                    
+
+                    // previous
                     entry = entry ??
                         await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
                         await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
-                                     
+
+                    // new
+                    //if (entry == null)
+                    //{
+                    //    entry = await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
+                    //    if (!string.IsNullOrEmpty(requestContext.ServiceBundle.Config.AzureRegion))
+                    //    {
+                    //        var uriBuilder = new UriBuilder(authorityInfo.CanonicalAuthority)
+                    //        {
+                    //            Host = entry.PreferredNetwork
+                    //        };
+                    //        entry = await _regionDiscoveryProvider.GetMetadataAsync(uriBuilder.Uri, requestContext).ConfigureAwait(false);
+                    //    }
+                    //}
+
                     if (entry == null)
                     {
                         string message = "[Instance Discovery] Instance metadata for this authority could neither be fetched nor found. MSAL will continue regardless. SSO might be broken if authority aliases exist. ";
