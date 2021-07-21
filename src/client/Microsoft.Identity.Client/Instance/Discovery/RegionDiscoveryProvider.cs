@@ -12,6 +12,7 @@ namespace Microsoft.Identity.Client.Region
     internal class RegionDiscoveryProvider : IRegionDiscoveryProvider
     {
         private readonly IRegionManager _regionManager;
+        public const string PublicEnvForRegional = "r.login.microsoftonline.com";
 
         public RegionDiscoveryProvider(IHttpManager httpManager, bool clearCache)
         {
@@ -23,12 +24,12 @@ namespace Microsoft.Identity.Client.Region
             string region = await _regionManager.GetAzureRegionAsync(requestContext).ConfigureAwait(false);
             if (string.IsNullOrEmpty(region))
             {
-                requestContext.Logger.Info("Azure region was not configured or could not be discovered. Not using a regional authority.");
+                requestContext.Logger.Info("[Region discovery] Azure region was not configured or could not be discovered. Not using a regional authority.");
                 return null;
             }
 
             // already regionalized
-            if (authority.Host.StartsWith(region))
+            if (authority.Host.StartsWith($"{region}."))
             {
                 return CreateEntry(requestContext.ServiceBundle.Config.AuthorityInfo.Host, authority.Host);
             }
@@ -49,15 +50,22 @@ namespace Microsoft.Identity.Client.Region
 
         private string GetRegionalizedEnviroment(Uri authority, string region)
         {
-            var builder = new UriBuilder(authority);
 
-            // special rule for Global cloud
-            if (KnownMetadataProvider.IsPublicEnvironment(authority.Host))
+            string host = authority.Host;
+
+            if (KnownMetadataProvider.IsPublicEnvironment(host))
             {
-                return $"{region}.login.microsoft.com";
+                return $"{region}.{PublicEnvForRegional}";
             }
 
-            return $"{region}.{builder.Host}";
+            // Regional business rule - use the PreferredNetwork value for public and sovereign clouds
+            // but do not do instance discovery for it - rely on cached values only
+            if (KnownMetadataProvider.TryGetKnownEnviromentPreferredNetwork(host, out var preferredNetworkEnv))
+            {
+                host = preferredNetworkEnv;
+            }
+
+            return $"{region}.{host}";
         }
     }
 }

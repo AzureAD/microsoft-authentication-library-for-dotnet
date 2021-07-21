@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Instance
         private Authority _currentAuthority;
 
         bool _instanceDiscoveryAndValidationExecuted = false;
-      
+
         public AuthorityManager(RequestContext requestContext, Authority initialAuthority)
         {
             _requestContext = requestContext;
@@ -37,13 +37,21 @@ namespace Microsoft.Identity.Client.Instance
 
         public Authority Authority => _currentAuthority;
 
+
+        private InstanceDiscoveryMetadataEntry _metadata;
+        public async Task<InstanceDiscoveryMetadataEntry> GetInstanceDiscoveryEntryAsync()
+        {
+            await RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
+            return _metadata;
+        }
+
         public async Task RunInstanceDiscoveryAndValidationAsync()
         {
             if (!_instanceDiscoveryAndValidationExecuted)
             {
-                // This will make a network call unless instance discovery is cached, but this ok
+                // This will make a network call unless instance discovery is cached, but this OK
                 // GetAccounts and AcquireTokenSilent do not need this
-                InstanceDiscoveryMetadataEntry metadata = await
+                _metadata = await
                                 _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
                                     _initialAuthority.AuthorityInfo,
                                     _requestContext)
@@ -51,7 +59,7 @@ namespace Microsoft.Identity.Client.Instance
 
                 _currentAuthority = Authority.CreateAuthorityWithEnvironment(
                                     _initialAuthority.AuthorityInfo,
-                                    metadata.PreferredNetwork);
+                                    _metadata.PreferredNetwork);
 
                 // We can only validate the initial environment, not regional environments
                 await ValidateAuthorityAsync(_initialAuthority).ConfigureAwait(false);
@@ -64,7 +72,7 @@ namespace Microsoft.Identity.Client.Instance
         {
             s_validatedEnvironments.Clear();
         }
-      
+
         private async Task ValidateAuthorityAsync(Authority authority)
         {
             // race conditions could occur here, where multiple requests validate the authority at the same time

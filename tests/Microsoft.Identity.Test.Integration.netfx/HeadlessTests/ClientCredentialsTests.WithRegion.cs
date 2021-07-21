@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ["allowestsrnonmsi"] = "true"
         };
 
-        private const string RegionalHost = "centralus.login.microsoft.com";
+        private const string RegionalHost = "centralus.r.login.microsoftonline.com";
         private const string GlobalHost = "login.microsoftonline.com";
         private IConfidentialClientApplication _confidentialClientApplication;
 
