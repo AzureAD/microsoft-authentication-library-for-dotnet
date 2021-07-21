@@ -41,15 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var msalTokenResponse = await SendTokenRequestAsync(
                                                 GetAdditionalBodyParameters(userAssertion), cancellationToken)
                                             .ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new MsalClientException(
-                    MsalError.IntegratedWindowsAuthenticaitonFailed,
-                    "Failure to acquire a token with integrated windows authentication. This may occur if there is an issue with your ADFS configuration."
-                    + " See https://aka.ms/msal-net-iwa-troubleshooting for more details. Error Message: " + ex.Message,
-                    ex);
-            }
+
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
@@ -64,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 //IWA is currently not supported in pure adfs environments. See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2771
                 throw new MsalClientException(
-                            MsalError.IntegratedWindowsAuthenticaitonFailed,
+                            MsalError.IntegratedWindowsAuthenticationFailed,
                             "Integrated windows authenticaiton is not supported when using WithAdfsAuthority() to specify the authority in ADFS on premises environments"
                             + " See https://aka.ms/msal-net-iwa for more details.");
             }
