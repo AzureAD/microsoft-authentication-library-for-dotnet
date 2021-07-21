@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     var broker = new AndroidContentProviderBroker(uIParent, logger);
                     await broker.InitiateBrokerHandShakeAsync().ConfigureAwait(false);
                     s_installedBroker = BrokerType.ContentProvider;
+                    logger.Info("Content provider broker is available and will be used.");
                     return broker;
                 }
                 catch (Exception exContentProvider)
@@ -52,6 +53,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         var broker = new AndroidAccountManagerBroker(uIParent, logger);
                         await broker.InitiateBrokerHandshakeAsync().ConfigureAwait(false);
                         s_installedBroker = BrokerType.AccountManager;
+                        logger.Info("Account manager broker is available and will be used.");
                         return broker;
                     }
                     catch (Exception exAccountManager)

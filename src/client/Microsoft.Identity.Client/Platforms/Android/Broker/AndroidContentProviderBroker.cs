@@ -309,6 +309,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             ContentResolver resolver = GetContentResolver();
 
+            _logger.Info($"Executeting content resolver operation: {operation}");
+
             ICursor resultCursor = null;
             await Task.Run(() => resultCursor = resolver.Query(AndroidUri.Parse(GetContentProviderUriForOperation(Enum.GetName(typeof(ContentResolverOperation), operation))),
                                                             !string.IsNullOrEmpty(_negotiatedBrokerProtocolKey) ? new string[] { _negotiatedBrokerProtocolKey } : null,
@@ -324,6 +326,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             var resultBundle = resultCursor.Extras;
             resultCursor.Close();
+
+            if (resultBundle != null)
+            {
+                _logger.Info($"Content resolver operation completed succesfully. Operation: {operation}");
+            }
 
             return resultBundle;
         }
