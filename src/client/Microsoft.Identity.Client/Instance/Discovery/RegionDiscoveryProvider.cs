@@ -12,6 +12,7 @@ namespace Microsoft.Identity.Client.Region
     internal class RegionDiscoveryProvider : IRegionDiscoveryProvider
     {
         private readonly IRegionManager _regionManager;
+        public const string PublicEnvForRegional = "r.login.microsoftonline.com";
 
         public RegionDiscoveryProvider(IHttpManager httpManager, bool clearCache)
         {
@@ -45,7 +46,13 @@ namespace Microsoft.Identity.Client.Region
 
         private string GetRegionalizedEnviroment(Uri authority, string region)
         {
+
             string host = authority.Host;
+
+            if (KnownMetadataProvider.IsPublicEnvironment(host))
+            {
+                return $"{region}.{PublicEnvForRegional}";
+            }
 
             // Regional business rule - use the PrefferedNetwork value for public and soverign clouds
             // but do not do instance discovery for it - rely on cached values only

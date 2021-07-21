@@ -55,8 +55,8 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
-        public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoftonline.com";
-        public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoftonline.com";
+        public const string ProductionPrefRegionalEnvironment = "centralus.r.login.microsoftonline.com";
+        public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.r.login.microsoftonline.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
         public const string PpeEnvironment = "login.windows-ppe.net";
 
