@@ -60,6 +60,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
             _harness?.Dispose();
             _regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, true);
+            _httpManager.Dispose();            
             base.TestCleanup();
         }
 
@@ -181,44 +182,39 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
-        //[TestMethod]
-        //public async Task NoImdsCancellation_UserCancelled_Async()
-        //{
-        //    var httpManager = new HttpManager(new SimpleHttpClientFactory());
+        [DataTestMethod]
+        [DataRow("Region with spaces")]
+        [DataRow("invalid`region")]
+        public async Task InvalidRegionEnvVariableAsync(string region)
+        {
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, region);
 
-        //    IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(
-        //        httpManager, 
-        //        new NetworkCacheMetadataProvider());
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region)); // IMDS will return a valid region
 
-        //    _userCancellationTokenSource.Cancel();
+            _testRequestContext.ServiceBundle.Config.AzureRegion =
+                ConfidentialClientApplication.AttemptRegionDiscovery;
 
-        //    var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => regionDiscoveryProvider.GetMetadataAsync(
-        //        new Uri("https://login.microsoftonline.com/common/"),
-        //        _testRequestContext))
-        //        .ConfigureAwait(false);
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-        //    Assert.AreEqual(MsalError.RegionDiscoveryFailed, ex.ErrorCode);
-        //    regionDiscoveryProvider.Clear();
-        //}
+            ValidateInstanceMetadata(regionalMetadata);
+        }
 
-        //[TestMethod]
-        //public async Task ImdsTimeout_Async()
-        //{
-        //    var httpManager = new HttpManager(new SimpleHttpClientFactory());
+        [DataTestMethod]
+        [DataRow("Region with spaces")]
+        [DataRow("invalid`region")]
+        public async Task InvalidImdsAsync(string region)
+        {
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(region)); // IMDS will return an invalid region
 
-        //    IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(
-        //        httpManager,
-        //        new NetworkCacheMetadataProvider(),
-        //        imdsCallTimeout: 0);
+            _testRequestContext.ServiceBundle.Config.AzureRegion =
+                ConfidentialClientApplication.AttemptRegionDiscovery;
 
-        //    var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => regionDiscoveryProvider.GetMetadataAsync(
-        //        new Uri("https://login.microsoftonline.com/common/"),
-        //        _testRequestContext))
-        //        .ConfigureAwait(false);
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-        //    Assert.AreEqual(MsalError.RegionDiscoveryFailed, ex.ErrorCode);
-        //  //  regionDiscoveryProvider.Clear();
-        //}      
+            Assert.IsNull(regionalMetadata, "Discovery requested, but it failed.");
+        }
 
         [TestMethod]
         public async Task NonPublicCloudTestAsync()
@@ -366,13 +362,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             }
         }
 
-        private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry)
+        private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry, string region = "centralus")
         {
             InstanceDiscoveryMetadataEntry expectedEntry = new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { "centralus.login.microsoft.com", "login.microsoftonline.com" },
+                Aliases = new[] { $"{region}.login.microsoft.com", "login.microsoftonline.com" },
                 PreferredCache = "login.microsoftonline.com",
-                PreferredNetwork = "centralus.login.microsoft.com"
+                PreferredNetwork = $"{region}.login.microsoft.com"
             };
 
             CollectionAssert.AreEquivalent(expectedEntry.Aliases, entry.Aliases);
