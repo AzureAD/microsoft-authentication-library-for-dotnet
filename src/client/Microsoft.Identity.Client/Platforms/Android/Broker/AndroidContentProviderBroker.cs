@@ -320,8 +320,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (resultCursor == null)
             {
-                _logger.Error("[Android broker] An error occurred during the content provider operation.");
-                throw new MsalClientException(MsalError.CannotInvokeBroker, "[Android broker] Could not communicate with broker via content provider.");
+                _logger.Error($"[Android broker] An error occurred during the content provider operation {operation}.");
+                throw new MsalClientException(MsalError.CannotInvokeBroker, $"[Android broker] Could not communicate with broker via content provider. Operation: {operation}");
             }
 
             var resultBundle = resultCursor.Extras;
