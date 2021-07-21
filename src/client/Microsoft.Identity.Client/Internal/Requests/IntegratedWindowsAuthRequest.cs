@@ -38,11 +38,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
             var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-
-            MsalTokenResponse msalTokenResponse;
-            try
-            {
-                msalTokenResponse = await SendTokenRequestAsync(
+            var msalTokenResponse = await SendTokenRequestAsync(
                                                 GetAdditionalBodyParameters(userAssertion), cancellationToken)
                                             .ConfigureAwait(false);
             }
@@ -66,7 +62,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
             {
-                return null;
+                //IWA is currently not supported in pure adfs environments. See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2771
+                throw new MsalClientException(
+                            MsalError.IntegratedWindowsAuthenticaitonFailed,
+                            "Integrated windows authenticaiton is not supported when using WithAdfsAuthority() to specify the authority in ADFS on premises environments"
+                            + " See https://aka.ms/msal-net-iwa for more details.");
             }
 
             var userRealmResponse = await _commonNonInteractiveHandler
