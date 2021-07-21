@@ -117,6 +117,18 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             return s_knownEnvironments.Contains(environment);
         }
 
+        public static bool TryGetKnownEnviromentPrefferedNetwork(string environment, out string preferredNetworkEnvironment)
+        {
+            if (s_knownEntries.TryGetValue(environment, out var entry))
+            {
+                preferredNetworkEnvironment = entry.PreferredNetwork;
+                return true;
+            }
+
+            preferredNetworkEnvironment = null;
+            return false;
+        }
+
         public static IDictionary<string, InstanceDiscoveryMetadataEntry> GetAllEntriesForTest()
         {
             return s_knownEntries;

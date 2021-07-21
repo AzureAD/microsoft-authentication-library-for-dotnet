@@ -27,11 +27,7 @@ namespace Microsoft.Identity.Client.Region
                 return null;
             }
 
-            // already regionalized
-            if (authority.Host.StartsWith(region))
-            {
-                return CreateEntry(requestContext.ServiceBundle.Config.AuthorityInfo.Host, authority.Host);
-            }
+            
 
             string regionalEnv = GetRegionalizedEnviroment(authority, region);
             return CreateEntry(authority.Host, regionalEnv);
@@ -49,15 +45,16 @@ namespace Microsoft.Identity.Client.Region
 
         private string GetRegionalizedEnviroment(Uri authority, string region)
         {
-            var builder = new UriBuilder(authority);
+            string host = authority.Host;
 
-            // special rule for Global cloud
-            if (KnownMetadataProvider.IsPublicEnvironment(authority.Host))
+            // Regional business rule - use the PrefferedNetwork value for public and soverign clouds
+            // but do not do instance discovery for it - rely on cached values only
+            if (KnownMetadataProvider.TryGetKnownEnviromentPrefferedNetwork(host, out var preferredNetworkEnv))
             {
-                return $"{region}.login.microsoft.com";
+                host = preferredNetworkEnv;
             }
 
-            return $"{region}.{builder.Host}";
+            return $"{region}.{host}";
         }
     }
 }

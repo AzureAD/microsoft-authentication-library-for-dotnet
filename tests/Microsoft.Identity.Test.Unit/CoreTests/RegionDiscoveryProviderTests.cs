@@ -162,25 +162,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual("user_region", _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual((int)RegionOutcome.UserProvidedInvalid, _testRequestContext.ApiEvent.RegionOutcome);
-        }
-
-        [TestMethod]
-        public async Task SuccessfulResponseFromRegionalizedAuthorityAsync()
-        {
-            var regionalizedAuthority = new Uri($"https://{TestConstants.Region}.login.microsoft.com/common/");
-            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
-
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-
-            // In the instance discovery flow, GetMetadataAsync is always called with a known authority first, then with regionalized.
-            await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
-            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(regionalizedAuthority, _testRequestContext).ConfigureAwait(false);
-
-            ValidateInstanceMetadata(regionalMetadata);
-            Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
-        }
+        }    
 
         [DataTestMethod]
         [DataRow("Region with spaces")]
