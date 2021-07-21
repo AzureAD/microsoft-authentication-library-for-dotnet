@@ -24,11 +24,15 @@ namespace Microsoft.Identity.Client.Region
             string region = await _regionManager.GetAzureRegionAsync(requestContext).ConfigureAwait(false);
             if (string.IsNullOrEmpty(region))
             {
-                requestContext.Logger.Info("Azure region was not configured or could not be discovered. Not using a regional authority.");
+                requestContext.Logger.Info("[Region discovery] Azure region was not configured or could not be discovered. Not using a regional authority.");
                 return null;
             }
 
-            
+            // already regionalized
+            if (authority.Host.StartsWith($"{region}."))
+            {
+                return CreateEntry(requestContext.ServiceBundle.Config.AuthorityInfo.Host, authority.Host);
+            }
 
             string regionalEnv = GetRegionalizedEnviroment(authority, region);
             return CreateEntry(authority.Host, regionalEnv);
@@ -54,9 +58,9 @@ namespace Microsoft.Identity.Client.Region
                 return $"{region}.{PublicEnvForRegional}";
             }
 
-            // Regional business rule - use the PrefferedNetwork value for public and soverign clouds
+            // Regional business rule - use the PreferredNetwork value for public and sovereign clouds
             // but do not do instance discovery for it - rely on cached values only
-            if (KnownMetadataProvider.TryGetKnownEnviromentPrefferedNetwork(host, out var preferredNetworkEnv))
+            if (KnownMetadataProvider.TryGetKnownEnviromentPreferredNetwork(host, out var preferredNetworkEnv))
             {
                 host = preferredNetworkEnv;
             }

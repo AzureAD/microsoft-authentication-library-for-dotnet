@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
@@ -117,7 +116,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             return s_knownEnvironments.Contains(environment);
         }
 
-        public static bool TryGetKnownEnviromentPrefferedNetwork(string environment, out string preferredNetworkEnvironment)
+        public static bool TryGetKnownEnviromentPreferredNetwork(string environment, out string preferredNetworkEnvironment)
         {
             if (s_knownEntries.TryGetValue(environment, out var entry))
             {

@@ -3,7 +3,6 @@
 
 #if !ANDROID && !iOS && !WINDOWS_APP 
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -350,7 +349,6 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", null);
             }
-
         }
 
         private static async Task RunPpeTestAsync(bool validateAuthority, bool authorityIsValid)

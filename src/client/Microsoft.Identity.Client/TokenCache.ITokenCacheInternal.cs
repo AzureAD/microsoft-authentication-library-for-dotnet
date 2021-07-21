@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata =
-                await requestParams.AuthorityManager.GetInstanceDisoveryEntryAsync().ConfigureAwait(false);
+                await requestParams.AuthorityManager.GetInstanceDiscoveryEntryAsync().ConfigureAwait(false);
 
             #region Create Cache Objects
             if (!string.IsNullOrEmpty(response.AccessToken))
