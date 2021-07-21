@@ -310,7 +310,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             ContentResolver resolver = GetContentResolver();
 
             var contentResolverUri = GetContentProviderUriForOperation(Enum.GetName(typeof(ContentResolverOperation), operation));
-            _logger.Info($"Executing content resolver operation: {operation} URI: {contentResolverUri}");
+            _logger.Info($"[Android broker] Executing content resolver operation: {operation} URI: {contentResolverUri}");
 
             ICursor resultCursor = null;
 
@@ -328,11 +328,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
 
             var resultBundle = resultCursor.Extras;
+
             resultCursor.Close();
+            resultCursor.Dispose();
 
             if (resultBundle != null)
             {
-                _logger.Verbose($"Content resolver operation completed succesfully. Operation: {operation} URI: {contentResolverUri}");
+                _logger.Verbose($"[Android broker] Content resolver operation completed succesfully. Operation: {operation} URI: {contentResolverUri}");
             }
 
             return resultBundle;
