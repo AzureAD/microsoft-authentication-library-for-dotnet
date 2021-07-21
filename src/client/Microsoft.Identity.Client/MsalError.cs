@@ -315,7 +315,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// This can occur if there is an configuration issue in the ADFS environment where this is authenticating. See https://aka.ms/msal-net-iwa-troubleshooting for more details
         /// </summary>
-        public const string IntegratedWindowsAuthenticaitonFailed = "integrated_windows_authenticaiton_failed";
+        public const string IntegratedWindowsAuthenticationFailed = "integrated_windows_authentication_failed";
 
         /// <summary>
         /// <para>What happens</para>
