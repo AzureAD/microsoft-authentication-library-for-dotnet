@@ -1,3 +1,26 @@
+4.35.0
+==========
+### Bug Fixes:
+**Bad WAM exception on Win 2012 [#2706](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706)
+**Better error message when using AcquireTokenByIntegratedWindowsAuth against ADFS [#2751](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2752)
+**If regional is configured, and original authority is known to MSAL, do not perform instance discovery [#2777] (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2777)
+**Fixed authority issue in Regional [#2778](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2778)
+**IWA improvements (ADFS support and better error messages) [#2731](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2731)
+**When creating ConfidentialClientApplicationBuilder with auto region discovery, System.UriFormatException: Invalid URI is thrown - [#2772](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2772)
+**Memory leak fixed for AuthorityEndpoint caching [#2770](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2770)
+**ADFS - result.Account.Username has different values between STS and cache [#1559](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1559)
+**No ccs routing hint is acceptable [#2755](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2755)
+**MSAL 4.33 throws on mismatch authority [#2736](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2736)
+**Method not found: 'Void Microsoft.Web.WebView2.." When calling AcquireTokenInteractive [#2685](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2685)
+**Instance discovery performed many times on non-public non-sovereign clouds [#27101](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2701)
+**Incorrect suggestedCache key for removeAsync [#2643](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2643)
+**Fix XML comments [#2756](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2756)
+
+### New Features
+**MSAL.NET supports response_mode=form_post for B2C requests [#2743](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2743)
+**Tenant profiles exposed in IAccount and ID token claims in the AuthenticationResult [#2583](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2583)
+
+
 4.34.0
 ==========
 ### Bug Fixes:
