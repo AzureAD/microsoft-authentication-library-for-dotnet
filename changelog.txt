@@ -1,7 +1,7 @@
 4.35.0
 ==========
 ### Bug Fixes:
-**AcquireTokenByIntegratedWindowsAuth against ADFS provides clearer error message** Error messages have been udpated. See issue [#2752](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2752) 
+**AcquireTokenByIntegratedWindowsAuth provides better error messages.** Error messages are now more actionable. See issue [#2752](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2752) 
 
 **MSAL no longer performs instance discovery on well known authorities.** This will improve performance for customers in regional scenarios See issue  [#2777](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2777)
 
@@ -18,13 +18,13 @@
 
 **ADFS now has consistent values for UserName between STS and cache.**. Tenant profiles will provide the consistency. [#1559](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1559)
 
-**MSAL.NET would throw an ArgumentNullException if the provided CcsRoutingHint was null**, now authentication will proceed forward as providing the hint is for resiliency and should not prevent sign-in. See issue [#2755](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2755)
+**MSAL.NET no longer throws ArgumentNullException when the parameters for WithCcsRoutingHint() are null.** Authentication will now proceed as if not hint was provided. See issue [#2755](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2755)
 
-**The mismtached authorities were throwing exceptions.** MSAL now does instance discovery to find the right match. See issue [#2736](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2736)
+**MSAL no longer throws exceptions for mismatched authorities if they are known aliases.** MSAL now ensures authorities configured in the application and request are not aliased before throwing. See issue [#2736](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2736)
 
 **WebView2 was throwing error when KeyDown was handled.** This error has been removed. See issue [#2685](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2685)
 
-**Instance discovery was being performed multiple times on non-public non-sovereign clouds.** You will get better performance as now it does discovery only if it is not in the cache. See issue [#2701](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2701)
+**Instance discovery was performed multiple times on non-public non-sovereign clouds.** MSAL provides improved performance as it now only performs discovery when needed. See issue [#2701](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2701)
 
 **RemoveAsync(account) in confidential client apps now returns suggested web cache key.** Empty key is no longer returned. [#2643](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2643)
 
