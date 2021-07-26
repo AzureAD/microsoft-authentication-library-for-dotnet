@@ -7,7 +7,6 @@
 
 **MSAL uses preferred_network name on sovereign clouds.** Skipping discovery will improve the performance. See issue [#2778](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2778)
 
-
 **Error messages in Integrated Windows Authentication are now clearer**. The following message related issues are fixed
     - [#2731](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2731)
     - [#2752](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2752)
@@ -34,7 +33,6 @@
 **Limits on URL length in embedded browsers was causing errors with auth code.** Applications will not fail on the embedded browers due to the limitation.  See issue [#2743](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2743)
 
 **IAccount now provides Tenant profile for each ID token.** This will enable customers to get ID tokens in the authentication results. See issue [#2583](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2583)
-
 
 4.34.0
 ==========
