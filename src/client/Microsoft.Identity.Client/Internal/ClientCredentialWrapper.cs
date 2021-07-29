@@ -90,6 +90,8 @@ namespace Microsoft.Identity.Client.Internal
                 case ConfidentialClientAuthenticationType.SignedClientAssertionDelegate:
                     SignedAssertionDelegate = config.SignedClientAssertionDelegate;
                     break;
+                default:
+                    throw new NotImplementedException();
             }
 
             if (Certificate != null)
