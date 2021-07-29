@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -34,10 +35,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// </summary>
         public HttpRequestMessage ActualRequestMessage { get; private set; }
 
+        public Dictionary<string, string> ActualRequestPostData { get; private set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            ActualRequestMessage = request;
-
             if (ExceptionToThrow != null)
             {
                 throw ExceptionToThrow;
@@ -81,21 +82,24 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 }
             }
 
-            if (ExpectedPostData != null)
+            if (request.Method != HttpMethod.Get && request.Content != null)
             {
                 string postData = request.Content.ReadAsStringAsync().Result;
-                Dictionary<string, string> requestPostDataPairs = CoreHelpers.ParseKeyValueList(postData, '&', true, null);
+                ActualRequestPostData = CoreHelpers.ParseKeyValueList(postData, '&', true, null);
+            }
 
+            if (ExpectedPostData != null)
+            {
                 foreach (string key in ExpectedPostData.Keys)
                 {
-                    Assert.IsTrue(requestPostDataPairs.ContainsKey(key));
+                    Assert.IsTrue(ActualRequestPostData.ContainsKey(key));
                     if (key.Equals(OAuth2Parameter.Scope, StringComparison.OrdinalIgnoreCase))
                     {
-                        CoreAssert.AreScopesEqual(ExpectedPostData[key], requestPostDataPairs[key]);
+                        CoreAssert.AreScopesEqual(ExpectedPostData[key], ActualRequestPostData[key]);
                     }
                     else
                     {
-                        Assert.AreEqual(ExpectedPostData[key], requestPostDataPairs[key]);
+                        Assert.AreEqual(ExpectedPostData[key], ActualRequestPostData[key]);
                     }
                 }
             }       

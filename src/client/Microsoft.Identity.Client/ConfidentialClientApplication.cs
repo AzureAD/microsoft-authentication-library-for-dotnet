@@ -198,7 +198,6 @@ namespace Microsoft.Identity.Client
             ITokenCacheInternal cache)
         {
             AuthenticationRequestParameters requestParams = await base.CreateRequestParametersAsync(commonParameters, requestContext, cache).ConfigureAwait(false);
-            requestParams.ClientCredential = ServiceBundle.Config.ClientCredential;
             return requestParams;
         }
 

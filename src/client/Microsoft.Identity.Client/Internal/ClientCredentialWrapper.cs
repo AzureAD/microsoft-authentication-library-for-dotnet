@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -22,90 +23,22 @@ namespace Microsoft.Identity.Client.Internal
     /// This class has one constructor for each case.
     /// These credentials are added in the application registration portal (in the secret section).
     /// </summary>
+    /// <remarks>
+    /// Important: this object is held at APP level and shared between all request, so it MUST be kept immutable
+    /// </remarks>
     internal sealed class ClientCredentialWrapper
     {
         public ClientCredentialWrapper(ApplicationConfiguration config)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 
-            ValidateInput(config);
-
-            switch (AuthenticationType)
+            if (config.ConfidentialClientCredentialCount == 0)
             {
-                case ConfidentialClientAuthenticationType.ClientCertificate:
-                    Certificate = config.ClientCredentialCertificate;
-                    break;
-                case ConfidentialClientAuthenticationType.ClientCertificateWithClaims:
-                    Certificate = config.ClientCredentialCertificate;
-                    ClaimsToSign = config.ClaimsToSign;
-                    break;
-                case ConfidentialClientAuthenticationType.ClientSecret:
-                    Secret = config.ClientSecret;
-                    break;
-                case ConfidentialClientAuthenticationType.SignedClientAssertion:
-                    SignedAssertion = config.SignedClientAssertion;
-                    break;
-                case ConfidentialClientAuthenticationType.SignedClientAssertionDelegate:
-                    SignedAssertionDelegate = config.SignedClientAssertionDelegate;
-                    break;
-            }
-        }
-
-        #region TestBuilders
-        //The following builders methods are intended for testing
-        public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
-        {
-            return new ClientCredentialWrapper(certificate, claimsToSign);
-        }
-
-        public static ClientCredentialWrapper CreateWithSecret(string secret)
-        {
-            var app = new ClientCredentialWrapper(secret, ConfidentialClientAuthenticationType.ClientSecret);
-            app.AuthenticationType = ConfidentialClientAuthenticationType.ClientSecret;
-            return app;
-        }
-
-        public static ClientCredentialWrapper CreateWithSignedClientAssertion(string signedClientAssertion)
-        {
-            var app = new ClientCredentialWrapper(signedClientAssertion, ConfidentialClientAuthenticationType.SignedClientAssertion);
-            app.AuthenticationType = ConfidentialClientAuthenticationType.SignedClientAssertion;
-            return app;
-        }
-
-        private ClientCredentialWrapper(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
-        {
-            ConfidentialClientApplication.GuardMobileFrameworks();
-
-            Certificate = certificate;
-
-            if (claimsToSign != null && claimsToSign.Any())
-            {
-                ClaimsToSign = claimsToSign;
-                AuthenticationType = ConfidentialClientAuthenticationType.ClientCertificateWithClaims;
-                return;
+                throw new MsalClientException(
+                    MsalError.ClientCredentialAuthenticationTypeMustBeDefined,
+                    MsalErrorMessage.ClientCredentialAuthenticationTypeMustBeDefined);
             }
 
-            AuthenticationType = ConfidentialClientAuthenticationType.ClientCertificate;
-        }
-
-        private ClientCredentialWrapper(string secretOrAssertion, ConfidentialClientAuthenticationType authType)
-        {
-            ConfidentialClientApplication.GuardMobileFrameworks();
-
-            if (authType == ConfidentialClientAuthenticationType.SignedClientAssertion)
-            {
-                SignedAssertion = secretOrAssertion;
-            }
-            else
-            {
-                Secret = secretOrAssertion;
-            }
-        }
-
-        #endregion TestBuilders       
-
-        private void ValidateInput(ApplicationConfiguration config)
-        {
             if (config.ConfidentialClientCredentialCount > 1)
             {
                 throw new MsalClientException(MsalError.ClientCredentialAuthenticationTypesAreMutuallyExclusive, MsalErrorMessage.ClientCredentialAuthenticationTypesAreMutuallyExclusive);
@@ -139,87 +72,94 @@ namespace Microsoft.Identity.Client.Internal
                 AuthenticationType = ConfidentialClientAuthenticationType.SignedClientAssertionDelegate;
             }
 
-            if (AuthenticationType == ConfidentialClientAuthenticationType.None)
+            switch (AuthenticationType)
             {
-                throw new MsalClientException(
-                    MsalError.ClientCredentialAuthenticationTypeMustBeDefined,
-                    MsalErrorMessage.ClientCredentialAuthenticationTypeMustBeDefined);
+                case ConfidentialClientAuthenticationType.ClientCertificate:
+                    Certificate = config.ClientCredentialCertificate;
+                    break;
+                case ConfidentialClientAuthenticationType.ClientCertificateWithClaims:
+                    Certificate = config.ClientCredentialCertificate;
+                    ClaimsToSign = config.ClaimsToSign;
+                    break;
+                case ConfidentialClientAuthenticationType.ClientSecret:
+                    Secret = config.ClientSecret;
+                    break;
+                case ConfidentialClientAuthenticationType.SignedClientAssertion:
+                    SignedAssertion = config.SignedClientAssertion;
+                    break;
+                case ConfidentialClientAuthenticationType.SignedClientAssertionDelegate:
+                    SignedAssertionDelegate = config.SignedClientAssertionDelegate;
+                    break;
+            }
+
+            if (Certificate != null)
+            {
+                Thumbprint = Base64UrlHelpers.Encode(Certificate.GetCertHash()); 
             }
         }
 
-        internal byte[] Sign(ICryptographyManager cryptographyManager, string message)
+        #region TestBuilders
+        //The following builders methods are intended for testing
+        public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
         {
-            return cryptographyManager.SignWithCertificate(message, Certificate);
+            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
+            applicationConfiguration.ClientCredentialCertificate = certificate;
+            applicationConfiguration.ConfidentialClientCredentialCount = 1;
+            applicationConfiguration.ClaimsToSign = claimsToSign;
+
+            return new ClientCredentialWrapper(applicationConfiguration);
         }
 
-        public static int MinKeySizeInBits { get; } = 2048;
-        internal string Thumbprint { get { return Base64UrlHelpers.Encode(Certificate.GetCertHash()); } }
-        internal X509Certificate2 Certificate { get; private set; }
-        // The cached assertion created from the JWT signing operation
-        internal string CachedAssertion { get; set; }
-        internal long ValidTo { get; set; }
-        internal bool ContainsX5C { get; set; }
-        internal string Audience { get; set; }
-        internal string Secret { get; private set; }
-        // The signed assertion passed in by the user
-        internal string SignedAssertion { get; private set; }
-        internal Func<string> SignedAssertionDelegate { get; private set; }
-        internal bool AppendDefaultClaims { get; private set; }
-        internal ConfidentialClientAuthenticationType AuthenticationType { get; private set; }
-        internal IDictionary<string, string> ClaimsToSign { get; private set; }
+        public static ClientCredentialWrapper CreateWithSecret(string secret)
+        {
+            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
+            applicationConfiguration.ClientSecret = secret;
+            applicationConfiguration.ConfidentialClientCredentialCount = 1;
 
-        public Dictionary<string, string> CreateClientCredentialBodyParameters(
+            return new ClientCredentialWrapper(applicationConfiguration);
+        }      
+
+        #endregion TestBuilders       
+   
+        public static int MinKeySizeInBits { get; } = 2048;
+        internal string Thumbprint { get; }
+        internal X509Certificate2 Certificate { get; }
+        // The cached assertion created from the JWT signing operation
+        internal string Secret { get; }
+        // The signed assertion passed in by the user
+        internal string SignedAssertion { get; }
+        internal Func<string> SignedAssertionDelegate { get; }
+        internal bool AppendDefaultClaims { get;  }
+        internal ConfidentialClientAuthenticationType AuthenticationType { get;  }
+        internal IDictionary<string, string> ClaimsToSign { get; }
+
+        public void AddConfidentialClientParameters(
+            OAuth2Client oAuth2Client,
             ICoreLogger logger,
             ICryptographyManager cryptographyManager,
             string clientId,
             Authority authority,
-            bool sendX5C,
-            bool withCaching = false) // TODO: for testing only, pls remove
+            bool sendX5C)
         {
             using (logger.LogMethodDuration())
             {
-                Dictionary<string, string> parameters = new Dictionary<string, string>();
-
                 switch (AuthenticationType)
-                {                  
+                {
                     case ConfidentialClientAuthenticationType.ClientCertificate:
-                        parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
                         string tokenEndpoint = authority.GetTokenEndpoint();
 
-                        if (withCaching)
-                        {
+                        var jwtToken2 = new JsonWebToken(
+                           cryptographyManager,
+                           clientId,
+                           tokenEndpoint);
 
-                            if (CachedAssertion == null ||
-                                !CanUseCachedAssertion(tokenEndpoint, sendX5C))
-                            {
-                                var jwtToken2 = new JsonWebToken(
-                                   cryptographyManager,
-                                   clientId,
-                                   tokenEndpoint);
+                        string assertion2 = jwtToken2.Sign(this, sendX5C);
 
-                                CachedAssertion = jwtToken2.Sign(this, sendX5C);
-                                ValidTo = jwtToken2.ValidTo;
-                                ContainsX5C = sendX5C;
-                                Audience = tokenEndpoint;
-
-                            }
-                            parameters[OAuth2Parameter.ClientAssertion] = CachedAssertion;
-
-                        }
-                        else
-                        {
-                            var jwtToken2 = new JsonWebToken(
-                                   cryptographyManager,
-                                   clientId,
-                                   tokenEndpoint);
-                            parameters[OAuth2Parameter.ClientAssertion] = jwtToken2.Sign(this, sendX5C);
-                        }
-
-
+                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion2);
 
                         break;
                     case ConfidentialClientAuthenticationType.ClientCertificateWithClaims:
-                        parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
                         tokenEndpoint = authority.GetTokenEndpoint();
 
                         var jwtToken = new JsonWebToken(
@@ -228,60 +168,36 @@ namespace Microsoft.Identity.Client.Internal
                             tokenEndpoint,
                             ClaimsToSign,
                             AppendDefaultClaims);
-                        parameters[OAuth2Parameter.ClientAssertion] = jwtToken.Sign(this, sendX5C);
+                        string assertion = jwtToken.Sign(this, sendX5C);
+
+                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
+
                         break;
                     case ConfidentialClientAuthenticationType.ClientSecret:
-                        parameters[OAuth2Parameter.ClientSecret] = Secret;
+                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientSecret, Secret);
                         break;
                     case ConfidentialClientAuthenticationType.SignedClientAssertion:
-                        parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
-                        parameters[OAuth2Parameter.ClientAssertion] = SignedAssertion;
+                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, SignedAssertion);
                         break;
                     case ConfidentialClientAuthenticationType.SignedClientAssertionDelegate:
-                        parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
-                        parameters[OAuth2Parameter.ClientAssertion] = SignedAssertionDelegate();
+                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, SignedAssertionDelegate.Invoke());
                         break;
                     default:
                         throw new NotImplementedException();
-
-
                 }
-                return parameters;
             }
         }
 
-        /// <summary>
-        ///     Determines whether or not the cached client assertion can be used again for the next authentication request by
-        ///     checking its values against incoming request parameters.
-        /// </summary>
-        /// <returns>Returns true if the previously cached client assertion is valid</returns>
-        public bool CanUseCachedAssertion(string audience, bool sendX5C)
-        {          
-            if (string.IsNullOrWhiteSpace(CachedAssertion))
-            {
-                return false;
-            }
-
-            //Check if all current client assertion values match incoming parameters and expiration time
-            //The clientCredential object contains the previously used values in the cached client assertion string
-            bool expired = ValidTo <=
-                           JsonWebToken.ConvertToTimeT(
-                               DateTime.UtcNow + TimeSpan.FromMinutes(Constants.ExpirationMarginInMinutes));
-
-            bool parametersMatch = string.Equals(Audience, audience, StringComparison.OrdinalIgnoreCase) &&
-                                   ContainsX5C == sendX5C;
-
-            return !expired && parametersMatch;
+        internal enum ConfidentialClientAuthenticationType
+        {
+            ClientCertificate,
+            ClientCertificateWithClaims,
+            ClientSecret,
+            SignedClientAssertion,
+            SignedClientAssertionDelegate
         }
-    }
-
-    internal enum ConfidentialClientAuthenticationType
-    {
-        None,
-        ClientCertificate,
-        ClientCertificateWithClaims,
-        ClientSecret,
-        SignedClientAssertion,
-        SignedClientAssertionDelegate
     }
 }

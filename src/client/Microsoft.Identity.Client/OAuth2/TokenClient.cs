@@ -122,20 +122,15 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
 
 
-            if (_requestParams.ClientCredential != null)
+            if (_serviceBundle.Config.ClientCredential != null)
             {
-                Dictionary<string, string> ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
+                _serviceBundle.Config.ClientCredential.AddConfidentialClientParameters(
+                    _oAuth2Client,
                     _requestParams.RequestContext.Logger,
-                    _serviceBundle.PlatformProxy.CryptographyManager,
-                    _requestParams.ClientCredential,
+                    _serviceBundle.PlatformProxy.CryptographyManager,                    
                     _requestParams.AppConfig.ClientId,
                     _requestParams.Authority,
-                    _requestParams.SendX5C);
-
-                foreach (var entry in ccBodyParameters)
-                {
-                    _oAuth2Client.AddBodyParameter(entry.Key, entry.Value);
-                }
+                    _requestParams.SendX5C);           
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);

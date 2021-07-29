@@ -15,6 +15,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     {
         public Prompt Prompt { get; set; } = Prompt.NotSpecified;
         public CoreUIParent UiParent { get; } = new CoreUIParent();
+
+        /// <summary>
+        ///  These need to be asked for to the /authorize endpoint (for consent)
+        ///  but not to the /token endpoint
+        /// </summary>
         public IEnumerable<string> ExtraScopesToConsent { get; set; } = new List<string>();
         public WebViewPreference UseEmbeddedWebView { get; set; } = WebViewPreference.NotSpecified;
         public string LoginHint { get; set; }

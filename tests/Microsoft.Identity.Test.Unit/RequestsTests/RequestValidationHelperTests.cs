@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Internal;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
+using static Microsoft.Identity.Client.Internal.ClientCredentialWrapper;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -30,66 +31,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [Description("Test for client assertion with mismatched parameters in Request Validator.")]
-        public void ClientAssertionRequestValidatorMismatchParameterTest()
-        {
-            var credential = ClientCredentialWrapper.CreateWithSecret(TestConstants.ClientSecret);
-            credential.Audience = _audience1;
-            credential.ContainsX5C = false;
-            credential.CachedAssertion = TestConstants.DefaultClientAssertion;
-            credential.ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds));
-
-            // Validate cached client assertion with parameters
-            Assert.IsTrue(credential.CanUseCachedAssertion( _audience1, false));
-
-            // Different audience
-            credential.Audience = _audience2;
-
-            // cached assertion should be invalid
-            Assert.IsFalse(credential.CanUseCachedAssertion(_audience1, false));
-
-            // Different x5c, same audience
-            credential.Audience = _audience1;
-            credential.ContainsX5C = true;
-
-            // cached assertion should be invalid
-            Assert.IsFalse(credential.CanUseCachedAssertion( _audience1, false));
-
-            // Different audience and x5c
-            credential.Audience = _audience2;
-
-            // cached assertion should be invalid
-            Assert.IsFalse(credential.CanUseCachedAssertion( _audience1, false));
-
-            // No cached Assertion
-            credential.CachedAssertion = "";
-
-            // should return false
-            Assert.IsFalse(credential.CanUseCachedAssertion( _audience1, false));
-        }
-
-        [TestMethod]
-        [Description("Test for expired client assertion in Request Validator.")]
-        public void ClientAssertionRequestValidatorExpirationTimeTest()
-        {
-            var credential = ClientCredentialWrapper.CreateWithSecret(TestConstants.ClientSecret);
-            credential.Audience = _audience1;
-            credential.ContainsX5C = false;
-            credential.CachedAssertion = TestConstants.DefaultClientAssertion;
-            credential.ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds));
-
-            // Validate cached client assertion with expiration time
-            // Cached assertion should be valid
-            Assert.IsTrue(credential.CanUseCachedAssertion( _audience1, false));
-
-            // Setting expiration time to now
-            credential.ValidTo = ConvertToTimeT(DateTime.UtcNow);
-
-            // cached assertion should have expired
-            Assert.IsFalse(credential.CanUseCachedAssertion( _audience1, false));
-        }
-
-        [TestMethod]
         public void CCACreatedWithoutAuthenticationType_Throws()
         {
             ApplicationConfiguration config = new ApplicationConfiguration();
@@ -104,7 +45,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange
             ApplicationConfiguration config = new ApplicationConfiguration
             {
-                ClientSecret = TestConstants.ClientSecret
+                ClientSecret = TestConstants.ClientSecret,
+                ConfidentialClientCredentialCount = 1
+
             };
 
             // Act
@@ -125,7 +68,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
             ApplicationConfiguration config = new ApplicationConfiguration
             {
-                ClientCredentialCertificate = cert
+                ClientCredentialCertificate = cert,
+                ConfidentialClientCredentialCount = 1
+
             };
 
             // Act
@@ -144,7 +89,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange
             ApplicationConfiguration config = new ApplicationConfiguration
             {
-                SignedClientAssertion = "signed"
+                SignedClientAssertion = "signed",
+                ConfidentialClientCredentialCount = 1
+
             };
 
             // Act
@@ -167,7 +114,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             ApplicationConfiguration config = new ApplicationConfiguration
             {                
                 ClientCredentialCertificate = cert,
-                ClaimsToSign = claims
+                ClaimsToSign = claims,
+                ConfidentialClientCredentialCount = 1
+
             };
 
             // Act
@@ -192,7 +141,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             ApplicationConfiguration config = new ApplicationConfiguration
             {
                 ClientCredentialCertificate = cert,
-                ClaimsToSign = claims
+                ClaimsToSign = claims,
+                ConfidentialClientCredentialCount = 1
             };
 
             // Act

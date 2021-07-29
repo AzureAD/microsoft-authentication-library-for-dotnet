@@ -94,8 +94,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(app.ClientCredential);
             Assert.IsNotNull(app.ClientCredential.Secret);
             Assert.AreEqual(TestConstants.ClientSecret, app.ClientCredential.Secret);
-            Assert.IsNull(app.ClientCredential.Certificate);
-            Assert.IsNull(app.ClientCredential.CachedAssertion);
+            Assert.IsNull(app.ClientCredential.Certificate);            
 
             app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
@@ -447,7 +446,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, cert, 3);
+                var app = CreateConfidentialClient(httpManager, cert, 1);
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
@@ -465,39 +464,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // check app token cache count to be 1
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no RTs are returned
-
-                // assert client credential
-
-                Assert.IsNotNull(app.ClientCredential.CachedAssertion);
-                Assert.AreNotEqual(0, app.ClientCredential.ValidTo);
-
-                // save client assertion.
-                string cachedAssertion = app.ClientCredential.CachedAssertion;
-                long cacheValidTo = app.ClientCredential.ValidTo;
-
-                result = await app
-                    .AcquireTokenForClient(TestConstants.s_scopeForAnotherResource.ToArray())
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-
-                appCacheAccess.AssertAccessCounts(2, 2);
-                userCacheAccess.AssertAccessCounts(0, 0);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(cacheValidTo, app.ClientCredential.ValidTo);
-                Assert.AreEqual(cachedAssertion, app.ClientCredential.CachedAssertion);
-
-                // validate the send x5c forces a refresh of the cached client assertion
-                await app
-                      .AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                      .WithSendX5C(true)
-                      .WithForceRefresh(true)
-                      .ExecuteAsync(CancellationToken.None)
-                      .ConfigureAwait(false);
-                Assert.AreNotEqual(cachedAssertion, app.ClientCredential.CachedAssertion);
-
-                appCacheAccess.AssertAccessCounts(2, 3);
-                userCacheAccess.AssertAccessCounts(0, 0);
             }
         }
 
@@ -536,7 +502,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, cert, 1, CredentialType.CertificateAndClaims);
+                var app = CreateConfidentialClient(httpManager, cert, 0, CredentialType.CertificateAndClaims);
+                var tokenHttpHandler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
@@ -555,17 +523,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no RTs are returned
 
+
+                var actualAssertion = tokenHttpHandler.ActualRequestPostData["client_assertion"];
+
                 // assert client credential
 
-                Assert.IsNotNull(app.ClientCredential.CachedAssertion);
-                Assert.AreNotEqual(0, app.ClientCredential.ValidTo);
-
-                // save client assertion.
-                string cachedAssertion = app.ClientCredential.CachedAssertion;
-                long cacheValidTo = app.ClientCredential.ValidTo;
-
                 var handler = new JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadJwtToken(((ConfidentialClientApplication)app).ClientCredential.CachedAssertion);
+                var jsonToken = handler.ReadJwtToken(actualAssertion);
                 var claims = jsonToken.Claims;
                 //checked if additional claim is in signed assertion
                 var audclaim = TestConstants.s_clientAssertionClaims.Where(x => x.Key == "aud").FirstOrDefault();
