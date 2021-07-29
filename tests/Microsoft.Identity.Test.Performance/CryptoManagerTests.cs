@@ -63,7 +63,6 @@ namespace Microsoft.Identity.Test.Performance
         [IterationSetup]
         public void IterationSetup()
         {
-            _cca.ClientCredential.CachedAssertion = null;
             _requestIdx = _requestIdx++ % AppsCount;
         }
 

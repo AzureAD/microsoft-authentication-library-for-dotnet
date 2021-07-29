@@ -10,18 +10,17 @@ using Microsoft.Identity.Client.Internal;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using static Microsoft.Identity.Client.Internal.ClientCredentialWrapper;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
     [DeploymentItem(@"Resources\testCert.crtfile")]
-    public class RequestValidationHelperTests
+    public class ClientCredentialWrapperTests
     {
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
 
         private IServiceBundle _serviceBundle;
-        readonly string _audience1 = "Audience1";
-        readonly string _audience2 = "Audience2";
 
         [TestInitialize]
         public void TestInitialize()
