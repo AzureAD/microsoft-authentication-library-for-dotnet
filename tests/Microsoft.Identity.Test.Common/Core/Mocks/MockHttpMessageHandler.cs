@@ -39,6 +39,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            ActualRequestMessage = request;
+
             if (ExceptionToThrow != null)
             {
                 throw ExceptionToThrow;
