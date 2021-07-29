@@ -95,6 +95,64 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        public void CacheSynchronization()
+        {
+            var options = new ConfidentialClientApplicationOptions() 
+            { 
+                ClientSecret = "secret",
+                ClientId = TestConstants.ClientId,
+            };
+            var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+
+            options = new ConfidentialClientApplicationOptions
+            {
+                ClientId = TestConstants.ClientId,
+                ClientSecret = "secret",
+                EnableCacheSynchronization = false
+            };            
+            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+
+            options = new ConfidentialClientApplicationOptions
+            {
+                ClientSecret = "secret",
+                ClientId = TestConstants.ClientId,
+                EnableCacheSynchronization = false
+            };
+            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).WithCacheSynchronization(false).Build();
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+
+            options = new ConfidentialClientApplicationOptions
+            {
+                ClientSecret = "secret",
+                ClientId = TestConstants.ClientId,
+                EnableCacheSynchronization = false
+            };
+            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).WithCacheSynchronization(true).Build();
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+
+            options = new ConfidentialClientApplicationOptions
+            {
+                ClientSecret = "secret",
+                ClientId = TestConstants.ClientId,
+                EnableCacheSynchronization = true
+            };
+            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).WithCacheSynchronization(true).Build();
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+
+            options = new ConfidentialClientApplicationOptions
+            {
+                ClientSecret = "secret",
+                ClientId = TestConstants.ClientId,
+                EnableCacheSynchronization = true
+            };
+            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).WithCacheSynchronization(false).Build();
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+
+        }
+
+        [TestMethod]
         public void TestBuildWithInstanceWithoutTrailingSlash()
         {
             var options = CreateConfidentialClientApplicationOptions();

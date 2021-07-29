@@ -51,6 +51,8 @@ namespace Microsoft.Identity.Client
                 builder = builder.WithAzureRegion(options.AzureRegion);
             }
 
+            builder = builder.WithCacheSynchronization(options.EnableCacheSynchronization);
+
             return builder;
         }
 
