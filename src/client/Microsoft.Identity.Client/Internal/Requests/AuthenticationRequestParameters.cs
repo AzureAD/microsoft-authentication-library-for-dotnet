@@ -122,7 +122,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
-        public ClientCredentialWrapper ClientCredential { get; set; }
 
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
         public bool SendX5C { get; set; }
@@ -156,7 +155,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #if ANDROID || iOS || WINDOWS_APP || MAC
                 return false;
 #else
-                return ClientCredential != null;
+                return _serviceBundle.Config.ClientCredential != null;
 #endif
             }
         }

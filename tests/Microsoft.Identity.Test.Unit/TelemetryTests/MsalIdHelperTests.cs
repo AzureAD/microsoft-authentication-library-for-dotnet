@@ -23,7 +23,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             {
                 using (var harness = base.CreateTestHarness())
                 {
-
                     var headers1 = harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                     PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)

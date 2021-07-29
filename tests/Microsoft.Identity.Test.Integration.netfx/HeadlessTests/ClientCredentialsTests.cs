@@ -156,21 +156,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(
                GetExpectedCacheKey(settings.ClientId, settings.TenantId),
-               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
-
-            if (credentialType == CredentialType.ClientClaims_MergeClaims)
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadJwtToken(((ConfidentialClientApplication)confidentialApp).ClientCredential.CachedAssertion);
-
-                //checked if additional claim is in signed assertion
-                var validClaim = GetClaims()
-                                    .Where(
-                                        x => x.Key == jsonToken.Claims.FirstOrDefault().Type &&
-                                        x.Value == jsonToken.Claims.FirstOrDefault().Value)
-                                    .FirstOrDefault();
-                Assert.IsNotNull(validClaim);
-            }
+               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);        
         }
 
         private static IConfidentialClientApplication CreateApp(CredentialType credentialType, IConfidentialAppSettings settings)

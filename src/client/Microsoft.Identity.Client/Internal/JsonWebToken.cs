@@ -45,10 +45,10 @@ namespace Microsoft.Identity.Client.Internal
             _appendDefaultClaims = appendDefaultClaims;
         }
 
-        public string Sign(ClientCredentialWrapper credential, bool sendCertificate)
+        public string Sign(ClientCredentialWrapper credential, bool sendX5C)
         {
             // Base64Url encoded header and claims
-            string token = Encode(credential, sendCertificate);
+            string token = Encode(credential, sendX5C);
 
             // Length check before sign
             if (MaxTokenLength < token.Length)
@@ -56,7 +56,8 @@ namespace Microsoft.Identity.Client.Internal
                 throw new MsalException(MsalError.EncodedTokenTooLong);
             }
 
-            return string.Concat(token, ".", UrlEncodeSegment(credential.Sign(_cryptographyManager, token)));
+            byte[] signature = _cryptographyManager.SignWithCertificate(token, credential.Certificate);                
+            return string.Concat(token, ".", UrlEncodeSegment(signature));
         }
 
         private static string EncodeSegment(string segment)
