@@ -95,10 +95,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void CacheSynchronization()
+        public void CacheSynchronizationWithDefault()
         {
-            var options = new ConfidentialClientApplicationOptions() 
-            { 
+            var options = new ConfidentialClientApplicationOptions()
+            {
                 ClientSecret = "secret",
                 ClientId = TestConstants.ClientId,
             };
@@ -110,46 +110,35 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 ClientId = TestConstants.ClientId,
                 ClientSecret = "secret",
                 EnableCacheSynchronization = false
-            };            
+            };
             app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
-            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+            Assert.AreEqual(false, (app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
 
             options = new ConfidentialClientApplicationOptions
             {
-                ClientSecret = "secret",
                 ClientId = TestConstants.ClientId,
-                EnableCacheSynchronization = false
-            };
-            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).WithCacheSynchronization(false).Build();
-            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
-
-            options = new ConfidentialClientApplicationOptions
-            {
                 ClientSecret = "secret",
-                ClientId = TestConstants.ClientId,
-                EnableCacheSynchronization = false
-            };
-            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).WithCacheSynchronization(true).Build();
-            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
-
-            options = new ConfidentialClientApplicationOptions
-            {
-                ClientSecret = "secret",
-                ClientId = TestConstants.ClientId,
                 EnableCacheSynchronization = true
             };
-            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).WithCacheSynchronization(true).Build();
-            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
+            Assert.AreEqual(true, (app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+        }
 
-            options = new ConfidentialClientApplicationOptions
+        [DataTestMethod]
+        [DataRow(false, false, false)]
+        [DataRow(true, true, true)]
+        [DataRow(true, false, false)]
+        [DataRow(false, true, true)]        
+        public void CacheSynchronizationNoDefault(bool optionFlag, bool builderFlag, bool result)
+        {
+            var options = new ConfidentialClientApplicationOptions
             {
                 ClientSecret = "secret",
                 ClientId = TestConstants.ClientId,
-                EnableCacheSynchronization = true
+                EnableCacheSynchronization = optionFlag
             };
-            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).WithCacheSynchronization(false).Build();
-            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
-
+            var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).WithCacheSynchronization(builderFlag).Build();
+            Assert.AreEqual(result, (app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
         [TestMethod]
