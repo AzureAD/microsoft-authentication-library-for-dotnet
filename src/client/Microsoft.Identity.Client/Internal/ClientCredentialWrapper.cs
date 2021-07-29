@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
@@ -25,7 +28,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 
-            ValidateCredentialParameters(config);
+            ValidateInput(config);
 
             switch (AuthenticationType)
             {
@@ -99,23 +102,9 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        #endregion TestBuilders
-        private void CheckCertificateKeySize(X509Certificate2 cert)
-        {
-            //Currently, the min key size is enforced on desktop (net 45) as 2048 as it is the current industry standard.
-            //This is not enforced on netCore unfortunately and adding this enforcement may break customers on netCore.
-            //NetCore can only enforce a min key size of 512 since it is enforced by the portal already.
-#if DESKTOP
-            if (cert.PublicKey.Key.KeySize < MinKeySizeInBits)
-            {
-                throw new ArgumentOutOfRangeException(nameof(cert),
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
-                        MinKeySizeInBits));
-            }
-#endif
-        }
+        #endregion TestBuilders       
 
-        private void ValidateCredentialParameters(ApplicationConfiguration config)
+        private void ValidateInput(ApplicationConfiguration config)
         {
             if (config.ConfidentialClientCredentialCount > 1)
             {
@@ -178,6 +167,112 @@ namespace Microsoft.Identity.Client.Internal
         internal bool AppendDefaultClaims { get; private set; }
         internal ConfidentialClientAuthenticationType AuthenticationType { get; private set; }
         internal IDictionary<string, string> ClaimsToSign { get; private set; }
+
+        public Dictionary<string, string> CreateClientCredentialBodyParameters(
+            ICoreLogger logger,
+            ICryptographyManager cryptographyManager,
+            string clientId,
+            Authority authority,
+            bool sendX5C,
+            bool withCaching = false) // TODO: for testing only, pls remove
+        {
+            using (logger.LogMethodDuration())
+            {
+                Dictionary<string, string> parameters = new Dictionary<string, string>();
+
+                switch (AuthenticationType)
+                {                  
+                    case ConfidentialClientAuthenticationType.ClientCertificate:
+                        parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
+                        string tokenEndpoint = authority.GetTokenEndpoint();
+
+                        if (withCaching)
+                        {
+
+                            if (CachedAssertion == null ||
+                                !CanUseCachedAssertion(tokenEndpoint, sendX5C))
+                            {
+                                var jwtToken2 = new JsonWebToken(
+                                   cryptographyManager,
+                                   clientId,
+                                   tokenEndpoint);
+
+                                CachedAssertion = jwtToken2.Sign(this, sendX5C);
+                                ValidTo = jwtToken2.ValidTo;
+                                ContainsX5C = sendX5C;
+                                Audience = tokenEndpoint;
+
+                            }
+                            parameters[OAuth2Parameter.ClientAssertion] = CachedAssertion;
+
+                        }
+                        else
+                        {
+                            var jwtToken2 = new JsonWebToken(
+                                   cryptographyManager,
+                                   clientId,
+                                   tokenEndpoint);
+                            parameters[OAuth2Parameter.ClientAssertion] = jwtToken2.Sign(this, sendX5C);
+                        }
+
+
+
+                        break;
+                    case ConfidentialClientAuthenticationType.ClientCertificateWithClaims:
+                        parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
+                        tokenEndpoint = authority.GetTokenEndpoint();
+
+                        var jwtToken = new JsonWebToken(
+                            cryptographyManager,
+                            clientId,
+                            tokenEndpoint,
+                            ClaimsToSign,
+                            AppendDefaultClaims);
+                        parameters[OAuth2Parameter.ClientAssertion] = jwtToken.Sign(this, sendX5C);
+                        break;
+                    case ConfidentialClientAuthenticationType.ClientSecret:
+                        parameters[OAuth2Parameter.ClientSecret] = Secret;
+                        break;
+                    case ConfidentialClientAuthenticationType.SignedClientAssertion:
+                        parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
+                        parameters[OAuth2Parameter.ClientAssertion] = SignedAssertion;
+                        break;
+                    case ConfidentialClientAuthenticationType.SignedClientAssertionDelegate:
+                        parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
+                        parameters[OAuth2Parameter.ClientAssertion] = SignedAssertionDelegate();
+                        break;
+                    default:
+                        throw new NotImplementedException();
+
+
+                }
+                return parameters;
+            }
+        }
+
+        /// <summary>
+        ///     Determines whether or not the cached client assertion can be used again for the next authentication request by
+        ///     checking its values against incoming request parameters.
+        /// </summary>
+        /// <returns>Returns true if the previously cached client assertion is valid</returns>
+        public bool CanUseCachedAssertion(string audience, bool sendX5C)
+        {          
+            if (string.IsNullOrWhiteSpace(CachedAssertion))
+            {
+                return false;
+            }
+
+            //Check if all current client assertion values match incoming parameters and expiration time
+            //The clientCredential object contains the previously used values in the cached client assertion string
+            bool expired = ValidTo <=
+                           JsonWebToken.ConvertToTimeT(
+                               DateTime.UtcNow + TimeSpan.FromMinutes(Constants.ExpirationMarginInMinutes));
+
+            bool parametersMatch = string.Equals(Audience, audience, StringComparison.OrdinalIgnoreCase) &&
+                                   ContainsX5C == sendX5C;
+
+            return !expired && parametersMatch;
+        }
     }
 
     internal enum ConfidentialClientAuthenticationType
