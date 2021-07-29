@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Client.Utils
 {
     /// <summary>
-    /// An object that either wraps a SemaphoreSlim for syncronization or ignores syncronization completely and just keeps track of Wait / Release operations.
+    /// An object that either wraps a SemaphoreSlim for synchronization or ignores synchronization completely and just keeps track of Wait / Release operations.
     /// </summary>
     internal class OptionalSemaphoreSlim
     {
@@ -20,6 +22,11 @@ namespace Microsoft.Identity.Client.Utils
             {
                 return _useRealSemaphore ? _semaphoreSlim.CurrentCount : _noLockCurrentCount;
             }
+        }
+
+        public string GetCurrentCountLogMessage()
+        {
+            return $"Real semaphore: {_useRealSemaphore}. Count: { CurrentCount}";
         }
 
         public OptionalSemaphoreSlim(bool useRealSemaphore)

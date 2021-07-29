@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client
                     instanceDiscoveryMetadata.PreferredNetwork,
                     wamAccountIds,
                     tenantProfiles?.Values);
-            requestParams.RequestContext.Logger.Verbose($"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.CurrentCount}.");
+            requestParams.RequestContext.Logger.Verbose($"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
             await _semaphoreSlim.WaitAsync(requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
             requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore. ");
 
@@ -910,7 +910,7 @@ namespace Microsoft.Identity.Client
 
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, RequestContext requestContext)
         {
-            requestContext.Logger.Verbose($"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.CurrentCount}");
+            requestContext.Logger.Verbose($"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
             await _semaphoreSlim.WaitAsync(requestContext.UserCancellationToken).ConfigureAwait(false);            
             requestContext.Logger.Verbose("[RemoveAccountAsync] Entered token cache semaphore");
 
