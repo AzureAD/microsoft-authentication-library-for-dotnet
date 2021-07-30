@@ -1,3 +1,9 @@
+4.35.1
+==========
+### Bug Fixes:
+**Fixed a race condition in confidential client requests** when an authority with a different tenant is specified for each request. See issue [#2798](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2798).  
+**Fix to correctly propagate `EnableCacheSynchronization` flag from `ConfidentialClientApplicationOptions`**. See pull request [#2801](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2801).  
+
 4.35.0
 ==========
 ### Bug Fixes:
