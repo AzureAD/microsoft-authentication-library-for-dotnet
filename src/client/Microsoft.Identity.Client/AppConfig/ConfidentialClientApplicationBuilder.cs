@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client
         /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
         /// <param name="mergeWithDefaultClaims">Determines whether or not to merge <paramref name="claimsToSign"/> with the default claims required for authentication.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. If 
-        /// Using SNI, ensure that you call WithSendX5C as well.</remarks>
+        /// using SNI, ensure that you call WithSendX5C as well.</remarks>
         public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true)
         {
             if (certificate == null)

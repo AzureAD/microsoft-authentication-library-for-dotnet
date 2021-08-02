@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
 
-        // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
+        // This should be set on a per-application basis, but can be overridden on a per-request basis should it be needed. 
         public bool? SendX5C { get; set; }
 
         public string LoginHint

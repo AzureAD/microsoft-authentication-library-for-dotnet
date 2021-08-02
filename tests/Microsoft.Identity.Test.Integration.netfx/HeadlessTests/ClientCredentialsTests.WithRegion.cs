@@ -199,8 +199,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
 #endif
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
-            var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);
-            return jwtToken.Sign(clientCredential, false);
+            var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims, false);
+            return jwtToken.Sign(clientCredential);
         }
 
         private static X509Certificate2 GetCertificate(bool useRSACert = false)

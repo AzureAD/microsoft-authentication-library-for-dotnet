@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -110,7 +110,6 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -151,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -163,7 +162,6 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
                 AuthenticationResult result = await app
                     .AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
-                    .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
@@ -202,7 +200,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -214,7 +212,6 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
                 AuthenticationResult result = await app
                     .AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                    .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
@@ -241,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -253,7 +250,6 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
                 AuthenticationResult result = await ((IByRefreshToken)app)
                     .AcquireTokenByRefreshToken(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                    .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
@@ -284,7 +280,8 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri("https://login.microsoftonline.com/my-utid"),true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate).BuildConcrete();
+                    .WithCertificate(certificate, true).
+                    BuildConcrete();
 
                 TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -306,7 +303,6 @@ namespace Microsoft.Identity.Test.Unit
                     .AcquireTokenSilent(
                         new[] { "someTestScope"},
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithSendX5C(true)
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
@@ -324,9 +320,9 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Check the JWTHeader when sendCert is true")]
         public void CheckJWTHeaderWithCertTrueTest()
         {
-            var credential = GenerateClientAssertionCredential();
+            var credential = GenerateClientAssertionCredential(true);
 
-            var header = new JWTHeaderWithCertificate(credential, true);
+            var header = new JWTHeaderWithCertificate(credential);
 
             Assert.IsNotNull(header.X509CertificatePublicCertValue);
             Assert.IsNotNull(header.X509CertificateThumbprint);
@@ -336,9 +332,9 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Check the JWTHeader when sendCert is false")]
         public void CheckJWTHeaderWithCertFalseTest()
         {
-            var credential = GenerateClientAssertionCredential();
+            var credential = GenerateClientAssertionCredential(false);
 
-            var header = new JWTHeaderWithCertificate(credential, false);
+            var header = new JWTHeaderWithCertificate(credential);
 
             Assert.IsNull(header.X509CertificatePublicCertValue);
             Assert.IsNotNull(header.X509CertificateThumbprint);
@@ -359,7 +355,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -369,7 +365,6 @@ namespace Microsoft.Identity.Test.Unit
                 
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -391,12 +386,12 @@ namespace Microsoft.Identity.Test.Unit
                 userCacheAccess.AssertAccessCounts(0, 0);
             }
         }
-        private ClientCredentialWrapper GenerateClientAssertionCredential()
+        private ClientCredentialWrapper GenerateClientAssertionCredential(bool withSendX5C = false)
         {
             var cert = new X509Certificate2(
             ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
 
-            var credential = ClientCredentialWrapper.CreateWithCertificate(cert);
+            var credential = ClientCredentialWrapper.CreateWithCertificate(cert, withSendX5C:withSendX5C);
             return credential;
         }
     }

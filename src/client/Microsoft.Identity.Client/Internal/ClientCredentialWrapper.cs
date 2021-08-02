@@ -104,12 +104,13 @@ namespace Microsoft.Identity.Client.Internal
 
         #region TestBuilders
         //The following builders methods are intended for testing
-        public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
+        public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null, bool withSendX5C=false)
         {
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
             applicationConfiguration.ClientCredentialCertificate = certificate;
             applicationConfiguration.ConfidentialClientCredentialCount = 1;
             applicationConfiguration.ClaimsToSign = claimsToSign;
+            applicationConfiguration.SendX5C = withSendX5C;
 
             return new ClientCredentialWrapper(applicationConfiguration);
         }
@@ -144,7 +145,7 @@ namespace Microsoft.Identity.Client.Internal
             ICryptographyManager cryptographyManager,
             string clientId,
             Authority authority,
-            bool? perRequestSendX5C)
+            bool? perRequestSendX5C = null)
         {
             using (logger.LogMethodDuration())
             {
@@ -173,7 +174,7 @@ namespace Microsoft.Identity.Client.Internal
                             tokenEndpoint,
                             ClaimsToSign,
                             AppendDefaultClaims);
-                        string assertion = jwtToken.Sign(this, perRequestSendX5C??this.SendX5C);
+                        string assertion = jwtToken.Sign(this, perRequestSendX5C ?? SendX5C);
 
                         oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
                         oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
