@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public string PkceCodeVerifier { get; set; }
 
-        public bool SendX5C { get; set; }
+        public bool? SendX5C { get; set; }
 
         public void LogParameters(ICoreLogger logger)
         {
