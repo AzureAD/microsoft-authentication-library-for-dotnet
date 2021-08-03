@@ -124,7 +124,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
 
         // This should be set on a per-application basis, but can be overridden on a per-request basis should it be needed. 
-        public bool? SendX5C { get; set; }
+        public bool SendX5C { get; set; } 
+        
+        internal bool SetPerRequestX5C = false;
 
         public string LoginHint
         {

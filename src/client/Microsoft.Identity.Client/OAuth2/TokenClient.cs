@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     _serviceBundle.PlatformProxy.CryptographyManager,                    
                     _requestParams.AppConfig.ClientId,
                     _requestParams.Authority,
-                    _requestParams.SendX5C);           
+                    _requestParams.SetPerRequestX5C ? _requestParams.SendX5C : _requestParams.AppConfig.SendX5C);           
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);

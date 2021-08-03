@@ -108,11 +108,11 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
-        [System.Obsolete("Set SendX5C once for this application using WithSendX5C on the ConfidentialClientApplicationBuilder object.", false)]
         public AcquireTokenSilentParameterBuilder WithSendX5C(bool withSendX5C)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
-            Parameters.SendX5C = withSendX5C;
+            Parameters.SendX5C = withSendX5C;            
+            Parameters.SetPerRequestX5C = true;
             return this;
         }
 

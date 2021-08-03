@@ -76,12 +76,10 @@ namespace Microsoft.Identity.Client.Internal
             {
                 case ConfidentialClientAuthenticationType.ClientCertificate:
                     Certificate = config.ClientCredentialCertificate;
-                    SendX5C = config.SendX5C;
                     break;
                 case ConfidentialClientAuthenticationType.ClientCertificateWithClaims:
                     Certificate = config.ClientCredentialCertificate;
                     ClaimsToSign = config.ClaimsToSign;
-                    SendX5C = config.SendX5C;
                     break;
                 case ConfidentialClientAuthenticationType.ClientSecret:
                     Secret = config.ClientSecret;
@@ -137,7 +135,6 @@ namespace Microsoft.Identity.Client.Internal
         internal bool AppendDefaultClaims { get;  }
         internal ConfidentialClientAuthenticationType AuthenticationType { get;  }
         internal IDictionary<string, string> ClaimsToSign { get; }
-        internal bool SendX5C;
 
         public void AddConfidentialClientParameters(
             OAuth2Client oAuth2Client,
@@ -145,7 +142,7 @@ namespace Microsoft.Identity.Client.Internal
             ICryptographyManager cryptographyManager,
             string clientId,
             Authority authority,
-            bool? perRequestSendX5C = null)
+            bool sendX5C)
         {
             using (logger.LogMethodDuration())
             {
@@ -159,7 +156,7 @@ namespace Microsoft.Identity.Client.Internal
                            clientId,
                            tokenEndpoint);
 
-                        string assertion2 = jwtToken2.Sign(this, perRequestSendX5C ?? SendX5C);
+                        string assertion2 = jwtToken2.Sign(this, sendX5C);
 
                         oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
                         oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion2);
@@ -174,7 +171,7 @@ namespace Microsoft.Identity.Client.Internal
                             tokenEndpoint,
                             ClaimsToSign,
                             AppendDefaultClaims);
-                        string assertion = jwtToken.Sign(this, perRequestSendX5C ?? SendX5C);
+                        string assertion = jwtToken.Sign(this, sendX5C);
 
                         oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
                         oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);

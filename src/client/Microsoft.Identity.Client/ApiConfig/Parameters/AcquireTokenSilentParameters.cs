@@ -7,7 +7,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool ForceRefresh { get; set; }
         public string LoginHint { get; set; }
         public IAccount Account { get; set; }
-        public bool? SendX5C { get; set; }
+        public bool SendX5C { get; set; } 
+        
+        internal bool SetPerRequestX5C = false;
 
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)
