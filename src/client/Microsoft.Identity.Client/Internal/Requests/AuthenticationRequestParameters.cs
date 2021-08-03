@@ -183,9 +183,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Authority - " + AuthorityInfo?.CanonicalAuthority);
             builder.AppendLine("ApiId - " + ApiId);
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
-#pragma warning disable CS0612 // Type or member is obsolete
             builder.AppendLine("SendX5C - " + SendX5C);
-#pragma warning restore CS0612 // Type or member is obsolete
             builder.AppendLine("LoginHint - " + LoginHint);
             builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
             builder.AppendLine("HomeAccountId - " + HomeAccountId);
@@ -202,9 +200,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
             builder.AppendLine("ApiId - " + ApiId);
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
-#pragma warning disable CS0612 // Type or member is obsolete
             builder.AppendLine("SendX5C - " + SendX5C);
-#pragma warning restore CS0612 // Type or member is obsolete
             builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
             builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));
