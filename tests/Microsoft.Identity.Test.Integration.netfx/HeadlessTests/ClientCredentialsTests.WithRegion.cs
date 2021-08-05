@@ -52,12 +52,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Arrange
             var factory = new HttpSnifferClientFactory();
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            _confidentialClientApplication = BuildCCA(settings, factory);
+            _confidentialClientApplication = BuildCCA(settings, factory, false, TestConstants.Region);
 
             AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},centralus,3,4|0,1");
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},centralus,1,2|0,1");
         }
 
         [TestMethod]
