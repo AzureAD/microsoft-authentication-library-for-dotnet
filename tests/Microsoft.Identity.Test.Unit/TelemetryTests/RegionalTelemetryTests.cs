@@ -36,7 +36,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestCleanup]
         public override void TestCleanup()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             _harness?.Dispose();
             base.TestCleanup();
         }
@@ -60,12 +59,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestMethod]
         public async Task TelemetryAcceptanceTestAsync()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            _harness.HttpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
 
             Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, 
-                ((int)RegionAutodetectionSource.EnvVariable).ToString(), 
+                ((int)RegionAutodetectionSource.Imds).ToString(), 
                 ((int)RegionOutcome.AutodetectSuccess).ToString());
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
 
@@ -101,14 +100,14 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestMethod]
         public async Task TelemetrySerializedTokenCacheTestAsync()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            _harness.HttpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
 
             Trace.WriteLine("Acquire token for client with token serialization.");
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, serializeCache: true)
                 .ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.EnvVariable).ToString(),
+                ((int)RegionAutodetectionSource.Imds).ToString(),
                 ((int)RegionOutcome.AutodetectSuccess).ToString(),
                 isCacheSerialized: true);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
@@ -154,13 +153,13 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestMethod]
         public async Task TelemetryUserProvidedRegionAutoDiscoverRegionSameTestsAsync()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            _harness.HttpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
 
             Trace.WriteLine("Acquire token for client with region provided by user and region detected is same as regionToUse.");
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.EnvVariable).ToString(),
+                ((int)RegionAutodetectionSource.Imds).ToString(),
                 ((int)RegionOutcome.UserProvidedValid).ToString(),
                 isCacheSerialized: false,
                 region: TestConstants.Region);
@@ -175,13 +174,13 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestMethod]
         public async Task TelemetryUserProvidedRegionAutoDiscoverRegionMismatchTestsAsync()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            _harness.HttpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
 
             Trace.WriteLine("Acquire token for client with region provided by user and region detected mismatches regionToUse.");
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedInvalidRegion).ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.EnvVariable).ToString(),
+                ((int)RegionAutodetectionSource.Imds).ToString(),
                 ((int)RegionOutcome.UserProvidedInvalid).ToString(),
                 isCacheSerialized: false,
                 region: TestConstants.InvalidRegion);

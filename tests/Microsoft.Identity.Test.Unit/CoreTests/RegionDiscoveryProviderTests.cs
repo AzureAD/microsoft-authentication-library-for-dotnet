@@ -53,25 +53,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestCleanup]
         public override void TestCleanup()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
             _harness?.Dispose();
             _regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, true);
             _httpManager.Dispose();
             base.TestCleanup();
-        }
-
-        [TestMethod]
-        public async Task SuccessfulResponseFromEnvironmentVariableAsync()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-
-            _testRequestContext.ServiceBundle.Config.AzureRegion = null; // not configured
-
-            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
-                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext)
-                .ConfigureAwait(false);
-
-            Assert.IsNull(regionalMetadata);
         }
 
         [TestMethod]
@@ -129,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task ResponseFromUserProvidedRegionSameAsRegionDetectedAsync()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            _httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
             _testRequestContext.ServiceBundle.Config.AzureRegion = TestConstants.Region;
 
             //            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager);
@@ -138,14 +123,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsNotNull(regionalMetadata);
             Assert.AreEqual($"centralus.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual((int)RegionAutodetectionSource.Imds, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual((int)RegionOutcome.UserProvidedValid, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]
         public async Task ResponseFromUserProvidedRegionDifferentFromRegionDetectedAsync()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, "detected_region");
+            _httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
             _testRequestContext.ServiceBundle.Config.AzureRegion = "user_region";
 
             //IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
@@ -156,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsNotNull(regionalMetadata);
             Assert.AreEqual($"user_region.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
             Assert.AreEqual("user_region", _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual((int)RegionAutodetectionSource.Imds, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual((int)RegionOutcome.UserProvidedInvalid, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
@@ -166,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             var regionalizedAuthority = new Uri($"https://{TestConstants.Region}.{RegionDiscoveryProvider.PublicEnvForRegional}/common/");
             _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
 
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            _httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
 
             // In the instance discovery flow, GetMetadataAsync is always called with a known authority first, then with regionalized.
             await _regionDiscoveryProvider.GetMetadataAsync(new Uri(TestConstants.AuthorityCommonTenant), _testRequestContext).ConfigureAwait(false);
@@ -174,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             ValidateInstanceMetadata(regionalMetadata);
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual((int)RegionAutodetectionSource.Imds, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
@@ -183,8 +168,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [DataRow("invalid`region")]
         public async Task InvalidRegionEnvVariableAsync(string region)
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, region);
-
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region)); // IMDS will return a valid region
 
             _testRequestContext.ServiceBundle.Config.AzureRegion =
@@ -216,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public async Task NonPublicCloudTestAsync()
         {
             // Arrange
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            _httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
             _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
 
             // Act

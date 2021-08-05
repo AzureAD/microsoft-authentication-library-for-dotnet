@@ -160,14 +160,6 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<RegionInfo> DiscoverAsync(ICoreLogger logger, CancellationToken requestCancellationToken)
         {
-            string region = Environment.GetEnvironmentVariable("REGION_NAME");
-
-            if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
-            {
-                logger.Info($"[Region discovery] Region found in environment variable: {region}.");
-                return new RegionInfo(region, RegionAutodetectionSource.EnvVariable);
-            }
-
             try
             {
                 var headers = new Dictionary<string, string>
@@ -191,7 +183,7 @@ namespace Microsoft.Identity.Client.Region
 
                 if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                 {
-                    region = response.Body;
+                    string region = response.Body;
 
                     if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
                     {

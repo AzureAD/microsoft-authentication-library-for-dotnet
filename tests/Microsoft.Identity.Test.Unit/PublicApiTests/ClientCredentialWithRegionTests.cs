@@ -128,40 +128,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [Description("Test when region is received from environment variable")]
-        public async Task FetchRegionFromEnvironmentAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                try
-                {
-                    Environment.SetEnvironmentVariable("REGION_NAME", TestConstants.Region);
-                    IConfidentialClientApplication app = CreateCca(
-                        httpManager,
-                        ConfidentialClientApplication.AttemptRegionDiscovery);
-
-                    httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
-
-                    AuthenticationResult result = await app
-                        .AcquireTokenForClient(TestConstants.s_scope)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false);
-
-                    Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
-                    Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, result.ApiEvent.RegionAutodetectionSource);
-                    Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
-
-                    Assert.IsNotNull(result.AccessToken);
-
-                }
-                finally
-                {
-                    Environment.SetEnvironmentVariable("REGION_NAME", null);
-                }
-            }
-        }
-
-        [TestMethod]
         [Description("Test when the region could not be fetched -> fallback to global.")]
         public async Task RegionFallbackToGlobalAsync()
         {
@@ -222,7 +188,6 @@ namespace Microsoft.Identity.Test.Unit
             {
                 httpManager.AddRegionDiscoveryMockHandlerNotFound();
 
-
                 var discoveryHandler = MockHelpers.CreateInstanceDiscoveryMockHandler(
                      "https://login.microsoftonline.com/common/discovery/instance",
                      TestConstants.DiscoveryJsonResponse);
@@ -274,21 +239,10 @@ namespace Microsoft.Identity.Test.Unit
         // regression: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686
         public async Task OtherCloud_WithValidation_Async()
         {
-            try
-            {
-                Environment.SetEnvironmentVariable("REGION_NAME", "eastus");
-
-                await RunPpeTestAsync(validateAuthority: true, authorityIsValid: true).ConfigureAwait(false);
-                await RunPpeTestAsync(validateAuthority: true, authorityIsValid: false).ConfigureAwait(false);
-                await RunPpeTestAsync(validateAuthority: false, authorityIsValid: true).ConfigureAwait(false);
-                await RunPpeTestAsync(validateAuthority: false, authorityIsValid: false).ConfigureAwait(false);
-
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("REGION_NAME", null);
-            }
-
+            await RunPpeTestAsync(validateAuthority: true, authorityIsValid: true).ConfigureAwait(false);
+            await RunPpeTestAsync(validateAuthority: true, authorityIsValid: false).ConfigureAwait(false);
+            await RunPpeTestAsync(validateAuthority: false, authorityIsValid: true).ConfigureAwait(false);
+            await RunPpeTestAsync(validateAuthority: false, authorityIsValid: false).ConfigureAwait(false);
         }
 
         [DataTestMethod]
@@ -303,51 +257,44 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("login.microsoftonline.com", "r.login.microsoftonline.com")]
         public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
         {
-            try
-            {
-                const string region = "eastus";
-                Environment.SetEnvironmentVariable("REGION_NAME", region);
+            const string region = "eastus";
 
-                using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                harness.HttpManager.AddRegionDiscoveryMockHandlerNotFound();
+                var tokenHttpCallHandler = new MockHttpMessageHandler()
                 {
-                    var tokenHttpCallHandler = new MockHttpMessageHandler()
-                    {
-                        ExpectedUrl = $"https://eastus.{expectedEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = CreateResponse(true)
-                    };
-                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+                    ExpectedUrl = $"https://eastus.{expectedEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = CreateResponse(true)
+                };
+                harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
 
-                    var app = ConfidentialClientApplicationBuilder
-                                     .Create(TestConstants.ClientId)
-                                     .WithAuthority($"https://{inputEnv}/common", true)
-                                     .WithHttpManager(harness.HttpManager)
-                                     .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                                     .WithClientSecret(TestConstants.ClientSecret)
-                                     .Build();
+                var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority($"https://{inputEnv}/common", true)
+                                 .WithHttpManager(harness.HttpManager)
+                                 .WithAzureRegion(region)
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build();
 
-                    AuthenticationResult result = await app
-                        .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithAuthority($"https://{inputEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority($"https://{inputEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
-                    Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
-                    Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                    result = await app
-                       .AcquireTokenForClient(TestConstants.s_scope)
-                       .WithAuthority($"https://{inputEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
-                       .ExecuteAsync()
-                       .ConfigureAwait(false);
+                result = await app
+                   .AcquireTokenForClient(TestConstants.s_scope)
+                   .WithAuthority($"https://{inputEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                   .ExecuteAsync()
+                   .ConfigureAwait(false);
 
-                    Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
-                    Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                }
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
@@ -358,12 +305,14 @@ namespace Microsoft.Identity.Test.Unit
                 MockHttpMessageHandler discoveryHandler = null;
                 if (authorityIsValid)
                 {
+                    harness.HttpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
                     discoveryHandler = MockHelpers.CreateInstanceDiscoveryMockHandler(
                          "https://login.microsoftonline.com/common/discovery/instance",
                          TestConstants.DiscoveryJsonResponse);
                 }
                 else
                 {
+                    harness.HttpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
                     discoveryHandler = new MockHttpMessageHandler()
                     {
                         ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",

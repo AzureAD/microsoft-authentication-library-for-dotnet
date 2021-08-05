@@ -46,12 +46,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-        }
-
         [TestMethod]
         public async Task AcquireTokenToRegionalEndpointAsync()
         {
@@ -60,7 +54,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             _confidentialClientApplication = BuildCCA(settings, factory);
 
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
             AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
@@ -76,7 +69,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             _confidentialClientApplication = BuildCCA(settings, factory, true, "invalid");
 
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
             AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             Assert.AreEqual(

@@ -26,14 +26,9 @@ namespace Microsoft.Identity.Client.Region
         Cache = 2,
 
         /// <summary>
-        /// Auto-detected from Env Variable
-        /// </summary>
-        EnvVariable = 3,
-
-        /// <summary>
         /// Auto-detected from IMDS
         /// </summary>
-        Imds = 4,
+        Imds = 3,
 
     }
 }

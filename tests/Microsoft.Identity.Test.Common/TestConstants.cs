@@ -142,7 +142,6 @@ namespace Microsoft.Identity.Test.Unit
         public const string Username = "joe@localhost.com";
         public const string PKeyAuthResponse = "PKeyAuth Context=\"context\",Version=\"1.0\"";
 
-        public const string RegionName = "REGION_NAME";
         public const string Region = "centralus";
         public const string InvalidRegion = "invalidregion";
         public const int TimeoutInMs = 2000;
