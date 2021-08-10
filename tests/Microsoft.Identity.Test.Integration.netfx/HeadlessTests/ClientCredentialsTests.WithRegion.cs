@@ -49,6 +49,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task AcquireTokenToRegionalEndpointAsync()
         {
+            if (Environment.GetEnvironmentVariable("TF_BUILD") == null)
+            {
+                Assert.Inconclusive("This test needs to run on Azure DevOps hosted agent located on an Azure VM.");
+            }
+
             // Arrange
             var factory = new HttpSnifferClientFactory();
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
@@ -57,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},centralus,1,2|0,1", 1);
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},centralus,3,3|0,1", 1);
         }
 
         [TestMethod]
@@ -86,7 +91,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private void AssertTelemetry(HttpSnifferClientFactory factory, string currentTelemetryHeader, int placement = 0)
         {
-            Console.WriteLine($"Total requests for regional: {factory.RequestsAndResponses.Count}");
             var (req, res) = factory.RequestsAndResponses.Skip(placement).Single();
             Assert.AreEqual(currentTelemetryHeader, req.Headers.GetValues("x-client-current-telemetry").First());
         }

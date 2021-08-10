@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Region
         /// <summary>
         /// Auto-detected from IMDS
         /// </summary>
-        Imds = 3,
+        Imds = 4,
 
     }
 }
