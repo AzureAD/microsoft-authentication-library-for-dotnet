@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// Standard OAuth2 protocol error code. It indicates that the application needs to expose the UI to the user
-        /// so that the user does an interactive action in order to get a new token.
+        /// so that the user does an interactive action in order to get a new token. Or you may be using multiple toke cache for the same user.
         /// <para>Mitigation:</para> If your application is a <see cref="T:IPublicClientApplication"/> call <c>AcquireTokenInteractive</c>
         /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
         /// of the exception is not empty. See <see cref="P:MsalServiceException.Claims"/> for the right mitigation

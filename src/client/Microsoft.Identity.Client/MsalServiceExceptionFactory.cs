@@ -121,7 +121,8 @@ namespace Microsoft.Identity.Client
 
         private static bool IsInvalidGrantSubError(string subError)
         {
-            if (string.IsNullOrEmpty(subError))
+            if (string.IsNullOrEmpty(subError)
+                || subError.Contains("50196"))
             {
                 return true;
             }
