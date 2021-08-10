@@ -10,6 +10,7 @@ schedules:
   branches:
     include:
     - master
+  always: true
 
 variables:
   BuildPlatform: 'any cpu'

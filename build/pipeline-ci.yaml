@@ -11,6 +11,7 @@ schedules:
   branches:
     include:
     - master
+  always: true
 
 pr: none
 
