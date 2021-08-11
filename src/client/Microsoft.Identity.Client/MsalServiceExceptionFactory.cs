@@ -11,6 +11,8 @@ namespace Microsoft.Identity.Client
 {
     internal class MsalServiceExceptionFactory
     {
+        private const string STSTooManyCallsError = "AADSTS50196";
+
         static ISet<string> s_nonUiSubErrors = new HashSet<string>(
             new[] { MsalError.ClientMismatch, MsalError.ProtectionPolicyRequired },
             StringComparer.OrdinalIgnoreCase);
@@ -26,7 +28,14 @@ namespace Microsoft.Identity.Client
 
             if (IsInvalidGrant(oAuth2Response?.Error, oAuth2Response?.SubError) || IsInteractionRequired(oAuth2Response?.Error))
             {
-                ex = new MsalUiRequiredException(errorCode, errorMessage, innerException);
+                if (IsThrottled(oAuth2Response))
+                {
+                    ex = new MsalUiRequiredException(errorCode, MsalErrorMessage.ThrottledTooManyCalls, innerException);
+                }
+                else
+                {
+                    ex = new MsalUiRequiredException(errorCode, errorMessage, innerException);
+                }
             }
 
             if (string.Equals(oAuth2Response?.Error, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
@@ -52,6 +61,12 @@ namespace Microsoft.Identity.Client
             ex.SubError = oAuth2Response?.SubError;
 
             return ex;
+        }
+
+        private static bool IsThrottled(OAuth2ResponseBase oAuth2Response)
+        {
+            return oAuth2Response.ErrorDescription != null &&
+               oAuth2Response.ErrorDescription.StartsWith(STSTooManyCallsError);
         }
 
         internal static MsalServiceException FromBrokerResponse(
@@ -121,8 +136,7 @@ namespace Microsoft.Identity.Client
 
         private static bool IsInvalidGrantSubError(string subError)
         {
-            if (string.IsNullOrEmpty(subError)
-                || subError.Contains("50196"))
+            if (string.IsNullOrEmpty(subError))
             {
                 return true;
             }
