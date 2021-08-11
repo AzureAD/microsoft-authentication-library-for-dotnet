@@ -68,22 +68,21 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [Ignore] //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2781
-        public async Task InvalidRegion_GoesToInvalidAuthority_Async()
+        public async Task RequestGoesToUserSpecifiedRegion_Async()
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            _confidentialClientApplication = BuildCCA(settings, factory, true, "invalid");
+            _confidentialClientApplication = BuildCCA(settings, factory, true, "westus");
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
             AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             Assert.AreEqual(
-              "https://invalid.login.microsoft.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token?allowestsrnonmsi=true",
+              "https://westus.r.login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token?allowestsrnonmsi=true",
               factory.RequestsAndResponses.Single().Item1.RequestUri.ToString());
 
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},invalid,3,3|0,1");
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},westus,3,3|0,1");
 
             _confidentialClientApplication = BuildCCA(settings, factory, true, TestConstants.Region);
             result = await GetAuthenticationResultAsync(settings.AppScopes, withForceRefresh: true).ConfigureAwait(false); // regional endpoint
