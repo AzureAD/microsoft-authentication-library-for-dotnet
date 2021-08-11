@@ -22,6 +22,7 @@ namespace NetDesktopWinForms
 
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
+            new ClientEntry() { Id = "04f0c124-f2bc-4f59-8241-bf6df9866bbd", Name = "04f0c124-f2bc-4f59-8241-bf6df9866bbd (new VS)"},
             new ClientEntry() { Id = "1d18b3b0-251b-4714-a02a-9956cec86c2d", Name = "1d18b3b0-251b-4714-a02a-9956cec86c2d (App in 49f)"},
             new ClientEntry() { Id = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1", Name = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1 (VS)"},
             new ClientEntry() { Id = "655015be-5021-4afc-a683-a4223eb5d0e5", Name = "655015be-5021-4afc-a683-a4223eb5d0e5"},
@@ -75,6 +76,7 @@ namespace NetDesktopWinForms
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
                 //.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
+                .WithRedirectUri("http://localhost")
                 .WithWindowsBrokerOptions(new WindowsBrokerOptions() {
                     ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
                     MsaPassthrough = cbxMsaPt.Checked
@@ -130,13 +132,14 @@ namespace NetDesktopWinForms
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
             {
                 throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account");
-            }
+            }            
 
             if (!string.IsNullOrEmpty(loginHint))
             {
                 if (IsMsaPassthroughConfigured())
                 {
-                    throw new InvalidAsynchronousStateException(
+                    // TODO: bogavril - move this exception in WAM
+                    throw new InvalidOperationException(
                         "[TEST APP FAILURE] Do not use login hint on AcquireTokenSilent for MSA-Passthrough. Use the IAccount overload.");
                 }
 
@@ -151,9 +154,30 @@ namespace NetDesktopWinForms
             {
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
+                var builder = pca.AcquireTokenSilent(GetScopes(), acc);
+                if (IsMsaPassthroughConfigured())
+                {
+                    // this is the same in all clouds
+                    const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
+
+                    // these are per cloud
+                    string publicCloudEnv = "https://login.microsoftonline.com/";
+                    string msaTenantIdPublicCloud = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
+
+                    if (acc.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
+                    {
+                        var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
+
+                        builder = builder.WithAuthority(msaAuthority);
+                    }
+                }
+                else
+                {
+                    builder = builder.WithAuthority(reqAuthority);
+                }
+
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
-                return await pca.AcquireTokenSilent(GetScopes(), acc)
-                    .WithAuthority(reqAuthority)
+                return await builder
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
@@ -246,7 +270,9 @@ namespace NetDesktopWinForms
             var scopes = GetScopes();
 
             var builder = pca.AcquireTokenInteractive(scopes)
-                .WithUseEmbeddedWebView(true)
+                .WithUseEmbeddedWebView(false)
+                //.WithExtraQueryParameters("domain_hint=live.com")
+                .WithExtraQueryParameters("msafed=0")
                 .WithEmbeddedWebViewOptions(
                 new EmbeddedWebViewOptions() { 
                     Title = "Hello world",                     
@@ -423,8 +449,12 @@ namespace NetDesktopWinForms
 
             if (clientEntry.Id == "872cd9fa-d31f-45e0-9eab-6e460a02d1f1") // VS
             {
+                cbxScopes.SelectedItem = "https://management.core.windows.net//.default";                
+            }
+
+            if (clientEntry.Id == "04f0c124-f2bc-4f59-8241-bf6df9866bbd") // VS
+            {
                 cbxScopes.SelectedItem = "https://management.core.windows.net//.default";
-                authorityCbx.SelectedItem = "https://login.windows-ppe.net/organizations";
             }
 
             if (clientEntry.Id == "c0186a6c-0bfc-4d83-9543-c2295b676f3b") // MSA-PT app

@@ -21,6 +21,7 @@ using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using System.Diagnostics;
 #if !UAP10_0
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Utils.Windows;
@@ -297,10 +298,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
         }
 
-        private static string WorkaroundOrganizationsBug(AuthenticationRequestParameters authenticationRequestParameters, WebAccount wamAccount)
+        private string WorkaroundOrganizationsBug(AuthenticationRequestParameters authenticationRequestParameters, WebAccount wamAccount)
         {
             string differentAuthority = null;
-            if (string.Equals(authenticationRequestParameters.Authority.TenantId, Constants.OrganizationsTenant) && // "organizations" tenant is configured
+            if (!_wamOptions.MsaPassthrough &&
+                string.Equals(authenticationRequestParameters.Authority.TenantId, Constants.OrganizationsTenant) && // "organizations" tenant is configured
                 (string.Equals(wamAccount?.WebAccountProvider?.Authority, Constants.OrganizationsTenant) || // AND user is Work and School
                 PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))) // OR user is Current Windows User
             {
@@ -359,14 +361,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 string transferToken = null;
                 bool isForceLoginPrompt = false;
-                if (isConsumerTenant && isMsaPassthrough)
+                if (isConsumerTenant && isMsaPassthrough) 
                 {
-                    // Get a transfer token to avoid prompting the user twice
                     transferToken = await _msaPassthroughHandler.TryFetchTransferTokenAsync(
-                       authenticationRequestParameters,
-                       accountProvider).ConfigureAwait(false);
+                     authenticationRequestParameters,
+                     accountProvider).ConfigureAwait(false);
 
-                    // If a TT cannot be obtained, force the interactive experience again
+                    // If a transfer token cannot be obtained, force the interactive experience again
                     isForceLoginPrompt = string.IsNullOrEmpty(transferToken);
 
                     // For MSA-PT, the MSA provider will issue v1 token, which cannot be used.
@@ -467,9 +468,19 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     .ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
-                WebAccountProvider provider = await GetProviderAsync(
-                    authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority,
-                    isMsa).ConfigureAwait(false);
+
+                WebAccountProvider provider;
+                if (_wamOptions.MsaPassthrough)
+                {
+                    provider = await GetProviderAsync(
+                        "organizations", false).ConfigureAwait(false);
+                }
+                else
+                {
+                    provider = await GetProviderAsync(
+                        authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority,
+                        isMsa).ConfigureAwait(false);
+                }
 
                 WebAccount webAccount = await FindWamAccountForMsalAccountAsync(
                     provider,
@@ -493,16 +504,27 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     isInteractive: false)
                     .ConfigureAwait(false);
 
-                WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger);
+                // For MSA-PT scenario, MSAL's authority is wrong. MSAL will use Account.HomeTenantId 
+                // which will essentialyl be /consumers. This is wrong, we are not trying to obtain 
+                // an MSA token, we are trying to obtain an ADD *guest* token.
+                string differentAuthority = null;
+                if (_wamOptions.MsaPassthrough && 
+                    authenticationRequestParameters.Authority is AadAuthority aadAuthority &&
+                    aadAuthority.IsConsumers())
+                {
+                    differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("organizations", forceTenantless: true);
+                }
+
+                WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, differentAuthority);
 
                 var wamResult =
                     await _wamProxy.GetTokenSilentlyAsync(webAccount, webTokenRequest).ConfigureAwait(false);
 
                 return WamAdapters.CreateMsalResponseFromWamResponse(
-                    wamResult, 
+                    wamResult,
                     wamPlugin,
                     authenticationRequestParameters.AppConfig.ClientId,
-                    _logger, 
+                    _logger,
                     isInteractive: false);
 
             }
@@ -551,10 +573,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     await _wamProxy.GetTokenSilentlyForDefaultAccountAsync(webTokenRequest).ConfigureAwait(false);
 
                 return WamAdapters.CreateMsalResponseFromWamResponse(
-                    wamResult, 
+                    wamResult,
                     wamPlugin,
                     authenticationRequestParameters.AppConfig.ClientId,
-                    _logger, 
+                    _logger,
                     isInteractive: false);
             }
         }
@@ -611,6 +633,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 if (!string.IsNullOrEmpty(loginHint) &&
                     string.Equals(loginHint, wamAccount.UserName, StringComparison.OrdinalIgnoreCase))
+                {
+                    matchedAccountByLoginHint = wamAccount;
+                }
+
+                if (string.Equals(account.Username, wamAccount.UserName, StringComparison.OrdinalIgnoreCase))
                 {
                     matchedAccountByLoginHint = wamAccount;
                 }
@@ -734,6 +761,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (authority.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
             {
                 _logger.Info("[WAM Broker] ADFS authority - using only AAD plugin");
+                return false;
+            }
+
+            if (msaPassthrough)
+            {
                 return false;
             }
 
