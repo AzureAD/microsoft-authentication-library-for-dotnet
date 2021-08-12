@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Client
         public const string TenantIdAndAadAuthorityInstanceAreMutuallyExclusive = "TenantId and AadAuthorityAudience are both set, but they're mutually exclusive. ";
         public const string InstanceAndAzureCloudInstanceAreMutuallyExclusive = "Instance and AzureCloudInstance are both set but they're mutually exclusive. ";
         public const string NoRefreshTokenProvided = "A refresh token must be provided. ";
-        public const string AadThrottledError = "Your app has been throttled by AAD due to too many requests. To avoid this, cache your tokens see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Client-Throttling.";
+        public const string AadThrottledError = "Your app has been throttled by AAD due to too many requests. To avoid this, cache your tokens see https://aka.ms/msal-net-throttling.";
 
         public const string NoTokensFoundError = "No Refresh Token found in the cache. ";
         public const string NoRefreshTokenInResponse = "Acquire by refresh token request completed, but no refresh token was found. ";
