@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 
@@ -11,8 +12,6 @@ namespace Microsoft.Identity.Client
 {
     internal class MsalServiceExceptionFactory
     {
-        private const string STSTooManyCallsError = "AADSTS50196";
-
         static ISet<string> s_nonUiSubErrors = new HashSet<string>(
             new[] { MsalError.ClientMismatch, MsalError.ProtectionPolicyRequired },
             StringComparer.OrdinalIgnoreCase);
@@ -30,7 +29,7 @@ namespace Microsoft.Identity.Client
             {
                 if (IsThrottled(oAuth2Response))
                 {
-                    ex = new MsalUiRequiredException(errorCode, MsalErrorMessage.ThrottledTooManyCalls, innerException);
+                    ex = new MsalUiRequiredException(errorCode, MsalErrorMessage.AadThrottledError, innerException);
                 }
                 else
                 {
@@ -66,7 +65,7 @@ namespace Microsoft.Identity.Client
         private static bool IsThrottled(OAuth2ResponseBase oAuth2Response)
         {
             return oAuth2Response.ErrorDescription != null &&
-               oAuth2Response.ErrorDescription.StartsWith(STSTooManyCallsError);
+               oAuth2Response.ErrorDescription.StartsWith(Constants.AadThrottledErrorCode);
         }
 
         internal static MsalServiceException FromBrokerResponse(

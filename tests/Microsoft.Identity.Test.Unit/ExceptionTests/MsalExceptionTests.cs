@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             // Arrange
             HttpResponse httpResponse = new HttpResponse()
             {
-                Body = JsonError.Replace("AADSTS90002", "AADSTS50196"),
+                Body = JsonError.Replace("AADSTS90002", Constants.AadThrottledErrorCode),
                 StatusCode = HttpStatusCode.BadRequest, // 400
             };
 
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             // Assert
             Assert.AreEqual(typeof(MsalUiRequiredException), msalException.GetType());
-            Assert.AreEqual(MsalErrorMessage.ThrottledTooManyCalls, msalException.Message);
+            Assert.AreEqual(MsalErrorMessage.AadThrottledError, msalException.Message);
             ValidateExceptionProductInformation(msalException);
         }
 
