@@ -10,7 +10,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     {
         public string RefreshToken { get; set; }
 
-        public bool SendX5C { get; set; }
+        public bool SendX5C { get; set; } 
+        
+        internal bool SetPerRequestX5C = false;
 
         public void LogParameters(ICoreLogger logger)
         {

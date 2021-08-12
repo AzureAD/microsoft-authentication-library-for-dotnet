@@ -9,7 +9,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     internal class AcquireTokenOnBehalfOfParameters : IAcquireTokenParameters
     {
         public UserAssertion UserAssertion { get; set; }
-        public bool SendX5C { get; set;}
+        public bool SendX5C { get; set; }
+        
+        internal bool SetPerRequestX5C = false;
         public bool ForceRefresh { get; set; }
 
         /// <inheritdoc />

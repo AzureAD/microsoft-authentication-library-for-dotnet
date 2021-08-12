@@ -65,7 +65,8 @@ namespace Microsoft.Identity.Client
         public AcquireTokenOnBehalfOfParameterBuilder WithSendX5C(bool withSendX5C)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C, withSendX5C);
-            Parameters.SendX5C = withSendX5C;
+            Parameters.SendX5C = withSendX5C; 
+            Parameters.SetPerRequestX5C = true;
             return this;
         }
 

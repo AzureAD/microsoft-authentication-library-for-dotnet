@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Client.Internal
         [Preserve(AllMembers = true)]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
-            public JWTHeaderWithCertificate(ClientCredentialWrapper credential, bool sendCertificate)
+            public JWTHeaderWithCertificate(ClientCredentialWrapper credential, bool? sendCertificate = null)
                 : base(credential)
             {
                 X509CertificateThumbprint = Credential.Thumbprint;
@@ -197,7 +197,9 @@ namespace Microsoft.Identity.Client.Internal
 
                 X509CertificatePublicCertValue = null;
 
-                if (!sendCertificate)
+                bool perRequestSendX5C = sendCertificate ?? credential?.SendX5C ?? false;
+
+                if (!perRequestSendX5C)
                 {
                     return;
                 }

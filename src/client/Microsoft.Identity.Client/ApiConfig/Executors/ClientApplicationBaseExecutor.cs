@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
 
-            requestParameters.SendX5C = refreshTokenParameters.SendX5C;
+            requestParameters.SendX5C = refreshTokenParameters.SetPerRequestX5C ? refreshTokenParameters.SendX5C : _clientApplicationBase.AppConfig.SendX5C;
 
             var handler = new ByRefreshTokenRequest(ServiceBundle, requestParameters, refreshTokenParameters);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
