@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task RequestGoesToUserSpecifiedRegion_Async()
+        public async Task InvalidRegion_GoesToInvalidAuthority_Async()
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
@@ -82,13 +82,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
               "https://westus.r.login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token?allowestsrnonmsi=true",
               factory.RequestsAndResponses.Single().Item1.RequestUri.ToString());
 
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},westus,3,3|0,1");
-
             _confidentialClientApplication = BuildCCA(settings, factory, true, TestConstants.Region);
             result = await GetAuthenticationResultAsync(settings.AppScopes, withForceRefresh: true).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory, 1);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.ForceRefresh:D},centralus,2,1|0,1", 1);
         }
 
         private void AssertTelemetry(HttpSnifferClientFactory factory, string currentTelemetryHeader, int placement = 0)
