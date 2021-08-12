@@ -14,8 +14,8 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     /// <summary>
-    /// This class is responsible for merging app level and request level params. 
-    /// Not all params need to be merged - app level params can be accessed via AppConfig property
+    /// This class is responsible for merging app level and request level parameters. 
+    /// Not all parameters need to be merged - app level parameters can be accessed via AppConfig property
     /// </summary>
     internal class AuthenticationRequestParameters
     {
@@ -75,18 +75,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         #region Authority
 
-        public AuthorityManager AuthorityManager { get; set; } 
+        public AuthorityManager AuthorityManager { get; set; }
 
         /// <summary>
         /// Authority is the URI used by MSAL for communication and storage
         /// During a request it can be updated: 
-        /// - with the preffered enviroment
+        /// - with the proffered environment
         /// - with actual tenant
         /// </summary>
         public Authority Authority => AuthorityManager.Authority;
 
         public AuthorityInfo AuthorityInfo => AuthorityManager.Authority.AuthorityInfo;
-        
+
         public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
         #endregion
@@ -160,6 +160,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
         public UserAssertion UserAssertion { get; set; }
+        public string OboCacheKey { get; set; }
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
 
@@ -186,6 +187,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
             builder.AppendLine("HomeAccountId - " + HomeAccountId);
             builder.AppendLine("CorrelationId - " + CorrelationId);
+            builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
+            builder.AppendLine("OboCacheKey set: " + !string.IsNullOrWhiteSpace(OboCacheKey));
 
             string messageWithPii = builder.ToString();
 
@@ -203,6 +206,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
             builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));
             builder.AppendLine("CorrelationId - " + CorrelationId);
+            builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
+            builder.AppendLine("OboCacheKey set: " + !string.IsNullOrWhiteSpace(OboCacheKey));
 
             logger.InfoPii(messageWithPii, builder.ToString());
         }

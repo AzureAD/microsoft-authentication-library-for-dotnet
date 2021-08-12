@@ -22,7 +22,7 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// IMPORTANT: this class is perf critical; any changes must be benchmarked using Microsoft.Identity.Test.Performace.
+    /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performace.
     /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
     /// </summary>
     public sealed partial class TokenCache : ITokenCacheInternal
@@ -71,6 +71,7 @@ namespace Microsoft.Identity.Client
                         requestParams.AuthenticationScheme.KeyId)
                     {
                         UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
+                        OboCacheKey = requestParams.OboCacheKey,
                         IsAdfs = isAdfsAuthority
                     };
             }
@@ -83,7 +84,8 @@ namespace Microsoft.Identity.Client
                                     response,
                                     homeAccountId)
                 {
-                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash
+                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
+                    OboCacheKey = requestParams.OboCacheKey,
                 };
 
                 if (!_featureFlags.IsFociEnabled)
@@ -93,7 +95,7 @@ namespace Microsoft.Identity.Client
             }
 
             Dictionary<string, string> wamAccountIds = GetWamAccountIds(requestParams, response);
-            var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);           
+            var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
 
             Account account;
             if (idToken != null)
@@ -331,7 +333,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// IMPORTANT: this class is perf critical; any changes must be benchmarked using Microsoft.Identity.Test.Performace.
+        /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performace.
         /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
         /// 
         /// Scenario: client_creds with default in-memory cache can get to ~500k tokens
@@ -443,8 +445,10 @@ namespace Microsoft.Identity.Client
             {
                 tokenCacheItems =
                     tokenCacheItems.FilterWithLogging(item =>
-                        !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                        item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                        (!string.IsNullOrEmpty(item.OboCacheKey) &&
+                        item.OboCacheKey.Equals(requestParams.OboCacheKey, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrEmpty(item.UserAssertionHash) &&
+                        item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase)),
                         requestParams.RequestContext.Logger,
                         $"Filtering AT by user assertion: {requestParams.UserAssertion.AssertionHash}");
 
@@ -559,18 +563,18 @@ namespace Microsoft.Identity.Client
 
             if (filteredItems.Count == 0)
             {
-                logger.Verbose("Not filtering AT by env, because there are no candidates");
+                logger.Verbose("Not filtering AT by environment, because there are no candidates");
                 return filteredItems;
             }
 
-            // at this point we need env aliases, try to get them without a discovery call
+            // at this point we need environment aliases, try to get them without a discovery call
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                                      requestParams.AuthorityInfo,
                                      filteredItems.Select(at => at.Environment),  // if all environments are known, a network call can be avoided
                                      requestParams.RequestContext)
                             .ConfigureAwait(false);
 
-            // In case we're sharing the cache with an MSAL that does not implement env aliasing,
+            // In case we're sharing the cache with an MSAL that does not implement environment aliasing,
             // it's possible (but unlikely), that we have multiple ATs from the same alias family.
             // To overcome some of these use cases, try to filter just by preferred cache alias
             var filteredByPreferredAlias = filteredItems.FilterWithLogging(
@@ -692,8 +696,10 @@ namespace Microsoft.Identity.Client
             if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
             {
                 rtCacheItems = rtCacheItems.FilterWithLogging(item =>
-                                !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                                (!string.IsNullOrEmpty(item.OboCacheKey) &&
+                                item.OboCacheKey.Equals(requestParams.OboCacheKey, StringComparison.OrdinalIgnoreCase)) ||
+                                (!string.IsNullOrEmpty(item.UserAssertionHash) &&
+                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase)),
                                 requestParams.RequestContext.Logger,
                                 $"Filtering RT by user assertion: {requestParams.UserAssertion.AssertionHash}");
             }
@@ -778,7 +784,7 @@ namespace Microsoft.Identity.Client
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
 
-            // Multi-cloud support - must filter by env.
+            // Multi-cloud support - must filter by environment.
             ISet<string> allEnvironmentsInCache = new HashSet<string>(
                 accountCacheItems.Select(aci => aci.Environment),
                 StringComparer.OrdinalIgnoreCase);
@@ -818,7 +824,7 @@ namespace Microsoft.Identity.Client
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
                             account.PreferredUsername,
-                            environment, // Preserve the env passed in by the user
+                            environment, // Preserve the environment passed in by the user
                             account.WamAccountIds,
                             tenantProfiles?.Values);
 
@@ -870,7 +876,7 @@ namespace Microsoft.Identity.Client
 
             return accounts;
         }
-       
+
         MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey)
         {
             var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
@@ -911,7 +917,7 @@ namespace Microsoft.Identity.Client
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, RequestContext requestContext)
         {
             requestContext.Logger.Verbose($"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
-            await _semaphoreSlim.WaitAsync(requestContext.UserCancellationToken).ConfigureAwait(false);            
+            await _semaphoreSlim.WaitAsync(requestContext.UserCancellationToken).ConfigureAwait(false);
             requestContext.Logger.Verbose("[RemoveAccountAsync] Entered token cache semaphore");
 
             try
@@ -995,7 +1001,7 @@ namespace Microsoft.Identity.Client
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            // To maintain backward compatiblity with other MSALs, filter all credentials by clientID if
+            // To maintain backward compatibility with other MSALs, filter all credentials by clientID if
             // Foci is disabled or if an FRT is not present
             bool filterByClientId = !_featureFlags.IsFociEnabled || !FrtExists(allRefreshTokens);
 

@@ -21,11 +21,11 @@ namespace Microsoft.Identity.Client.Cache.Items
             MsalTokenResponse response,
             string homeAccountId)
             : this(
-                  preferredCacheEnv, 
-                  clientId, 
-                  response.RefreshToken, 
-                  response.ClientInfo, 
-                  response.FamilyId, 
+                  preferredCacheEnv,
+                  clientId,
+                  response.RefreshToken,
+                  response.ClientInfo,
+                  response.FamilyId,
                   homeAccountId)
         {
         }
@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         public string FamilyId { get; set; }
 
         internal string UserAssertionHash { get; set; }
+        internal string OboCacheKey { get; set; }
 
         /// <summary>
         /// Family Refresh Tokens, can be used for all clients part of the family
@@ -79,6 +80,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             var item = new MsalRefreshTokenCacheItem();
             item.FamilyId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
             item.UserAssertionHash = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash);
+            item.OboCacheKey = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.OboCacheKey);
 
             item.PopulateFieldsFromJObject(j);
 
@@ -90,6 +92,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             var json = base.ToJObject();
             SetItemIfValueNotNull(json, StorageJsonKeys.FamilyId, FamilyId);
             SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, UserAssertionHash);
+            SetItemIfValueNotNull(json, StorageJsonKeys.OboCacheKey, OboCacheKey);
             return json;
         }
 

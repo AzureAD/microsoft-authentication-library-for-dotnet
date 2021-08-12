@@ -1,21 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Internal.Requests;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.TelemetryCore;
-using System.Threading;
-using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.ApiConfig.Executors;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.CacheImpl;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client
 {
@@ -30,7 +24,7 @@ namespace Microsoft.Identity.Client
     /// and never directly exposed. For details see https://aka.ms/msal-net-client-applications
     /// </remarks>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
     public sealed partial class ConfidentialClientApplication
         : ClientApplicationBase,
@@ -51,7 +45,7 @@ namespace Microsoft.Identity.Client
             GuardMobileFrameworks();
 
             InMemoryPartitionedCacheSerializer = new InMemoryPartitionedCacheSerializer(ServiceBundle.ApplicationLogger);
-            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? 
+            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ??
                 new TokenCache(ServiceBundle, true, InMemoryPartitionedCacheSerializer);
             Certificate = configuration.ClientCredentialCertificate;
 
@@ -91,7 +85,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">scopes requested to access a protected API. For this flow (client credentials), the scopes
         /// should be of the form "{ResourceIdUri/.default}" for instance <c>https://management.azure.net/.default</c> or, for Microsoft
         /// Graph, <c>https://graph.microsoft.com/.default</c> as the requested scopes are defined statically with the application registration
-        /// in the portal, and cannot be overriden in the application.</param>
+        /// in the portal, and cannot be overridden in the application.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can also chain the following optional parameters:
         /// <see cref="AcquireTokenForClientParameterBuilder.WithForceRefresh(bool)"/>
@@ -133,6 +127,27 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes,
                 userAssertion);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="cacheKey"></param>
+        /// <returns></returns>
+        public AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(
+            IEnumerable<string> scopes,
+            string cacheKey)
+        {
+            if (cacheKey == null)
+            {
+                throw new ArgumentNullException(nameof(cacheKey));
+            }
+
+            return AcquireTokenOnBehalfOfParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                cacheKey);
         }
 
         /// <summary>

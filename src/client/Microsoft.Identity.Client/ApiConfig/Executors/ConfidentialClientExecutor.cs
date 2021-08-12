@@ -5,7 +5,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 
@@ -42,7 +41,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             var handler = new ConfidentialAuthCodeRequest(
                 ServiceBundle,
                 requestParams,
-                authorizationCodeParameters); 
+                authorizationCodeParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -58,9 +57,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.AppTokenCacheInternal).ConfigureAwait(false);
-       
+
             requestParams.SendX5C = clientParameters.SendX5C;
-            
+
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
                 requestParams,
@@ -83,6 +82,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             requestParams.SendX5C = onBehalfOfParameters.SendX5C;
             requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
+            requestParams.OboCacheKey = onBehalfOfParameters.OboCacheKey;
 
             var handler = new OnBehalfOfRequest(
                 ServiceBundle,
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestParameters.RedirectUri = new Uri(authorizationRequestUrlParameters.RedirectUri);
             }
 
-            await requestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);            
+            await requestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
             var handler = new AuthCodeRequestComponent(
                 requestParameters,
                 authorizationRequestUrlParameters.ToInteractiveParameters());

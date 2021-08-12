@@ -9,7 +9,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     internal class AcquireTokenOnBehalfOfParameters : IAcquireTokenParameters
     {
         public UserAssertion UserAssertion { get; set; }
-        public bool SendX5C { get; set;}
+        public string OboCacheKey { get; set; }
+        public bool SendX5C { get; set; }
         public bool ForceRefresh { get; set; }
 
         /// <inheritdoc />
@@ -19,6 +20,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             builder.AppendLine("=== OnBehalfOfParameters ===");
             builder.AppendLine("SendX5C: " + SendX5C);
             builder.AppendLine("ForceRefresh: " + ForceRefresh);
+            builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
+            builder.AppendLine("OboCacheKey set: " + !string.IsNullOrWhiteSpace(OboCacheKey));
             logger.Info(builder.ToString());
         }
     }

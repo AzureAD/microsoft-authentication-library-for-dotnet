@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.Cache
@@ -50,7 +49,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
-                key = requestParameters.UserAssertion.AssertionHash;
+                key = requestParameters.OboCacheKey ?? requestParameters.UserAssertion.AssertionHash;
                 return true;
             }
 
@@ -58,7 +57,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 string tenantId = requestParameters.Authority.TenantId ?? "";
                 key = GetClientCredentialKey(requestParameters.AppConfig.ClientId, tenantId);
-                    
+
                 return true;
             }
 
@@ -67,7 +66,7 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         public /* for test */ static string GetClientCredentialKey(string clientId, string tenantId)
-        {                
+        {
             return $"{clientId}_{tenantId}_AppTokenCache";
         }
     }

@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client
 
         internal static AcquireTokenOnBehalfOfParameterBuilder Create(
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
-            IEnumerable<string> scopes, 
+            IEnumerable<string> scopes,
             UserAssertion userAssertion)
         {
             return new AcquireTokenOnBehalfOfParameterBuilder(confidentialClientApplicationExecutor)
@@ -44,10 +44,30 @@ namespace Microsoft.Identity.Client
                    .WithUserAssertion(userAssertion);
         }
 
+        internal static AcquireTokenOnBehalfOfParameterBuilder Create(
+            IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
+            IEnumerable<string> scopes,
+            string cacheKey)
+        {
+            return new AcquireTokenOnBehalfOfParameterBuilder(confidentialClientApplicationExecutor)
+                   .WithScopes(scopes)
+                   .WithCacheKey(cacheKey);
+        }
         private AcquireTokenOnBehalfOfParameterBuilder WithUserAssertion(UserAssertion userAssertion)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithUserAssertion);
             Parameters.UserAssertion = userAssertion;
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cacheKey"></param>
+        /// <returns></returns>
+        public AcquireTokenOnBehalfOfParameterBuilder WithCacheKey(string cacheKey)
+        {
+            Parameters.OboCacheKey = cacheKey ?? throw new ArgumentNullException(nameof(cacheKey));
             return this;
         }
 

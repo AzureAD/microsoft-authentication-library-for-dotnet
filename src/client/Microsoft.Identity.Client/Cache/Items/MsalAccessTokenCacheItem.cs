@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             HomeAccountId = homeAccountId;
-        }        
+        }
 
         private string _tenantId;
 
@@ -90,6 +90,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string ExpiresOnUnixTimestamp { get; set; }
         internal string ExtendedExpiresOnUnixTimestamp { get; set; }
         internal string UserAssertionHash { get; set; }
+        internal string OboCacheKey { get; set; }
 
         /// <summary>
         /// Used when the token is bound to a public / private key pair which is identified by a key id (kid). 
@@ -160,12 +161,13 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             var item = new MsalAccessTokenCacheItem(JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target))
             {
-                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),                
+                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
                 CachedAt = cachedAt.ToString(CultureInfo.InvariantCulture),
                 ExpiresOnUnixTimestamp = expiresOn.ToString(CultureInfo.InvariantCulture),
                 ExtendedExpiresOnUnixTimestamp = extendedExpiresOn.ToString(CultureInfo.InvariantCulture),
                 RefreshOnUnixTimestamp = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.RefreshOn),
                 UserAssertionHash = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash),
+                OboCacheKey = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.OboCacheKey),
                 KeyId = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId),
                 TokenType = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer
             };
@@ -182,6 +184,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
             SetItemIfValueNotNull(json, StorageJsonKeys.Target, _scopes);
             SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, UserAssertionHash);
+            SetItemIfValueNotNull(json, StorageJsonKeys.OboCacheKey, OboCacheKey);
             SetItemIfValueNotNull(json, StorageJsonKeys.CachedAt, CachedAt);
             SetItemIfValueNotNull(json, StorageJsonKeys.ExpiresOn, ExpiresOnUnixTimestamp);
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn, ExtendedExpiresOnUnixTimestamp);
@@ -189,8 +192,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNullOrDefault(json, StorageJsonKeys.TokenType, TokenType, StorageJsonValues.TokenTypeBearer);
             SetItemIfValueNotNull(json, StorageJsonKeys.RefreshOn, RefreshOnUnixTimestamp);
 
-            // previous versions of msal used "ext_expires_on" instead of the correct "extended_expires_on".
-            // this is here for back compat
+            // previous versions of MSAL used "ext_expires_on" instead of the correct "extended_expires_on".
+            // this is here for back compatibility
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn_MsalCompat, ExtendedExpiresOnUnixTimestamp);
 
             return json;
@@ -208,7 +211,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TenantId,
                 HomeAccountId,
                 ClientId,
-                _scopes, 
+                _scopes,
                 TokenType);
         }
 
