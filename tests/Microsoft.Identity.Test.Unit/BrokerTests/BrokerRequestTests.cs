@@ -28,12 +28,13 @@ using System.Net.Http;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
     [TestClass]
     [TestCategory("Broker")]
-    public class BrokerRequestTests : TestBase
+    public class BrokerTests : TestBase
     {
         private BrokerInteractiveRequestComponent _brokerInteractiveRequest;
         private BrokerSilentStrategy _brokerSilentAuthStrategy;
@@ -172,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         Assert.AreEqual(MsalErrorMessage.BrokerResponseReturnedError, exc.Message);
                     });
             }
-        }       
+        }
 
         [TestMethod]
         public void BrokerInteractiveRequestTest()
@@ -238,10 +239,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(
                     () => broker.GetAccountsAsync(
-                        TestConstants.ClientId, 
-                        TestConstants.RedirectUri, 
-                        null, 
-                        null, 
+                        TestConstants.ClientId,
+                        TestConstants.RedirectUri,
+                        null,
+                        null,
                         null))
                     .ConfigureAwait(false);
             }
@@ -259,6 +260,126 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
+        [TestMethod]
+        public void GetAccountWithDuplicateBrokerAccountsTest()
+        {
+            // Arrange
+            var app = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .BuildConcrete();
+
+            var broker = Substitute.For<IBroker>();
+            var expectedAccount = TestConstants.s_user;
+            broker.GetAccountsAsync(
+                TestConstants.ClientId,
+                TestConstants.RedirectUri,
+                Arg.Any<AuthorityInfo>(),
+                Arg.Any<ICacheSessionManager>(),
+                Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount, expectedAccount });
+            broker.IsBrokerInstalledAndInvokable().Returns(true);
+
+            var platformProxy = Substitute.For<IPlatformProxy>();
+            platformProxy.CreateBroker(Arg.Any<ApplicationConfiguration>(), Arg.Any<CoreUIParent>()).ReturnsForAnyArgs(broker);
+
+            app.ServiceBundle.SetPlatformProxyForTest(platformProxy);
+            app.ServiceBundle.Config.IsBrokerEnabled = true;
+
+            // Act
+            var account = app.GetAccountAsync(TestConstants.HomeAccountId).GetAwaiter().GetResult();
+
+            // Assert
+            Assert.AreEqual(TestConstants.HomeAccountId, account.HomeAccountId.Identifier);
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
+        public async Task NullBroker_GetAccounts_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                var builder = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(harness.HttpManager);
+
+                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new NullBroker(logger); };
+
+                var app = builder.WithBroker(true).BuildConcrete();
+
+
+                // Act
+                var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.IsFalse(accounts.Any());
+            }
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
+        public async Task NullBroker_RemoveAccounts_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                var builder = PublicClientApplicationBuilder
+                     .Create(TestConstants.ClientId)
+                     .WithHttpManager(harness.HttpManager);
+
+                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new NullBroker(logger); };
+                
+                var app = builder.WithBroker(true).BuildConcrete();
+
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+
+
+                // Act
+                var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+                await app.RemoveAsync(accounts.Single()).ConfigureAwait(false);
+                var accounts2 = await app.GetAccountsAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(1, accounts.Count());
+                Assert.IsFalse(accounts2.Any());
+            }
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
+        public async Task NullBroker_AcquireSilentInteractive_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                var builder = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(harness.HttpManager);
+
+                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new NullBroker(logger); };
+
+                var app = builder.WithBroker(true).BuildConcrete();
+
+                // Act
+                try
+                {
+                    await app.AcquireTokenSilent(new[] { "User.Read" }, new Account("id", "upn", "env"))
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+                }
+                catch (MsalUiRequiredException e)
+                {
+                    Assert.AreEqual("no_tokens_found", e.ErrorCode);
+
+                    harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                    harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                    app.ServiceBundle.ConfigureMockWebUI();
+                    var result = await
+                        app.AcquireTokenInteractive(new[] { "User.Read" }).ExecuteAsync().ConfigureAwait(false);
+
+                    Assert.IsNotNull(result, "Broker is not installed, so MSAL will get a token using the browser");
+                }
+            }
+        }
+
 #if NET5_WIN
         [TestMethod]
         public async Task BrokerGetAccountsWithBrokerInstalledTestAsync()
@@ -266,7 +387,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
 
             var platformProxy = Substitute.For<IPlatformProxy>();
-            platformProxy.CanBrokerSupportSilentAuth().Returns(true);
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
@@ -300,7 +420,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             // Arrange
             var platformProxy = Substitute.For<IPlatformProxy>();
-            platformProxy.CanBrokerSupportSilentAuth().Returns(true);
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
@@ -341,7 +460,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var mockBroker = Substitute.For<IBroker>();
                 var expectedAccount = Substitute.For<IAccount>();
                 mockBroker.GetAccountsAsync(
-                    TestConstants.ClientId, 
+                    TestConstants.ClientId,
                     TestConstants.RedirectUri,
                     AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     Arg.Any<ICacheSessionManager>(),
@@ -349,11 +468,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
-                platformProxy.CanBrokerSupportSilentAuth().Returns(true);
                 platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
                 harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
-                
+
                 var mockClientStrategy = Substitute.For<ISilentAuthRequestStrategy>();
                 var mockBrokerStrategy = Substitute.For<ISilentAuthRequestStrategy>();
                 var brokerAuthenticationResult = new AuthenticationResult();
@@ -368,9 +486,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 //Execute silent request with invalid grant
                 var silentRequest = new SilentRequest(
-                    harness.ServiceBundle, 
-                    _parameters, 
-                    _acquireTokenSilentParameters, 
+                    harness.ServiceBundle,
+                    _parameters,
+                    _acquireTokenSilentParameters,
                     mockClientStrategy,
                     mockBrokerStrategy);
 
@@ -391,7 +509,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
                 Assert.AreEqual(result, brokerAuthenticationResult);
             }
-        }
+        }       
 
         [TestMethod]
         public void SpecialAccount_CallsBrokerSilentAuth()
@@ -403,7 +521,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
-                platformProxy.CanBrokerSupportSilentAuth().Returns(true);
                 platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
                 harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
@@ -449,6 +566,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _parameters.Account = PublicClientApplication.OperatingSystemAccount;
                 broker.AcquireTokenSilentDefaultUserAsync(_parameters, _acquireTokenSilentParameters)
                     .Returns(Task.FromResult(_msalTokenResponse));
+                broker.IsBrokerInstalledAndInvokable().Returns(true);
 
                 // Act
                 var result = await brokerSilentAuthStrategy.ExecuteAsync(default).ConfigureAwait(false);

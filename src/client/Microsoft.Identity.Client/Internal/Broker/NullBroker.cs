@@ -3,7 +3,9 @@
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
@@ -18,8 +20,16 @@ namespace Microsoft.Identity.Client.Internal.Broker
     /// </summary>
     internal class NullBroker : IBroker
     {
+        private readonly ICoreLogger _logger;
+
+        public NullBroker(ICoreLogger logger)
+        {
+            _logger = logger ?? new NullLogger();
+        }
+
         public bool IsBrokerInstalledAndInvokable()
         {
+            _logger.Info("NullLogger - acting as not installed.");
             return false;
         }      
 
@@ -30,7 +40,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public Task<MsalTokenResponse> AcquireTokenSilentAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            throw new PlatformNotSupportedException();
+            _logger.Info("NullLogger - returning null on silent request.");
+            return null;
         }
 
         public void HandleInstallUrl(string appLink)
@@ -40,12 +51,14 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
-            throw new PlatformNotSupportedException();
+            _logger.Info("NullLogger::RemoveAccountAsync - NOP.");
+            return Task.Delay(0); // nop
         }
 
         public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            throw new PlatformNotSupportedException();
+            _logger.Info("NullLogger - returning null on silent request.");
+            return null;
         }
 
         Task<IReadOnlyList<IAccount>> IBroker.GetAccountsAsync(
@@ -55,7 +68,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
             ICacheSessionManager cacheSessionManager, 
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            throw new NotImplementedException();
+            _logger.Info("NullLogger - returning empty list on GetAccounts request.");
+            return Task.FromResult<IReadOnlyList<IAccount>>(new List<IAccount>()); // nop
         }
     }
 }
