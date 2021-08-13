@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public UserAssertion UserAssertion { get; set; }
         public bool SendX5C { get; set; }
         
-        internal bool SetPerRequestX5C = false;
+        internal bool SetPerRequestX5C = true;
         public bool ForceRefresh { get; set; }
 
         /// <inheritdoc />

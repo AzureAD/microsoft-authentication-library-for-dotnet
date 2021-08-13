@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IAccount Account { get; set; }
         public bool SendX5C { get; set; } 
         
-        internal bool SetPerRequestX5C = false;
+        internal bool SetPerRequestX5C = true;
 
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)

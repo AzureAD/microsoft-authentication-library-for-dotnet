@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// </summary>
         public bool SendX5C { get; set; } 
         
-        internal bool SetPerRequestX5C = false;
+        internal bool SetPerRequestX5C = true;
 
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)
