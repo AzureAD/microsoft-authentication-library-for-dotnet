@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #endif
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims, false);
-            return jwtToken.Sign(clientCredential);
+            return jwtToken.Sign(clientCredential, true);
         }
 
         private static X509Certificate2 GetCertificate(bool useRSACert = false)

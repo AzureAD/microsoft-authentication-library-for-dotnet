@@ -124,13 +124,6 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// </summary>
-#if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
-#endif
-        bool SendX5C { get; }
-
-        /// <summary>
-        /// </summary>
         Func<object> ParentActivityOrWindowFunc { get; }
 
 #if WINDOWS_APP

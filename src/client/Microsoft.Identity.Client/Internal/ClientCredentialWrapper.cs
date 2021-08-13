@@ -108,7 +108,6 @@ namespace Microsoft.Identity.Client.Internal
             applicationConfiguration.ClientCredentialCertificate = certificate;
             applicationConfiguration.ConfidentialClientCredentialCount = 1;
             applicationConfiguration.ClaimsToSign = claimsToSign;
-            applicationConfiguration.SendX5C = withSendX5C;
 
             return new ClientCredentialWrapper(applicationConfiguration);
         }

@@ -96,28 +96,6 @@ namespace Microsoft.Identity.Client
 
             Config.ClientCredentialCertificate = certificate;
             Config.ConfidentialClientCredentialCount++;
-            return WithSendX5C(withSendX5C);
-        }
-
-        /// <summary>
-        /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
-        /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
-        /// this method will send the public certificate to Azure AD along with all STS requests,
-        /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
-        /// This saves the application admin from the need to explicitly manage the certificate rollover
-        /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
-        /// </summary>
-        /// <param name="withSendX5C"> Determines if the x5c claim should be sent in the header, for Subject Name and Issuer certificate use.
-        /// The default for all applications is <c>false</c></param>
-        public ConfidentialClientApplicationBuilder WithSendX5C(bool withSendX5C)
-        {
-            // Default is not to send X5C, so if called with false, this is a no-op. 
-            if (!withSendX5C)
-            {
-                return this;
-            }
-
-            Config.SendX5C= withSendX5C;
             return this;
         }
 
@@ -148,7 +126,7 @@ namespace Microsoft.Identity.Client
             Config.ClaimsToSign = claimsToSign;
             Config.MergeWithDefaultClaims = mergeWithDefaultClaims;
             Config.ConfidentialClientCredentialCount++;
-            return WithSendX5C(withSendX5C);
+            return this;
         }
 
         /// <summary>
