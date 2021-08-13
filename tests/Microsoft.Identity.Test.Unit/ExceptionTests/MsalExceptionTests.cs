@@ -174,6 +174,25 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         }
 
         [TestMethod]
+        public void MsalServiceException_Throws_MsalUIRequiredException_When_Throttled()
+        {
+            // Arrange
+            HttpResponse httpResponse = new HttpResponse()
+            {
+                Body = JsonError.Replace("AADSTS90002", Constants.AadThrottledErrorCode),
+                StatusCode = HttpStatusCode.BadRequest, // 400
+            };
+
+            // Act
+            var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse);
+
+            // Assert
+            Assert.AreEqual(typeof(MsalUiRequiredException), msalException.GetType());
+            Assert.AreEqual(MsalErrorMessage.AadThrottledError, msalException.Message);
+            ValidateExceptionProductInformation(msalException);
+        }
+
+        [TestMethod]
         public void MsalServiceException_HttpResponse_OAuthResponse()
         {
             // Arrange
