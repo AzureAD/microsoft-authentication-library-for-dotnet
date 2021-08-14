@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 
@@ -26,7 +27,14 @@ namespace Microsoft.Identity.Client
 
             if (IsInvalidGrant(oAuth2Response?.Error, oAuth2Response?.SubError) || IsInteractionRequired(oAuth2Response?.Error))
             {
-                ex = new MsalUiRequiredException(errorCode, errorMessage, innerException);
+                if (IsThrottled(oAuth2Response))
+                {
+                    ex = new MsalUiRequiredException(errorCode, MsalErrorMessage.AadThrottledError, innerException);
+                }
+                else
+                {
+                    ex = new MsalUiRequiredException(errorCode, errorMessage, innerException);
+                }
             }
 
             if (string.Equals(oAuth2Response?.Error, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
@@ -52,6 +60,12 @@ namespace Microsoft.Identity.Client
             ex.SubError = oAuth2Response?.SubError;
 
             return ex;
+        }
+
+        private static bool IsThrottled(OAuth2ResponseBase oAuth2Response)
+        {
+            return oAuth2Response.ErrorDescription != null &&
+               oAuth2Response.ErrorDescription.StartsWith(Constants.AadThrottledErrorCode);
         }
 
         internal static MsalServiceException FromBrokerResponse(

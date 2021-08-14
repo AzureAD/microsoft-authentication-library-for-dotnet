@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31512.422
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9B0B5396-4D95-4C15-82ED-DC22B5A3123F}"
 EndProject
@@ -109,7 +109,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-build-and-run-cachecompat-tests.yaml = build\template-build-and-run-cachecompat-tests.yaml
 		build\template-build-android-automation.yaml = build\template-build-android-automation.yaml
 		build\template-build-ios-automation.yaml = build\template-build-ios-automation.yaml
-		build\template-ci-and-pr.yaml = build\template-ci-and-pr.yaml
 		build\template-desktop-unit-and-automation.yaml = build\template-desktop-unit-and-automation.yaml
 		build\template-install-dotnet-core.yaml = build\template-install-dotnet-core.yaml
 		build\template-install-keyvault-secrets.yaml = build\template-install-keyvault-secrets.yaml
