@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Client
                    .WithScopes(scopes)
                    .WithCacheKey(cacheKey);
         }
+
         private AcquireTokenOnBehalfOfParameterBuilder WithUserAssertion(UserAssertion userAssertion)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithUserAssertion);
@@ -61,10 +62,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
+        /// Specifies a key by which to look up the token in the cache instead of searching by an assertion.
         /// </summary>
-        /// <param name="cacheKey"></param>
-        /// <returns></returns>
+        /// <param name="cacheKey">Key by which to look up the token in the cache</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         public AcquireTokenOnBehalfOfParameterBuilder WithCacheKey(string cacheKey)
         {
             Parameters.OboCacheKey = cacheKey ?? throw new ArgumentNullException(nameof(cacheKey));

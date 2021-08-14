@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             cca.UserTokenCacheInternal.Accessor.AssertItemCount(3, 2, 3, 3, 1);
             foreach (var at in cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens())
             {
-                at.UserAssertionHash = "_JPLB-GtkomFJxAOWKHPHR5_ZemiZqb4fzyE_rVBx7M"; // the hash of "jwt"
+                at.OboCacheKey = "_JPLB-GtkomFJxAOWKHPHR5_ZemiZqb4fzyE_rVBx7M"; // the hash of "jwt"
             }
 
             cca.UserTokenCacheInternal.Accessor.DeleteAccessToken(

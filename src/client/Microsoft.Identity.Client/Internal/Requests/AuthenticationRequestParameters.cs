@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <summary>
         /// Authority is the URI used by MSAL for communication and storage
         /// During a request it can be updated: 
-        /// - with the proffered environment
+        /// - with the preferred environment
         /// - with actual tenant
         /// </summary>
         public Authority Authority => AuthorityManager.Authority;

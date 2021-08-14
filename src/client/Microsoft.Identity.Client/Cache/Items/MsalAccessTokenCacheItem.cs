@@ -89,7 +89,10 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string CachedAt { get; set; }
         internal string ExpiresOnUnixTimestamp { get; set; }
         internal string ExtendedExpiresOnUnixTimestamp { get; set; }
-        internal string UserAssertionHash { get; set; }
+
+        /// <summary>
+        /// Used to find the token in the cache. Can be a token assertion hash or a user provided key.
+        /// </summary>
         internal string OboCacheKey { get; set; }
 
         /// <summary>
@@ -166,8 +169,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 ExpiresOnUnixTimestamp = expiresOn.ToString(CultureInfo.InvariantCulture),
                 ExtendedExpiresOnUnixTimestamp = extendedExpiresOn.ToString(CultureInfo.InvariantCulture),
                 RefreshOnUnixTimestamp = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.RefreshOn),
-                UserAssertionHash = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash),
-                OboCacheKey = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.OboCacheKey),
+                OboCacheKey = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash),
                 KeyId = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId),
                 TokenType = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer
             };
@@ -183,8 +185,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
             SetItemIfValueNotNull(json, StorageJsonKeys.Target, _scopes);
-            SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, UserAssertionHash);
-            SetItemIfValueNotNull(json, StorageJsonKeys.OboCacheKey, OboCacheKey);
+            SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, OboCacheKey);
             SetItemIfValueNotNull(json, StorageJsonKeys.CachedAt, CachedAt);
             SetItemIfValueNotNull(json, StorageJsonKeys.ExpiresOn, ExpiresOnUnixTimestamp);
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn, ExtendedExpiresOnUnixTimestamp);

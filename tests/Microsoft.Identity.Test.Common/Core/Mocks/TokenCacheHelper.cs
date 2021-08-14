@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             if (userAssertion != null)
             {
                 var crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
-                atItem.UserAssertionHash = crypto.CreateBase64UrlEncodedSha256Hash(userAssertion);
+                atItem.OboCacheKey = crypto.CreateBase64UrlEncodedSha256Hash(userAssertion);
             }
 
             // add access token
@@ -281,7 +281,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             foreach (var atItem in allAccessTokens)
             {
-                atItem.UserAssertionHash = assertion;
+                atItem.OboCacheKey = assertion;
                 tokenCache.AddAccessTokenCacheItem(atItem);
             }
         }
@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             foreach (var rtItem in rtItems)
             {
-                rtItem.UserAssertionHash = assertion;
+                rtItem.OboCacheKey = assertion;
                 tokenCache.AddRefreshTokenCacheItem(rtItem);
             }
         }

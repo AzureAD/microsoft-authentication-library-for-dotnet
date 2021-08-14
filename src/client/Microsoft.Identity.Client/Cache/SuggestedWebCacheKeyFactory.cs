@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
-                key = requestParameters.OboCacheKey ?? requestParameters.UserAssertion.AssertionHash;
+                key = !string.IsNullOrEmpty(requestParameters.OboCacheKey) ? requestParameters.OboCacheKey : requestParameters.UserAssertion.AssertionHash;
                 return true;
             }
 

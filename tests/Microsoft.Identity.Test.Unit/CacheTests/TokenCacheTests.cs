@@ -697,7 +697,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // set it as the value of the access token.
                 string atKey = atItem.GetKey().ToString();
                 atItem.Secret = atKey;
-                atItem.UserAssertionHash = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
+                atItem.OboCacheKey = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
                 cache.Accessor.SaveAccessToken(atItem);
 
                 var rtItem = new MsalRefreshTokenCacheItem(
@@ -710,7 +710,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 string rtKey = rtItem.GetKey().ToString();
                 rtItem.Secret = rtKey;
-                rtItem.UserAssertionHash = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
+                rtItem.OboCacheKey = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -718,7 +718,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.s_scope,
                     cache,
                     apiId: ApiEvent.ApiIds.AcquireTokenOnBehalfOf);
-                authParams.UserAssertion = new UserAssertion(atItem.UserAssertionHash + "-random");
+                authParams.UserAssertion = new UserAssertion(atItem.OboCacheKey + "-random");
 
                 var itemAT = cache.FindAccessTokenAsync(authParams).Result;
                 var itemRT = cache.FindRefreshTokenAsync(authParams).Result;
@@ -753,7 +753,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // set it as the value of the access token.
                 string atKey = atItem.GetKey().ToString();
                 atItem.Secret = atKey;
-                atItem.UserAssertionHash = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
+                atItem.OboCacheKey = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
 
                 cache.Accessor.SaveAccessToken(atItem);
 
@@ -767,7 +767,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 string rtKey = rtItem.GetKey().ToString();
                 rtItem.Secret = rtKey;
-                rtItem.UserAssertionHash = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
+                rtItem.OboCacheKey = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(

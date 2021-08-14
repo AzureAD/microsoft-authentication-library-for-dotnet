@@ -70,8 +70,7 @@ namespace Microsoft.Identity.Client
                         homeAccountId,
                         requestParams.AuthenticationScheme.KeyId)
                     {
-                        UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
-                        OboCacheKey = requestParams.OboCacheKey,
+                        OboCacheKey = !string.IsNullOrEmpty(requestParams.OboCacheKey) ? requestParams.OboCacheKey : requestParams.UserAssertion?.AssertionHash,
                         IsAdfs = isAdfsAuthority
                     };
             }
@@ -84,8 +83,7 @@ namespace Microsoft.Identity.Client
                                     response,
                                     homeAccountId)
                 {
-                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
-                    OboCacheKey = requestParams.OboCacheKey,
+                    OboCacheKey = !string.IsNullOrEmpty(requestParams.OboCacheKey) ? requestParams.OboCacheKey : requestParams.UserAssertion?.AssertionHash,
                 };
 
                 if (!_featureFlags.IsFociEnabled)
@@ -445,10 +443,8 @@ namespace Microsoft.Identity.Client
             {
                 tokenCacheItems =
                     tokenCacheItems.FilterWithLogging(item =>
-                        (!string.IsNullOrEmpty(item.OboCacheKey) &&
-                        item.OboCacheKey.Equals(requestParams.OboCacheKey, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrEmpty(item.UserAssertionHash) &&
-                        item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase)),
+                        !string.IsNullOrEmpty(item.OboCacheKey) &&
+                        item.OboCacheKey.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
                         requestParams.RequestContext.Logger,
                         $"Filtering AT by user assertion: {requestParams.UserAssertion.AssertionHash}");
 
@@ -696,10 +692,8 @@ namespace Microsoft.Identity.Client
             if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
             {
                 rtCacheItems = rtCacheItems.FilterWithLogging(item =>
-                                (!string.IsNullOrEmpty(item.OboCacheKey) &&
-                                item.OboCacheKey.Equals(requestParams.OboCacheKey, StringComparison.OrdinalIgnoreCase)) ||
-                                (!string.IsNullOrEmpty(item.UserAssertionHash) &&
-                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase)),
+                                !string.IsNullOrEmpty(item.OboCacheKey) &&
+                                item.OboCacheKey.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
                                 $"Filtering RT by user assertion: {requestParams.UserAssertion.AssertionHash}");
             }

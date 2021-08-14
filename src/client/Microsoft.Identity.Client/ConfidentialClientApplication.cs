@@ -129,12 +129,7 @@ namespace Microsoft.Identity.Client
                 userAssertion);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="scopes"></param>
-        /// <param name="cacheKey"></param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(
             IEnumerable<string> scopes,
             string cacheKey)
