@@ -29,6 +29,7 @@ using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -291,13 +292,38 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             Assert.AreEqual(TestConstants.HomeAccountId, account.HomeAccountId.Identifier);
         }
 
-        [TestMethod]
+        internal class IosBrokerMock : NullBroker
+        {
+            public IosBrokerMock(ICoreLogger logger) : base(logger)
+            {
+
+            }
+            public override bool IsBrokerInstalledAndInvokable()
+            {
+                return true;
+            }
+        }
+
+        private static IBroker CreateBroker(Type brokerType)
+        {
+            if (brokerType == typeof(NullBroker))
+                return new NullBroker(null);
+            if (brokerType == typeof(IosBrokerMock))
+                return new IosBrokerMock(null);
+
+            throw new NotImplementedException();
+        }
+
+        [DataTestMethod]
+        [DataRow(typeof(NullBroker))]
+        [DataRow(typeof(IosBrokerMock))]
         [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
-        public async Task NullBroker_GetAccounts_Async()
+        public async Task NullAndIosBroker_GetAccounts_Async(Type brokerType)
         {
             using (var harness = CreateTestHarness())
             {
                 // Arrange
+                var broker = CreateBroker(brokerType);
                 var builder = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
@@ -315,18 +341,22 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-        [TestMethod]
+        [DataTestMethod]
+        [DataRow(typeof(NullBroker))]
+        [DataRow(typeof(IosBrokerMock))]
         [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
-        public async Task NullBroker_RemoveAccounts_Async()
+        public async Task NullAndIosBroker_RemoveAccounts_Async(Type brokerType)
         {
             using (var harness = CreateTestHarness())
             {
+                var broker = CreateBroker(brokerType);
+
                 var builder = PublicClientApplicationBuilder
                      .Create(TestConstants.ClientId)
                      .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new NullBroker(logger); };
-                
+                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return broker; };
+
                 var app = builder.WithBroker(true).BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
@@ -376,6 +406,34 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         app.AcquireTokenInteractive(new[] { "User.Read" }).ExecuteAsync().ConfigureAwait(false);
 
                     Assert.IsNotNull(result, "Broker is not installed, so MSAL will get a token using the browser");
+                }
+            }
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
+        public async Task iosBroker_AcquireSilentInteractive_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                var builder = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(harness.HttpManager);
+
+                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new IosBrokerMock(logger); };
+
+                var app = builder.WithBroker(true).BuildConcrete();
+
+                // Act
+                try
+                {
+                    await app.AcquireTokenSilent(new[] { "User.Read" }, new Account("id", "upn", "env"))
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+                }
+                catch (MsalUiRequiredException e)
+                {
+                    Assert.AreEqual("no_tokens_found", e.ErrorCode);
                 }
             }
         }
@@ -509,7 +567,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
                 Assert.AreEqual(result, brokerAuthenticationResult);
             }
-        }       
+        }
 
         [TestMethod]
         public void SpecialAccount_CallsBrokerSilentAuth()
@@ -723,4 +781,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             return harness;
         }
     }
+
+
 }

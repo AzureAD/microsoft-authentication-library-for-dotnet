@@ -27,9 +27,9 @@ namespace Microsoft.Identity.Client.Internal.Broker
             _logger = logger ?? new NullLogger();
         }
 
-        public bool IsBrokerInstalledAndInvokable()
+        public virtual bool IsBrokerInstalledAndInvokable()
         {
-            _logger.Info("NullLogger - acting as not installed.");
+            _logger.Info("NullBroker - acting as not installed.");
             return false;
         }      
 
@@ -40,8 +40,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public Task<MsalTokenResponse> AcquireTokenSilentAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            _logger.Info("NullLogger - returning null on silent request.");
-            return null;
+            _logger.Info("NullBroker - returning null on silent request.");
+            return Task.FromResult<MsalTokenResponse>(null);
         }
 
         public void HandleInstallUrl(string appLink)
@@ -51,24 +51,24 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
-            _logger.Info("NullLogger::RemoveAccountAsync - NOP.");
+            _logger.Info("NullBroker::RemoveAccountAsync - NOP.");
             return Task.Delay(0); // nop
         }
 
         public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            _logger.Info("NullLogger - returning null on silent request.");
-            return null;
+            _logger.Info("NullBroker - returning null on silent request.");
+            return Task.FromResult<MsalTokenResponse>(null);
         }
 
-        Task<IReadOnlyList<IAccount>> IBroker.GetAccountsAsync(
+        public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientID, 
             string redirectUri,             
             AuthorityInfo authorityInfo,
             ICacheSessionManager cacheSessionManager, 
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            _logger.Info("NullLogger - returning empty list on GetAccounts request.");
+            _logger.Info("NullBroker - returning empty list on GetAccounts request.");
             return Task.FromResult<IReadOnlyList<IAccount>>(new List<IAccount>()); // nop
         }
     }

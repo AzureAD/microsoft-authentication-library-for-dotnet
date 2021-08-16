@@ -46,8 +46,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             MsalTokenResponse response = await SendTokenRequestToBrokerAsync().ConfigureAwait(false);
-            Metrics.IncrementTotalAccessTokensFromBroker();
-            return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
+            if (response != null)
+            {
+                ValidateResponseFromBroker(response);
+                Metrics.IncrementTotalAccessTokensFromBroker();
+                return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
+            }
+
+            return null;
         }
 
         private async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
@@ -69,7 +75,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                      _silentParameters).ConfigureAwait(false);
             }
 
-            ValidateResponseFromBroker(msalTokenResponse);
             return msalTokenResponse;
         }
 
