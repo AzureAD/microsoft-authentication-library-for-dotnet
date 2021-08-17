@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Integration.Win8
 
         
         [TestMethod]
-        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2821
+        //[Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2821
         public async Task PKeyAuthNonInteractiveTestAsync()
         {
             //Arrange
