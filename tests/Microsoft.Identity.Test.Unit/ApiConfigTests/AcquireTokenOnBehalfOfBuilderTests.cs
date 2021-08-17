@@ -63,7 +63,36 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .ConfigureAwait(false);
 
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenOnBehalfOf);
-            _harness.ValidateOnBehalfOfParameters(TestConstants.UserAssertion, forceRefresh: true);
+            _harness.ValidateOnBehalfOfParameters(TestConstants.UserAssertion, expectedForceRefresh: true);
+        }
+
+        [TestMethod]
+        public async Task TestAcquireTokenOnBehalfOfBuilder_ConstructorWithCacheKey_Async()
+        {
+            var cacheKey = "obo-cache-key";
+            await AcquireTokenOnBehalfOfParameterBuilder.Create(_harness.Executor,
+                TestConstants.s_scope,
+                cacheKey)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenOnBehalfOf);
+            _harness.ValidateOnBehalfOfParameters(expectedOboCacheKey: cacheKey);
+        }
+
+        [TestMethod]
+        public async Task TestAcquireTokenOnBehalfOfBuilder_WithCacheKey_Async()
+        {
+            var cacheKey = "obo-cache-key";
+            await AcquireTokenOnBehalfOfParameterBuilder.Create(_harness.Executor,
+                TestConstants.s_scope,
+                new UserAssertion(TestConstants.UserAssertion))
+                .WithCacheKey(cacheKey)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenOnBehalfOf);
+            _harness.ValidateOnBehalfOfParameters(TestConstants.UserAssertion, expectedOboCacheKey: cacheKey);
         }
     }
 }

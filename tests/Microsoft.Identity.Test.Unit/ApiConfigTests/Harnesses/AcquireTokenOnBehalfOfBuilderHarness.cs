@@ -28,14 +28,16 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
         }
 
         public void ValidateOnBehalfOfParameters(
-            string expectedUserAssertion,
+            string expectedUserAssertion = null,
             bool expectedSendX5C = false,
-            bool forceRefresh = false)
+            bool expectedForceRefresh = false,
+            string expectedOboCacheKey = null)
         {
             Assert.IsNotNull(OnBehalfOfParametersReceived);
             Assert.AreEqual(expectedSendX5C, OnBehalfOfParametersReceived.SendX5C);
-            Assert.AreEqual(expectedUserAssertion, OnBehalfOfParametersReceived.UserAssertion.Assertion);
-            Assert.AreEqual(forceRefresh, OnBehalfOfParametersReceived.ForceRefresh);
+            Assert.AreEqual(expectedUserAssertion, OnBehalfOfParametersReceived.UserAssertion?.Assertion);
+            Assert.AreEqual(expectedForceRefresh, OnBehalfOfParametersReceived.ForceRefresh);
+            Assert.AreEqual(expectedOboCacheKey, OnBehalfOfParametersReceived.OboCacheKey);
         }
     }
 }

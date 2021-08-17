@@ -4,28 +4,23 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using System.Threading;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.Identity.Client.OAuth2;
 
 #if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -94,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(app.ClientCredential);
             Assert.IsNotNull(app.ClientCredential.Secret);
             Assert.AreEqual(TestConstants.ClientSecret, app.ClientCredential.Secret);
-            Assert.IsNull(app.ClientCredential.Certificate);            
+            Assert.IsNull(app.ClientCredential.Certificate);
 
             app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
@@ -1174,7 +1169,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var onBehalfOfBuilder = app.AcquireTokenOnBehalfOf(
                                            TestConstants.s_scope,
                                            new UserAssertion("assertion", "assertiontype"))
-                                       .WithSendX5C(true);
+                                       .WithSendX5C(true)
+                                       .WithCacheKey("obo-cache-key");
             PublicClientApplicationTests.CheckBuilderCommonMethods(onBehalfOfBuilder);
 
             var silentBuilder = app.AcquireTokenSilent(TestConstants.s_scope, "user@contoso.com")
@@ -1221,7 +1217,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, expectedTimeDiff);
 
                 TokenCacheHelper.PopulateDefaultAppTokenCache(app);
-                app.AppTokenCache.SetAfterAccess((args) => 
+                app.AppTokenCache.SetAfterAccess((args) =>
                 {
                     if (args.HasStateChanged == true)
                     {

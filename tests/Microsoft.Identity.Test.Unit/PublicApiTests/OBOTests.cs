@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -18,7 +15,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     {
         [TestMethod]
         [DeploymentItem(@"Resources\MultiTenantTokenCache.json")]
-        public async Task MultiTenantOBOAsync()
+        public async Task MultiTenantOboAsync()
         {
             const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
             const string tenant2 = "49f548d0-12b7-4169-a390-bb5304d24462";
@@ -32,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Act
                 var result1 = await cca.AcquireTokenOnBehalfOf(
-                    new[] { "User.Read" }, 
+                    new[] { "User.Read" },
                     new UserAssertion("jwt"))
                     .WithAuthority(AzureCloudInstance.AzurePublic, tenant1)
                     .ExecuteAsync().ConfigureAwait(false);

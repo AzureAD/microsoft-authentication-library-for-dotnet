@@ -444,9 +444,13 @@ namespace Microsoft.Identity.Client
                 tokenCacheItems =
                     tokenCacheItems.FilterWithLogging(item =>
                         !string.IsNullOrEmpty(item.OboCacheKey) &&
-                        item.OboCacheKey.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                        item.OboCacheKey.Equals(
+                            requestParams.OboCacheKey ?? requestParams.UserAssertion.AssertionHash,
+                            StringComparison.OrdinalIgnoreCase),
                         requestParams.RequestContext.Logger,
-                        $"Filtering AT by user assertion: {requestParams.UserAssertion.AssertionHash}");
+                        requestParams.OboCacheKey != null ?
+                            $"Filtering AT by user-provided cache key: {requestParams.OboCacheKey}" :
+                            $"Filtering AT by user assertion: {requestParams.UserAssertion.AssertionHash}");
 
                 // OBO calls FindAccessTokenAsync directly, but we are not able to resolve the authority 
                 // unless the developer has configured a tenanted authority. If they have configured /common
@@ -693,8 +697,12 @@ namespace Microsoft.Identity.Client
             {
                 rtCacheItems = rtCacheItems.FilterWithLogging(item =>
                                 !string.IsNullOrEmpty(item.OboCacheKey) &&
-                                item.OboCacheKey.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                                item.OboCacheKey.Equals(
+                                    requestParams.OboCacheKey ?? requestParams.UserAssertion.AssertionHash,
+                                    StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
+                                requestParams.OboCacheKey != null ?
+                                $"Filtering RT by user-provided cache key: {requestParams.OboCacheKey}" :
                                 $"Filtering RT by user assertion: {requestParams.UserAssertion.AssertionHash}");
             }
             else
