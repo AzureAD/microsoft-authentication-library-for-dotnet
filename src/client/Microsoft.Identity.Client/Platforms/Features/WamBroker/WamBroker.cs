@@ -263,6 +263,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 isAccountInWam: true)
            .ConfigureAwait(false);
 
+            // because of https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2476
             string differentAuthority = WorkaroundOrganizationsBug(authenticationRequestParameters, wamAccount);
 
             WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, differentAuthority);
