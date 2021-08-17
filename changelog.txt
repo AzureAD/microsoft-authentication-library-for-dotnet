@@ -2,6 +2,7 @@
 ==========
 ### Bug Fixes:
 **Fixed a race condition in confidential client requests** when an authority with a different tenant is specified for each request. See issue [#2798](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2798).  
+
 **Fix to correctly propagate `EnableCacheSynchronization` flag from `ConfidentialClientApplicationOptions`**. See pull request [#2801](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2801).  
 
 4.35.0
@@ -34,6 +35,8 @@
 **RemoveAsync(account) in confidential client apps now returns suggested web cache key.** Empty key is no longer returned. [#2643](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2643)
 
 **Invalid syntax in XML comments for NoPromptFailedError and NoTokensFoundError has now been fixed.** See issue [#2756](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2756)
+
+**MSAL.NET now enables confidential client apps to disable the internal cache semaphore by setting the `EnableCacheSynchronization` property to 'false'**. This allows requests to bypass other requests that timeout, for example in the case of using a distributed cache. See PR [#2702](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2702) for details.
 
 ### New Features
 **Limits on URL length in embedded browsers was causing errors with auth code.** Applications will not fail on the embedded browers due to the limitation.  See issue [#2743](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2743)
