@@ -57,10 +57,10 @@ namespace Microsoft.Identity.Client.Instance
                 s_tenantlessTenantNames.Contains(tenantId);
         }
 
-        internal override string GetTenantedAuthority(string tenantId, bool forceTenantless = false)
+        internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
             if (!string.IsNullOrEmpty(tenantId) &&
-                (forceTenantless || IsCommonOrganizationsOrConsumersTenant()))
+                (forceSpecifiedTenant || IsCommonOrganizationsOrConsumersTenant()))
             {
                 var authorityUri = new Uri(AuthorityInfo.CanonicalAuthority);
 

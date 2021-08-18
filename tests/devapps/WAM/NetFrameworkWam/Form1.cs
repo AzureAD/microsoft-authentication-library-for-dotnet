@@ -271,8 +271,8 @@ namespace NetDesktopWinForms
 
             var builder = pca.AcquireTokenInteractive(scopes)
                 .WithUseEmbeddedWebView(false)
-                //.WithExtraQueryParameters("domain_hint=live.com")
-                .WithExtraQueryParameters("msafed=0")
+                //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
+                //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
                 .WithEmbeddedWebViewOptions(
                 new EmbeddedWebViewOptions() { 
                     Title = "Hello world",                     
@@ -535,7 +535,6 @@ namespace NetDesktopWinForms
         public IAccount Account { get; }
 
         public string DisplayValue { get; }
-        //public string IdValue => $"{_account.HomeAccountId.Identifier}";
 
         public AccountModel(IAccount account, string displayValue = null)
         {
