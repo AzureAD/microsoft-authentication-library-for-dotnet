@@ -471,39 +471,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             // Assert that MSAL acquires an account from the broker cache
             Assert.AreSame(expectedAccount, actualAccount.Single());
-        }
-
-        [TestMethod]
-        public async Task BrokerGetAccountsWithBrokerNotInstalledTestAsync()
-        {
-            // Arrange
-            var platformProxy = Substitute.For<IPlatformProxy>();
-
-            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
-                .WithBroker(true)
-                .WithPlatformProxy(platformProxy)
-                .Build();
-
-            var mockBroker = Substitute.For<IBroker>();
-            var expectedAccount = new Account("a.b", "user", "login.windows.net");
-            mockBroker.GetAccountsAsync(
-                TestConstants.ClientId, 
-                TestConstants.RedirectUri,
-                (pca.AppConfig as ApplicationConfiguration).AuthorityInfo,
-                Arg.Any<ICacheSessionManager>(),
-                Arg.Any<IInstanceDiscoveryManager>() ).Returns(new[] { expectedAccount });
-            mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
-
-            platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
-
-
-            // Act
-            var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
-
-            // Assert that MSAL attempts to acquire an account locally when broker is not available
-            Assert.IsTrue(actualAccount.Count() == 1);
-        }
+        }        
 #endif
 
         [TestMethod]
