@@ -377,7 +377,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// </summary>
         public Task RemoveAccountAsync(ApplicationConfiguration applicationConfiguration, IAccount account)
         {
-            throw new NotImplementedException();
+            return Task.Delay(0); // nop
         }
 
         /// <summary>
@@ -390,7 +390,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     ICacheSessionManager cacheSessionManager,
                     IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            throw new NotImplementedException();
+            return Task.FromResult<IReadOnlyList<IAccount>>(new List<IAccount>()); // nop
         }
 
         /// <summary>
@@ -398,12 +398,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// </summary>
         public Task<MsalTokenResponse> AcquireTokenSilentAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            throw new NotImplementedException();
+            return Task.FromResult<MsalTokenResponse>(null); // nop
         }
 
         public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            throw new NotImplementedException();
+            return Task.FromResult<MsalTokenResponse>(null); // nop
         }
 
         #endregion

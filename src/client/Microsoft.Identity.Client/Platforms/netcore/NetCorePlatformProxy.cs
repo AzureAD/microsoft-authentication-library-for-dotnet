@@ -243,8 +243,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return PoPProviderFactory.GetOrCreateProvider();
         }
 
-        public override bool CanBrokerSupportSilentAuth() => true;
-
         public override bool BrokerSupportsWamAccounts => true;
 
         /// <summary>

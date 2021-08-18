@@ -35,14 +35,9 @@ namespace Microsoft.Identity.Client.Platforms.net5win
             }
             else
             {
-                Logger.Info("Not a Win10 machine. WAM is not available");
-                return new NullBroker();
+                Logger.Info("Not a Win10 or Server 2019 or Server 2016 machine. WAM is not available");
+                return new NullBroker(Logger);
             }
-        }
-
-        public override bool CanBrokerSupportSilentAuth()
-        {
-            return true;
         }
 
         public override bool BrokerSupportsWamAccounts => true;

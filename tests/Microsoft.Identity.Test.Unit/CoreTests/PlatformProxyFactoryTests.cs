@@ -153,8 +153,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
 
-            Assert.IsTrue(proxy.BrokerSupportsWamAccounts);
-            Assert.IsTrue(proxy.CanBrokerSupportSilentAuth());
+            Assert.IsTrue(proxy.BrokerSupportsWamAccounts);            
 
             
             Assert.AreSame(

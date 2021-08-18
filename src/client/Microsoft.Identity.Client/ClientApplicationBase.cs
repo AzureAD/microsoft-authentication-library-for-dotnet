@@ -196,12 +196,15 @@ namespace Microsoft.Identity.Client
                 await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
             }
 
-            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            if (AppConfig.IsBrokerEnabled)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
-                await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
+                if (broker.IsBrokerInstalledAndInvokable())
+                {
+                    await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
+                }
             }
         }
 
@@ -246,28 +249,31 @@ namespace Microsoft.Identity.Client
             ICacheSessionManager cacheSessionManager, 
             CancellationToken cancellationToken)
         {
-            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            if (AppConfig.IsBrokerEnabled)
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
-                var brokerAccounts =
-                    (await broker.GetAccountsAsync(
-                        AppConfig.ClientId, 
-                        AppConfig.RedirectUri, 
-                        AuthorityInfo,
-                        cacheSessionManager,
-                        ServiceBundle.InstanceDiscoveryManager).ConfigureAwait(false))
-                    ?? Enumerable.Empty<IAccount>();
-
-                if (!string.IsNullOrEmpty(homeAccountIdFilter))
+                if (broker.IsBrokerInstalledAndInvokable())
                 {
-                    brokerAccounts = brokerAccounts.Where(
-                        acc => homeAccountIdFilter.Equals(
-                            acc.HomeAccountId.Identifier,
-                            StringComparison.OrdinalIgnoreCase));
-                }
+                    var brokerAccounts =
+                        (await broker.GetAccountsAsync(
+                            AppConfig.ClientId,
+                            AppConfig.RedirectUri,
+                            AuthorityInfo,
+                            cacheSessionManager,
+                            ServiceBundle.InstanceDiscoveryManager).ConfigureAwait(false))
+                        ?? Enumerable.Empty<IAccount>();
 
-                brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts, cancellationToken).ConfigureAwait(false);
-                return brokerAccounts;
+                    if (!string.IsNullOrEmpty(homeAccountIdFilter))
+                    {
+                        brokerAccounts = brokerAccounts.Where(
+                            acc => homeAccountIdFilter.Equals(
+                                acc.HomeAccountId.Identifier,
+                                StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts, cancellationToken).ConfigureAwait(false);
+                    return brokerAccounts;
+                }
             }
 
             return Enumerable.Empty<IAccount>();

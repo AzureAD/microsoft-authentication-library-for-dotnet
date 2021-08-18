@@ -116,11 +116,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
         public override bool BrokerSupportsWamAccounts => true;
 
-        public override bool CanBrokerSupportSilentAuth()
-        {
-            return true;
-        }
-
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
             return new WamBroker(uiParent, appConfig, Logger);
