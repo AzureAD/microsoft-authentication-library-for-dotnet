@@ -208,13 +208,29 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 expectedAuthorityType,
                 (pca2.AppConfig as ApplicationConfiguration).AuthorityInfo.AuthorityType);
         }
+      
+        [TestMethod]
+        public void CreateAuthorityFromTenantedWithTenantTest()
+        {
+            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl("https://login.microsoft.com/tid");
+
+            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
+            Assert.AreEqual("https://login.microsoft.com/tid/", updatedAuthority, "Not changed, original authority aleady has tenant id");
+            
+            string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
+            Assert.AreEqual("https://login.microsoft.com/other_tenant_id/", updatedAuthority2, "Changed with forced flag");
+        }
 
         [TestMethod]
-        public void TenantAuthorityDoesNotChange()
+        public void CreateAuthorityFromCommonWithTenantTest()
         {
-            // no change because initial authority is tenanted
-            AuthorityTestHelper.AuthorityDoesNotUpdateTenant(
-                TestConstants.AuthorityUtidTenant, TestConstants.Utid);
+            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl("https://login.microsoft.com/common");
+
+            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
+            Assert.AreEqual("https://login.microsoft.com/other_tenant_id/", updatedAuthority, "Changed, original is common");
+
+            string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
+            Assert.AreEqual("https://login.microsoft.com/other_tenant_id/", updatedAuthority2, "Changed with forced flag");
         }
 
         [TestMethod]

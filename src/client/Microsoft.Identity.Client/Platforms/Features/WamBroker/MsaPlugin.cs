@@ -41,7 +41,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             bool isForceLoginPrompt,
             bool isInteractive,
-            bool isAccountInWam)
+            bool isAccountInWam, 
+            string scopeOverride = null)
         {
             bool setLoginHint = false;
             bool addNewAccount = false;
@@ -66,7 +67,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 WebTokenRequestPromptType.ForceAuthentication :
                 WebTokenRequestPromptType.Default;
 
-            string scopes = ScopeHelper.GetMsalScopes(authenticationRequestParameters.Scope).AsSingleString();
+            string scopes = scopeOverride ?? ScopeHelper.GetMsalScopes(authenticationRequestParameters.Scope).AsSingleString();
             WebTokenRequest request = new WebTokenRequest(
                 provider,
                 scopes,
