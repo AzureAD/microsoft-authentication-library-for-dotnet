@@ -1,21 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Internal.Requests;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.TelemetryCore;
-using System.Threading;
-using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.ApiConfig.Executors;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.CacheImpl;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client
 {
@@ -51,8 +45,7 @@ namespace Microsoft.Identity.Client
             GuardMobileFrameworks();
 
             InMemoryPartitionedCacheSerializer = new InMemoryPartitionedCacheSerializer(ServiceBundle.ApplicationLogger);
-            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? 
-                new TokenCache(ServiceBundle, true, InMemoryPartitionedCacheSerializer);
+            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
             Certificate = configuration.ClientCredentialCertificate;
 
             this.ServiceBundle.ApplicationLogger.Verbose($"ConfidentialClientApplication {configuration.GetHashCode()} created");

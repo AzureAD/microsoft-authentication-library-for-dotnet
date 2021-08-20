@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Cache
         MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey);
 
         MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey);
-        
+
         MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey);
 
         MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey);
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Cache
 
         void DeleteAccount(MsalAccountCacheKey cacheKey);
 
-        IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens();
+        IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string tenantId = null);
 
         IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens();
 
@@ -46,7 +46,6 @@ namespace Microsoft.Identity.Client.Cache
         IReadOnlyList<MsalAccountCacheItem> GetAllAccounts();
 
         IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata();
-
 
 #if iOS
         void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);

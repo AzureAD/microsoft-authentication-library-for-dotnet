@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
@@ -13,12 +12,12 @@ using Microsoft.Identity.Client.Core;
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     /// <summary>
-    /// Keeps the token cache dictionaries in memory. Token Cache extensions
-    /// are responsible for persistance.
+    /// Keeps the token cache dictionaries in memory. Token cache extensions
+    /// are responsible for persistence.
     /// </summary>
     internal class InMemoryTokenCacheAccessor : ITokenCacheAccessor
     {
-        // perf improvement: intialize the capacity and concurrency level 
+        // perf improvement: initialize the capacity and concurrency level 
         // since most websites would use distributed caching, these dictionaries would mostly hold a single item
 
         // perf: do not use ConcurrentDictionary.Values as it takes a lock
@@ -37,7 +36,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> _appMetadataDictionary =
            new ConcurrentDictionary<string, MsalAppMetadataCacheItem>(1, 1);
 
-        private readonly ICoreLogger _logger;
+        protected readonly ICoreLogger _logger;
 
         public InMemoryTokenCacheAccessor(ICoreLogger logger)
         {
@@ -154,7 +153,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #endregion
 
         #region Get All Values
-        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens()
+        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string tenantID = null)
         {
             return _accessTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
@@ -193,7 +192,5 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             _accountCacheDictionary.Clear();
             // app metadata isn't removable
         }
-
-
     }
 }

@@ -24,6 +24,8 @@ namespace Microsoft.Identity.Client.Cache.Keys
         // Note: when using multiple parts, ordering is important
         private readonly string[] _extraKeyParts;
 
+        internal string TenantId => _tenantId;
+
         internal MsalAccessTokenCacheKey(
             string environment,
             string tenantId,

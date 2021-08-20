@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Cache.Items;
@@ -14,6 +13,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -34,11 +34,11 @@ namespace Microsoft.Identity.Client
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         private static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);
         internal const int ExpirationTooLongInDays = 10 * 365;
-        
+
         private readonly IFeatureFlags _featureFlags;
         private readonly ITokenCacheAccessor _accessor;
         private bool _usesDefaultSerialization = false;
-        private volatile bool _hasStateChanged;        
+        private volatile bool _hasStateChanged;
 
         internal IServiceBundle ServiceBundle { get; }
         internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client
 
         private readonly OptionalSemaphoreSlim _semaphoreSlim;
         OptionalSemaphoreSlim ITokenCacheInternal.Semaphore => _semaphoreSlim;
-        
+
         /// <summary>
         /// Constructor of a token cache. This constructor is left for compatibility with MSAL 2.x.
         /// The recommended way to get a cache is by using <see cref="IClientApplicationBase.UserTokenCache"/>
@@ -67,19 +67,19 @@ namespace Microsoft.Identity.Client
 
         internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache, ICacheSerializationProvider optionalDefaultSerializer = null)
         {
-            if (serviceBundle == null) 
-                throw new ArgumentNullException(nameof(serviceBundle));   
+            if (serviceBundle == null)
+                throw new ArgumentNullException(nameof(serviceBundle));
 
             // useRealSemaphore= false for MyApps and potentially for all apps when using non-singleton MSAL
-            _semaphoreSlim =  new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled); 
+            _semaphoreSlim = new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled);
 
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
-            _accessor = proxy.CreateTokenCacheAccessor();
+            _accessor = isApplicationTokenCache ? new InMemoryPartitionedTokenCacheAccessor(serviceBundle?.ApplicationLogger) : proxy.CreateTokenCacheAccessor();
             _featureFlags = proxy.GetFeatureFlags();
 
             _usesDefaultSerialization = optionalDefaultSerializer != null;
             optionalDefaultSerializer?.Initialize(this);
-            
+
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
 
 #if iOS
@@ -96,9 +96,9 @@ namespace Microsoft.Identity.Client
         /// This method is so we can inject test ILegacyCachePersistence...
         /// </summary>
         internal TokenCache(
-            IServiceBundle serviceBundle, 
-            ILegacyCachePersistence legacyCachePersistenceForTest, 
-            bool isApplicationTokenCache, 
+            IServiceBundle serviceBundle,
+            ILegacyCachePersistence legacyCachePersistenceForTest,
+            bool isApplicationTokenCache,
             ICacheSerializationProvider optionalDefaultCacheSerializer = null)
             : this(serviceBundle, isApplicationTokenCache, optionalDefaultCacheSerializer)
         {
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> environmentAliases,
             string tenantId,
             HashSet<string> scopeSet,
-            string homeAccountId, 
+            string homeAccountId,
             string tokenType)
         {
             // delete all cache entries with intersecting scopes.
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client
             {
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
-                    string.Equals(accessToken.TokenType ?? "",  tokenType ?? "", StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(accessToken.TokenType ?? "", tokenType ?? "", StringComparison.OrdinalIgnoreCase) &&
                     (accessToken.IsAdfs || accessToken.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase)) &&
                     accessToken.ScopeSet.Overlaps(scopeSet))
                 {
@@ -242,9 +242,9 @@ namespace Microsoft.Identity.Client
                 : refreshTokens;
         }
 
-        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId)
+        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string tenantId = null)
         {
-            var accessTokens = _accessor.GetAllAccessTokens();
+            var accessTokens = _accessor.GetAllAccessTokens(tenantId);
             return filterByClientId
                 ? accessTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : accessTokens;
