@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
         }
 
-      
+
 
         /// <summary>
         /// Return a custom set of scopes to override the default MSAL logic of merging
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Stopwatch sw = Stopwatch.StartNew();
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
-            AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;            
+            AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
             try
             {
                 using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
@@ -185,18 +185,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var account = tuple.Item3;
 
             return new AuthenticationResult(
-                atItem, 
-                idtItem, 
+                atItem,
+                idtItem,
                 account.TenantProfiles,
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
-                msalTokenResponse.TokenSource, 
+                msalTokenResponse.TokenSource,
                 AuthenticationRequestParameters.RequestContext.ApiEvent);
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
         {
-            if (fromServer == null || 
+            if (fromServer == null ||
                 AuthenticationRequestParameters?.Account?.HomeAccountId == null ||
                 PublicClientApplication.IsOperatingSystemAccount(AuthenticationRequestParameters?.Account))
             {
@@ -234,8 +234,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         protected Task ResolveAuthorityAsync()
-        {      
-            return AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync();            
+        {
+            return AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync();
         }
 
         internal Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -297,10 +297,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 return GetCcsUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
             }
-            
+
             if (!String.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
             {
-                return GetCcsUpnHeader (AuthenticationRequestParameters.LoginHint);
+                return GetCcsUpnHeader(AuthenticationRequestParameters.LoginHint);
             }
 
             return new KeyValuePair<string, string>();
@@ -315,7 +315,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
         {
             if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
-            {                
+            {
                 string scopes = authenticationRequestParameters.Scope.AsSingleString();
                 string messageWithPii = string.Format(
                     CultureInfo.InvariantCulture,
@@ -342,17 +342,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
             }
-
-            if (authenticationRequestParameters.IsConfidentialClient &&
-                !CacheManager.TokenCacheInternal.IsTokenCacheSerialized())
-            {
-                authenticationRequestParameters.RequestContext.Logger.Error("The default token cache provided by MSAL is not designed to be performant when used in confidential client applications. Please use token cache serialization. See https://aka.ms/msal-net-cca-token-cache-serialization.");
-            }
         }
 
         private void LogReturnedToken(AuthenticationResult result)
         {
-            if (result.AccessToken != null && 
+            if (result.AccessToken != null &&
                 AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
                 int appHashCode = AuthenticationRequestParameters.AppConfig.GetHashCode();
@@ -363,7 +357,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     $"Fetched access token from host {canonicalAuthority.Host}. ");
 
                 AuthenticationRequestParameters.RequestContext.Logger.Info("\n\t=== Token Acquisition finished successfully:");
-                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(                
+                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
                         $" AT expiration time: {result.ExpiresOn}, scopes {scopes} " +
                             $"source {result.AuthenticationResultMetadata.TokenSource} from {canonicalAuthority} appHashCode {appHashCode}",
                         $" AT expiration time: {result.ExpiresOn}, scopes {scopes} " +
@@ -372,7 +366,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         internal async Task<AuthenticationResult> HandleTokenRefreshErrorAsync(MsalServiceException e, MsalAccessTokenCacheItem cachedAccessTokenItem)
-        {            
+        {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             bool isAadUnavailable = e.IsAadUnavailable();
             logger.Warning($"Fetching a new AT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");

@@ -56,7 +56,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
             else
             {
-                return _accessTokenCacheDictionary[filterByTenantId]?.Select(kv => kv.Value)?.ToList() ?? new List<MsalAccessTokenCacheItem>();
+                _accessTokenCacheDictionary.TryGetValue(filterByTenantId, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
+                return partition?.Select(kv => kv.Value)?.ToList() ?? new List<MsalAccessTokenCacheItem>();
             }
         }
 
