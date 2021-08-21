@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             Remove(cacheKey);
         }
 
-        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string tenantId = null)
+        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string filterByTenantId = null)
         {
             return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken)
                 .Select(x => MsalAccessTokenCacheItem.FromJsonString(x))

@@ -18,26 +18,29 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public InMemoryPartitionedTokenCacheAccessor(ICoreLogger logger) : base(logger)
         {
-
         }
 
-        public new void SaveAccessToken(MsalAccessTokenCacheItem item)
+        public override void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             string key = item.GetKey().ToString();
 
             // if a conflict occurs, pick the latest value
-            _accessTokenCacheDictionary[item.TenantId][key] = item;
+            _accessTokenCacheDictionary
+                .GetOrAdd(item.TenantId, new ConcurrentDictionary<string, MsalAccessTokenCacheItem>())[key] = item;
         }
 
-        public new MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
+        public override MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
-            _accessTokenCacheDictionary[accessTokenKey.TenantId].TryGetValue(accessTokenKey.ToString(), out MsalAccessTokenCacheItem cacheItem);
+            _accessTokenCacheDictionary.TryGetValue(accessTokenKey.TenantId, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
+            MsalAccessTokenCacheItem cacheItem = null;
+            partition?.TryGetValue(accessTokenKey.ToString(), out cacheItem);
             return cacheItem;
         }
 
-        public new void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
+        public override void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
         {
-            if (!_accessTokenCacheDictionary[cacheKey.TenantId].TryRemove(cacheKey.ToString(), out _))
+            _accessTokenCacheDictionary.TryGetValue(cacheKey.TenantId, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
+            if (partition == null || !partition.TryRemove(cacheKey.ToString(), out _))
             {
                 _logger.InfoPii(
                     $"Cannot delete an access token because it was already deleted. Key {cacheKey}",
@@ -45,19 +48,19 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
-        public new IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string tenantID = null)
+        public override IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string filterByTenantId = null)
         {
-            if (!string.IsNullOrEmpty(tenantID))
-            {
-                return _accessTokenCacheDictionary[tenantID].Select(kv => kv.Value).ToList();
-            }
-            else
+            if (string.IsNullOrEmpty(filterByTenantId))
             {
                 return _accessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
             }
+            else
+            {
+                return _accessTokenCacheDictionary[filterByTenantId]?.Select(kv => kv.Value)?.ToList() ?? new List<MsalAccessTokenCacheItem>();
+            }
         }
 
-        public new void Clear()
+        public override void Clear()
         {
             _accessTokenCacheDictionary.Clear();
             base.Clear();

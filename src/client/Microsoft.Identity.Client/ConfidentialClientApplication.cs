@@ -7,7 +7,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 
@@ -44,7 +43,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            InMemoryPartitionedCacheSerializer = new InMemoryPartitionedCacheSerializer(ServiceBundle.ApplicationLogger);
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
             Certificate = configuration.ClientCredentialCertificate;
 
@@ -178,12 +176,6 @@ namespace Microsoft.Identity.Client
 
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
-
-        // App token cache is serialized by default (unless the user overrides this) 
-        // the serialization stores tokens in this dictionary, where the key is the client_id + tenant_id
-        // This makes cache operations be O(1) instead of O(n), and avoids catastrophic latency of
-        // multi-tenant apps that do not serialize their cache.
-        internal InMemoryPartitionedCacheSerializer InMemoryPartitionedCacheSerializer { get; }
 
         internal override async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,

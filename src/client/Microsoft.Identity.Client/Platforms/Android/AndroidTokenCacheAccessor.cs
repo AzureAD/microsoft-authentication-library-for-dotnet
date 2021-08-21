@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             editor.Apply();
         }
 
-        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string tenantId = null)
+        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string filterByTenantId = null)
         {
             return _accessTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
         }

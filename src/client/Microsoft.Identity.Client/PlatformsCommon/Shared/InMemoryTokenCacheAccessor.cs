@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         #region Add
-        public void SaveAccessToken(MsalAccessTokenCacheItem item)
+        public virtual void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             string key = item.GetKey().ToString();
 
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #endregion
 
         #region Get
-        public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
+        public virtual MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
             _accessTokenCacheDictionary.TryGetValue(accessTokenKey.ToString(), out MsalAccessTokenCacheItem cacheItem);
             return cacheItem;
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #endregion
 
         #region Delete
-        public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
+        public virtual void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
         {
             if (!_accessTokenCacheDictionary.TryRemove(cacheKey.ToString(), out _))
             {
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #endregion
 
         #region Get All Values
-        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string tenantID = null)
+        public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string filterByTenantId = null)
         {
             return _accessTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             throw new System.NotImplementedException();
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             _accessTokenCacheDictionary.Clear();
             _refreshTokenCacheDictionary.Clear();
