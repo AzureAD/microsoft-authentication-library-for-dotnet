@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Test.Unit.pop
     {
         private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
         private const string ProtectedUrlWithPort = "https://www.contoso.com:5555/path1/path2?queryParam1=a&queryParam2=b";
+        private const string CustomNonce = "my_nonce";
 
         [TestMethod]
         public async Task POP_ShrValidation_Async()
@@ -62,6 +63,43 @@ namespace Microsoft.Identity.Test.Unit.pop
         }
 
         [TestMethod]
+        public async Task POP_NoHttpRequest_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .WithExperimentalFeatures(true)
+                                                              .BuildConcrete();
+
+                // no HTTP method binding, but custom nonce
+                var popConfig = new PoPAuthenticationConfiguration() { Nonce = CustomNonce };
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithProofOfPossession(popConfig)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // access token parsing can be done with MSAL's id token parsing logic
+                var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
+
+                Assert.AreEqual(CustomNonce, claims.FindAll("nonce").Single().Value);
+                AssertTsAndJwkClaims(popConfig, claims);
+
+                Assert.IsFalse(claims.FindAll("m").Any());
+                Assert.IsFalse(claims.FindAll("u").Any());
+                Assert.IsFalse(claims.FindAll("p").Any());
+            }
+        }
+
+        [TestMethod]
         public async Task POP_WithCustomNonce_Async()
         {
             using (var httpManager = new MockHttpManager())
@@ -74,7 +112,6 @@ namespace Microsoft.Identity.Test.Unit.pop
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
-                const string CustomNonce = "my_nonce";
                 var popConfig = new PoPAuthenticationConfiguration(request) { Nonce = CustomNonce };
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -100,6 +137,11 @@ namespace Microsoft.Identity.Test.Unit.pop
             Assert.AreEqual("www.contoso.com", claims.FindAll("u").Single().Value);
             Assert.AreEqual("/path1/path2", claims.FindAll("p").Single().Value);
 
+            AssertTsAndJwkClaims(popConfig, claims);
+        }
+
+        private static void AssertTsAndJwkClaims(PoPAuthenticationConfiguration popConfig, System.Security.Claims.ClaimsPrincipal claims)
+        {
             long ts = long.Parse(claims.FindAll("ts").Single().Value);
             CoreAssert.AreEqual(DateTimeOffset.UtcNow, CoreHelpers.UnixTimestampToDateTime(ts), TimeSpan.FromSeconds(5));
 
