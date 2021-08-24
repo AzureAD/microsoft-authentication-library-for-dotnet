@@ -79,10 +79,8 @@ namespace Microsoft.Identity.Client
         /// Sets the certificate associated with the application
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
-        /// <param name="withSendX5C"> Specifies if the x5c claim (public key of the certificate) should be sent to the STS for Subject Name and 
-        /// Issuer certificate authentication. The default is <c>false</c></param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
-        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool withSendX5C = true)
+        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
         {
             if (certificate == null)
             {
@@ -107,10 +105,8 @@ namespace Microsoft.Identity.Client
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
         /// <param name="mergeWithDefaultClaims">Determines whether or not to merge <paramref name="claimsToSign"/> with the default claims required for authentication.</param>
-        /// <param name="withSendX5C"> Specifies if the x5c claim (public key of the certificate) should be sent to the STS for Subject Name and 
-        /// Issuer certificate authentication. The default is <c>false</c></param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.</remarks>
-        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true, bool withSendX5C = true)
+        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true)
         {
             if (certificate == null)
             {

@@ -66,6 +66,11 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentException("AuthorizationCode can not be null or whitespace", nameof(Parameters.AuthorizationCode));
             }
+
+            if (Parameters.SendX5C == null)
+            {
+                Parameters.SendX5C = this.ServiceBundle.Config.SendX5C;
+            }
         }
 
         /// <inheritdoc />
@@ -88,8 +93,7 @@ namespace Microsoft.Identity.Client
         public AcquireTokenByAuthorizationCodeParameterBuilder WithSendX5C(bool withSendX5C)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
-            Parameters.SendX5C = withSendX5C; 
-            Parameters.SetPerRequestX5C = true;
+            Parameters.SetPerRequestX5C = withSendX5C;
             return this;
         }
 

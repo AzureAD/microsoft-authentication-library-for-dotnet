@@ -54,7 +54,7 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
-  <PropertyGroup  Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
+  <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
@@ -132,6 +132,7 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
+    <None Remove="D:\Gits\Bugs\src\client\Microsoft.Identity.Client\ApiConfig\Parameters\AbstractAcquireTokenConfidentialClientParameters.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
 

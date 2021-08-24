@@ -5,13 +5,11 @@ using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    internal class AcquireTokenByAuthorizationCodeParameters : IAcquireTokenParameters
+    internal class AcquireTokenByAuthorizationCodeParameters : AbstractAcquireTokenConfidentialClientParameters, IAcquireTokenParameters
     {
         public string AuthorizationCode { get; set; }
 
         public string PkceCodeVerifier { get; set; }
-
-        public bool SendX5C { get; set; } 
 
         internal bool SetPerRequestX5C = true;
 

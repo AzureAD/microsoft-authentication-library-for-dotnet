@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
-            requestParams.SendX5C = authorizationCodeParameters.SetPerRequestX5C ? authorizationCodeParameters.SendX5C : true;
+            requestParams.SendX5C = authorizationCodeParameters.SendX5C ?? true;
 
             var handler = new ConfidentialAuthCodeRequest(
                 ServiceBundle,
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _confidentialClientApplication.AppTokenCacheInternal).ConfigureAwait(false);
        
-            requestParams.SendX5C = clientParameters.SetPerRequestX5C ? clientParameters.SendX5C : true;
+            requestParams.SendX5C = clientParameters.SendX5C ?? true;
             
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
 
-            requestParams.SendX5C = onBehalfOfParameters.SetPerRequestX5C ? onBehalfOfParameters.SendX5C : true;
+            requestParams.SendX5C = onBehalfOfParameters.SendX5C ?? true;
             requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
 
             var handler = new OnBehalfOfRequest(

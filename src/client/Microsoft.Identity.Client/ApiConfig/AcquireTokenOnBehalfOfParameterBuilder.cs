@@ -66,7 +66,6 @@ namespace Microsoft.Identity.Client
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C, withSendX5C);
             Parameters.SendX5C = withSendX5C; 
-            Parameters.SetPerRequestX5C = true;
             return this;
         }
 
@@ -141,6 +140,15 @@ namespace Microsoft.Identity.Client
             return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
+        /// <inheritdoc/>
+        protected override void Validate()
+        {
+            base.Validate();
+            if (Parameters.SendX5C == null)
+            {
+                Parameters.SendX5C = this.ServiceBundle.Config.SendX5C;
+            }
+        }
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {

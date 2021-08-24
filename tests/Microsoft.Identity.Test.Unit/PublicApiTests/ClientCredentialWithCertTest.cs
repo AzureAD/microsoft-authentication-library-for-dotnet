@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate, true)
+                    .WithCertificate(certificate)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate, true)
+                    .WithCertificate(certificate)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate, true)
+                    .WithCertificate(certificate)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate, true)
+                    .WithCertificate(certificate)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri("https://login.microsoftonline.com/my-utid"),true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate, true).
+                    .WithCertificate(certificate).
                     BuildConcrete();
 
                 TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             var credential = GenerateClientAssertionCredential(true);
 
-            var header = new JWTHeaderWithCertificate(credential);
+            var header = new JWTHeaderWithCertificate(credential, true);
 
             Assert.IsNotNull(header.X509CertificatePublicCertValue);
             Assert.IsNotNull(header.X509CertificateThumbprint);
@@ -355,7 +355,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate, true)
+                    .WithCertificate(certificate)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
