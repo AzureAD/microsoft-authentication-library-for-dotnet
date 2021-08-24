@@ -37,23 +37,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         // This endpoint is hosted in the MSID Lab and is able to verify any pop token bound to an HTTP request
         private const string PoPValidatorEndpoint = "https://signedhttprequest.azurewebsites.net/api/validateSHR";
 
-        private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
 
         private const string PublicCloudConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+        private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
         private static string s_publicCloudCcaSecret;
         private KeyVaultSecretsProvider _keyVault;
 
-        // Doesn't exist, but the POP validator endpoint will check if the POP token matches this HTTP request 
-
-        private string _popValidationEndpointSecret;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-        }
+        private string _popValidationEndpointSecret;     
 
         [TestInitialize]
         public void TestInitialize()
@@ -72,12 +64,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        //[TestMethod]
-
-        public async Task PoP_AcquireAndAcquireSilent_MultipleKeys_Async()
+        [TestMethod]
+        public async Task PoP_MultipleKeys_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await AcquireAndAcquireSilent_MultipleKeys_Async(labResponse).ConfigureAwait(false);
+            await MultipleKeys_Async(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -88,7 +79,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task PopCCAAsync()
+        public async Task HappyPath_Async()
         {
             await RunTestWithClientSecretAsync(PublicCloudConfidentialClientID, PublicCloudTestAuthority, s_publicCloudCcaSecret).ConfigureAwait(false);
         }
@@ -96,10 +87,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task BearerAndPoP_CanCoexist_Async()
         {
             // Arrange
-            var popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
             popConfig.HttpMethod = HttpMethod.Get;
 
-            //SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             string clientId = PublicCloudConfidentialClientID;
 
             var pca = ConfidentialClientApplicationBuilder
@@ -133,15 +123,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 (pca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
         }
 
-        private async Task AcquireAndAcquireSilent_MultipleKeys_Async(LabResponse labResponse)
+        private async Task MultipleKeys_Async(LabResponse labResponse)
         {
-            var popConfig1 = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig1 = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
             popConfig1.HttpMethod = HttpMethod.Get;
             var popConfig2 = new PoPAuthenticationConfiguration(new Uri("https://www.bing.com/path3/path4?queryParam5=c&queryParam6=d"));
             popConfig2.HttpMethod = HttpMethod.Post;
 
             var user = labResponse.User;
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
             var pca = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
                 .WithExperimentalFeatures()
@@ -200,7 +189,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         public async Task RunTestWithClientSecretAsync(string clientID, string authority, string secret)
         {
-            var popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
             popConfig.HttpMethod = HttpMethod.Get;
 
             var confidentialClientAuthority = authority;
@@ -237,7 +226,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            var popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
             popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
             popConfig.HttpMethod = HttpMethod.Get;
 
@@ -266,7 +255,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             //RSA provider
-            var popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
             popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
             popConfig.HttpMethod = HttpMethod.Get;
 
@@ -294,7 +283,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             //ECD Provider
-            var popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
             popConfig.PopCryptoProvider = new ECDCertificatePopCryptoProvider();
             popConfig.HttpMethod = HttpMethod.Post;
 
@@ -350,7 +339,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             request.Headers.Authorization = authHeader;
 
             // the URI the POP token is bound to
-            request.Headers.Add("ShrUri", popConfig.RequestUri.ToString());
+            request.Headers.Add("ShrUri", ProtectedUrl);
 
             // the method the POP token in bound to
             request.Headers.Add("ShrMethod", popConfig.HttpMethod.ToString());
@@ -428,7 +417,5 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
         }
-
-
     }
 }
