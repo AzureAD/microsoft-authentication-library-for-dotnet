@@ -74,6 +74,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             HomeAccountId = homeAccountId;
+
+            AddJitterToTokenExpiration();
         }        
 
         private string _tenantId;
@@ -119,6 +121,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             get;
         }
 
+        //Represents 5 minutes in Unit time stamp
+        private readonly int _defaultJitterRangeUnixTime = 300;
+
         internal DateTimeOffset ExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExpiresOnUnixTimestamp);
         internal DateTimeOffset ExtendedExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExtendedExpiresOnUnixTimestamp);
         internal DateTimeOffset? RefreshOn
@@ -130,6 +135,20 @@ namespace Microsoft.Identity.Client.Cache.Items
                     (DateTimeOffset?)null;
             }
         }
+
+        internal void AddJitterToTokenExpiration()
+        {
+            Random r = new Random();
+            int jitter = r.Next(1, _defaultJitterRangeUnixTime);
+
+            ExpiresOnUnixTimestamp = (Convert.ToInt64(ExpiresOnUnixTimestamp, CultureInfo.InvariantCulture) - jitter).ToString();
+
+            if (!string.IsNullOrEmpty(RefreshOnUnixTimestamp))
+            {
+                RefreshOnUnixTimestamp = (Convert.ToInt64(RefreshOnUnixTimestamp, CultureInfo.InvariantCulture) - jitter).ToString();
+            }
+        }
+
         internal DateTimeOffset CachedAtOffset => CoreHelpers.UnixTimestampStringToDateTime(CachedAt);
 
         public bool IsExtendedLifeTimeToken { get; set; }
