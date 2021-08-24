@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.pop
 {
 
     [TestClass]
-    public class PoPTests
+    public class PoPTests : TestBase
     {
         private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
         private const string ProtectedUrlWithPort = "https://www.contoso.com:5555/path1/path2?queryParam1=a&queryParam2=b";
@@ -131,6 +131,24 @@ namespace Microsoft.Identity.Test.Unit.pop
             }
         }
 
+        [TestMethod]
+        public void PopConfig()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+            var popConfig = new PoPAuthenticationConfiguration(request);
+
+            Assert.AreEqual(HttpMethod.Get, popConfig.HttpMethod);
+            Assert.AreEqual("www.contoso.com", popConfig.HttpHost);
+            Assert.AreEqual("/path1/path2", popConfig.HttpPath);
+
+
+            request = new HttpRequestMessage(HttpMethod.Post, new Uri(ProtectedUrlWithPort));
+            popConfig = new PoPAuthenticationConfiguration(request);
+
+            Assert.AreEqual(HttpMethod.Post, popConfig.HttpMethod);
+            Assert.AreEqual("www.contoso.com:5555", popConfig.HttpHost);
+            Assert.AreEqual("/path1/path2", popConfig.HttpPath);
+        }
         private static void AssertSingedHttpRequestClaims(PoPAuthenticationConfiguration popConfig, System.Security.Claims.ClaimsPrincipal claims)
         {
             Assert.AreEqual("GET", claims.FindAll("m").Single().Value);
@@ -151,30 +169,6 @@ namespace Microsoft.Identity.Test.Unit.pop
             var jwkInToken = JObject.Parse(jwkClaim);
 
             Assert.IsTrue(JObject.DeepEquals(jwkInConfig, jwkInToken));
-        }
-
-        [TestMethod]
-        public void PopConfig()
-        {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
-            var popConfig = new PoPAuthenticationConfiguration(request);
-
-            Assert.AreEqual(HttpMethod.Get, popConfig.HttpMethod);
-            Assert.AreEqual("www.contoso.com", popConfig.HttpHost);
-            Assert.AreEqual("/path1/path2", popConfig.HttpPath);
-
-
-            request = new HttpRequestMessage(HttpMethod.Post, new Uri(ProtectedUrlWithPort));
-            popConfig = new PoPAuthenticationConfiguration(request);
-
-            Assert.AreEqual(HttpMethod.Post, popConfig.HttpMethod);
-            Assert.AreEqual("www.contoso.com:5555", popConfig.HttpHost);
-            Assert.AreEqual("/path1/path2", popConfig.HttpPath);
-
-            popConfig = new PoPAuthenticationConfiguration(); // no config
-
-        }
+        }       
     }
-
- 
 }

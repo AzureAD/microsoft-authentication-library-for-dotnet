@@ -48,8 +48,6 @@ namespace Microsoft.Identity.Client.AppConfig
             HttpPath = httpRequestMessage.RequestUri.AbsolutePath; 
         }
 
-      
-
         /// <summary>
         /// Creates a configuration using the default key management, and which binds only the Uri part of the HTTP request.
         /// </summary>
