@@ -90,8 +90,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
             popConfig.HttpMethod = HttpMethod.Get;
 
-            string clientId = PublicCloudConfidentialClientID;
-
             var pca = ConfidentialClientApplicationBuilder
                 .Create(PublicCloudConfidentialClientID)
                 .WithExperimentalFeatures()
@@ -110,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual("pop", result.TokenType);
-            await VerifyPoPTokenAsync(clientId, popConfig, result).ConfigureAwait(false);
+            await VerifyPoPTokenAsync(PublicCloudConfidentialClientID, popConfig, result).ConfigureAwait(false);
 
             Trace.WriteLine("Getting a Bearer token");
             result = await pca
