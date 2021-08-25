@@ -56,7 +56,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             GetAccounts = 1010,
             GetAccountById = 1011,
             GetAccountsByUserFlow = 1012,
-            RemoveAccount = 1013
+            RemoveAccount = 1013,
+            InjectAppToken = 1014
         }
 
         private readonly ICryptographyManager _cryptographyManager;

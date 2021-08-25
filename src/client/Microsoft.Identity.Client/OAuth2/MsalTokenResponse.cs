@@ -40,6 +40,11 @@ namespace Microsoft.Identity.Client.OAuth2
         private long _extendedExpiresIn;
         private long _refreshIn;
 
+        public MsalTokenResponse()
+        {
+
+        }
+
         [JsonProperty(PropertyName = TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
 

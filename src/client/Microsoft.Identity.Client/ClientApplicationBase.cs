@@ -189,7 +189,13 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">Cancellation token</param>
         public async Task RemoveAsync(IAccount account, CancellationToken cancellationToken = default)
         {
-            RequestContext requestContext = CreateRequestContext(Guid.NewGuid(), cancellationToken);            
+            Guid correlationId = Guid.NewGuid();
+            RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
+            requestContext.ApiEvent = new ApiEvent(
+               requestContext.Logger,
+               requestContext.ServiceBundle.PlatformProxy.CryptographyManager,
+               correlationId.ToString());
+            requestContext.ApiEvent.ApiId = ApiEvent.ApiIds.RemoveAccount;
 
             if (account != null && UserTokenCacheInternal != null)
             {
@@ -212,10 +218,13 @@ namespace Microsoft.Identity.Client
         {
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
-            requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId.ToString());
+            requestContext.ApiEvent = new ApiEvent(
+                requestContext.Logger, 
+                requestContext.ServiceBundle.PlatformProxy.CryptographyManager, 
+                correlationId.ToString());
             requestContext.ApiEvent.ApiId = apiId;
 
-            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+            var authority = await Instance.Authority.CreateAuthorityForRequestAsync(
               requestContext,
               null).ConfigureAwait(false);
 

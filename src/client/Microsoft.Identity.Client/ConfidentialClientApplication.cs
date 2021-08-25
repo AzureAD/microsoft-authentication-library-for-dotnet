@@ -16,6 +16,10 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Cache.CacheImpl;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.AuthScheme.Bearer;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Internal.Broker;
 
 namespace Microsoft.Identity.Client
 {
@@ -55,7 +59,7 @@ namespace Microsoft.Identity.Client
                 new TokenCache(ServiceBundle, true, InMemoryPartitionedCacheSerializer);
             Certificate = configuration.ClientCredentialCertificate;
 
-            this.ServiceBundle.ApplicationLogger.Verbose($"ConfidentialClientApplication {configuration.GetHashCode()} created");
+            ServiceBundle.ApplicationLogger.Verbose($"ConfidentialClientApplication created");
         }
 
         /// <summary>
@@ -82,6 +86,58 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes,
                 authorizationCode);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="expiresIn"></param>
+        /// <param name="accessTokenRawString"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task InjectAppTokenAsync(
+            string[] scopes,
+            long expiresIn,
+            string accessTokenRawString,
+            CancellationToken cancellationToken = default)
+        {
+            Guid correlationId = Guid.NewGuid();
+            var requestContext = new RequestContext(ServiceBundle, correlationId, cancellationToken);
+            requestContext.ApiEvent = new ApiEvent(
+               requestContext.Logger,
+               ServiceBundle.PlatformProxy.CryptographyManager,
+               correlationId.ToString());
+            requestContext.ApiEvent.ApiId = ApiEvent.ApiIds.InjectAppToken;
+
+            AcquireTokenCommonParameters commonParameters = new AcquireTokenCommonParameters()
+            {
+                ApiId = requestContext.ApiEvent.ApiId,
+                CorrelationId = correlationId,
+                Scopes = scopes
+            };
+
+            var authority = await Instance.Authority.CreateAuthorityForRequestAsync(
+               requestContext, null).ConfigureAwait(false);
+
+            AuthenticationRequestParameters requestParameters = new AuthenticationRequestParameters(
+                ServiceBundle,
+                AppTokenCacheInternal,
+                commonParameters,
+                requestContext,
+                authority);
+
+            MsalTokenResponse response = new MsalTokenResponse()
+            {
+                AccessToken = accessTokenRawString,
+                ExpiresIn = expiresIn,
+                CorrelationId = correlationId.ToString(),
+                Scope = string.Join(" ", scopes),
+                TokenType = BrokerResponseConst.Bearer,
+            };
+
+            
+            await AppTokenCacheInternal.SaveTokenResponseAsync(requestParameters, response).ConfigureAwait(false);
         }
 
         /// <summary>

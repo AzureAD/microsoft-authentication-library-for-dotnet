@@ -146,7 +146,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 
-        public bool IsClientCredentialRequest => ApiId == ApiEvent.ApiIds.AcquireTokenForClient;
+        public bool IsClientCredentialRequest =>
+            ApiId == ApiEvent.ApiIds.AcquireTokenForClient ||
+            ApiId == ApiEvent.ApiIds.InjectAppToken;
 
         public bool IsConfidentialClient
         {
