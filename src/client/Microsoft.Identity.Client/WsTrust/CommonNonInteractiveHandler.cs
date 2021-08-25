@@ -49,12 +49,6 @@ namespace Microsoft.Identity.Client.WsTrust
                 username,
                 _requestContext).ConfigureAwait(false);
 
-            if (userRealmResponse == null)
-            {
-                throw new MsalClientException(
-                    MsalError.UserRealmDiscoveryFailed,
-                    MsalErrorMessage.UserRealmDiscoveryFailed);
-            }
             if (string.Equals(userRealmResponse.DomainName, Constants.UserRealmMsaDomainName))
             {
                 throw new MsalClientException(
