@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var ex = await Assert.ThrowsExceptionAsync<HttpRequestException>(
                 async () => await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false)).ConfigureAwait(false);
 
-            Assert.AreEqual("No such host is known.", ex.Message);
+            Assert.IsTrue(ex is HttpRequestException);
         }
 
         private void AssertTelemetry(HttpSnifferClientFactory factory, string currentTelemetryHeader, int placement = 0)
