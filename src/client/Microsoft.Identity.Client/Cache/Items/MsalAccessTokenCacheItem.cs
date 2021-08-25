@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
@@ -119,9 +120,6 @@ namespace Microsoft.Identity.Client.Cache.Items
             get;
         }
 
-        //Represents 5 minutes in Unit time stamp
-        private readonly int _defaultJitterRangeUnixTime = 300;
-
         internal DateTimeOffset ExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExpiresOnUnixTimestamp);
         internal DateTimeOffset ExtendedExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExtendedExpiresOnUnixTimestamp);
         internal DateTimeOffset? RefreshOn
@@ -129,7 +127,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             get
             {
                 Random r = new Random();
-                int jitterValue = r.Next(1, _defaultJitterRangeUnixTime);
+                int jitterValue = r.Next(1, Constants.DefaultJitterRangeUnixTime);
                 var jitter = TimeSpan.FromSeconds(jitterValue);
 
                 return !string.IsNullOrEmpty(RefreshOnUnixTimestamp) ?
