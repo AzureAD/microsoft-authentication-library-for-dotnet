@@ -177,8 +177,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
-                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Count);
-                Assert.IsTrue(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Keys.Single().Equals(TestConstants.Utid));
+                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
+                Assert.IsTrue(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Single().Equals(TestConstants.Utid));
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
@@ -187,9 +187,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
-                Assert.AreEqual(2, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Count);
-                Assert.IsTrue(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Keys.Any(k => k.Equals(TestConstants.Utid)));
-                Assert.IsTrue(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Keys.Any(k => k.Equals(TestConstants.Utid2)));
+                Assert.AreEqual(2, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
+                Assert.IsTrue(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(TestConstants.Utid)));
+                Assert.IsTrue(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(TestConstants.Utid2)));
 
             }
         }
@@ -215,9 +215,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // One tenant partition with one token
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Count);
-                Assert.IsNotNull(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[TestConstants.Utid]);
-                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[TestConstants.Utid].Count);
+                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
+                Assert.IsNotNull(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid]);
+                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid].Count);
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
@@ -227,9 +227,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // One tenant partition with two tokens
                 Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Count);
-                Assert.IsNotNull(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[TestConstants.Utid]);
-                Assert.AreEqual(2, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[TestConstants.Utid].Count);
+                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
+                Assert.IsNotNull(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid]);
+                Assert.AreEqual(2, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid].Count);
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
@@ -239,9 +239,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Two tenant partitions with three tokens total
                 Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(2, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Count);
-                Assert.IsNotNull(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[TestConstants.Utid2]);
-                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[TestConstants.Utid2].Count);
+                Assert.AreEqual(2, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
+                Assert.IsNotNull(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid2]);
+                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid2].Count);
 
             }
         }
