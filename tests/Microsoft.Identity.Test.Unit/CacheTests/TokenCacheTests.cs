@@ -415,8 +415,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 //Arrange
                 int jitterRange = 300;
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
-                var expiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromMinutes(60));
-                var refreshIn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromMinutes(120));
+                var expiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromMinutes(120));
+                var refreshIn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromMinutes(60));
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -444,13 +444,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var accessToken = cache.FindAccessTokenAsync(param).Result;
 
                 //Assert
-                var timeDiff = expiresOn.ToUnixTimeSeconds() - accessToken.ExpiresOn.ToUnixTimeSeconds();
+                var timeDiff = refreshIn.ToUnixTimeSeconds() - ((DateTimeOffset)accessToken.RefreshOn).ToUnixTimeSeconds();
                 Assert.IsTrue(jitterRange >= timeDiff && timeDiff > 0);
 
-                timeDiff = refreshIn.ToUnixTimeSeconds() - ((DateTimeOffset)accessToken.RefreshOn).ToUnixTimeSeconds();
-                Assert.IsTrue(jitterRange >= timeDiff && timeDiff > 0);
-
-                Assert.IsTrue(expiresOn != accessToken.ExpiresOn);
                 Assert.IsTrue(refreshIn != accessToken.RefreshOn);
             }
         }

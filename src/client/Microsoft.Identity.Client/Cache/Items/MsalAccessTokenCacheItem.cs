@@ -74,8 +74,6 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             HomeAccountId = homeAccountId;
-
-            AddJitterToTokenExpiration();
         }        
 
         private string _tenantId;
@@ -130,22 +128,13 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             get
             {
+                Random r = new Random();
+                int jitterValue = r.Next(1, _defaultJitterRangeUnixTime);
+                var jitter = TimeSpan.FromSeconds(jitterValue);
+
                 return !string.IsNullOrEmpty(RefreshOnUnixTimestamp) ?
-                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp) :
+                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp) - jitter :
                     (DateTimeOffset?)null;
-            }
-        }
-
-        internal void AddJitterToTokenExpiration()
-        {
-            Random r = new Random();
-            int jitter = r.Next(1, _defaultJitterRangeUnixTime);
-
-            ExpiresOnUnixTimestamp = (Convert.ToInt64(ExpiresOnUnixTimestamp, CultureInfo.InvariantCulture) - jitter).ToString();
-
-            if (!string.IsNullOrEmpty(RefreshOnUnixTimestamp))
-            {
-                RefreshOnUnixTimestamp = (Convert.ToInt64(RefreshOnUnixTimestamp, CultureInfo.InvariantCulture) - jitter).ToString();
             }
         }
 
