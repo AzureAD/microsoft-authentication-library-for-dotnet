@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenByIntegratedWindowsAuthTest_ManagedUser_DiscoverFailed_ThrowsExceptionAsync()
+        public async Task AcquireTokenByIntegratedWindowsAuthTest_ManagedUser_DiscoveryFailed_ThrowsExceptionAsync()
         {
             // Arrange
             using (var httpManager = new MockHttpManager())
