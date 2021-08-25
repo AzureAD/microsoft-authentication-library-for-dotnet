@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal class InMemoryPartitionedTokenCacheAccessor : InMemoryTokenCacheAccessor
     {
         // perf: do not use ConcurrentDictionary.Values as it takes a lock
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> _accessTokenCacheDictionary =
+        internal /* internal for test only */ readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> _accessTokenCacheDictionary =
             new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>(1, 1);
 
         public InMemoryPartitionedTokenCacheAccessor(ICoreLogger logger) : base(logger)
