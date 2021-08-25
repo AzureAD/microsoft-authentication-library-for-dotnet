@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -73,19 +74,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Arrange
             var factory = new HttpSnifferClientFactory();
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            _confidentialClientApplication = BuildCCA(settings, factory, true, "westus");
+            _confidentialClientApplication = BuildCCA(settings, factory, true, "invalid");
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-            AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
-            AssertTokenSourceIsIdp(result);
-            Assert.AreEqual(
-              "https://westus.r.login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token?allowestsrnonmsi=true",
-              factory.RequestsAndResponses.Single().Item1.RequestUri.ToString());
 
-            _confidentialClientApplication = BuildCCA(settings, factory, true, TestConstants.Region);
-            result = await GetAuthenticationResultAsync(settings.AppScopes, withForceRefresh: true).ConfigureAwait(false); // regional endpoint
-            AssertTokenSourceIsIdp(result);
-            AssertValidHost(true, factory, 1);
+            var ex = await Assert.ThrowsExceptionAsync<HttpRequestException>(
+                async () => await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false)).ConfigureAwait(false);
+
+            Assert.AreEqual("No such host is known.", ex.Message);
         }
 
         private void AssertTelemetry(HttpSnifferClientFactory factory, string currentTelemetryHeader, int placement = 0)
