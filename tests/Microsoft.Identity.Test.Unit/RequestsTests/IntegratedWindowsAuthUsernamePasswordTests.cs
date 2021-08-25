@@ -207,6 +207,49 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        public async Task AcquireTokenByIntegratedWindowsAuthTest_ManagedUser_DiscoverFailed_ThrowsExceptionAsync()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
+                        {
+                            Content = new StringContent(
+                                "{\"ver\":\"1.0\"," +
+                                "\"account_type\":\"Managed\"," +
+                                "\"domain_name\":\"some_domain.onmicrosoft.com\"," +
+                                "\"cloud_audience_urn\":\"urn:federation:MicrosoftOnline\"," +
+                                "\"cloud_instance_name\":\"login.microsoftonline.com\"}")
+                        }
+                    });
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
+                                                        .BuildConcrete();
+
+                // Act
+                MsalServiceException exception = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    async () => await app
+                        .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
+                        .WithUsername(TestConstants.s_user.Username)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false)).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.UserRealmDiscoveryFailed, exception.ErrorCode);
+                Assert.AreEqual(HttpStatusCode.NotFound, (HttpStatusCode)exception.StatusCode);
+            }
+        }
+
+        [TestMethod]
         public async Task AcquireTokenByIntegratedWindowsAuthTest_UnknownUserAsync()
         {
             // Arrange
