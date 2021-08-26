@@ -3,8 +3,10 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache.CacheImpl;
 
-namespace Microsoft.Identity.Client.Cache.CacheImpl
+namespace WebApi.Misc
 {
     /// <summary>
     /// A token cache base that is useful for ConfidentialClient scenarios, as it partitions the cache using the SuggestedWebKey
@@ -58,7 +60,7 @@ namespace Microsoft.Identity.Client.Cache.CacheImpl
                 byte[] tokenCacheBytes = ReadCacheBytes(args.SuggestedCacheKey);
                 args.TokenCache.DeserializeMsalV3(tokenCacheBytes, shouldClearExistingCache: true);
             }
-        }    
+        }
 
         /// <summary>
         /// Clear the cache.
