@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #endregion
 
         #region Get All Values
-        public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string filterByTenantId = null)
+        public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string tenantIdFilter = null)
         {
             return _accessTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }

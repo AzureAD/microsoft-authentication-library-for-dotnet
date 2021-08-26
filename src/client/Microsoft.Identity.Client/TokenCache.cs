@@ -242,9 +242,9 @@ namespace Microsoft.Identity.Client
                 : refreshTokens;
         }
 
-        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string filterByTenantId = null)
+        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string tenantIdFilter = null)
         {
-            var accessTokens = _accessor.GetAllAccessTokens(filterByTenantId);
+            var accessTokens = _accessor.GetAllAccessTokens(tenantIdFilter);
             return filterByClientId
                 ? accessTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : accessTokens;

@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Cache
 
         void DeleteAccount(MsalAccountCacheKey cacheKey);
 
-        IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string filterByTenantId = null);
+        IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string tenantIdFilter = null);
 
         IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens();
 
