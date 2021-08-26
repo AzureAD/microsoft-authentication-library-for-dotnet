@@ -842,7 +842,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             if (actual.RefreshOn != null)
             {
                 var timeDiff = int.Parse(refreshOnTimeStamp) - ((DateTimeOffset)actual.RefreshOn).ToUnixTimeSeconds();
-                Assert.IsTrue(Constants.DefaultJitterRangeUnixTime >= timeDiff && timeDiff > 0);
+                Assert.IsTrue(Constants.DefaultJitterRangeUnixTime >= timeDiff && timeDiff > -Constants.DefaultJitterRangeUnixTime);
             }
         }
 

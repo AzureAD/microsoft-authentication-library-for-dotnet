@@ -445,7 +445,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 //Assert
                 var timeDiff = refreshIn.ToUnixTimeSeconds() - ((DateTimeOffset)accessToken.RefreshOn).ToUnixTimeSeconds();
-                Assert.IsTrue(jitterRange >= timeDiff && timeDiff > 0);
+                Assert.IsTrue(jitterRange >= timeDiff && timeDiff > -jitterRange);
                 Assert.IsTrue(refreshIn != accessToken.RefreshOn);
             }
         }

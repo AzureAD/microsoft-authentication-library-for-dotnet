@@ -75,6 +75,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             HomeAccountId = homeAccountId;
+            AddJitterToTokenRefreshOn();
         }        
 
         private string _tenantId;
@@ -126,12 +127,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             get
             {
-                Random r = new Random();
-                int jitterValue = r.Next(1, Constants.DefaultJitterRangeUnixTime);
-                var jitter = TimeSpan.FromSeconds(jitterValue);
-
                 return !string.IsNullOrEmpty(RefreshOnUnixTimestamp) ?
-                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp) - jitter :
+                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp):
                     (DateTimeOffset?)null;
             }
         }
@@ -139,6 +136,16 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal DateTimeOffset CachedAtOffset => CoreHelpers.UnixTimestampStringToDateTime(CachedAt);
 
         public bool IsExtendedLifeTimeToken { get; set; }
+
+        internal void AddJitterToTokenRefreshOn()
+        {
+            if (!string.IsNullOrEmpty(RefreshOnUnixTimestamp))
+            {
+                Random r = new Random();
+                int jitter = r.Next(-Constants.DefaultJitterRangeUnixTime, Constants.DefaultJitterRangeUnixTime);
+                RefreshOnUnixTimestamp = (Convert.ToInt64(RefreshOnUnixTimestamp, CultureInfo.InvariantCulture) - jitter).ToString();
+            }
+        }
 
         internal static MsalAccessTokenCacheItem FromJsonString(string json)
         {
