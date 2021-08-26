@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client
             requestParams.RequestContext.Logger.Info("Looking for scopes for the authority in the cache which intersect with " +
                       requestParams.Scope.AsSingleString());
             IList<MsalAccessTokenCacheItem> accessTokenItemList = new List<MsalAccessTokenCacheItem>();
-            foreach (var accessToken in _accessor.GetAllAccessTokens())
+            foreach (var accessToken in _accessor.GetAllAccessTokens(tenantId))
             {
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
@@ -242,9 +242,9 @@ namespace Microsoft.Identity.Client
                 : refreshTokens;
         }
 
-        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string tenantIdFilter = null)
+        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string optionalTenantIdFilter = null)
         {
-            var accessTokens = _accessor.GetAllAccessTokens(tenantIdFilter);
+            var accessTokens = _accessor.GetAllAccessTokens(optionalTenantIdFilter);
             return filterByClientId
                 ? accessTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : accessTokens;

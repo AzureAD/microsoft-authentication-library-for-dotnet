@@ -37,7 +37,14 @@ namespace Microsoft.Identity.Client.Cache
 
         void DeleteAccount(MsalAccountCacheKey cacheKey);
 
-        IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string tenantIdFilter = null);
+        /// <summary>
+        /// Returns all access tokens from the underlying cache collection.
+        /// If optionalTenantIdFilter parameter is specified, returns access tokens pertaining to the specified tenant.
+        /// Token cache accessors implementing this interface are not required to obey Parameter optionalTenantIdFilter.
+        /// See <see cref="PlatformsCommon.Shared.InMemoryPartitionedTokenCacheAccessor.GetAllAccessTokens"/> which uses this filter.
+        /// See <see cref="PlatformsCommon.Shared.InMemoryTokenCacheAccessor.GetAllAccessTokens"/> which does not use this filter.
+        /// </summary>
+        IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalTenantIdFilter = null);
 
         IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens();
 

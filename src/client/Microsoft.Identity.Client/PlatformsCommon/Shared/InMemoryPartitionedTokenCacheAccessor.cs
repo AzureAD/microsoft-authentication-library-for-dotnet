@@ -48,15 +48,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
-        public override IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string tenantIdFilter = null)
+        public override IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalTenantIdFilter = null)
         {
-            if (string.IsNullOrEmpty(tenantIdFilter))
+            if (string.IsNullOrEmpty(optionalTenantIdFilter))
             {
                 return AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
             }
             else
             {
-                AccessTokenCacheDictionary.TryGetValue(tenantIdFilter, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
+                AccessTokenCacheDictionary.TryGetValue(optionalTenantIdFilter, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
                 return partition?.Select(kv => kv.Value)?.ToList() ?? new List<MsalAccessTokenCacheItem>();
             }
         }
