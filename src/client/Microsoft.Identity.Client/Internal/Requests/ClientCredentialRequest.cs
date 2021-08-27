@@ -40,27 +40,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
 
+            AuthenticationResult authResult = null;
+
             if (!_clientParameters.ForceRefresh && 
                 string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
-                if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
+                if (cachedAccessTokenItem != null)
                 {
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 
                     Metrics.IncrementTotalAccessTokensFromCache();
-                    return new AuthenticationResult(
-                        cachedAccessTokenItem,
-                        null,
-                        null,
-                        AuthenticationRequestParameters.AuthenticationScheme,
-                        AuthenticationRequestParameters.RequestContext.CorrelationId,
-                        TokenSource.Cache,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent);
+                    authResult = new AuthenticationResult(
+                                                            cachedAccessTokenItem,
+                                                            null,
+                                                            null,
+                                                            AuthenticationRequestParameters.AuthenticationScheme,
+                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
+                                                            TokenSource.Cache,
+                                                            AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
 
-                cacheInfoTelemetry = (cachedAccessTokenItem == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.RefreshIn;
+                cacheInfoTelemetry = CacheInfoTelemetry.RefreshIn;
             }
             else
             {
@@ -69,6 +71,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (_clientParameters.ForceRefresh)
                 {
                     cacheInfoTelemetry = CacheInfoTelemetry.ForceRefresh;
+                }
+                else
+                {
+                    cacheInfoTelemetry = CacheInfoTelemetry.NoCachedAT;
                 }
             }
 
@@ -80,7 +86,34 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // No AT in the cache or AT needs to be refreshed
             try
             {
-                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                if (cachedAccessTokenItem == null)
+                {
+                    return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    if (cachedAccessTokenItem.NeedsRefresh())
+                    {
+                        _ = Task.Run(async () =>
+                        {
+                            // TODO - Exception handling is being discussed.
+                            try
+                            {
+                                await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                            }
+                            catch (MsalServiceException ex)
+                            {
+                                logger.Warning($"RefreshRtOrFailAsync Refreshing the RT failed. Is AAD down? { ex.IsAadUnavailable()}. Error {ex.Message} ");
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.Warning($"RefreshRtOrFailAsync Error {ex.Message}");
+                            }
+                        });
+                    }
+
+                    return authResult;
+                }
             }
             catch (MsalServiceException e)
             {

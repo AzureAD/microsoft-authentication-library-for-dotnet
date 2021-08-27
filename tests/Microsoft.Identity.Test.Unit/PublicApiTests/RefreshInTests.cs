@@ -53,6 +53,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.IsNotNull(result);
+
+                // The following can be indeterministic due to background threading nature
+                // So it is verified on check and wait basis
+
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
+
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
                 cacheAccess.AssertAccessCounts(1, 1);
@@ -70,6 +76,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
 
                 cacheAccess.AssertAccessCounts(2, 1);
+
             }
         }
 
@@ -112,8 +119,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
+                // The following can be indeterministic due to background threading nature
+                // So it is verified on check and wait basis
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
+
                 // Assert
                 Assert.IsNotNull(result, "ATS still succeeds even though AAD is unavaible");
+
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
                 cacheAccess.AssertAccessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
@@ -125,12 +137,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddTokenResponse(TokenResponseType.Valid);
 
                 result = await app
-                  .AcquireTokenSilent(
-                      TestConstants.s_scope.ToArray(),
-                      account)
-                  .ExecuteAsync(CancellationToken.None)
-                  .ConfigureAwait(false);
+                    .AcquireTokenSilent(
+                        TestConstants.s_scope.ToArray(),
+                        account)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
                 Assert.IsNotNull(result);
+                
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
+
                 cacheAccess.AssertAccessCounts(2, 1); // new tokens written to cache
             }
         }
@@ -228,6 +243,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.IsNotNull(result);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
@@ -259,6 +275,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.IsNotNull(result);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
@@ -310,6 +327,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.IsNotNull(result, "ClientCreds should still succeeds even though AAD is unavaible");
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
                 cacheAccess.AssertAccessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
@@ -320,6 +338,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result);
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 cacheAccess.AssertAccessCounts(2, 1); // new tokens written to cache
             }
         }
@@ -415,6 +434,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 atItem.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow - TimeSpan.FromMinutes(1));
             }
+        }
+
+        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 3000)
+        {
+            int iCount = maxTimeInMilliSec / 100;
+            while (iCount > 0)
+            {
+                if (func())
+                {
+                    return true;
+                }
+                Thread.Yield();
+                Thread.Sleep(100);
+                iCount--;
+            }
+
+            return false;
         }
     }
 }

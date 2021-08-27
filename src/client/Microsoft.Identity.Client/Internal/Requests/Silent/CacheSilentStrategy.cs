@@ -42,26 +42,25 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             ThrowIfNoScopesOnB2C();
             ThrowIfCurrentBrokerAccount();
 
+            AuthenticationResult authResult = null;
+
             if (!_silentParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
-                if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
+                if (cachedAccessTokenItem != null)
                 {
                     logger.Info("Returning access token found in cache. RefreshOn exists ? "
                         + cachedAccessTokenItem.RefreshOn.HasValue);
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                     Metrics.IncrementTotalAccessTokensFromCache();
-                    return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
+                    authResult = await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
+                    cacheInfoTelemetry = CacheInfoTelemetry.RefreshIn;
                 }
-                else if (cachedAccessTokenItem == null)
+                else
                 {
                     cacheInfoTelemetry = CacheInfoTelemetry.NoCachedAT;
                 } 
-                else
-                {
-                    cacheInfoTelemetry = CacheInfoTelemetry.RefreshIn;
-                }
             }
             else
             {
@@ -77,7 +76,32 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             // No AT or AT.RefreshOn > Now --> refresh the RT
             try
             {
-                return await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
+                if (cachedAccessTokenItem == null)
+                {
+                    return await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                if(cachedAccessTokenItem.NeedsRefresh())
+                {
+                     _ = Task.Run( async () =>
+                     {
+                         // TODO - Exception handling is being discussed.
+                         try
+                         {
+                             await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
+                         }
+                         catch (MsalServiceException ex)
+                         {
+                             logger.Warning($"RefreshRtOrFailAsync Refreshing the RT failed. Is AAD down? { ex.IsAadUnavailable()}. Error {ex.Message} ");
+                         }
+                         catch (Exception ex)
+                         {
+                             logger.Warning($"RefreshRtOrFailAsync Error {ex.Message}");
+                         }
+                     });
+                }
+
+                return authResult;
             }
             catch (MsalServiceException e)
             {
