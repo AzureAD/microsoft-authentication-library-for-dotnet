@@ -12,6 +12,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
@@ -216,12 +217,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSerializeMsalAccessTokenCacheItem_WithRefreshOn()
         {
+            string refreshOn = "123456";
             var item = CreateAccessTokenItem();
-            item.RefreshOnUnixTimestamp = "123456";
+            item.RefreshOnUnixTimestamp = refreshOn;
             string asJson = item.ToJsonString();
             var item2 = MsalAccessTokenCacheItem.FromJsonString(asJson);
 
-            AssertAccessTokenCacheItemsAreEqual(item, item2);
+            AssertAccessTokenCacheItemsAreEqual(item, item2, refreshOn);
         }
 
 
@@ -818,7 +820,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(expected.CredentialType, actual.CredentialType, nameof(actual.CredentialType));
         }
 
-        private void AssertAccessTokenCacheItemsAreEqual(MsalAccessTokenCacheItem expected, MsalAccessTokenCacheItem actual)
+        private void AssertAccessTokenCacheItemsAreEqual(MsalAccessTokenCacheItem expected, MsalAccessTokenCacheItem actual, string refreshOnTimeStamp = "")
         {
             AssertCredentialCacheItemBaseItemsAreEqual(expected, actual);
 
@@ -834,9 +836,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
             Assert.AreEqual(expected.OboCacheKey, actual.OboCacheKey, nameof(actual.OboCacheKey));
             Assert.AreEqual(expected.RefreshOnUnixTimestamp, actual.RefreshOnUnixTimestamp, nameof(actual.RefreshOnUnixTimestamp));
-            Assert.AreEqual(expected.RefreshOn, actual.RefreshOn, nameof(actual.RefreshOn));
             Assert.AreEqual(expected.KeyId, actual.KeyId, nameof(actual.KeyId));
             Assert.AreEqual(expected.TokenType, actual.TokenType, nameof(actual.TokenType));
+
+            if (actual.RefreshOn != null)
+            {
+                var timeDiff = int.Parse(refreshOnTimeStamp) - ((DateTimeOffset)actual.RefreshOn).ToUnixTimeSeconds();
+                Assert.IsTrue(Constants.DefaultJitterRangeInSeconds >= timeDiff && timeDiff >= -Constants.DefaultJitterRangeInSeconds);
+            }
         }
 
         private void AssertRefreshTokenCacheItemsAreEqual(MsalRefreshTokenCacheItem expected, MsalRefreshTokenCacheItem actual)

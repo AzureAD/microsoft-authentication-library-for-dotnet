@@ -678,7 +678,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var builder1 = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId);
 
-
             // broker is not available out of the box
             Assert.AreEqual(false, builder1.IsBrokerAvailable());
 

@@ -171,13 +171,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return appConfig.BrokerCreatorFunc != null ?
                 appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
-                new NullBroker();
-        }
-
-        public virtual bool CanBrokerSupportSilentAuth()
-        {
-            return true;
-        }
+                new NullBroker(Logger);
+        }      
 
         public virtual bool BrokerSupportsWamAccounts => false;
 

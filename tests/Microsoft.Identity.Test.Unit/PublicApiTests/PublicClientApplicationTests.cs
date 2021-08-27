@@ -654,38 +654,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(userToFind.Environment, acc.Environment);
         }
 
-        [TestMethod]
-        public void GetAccountWithDuplicateBrokerAccountsTest()
-        {
-            // Arrange
-            var app = PublicClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .BuildConcrete();
-
-            var broker = Substitute.For<IBroker>();
-            var expectedAccount = TestConstants.s_user;
-            broker.GetAccountsAsync(
-                TestConstants.ClientId,
-                TestConstants.RedirectUri,
-                Arg.Any<AuthorityInfo>(), 
-                Arg.Any<ICacheSessionManager>(),
-                Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount, expectedAccount });
-            broker.IsBrokerInstalledAndInvokable().Returns(false);
-
-            var platformProxy = Substitute.For<IPlatformProxy>();
-            platformProxy.CanBrokerSupportSilentAuth().Returns(true);
-            platformProxy.CreateBroker(Arg.Any<ApplicationConfiguration>(), Arg.Any<CoreUIParent>()).ReturnsForAnyArgs(broker);
-
-            app.ServiceBundle.SetPlatformProxyForTest(platformProxy);
-            app.ServiceBundle.Config.IsBrokerEnabled = true;
-
-            // Act
-            var account = app.GetAccountAsync(TestConstants.HomeAccountId).GetAwaiter().GetResult();
-
-            // Assert
-            Assert.AreEqual(TestConstants.HomeAccountId, account.HomeAccountId.Identifier);
-        }
-
+      
         [TestMethod]
         public async Task GetAccountByUserFlowTestsAsync()
         {

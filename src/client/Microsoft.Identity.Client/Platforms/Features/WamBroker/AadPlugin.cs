@@ -239,7 +239,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             bool isForceLoginPrompt,
             bool isInteractive,
-            bool isAccountInWam)
+            bool isAccountInWam, 
+            string scopeOverride = null)
         {
             string loginHint = !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint) ?
                 authenticationRequestParameters.LoginHint :
@@ -256,7 +257,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             WebTokenRequest request = new WebTokenRequest(
                 provider,
-                ScopeHelper.GetMsalScopes(authenticationRequestParameters.Scope).AsSingleString(),
+                scopeOverride ?? ScopeHelper.GetMsalScopes(authenticationRequestParameters.Scope).AsSingleString(),
                 authenticationRequestParameters.AppConfig.ClientId,
                 wamPrompt);
 

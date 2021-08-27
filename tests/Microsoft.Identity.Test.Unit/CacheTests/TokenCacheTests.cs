@@ -408,6 +408,38 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        public void ValidateAccessTokenRefeshOnHasJitterTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                //Arrange
+                int jitterRange = Constants.DefaultJitterRangeInSeconds;
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
+                var expiresOn = new DateTimeOffset(DateTime.MinValue + TimeSpan.FromMinutes(120));
+                var refreshIn = new DateTimeOffset(DateTime.MinValue + TimeSpan.FromMinutes(60));
+
+                //Act
+                var accessToken = new MsalAccessTokenCacheItem(
+                    TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.ClientId,
+                    TestConstants.s_scope.AsSingleString(),
+                    TestConstants.Utid,
+                    null,
+                    accessTokenExpiresOn: expiresOn,
+                    accessTokenExtendedExpiresOn: new DateTimeOffset(DateTime.MinValue + TimeSpan.FromHours(360)),
+                    _clientInfo,
+                    _homeAccountId,
+                    null,
+                    accessTokenRefreshOn: refreshIn);
+
+                //Assert
+                var timeDiff = refreshIn.ToUnixTimeSeconds() - ((DateTimeOffset)accessToken.RefreshOn).ToUnixTimeSeconds();
+                Assert.IsTrue(jitterRange >= timeDiff && timeDiff >= -jitterRange);
+                Assert.IsTrue(refreshIn != accessToken.RefreshOn);
+            }
+        }
+
+        [TestMethod]
         public void GetExpiredAccessToken_WithExtendedExpireStillValid_Test()
         {
             using (var harness = CreateTestHarness(isExtendedTokenLifetimeEnabled: true))

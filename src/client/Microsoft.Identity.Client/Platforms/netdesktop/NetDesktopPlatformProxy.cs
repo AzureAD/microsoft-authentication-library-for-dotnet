@@ -308,11 +308,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return new NetDesktopHttpClientFactory();
         }
 
-        public override bool CanBrokerSupportSilentAuth()
-        {
-            return true;
-        }
-
         public override bool BrokerSupportsWamAccounts => true;
     }
 }

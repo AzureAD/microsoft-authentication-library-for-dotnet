@@ -3,6 +3,7 @@
 
 using System;
 using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 
@@ -15,10 +16,10 @@ namespace Microsoft.Identity.Test.Performance
             BenchmarkRunner.Run<AcquireTokenForClientLargeCacheTests>(
                 DefaultConfig.Instance
                     .WithOptions(ConfigOptions.DontOverwriteResults)
-                    
+                    .AddDiagnoser(MemoryDiagnoser.Default)
                     .AddJob(
                         Job.Default
-                            .WithId("Job-PerfTests")                            
+                            .WithId("Job-PerfTests")
                             ));
 
             Console.ReadKey();

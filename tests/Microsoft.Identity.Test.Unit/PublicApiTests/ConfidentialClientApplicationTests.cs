@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -176,8 +177,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
-                Assert.AreEqual(1, app.InMemoryPartitionedCacheSerializer.CachePartition.Count);
-                Assert.IsTrue(app.InMemoryPartitionedCacheSerializer.CachePartition.Keys.Single().Contains(TestConstants.Utid));
+                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
+                Assert.IsTrue(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Single().Equals(TestConstants.Utid));
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
@@ -186,15 +187,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
-                Assert.AreEqual(2, app.InMemoryPartitionedCacheSerializer.CachePartition.Count);
-                Assert.IsTrue(app.InMemoryPartitionedCacheSerializer.CachePartition.Keys.Any(k => k.Contains(TestConstants.Utid)));
-                Assert.IsTrue(app.InMemoryPartitionedCacheSerializer.CachePartition.Keys.Any(k => k.Contains(TestConstants.Utid2)));
+                Assert.AreEqual(2, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
+                Assert.IsTrue(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(TestConstants.Utid)));
+                Assert.IsTrue(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(TestConstants.Utid2)));
 
             }
         }
 
         [TestMethod]
-        public async Task ClientCreds_DefaultSerialization_Async()
+        public async Task ClientCreds_UsesDefaultPartitionedCacheCorrectly_Async()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -208,27 +209,40 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-                // Will use the partitioned dictionary for token 
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                var result = await app.AcquireTokenForClient(new[] { "scope1" })
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
-                Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
-                Assert.AreEqual(1, app.InMemoryPartitionedCacheSerializer.CachePartition.Count);
-                Assert.IsTrue(app.InMemoryPartitionedCacheSerializer.CachePartition.Keys.Single().Contains(TestConstants.Utid));
-
-                // memory cache should no longer be used
-                InMemoryTokenCache inMemoryTokenCache = new InMemoryTokenCache();
-                inMemoryTokenCache.Bind(app.AppTokenCache);
+                // One tenant partition with one token
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
+                Assert.IsNotNull(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid]);
+                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid].Count);
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                result = await app.AcquireTokenForClient(new[] { "scope2" })
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
-                Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
+                // One tenant partition with two tokens
+                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
+                Assert.IsNotNull(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid]);
+                Assert.AreEqual(2, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid].Count);
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                result = await app.AcquireTokenForClient(new[] { "scope1" })
+                    .WithAuthority(TestConstants.AuthorityUtid2Tenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                // Two tenant partitions with three tokens total
+                Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(2, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
+                Assert.IsNotNull(((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid2]);
+                Assert.AreEqual(1, ((InMemoryPartitionedTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[TestConstants.Utid2].Count);
+
             }
         }
 
@@ -953,7 +967,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
-                TokenCacheHelper.PopulateDefaultAppTokenCache(app);
+                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
 
                 // Don't add mock to fail in case of network call
                 // If there's a network call by mistake, then there won't be a proper number
@@ -1215,7 +1229,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, expectedTimeDiff);
 
-                TokenCacheHelper.PopulateDefaultAppTokenCache(app);
+                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addAccessTokenOnly: true);
                 app.AppTokenCache.SetAfterAccess((args) =>
                 {
                     if (args.HasStateChanged == true)
