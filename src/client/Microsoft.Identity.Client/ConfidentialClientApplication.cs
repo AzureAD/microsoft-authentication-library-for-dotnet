@@ -130,6 +130,46 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc />
+        public AcquireTokenOnBehalfOfParameterBuilder InitiateLongRunningProcessInWebApi(
+            IEnumerable<string> scopes,
+            string userToken,
+            ref string longRunningProcessSessionKey)
+        {
+            if (userToken == null)
+            {
+                throw new ArgumentNullException(nameof(userToken));
+            }
+
+            UserAssertion userAssertion = new UserAssertion(userToken);
+
+            if (string.IsNullOrEmpty(longRunningProcessSessionKey))
+            {
+                longRunningProcessSessionKey = userAssertion.AssertionHash;
+            }
+
+            return AcquireTokenOnBehalfOfParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                userAssertion,
+                longRunningProcessSessionKey);
+        }
+
+        /// <inheritdoc />
+        public AcquireTokenOnBehalfOfParameterBuilder AcquireTokenInLongRunningProcess(
+            IEnumerable<string> scopes,
+            string longRunningProcessSessionKey)
+        {
+            if (longRunningProcessSessionKey == null)
+            {
+                throw new ArgumentNullException(nameof(longRunningProcessSessionKey));
+            }
+
+            return AcquireTokenOnBehalfOfParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                longRunningProcessSessionKey);
+        }
+
         public AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(
             IEnumerable<string> scopes,
             string cacheKey)

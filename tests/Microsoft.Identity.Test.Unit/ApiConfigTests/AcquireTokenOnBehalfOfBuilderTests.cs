@@ -81,13 +81,13 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [TestMethod]
-        public async Task TestAcquireTokenOnBehalfOfBuilder_WithCacheKey_Async()
+        public async Task TestAcquireTokenOnBehalfOfBuilder_ConstructorWithCacheKeyAndUserAssertion_Async()
         {
             var cacheKey = "obo-cache-key";
             await AcquireTokenOnBehalfOfParameterBuilder.Create(_harness.Executor,
                 TestConstants.s_scope,
-                new UserAssertion(TestConstants.UserAssertion))
-                .WithCacheKey(cacheKey)
+                new UserAssertion(TestConstants.UserAssertion),
+                cacheKey)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

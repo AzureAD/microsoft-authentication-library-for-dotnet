@@ -1169,8 +1169,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var onBehalfOfBuilder = app.AcquireTokenOnBehalfOf(
                                            TestConstants.s_scope,
                                            new UserAssertion("assertion", "assertiontype"))
-                                       .WithSendX5C(true)
-                                       .WithCacheKey("obo-cache-key");
+                                       .WithSendX5C(true);
             PublicClientApplicationTests.CheckBuilderCommonMethods(onBehalfOfBuilder);
 
             var silentBuilder = app.AcquireTokenSilent(TestConstants.s_scope, "user@contoso.com")

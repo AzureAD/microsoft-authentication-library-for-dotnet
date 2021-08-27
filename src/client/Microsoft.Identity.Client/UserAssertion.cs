@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
@@ -39,7 +37,7 @@ namespace Microsoft.Identity.Client
         /// <item><term>urn:ietf:params:oauth:grant-type:jwt-bearer</term><description>JWT bearer token. Passing this is equivalent to using
         /// the other (simpler) constructor</description></item>
         /// <item><term>urn:ietf:params:oauth:grant-type:saml1_1-bearer</term><description>SAML 1.1 bearer token</description></item>
-        /// <item><term>urn:ietf:params:oauth:grant-type:jwt-bearer</term><description>SAML 2 bearer token</description></item>
+        /// <item><term>urn:ietf:params:oauth:grant-type:saml2-bearer</term><description>SAML 2 bearer token</description></item>
         /// </list></param>
         public UserAssertion(string assertion, string assertionType)
         {

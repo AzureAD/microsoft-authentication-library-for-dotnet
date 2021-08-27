@@ -169,10 +169,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var userCacheAccess = cca.UserTokenCache.RecordAccess();
 
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
                 string oboCacheKey = "obo-cache-key";
-                var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
-                    .WithCacheKey(oboCacheKey)
+                var result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -195,10 +193,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenByObo_WithNullCacheKey_Throws_TestAsync()
+        public async Task AcquireTokenByObo_WithNullCacheKey_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
+
                 var cca = ConfidentialClientApplicationBuilder
                                                          .Create(TestConstants.ClientId)
                                                          .WithClientSecret(TestConstants.ClientSecret)
@@ -206,12 +208,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                          .WithHttpManager(httpManager)
                                                          .BuildConcrete();
 
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
-                await AssertException.TaskThrowsAsync<ArgumentNullException>(
-                    () => cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
-                        .WithCacheKey(null)
-                        .ExecuteAsync())
+                string cacheKey = null;
+                await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref cacheKey)
+                    .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Assert.AreEqual(new UserAssertion(TestConstants.DefaultAccessToken).AssertionHash, cacheKey);
 
                 await AssertException.TaskThrowsAsync<ArgumentNullException>(
                     () => cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, cacheKey: null)
