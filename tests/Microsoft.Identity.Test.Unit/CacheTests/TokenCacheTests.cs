@@ -408,44 +408,33 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        public void ValidateAccessTokenExpirationHasJitterTest()
+        public void ValidateAccessTokenRefeshOnHasJitterTest()
         {
             using (var harness = CreateTestHarness())
             {
                 //Arrange
-                int jitterRange = 300;
+                int jitterRange = Constants.DefaultJitterRangeInSeconds;
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
-                var expiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromMinutes(120));
-                var refreshIn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromMinutes(60));
+                var expiresOn = new DateTimeOffset(DateTime.MinValue + TimeSpan.FromMinutes(120));
+                var refreshIn = new DateTimeOffset(DateTime.MinValue + TimeSpan.FromMinutes(60));
 
-                var atItem = new MsalAccessTokenCacheItem(
+                //Act
+                var accessToken = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
                     accessTokenExpiresOn: expiresOn,
-                    accessTokenExtendedExpiresOn: new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(360)),
+                    accessTokenExtendedExpiresOn: new DateTimeOffset(DateTime.MinValue + TimeSpan.FromHours(360)),
                     _clientInfo,
                     _homeAccountId,
                     null,
                     accessTokenRefreshOn: refreshIn);
 
-                atItem.Secret = atItem.GetKey().ToString();
-                cache.Accessor.SaveAccessToken(atItem);
-
-                var param = harness.CreateAuthenticationRequestParameters(
-                    TestConstants.AuthorityTestTenant,
-                    new SortedSet<string>(),
-                    cache,
-                    account: new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null));
-
-                //Act
-                var accessToken = cache.FindAccessTokenAsync(param).Result;
-
                 //Assert
                 var timeDiff = refreshIn.ToUnixTimeSeconds() - ((DateTimeOffset)accessToken.RefreshOn).ToUnixTimeSeconds();
-                Assert.IsTrue(jitterRange >= timeDiff && timeDiff > -jitterRange);
+                Assert.IsTrue(jitterRange >= timeDiff && timeDiff >= -jitterRange);
                 Assert.IsTrue(refreshIn != accessToken.RefreshOn);
             }
         }

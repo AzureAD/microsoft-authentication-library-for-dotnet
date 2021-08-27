@@ -137,12 +137,12 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         public bool IsExtendedLifeTimeToken { get; set; }
 
-        internal void AddJitterToTokenRefreshOn()
+        private void AddJitterToTokenRefreshOn()
         {
             if (!string.IsNullOrEmpty(RefreshOnUnixTimestamp))
             {
                 Random r = new Random();
-                int jitter = r.Next(-Constants.DefaultJitterRangeUnixTime, Constants.DefaultJitterRangeUnixTime);
+                int jitter = r.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds);
                 RefreshOnUnixTimestamp = (Convert.ToInt64(RefreshOnUnixTimestamp, CultureInfo.InvariantCulture) - jitter).ToString();
             }
         }
