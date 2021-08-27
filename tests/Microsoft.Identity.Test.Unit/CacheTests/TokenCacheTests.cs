@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             CoreAssert.AreEqual(
                 at.RefreshOn.Value,
                 (at.CachedAtOffset + TimeSpan.FromSeconds(1800)),
-                TimeSpan.FromSeconds(1));
+                TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
         }
 
 
@@ -413,7 +413,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = CreateTestHarness())
             {
                 //Arrange
-                int jitterRange = Constants.DefaultJitterRangeInSeconds;
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
                 var expiresOn = new DateTimeOffset(DateTime.MinValue + TimeSpan.FromMinutes(120));
                 var refreshIn = new DateTimeOffset(DateTime.MinValue + TimeSpan.FromMinutes(60));
@@ -433,8 +432,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     accessTokenRefreshOn: refreshIn);
 
                 //Assert
-                var timeDiff = refreshIn.ToUnixTimeSeconds() - ((DateTimeOffset)accessToken.RefreshOn).ToUnixTimeSeconds();
-                Assert.IsTrue(jitterRange >= timeDiff && timeDiff >= -jitterRange);
+                CoreAssert.AreEqual(refreshIn, (DateTimeOffset)accessToken.RefreshOn, TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
                 Assert.IsTrue(refreshIn != accessToken.RefreshOn);
             }
         }
