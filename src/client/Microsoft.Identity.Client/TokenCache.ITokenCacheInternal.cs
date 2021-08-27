@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client
             }
 
             Dictionary<string, string> wamAccountIds = GetWamAccountIds(requestParams, response);
-            var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);           
+            var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
 
             Account account;
             if (idToken != null)
@@ -350,7 +350,7 @@ namespace Microsoft.Identity.Client
 
             // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
             // as this method is NOT locked by the semaphore
-            IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
+            IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, requestParams.Authority.TenantId);
             if (tokenCacheItems.Count == 0)
             {
                 logger.Verbose("No access tokens found in the cache. Skipping filtering. ");
@@ -870,7 +870,7 @@ namespace Microsoft.Identity.Client
 
             return accounts;
         }
-       
+
         MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey)
         {
             var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
@@ -911,7 +911,7 @@ namespace Microsoft.Identity.Client
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, RequestContext requestContext)
         {
             requestContext.Logger.Verbose($"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
-            await _semaphoreSlim.WaitAsync(requestContext.UserCancellationToken).ConfigureAwait(false);            
+            await _semaphoreSlim.WaitAsync(requestContext.UserCancellationToken).ConfigureAwait(false);
             requestContext.Logger.Verbose("[RemoveAccountAsync] Entered token cache semaphore");
 
             try
