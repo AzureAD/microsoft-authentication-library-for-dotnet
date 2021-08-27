@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Secret = "access_token_secret",
                 TenantId = tenant,
                 RawClientInfo = string.Empty,
-                UserAssertionHash = "assertion_hash",
+                OboCacheKey = "assertion_hash",
                 TokenType = StorageJsonValues.TokenTypeBearer
             };
         }
