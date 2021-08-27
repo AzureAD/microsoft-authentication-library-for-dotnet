@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 $"The dates are off by {t.TotalMilliseconds}ms, which is more than the expected {delta.TotalMilliseconds}ms");
         }
 
-        public static void IsInRange(DateTimeOffset expected, DateTimeOffset actual, TimeSpan range)
+        public static void IsWithinRange(DateTimeOffset expected, DateTimeOffset actual, TimeSpan range)
         {
             TimeSpan t = expected - actual;
             Assert.IsTrue(t >= -range && t <= range,

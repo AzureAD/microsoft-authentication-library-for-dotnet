@@ -289,7 +289,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(tokenResponse.TokenType, at.TokenType);
             Assert.IsNull(at.KeyId);
             Assert.IsTrue(at.RefreshOn.HasValue);
-            CoreAssert.IsInRange(
+            CoreAssert.IsWithinRange(
                 at.RefreshOn.Value,
                 (at.CachedAtOffset + TimeSpan.FromSeconds(1800)),
                 TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
@@ -432,7 +432,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     accessTokenRefreshOn: refreshIn);
 
                 //Assert
-                CoreAssert.IsInRange(refreshIn, (DateTimeOffset)accessToken.RefreshOn, TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
+                CoreAssert.IsWithinRange(refreshIn, (DateTimeOffset)accessToken.RefreshOn, TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
                 Assert.IsTrue(refreshIn != accessToken.RefreshOn);
             }
         }
