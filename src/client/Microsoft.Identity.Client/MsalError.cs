@@ -544,7 +544,7 @@ namespace Microsoft.Identity.Client
         /// <para>What happens?</para>You did not define an authority at the application level, so it defaults to the public cloud (login.microsoft.com), but the authority at the request level is for a different cloud. Only the tenant can be changed at the request level.
         /// <para>Mitigation</para>Add .WithAuthority("https://login.windows-ppe.net/common) at the application level and specify the tenant at the request level: .WithAuthority("https://login.windows-ppe.net/1234-567-890-12345678). 
         /// </summary>
-        public const string AuthorityHostMismatch = "authority_host_mismatch";       
+        public const string AuthorityHostMismatch = "authority_host_mismatch";
 
         /// <summary>
         /// Duplicate query parameter was found in extraQueryParameters.
@@ -987,6 +987,7 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para> For troubleshooting details, see https://aka.ms/msal-net-webview2 .
         /// </summary>
         public const string WebView2LoaderNotFound = "webview2loader_not_found";
+
         /// <summary>
         /// <para>What happens?</para>You configured both Regional Authority and Authority Validation. Authority validation is not currently supported for regional authorities.
         /// <para>Mitigation</para>Set the validateAuthority flag to false to use Azure Regional authority. Do not disable authority validation if you read the authority from an untrusted source, 
@@ -1004,5 +1005,23 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>For troubleshooting details, see https://aka.ms/msal-net-wam .
         /// </summary>
         public const string InitializeProcessSecurityError = "initialize_process_security_error";
+
+        /// <summary>
+        /// <para>What happens?</para>The token cache already contains a token with an OBO cache key that
+        /// matches the <c>longRunningProcessSessionKey</c> passed into <see cref="IConfidentialClientApplication.AcquireTokenInLongRunningProcess"/>.
+        /// <para>Mitigation</para>Call <see cref="IConfidentialClientApplication.InitiateLongRunningProcessInWebApi"/> with a new <c>longRunningProcessSessionKey</c>
+        /// that does not exist in the token cache or call <see cref="IConfidentialClientApplication.AcquireTokenInLongRunningProcess"/> with an already used
+        /// <c>longRunningProcessSessionKey</c>.
+        /// </summary>
+        public const string OboCacheKeyAlreadyInCacheError = "obo_cache_key_in_cache_error";
+
+        /// <summary>
+        /// <para>What happens?</para>The token cache does not contain a token with an OBO cache key that
+        /// matches the <c>longRunningProcessSessionKey</c> passed into <see cref="IConfidentialClientApplication.AcquireTokenInLongRunningProcess"/>.
+        /// <para>Mitigation</para>Call <see cref="IConfidentialClientApplication.InitiateLongRunningProcessInWebApi"/> with a new <c>longRunningProcessSessionKey</c>
+        /// that does not exist in the token cache or call <see cref="IConfidentialClientApplication.AcquireTokenInLongRunningProcess"/> with an already used
+        /// <c>longRunningProcessSessionKey</c>.
+        /// </summary>
+        public const string OboCacheKeyNotInCacheError = "obo_cache_key_not_in_cache_error";
     }
 }

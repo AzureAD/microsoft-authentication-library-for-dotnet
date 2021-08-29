@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -50,6 +49,8 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string> { { "client_ip", "some_ip" }, { "aud", "some_audience" } };
         public const string RTSecret = "someRT";
         public const string ATSecret = "some-access-token";
+        public const string RTSecret2 = "someRT2";
+        public const string ATSecret2 = "some-access-token2";
 
         public const string HomeAccountId = Uid + "." + Utid;
 
@@ -110,13 +111,13 @@ namespace Microsoft.Identity.Test.Unit
         public const string UniqueId = "unique_id";
         public const string IdentityProvider = "my-idp";
         public const string Name = "First Last";
-        
+
         public const string Claims = @"{""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
         public static readonly string[] ClientCapabilities = new[] { "cp1", "cp2" };
         public const string ClientCapabilitiesJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}}}";
         // this a JSON merge from Claims and ClientCapabilitiesJson
         public const string ClientCapabilitiesAndClaimsJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}},""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
-            
+
 
         public const string DisplayableId = "displayable@id.com";
         public const string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
@@ -314,7 +315,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                ""trace_id"":""82e709b9-f0b3-431d-99cd-f3c2ca3d4b00"",
                ""correlation_id"":""e7619cf4-53ea-443c-b76a-194c032e9840"",
                ""error_uri"":""https://login.microsoftonline.com/error?code=50049""}";
-        
+
 
         public const string TokenResponseJson = @"{
                                                    ""token_type"": ""Bearer"",

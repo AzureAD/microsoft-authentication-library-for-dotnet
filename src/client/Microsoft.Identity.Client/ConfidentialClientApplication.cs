@@ -167,21 +167,6 @@ namespace Microsoft.Identity.Client
                 longRunningProcessSessionKey);
         }
 
-        public AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(
-            IEnumerable<string> scopes,
-            string cacheKey)
-        {
-            if (cacheKey == null)
-            {
-                throw new ArgumentNullException(nameof(cacheKey));
-            }
-
-            return AcquireTokenOnBehalfOfParameterBuilder.Create(
-                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
-                scopes,
-                cacheKey);
-        }
-
         /// <summary>
         /// Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
         /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.

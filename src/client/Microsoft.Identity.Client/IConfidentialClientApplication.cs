@@ -85,7 +85,8 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="userToken">A JSON Web Token which was used to call the web API and contains the credential information
         /// about the user on behalf of whom to get a token.</param>
-        /// <param name="longRunningProcessSessionKey">Key by which to look up the token in the cache</param>
+        /// <param name="longRunningProcessSessionKey">Key by which to look up the token in the cache.
+        /// If null, it will be set to the assertion hash by default.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         AcquireTokenOnBehalfOfParameterBuilder InitiateLongRunningProcessInWebApi(IEnumerable<string> scopes, string userToken, ref string longRunningProcessSessionKey);
 

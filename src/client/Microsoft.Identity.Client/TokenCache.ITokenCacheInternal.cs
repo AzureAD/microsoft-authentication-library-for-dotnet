@@ -353,6 +353,13 @@ namespace Microsoft.Identity.Client
             IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, requestParams.Authority.TenantId);
             if (tokenCacheItems.Count == 0)
             {
+                // Validates correct AcquireTokenInLongRunningProcess call (user assertion is null in this case)
+                if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf && requestParams.UserAssertion == null && !string.IsNullOrEmpty(requestParams.OboCacheKey))
+                {
+                    logger.Error("[FindAccessTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
+                    throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
+                }
+
                 logger.Verbose("No access tokens found in the cache. Skipping filtering. ");
                 requestParams.RequestContext.ApiEvent.CacheInfo = (int)CacheInfoTelemetry.NoCachedAT;
                 return null;
@@ -364,6 +371,23 @@ namespace Microsoft.Identity.Client
             tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);
 
             CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
+
+            // Verify appropriate scenario for OBO tokens in long running process
+            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
+            {
+                // Validates correct AcquireTokenInLongRunningProcess call (user assertion is null in this case)
+                if (requestParams.UserAssertion == null && !string.IsNullOrEmpty(requestParams.OboCacheKey) && tokenCacheItems.Count == 0)
+                {
+                    logger.Error("[FindAccessTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
+                    throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
+                }
+                // Validates correct InitiateLongRunningProcessInWebAPI call (user assertion is specified in this case)
+                if (requestParams.UserAssertion != null && !string.IsNullOrEmpty(requestParams.OboCacheKey) && tokenCacheItems.Count > 0)
+                {
+                    logger.Error("[FindAccessTokenAsync] InitiateLongRunningProcessInWebAPI was called and OBO token was already found in the cache.");
+                    throw new MsalClientException(MsalError.OboCacheKeyAlreadyInCacheError, MsalErrorMessage.OboCacheKeyAlreadyInCache);
+                }
+            }
 
             // no match
             if (tokenCacheItems.Count == 0)
@@ -660,6 +684,13 @@ namespace Microsoft.Identity.Client
             else
             {
                 requestParams.RequestContext.Logger.Verbose("No RTs found in the MSAL cache ");
+
+                // Validates correct AcquireTokenInLongRunningProcess call (user assertion is null in this case)
+                if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf && requestParams.UserAssertion == null && !string.IsNullOrEmpty(requestParams.OboCacheKey))
+                {
+                    requestParams.RequestContext.Logger.Error("[FindRefreshTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
+                    throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
+                }
             }
 
             requestParams.RequestContext.Logger.Verbose("Checking ADAL cache for matching RT. ");
