@@ -7,9 +7,9 @@
 ### Bug Fixes:
 **Added a more descriptive and actionable error message when AAD throttles the requests from the app**. See issue [#2808](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2808).  
 **Improved error messaging related to broker support**. See issue [#2706](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706).  
-**Fixed MSA Pass-through to work with WAM**. See issue [#2822](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2822).  
+**MSA Pass-through enabled applications using MSAL can now use WAM**. See issue [#2822](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2822).  
 **Improved error messaging when MSAL fails during the user realm discovery**. See issue [#2835](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2835).  
-**Removed serialization from the default app token cache** for client credentials flow to improve performance. See issue [#2826](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2826).  
+**Improved performance by removing unnecessary serialization in default app token cache** used in client credentials flow. See issue [#2826](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2826).  
 
 ### Fundamentals:
 **Validated MSAL.NET works with .NET 6 and MAUI**. See issues [#2810](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2810), [#2655](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2655).  
