@@ -2,7 +2,7 @@
 ==========
 ### New Features:
 **Added custom nonce support to Proof-of-Possession requests**. See issue [#2809](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2809).  
-**Added a random jitter (within ten minutes range) to the Refresh In time for a token**. See issue [#2796](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2796).  
+**Added a random jitter (within ten minutes range) to the Refresh In time for a token to optimize for resiliency**. See issue [#2796](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2796).  
 
 ### Bug Fixes:
 **Added a more descriptive and actionable error message when AAD throttles the requests from the app**. See issue [#2808](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2808).  
