@@ -8,8 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -352,7 +350,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-    
+
 
         [TestMethod]
         public async Task GetAccounts_DoesNotFireNotifications_WhenTokenCacheIsNotSerialized_Async()
@@ -442,9 +440,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                .WithClientSecret(TestConstants.ClientSecret)
                .BuildConcrete();
 
-            Assert.IsTrue(
-                (cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized(),
-                "The app token cache, used by AcquireTokenForClient, is serialized by default");
+            Assert.IsFalse((cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
             Assert.IsFalse((cca.UserTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
 
             var inMemoryTokenCache = new InMemoryTokenCache();

@@ -9,10 +9,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -35,7 +33,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .BuildConcrete();
 
-                
+
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false);
 
                 Trace.WriteLine("2. Silent Request without claims returns the AT from the cache");
@@ -73,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                                                            .WithHttpManager(harness.HttpManager)
                                                            .BuildConcrete();
 
-                TokenCacheHelper.PopulateDefaultAppTokenCache(app);
+                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
 
                 Trace.WriteLine("2. AcquireTokenForClient returns from the cache ");
                 AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -143,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                var mockUi = 
+                var mockUi =
                      app.ServiceBundle.ConfigureMockWebUI(
                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
@@ -177,7 +175,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                               .WithClientCapabilities(TestConstants.ClientCapabilities)
                               .BuildConcrete();
 
-                var mockUi = 
+                var mockUi =
                      app.ServiceBundle.ConfigureMockWebUI(
                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
@@ -212,7 +210,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                                 .WithTelemetry(new TraceTelemetryConfig())
                                 .BuildConcrete();
 
-                var mockUi = 
+                var mockUi =
                      app.ServiceBundle.ConfigureMockWebUI(
                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
