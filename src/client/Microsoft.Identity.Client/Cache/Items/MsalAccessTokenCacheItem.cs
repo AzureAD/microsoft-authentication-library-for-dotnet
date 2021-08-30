@@ -123,6 +123,11 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal DateTimeOffset ExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExpiresOnUnixTimestamp);
         internal DateTimeOffset ExtendedExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExtendedExpiresOnUnixTimestamp);
+
+        /// <summary>
+        /// RefreshOn has a jitter time added to it that can be between + or - <see cref="Constants.DefaultJitterRangeInSeconds"/>.
+        /// Please take this into consideration when testing.
+        /// </summary>
         internal DateTimeOffset? RefreshOn
         {
             get
