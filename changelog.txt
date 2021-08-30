@@ -1,16 +1,15 @@
 4.36.0
 ==========
+### New Features:
+**Added custom nonce support to Proof-of-Possession requests**. See issue [#2809](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2809).  
+**Added a random jitter (within ten minutes range) to the Refresh In time for a token**. See issue [#2796](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2796).  
+
 ### Bug Fixes:
-**Added a more descriptive error message when AAD throttles the app**. See issue [#2808](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2808).  
+**Added a more descriptive and actionable error message when AAD throttles the requests from the app**. See issue [#2808](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2808).  
 **Improved error messaging related to broker support**. See issue [#2706](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706).  
 **Fixed MSA Pass-through to work with WAM**. See issue [#2822](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2822).  
 **Improved error messaging when MSAL fails during the user realm discovery**. See issue [#2835](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2835).  
 **Removed serialization from the default app token cache** for client credentials flow to improve performance. See issue [#2826](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2826).  
-
-### New Features:
-**In MSAL.NET Cache Extensions, exposed the Storage API**. See issue [#92](https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/issues/92).  
-**Added custom nonce support to Proof-of-Possession requests**. See issue [#2809](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2809).  
-**Added a random jitter (within ten minutes range) to the Refresh In time for a token**. See issue [#2796](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2796).  
 
 ### Fundamentals:
 **Validated MSAL.NET works with .NET 6 and MAUI**. See issues [#2810](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2810), [#2655](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2655).  
