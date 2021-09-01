@@ -1,3 +1,16 @@
+4.36.0
+==========
+### New Features:
+**Added custom nonce support to Proof-of-Possession requests**. See issue [#2809](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2809).  
+**Added a random jitter (within ten minutes range) to the Refresh In time for a token to optimize for resiliency**. See issue [#2796](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2796).  
+
+### Bug Fixes:
+**Added a more descriptive and actionable error message when AAD throttles the requests from the app**. See issue [#2808](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2808).  
+**Improved error messaging related to broker support**. See issue [#2706](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706).  
+**MSA Pass-through enabled applications using MSAL can now use WAM**. See issue [#2822](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2822).  
+**Improved error messaging when MSAL fails during the user realm discovery**. See issue [#2835](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2835).  
+**Improved performance by removing unnecessary serialization in default app token cache** used in client credentials flow. See issue [#2826](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2826).  
+
 4.35.1
 ==========
 ### Bug Fixes:
