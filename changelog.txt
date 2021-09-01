@@ -11,10 +11,6 @@
 **Improved error messaging when MSAL fails during the user realm discovery**. See issue [#2835](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2835).  
 **Improved performance by removing unnecessary serialization in default app token cache** used in client credentials flow. See issue [#2826](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2826).  
 
-### Fundamentals:
-**Validated MSAL.NET works with .NET 6 and MAUI**. See issues [#2810](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2810), [#2655](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2655).  
-**Validated MSAL.NET desktop scenarios on Windows 11**. See issues [#2738](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2738).  
-
 4.35.1
 ==========
 ### Bug Fixes:
