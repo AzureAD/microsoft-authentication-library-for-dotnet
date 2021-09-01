@@ -93,6 +93,7 @@ namespace Microsoft.Identity.Client
             }
 
             Config.ClientCredentialCertificate = certificate;
+            Config.SendX5C = true;
             Config.ConfidentialClientCredentialCount++;
             return this;
         }

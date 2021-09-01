@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _clientApplicationBase.UserTokenCacheInternal).ConfigureAwait(false);
 
-            requestParameters.SendX5C = silentParameters.SendX5C ?? true;
+            requestParameters.SendX5C = silentParameters.SendX5C ?? false;
 
             var handler = new SilentRequest(ServiceBundle, requestParameters, silentParameters);
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
 
-            requestParameters.SendX5C = refreshTokenParameters.SendX5C ?? true;
+            requestParameters.SendX5C = refreshTokenParameters.SendX5C ?? false;
 
             var handler = new ByRefreshTokenRequest(ServiceBundle, requestParameters, refreshTokenParameters);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);

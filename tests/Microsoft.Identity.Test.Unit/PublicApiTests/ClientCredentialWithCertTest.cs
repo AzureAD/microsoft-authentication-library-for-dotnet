@@ -84,6 +84,67 @@ namespace Microsoft.Identity.Test.Unit
             httpManager.AddInstanceDiscoveryMockHandler();
         }
 
+        [DataTestMethod]
+        [DataRow(true, null, true)]
+        [DataRow(false, null, false)]
+        [DataRow(null, null, false)] // the default is false
+        [DataRow(null, true, true)]
+        [DataRow(null, false, false)]
+        [DataRow(true, true, true)]
+        [DataRow(false, false, false)]
+        [DataRow(true, false, false)] // request overrides
+        [DataRow(false, true, true)] // request overrides
+        public async Task JsonWebTokenWithX509PublicCertSendCertificateTest2Async(bool? appFlag, bool? requestFlag, bool expectX5c)
+        {
+            using (var harness = CreateTestHarness())
+            {
+                SetupMocks(harness.HttpManager);
+                var certificate = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                TestConstants.DefaultPassword);
+
+                var appBuilder = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithHttpManager(harness.HttpManager);
+
+                appBuilder = appBuilder.WithCertificate(certificate); // app flag
+                if (appFlag.HasValue)
+                {
+                    appBuilder.Config.SendX5C = appFlag.Value;
+                }
+
+                var app = appBuilder.BuildConcrete();
+
+                //Check for x5c claim
+                if (expectX5c)
+                {
+                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
+                }
+                else
+                {
+                    harness.HttpManager.AddMockHandler(new MockHttpMessageHandler()
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(true),
+                    });
+                }
+
+                var builder = app.AcquireTokenForClient(TestConstants.s_scope);
+
+
+                if (requestFlag != null)
+                {
+                    builder = builder.WithSendX5C(requestFlag.Value);
+                }
+
+                AuthenticationResult result = await builder
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+            }
+        }
+
         [TestMethod]
         [Description("Test for client assertion with X509 public certificate using sendCertificate")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateTestAsync()
