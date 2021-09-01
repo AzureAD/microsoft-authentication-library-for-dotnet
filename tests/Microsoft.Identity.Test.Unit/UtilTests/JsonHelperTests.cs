@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             var certificate = new X509Certificate2(
                    ResourceHelper.GetTestResourceRelativePath("RSATestCertDotNet.pfx"));
 
-            var header = new JWTHeaderWithCertificate(ClientCredentialWrapper.CreateWithCertificate(certificate, withSendX5C:true));
+            var header = new JWTHeaderWithCertificate(ClientCredentialWrapper.CreateWithCertificate(certificate), true);
             string actualPayload = JsonHelper.SerializeToJson(payload);
             string actualHeader = JsonHelper.SerializeToJson(header);
 

@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Client.Internal
 
                 X509CertificatePublicCertValue = null;
 
-                bool perRequestSendX5C = sendCertificate ?? true;
+                bool perRequestSendX5C = sendCertificate ?? false;
 
                 if (!perRequestSendX5C)
                 {
