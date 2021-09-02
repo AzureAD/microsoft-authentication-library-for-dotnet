@@ -56,11 +56,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(Cloud.Public, RunOn.NetFx | RunOn.NetCore)]
         [DataRow(Cloud.Adfs, RunOn.NetCore)]
         [DataRow(Cloud.PPE, RunOn.NetFx)]
-         //[DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithCertificate_TestAsync(Cloud cloud, RunOn runOn)
+        [DataRow(Cloud.PPE, new object[] { RunOn.NetFx, true })]
+        [DataRow(Cloud.Public, new object[] { RunOn.NetFx | RunOn.NetCore, true })]
+        //[DataRow(Cloud.Arlington)] - cert not setup
+        public async Task WithCertificate_TestAsync(Cloud cloud, RunOn runOn, bool useAppIdUri = false)
         {
             runOn.AssertFramework();
-            await RunClientCredsAsync(cloud, CredentialType.Cert).ConfigureAwait(false);
+            await RunClientCredsAsync(cloud, CredentialType.Cert, useAppIdUri).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -115,10 +117,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims).ConfigureAwait(false);
         }
 
-        private async Task RunClientCredsAsync(Cloud cloud, CredentialType credentialType)
+        private async Task RunClientCredsAsync(Cloud cloud, CredentialType credentialType, bool UseAppIdUri = false)
         {
             Trace.WriteLine($"Running test with settings for cloud {cloud}, credential type {credentialType}");
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
+
+            settings.UseAppIdUri = UseAppIdUri;
 
             AuthenticationResult authResult;
 
