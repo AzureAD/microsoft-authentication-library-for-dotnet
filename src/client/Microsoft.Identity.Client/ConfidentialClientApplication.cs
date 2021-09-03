@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? 
                 new TokenCache(ServiceBundle, true, InMemoryPartitionedCacheSerializer);
             Certificate = configuration.ClientCredentialCertificate;
-            SendX5C = configuration.SendX5C;
             
             this.ServiceBundle.ApplicationLogger.Verbose($"ConfidentialClientApplication {configuration.GetHashCode()} created");
         }
@@ -183,11 +182,6 @@ namespace Microsoft.Identity.Client
         /// The certificate used to create this <see cref="ConfidentialClientApplication"/>, if any.
         /// </summary>
         public X509Certificate2 Certificate { get; }
-
-        /// <summary>
-        /// Send X5C with each request
-        /// </summary>
-        public bool SendX5C { get; }
 
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }

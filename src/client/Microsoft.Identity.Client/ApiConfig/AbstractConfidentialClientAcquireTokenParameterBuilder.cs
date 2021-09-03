@@ -24,8 +24,6 @@ namespace Microsoft.Identity.Client
         : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
-        internal bool SendX5C { get; set; }
-
         internal AbstractConfidentialClientAcquireTokenParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor.ServiceBundle)
         {

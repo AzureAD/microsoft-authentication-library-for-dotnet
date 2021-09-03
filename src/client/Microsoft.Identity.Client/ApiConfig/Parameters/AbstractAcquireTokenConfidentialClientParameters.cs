@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     /// Abstract class for confidential clients
     /// Supports common property(ies)
     /// </summary>
-    public abstract class AbstractAcquireTokenConfidentialClientParameters
+    internal abstract class AbstractAcquireTokenConfidentialClientParameters
     {
         /// <summary>
         /// Parameter sent to request to send X5C or not.

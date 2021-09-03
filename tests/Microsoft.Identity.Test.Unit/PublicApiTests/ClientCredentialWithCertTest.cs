@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit
             };
         }
 
-        private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithX5CValidation(bool clientCredentialFlow)
+        private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithX5CValidation(bool clientCredentialFlow, bool expectX5C = true)
         {
             return new MockHttpMessageHandler()
             {
@@ -58,8 +58,16 @@ namespace Microsoft.Identity.Test.Unit
                     var handler = new JwtSecurityTokenHandler();
                     var jsonToken = handler.ReadJwtToken(encodedJwt);
                     var x5c = jsonToken.Header.Where(header => header.Key == "x5c").FirstOrDefault();
-                    Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-                    Assert.AreEqual(x5c.Value.ToString(), TestConstants.Defaultx5cValue);
+                    if (expectX5C)
+                    {
+                        Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
+                        Assert.AreEqual(x5c.Value.ToString(), TestConstants.Defaultx5cValue);
+                    }
+                    else
+                    {
+                        Assert.IsNull(x5c.Key);
+                        Assert.IsNull(x5c.Value);
+                    }
                 }
             };
         }
@@ -94,7 +102,7 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow(false, false, false)]
         [DataRow(true, false, false)] // request overrides
         [DataRow(false, true, true)] // request overrides
-        public async Task JsonWebTokenWithX509PublicCertSendCertificateTest2Async(bool? appFlag, bool? requestFlag, bool expectX5c)
+        public async Task JsonWebTokenWithX509PublicCertSendCertificateTestSendX5cCombinationsAsync(bool? appFlag, bool? requestFlag, bool expectX5c)
         {
             using (var harness = CreateTestHarness())
             {
@@ -110,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit
                 appBuilder = appBuilder.WithCertificate(certificate); // app flag
                 if (appFlag.HasValue)
                 {
-                    appBuilder.Config.SendX5C = appFlag.Value;
+                    appBuilder.WithSendX5C(appFlag.Value);
                 }
 
                 var app = appBuilder.BuildConcrete();
@@ -122,11 +130,7 @@ namespace Microsoft.Identity.Test.Unit
                 }
                 else
                 {
-                    harness.HttpManager.AddMockHandler(new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = CreateResponse(true),
-                    });
+                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true, false));
                 }
 
                 var builder = app.AcquireTokenForClient(TestConstants.s_scope);
@@ -162,6 +166,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)
+                    .WithSendX5C(true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -212,6 +217,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)
+                    .WithSendX5C(true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -262,6 +268,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)
+                    .WithSendX5C(true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -300,6 +307,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)
+                    .WithSendX5C(true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -341,8 +349,9 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri("https://login.microsoftonline.com/my-utid"),true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate).
-                    BuildConcrete();
+                    .WithCertificate(certificate)
+                    .WithSendX5C(true)
+                    .BuildConcrete();
 
                 TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -381,7 +390,7 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Check the JWTHeader when sendCert is true")]
         public void CheckJWTHeaderWithCertTrueTest()
         {
-            var credential = GenerateClientAssertionCredential(true);
+            var credential = GenerateClientAssertionCredential();
 
             var header = new JWTHeaderWithCertificate(credential, true);
 
@@ -393,9 +402,9 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Check the JWTHeader when sendCert is false")]
         public void CheckJWTHeaderWithCertFalseTest()
         {
-            var credential = GenerateClientAssertionCredential(false);
+            var credential = GenerateClientAssertionCredential();
 
-            var header = new JWTHeaderWithCertificate(credential);
+            var header = new JWTHeaderWithCertificate(credential, false);
 
             Assert.IsNull(header.X509CertificatePublicCertValue);
             Assert.IsNotNull(header.X509CertificateThumbprint);
@@ -447,12 +456,12 @@ namespace Microsoft.Identity.Test.Unit
                 userCacheAccess.AssertAccessCounts(0, 0);
             }
         }
-        private ClientCredentialWrapper GenerateClientAssertionCredential(bool withSendX5C = false)
+        private ClientCredentialWrapper GenerateClientAssertionCredential()
         {
             var cert = new X509Certificate2(
             ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
 
-            var credential = ClientCredentialWrapper.CreateWithCertificate(cert, withSendX5C:withSendX5C);
+            var credential = ClientCredentialWrapper.CreateWithCertificate(cert);
             return credential;
         }
     }

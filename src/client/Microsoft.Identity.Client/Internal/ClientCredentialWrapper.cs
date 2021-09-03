@@ -102,14 +102,13 @@ namespace Microsoft.Identity.Client.Internal
 
         #region TestBuilders
         //The following builders methods are intended for testing
-        public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null, bool withSendX5C=false)
+        public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
         {
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
             
             applicationConfiguration.ClientCredentialCertificate = certificate;
             applicationConfiguration.ConfidentialClientCredentialCount = 1;
             applicationConfiguration.ClaimsToSign = claimsToSign;
-            applicationConfiguration.SendX5C = withSendX5C;
 
             return new ClientCredentialWrapper(applicationConfiguration);
         }
