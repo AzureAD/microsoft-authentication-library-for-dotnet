@@ -16,7 +16,7 @@ namespace WebApi.Controllers
     {
         private readonly ILogger<SingletonController> _logger;
         private static Random s_random = new Random();
-        
+
 
         public WilsonLruCacheController(ILogger<SingletonController> logger)
         {
@@ -27,9 +27,9 @@ namespace WebApi.Controllers
         // 1 token -> ~2200 bytes (assuming 1 simple scope + bearer token)
         // 975k tokens -> ~2GB
         private static EventBasedLRUCache<string, byte[]> s_wilsonCache =
-            new EventBasedLRUCache<string, byte[]>(500 * 1000 );
+            new EventBasedLRUCache<string, byte[]>(500 * 1000);
         private static MsalCacheBasedOnWilson s_msalCache = new MsalCacheBasedOnWilson(s_wilsonCache);
-            
+
 
 
         [HttpGet]

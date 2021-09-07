@@ -50,7 +50,7 @@ namespace WebApi.Controllers
 
             Guid requestId = Guid.NewGuid();
             StringBuilder sb = new StringBuilder();
-            
+
             ConfidentialClientApplication local_cca = ConfidentialClientApplicationBuilder
                     .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                     .WithAuthority($"https://login.microsoftonline.com/tid")

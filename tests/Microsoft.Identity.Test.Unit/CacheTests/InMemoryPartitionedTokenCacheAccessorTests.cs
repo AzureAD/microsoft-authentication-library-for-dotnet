@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void SaveRefreshToken_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
 
             var rt1 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion", "homeAccountId");
 
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void DeleteRefreshToken_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
             var rt1 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion", "homeAccountId");
             var rt2 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion", "homeAccountId2");
             var rt3 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion2", "homeAccountId");
@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void GetAllRefreshTokens_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
             var rt1 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion", "homeAccountId");
             var rt2 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion", "homeAccountId2");
             var rt3 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion2", "homeAccountId");
@@ -255,7 +255,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void SaveIdToken_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
 
             var idt1 = TokenCacheHelper.CreateIdTokenCacheItem("tenant1", "homeAccountId");
 
@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void DeleteIdToken_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
             var idt1 = TokenCacheHelper.CreateIdTokenCacheItem("tenant1", "homeAccountId");
             var idt2 = TokenCacheHelper.CreateIdTokenCacheItem("tenant1", "homeAccountId2");
             var idt3 = TokenCacheHelper.CreateIdTokenCacheItem("tenant2", "homeAccountId");
@@ -315,7 +315,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void GetIdToken_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
             var idt1 = TokenCacheHelper.CreateIdTokenCacheItem("tenant1", "homeAccountId");
             var idt2 = TokenCacheHelper.CreateIdTokenCacheItem("tenant1", "homeAccountId2");
             var idt3 = TokenCacheHelper.CreateIdTokenCacheItem("tenant2", "homeAccountId");
@@ -337,7 +337,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void GetAllIdTokens_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
             var idt1 = TokenCacheHelper.CreateIdTokenCacheItem("tenant1", "homeAccountId");
             var idt2 = TokenCacheHelper.CreateIdTokenCacheItem("tenant1", "homeAccountId2");
             var idt3 = TokenCacheHelper.CreateIdTokenCacheItem("tenant2", "homeAccountId");
@@ -363,7 +363,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void SaveAccount_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
 
             var acc1 = TokenCacheHelper.CreateAccountItem("tenant1", "homeAccountId");
 
@@ -400,7 +400,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void DeleteAccount_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
             var acc1 = TokenCacheHelper.CreateAccountItem("tenant1", "homeAccountId");
             var acc2 = TokenCacheHelper.CreateAccountItem("tenant1", "homeAccountId2");
             var acc3 = TokenCacheHelper.CreateAccountItem("tenant2", "homeAccountId");
@@ -423,7 +423,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void GetAccount_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
             var acc1 = TokenCacheHelper.CreateAccountItem("tenant1", "homeAccountId");
             var acc2 = TokenCacheHelper.CreateAccountItem("tenant1", "homeAccountId2");
             var acc3 = TokenCacheHelper.CreateAccountItem("tenant2", "homeAccountId");
@@ -443,7 +443,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void GetAllAccounts_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
             var acc1 = TokenCacheHelper.CreateAccountItem("tenant1", "homeAccountId");
             var acc2 = TokenCacheHelper.CreateAccountItem("tenant1", "homeAccountId2");
             var acc3 = TokenCacheHelper.CreateAccountItem("tenant2", "homeAccountId");
@@ -469,7 +469,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void ClearCache_AppCache_Test()
         {
-            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), null);
             accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem());
 
             Assert.AreEqual(1, accessor.AccessTokenCacheDictionary.Count);
@@ -482,7 +482,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void ClearCache_UserCache_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
             accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem());
             accessor.SaveRefreshToken(TokenCacheHelper.CreateRefreshTokenItem());
             accessor.SaveIdToken(TokenCacheHelper.CreateIdTokenCacheItem());
@@ -504,7 +504,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void HasAccessOrRefreshTokens_AppCache_Test()
         {
-            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), null);
 
             // Assert: false with empty collection
             Assert.IsFalse(accessor.HasAccessOrRefreshTokens());
@@ -523,7 +523,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void HasAccessOrRefreshTokens_UserCache_Test()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(new NullLogger(), null);
 
             // Assert: false with empty collection
             Assert.IsFalse(accessor.HasAccessOrRefreshTokens());
@@ -548,7 +548,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void NoSupportedMethods_AppCache_Test()
         {
-            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger());
+            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), null);
 
             Assert.ThrowsException<NotSupportedException>(() =>
                 accessor.SaveRefreshToken(TokenCacheHelper.CreateRefreshTokenItem())
@@ -590,7 +590,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private ITokenCacheAccessor CreateTokenCacheAccessor(bool isAppCache)
         {
-            return PlatformProxyFactory.CreatePlatformProxy(new NullLogger()).CreateTokenCacheAccessor(isAppCache);
+            return PlatformProxyFactory.CreatePlatformProxy(new NullLogger()).CreateTokenCacheAccessor(null, isAppCache);
         }
 
         private ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> GetAccessTokenCache(ITokenCacheAccessor accessor, bool isAppCache)

@@ -46,15 +46,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 proxy.CreateLegacyCachePersistence());
 
             Assert.AreNotSame(
-                proxy.CreateTokenCacheAccessor(),
-                proxy.CreateTokenCacheAccessor());
+                proxy.CreateTokenCacheAccessor(null),
+                proxy.CreateTokenCacheAccessor(null));
 
             Assert.AreSame(
                 proxy.CryptographyManager,
                 proxy.CryptographyManager);
-
         }
-
 
         [TestMethod]
         public void PlatformProxy_HttpClient()

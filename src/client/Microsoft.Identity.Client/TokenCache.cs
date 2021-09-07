@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
             _semaphoreSlim = new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled);
 
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
-            _accessor = proxy.CreateTokenCacheAccessor(isApplicationTokenCache);
+            _accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);
             _featureFlags = proxy.GetFeatureFlags();
 
             UsesDefaultSerialization = optionalDefaultSerializer != null;

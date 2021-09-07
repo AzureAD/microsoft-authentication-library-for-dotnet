@@ -13,15 +13,15 @@ namespace WebApi.Controllers
     [Route("[controller]")]
     public class FlatCacheController : ControllerBase
     {
-        private readonly ILogger<SingletonController> _logger;
+        private readonly ILogger<FlatCacheController> _logger;
         private static Random s_random = new Random();
-        
 
-        public FlatCacheController(ILogger<SingletonController> logger)
+
+        public FlatCacheController(ILogger<FlatCacheController> logger)
         {
             _logger = logger;
         }
-      
+
         static InMemoryTokenCache s_flatTokenCache = new InMemoryTokenCache();
 
 

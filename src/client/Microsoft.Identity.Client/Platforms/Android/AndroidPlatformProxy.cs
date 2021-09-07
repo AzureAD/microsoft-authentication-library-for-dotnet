@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         /// <inheritdoc />
-        public override ITokenCacheAccessor CreateTokenCacheAccessor(bool isApplicationTokenCache = false)
+        public override ITokenCacheAccessor CreateTokenCacheAccessor(InternalMemoryTokenCacheOptions tokenCacheAccessorOptions, bool isApplicationTokenCache = false)
         {
             return new AndroidTokenCacheAccessor();
         }

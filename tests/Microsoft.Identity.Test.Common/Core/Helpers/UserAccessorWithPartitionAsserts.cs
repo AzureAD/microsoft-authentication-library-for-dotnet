@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -12,7 +13,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     internal class UserAccessorWithPartitionAsserts : InMemoryPartitionedUserTokenCacheAccessor
     {
-        public UserAccessorWithPartitionAsserts(ICoreLogger logger) : base(logger)
+        public UserAccessorWithPartitionAsserts(ICoreLogger logger, InternalMemoryTokenCacheOptions tokenCacheAccessorOptions) : base(logger, tokenCacheAccessorOptions)
         {
 
         }

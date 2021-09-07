@@ -2,6 +2,8 @@
 // Licensed under the MIT License.;
 
 using System.Collections.Concurrent;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
@@ -53,6 +55,56 @@ namespace WebApi.Misc
             CachePartition[cacheKey] = bytes;
         }
     }
+
+ 
+
+    internal class FilePartionedCacheSerializer
+        : AbstractPartitionedCacheSerializer
+    {
+        private readonly string _filePath;
+
+        public FilePartionedCacheSerializer(string filePath = "c:\\temp")
+        {
+            _filePath = filePath;
+        }
+
+        protected override byte[] ReadCacheBytes(string cacheKey)
+        {
+            string file = GetPath(cacheKey);
+
+            if (File.Exists(file))
+            {
+                //_logger.Verbose($"[InMemoryPartitionedTokenCache] ReadCacheBytes found cacheKey {cacheKey}");
+                return File.ReadAllBytes(file);
+            }
+
+            //_logger.Verbose($"[InMemoryPartitionedTokenCache] ReadCacheBytes did not find cacheKey {cacheKey}");
+
+            return null;
+        }
+
+        private string GetPath(string cacheKey)
+        {
+            return Path.Combine(_filePath, cacheKey) + ".json";
+        }
+
+        protected override void RemoveKey(string cacheKey)
+        {
+            string file = GetPath(cacheKey);
+
+            if (File.Exists(file))
+            {
+                File.Delete(cacheKey);
+            }
+        }
+
+        protected override void WriteCacheBytes(string cacheKey, byte[] bytes)
+        {
+            string file = GetPath(cacheKey);
+            File.WriteAllBytes(file, bytes);
+        }
+    }
+
 }
 
 
