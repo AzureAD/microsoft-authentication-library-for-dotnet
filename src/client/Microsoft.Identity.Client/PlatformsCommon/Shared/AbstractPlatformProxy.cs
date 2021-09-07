@@ -112,17 +112,18 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public ITokenCacheAccessor UserTokenCacheAccessorForTest { get; set; }
         public ITokenCacheAccessor AppTokenCacheAccessorForTest { get; set; }
-
-        /// <inheritdoc />
-        public virtual ITokenCacheAccessor CreateTokenCacheAccessor(bool isApplicationTokenCache = false)
+                
+        public virtual ITokenCacheAccessor CreateTokenCacheAccessor(InternalMemoryTokenCacheOptions tokenCacheAccessorOptions, bool isApplicationTokenCache = false)
         {
             if (isApplicationTokenCache)
-            {
-                return AppTokenCacheAccessorForTest ?? new InMemoryPartitionedAppTokenCacheAccessor(Logger);
+            {                
+                return AppTokenCacheAccessorForTest ?? 
+                    new InMemoryPartitionedAppTokenCacheAccessor(Logger, tokenCacheAccessorOptions);
             }
             else
-            {
-                return UserTokenCacheAccessorForTest ?? new InMemoryPartitionedUserTokenCacheAccessor(Logger);
+            {                
+                return UserTokenCacheAccessorForTest ?? 
+                    new InMemoryPartitionedUserTokenCacheAccessor(Logger, tokenCacheAccessorOptions);
             }
         }
 

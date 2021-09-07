@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -14,13 +13,13 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         public static T WithCachePartitioningAsserts<T>(
             this AbstractApplicationBuilder<T> builder,
             IPlatformProxy platformProxy)
-            where T: AbstractApplicationBuilder<T>
+            where T : AbstractApplicationBuilder<T>
         {
             (platformProxy as AbstractPlatformProxy).UserTokenCacheAccessorForTest =
-                   new UserAccessorWithPartitionAsserts(new NullLogger());
+                   new UserAccessorWithPartitionAsserts(new NullLogger(), null);
 
             (platformProxy as AbstractPlatformProxy).AppTokenCacheAccessorForTest =
-                  new AppAccessorWithPartitionAsserts(new NullLogger());
+                  new AppAccessorWithPartitionAsserts(new NullLogger(), null);
 
             builder.Config.PlatformProxy = platformProxy;
             return (T)builder;

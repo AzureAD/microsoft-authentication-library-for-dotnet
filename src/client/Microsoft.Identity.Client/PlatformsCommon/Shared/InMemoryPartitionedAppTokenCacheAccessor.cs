@@ -21,17 +21,36 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal class InMemoryPartitionedAppTokenCacheAccessor : ITokenCacheAccessor
     {
         // perf: do not use ConcurrentDictionary.Values as it takes a lock
-        internal /* internal for test only */ readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> AccessTokenCacheDictionary =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>(1, 1);
+        // internal for test only
+        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> AccessTokenCacheDictionary;
+        internal readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> AppMetadataDictionary;
 
-        internal /* internal for test only */  readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> AppMetadataDictionary =
+        // static versions to support the "shared cache" mode
+        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> s_accessTokenCacheDictionary =
+            new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
+        private static readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> s_appMetadataDictionary =
            new ConcurrentDictionary<string, MsalAppMetadataCacheItem>(1, 1);
 
         protected readonly ICoreLogger _logger;
+        private readonly InternalMemoryTokenCacheOptions _tokenCacheAccessorOptions;
 
-        public InMemoryPartitionedAppTokenCacheAccessor(ICoreLogger logger)
+        public InMemoryPartitionedAppTokenCacheAccessor(
+            ICoreLogger logger,
+            InternalMemoryTokenCacheOptions tokenCacheAccessorOptions)
         {
             _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
+            _tokenCacheAccessorOptions = tokenCacheAccessorOptions ?? new InternalMemoryTokenCacheOptions();
+
+            if (_tokenCacheAccessorOptions.UseSharedCache)
+            {
+                AccessTokenCacheDictionary = s_accessTokenCacheDictionary;
+                AppMetadataDictionary = s_appMetadataDictionary;
+            }
+            else
+            {
+                AccessTokenCacheDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
+                AppMetadataDictionary = new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
+            }
         }
 
         #region Add
@@ -198,10 +217,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             // app metadata isn't removable
         }
 
-        /// <summary>
-        /// WARNING: this API is slow as it loads all tokens, not just from 1 partition. It should only 
-        /// to support external token caching, in the hope that the external token cache is partitioned.
-        /// </summary>
         public virtual bool HasAccessOrRefreshTokens()
         {
             return AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpired()));

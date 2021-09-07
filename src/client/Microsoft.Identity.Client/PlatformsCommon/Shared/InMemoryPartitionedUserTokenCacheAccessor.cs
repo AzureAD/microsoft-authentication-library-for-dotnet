@@ -21,26 +21,49 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal class InMemoryPartitionedUserTokenCacheAccessor : ITokenCacheAccessor
     {
         // perf: do not use ConcurrentDictionary.Values as it takes a lock
-        internal /* internal for test only */ readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> AccessTokenCacheDictionary =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>(1, 1);
+        // internal for test only
+        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> AccessTokenCacheDictionary;
+        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalRefreshTokenCacheItem>> RefreshTokenCacheDictionary;
+        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalIdTokenCacheItem>> IdTokenCacheDictionary;
+        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccountCacheItem>> AccountCacheDictionary;
+        internal readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> AppMetadataDictionary;
 
-        internal /* internal for test only */ readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalRefreshTokenCacheItem>> RefreshTokenCacheDictionary =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalRefreshTokenCacheItem>>(1, 1);
-
-        internal /* internal for test only */ readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalIdTokenCacheItem>> IdTokenCacheDictionary =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalIdTokenCacheItem>>(1, 1);
-
-        internal /* internal for test only */ readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccountCacheItem>> AccountCacheDictionary =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccountCacheItem>>(1, 1);
-
-        internal /* internal for test only */  readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> AppMetadataDictionary =
-           new ConcurrentDictionary<string, MsalAppMetadataCacheItem>(1, 1);
+        // static versions to support the "shared cache" mode
+        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> s_accessTokenCacheDictionary =
+          new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
+        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalRefreshTokenCacheItem>> s_refreshTokenCacheDictionary =
+             new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalRefreshTokenCacheItem>>();
+        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalIdTokenCacheItem>> s_idTokenCacheDictionary =
+             new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalIdTokenCacheItem>>();
+        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccountCacheItem>> s_accountCacheDictionary =
+             new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccountCacheItem>>();
+        private static readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> s_appMetadataDictionary =
+            new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
 
         protected readonly ICoreLogger _logger;
+        private readonly InternalMemoryTokenCacheOptions _tokenCacheAccessorOptions;
 
-        public InMemoryPartitionedUserTokenCacheAccessor(ICoreLogger logger)
+        public InMemoryPartitionedUserTokenCacheAccessor(ICoreLogger logger, InternalMemoryTokenCacheOptions tokenCacheAccessorOptions)
         {
-            _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _tokenCacheAccessorOptions = tokenCacheAccessorOptions ?? new InternalMemoryTokenCacheOptions();
+
+            if (_tokenCacheAccessorOptions.UseSharedCache)
+            {
+                AccessTokenCacheDictionary = s_accessTokenCacheDictionary;
+                RefreshTokenCacheDictionary = s_refreshTokenCacheDictionary;
+                IdTokenCacheDictionary = s_idTokenCacheDictionary;
+                AccountCacheDictionary = s_accountCacheDictionary;
+                AppMetadataDictionary = s_appMetadataDictionary;
+            }
+            else
+            {
+                AccessTokenCacheDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
+                RefreshTokenCacheDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalRefreshTokenCacheItem>>();
+                IdTokenCacheDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalIdTokenCacheItem>>();
+                AccountCacheDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccountCacheItem>>();
+                AppMetadataDictionary = new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
+            }
         }
 
         #region Add
