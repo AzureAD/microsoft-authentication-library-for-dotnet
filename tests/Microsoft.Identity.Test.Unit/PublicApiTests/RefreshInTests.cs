@@ -80,11 +80,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        private static PublicClientApplication SetupPca(MockHttpAndServiceBundle harness)
+        private static PublicClientApplication SetupPca(MockHttpAndServiceBundle harness, LogCallback logCallback = null)
         {
             Trace.WriteLine("1. Setup an app with a token cache with one AT");
             PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                         .WithHttpManager(harness.HttpManager)
+                                                                        .WithLogging(logCallback)
                                                                         .BuildConcrete();
 
             TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false);
@@ -154,11 +155,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [Description("AT in cache, needs refresh. AAD fails but is available when refreshing.")]
         public async Task ATS_NonExpired_NeedsRefresh_AADInvalidResponse_Async()
         {
+            bool wasErrorLogged = false;
             // Arrange
             using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
             {
                 Trace.WriteLine("1. Setup an app with a token cache with one AT");
-                PublicClientApplication app = SetupPca(harness);
+                PublicClientApplication app = SetupPca(harness, LocalLogCallback);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
                 UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
@@ -170,13 +172,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
 
-                // Act
-                await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app
-                    .AcquireTokenSilent(
+                await app.AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         account)
-                    .ExecuteAsync())
+                    .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Assert.IsTrue(YieldTillSatisfied(() => wasErrorLogged == true));
+            }
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Warning &&
+                    message.Contains(AAD_InvalidGrant_Error))
+                {
+                    wasErrorLogged = true;
+                }
             }
         }
 
@@ -283,12 +294,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        private static ConfidentialClientApplication SetupCca(MockHttpAndServiceBundle harness)
+        private static ConfidentialClientApplication SetupCca(MockHttpAndServiceBundle harness, LogCallback logCallback = null)
         {
             ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                           .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                                                           .WithClientSecret(TestConstants.ClientSecret)
                                                           .WithHttpManager(harness.HttpManager)
+                                                          .WithLogging(logCallback)
                                                           .BuildConcrete();
 
             TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false, userAssertion: TestConstants.UserAssertion);
@@ -346,11 +358,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task ClientCreds_NonExpired_NeedsRefresh_AADInvalidResponse_Async()
         {
+            bool wasErrorLogged = false;
             // Arrange
             using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
             {
                 Trace.WriteLine("1. Setup an app");
-                ConfidentialClientApplication app = SetupCca(harness);
+                ConfidentialClientApplication app = SetupCca(harness, LocalLogCallback);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
 
@@ -364,11 +377,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddAllMocks(TokenResponseType.InvalidGrant);
 
                 // Act
-                await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => 
-                   app.AcquireTokenForClient(TestConstants.s_scope)
-                    .ExecuteAsync())
+                await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Assert.IsTrue(YieldTillSatisfied(() => wasErrorLogged == true));
                 cacheAccess.AssertAccessCounts(1, 0);
+            }
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Warning &&
+                    message.Contains(AAD_InvalidGrant_Error))
+                {
+                    wasErrorLogged = true;
+                }
             }
         }
 
@@ -452,5 +475,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             return false;
         }
+
+        private const string AAD_InvalidGrant_Error = "AADSTS70008";
     }
 }

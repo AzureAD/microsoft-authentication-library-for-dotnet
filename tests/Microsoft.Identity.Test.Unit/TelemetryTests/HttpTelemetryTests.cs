@@ -6,23 +6,25 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using Microsoft.Identity.Test.Unit.Throttling;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.Http;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Test.Unit.Throttling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
-using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Utils;
-using System.Threading;
 
 namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
@@ -239,12 +241,25 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 cacheAccess = _app.UserTokenCache.RecordAccess();
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheInfoTelemetry.RefreshIn, isCacheSerialized: true);
-                // AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // This is failing Investigate
+                
+                // Use reflection to get the value and wait till achived
+                HttpTelemetryManager httpTelemetryManager = (HttpTelemetryManager)_app.ServiceBundle.HttpTelemetryManager;
+                Type httpTeleMgrType = typeof(HttpTelemetryManager);
+                FieldInfo field = httpTeleMgrType.GetField("_successfulSilentCallCount", BindingFlags.NonPublic | BindingFlags.Instance);
+                Assert.IsTrue(YieldTillSatisfied(() =>
+                {
+                    var actual = (int)field.GetValue(httpTelemetryManager);
+                    return actual == 0;
+                }));
 
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheInfoTelemetry.ForceRefresh, isCacheSerialized: true);
-                // AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);// This is failing Investigate
+                Assert.IsTrue(YieldTillSatisfied(() =>
+                {
+                    var actual = (int)field.GetValue(httpTelemetryManager);
+                    return actual == 0;
+                }));
             }
         }
 
