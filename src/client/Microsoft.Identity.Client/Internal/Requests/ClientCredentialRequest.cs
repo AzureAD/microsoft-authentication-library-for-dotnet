@@ -94,22 +94,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     if (cachedAccessTokenItem.NeedsRefresh())
                     {
-                        _ = Task.Run(async () =>
-                        {
-                            // TODO - Exception handling is being discussed.
-                            try
-                            {
-                                await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
-                            }
-                            catch (MsalServiceException ex)
-                            {
-                                logger.Warning($"RefreshRtOrFailAsync Refreshing the RT failed. Is AAD down? { ex.IsAadUnavailable()}. Error {ex.Message} ");
-                            }
-                            catch (Exception ex)
-                            {
-                                logger.Warning($"RefreshRtOrFailAsync Error {ex.Message}");
-                            }
-                        });
+                        SilentRequestHelper.ProcessFetchInBackgroundAsync(() => FetchNewAccessTokenAsync(cancellationToken), logger);
                     }
 
                     return authResult;

@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheInfoTelemetry.RefreshIn, isCacheSerialized: true);
                 
-                // Use reflection to get the value and wait till achived
+                // Use reflection to get the value and wait till achieved
                 HttpTelemetryManager httpTelemetryManager = (HttpTelemetryManager)_app.ServiceBundle.HttpTelemetryManager;
                 Type httpTeleMgrType = typeof(HttpTelemetryManager);
                 FieldInfo field = httpTeleMgrType.GetField("_successfullSilentCallCount", BindingFlags.NonPublic | BindingFlags.Instance);
