@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         [TestMethod]
         public async Task CreateWwwAuthenticateResponseFromKeyVaultUrlAsync()
         {
-            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://msidentitywebsamples.vault.azure.net/secrets/CertName/CertVersion").ConfigureAwait(false);
+            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://buildautomation.vault.azure.net/secrets/CertName/CertVersion").ConfigureAwait(false);
 
             Assert.AreEqual("https://vault.azure.net", authParams.Resource);
             Assert.AreEqual("login.windows.net", new Uri(authParams.Authority).Host);

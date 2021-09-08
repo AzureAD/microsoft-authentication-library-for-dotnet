@@ -142,9 +142,19 @@ namespace Microsoft.Identity.Client.WsTrust
                 msalIdParams,
                 requestContext.Logger).ConfigureAwait(false);
 
-            return httpResponse.StatusCode == System.Net.HttpStatusCode.OK
-                ? JsonHelper.DeserializeFromJson<UserRealmDiscoveryResponse>(httpResponse.Body)
-                : null;
+            if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return JsonHelper.DeserializeFromJson<UserRealmDiscoveryResponse>(httpResponse.Body);
+            }
+
+            string message = string.Format(CultureInfo.CurrentCulture,
+                    MsalErrorMessage.HttpRequestUnsuccessful,
+                    (int)httpResponse.StatusCode, httpResponse.StatusCode);
+
+            throw MsalServiceExceptionFactory.FromHttpResponse(
+                MsalError.UserRealmDiscoveryFailed,
+                message,
+                httpResponse);
         }
     }
 }

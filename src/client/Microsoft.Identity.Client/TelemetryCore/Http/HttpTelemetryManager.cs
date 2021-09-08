@@ -19,12 +19,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
     /// </remarks>
     internal class HttpTelemetryManager : IHttpTelemetryManager
     {
-        private int _successfulSilentCallCount = 0;
+        private int _successfullSilentCallCount = 0;
         private ConcurrentQueue<ApiEvent> _failedEvents = new ConcurrentQueue<ApiEvent>();
 
         public void ResetPreviousUnsentData()
         {
-            _successfulSilentCallCount = 0;
+            _successfullSilentCallCount = 0;
             while (_failedEvents.TryDequeue(out _))
             {
                 // do nothing
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             // cache hits can occur in AcquireTokenSilent, AcquireTokenForClient and OBO
             if (stoppedEvent.IsAccessTokenCacheHit)
             {
-                _successfulSilentCallCount++;
+                _successfullSilentCallCount++;
             }
         }
 
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
             string data =
                 $"{TelemetryConstants.HttpTelemetrySchemaVersion}|" +
-                $"{_successfulSilentCallCount}|" +
+                $"{_successfullSilentCallCount}|" +
                 $"{failedRequests}|" +
                 $"{errors}|";
 

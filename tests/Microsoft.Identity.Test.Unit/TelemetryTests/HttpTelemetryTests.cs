@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 // Use reflection to get the value and wait till achived
                 HttpTelemetryManager httpTelemetryManager = (HttpTelemetryManager)_app.ServiceBundle.HttpTelemetryManager;
                 Type httpTeleMgrType = typeof(HttpTelemetryManager);
-                FieldInfo field = httpTeleMgrType.GetField("_successfulSilentCallCount", BindingFlags.NonPublic | BindingFlags.Instance);
+                FieldInfo field = httpTeleMgrType.GetField("_successfullSilentCallCount", BindingFlags.NonPublic | BindingFlags.Instance);
                 Assert.IsTrue(YieldTillSatisfied(() =>
                 {
                     var actual = (int)field.GetValue(httpTelemetryManager);
