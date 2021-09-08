@@ -1,6 +1,11 @@
 4.36.0
 ==========
 ### New Features:
+**Added support for Application ID URIs to be used in confidential client applications**. Confidential client applications will now be able to replace the Client ID (GUID) with Application ID URIs. See [#2852](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2852)
+
+4.36.0
+==========
+### New Features:
 **Added custom nonce support to Proof-of-Possession requests**. See issue [#2809](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2809).  
 **Added a random jitter (within ten minutes range) to the Refresh In time for a token to optimize for resiliency**. See issue [#2796](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2796).  
 
