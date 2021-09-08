@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Utils
                     //default or case 0: no further operations are needed.
             }
 
-            return new(output, 0, j);
+            return new string(output, 0, j);
         }
 
         /// <summary>
