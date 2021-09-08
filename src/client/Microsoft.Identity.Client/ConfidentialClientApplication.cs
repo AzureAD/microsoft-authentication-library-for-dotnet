@@ -160,10 +160,10 @@ namespace Microsoft.Identity.Client
 
         internal ClientCredentialWrapper ClientCredential => ServiceBundle.Config.ClientCredential;
 
-        /// <Summary>
+        /// <summary>
         /// Application token cache. This case holds access tokens and refresh tokens for the application. It's maintained
         /// and updated silently if needed when calling <see cref="AcquireTokenForClient(IEnumerable{string})"/>
-        /// </Summary>
+        /// </summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
         /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms
         /// </remarks>
