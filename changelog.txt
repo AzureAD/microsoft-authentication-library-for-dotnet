@@ -1,3 +1,8 @@
+4.36.1
+==========
+### New Features:
+**Added support for Application ID URIs to be used in confidential client applications**. Confidential client applications, specifically web APIs, will now be able to use either the Client ID (GUID) or the Application ID URI, in the confidential client application builder. See [#2852](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2852)
+
 4.36.0
 ==========
 ### New Features:
