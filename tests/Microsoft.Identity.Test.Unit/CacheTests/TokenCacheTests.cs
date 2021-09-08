@@ -45,9 +45,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [DataTestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
-        public async Task WithLegacyCacheCompatibilityTest_Async(bool enableLegacyCacheCompatibility)
+        [DataRow(true, true, true)]
+        [DataRow(true, false, false)]
+        [DataRow(false, true, false)]
+        [DataRow(false, true, false)]        
+        public async Task WithLegacyCacheCompatibilityTest_Async(
+            bool enableLegacyCacheCompatibility, 
+            bool serializeCache, 
+            bool expectToCallAdalLegacyCache)
         {
             // Arrange
             var legacyCachePersistence = Substitute.For<ILegacyCachePersistence>();
@@ -55,8 +60,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
             var response = TestConstants.CreateMsalTokenResponse();
 
-            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);            
             ((TokenCache)cache).LegacyCachePersistence = legacyCachePersistence;
+            if (serializeCache) // no point in invoking the Legacy ADAL cache if you're only keeping it memory
+            {
+                cache.SetBeforeAccess((n) => { });
+            }
 
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
             requestParams.AuthorityManager = new AuthorityManager(
@@ -70,10 +79,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
             await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
             await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
-            await cache.RemoveAccountAsync(requestParams.Account, requestContext).ConfigureAwait(true);
+            await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
 
             // Assert
-            if (enableLegacyCacheCompatibility)
+            if (expectToCallAdalLegacyCache)
             {
                 legacyCachePersistence.ReceivedWithAnyArgs().LoadCache();
                 legacyCachePersistence.ReceivedWithAnyArgs().WriteCache(Arg.Any<byte[]>());
@@ -571,14 +580,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-#if !WINDOWS_APP && !ANDROID && !iOS // Confidential Client N/A
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void GetAppTokenFromCacheTest()
+        public async Task GetAppTokenFromCacheTestAsync()
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, true);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -602,13 +610,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     cache,
                     apiId: ApiEvent.ApiIds.AcquireTokenForClient);
 
-                var cacheItem = cache.FindAccessTokenAsync(authParams).Result;
+                var cacheItem = await cache.FindAccessTokenAsync(authParams).ConfigureAwait(false);
 
                 Assert.IsNotNull(cacheItem);
                 Assert.AreEqual(atItem.GetKey().ToString(), cacheItem.GetKey().ToString());
             }
         }
-#endif
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]

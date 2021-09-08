@@ -3,12 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
-using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
@@ -25,7 +23,7 @@ namespace Microsoft.Identity.Client
         #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
         Task<IEnumerable<IAccount>> GetAccountsAsync(AuthenticationRequestParameters requestParameters);
-      
+
         Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response);
@@ -50,7 +48,7 @@ namespace Microsoft.Identity.Client
         /// FOCI - check in the app metadata to see if the app is part of the family
         /// </summary>
         /// <returns>null if unknown, true or false if app metadata has details</returns>
-        Task<bool?> IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId);     
+        Task<bool?> IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId);
 
         void SetIosKeychainSecurityGroup(string securityGroup);
 
@@ -66,7 +64,7 @@ namespace Microsoft.Identity.Client
         /// Shows if MSAL's in-memory token cache has any kind of RT or non-expired AT. Does not trigger a cache notification.
         /// Ignores ADAL's cache.
         /// </summary>
-        bool HasTokensNoLocks();
+        bool HasTokensNoLocks(string partitionKey);
 
 
         bool IsTokenCacheSerialized();

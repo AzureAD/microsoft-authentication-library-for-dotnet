@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class OBOTests : TestBase
     {
         [TestMethod]
-        [DeploymentItem(@"Resources\MultiTenantTokenCache.json")]
+        [DeploymentItem(@"Resources\MultiTenantOBOTokenCache.json")]
         public async Task MultiTenantOBOAsync()
         {
             const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
            string authority = null)
         {
             const string clientIdInFile = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
-            const string tokenCacheFile = "MultiTenantTokenCache.json";
+            const string tokenCacheFile = "MultiTenantOBOTokenCache.json";
 
             var ccaBuilder = ConfidentialClientApplicationBuilder
                 .Create(clientIdInFile)
@@ -77,15 +77,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var cca = ccaBuilder.BuildConcrete();
             cca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile), true);
-            cca.UserTokenCacheInternal.Accessor.AssertItemCount(3, 2, 3, 3, 1);
-            foreach (var at in cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens())
-            {
-                at.UserAssertionHash = "_JPLB-GtkomFJxAOWKHPHR5_ZemiZqb4fzyE_rVBx7M"; // the hash of "jwt"
-            }
-
-            cca.UserTokenCacheInternal.Accessor.DeleteAccessToken(
-                cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single(
-                    at => at.HomeAccountId == "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462").GetKey());
+            cca.UserTokenCacheInternal.Accessor.AssertItemCount(2, 2, 3, 3, 1);
 
             return cca;
         }

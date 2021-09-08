@@ -114,22 +114,22 @@ namespace Microsoft.Identity.Client.Platforms.Android
             editor.Apply();
         }
 
-        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalTenantIdFilter = null)
+        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null)
         {
             return _accessTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
+        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null)
         {
             return _refreshTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalRefreshTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens()
+        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null)
         {
             return _idTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalIdTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts()
+        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null)
         {
             return _accountSharedPreference.All.Values.Cast<string>().Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
         }

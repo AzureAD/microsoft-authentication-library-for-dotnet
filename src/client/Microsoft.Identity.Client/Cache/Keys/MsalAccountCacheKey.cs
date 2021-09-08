@@ -18,6 +18,8 @@ namespace Microsoft.Identity.Client.Cache.Keys
         private readonly string _username;
         private readonly string _authorityType;
 
+        internal string HomeAccountId => _homeAccountId;
+
         public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier, string username, string authorityType)
         {
             if (string.IsNullOrEmpty(environment))

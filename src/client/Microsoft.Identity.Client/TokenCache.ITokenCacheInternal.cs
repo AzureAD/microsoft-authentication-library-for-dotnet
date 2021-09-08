@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client
                             account,
                             hasStateChanged: true,
                             tokenCacheInternal.IsApplicationCache,
-                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                            hasTokens: tokenCacheInternal.HasTokensNoLocks(suggestedWebCacheKey),
                             requestParams.RequestContext.UserCancellationToken,
                             suggestedCacheKey: suggestedWebCacheKey);
 
@@ -221,9 +221,9 @@ namespace Microsoft.Identity.Client
                     {
                         DateTimeOffset? cacheExpiry = null;
 
-                        if (!_accessor.GetAllRefreshTokens().Any())
+                        if (!_accessor.GetAllRefreshTokens(suggestedWebCacheKey).Any())
                         {
-                            cacheExpiry = CalculateSuggestedCacheExpiry();
+                            cacheExpiry = CalculateSuggestedCacheExpiry(suggestedWebCacheKey);
                         }
 
                         var args = new TokenCacheNotificationArgs(
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Client
                             account,
                             hasStateChanged: true,
                             tokenCacheInternal.IsApplicationCache,
-                            tokenCacheInternal.HasTokensNoLocks(),
+                            tokenCacheInternal.HasTokensNoLocks(suggestedWebCacheKey),
                             requestParams.RequestContext.UserCancellationToken,
                             suggestedCacheKey: suggestedWebCacheKey,
                             suggestedCacheExpiry: cacheExpiry);
@@ -255,9 +255,9 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private DateTimeOffset CalculateSuggestedCacheExpiry()
+        private DateTimeOffset CalculateSuggestedCacheExpiry(string partitionKey)
         {
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, partitionKey);
             var unixCacheExpiry = tokenCacheItems.Max(item => item.ExpiresOnUnixTimestamp);
             return (DateTimeOffset)CoreHelpers.UnixTimestampStringToDateTime(unixCacheExpiry);
         }
@@ -273,12 +273,7 @@ namespace Microsoft.Identity.Client
 
         private void MergeWamAccountIds(MsalAccountCacheItem msalAccountCacheItem)
         {
-            var existingAccount = _accessor.GetAllAccounts()
-                .SingleOrDefault(
-                    acc => string.Equals(
-                        acc.GetKey().ToString(),
-                        msalAccountCacheItem.GetKey().ToString(),
-                        StringComparison.OrdinalIgnoreCase));
+            var existingAccount = _accessor.GetAccount(msalAccountCacheItem.GetKey());
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
         }
@@ -350,7 +345,8 @@ namespace Microsoft.Identity.Client
 
             // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
             // as this method is NOT locked by the semaphore
-            IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, requestParams.Authority.TenantId);
+            string partitionKey = SuggestedWebCacheKeyFactory.GetKeyFromRequest(requestParams);
+            IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, partitionKey);
             if (tokenCacheItems.Count == 0)
             {
                 logger.Verbose("No access tokens found in the cache. Skipping filtering. ");
@@ -630,7 +626,7 @@ namespace Microsoft.Identity.Client
             if (requestParams.Authority == null)
                 return null;
 
-            IReadOnlyList<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens();
+            IReadOnlyList<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens(SuggestedWebCacheKeyFactory.GetKeyFromRequest(requestParams));
             if (allRts.Count != 0)
             {
                 var metadata =
@@ -772,8 +768,10 @@ namespace Microsoft.Identity.Client
             bool filterByClientId = !_featureFlags.IsFociEnabled;
             bool isAadAuthority = requestParameters.AuthorityInfo.AuthorityType == AuthorityType.Aad;
 
-            IReadOnlyList<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);
-            IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
+            string partitionkey = SuggestedWebCacheKeyFactory.GetKeyFromRequest(requestParameters);
+
+            IReadOnlyList<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId, partitionkey);
+            IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts(partitionkey);
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
@@ -885,7 +883,7 @@ namespace Microsoft.Identity.Client
             }
 
 
-            var idTokenCacheItems = GetAllIdTokensWithNoLocks(true);
+            var idTokenCacheItems = GetAllIdTokensWithNoLocks(true, homeAccountId);
 
             ISet<string> allEnvironmentsInCache = new HashSet<string>(
                 idTokenCacheItems.Select(aci => aci.Environment),
@@ -919,6 +917,7 @@ namespace Microsoft.Identity.Client
                 requestContext.Logger.Info("Removing user from cache..");
 
                 ITokenCacheInternal tokenCacheInternal = this;
+                var partitionKey = account.HomeAccountId.Identifier;
 
                 try
                 {
@@ -930,7 +929,7 @@ namespace Microsoft.Identity.Client
                             account,
                             true,
                             tokenCacheInternal.IsApplicationCache,
-                            tokenCacheInternal.HasTokensNoLocks(),
+                            tokenCacheInternal.HasTokensNoLocks(partitionKey),
                             requestContext.UserCancellationToken,
                             account.HomeAccountId.Identifier);
 
@@ -954,7 +953,7 @@ namespace Microsoft.Identity.Client
                             account,
                             true,
                             tokenCacheInternal.IsApplicationCache,
-                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                            hasTokens: tokenCacheInternal.HasTokensNoLocks(partitionKey),
                             requestContext.UserCancellationToken,
                             account.HomeAccountId.Identifier);
 
@@ -972,10 +971,10 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        bool ITokenCacheInternal.HasTokensNoLocks()
+        bool ITokenCacheInternal.HasTokensNoLocks(string partitionKey)
         {
-            return _accessor.GetAllRefreshTokens().Count > 0 ||
-                _accessor.GetAllAccessTokens().Any(at => !IsAtExpired(at));
+            return _accessor.GetAllRefreshTokens(partitionKey).Count > 0 ||
+                _accessor.GetAllAccessTokens(partitionKey).Any(at => !IsAtExpired(at));
         }
 
         private bool IsAtExpired(MsalAccessTokenCacheItem at)
@@ -991,11 +990,13 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            var allRefreshTokens = GetAllRefreshTokensWithNoLocks(false)
+            string partitionKey = account.HomeAccountId.Identifier;
+
+            var allRefreshTokens = GetAllRefreshTokensWithNoLocks(false, partitionKey)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            // To maintain backward compatiblity with other MSALs, filter all credentials by clientID if
+            // To maintain backward compatibility with other MSALs, filter all credentials by clientID if
             // Foci is disabled or if an FRT is not present
             bool filterByClientId = !_featureFlags.IsFociEnabled || !FrtExists(allRefreshTokens);
 
@@ -1010,7 +1011,7 @@ namespace Microsoft.Identity.Client
             }
 
             requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
-            IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensWithNoLocks(filterByClientId)
+            IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensWithNoLocks(filterByClientId, partitionKey)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
@@ -1020,7 +1021,7 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
 
-            var allIdTokens = GetAllIdTokensWithNoLocks(filterByClientId)
+            var allIdTokens = GetAllIdTokensWithNoLocks(filterByClientId, partitionKey)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
@@ -1030,7 +1031,7 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info("Deleted Id token count - " + allIdTokens.Count);
 
-            _accessor.GetAllAccounts()
+            _accessor.GetAllAccounts(partitionKey)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
                                item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase))
                 .ToList()
