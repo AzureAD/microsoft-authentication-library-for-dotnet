@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         #region Add
-        public virtual void SaveAccessToken(MsalAccessTokenCacheItem item)
+        public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             string key = item.GetKey().ToString();
 
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #endregion
 
         #region Get
-        public virtual MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
+        public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
             _accessTokenCacheDictionary.TryGetValue(accessTokenKey.ToString(), out MsalAccessTokenCacheItem cacheItem);
             return cacheItem;
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #endregion
 
         #region Delete
-        public virtual void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
+        public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
         {
             if (!_accessTokenCacheDictionary.TryRemove(cacheKey.ToString(), out _))
             {
@@ -152,23 +152,23 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         #endregion
 
-        #region Get All Values
-        public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalTenantIdFilter = null)
+        #region Get All
+        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null)
         {
             return _accessTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
-        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
+        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null)
         {
             return _refreshTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
-        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens()
+        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null)
         {
             return _idTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
-        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts()
+        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null)
         {
             return _accountCacheDictionary.Select(kv => kv.Value).ToList();
         }
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             throw new System.NotImplementedException();
         }
 
-        public virtual void Clear()
+        public void Clear()
         {
             _accessTokenCacheDictionary.Clear();
             _refreshTokenCacheDictionary.Clear();

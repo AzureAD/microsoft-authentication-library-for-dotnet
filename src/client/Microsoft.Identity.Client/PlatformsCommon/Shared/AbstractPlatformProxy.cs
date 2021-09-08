@@ -111,7 +111,17 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public abstract ILegacyCachePersistence CreateLegacyCachePersistence();
 
         /// <inheritdoc />
-        public abstract ITokenCacheAccessor CreateTokenCacheAccessor();
+        public virtual ITokenCacheAccessor CreateTokenCacheAccessor(bool isApplicationTokenCache = false)
+        {
+            if (isApplicationTokenCache)
+            {
+                return new InMemoryPartitionedAppTokenCacheAccessor(Logger);
+            }
+            else
+            {
+                return new InMemoryPartitionedUserTokenCacheAccessor(Logger);
+            }
+        }
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager => _cryptographyManager.Value;

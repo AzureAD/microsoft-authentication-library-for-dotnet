@@ -368,7 +368,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 .WithUserTokenCacheInternalForTest(userTokenCacheInternal)
                 .BuildConcrete();
 
-            userTokenCacheInternal.IsTokenCacheSerialized().Returns(false);
+            userTokenCacheInternal.IsExternalSerializationEnabled().Returns(false);
 
             // Act
             await cca.GetAccountsAsync().ConfigureAwait(false);
@@ -380,7 +380,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
 
             // Arrange
-            userTokenCacheInternal.IsTokenCacheSerialized().Returns(true);
+            userTokenCacheInternal.IsExternalSerializationEnabled().Returns(true);
 
             // Act
             await cca.GetAccountsAsync().ConfigureAwait(true);
@@ -409,7 +409,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 .WithAppTokenCacheInternalForTest(appTokenCache)
                 .BuildConcrete();
 
-            appTokenCache.IsTokenCacheSerialized().Returns(false);
+            appTokenCache.IsExternalSerializationEnabled().Returns(false);
 
             // Act
             await cca.AcquireTokenForClient(new[] { "https://resource/.default" }).ExecuteAsync().ConfigureAwait(false);
@@ -421,7 +421,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
 
             // Arrange
-            appTokenCache.IsTokenCacheSerialized().Returns(true);
+            appTokenCache.IsExternalSerializationEnabled().Returns(true);
 
             // Act
             await cca.AcquireTokenForClient(new[] { "https://resource/.default" }).ExecuteAsync().ConfigureAwait(false);
@@ -440,19 +440,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                .WithClientSecret(TestConstants.ClientSecret)
                .BuildConcrete();
 
-            Assert.IsFalse((cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
-            Assert.IsFalse((cca.UserTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
+            Assert.IsFalse((cca.AppTokenCache as ITokenCacheInternal).IsExternalSerializationEnabled());
+            Assert.IsFalse((cca.UserTokenCache as ITokenCacheInternal).IsExternalSerializationEnabled());
 
             var inMemoryTokenCache = new InMemoryTokenCache();
             inMemoryTokenCache.Bind(cca.AppTokenCache);
 
-            Assert.IsTrue((cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
-            Assert.IsFalse((cca.UserTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
+            Assert.IsTrue((cca.AppTokenCache as ITokenCacheInternal).IsExternalSerializationEnabled());
+            Assert.IsFalse((cca.UserTokenCache as ITokenCacheInternal).IsExternalSerializationEnabled());
 
             inMemoryTokenCache.Bind(cca.UserTokenCache);
 
-            Assert.IsTrue((cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
-            Assert.IsTrue((cca.UserTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
+            Assert.IsTrue((cca.AppTokenCache as ITokenCacheInternal).IsExternalSerializationEnabled());
+            Assert.IsTrue((cca.UserTokenCache as ITokenCacheInternal).IsExternalSerializationEnabled());
 
         }
     }

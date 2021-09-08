@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -17,7 +16,7 @@ namespace Microsoft.Identity.Client
     public partial interface IConfidentialClientApplication : IClientApplicationBase
     {
         /// <summary>
-        /// Application token cache. This case holds access tokens and refresh tokens for the application. It's maintained
+        /// Application token cache. This case holds access tokens for the application. It's maintained
         /// and updated silently if needed when calling <see cref="AcquireTokenForClient(IEnumerable{string})"/>
         /// </summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.

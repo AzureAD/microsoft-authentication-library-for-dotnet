@@ -96,11 +96,6 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             return new InMemoryLegacyCachePersistance();
         }
 
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
-        {
-            return new InMemoryTokenCacheAccessor(Logger);
-        }
-
         protected override IWebUIFactory CreateWebUiFactory() => new NetStandard13WebUiFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetStandard13CryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();

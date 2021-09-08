@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
     /// and never directly exposed. For details see https://aka.ms/msal-net-client-applications
     /// </remarks>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
     public sealed partial class ConfidentialClientApplication
         : ClientApplicationBase,
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">scopes requested to access a protected API. For this flow (client credentials), the scopes
         /// should be of the form "{ResourceIdUri/.default}" for instance <c>https://management.azure.net/.default</c> or, for Microsoft
         /// Graph, <c>https://graph.microsoft.com/.default</c> as the requested scopes are defined statically with the application registration
-        /// in the portal, and cannot be overriden in the application.</param>
+        /// in the portal, and cannot be overridden in the application.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can also chain the following optional parameters:
         /// <see cref="AcquireTokenForClientParameterBuilder.WithForceRefresh(bool)"/>
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client
         internal ClientCredentialWrapper ClientCredential => ServiceBundle.Config.ClientCredential;
 
         /// <summary>
-        /// Application token cache. This case holds access tokens and refresh tokens for the application. It's maintained
+        /// Application token cache. This case holds access tokens for the application. It's maintained
         /// and updated silently if needed when calling <see cref="AcquireTokenForClient(IEnumerable{string})"/>
         /// </summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.

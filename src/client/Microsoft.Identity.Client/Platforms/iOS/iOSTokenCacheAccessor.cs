@@ -118,28 +118,28 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             Remove(cacheKey);
         }
 
-        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalTenantIdFilter = null)
+        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null)
         {
             return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken)
                 .Select(x => MsalAccessTokenCacheItem.FromJsonString(x))
                 .ToList();
         }
 
-        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
+        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null)
         {
             return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken)
                 .Select(x => MsalRefreshTokenCacheItem.FromJsonString(x))
                 .ToList();
         }
 
-        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens()
+        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null)
         {
             return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.IdToken)
                 .Select(x => MsalIdTokenCacheItem.FromJsonString(x))
                 .ToList();
         }
 
-        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts()
+        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null)
         {
             return GetPayloadAsString(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()])
                 .Select(x => MsalAccountCacheItem.FromJsonString(x))

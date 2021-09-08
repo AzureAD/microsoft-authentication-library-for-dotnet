@@ -107,12 +107,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc />
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
-        {
-            return new InMemoryTokenCacheAccessor(Logger);
-        }
-
-        /// <inheritdoc />
         protected override IWebUIFactory CreateWebUiFactory()
         {
             return new NetDesktopWebUIFactory();

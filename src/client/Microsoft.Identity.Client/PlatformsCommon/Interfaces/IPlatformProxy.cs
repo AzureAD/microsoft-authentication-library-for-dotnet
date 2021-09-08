@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         ILegacyCachePersistence CreateLegacyCachePersistence();
 
-        ITokenCacheAccessor CreateTokenCacheAccessor();
+        ITokenCacheAccessor CreateTokenCacheAccessor(bool isApplicationTokenCache = false);
 
         ICacheSerializationProvider CreateTokenCacheBlobStorage();
 
