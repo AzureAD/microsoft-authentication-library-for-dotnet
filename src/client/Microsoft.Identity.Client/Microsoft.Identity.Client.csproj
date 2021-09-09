@@ -64,8 +64,6 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!-- VS 2019 uses C# 10. Not all C# 10 language features are available. See https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/configure-language-version -->
-    <LangVersion>latestMajor</LangVersion> 
   </PropertyGroup>
 
   <Import Project="../../../build/platform_and_feature_flags.props" />
