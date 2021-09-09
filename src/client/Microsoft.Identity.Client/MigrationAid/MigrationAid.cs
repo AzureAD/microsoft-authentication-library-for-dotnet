@@ -76,10 +76,10 @@ namespace Microsoft.Identity.Client
         string Identifier { get; }
     }
 
-    /// <Summary>
+    /// <summary>
     /// Interface defining common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
-    /// </Summary>    
+    /// </summary>    
     public partial interface IClientApplicationBase
     {
         /// <summary>
@@ -216,10 +216,10 @@ namespace Microsoft.Identity.Client
         #endregion MSAL3X deprecations
     }
 
-    /// <Summary>
+    /// <summary>
     /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
-    /// </Summary>
+    /// </summary>
     public partial class ClientApplicationBase
     {
         /// <summary>
@@ -800,10 +800,10 @@ namespace Microsoft.Identity.Client
         #endregion MSAL3X deprecations
     }
 
-    /// <Summary>
+    /// <summary>
     /// Abstract class containing common API methods and properties.
     /// For details see https://aka.ms/msal-net-client-applications
-    /// </Summary>
+    /// </summary>
     public partial class PublicClientApplication
     {
 #if WINDOWS_APP
@@ -1396,10 +1396,10 @@ namespace Microsoft.Identity.Client
         #endregion MSAL3X deprecations
     }
 
-    /// <Summary>
+    /// <summary>
     /// Interface defining common API methods and properties.
     /// For details see https://aka.ms/msal-net-client-applications
-    /// </Summary>
+    /// </summary>
     public partial interface IPublicClientApplication
     {
 #if iOS

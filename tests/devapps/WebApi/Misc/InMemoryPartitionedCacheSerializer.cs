@@ -3,9 +3,10 @@
 
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.Cache.CacheImpl
+namespace WebApi.Misc
 {
     /// <summary>
     /// A simple partitioned cache, useful for Confidential Client flows. 

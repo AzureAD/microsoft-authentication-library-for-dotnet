@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Authority.GetTokenEndpoint();
                 string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
 
-                AddBodyParamsAndHeaders(additionalBodyParameters, scopes);
+                await AddBodyParamsAndHeadersAsync(additionalBodyParameters, scopes, cancellationToken).ConfigureAwait(false);
                 AddThrottlingHeader();
 
                 _serviceBundle.ThrottlingManager.TryThrottle(_requestParams, _oAuth2Client.GetBodyParameters());
@@ -116,7 +116,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 ThrottleCommon.ThrottleRetryAfterHeaderValue);
         }
 
-        private void AddBodyParamsAndHeaders(IDictionary<string, string> additionalBodyParameters, string scopes)
+        private async Task AddBodyParamsAndHeadersAsync(
+            IDictionary<string, string> additionalBodyParameters, 
+            string scopes, 
+            CancellationToken cancellationToken)
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
@@ -124,13 +127,14 @@ namespace Microsoft.Identity.Client.OAuth2
 
             if (_serviceBundle.Config.ClientCredential != null)
             {
-                _serviceBundle.Config.ClientCredential.AddConfidentialClientParameters(
+                await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
                     _oAuth2Client,
                     _requestParams.RequestContext.Logger,
                     _serviceBundle.PlatformProxy.CryptographyManager,                    
                     _requestParams.AppConfig.ClientId,
                     _requestParams.Authority,
-                    _requestParams.SendX5C);           
+                    _requestParams.SendX5C, 
+                    cancellationToken).ConfigureAwait(false);
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);

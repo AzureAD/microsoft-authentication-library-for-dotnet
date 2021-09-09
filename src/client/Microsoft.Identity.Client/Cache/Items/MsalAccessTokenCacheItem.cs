@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
@@ -74,6 +75,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             HomeAccountId = homeAccountId;
+            AddJitterToTokenRefreshOn();
         }        
 
         private string _tenantId;
@@ -121,18 +123,34 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal DateTimeOffset ExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExpiresOnUnixTimestamp);
         internal DateTimeOffset ExtendedExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExtendedExpiresOnUnixTimestamp);
+
+        /// <summary>
+        /// RefreshOn has a jitter time added to it that can be between + or - <see cref="Constants.DefaultJitterRangeInSeconds"/>.
+        /// Please take this into consideration when testing.
+        /// </summary>
         internal DateTimeOffset? RefreshOn
         {
             get
             {
                 return !string.IsNullOrEmpty(RefreshOnUnixTimestamp) ?
-                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp) :
+                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp):
                     (DateTimeOffset?)null;
             }
         }
+
         internal DateTimeOffset CachedAtOffset => CoreHelpers.UnixTimestampStringToDateTime(CachedAt);
 
         public bool IsExtendedLifeTimeToken { get; set; }
+
+        private void AddJitterToTokenRefreshOn()
+        {
+            if (!string.IsNullOrEmpty(RefreshOnUnixTimestamp))
+            {
+                Random r = new Random();
+                int jitter = r.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds);
+                RefreshOnUnixTimestamp = (Convert.ToInt64(RefreshOnUnixTimestamp, CultureInfo.InvariantCulture) - jitter).ToString();
+            }
+        }
 
         internal static MsalAccessTokenCacheItem FromJsonString(string json)
         {

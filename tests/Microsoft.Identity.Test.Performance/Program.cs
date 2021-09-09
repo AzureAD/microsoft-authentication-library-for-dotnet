@@ -19,10 +19,7 @@ namespace Microsoft.Identity.Test.Performance
                     .AddDiagnoser(MemoryDiagnoser.Default)
                     .AddJob(
                         Job.Default
-                            .WithId("Job-PerfTests")
-                    //        .WithGcMode(new GcMode() { Server = true })
-
-));
+                            .WithId("Job-PerfTests")));
 
 
             Console.ReadKey();

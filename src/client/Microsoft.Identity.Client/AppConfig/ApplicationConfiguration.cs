@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -89,7 +91,8 @@ namespace Microsoft.Identity.Client
         public ClientCredentialWrapper ClientCredential { get; internal set; }
         public string ClientSecret { get; internal set; }
         public string SignedClientAssertion { get; internal set; }
-        public Func<string> SignedClientAssertionDelegate { get; internal set; }
+        public Func<CancellationToken, Task<string>> SignedClientAssertionDelegate { get; internal set; }
+         
         public X509Certificate2 ClientCredentialCertificate { get; internal set; }
         public IDictionary<string, string> ClaimsToSign { get; internal set; }
         public bool MergeWithDefaultClaims { get; internal set; }

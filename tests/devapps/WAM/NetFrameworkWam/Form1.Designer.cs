@@ -84,7 +84,7 @@
             "https://login.microsoftonline.com/consumers",
             "https://login.microsoftonline.com/49f548d0-12b7-4169-a390-bb5304d24462",
             "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
-            "https://login.microsoftonline.com/61411618-6f67-4fc5-ba6a-4a0fe32d4eec",
+            "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a",
             "https://login.windows-ppe.net/organizations",
             "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47"});
             this.authorityCbx.Location = new System.Drawing.Point(73, 42);

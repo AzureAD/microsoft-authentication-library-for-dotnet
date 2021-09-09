@@ -255,10 +255,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return CreateFailureMessage(HttpStatusCode.BadRequest, string.Empty);
         }
 
-        public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage(string token = "header.payload.signature", string expiry = "3599")
+        public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage(
+            string token = "header.payload.signature", 
+            string expiry = "3599", 
+            string tokenType = "Bearer")
         {
             return CreateSuccessResponseMessage(
-                "{\"token_type\":\"Bearer\",\"expires_in\":\"" + expiry + "\",\"client_info\":\"" + CreateClientInfo() + "\",\"access_token\":\"" + token + "\"}");                
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"client_info\":\"" + CreateClientInfo() + "\",\"access_token\":\"" + token + "\"}");                
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope, bool foci = false)

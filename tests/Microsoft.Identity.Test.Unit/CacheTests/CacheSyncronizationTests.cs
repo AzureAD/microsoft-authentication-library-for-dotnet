@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     {
 
         [TestMethod]
-        [Timeout(1000)]
+        [Timeout(2000)]
         public async Task DisableInternalSemaphore_Async()
         {
             await RunSemaphoreTestAsync(true).ConfigureAwait(false);

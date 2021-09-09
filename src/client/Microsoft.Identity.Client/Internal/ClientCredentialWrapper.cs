@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
@@ -130,18 +132,19 @@ namespace Microsoft.Identity.Client.Internal
         internal string Secret { get; }
         // The signed assertion passed in by the user
         internal string SignedAssertion { get; }
-        internal Func<string> SignedAssertionDelegate { get; }
+        internal Func<CancellationToken, Task<string>> SignedAssertionDelegate { get; }
         internal bool AppendDefaultClaims { get;  }
         internal ConfidentialClientAuthenticationType AuthenticationType { get;  }
         internal IDictionary<string, string> ClaimsToSign { get; }
 
-        public void AddConfidentialClientParameters(
+        public async Task AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
             ICoreLogger logger,
             ICryptographyManager cryptographyManager,
             string clientId,
             Authority authority,
-            bool sendX5C)
+            bool sendX5C, 
+            CancellationToken cancellationToken)
         {
             using (logger.LogMethodDuration())
             {
@@ -185,7 +188,8 @@ namespace Microsoft.Identity.Client.Internal
                         break;
                     case ConfidentialClientAuthenticationType.SignedClientAssertionDelegate:
                         oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
-                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, SignedAssertionDelegate.Invoke());
+                        string signedAssertion = await SignedAssertionDelegate(cancellationToken).ConfigureAwait(false);
+                        oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, signedAssertion);
                         break;
                     default:
                         throw new NotImplementedException();
