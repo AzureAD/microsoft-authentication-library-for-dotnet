@@ -5,7 +5,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -145,14 +144,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 
                 YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
-                // Use reflection to get the value and wait till achieved
-                Type httpTeleMgrType = typeof(TokenCacheAccessRecorder);
-                FieldInfo field = httpTeleMgrType.GetField("_afterAccessTotalCount", BindingFlags.NonPublic | BindingFlags.Instance);
-                Assert.IsTrue(YieldTillSatisfied(() =>
-                {
-                    var actual = (int)field.GetValue(cacheAccess);
-                    return actual == 3;
-                }));
+
+                Assert.IsTrue(YieldTillSatisfied(() => cacheAccess.AfterAccessTotalCount == 3));
 
                 cacheAccess.AssertAccessCounts(2, 1); // new tokens written to cache
             }
@@ -191,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             void LocalLogCallback(LogLevel level, string message, bool containsPii)
             {
                 if (level == LogLevel.Error &&
-                    message.Contains(AAD_InvalidGrant_Error))
+                    message.Contains(BackgroundFetch_Failed))
                 {
                     wasErrorLogged = true;
                 }
@@ -390,7 +383,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             void LocalLogCallback(LogLevel level, string message, bool containsPii)
             {
                 if (level == LogLevel.Error &&
-                    message.Contains(AAD_InvalidGrant_Error))
+                    message.Contains(BackgroundFetch_Failed))
                 {
                     wasErrorLogged = true;
                 }
@@ -459,7 +452,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 3000)
+        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 10000)
         {
             int iCount = maxTimeInMilliSec / 100;
             while (iCount > 0)
@@ -476,6 +469,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             return false;
         }
 
-        private const string AAD_InvalidGrant_Error = "AADSTS70008";
+        private const string BackgroundFetch_Failed = "Background fetch failed";
     }
 }

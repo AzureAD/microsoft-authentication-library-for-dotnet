@@ -53,19 +53,20 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 catch (MsalServiceException ex)
                 {
-                    string logMsg = $"Background fetch failed. Is AAD down? { ex.IsAadUnavailable()}. MsalServiceException {ex.ToString()}";
+                    string logMsg = $"Background fetch failed MsalServiceException. Is AAD down? { ex.IsAadUnavailable()}";
                     if (ex.StatusCode == 400)
                     {
-                        logger.Error(logMsg);
+                        logger.ErrorPiiWithPrefix(ex, logMsg);
                     }
                     else
                     {
-                        logger.Warning(logMsg);
+                        logger.WarningPiiWithPrefix(ex, logMsg);
                     }
                 }
                 catch (Exception ex)
                 {
-                    logger.Warning($"Background fetch failed Exception {ex.ToString()}");
+                    string logMsg = $"Background fetch failed Exception.";
+                    logger.WarningPiiWithPrefix(ex, logMsg);
                 }
             });
         }
