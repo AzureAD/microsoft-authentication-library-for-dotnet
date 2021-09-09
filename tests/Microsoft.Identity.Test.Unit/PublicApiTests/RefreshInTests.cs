@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -52,6 +53,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.IsNotNull(result);
+
+                // The following can be indeterministic due to background threading nature
+                // So it is verified on check and wait basis
+
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
+
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
                 cacheAccess.AssertAccessCounts(1, 1);
@@ -69,14 +76,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
 
                 cacheAccess.AssertAccessCounts(2, 1);
+
             }
         }
 
-        private static PublicClientApplication SetupPca(MockHttpAndServiceBundle harness)
+        private static PublicClientApplication SetupPca(MockHttpAndServiceBundle harness, LogCallback logCallback = null)
         {
             Trace.WriteLine("1. Setup an app with a token cache with one AT");
             PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                         .WithHttpManager(harness.HttpManager)
+                                                                        .WithLogging(logCallback)
                                                                         .BuildConcrete();
 
             TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false);
@@ -111,6 +120,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
+                // The following can be indeterministic due to background threading nature
+                // So it is verified on check and wait basis
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
+
                 // Assert
                 Assert.IsNotNull(result, "ATS still succeeds even though AAD is unavailable");
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
@@ -124,12 +137,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddTokenResponse(TokenResponseType.Valid);
 
                 result = await app
-                  .AcquireTokenSilent(
-                      TestConstants.s_scope.ToArray(),
-                      account)
-                  .ExecuteAsync(CancellationToken.None)
-                  .ConfigureAwait(false);
+                    .AcquireTokenSilent(
+                        TestConstants.s_scope.ToArray(),
+                        account)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
                 Assert.IsNotNull(result);
+                
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
+                // Use reflection to get the value and wait till achieved
+                Type httpTeleMgrType = typeof(TokenCacheAccessRecorder);
+                FieldInfo field = httpTeleMgrType.GetField("_afterAccessTotalCount", BindingFlags.NonPublic | BindingFlags.Instance);
+                Assert.IsTrue(YieldTillSatisfied(() =>
+                {
+                    var actual = (int)field.GetValue(cacheAccess);
+                    return actual == 3;
+                }));
+
                 cacheAccess.AssertAccessCounts(2, 1); // new tokens written to cache
             }
         }
@@ -138,11 +162,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [Description("AT in cache, needs refresh. AAD fails but is available when refreshing.")]
         public async Task ATS_NonExpired_NeedsRefresh_AADInvalidResponse_Async()
         {
+            bool wasErrorLogged = false;
             // Arrange
             using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
             {
                 Trace.WriteLine("1. Setup an app with a token cache with one AT");
-                PublicClientApplication app = SetupPca(harness);
+                PublicClientApplication app = SetupPca(harness, LocalLogCallback);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
                 UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
@@ -154,13 +179,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
 
-                // Act
-                await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app
-                    .AcquireTokenSilent(
+                await app.AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         account)
-                    .ExecuteAsync())
+                    .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Assert.IsTrue(YieldTillSatisfied(() => wasErrorLogged == true));
+            }
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Error &&
+                    message.Contains(AAD_InvalidGrant_Error))
+                {
+                    wasErrorLogged = true;
+                }
             }
         }
 
@@ -225,6 +259,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.IsNotNull(result);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
@@ -256,6 +291,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.IsNotNull(result);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
@@ -263,12 +299,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        private static ConfidentialClientApplication SetupCca(MockHttpAndServiceBundle harness)
+        private static ConfidentialClientApplication SetupCca(MockHttpAndServiceBundle harness, LogCallback logCallback = null)
         {
             ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                           .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                                                           .WithClientSecret(TestConstants.ClientSecret)
                                                           .WithHttpManager(harness.HttpManager)
+                                                          .WithLogging(logCallback)
                                                           .BuildConcrete();
 
             TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
@@ -306,6 +343,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.IsNotNull(result, "ClientCreds should still succeeds even though AAD is unavailable");
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
                 cacheAccess.AssertAccessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
@@ -316,6 +354,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result);
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 cacheAccess.AssertAccessCounts(2, 1); // new tokens written to cache
             }
         }
@@ -323,11 +362,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task ClientCreds_NonExpired_NeedsRefresh_AADInvalidResponse_Async()
         {
+            bool wasErrorLogged = false;
             // Arrange
             using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
             {
                 Trace.WriteLine("1. Setup an app");
-                ConfidentialClientApplication app = SetupCca(harness);
+                ConfidentialClientApplication app = SetupCca(harness, LocalLogCallback);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
 
@@ -339,11 +379,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddAllMocks(TokenResponseType.InvalidGrant);
 
                 // Act
-                await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
-                   app.AcquireTokenForClient(TestConstants.s_scope)
-                    .ExecuteAsync())
+                await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Assert.IsTrue(YieldTillSatisfied(() => wasErrorLogged == true));
                 cacheAccess.AssertAccessCounts(1, 0);
+            }
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Error &&
+                    message.Contains(AAD_InvalidGrant_Error))
+                {
+                    wasErrorLogged = true;
+                }
             }
         }
 
@@ -408,5 +458,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 atItem.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow - TimeSpan.FromMinutes(1));
             }
         }
+
+        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 3000)
+        {
+            int iCount = maxTimeInMilliSec / 100;
+            while (iCount > 0)
+            {
+                if (func())
+                {
+                    return true;
+                }
+                Thread.Yield();
+                Thread.Sleep(100);
+                iCount--;
+            }
+
+            return false;
+        }
+
+        private const string AAD_InvalidGrant_Error = "AADSTS70008";
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,6 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
             MsalAccessTokenCacheItem msalAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            AuthenticationResult authResult = null;
 
             CacheInfoTelemetry cacheInfoTelemetry;
             if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
@@ -54,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
                 }
 
-                if (msalAccessTokenItem != null && !msalAccessTokenItem.NeedsRefresh())
+                if (msalAccessTokenItem != null)
                 {
                     var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
                     var tenantProfiles = await CacheManager.GetTenantProfilesAsync(msalAccessTokenItem.HomeAccountId).ConfigureAwait(false); 
@@ -65,23 +67,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 
                     Metrics.IncrementTotalAccessTokensFromCache();
-                    return new AuthenticationResult(
-                        msalAccessTokenItem,
-                        msalIdTokenItem,
-                        tenantProfiles?.Values,
-                        AuthenticationRequestParameters.AuthenticationScheme,
-                        AuthenticationRequestParameters.RequestContext.CorrelationId,
-                        TokenSource.Cache,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent);
+                    authResult = new AuthenticationResult(
+                                                            msalAccessTokenItem,
+                                                            msalIdTokenItem,
+                                                            tenantProfiles?.Values,
+                                                            AuthenticationRequestParameters.AuthenticationScheme,
+                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
+                                                            TokenSource.Cache,
+                                                            AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
 
-                cacheInfoTelemetry = (msalAccessTokenItem == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.RefreshIn;
+                cacheInfoTelemetry = CacheInfoTelemetry.RefreshIn;
                 logger.Verbose($"[OBO request] No valid access token found because {cacheInfoTelemetry} ");
             }
             else
             {
                 logger.Info("[OBO Request] Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
-                cacheInfoTelemetry = CacheInfoTelemetry.ForceRefresh;
+                cacheInfoTelemetry = (msalAccessTokenItem == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.ForceRefresh;
             }
 
             if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfoTelemetry.None)
@@ -92,7 +94,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // No AT in the cache or AT needs to be refreshed
             try
             {
-                return await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                if (msalAccessTokenItem == null)
+                {
+                    return await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    if (msalAccessTokenItem.NeedsRefresh())
+                    {
+                        SilentRequestHelper.ProcessFetchInBackgroundAsync(() => RefreshRtOrFetchNewAccessTokenAsync(cancellationToken), logger);
+                    }
+
+                    return authResult;
+                }
             }
             catch (MsalServiceException e)
             {
