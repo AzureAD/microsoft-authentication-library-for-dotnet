@@ -123,13 +123,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public CancellationToken CancellationToken { get; }
 
-        /// <Summary>
+        /// <summary>
         /// Suggested value of the expiry, to help determining the cache eviction time. 
         /// This value is <b>only</b> set on the <code>OnAfterAccess</code> delegate, on a cache write
         /// operation (that is when <code>args.HasStateChanged</code> is <code>true</code>) and when the cache write 
         /// is triggered from the <code>AcquireTokenForClient</code> method. In all other cases it's <code>null</code>, as there is a refresh token, and therefore the
         /// access tokens are refreshable.
-        /// </Summary> 
+        /// </summary> 
         public DateTimeOffset? SuggestedCacheExpiry { get; private set; }
     }
 }
