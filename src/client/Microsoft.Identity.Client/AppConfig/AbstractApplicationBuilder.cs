@@ -184,7 +184,6 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-
         internal T WithUserTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {
             Config.UserTokenCacheInternalForTest = tokenCacheInternal;

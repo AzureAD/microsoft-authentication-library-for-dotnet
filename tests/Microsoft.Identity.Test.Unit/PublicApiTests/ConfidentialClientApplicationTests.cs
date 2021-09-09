@@ -395,7 +395,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Certificate,
             CertificateAndClaims,
             SignedAssertion,
-            SignedAssertionDelegate
+            SignedAssertionDelegate,
+            SignedAssertionAsyncDelegate,
         }
 
         private ConfidentialClientApplication CreateConfidentialClient(
@@ -427,6 +428,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     break;
                 case CredentialType.SignedAssertionDelegate:
                     builder = builder.WithClientAssertion(() => { return TestConstants.DefaultClientAssertion; });
+                    app = builder.BuildConcrete();
+                    Assert.IsNull(app.Certificate);
+                    break;
+                case CredentialType.SignedAssertionAsyncDelegate:
+                    builder = builder.WithClientAssertion(
+                        async ct => await Task.FromResult(TestConstants.DefaultClientAssertion).ConfigureAwait(false));
                     app = builder.BuildConcrete();
                     Assert.IsNull(app.Certificate);
                     break;
@@ -577,7 +584,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task ConfidentialClientUsingSignedClientAssertionDelegateTestAsync()
+        public async Task ConfidentialClientUsingSignedClientAssertion_SyncDelegateTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -601,7 +608,63 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // assert client credential
                 Assert.IsNotNull(app.ClientCredential.SignedAssertionDelegate);
-                Assert.AreEqual(TestConstants.DefaultClientAssertion, app.ClientCredential.SignedAssertionDelegate());
+                var cred = await app.ClientCredential.SignedAssertionDelegate(default).ConfigureAwait(false);
+                Assert.AreEqual(TestConstants.DefaultClientAssertion, cred);
+            }
+        }
+
+        [TestMethod]
+        public async Task ConfidentialClientUsingSignedClientAssertion_AsyncDelegateTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
+                var app = CreateConfidentialClient(httpManager, null, 1, CredentialType.SignedAssertionDelegate);
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+
+                Assert.IsNotNull(app.ClientCredential.SignedAssertionDelegate);
+                var cred = await app.ClientCredential.SignedAssertionDelegate(default).ConfigureAwait(false);
+                Assert.AreEqual(TestConstants.DefaultClientAssertion, cred);
+            }
+        }
+
+
+        [TestMethod]
+        public async Task ConfidentialClientUsingSignedClientAssertion_AsyncDelegate_CancellationTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+                var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithHttpManager(httpManager)
+                            .WithClientAssertion(
+                            async ct =>
+                            {
+                                // make sure that the cancellation token given to AcquireToken method
+                                // is propagated to here
+                                cancellationTokenSource.Cancel();
+                                ct.ThrowIfCancellationRequested();
+                                return await Task.FromResult(TestConstants.DefaultClientAssertion)
+                                .ConfigureAwait(false);
+                            });
+
+                var app = builder.BuildConcrete();
+                Assert.IsNull(app.Certificate);
+
+                await AssertException.TaskThrowsAsync<OperationCanceledException>(
+                    () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(cancellationTokenSource.Token)).ConfigureAwait(false);
             }
         }
 
