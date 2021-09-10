@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client
         ITokenCacheAccessor Accessor { get; }
 
         #region High-Level cache operations
-        Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
+        Task RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters);
         Task<IEnumerable<IAccount>> GetAccountsAsync(AuthenticationRequestParameters requestParameters);
 
         Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(
@@ -41,8 +41,6 @@ namespace Microsoft.Identity.Client
         Task<IDictionary<string, TenantProfile>> GetTenantProfilesAsync(AuthenticationRequestParameters requestParameters, string homeAccountId);
 
         #endregion
-
-        void RemoveMsalAccountWithNoLocks(IAccount account, RequestContext requestContext);
 
         /// <summary>
         /// FOCI - check in the app metadata to see if the app is part of the family
@@ -67,13 +65,15 @@ namespace Microsoft.Identity.Client
         bool HasTokensNoLocks(string partitionKey);
 
 
-        bool IsTokenCacheSerialized();
+        /// <summary>
+        /// True when MSAL has been configured to fire the serialization events. This can be done by the app developer or by MSAL itself (on UWP)
+        /// </summary>
+        bool IsExternalSerializationEnabled();
 
         /// <summary>
-        /// MSAL adds serialziation for UWP and also for ConfidentialClient app token cache. 
-        /// If the app developer provides their own serialization, this flags is false
+        /// True when MSAL has been configured by the app developer to fire serialization events.
         /// </summary>
-        bool UsesDefaultSerialization { get; }
+        bool IsExternalSerializationConfigured();
 
         #endregion
     }

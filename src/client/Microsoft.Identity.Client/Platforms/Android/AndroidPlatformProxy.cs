@@ -165,5 +165,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             return new AndroidHttpClientFactory();
         }
+
+        public bool LegacyCacheRequiresSerialization => false;
+
     }
 }

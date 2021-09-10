@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.Cache
         /// </remarks>
         private async Task RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes cacheEventType)
         {
-            if (TokenCacheInternal.IsTokenCacheSerialized())
+            if (TokenCacheInternal.IsExternalSerializationEnabled())
             {
                 if (!_cacheRefreshedForRead)
                 {
