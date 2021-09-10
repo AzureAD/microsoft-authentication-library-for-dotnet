@@ -147,9 +147,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.AuthorityType = AuthenticationRequestParameters.AuthorityInfo.AuthorityType.ToString();
             }
 
-            apiEvent.IsTokenCacheSerialized =
-                !AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.UsesDefaultSerialization &&
-                AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsTokenCacheSerialized();
+            apiEvent.IsTokenCacheSerialized = AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsExternalSerializationConfigured();
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
             apiEvent.CacheInfo = (int)CacheInfoTelemetry.None;
 
@@ -187,7 +185,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return new AuthenticationResult(
                 atItem,
                 idtItem,
-                account.TenantProfiles,
+                account?.TenantProfiles,
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 msalTokenResponse.TokenSource,
@@ -345,7 +343,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (authenticationRequestParameters.IsConfidentialClient &&
                 !authenticationRequestParameters.IsClientCredentialRequest &&
-                !CacheManager.TokenCacheInternal.IsTokenCacheSerialized())
+                !CacheManager.TokenCacheInternal.IsExternalSerializationEnabled())
             {
                 authenticationRequestParameters.RequestContext.Logger.Error("The default token cache provided by MSAL is not designed to be performant when used in confidential client applications. Please use token cache serialization. See https://aka.ms/msal-net-cca-token-cache-serialization.");
             }

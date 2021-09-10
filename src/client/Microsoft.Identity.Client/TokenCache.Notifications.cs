@@ -29,10 +29,16 @@ namespace Microsoft.Identity.Client
         internal Func<TokenCacheNotificationArgs, Task> AsyncAfterAccess { get; set; }
         internal Func<TokenCacheNotificationArgs, Task> AsyncBeforeWrite { get; set; }
 
-        bool ITokenCacheInternal.IsTokenCacheSerialized()
+        bool ITokenCacheInternal.IsExternalSerializationEnabled()
         {
             return BeforeAccess != null || AfterAccess != null || BeforeWrite != null ||
                 AsyncBeforeAccess != null || AsyncAfterAccess != null || AsyncBeforeWrite != null;
+        }
+
+        bool ITokenCacheInternal.IsExternalSerializationConfigured()
+        {
+            return !this.UsesDefaultSerialization &&
+                (this as ITokenCacheInternal).IsExternalSerializationEnabled();                
         }
 
         async Task ITokenCacheInternal.OnAfterAccessAsync(TokenCacheNotificationArgs args)
@@ -180,7 +186,7 @@ namespace Microsoft.Identity.Client
         // so reset them all if the user customizes the serialzer
         private void ResetDefaultDelegates()
         {
-            if (_usesDefaultSerialization)
+            if (UsesDefaultSerialization)
             {
                 BeforeAccess = null;
                 AfterAccess = null;
@@ -189,7 +195,7 @@ namespace Microsoft.Identity.Client
                 AsyncBeforeAccess = null;
                 AsyncAfterAccess = null;
                 AsyncBeforeWrite = null;
-                _usesDefaultSerialization = false;
+                UsesDefaultSerialization = false;
             }
         }
     }
