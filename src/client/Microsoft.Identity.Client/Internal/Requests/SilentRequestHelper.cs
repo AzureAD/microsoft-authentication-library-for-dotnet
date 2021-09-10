@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 catch (MsalServiceException ex)
                 {
-                    string logMsg = $"Background fetch failed MsalServiceException. Is AAD down? { ex.IsAadUnavailable()}";
+                    string logMsg = $"Background fetch failed with MsalServiceException. Is AAD down? { ex.IsAadUnavailable()}";
                     if (ex.StatusCode == 400)
                     {
                         logger.ErrorPiiWithPrefix(ex, logMsg);
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 catch (Exception ex)
                 {
-                    string logMsg = $"Background fetch failed Exception.";
+                    string logMsg = $"Background fetch failed with exception.";
                     logger.WarningPiiWithPrefix(ex, logMsg);
                 }
             });
