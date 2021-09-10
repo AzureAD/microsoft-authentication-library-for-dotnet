@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -68,6 +69,29 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
             Assert.AreEqual(expectedReads, AfterAccessTotalCount - AfterAccessWriteCount, "Reads");
             Assert.AreEqual(expectedReads +  expectedWrites, BeforeAccessCount, "Reads");
+        }
+
+        public void WaitTo_AssertAcessCounts(int expectedReads, int expectedWrites, int maxTimeInMilliSec = 30000)
+        {
+            YieldTillSatisfied(() => BeforeWriteCount == expectedWrites && AfterAccessWriteCount == expectedWrites && AfterAccessTotalCount == (expectedReads + expectedWrites) && BeforeAccessCount == (expectedReads + expectedWrites), maxTimeInMilliSec);
+            AssertAccessCounts(expectedReads, expectedWrites);
+        }
+
+        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
+        {
+            int iCount = maxTimeInMilliSec / 100;
+            while (iCount > 0)
+            {
+                if (func())
+                {
+                    return true;
+                }
+                Thread.Yield();
+                Thread.Sleep(100);
+                iCount--;
+            }
+
+            return false;
         }
     }
 }

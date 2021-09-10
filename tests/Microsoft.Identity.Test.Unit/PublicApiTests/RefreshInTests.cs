@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                cacheAccess.AssertAccessCounts(1, 1);
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
                 MsalAccessTokenCacheItem ati = app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
                 Assert.IsTrue(ati.RefreshOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
 
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                   .ConfigureAwait(false);
                 Assert.IsNotNull(result);
 
-                cacheAccess.AssertAccessCounts(2, 1);
+                cacheAccess.WaitTo_AssertAcessCounts(2, 1);
 
             }
         }
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert
                 Assert.IsNotNull(result, "ATS still succeeds even though AAD is unavailable");
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
-                cacheAccess.AssertAccessCounts(1, 0); // the refresh failed, no new data is written to the cache
+                cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
                 // reset throttling, otherwise MSAL would block similar requests for 2 minutes 
                 // and we would still get a cached response
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsTrue(YieldTillSatisfied(() => cacheAccess.AfterAccessTotalCount == 3));
 
-                cacheAccess.AssertAccessCounts(2, 1); // new tokens written to cache
+                cacheAccess.WaitTo_AssertAcessCounts(2, 1); // new tokens written to cache
             }
         }
 
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                cacheAccess.AssertAccessCounts(1, 1);
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
             }
         }
 
@@ -288,7 +288,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                cacheAccess.AssertAccessCounts(1, 1);
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
             }
         }
 
@@ -338,7 +338,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result, "ClientCreds should still succeeds even though AAD is unavailable");
                 YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
-                cacheAccess.AssertAccessCounts(1, 0); // the refresh failed, no new data is written to the cache
+                cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
                 // Now let AAD respond with tokens
                 harness.HttpManager.AddTokenResponse(TokenResponseType.Valid);
@@ -347,8 +347,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result);
-                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
-                cacheAccess.AssertAccessCounts(2, 1); // new tokens written to cache
+
+                cacheAccess.WaitTo_AssertAcessCounts(2, 1); // new tokens written to cache
             }
         }
 
@@ -377,7 +377,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsTrue(YieldTillSatisfied(() => wasErrorLogged == true));
-                cacheAccess.AssertAccessCounts(1, 0);
+                cacheAccess.WaitTo_AssertAcessCounts(1, 0);
             }
 
             void LocalLogCallback(LogLevel level, string message, bool containsPii)
@@ -415,7 +415,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsFalse(ex is MsalUiRequiredException, "5xx exceptions do not translate to MsalUIRequired");
                 Assert.AreEqual(503, ex.StatusCode);
-                cacheAccess.AssertAccessCounts(1, 0);
+                cacheAccess.WaitTo_AssertAcessCounts(1, 0);
             }
         }
 
@@ -452,7 +452,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 10000)
+        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
         {
             int iCount = maxTimeInMilliSec / 100;
             while (iCount > 0)

@@ -607,7 +607,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             return atItem;
         }
 
-        private static bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 10000)
+        private static bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
         {
             int iCount = maxTimeInMilliSec / 100;
             while (iCount > 0)
