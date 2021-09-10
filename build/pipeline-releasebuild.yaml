@@ -23,7 +23,6 @@ stages:
 - stage: MSALBuildAndTest
   jobs: #Build and stage projects
 
-  steps:
   #Pre build analysis
   - template: template-prebuild-code-analysis.yaml
 
