@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             HomeAccountId = homeAccountId;
             AddJitterToTokenRefreshOn();
-        }        
+        }
 
         private string _tenantId;
 
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             get
             {
                 return !string.IsNullOrEmpty(RefreshOnUnixTimestamp) ?
-                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp):
+                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp) :
                     (DateTimeOffset?)null;
             }
         }
@@ -178,12 +178,12 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             var item = new MsalAccessTokenCacheItem(JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target))
             {
-                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),                
+                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
                 CachedAt = cachedAt.ToString(CultureInfo.InvariantCulture),
                 ExpiresOnUnixTimestamp = expiresOn.ToString(CultureInfo.InvariantCulture),
                 ExtendedExpiresOnUnixTimestamp = extendedExpiresOn.ToString(CultureInfo.InvariantCulture),
                 RefreshOnUnixTimestamp = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.RefreshOn),
-                UserAssertionHash = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash),
+                UserAssertionHash = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.UserAssertionHash),
                 KeyId = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId),
                 TokenType = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer
             };
@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TenantId,
                 HomeAccountId,
                 ClientId,
-                _scopes, 
+                _scopes,
                 TokenType);
         }
 
@@ -239,6 +239,11 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             return RefreshOn.HasValue &&
                 RefreshOn.Value < DateTime.UtcNow;
+        }
+
+        internal bool IsExpired()
+        {
+            return ExpiresOn < DateTime.UtcNow + Constants.AccessTokenExpirationBuffer;
         }
     }
 }

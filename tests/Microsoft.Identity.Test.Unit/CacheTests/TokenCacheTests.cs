@@ -1162,7 +1162,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.Accessor.ClearAccessTokens();
             cache.Accessor.ClearRefreshTokens();
-
+            
             Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
 

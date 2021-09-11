@@ -38,8 +38,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
             _accountSharedPreference = Application.Context.GetSharedPreferences(AccountSharedPreferenceName,
                 FileCreationMode.Private);
 
-            if (_accessTokenSharedPreference == null || _refreshTokenSharedPreference == null
-                || _idTokenSharedPreference == null || _accountSharedPreference == null)
+            if (_accessTokenSharedPreference == null ||
+                _refreshTokenSharedPreference == null ||
+                _idTokenSharedPreference == null ||
+                _accountSharedPreference == null)
             {
                 throw new MsalClientException(
                     MsalError.FailedToCreateSharedPreference,
@@ -52,6 +54,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             _requestContext = requestContext;
         }
 
+        #region SaveItem
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
@@ -79,25 +82,28 @@ namespace Microsoft.Identity.Client.Platforms.Android
             editor.PutString(item.GetKey().ToString(), item.ToJsonString());
             editor.Apply();
         }
+        #endregion
 
-        public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
+        #region DeleteItem
+        public void DeleteAccessToken(MsalAccessTokenCacheItem item)
         {
-            Delete(cacheKey.ToString(), _accessTokenSharedPreference.Edit());
+            Delete(item.GetKey().ToString(), _accessTokenSharedPreference.Edit());
         }
 
-        public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey)
+        public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Delete(cacheKey.ToString(), _refreshTokenSharedPreference.Edit());
+            Delete(item.GetKey().ToString(), _refreshTokenSharedPreference.Edit());
         }
 
-        public void DeleteIdToken(MsalIdTokenCacheKey cacheKey)
+        public void DeleteIdToken(MsalIdTokenCacheItem item)
         {
-            Delete(cacheKey.ToString(), _idTokenSharedPreference.Edit());
+            Delete(item.GetKey().ToString(), _idTokenSharedPreference.Edit());
         }
 
-        public void DeleteAccount(MsalAccountCacheKey cacheKey)
+        public void DeleteAccount(MsalAccountCacheItem item)
         {
-            Delete(cacheKey.ToString(), _accountSharedPreference.Edit());
+            Delete(item.GetKey().ToString(), _accountSharedPreference.Edit());
+
         }
 
         private void Delete(string key, ISharedPreferencesEditor editor)
@@ -114,6 +120,25 @@ namespace Microsoft.Identity.Client.Platforms.Android
             editor.Apply();
         }
 
+        public void Clear()
+        {
+            DeleteAll(_accessTokenSharedPreference);
+            DeleteAll(_refreshTokenSharedPreference);
+            DeleteAll(_idTokenSharedPreference);
+            DeleteAll(_accountSharedPreference);
+        }
+
+        #endregion
+
+        #region GetItem
+        public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
+        {
+            return MsalIdTokenCacheItem.FromJsonString(
+                _idTokenSharedPreference.GetString(accessTokenCacheItem.GetIdTokenItemKey().ToString(), null));
+        }
+        #endregion
+
+        #region GetAll
         public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null)
         {
             return _accessTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
@@ -133,33 +158,19 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             return _accountSharedPreference.All.Values.Cast<string>().Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
         }
-
-        public void Clear()
-        {
-            DeleteAll(_accessTokenSharedPreference);
-            DeleteAll(_refreshTokenSharedPreference);
-            DeleteAll(_idTokenSharedPreference);
-            DeleteAll(_accountSharedPreference);
-        }
-
-        public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
-        {
-            return MsalAccessTokenCacheItem.FromJsonString(_accessTokenSharedPreference.GetString(accessTokenKey.ToString(), null));
-        }
-
-        public MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
-        {
-            return MsalRefreshTokenCacheItem.FromJsonString(_refreshTokenSharedPreference.GetString(refreshTokenKey.ToString(), null));
-        }
-
-        public MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey)
-        {
-            return MsalIdTokenCacheItem.FromJsonString(_idTokenSharedPreference.GetString(idTokenKey.ToString(), null));
-        }
+        #endregion
 
         public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
         {
             return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountKey.ToString(), null));
+        }
+
+        /// <summary>
+        /// This method is used during token cache serialization which is not supported for Android.
+        /// </summary>
+        public bool HasAccessOrRefreshTokens()
+        {
+            throw new NotSupportedException();
         }
 
         #region App Metadata - not used on Android

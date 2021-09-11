@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new IosHttpClientFactory();
         }
 
-        public bool LegacyCacheRequiresSerialization => false;
+        public override bool LegacyCacheRequiresSerialization => false;
 
     }
 }

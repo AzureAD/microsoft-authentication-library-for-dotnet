@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Cache.Keys;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -29,7 +27,7 @@ namespace Microsoft.Identity.Client
             MsalTokenResponse response);
 
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters requestParams);
-        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey);
+        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem);
 
         /// <summary>
         /// Returns a RT for the request. If familyId is specified, it tries to return the FRT.
@@ -50,7 +48,6 @@ namespace Microsoft.Identity.Client
 
         void SetIosKeychainSecurityGroup(string securityGroup);
 
-
         #region Cache notifications
         Task OnAfterAccessAsync(TokenCacheNotificationArgs args);
         Task OnBeforeAccessAsync(TokenCacheNotificationArgs args);
@@ -62,18 +59,17 @@ namespace Microsoft.Identity.Client
         /// Shows if MSAL's in-memory token cache has any kind of RT or non-expired AT. Does not trigger a cache notification.
         /// Ignores ADAL's cache.
         /// </summary>
-        bool HasTokensNoLocks(string partitionKey);
-
-
-        /// <summary>
-        /// True when MSAL has been configured to fire the serialization events. This can be done by the app developer or by MSAL itself (on UWP)
-        /// </summary>
-        bool IsExternalSerializationEnabled();
+        bool HasTokensNoLocks();
 
         /// <summary>
-        /// True when MSAL has been configured by the app developer to fire serialization events.
+        /// True when MSAL has been configured to fire the serialization events. This can be done by the app developer or by MSAL itself (on UWP).
         /// </summary>
-        bool IsExternalSerializationConfigured();
+        bool IsAppSubscribedToSerializationEvents();
+
+        /// <summary>
+        /// True when the app developer subscribed to token cache serialization events.
+        /// </summary>
+        bool IsExternalSerializationConfiguredByUser();
 
         #endregion
     }

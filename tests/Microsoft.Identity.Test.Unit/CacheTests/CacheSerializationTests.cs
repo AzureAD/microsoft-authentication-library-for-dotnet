@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             int numIdTokens,
             int numAccounts)
         {
-            var accessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>());
 
             for (int i = 1; i <= numAccessTokens; i++)
             {
@@ -477,7 +477,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize(null);
             string json = new UTF8Encoding().GetString(bytes);
 
-            var otherAccessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
+            var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>());
             var s2 = new TokenCacheDictionarySerializer(otherAccessor);
             s2.Deserialize(bytes, false);
 
@@ -536,7 +536,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson), JObject.Parse(expectedJson)));
 
-            var otherAccessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
+            var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>());
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
             s2.Deserialize(bytes, false);
 
@@ -645,7 +645,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DeploymentItem(@"Resources\cachecompat_dotnet_dictionary.bin")]
         public void TestMsalNet2XCacheSerializationInterop()
         {
-            var accessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>());
             var s = new TokenCacheDictionarySerializer(accessor);
             string binFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_dotnet_dictionary.bin");
             byte[] bytes = File.ReadAllBytes(binFilePath);
@@ -668,7 +668,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 CachedAt = "1548803419",
                 ExpiresOnUnixTimestamp = "1548846619",
                 ExtendedExpiresOnUnixTimestamp = "1548846619",
-                UserAssertionHash = string.Empty,
+                UserAssertionHash = null,
                 TokenType = StorageJsonValues.TokenTypeBearer
             };
             AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.GetAllAccessTokens().First());

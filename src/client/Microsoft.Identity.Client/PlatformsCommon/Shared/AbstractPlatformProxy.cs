@@ -210,6 +210,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// On Android, iOS and UWP, MSAL will save the legacy ADAL cache in a known location.
         /// On other platforms, the app developer must use the serialization callbacks
         /// </summary>
-        public bool LegacyCacheRequiresSerialization => true;
+        public virtual bool LegacyCacheRequiresSerialization => true;
     }
 }

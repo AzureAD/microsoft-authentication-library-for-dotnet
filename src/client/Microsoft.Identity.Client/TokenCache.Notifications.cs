@@ -29,16 +29,16 @@ namespace Microsoft.Identity.Client
         internal Func<TokenCacheNotificationArgs, Task> AsyncAfterAccess { get; set; }
         internal Func<TokenCacheNotificationArgs, Task> AsyncBeforeWrite { get; set; }
 
-        bool ITokenCacheInternal.IsExternalSerializationEnabled()
+        bool ITokenCacheInternal.IsAppSubscribedToSerializationEvents()
         {
             return BeforeAccess != null || AfterAccess != null || BeforeWrite != null ||
                 AsyncBeforeAccess != null || AsyncAfterAccess != null || AsyncBeforeWrite != null;
         }
 
-        bool ITokenCacheInternal.IsExternalSerializationConfigured()
+        bool ITokenCacheInternal.IsExternalSerializationConfiguredByUser()
         {
             return !this.UsesDefaultSerialization &&
-                (this as ITokenCacheInternal).IsExternalSerializationEnabled();                
+                (this as ITokenCacheInternal).IsAppSubscribedToSerializationEvents();                
         }
 
         async Task ITokenCacheInternal.OnAfterAccessAsync(TokenCacheNotificationArgs args)

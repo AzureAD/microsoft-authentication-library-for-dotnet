@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
         private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
-            var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
+            var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
             var tenantProfiles = await CacheManager.GetTenantProfilesAsync(cachedAccessTokenItem.HomeAccountId).ConfigureAwait(false);
 
             return new AuthenticationResult(
