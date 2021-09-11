@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             pcaDe.UserTokenCacheInternal.Accessor.GetAllAccounts()
                 .Where(a => a.Environment != "login.microsoftonline.de")
                 .ToList()
-                .ForEach(a => pcaDe.UserTokenCacheInternal.Accessor.DeleteAccount(a.GetKey()));
+                .ForEach(a => pcaDe.UserTokenCacheInternal.Accessor.DeleteAccount(a));
             var cacheAccessRecorder = pcaDe.UserTokenCache.RecordAccess();
 
             // Act

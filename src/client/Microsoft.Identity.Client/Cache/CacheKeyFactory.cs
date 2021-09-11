@@ -2,11 +2,21 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal static class SuggestedWebCacheKeyFactory
+    /// <summary>
+    /// Responsible for computing:
+    /// - external distributed cache key (from request and responses)
+    /// - internal cache partition keys (as above, but also from cache items)
+    /// 
+    /// These are the same string, but MSAL cannot control if the app developer actually uses distributed caching. 
+    /// However, MSAL's in-memory cache needs to be partitioned, and this class computes the partition key.
+    /// </summary>
+    internal static class CacheKeyFactory
     {
         public static string GetKeyFromRequest(AuthenticationRequestParameters requestParameters)
         {
@@ -27,7 +37,6 @@ namespace Microsoft.Identity.Client.Cache
             }
 
             return null;
-
         }
 
         public static string GetKeyFromResponse(AuthenticationRequestParameters requestParameters, string homeAccountIdFromResponse)
@@ -66,9 +75,48 @@ namespace Microsoft.Identity.Client.Cache
             return false;
         }
 
-        public /* for test */ static string GetClientCredentialKey(string clientId, string tenantId)
+        public static string GetClientCredentialKey(string clientId, string tenantId)
         {                
             return $"{clientId}_{tenantId}_AppTokenCache";
+        }
+
+        public static string GetKeyFromCachedItem(MsalAccessTokenCacheItem accessTokenCacheItem)
+        {            
+            string partitionKey = !string.IsNullOrEmpty(accessTokenCacheItem.UserAssertionHash) ?
+              accessTokenCacheItem.UserAssertionHash : 
+              accessTokenCacheItem.HomeAccountId;
+
+            return partitionKey;
+        }
+
+        public static string GetKeyFromCachedItem(MsalRefreshTokenCacheItem refreshTokenCacheItem)
+        {
+            string partitionKey = !string.IsNullOrEmpty(refreshTokenCacheItem.UserAssertionHash) ?
+              refreshTokenCacheItem.UserAssertionHash : 
+              refreshTokenCacheItem.HomeAccountId;
+
+            return partitionKey;
+        }
+
+        // Id tokens are not indexed by OBO key, only by home account key
+        public static string GetIdTokenKeyFromCachedItem(MsalAccessTokenCacheItem accessTokenCacheItem)
+        {
+            return accessTokenCacheItem.HomeAccountId;
+        }
+
+        public static string GetKeyFromAccount(MsalAccountCacheKey accountKey)
+        {
+            return accountKey.HomeAccountId;
+        }
+
+        public static string GetKeyFromCachedItem(MsalIdTokenCacheItem idTokenCacheItem)
+        {
+            return idTokenCacheItem.HomeAccountId;
+        }
+
+        public static string GetKeyFromCachedItem(MsalAccountCacheItem accountCacheItem)
+        {
+            return accountCacheItem.HomeAccountId;
         }
     }
 }

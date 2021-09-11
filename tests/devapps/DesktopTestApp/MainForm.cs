@@ -116,12 +116,6 @@ namespace DesktopTestApp
             tabControl1.SelectedTab = settingsTabPage;
         }
 
-        private void cache_Click(object sender, EventArgs e)
-        {
-            tabControl1.SelectedTab = cacheTabPage;
-            LoadCacheTabPageAsync().ConfigureAwait(true);
-        }
-
         private void logs_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedTab = logsTabPage;
@@ -388,68 +382,6 @@ namespace DesktopTestApp
             callResult.Text = string.Empty;
         }
 
-        #endregion
-
-        #region Cache Tab Operations
-        private async Task LoadCacheTabPageAsync()
-        {
-            while (cachePageTableLayout.Controls.Count > 0)
-            {
-                cachePageTableLayout.Controls[0].Dispose();
-            }
-
-            // Bring the cache back into memory
-            var acc = _publicClientHandler.PublicClientApplication.GetAccountsAsync().Result;
-            Trace.WriteLine("Accounts: " + acc.Count());
-
-            cachePageTableLayout.RowCount = 0;
-            var allRefreshTokens = _publicClientHandler
-                .PublicClientApplication
-                .UserTokenCacheInternal
-                .Accessor
-                .GetAllRefreshTokens();
-
-            var allAccessTokens = _publicClientHandler
-                .PublicClientApplication
-                .UserTokenCacheInternal
-                .Accessor
-                .GetAllAccessTokens();
-
-            foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
-            {
-                AddControlToCachePageTableLayout(
-                    new MsalUserRefreshTokenControl(_publicClientHandler.PublicClientApplication, rtItem)
-                    {
-                        RefreshViewAsyncDelegate = LoadCacheTabPageAsync
-                    });
-
-                foreach (MsalAccessTokenCacheItem atItem in allAccessTokens)
-                {
-                    if (atItem.HomeAccountId.Equals(rtItem.HomeAccountId, StringComparison.OrdinalIgnoreCase))
-                    {
-                        AddControlToCachePageTableLayout(
-                            new MsalUserAccessTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCacheInternal,
-                                atItem)
-                            {
-                                RefreshViewAsyncDelegate = LoadCacheTabPageAsync
-                            });
-                    }
-                }
-            }
-        }
-
-        private void AddControlToCachePageTableLayout(Control ctl)
-        {
-            cachePageTableLayout.RowCount += 1;
-            cachePageTableLayout.RowStyles.Add(
-                new RowStyle(SizeType.AutoSize, ctl.Height));
-            ctl.Dock = DockStyle.Fill;
-            cachePageTableLayout.Controls.Add(ctl, 0, cachePageTableLayout.RowCount - 1);
-            foreach (RowStyle rs in cachePageTableLayout.RowStyles)
-            {
-                rs.Height = ctl.Height;
-            }
-        }
         #endregion
 
         #region Settings Tab Operations

@@ -19,23 +19,19 @@ namespace Microsoft.Identity.Client.Cache
 
         void SaveAppMetadata(MsalAppMetadataCacheItem item);
 
-        MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey);
-
-        MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey);
-
-        MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey);
+        MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem);
 
         MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey);
 
         MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey);
 
-        void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey);
+        void DeleteAccessToken(MsalAccessTokenCacheItem item);
 
-        void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey);
+        void DeleteRefreshToken(MsalRefreshTokenCacheItem item);
 
-        void DeleteIdToken(MsalIdTokenCacheKey cacheKey);
+        void DeleteIdToken(MsalIdTokenCacheItem item);
 
-        void DeleteAccount(MsalAccountCacheKey cacheKey);
+        void DeleteAccount(MsalAccountCacheItem item);
 
         /// <summary>
         /// Returns all access tokens from the underlying cache collection.
@@ -80,5 +76,8 @@ namespace Microsoft.Identity.Client.Cache
 #endif
 
         void Clear();
+
+        bool HasAccessOrRefreshTokens();
+
     }
 }

@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             {
                 foreach (var item in accessor.GetAllAccessTokens())
                 {
-                    accessor.DeleteAccessToken(item.GetKey());
+                    accessor.DeleteAccessToken(item);
                 }
             }
         }
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             {
                 foreach (var item in accessor.GetAllRefreshTokens())
                 {
-                    accessor.DeleteRefreshToken(item.GetKey());
+                    accessor.DeleteRefreshToken(item);
                 }
             }
         }

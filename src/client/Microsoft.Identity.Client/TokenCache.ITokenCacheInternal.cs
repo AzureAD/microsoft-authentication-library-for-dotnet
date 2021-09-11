@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
             string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
             string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
             string homeAccountId = GetHomeAccountId(requestParams, response, idToken);
-            string suggestedWebCacheKey = SuggestedWebCacheKeyFactory.GetKeyFromResponse(requestParams, homeAccountId);
+            string suggestedWebCacheKey = CacheKeyFactory.GetKeyFromResponse(requestParams, homeAccountId);
 
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client
 
                 try
                 {
-                    if (tokenCacheInternal.IsExternalSerializationEnabled())
+                    if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
                         var args = new TokenCacheNotificationArgs(
                             this,
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
                             account,
                             hasStateChanged: true,
                             tokenCacheInternal.IsApplicationCache,
-                            hasTokens: tokenCacheInternal.HasTokensNoLocks(suggestedWebCacheKey),
+                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             requestParams.RequestContext.UserCancellationToken,
                             suggestedCacheKey: suggestedWebCacheKey);
 
@@ -200,13 +200,13 @@ namespace Microsoft.Identity.Client
                 }
                 finally
                 {
-                    if (tokenCacheInternal.IsExternalSerializationEnabled())
+                    if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
                         DateTimeOffset? cacheExpiry = null;
 
-                        if (!_accessor.GetAllRefreshTokens(suggestedWebCacheKey).Any())
+                        if (!_accessor.GetAllRefreshTokens().Any())
                         {
-                            cacheExpiry = CalculateSuggestedCacheExpiry(suggestedWebCacheKey);
+                            cacheExpiry = CalculateSuggestedCacheExpiry();
                         }
 
                         var args = new TokenCacheNotificationArgs(
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client
                             account,
                             hasStateChanged: true,
                             tokenCacheInternal.IsApplicationCache,
-                            tokenCacheInternal.HasTokensNoLocks(suggestedWebCacheKey),
+                            tokenCacheInternal.HasTokensNoLocks(),
                             requestParams.RequestContext.UserCancellationToken,
                             suggestedCacheKey: suggestedWebCacheKey,
                             suggestedCacheExpiry: cacheExpiry);
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Client
             }
 
             if (ServiceBundle.PlatformProxy.LegacyCacheRequiresSerialization &&
-               !(this as ITokenCacheInternal).IsExternalSerializationConfigured())
+               !(this as ITokenCacheInternal).IsExternalSerializationConfiguredByUser())
             {
                 // serialization is not configured but is required
                 return false;
@@ -297,9 +297,9 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private DateTimeOffset CalculateSuggestedCacheExpiry(string partitionKey)
+        private DateTimeOffset CalculateSuggestedCacheExpiry()
         {
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, partitionKey);
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
             var unixCacheExpiry = tokenCacheItems.Max(item => item.ExpiresOnUnixTimestamp);
             return (DateTimeOffset)CoreHelpers.UnixTimestampStringToDateTime(unixCacheExpiry);
         }
@@ -388,7 +388,7 @@ namespace Microsoft.Identity.Client
 
             // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
             // as this method is NOT locked by the semaphore
-            string partitionKey = SuggestedWebCacheKeyFactory.GetKeyFromRequest(requestParams);
+            string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, partitionKey);
             if (tokenCacheItems.Count == 0)
             {
@@ -528,7 +528,7 @@ namespace Microsoft.Identity.Client
             if (msalAccessTokenCacheItem != null)
             {
 
-                if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + AccessTokenExpirationBuffer)
+                if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + Constants.AccessTokenExpirationBuffer)
                 {
                     // due to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806
                     if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromDays(ExpirationTooLongInDays))
@@ -550,7 +550,7 @@ namespace Microsoft.Identity.Client
                 }
 
                 if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled &&
-                    msalAccessTokenCacheItem.ExtendedExpiresOn > DateTime.UtcNow + AccessTokenExpirationBuffer)
+                    msalAccessTokenCacheItem.ExtendedExpiresOn > DateTime.UtcNow + Constants.AccessTokenExpirationBuffer)
                 {
                     if (logger.IsLoggingEnabled(LogLevel.Info))
                     {
@@ -671,7 +671,7 @@ namespace Microsoft.Identity.Client
             if (requestParams.Authority == null)
                 return null;
 
-            IReadOnlyList<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens(SuggestedWebCacheKeyFactory.GetKeyFromRequest(requestParams));
+            IReadOnlyList<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens(CacheKeyFactory.GetKeyFromRequest(requestParams));
             if (allRts.Count != 0)
             {
                 var metadata =
@@ -813,10 +813,10 @@ namespace Microsoft.Identity.Client
             bool isAadAuthority = requestParameters.AuthorityInfo.AuthorityType == AuthorityType.Aad;
 
             // this will either be the home account id or null, it can never be obo assertion or tenant id
-            string partitionkey = SuggestedWebCacheKeyFactory.GetKeyFromRequest(requestParameters);
+            string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParameters);
 
-            IReadOnlyList<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId, partitionkey);
-            IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts(partitionkey);
+            IReadOnlyList<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId, partitionKey);
+            IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts(partitionKey);
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
@@ -956,9 +956,9 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey)
+        MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
+            var idToken = _accessor.GetIdToken(msalAccessTokenCacheItem);
             return idToken;
         }
 
@@ -1008,11 +1008,10 @@ namespace Microsoft.Identity.Client
                 requestParameters.RequestContext.Logger.Info("Removing user from cache..");
 
                 ITokenCacheInternal tokenCacheInternal = this;
-                var partitionKey = account.HomeAccountId.Identifier;
 
                 try
                 {
-                    if (tokenCacheInternal.IsExternalSerializationEnabled())
+                    if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
                         var args = new TokenCacheNotificationArgs(
                             this,
@@ -1020,7 +1019,7 @@ namespace Microsoft.Identity.Client
                             account,
                             true,
                             tokenCacheInternal.IsApplicationCache,
-                            tokenCacheInternal.HasTokensNoLocks(partitionKey),
+                            tokenCacheInternal.HasTokensNoLocks(),
                             requestParameters.RequestContext.UserCancellationToken,
                             account.HomeAccountId.Identifier);
 
@@ -1041,7 +1040,7 @@ namespace Microsoft.Identity.Client
                 }
                 finally
                 {
-                    if (tokenCacheInternal.IsExternalSerializationEnabled())
+                    if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
                         var afterAccessArgs = new TokenCacheNotificationArgs(
                             this,
@@ -1049,7 +1048,7 @@ namespace Microsoft.Identity.Client
                             account,
                             true,
                             tokenCacheInternal.IsApplicationCache,
-                            hasTokens: tokenCacheInternal.HasTokensNoLocks(partitionKey),
+                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             requestParameters.RequestContext.UserCancellationToken,
                             account.HomeAccountId.Identifier);
 
@@ -1067,15 +1066,9 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        bool ITokenCacheInternal.HasTokensNoLocks(string partitionKey)
+        bool ITokenCacheInternal.HasTokensNoLocks()
         {
-            return _accessor.GetAllRefreshTokens(partitionKey).Count > 0 ||
-                _accessor.GetAllAccessTokens(partitionKey).Any(at => !IsAtExpired(at));
-        }
-
-        private bool IsAtExpired(MsalAccessTokenCacheItem at)
-        {
-            return at.ExpiresOn < DateTime.UtcNow + AccessTokenExpirationBuffer;
+            return _accessor.HasAccessOrRefreshTokens();
         }
 
         internal /* internal for test only */ void RemoveAccountInternal(IAccount account, RequestContext requestContext)
@@ -1103,7 +1096,7 @@ namespace Microsoft.Identity.Client
 
             foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in refreshTokensToDelete)
             {
-                _accessor.DeleteRefreshToken(refreshTokenCacheItem.GetKey());
+                _accessor.DeleteRefreshToken(refreshTokenCacheItem);
             }
 
             requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
@@ -1112,7 +1105,7 @@ namespace Microsoft.Identity.Client
                 .ToList();
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
             {
-                _accessor.DeleteAccessToken(accessTokenCacheItem.GetKey());
+                _accessor.DeleteAccessToken(accessTokenCacheItem);
             }
 
             requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
@@ -1122,7 +1115,7 @@ namespace Microsoft.Identity.Client
                 .ToList();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
             {
-                _accessor.DeleteIdToken(idTokenCacheItem.GetKey());
+                _accessor.DeleteIdToken(idTokenCacheItem);
             }
 
             requestContext.Logger.Info("Deleted Id token count - " + allIdTokens.Count);
@@ -1131,7 +1124,7 @@ namespace Microsoft.Identity.Client
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
                                item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase))
                 .ToList()
-                .ForEach(accItem => _accessor.DeleteAccount(accItem.GetKey()));
+                .ForEach(accItem => _accessor.DeleteAccount(accItem));
         }
     }
 }

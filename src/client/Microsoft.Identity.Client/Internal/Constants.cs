@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Globalization;
 
 namespace Microsoft.Identity.Client.Internal
@@ -31,6 +32,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string AadThrottledErrorCode = "AADSTS50196";
         //Represents 5 minutes in Unit time stamp
         public const int DefaultJitterRangeInSeconds = 300;
+        public static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);
 
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {

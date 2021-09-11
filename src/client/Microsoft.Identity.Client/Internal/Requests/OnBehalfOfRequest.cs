@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (msalAccessTokenItem != null)
                 {
-                    var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
+                    var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem).ConfigureAwait(false);
                     var tenantProfiles = await CacheManager.GetTenantProfilesAsync(msalAccessTokenItem.HomeAccountId).ConfigureAwait(false); 
 
                     logger.Info(

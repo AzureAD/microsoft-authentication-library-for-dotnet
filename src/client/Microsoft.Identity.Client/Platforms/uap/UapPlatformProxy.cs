@@ -201,6 +201,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return new NullDeviceAuthManager();
         }
 
-        public bool LegacyCacheRequiresSerialization => false;
+        public override bool LegacyCacheRequiresSerialization => false;
     }
 }
