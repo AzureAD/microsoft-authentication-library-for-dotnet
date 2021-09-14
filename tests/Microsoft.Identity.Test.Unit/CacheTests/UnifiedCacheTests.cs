@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 // The ADAL cache contains access tokens, but these are NOT usable by MSAL / v2 endpoint. 
                 // MSAL will however use the RT from ADAL to fetch new access tokens...
-                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_UserFlows);
                 var res = await app.AcquireTokenSilent(TestConstants.s_scope, accounts.First()).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(res);

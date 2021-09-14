@@ -110,16 +110,19 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <inheritdoc />
         public abstract ILegacyCachePersistence CreateLegacyCachePersistence();
 
+        public ITokenCacheAccessor UserTokenCacheAccessorForTest { get; set; }
+        public ITokenCacheAccessor AppTokenCacheAccessorForTest { get; set; }
+
         /// <inheritdoc />
         public virtual ITokenCacheAccessor CreateTokenCacheAccessor(bool isApplicationTokenCache = false)
         {
             if (isApplicationTokenCache)
             {
-                return new InMemoryPartitionedAppTokenCacheAccessor(Logger);
+                return AppTokenCacheAccessorForTest ?? new InMemoryPartitionedAppTokenCacheAccessor(Logger);
             }
             else
             {
-                return new InMemoryPartitionedUserTokenCacheAccessor(Logger);
+                return UserTokenCacheAccessorForTest ?? new InMemoryPartitionedUserTokenCacheAccessor(Logger);
             }
         }
 

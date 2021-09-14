@@ -107,13 +107,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("B2C")]
-        public void B2CAcquireTokenWithValidateAuthorityTrueAndRandomAuthorityTest()
+        public async Task B2CAcquireTokenWithValidateAuthorityTrueAndRandomAuthorityTest_Async()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.B2CCustomDomain), true)
-                                                                            .WithHttpManager(httpManager)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .WithCachePartitioningAsserts(harness.ServiceBundle.PlatformProxy)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
@@ -121,15 +122,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CCustomDomain);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CCustomDomain);
 
-                AuthenticationResult result = app
+                AuthenticationResult result = await app
                     .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                await app.AcquireTokenSilent(TestConstants.s_scope, result.Account).ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 

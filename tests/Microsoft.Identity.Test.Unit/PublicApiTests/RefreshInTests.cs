@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_UserFlows);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 SingletonThrottlingManager.GetInstance().ResetCache();
 
                 // Now let AAD respond with tokens
-                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
 
                 result = await app
                     .AcquireTokenSilent(
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_UserFlows);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
@@ -322,8 +322,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
-                //UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
-
 
                 Trace.WriteLine("3. Configure AAD to respond with an error");
                 harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
@@ -341,7 +339,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
                 // Now let AAD respond with tokens
-                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()

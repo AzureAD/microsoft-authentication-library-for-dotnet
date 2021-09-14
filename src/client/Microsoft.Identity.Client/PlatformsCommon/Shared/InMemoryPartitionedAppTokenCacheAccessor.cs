@@ -37,8 +37,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Add
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            var partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId);
             string itemKey = item.GetKey().ToString();
+            string partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId);
+
             // if a conflict occurs, pick the latest value
             AccessTokenCacheDictionary
                 .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccessTokenCacheItem>())[itemKey] = item;
@@ -120,7 +121,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// <summary>
         /// This method is not supported for the app token cache because
-        /// there are no refresh tokens, ID tokens, or accounts in a client credential flow
+        /// there are no refresh tokens in a client credential flow.
         /// </summary>
         public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
         {
@@ -129,7 +130,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// <summary>
         /// This method is not supported for the app token cache because
-        /// there are no refresh tokens, ID tokens, or accounts in a client credential flow
+        /// there are no ID tokens in a client credential flow.
         /// </summary>
         public void DeleteIdToken(MsalIdTokenCacheItem item)
         {
@@ -138,7 +139,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// <summary>
         /// This method is not supported for the app token cache because
-        /// there are no refresh tokens, ID tokens, or accounts in a client credential flow
+        /// there are no user accounts in a client credential flow.
         /// </summary>
         public void DeleteAccount(MsalAccountCacheItem item)
         {
@@ -147,7 +148,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #endregion
 
         #region Get All
-        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
+
+        /// <summary>
+        /// WARNING: if partitonKey = null, this API is slow as it loads all tokens, not just from 1 partition. 
+        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// </summary>
+        public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
         {
             if (string.IsNullOrEmpty(partitionKey))
             {
@@ -160,17 +166,17 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
-        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
+        public virtual IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
         {
             return new List<MsalRefreshTokenCacheItem>();
         }
 
-        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
+        public virtual IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
         {
             return new List<MsalIdTokenCacheItem>();
         }
 
-        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
+        public virtual IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
         {
             return new List<MsalAccountCacheItem>();
         }
@@ -192,7 +198,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             // app metadata isn't removable
         }
 
-        public bool HasAccessOrRefreshTokens()
+        /// <summary>
+        /// WARNING: this API is slow as it loads all tokens, not just from 1 partition. It should only 
+        /// to support external token caching, in the hope that the external token cache is partitioned.
+        /// </summary>
+        public virtual bool HasAccessOrRefreshTokens()
         {
             return AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpired()));
         }

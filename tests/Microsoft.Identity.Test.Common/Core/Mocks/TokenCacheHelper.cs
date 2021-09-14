@@ -2,11 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Unit;
@@ -19,10 +22,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static long ValidExtendedExpiresIn = 57600;
 
         internal static MsalAccessTokenCacheItem CreateAccessTokenItem(
-                    string scopes = TestConstants.ScopeStr,
-                    string tenant = TestConstants.Utid,
-                    string homeAccountId = TestConstants.HomeAccountId,
-                    bool isExpired = false)
+            string scopes = TestConstants.ScopeStr,
+            string tenant = TestConstants.Utid,
+            string homeAccountId = TestConstants.HomeAccountId,
+            bool isExpired = false)
         {
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                TestConstants.ProductionPrefCacheEnvironment,
@@ -47,15 +50,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ClientId = TestConstants.ClientId,
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
                 HomeAccountId = homeAccountId,
-                UserAssertionHash = userAssertionHash,
-                Secret = string.Empty
+                UserAssertionHash = userAssertionHash,                
             };
         }
 
         internal static MsalIdTokenCacheItem CreateIdTokenCacheItem(
-            string tenant = TestConstants.Utid,
-            string homeAccountId = TestConstants.HomeAccountId,
-            string uid = TestConstants.Uid)
+            string tenant = TestConstants.TenantId,
+            string homeAccountId = TestConstants.HomeAccountId)
         {
             return new MsalIdTokenCacheItem()
             {
@@ -63,12 +64,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
                 HomeAccountId = homeAccountId,
                 TenantId = tenant,
-                Secret = MockHelpers.CreateIdToken(uid, TestConstants.DisplayableId, tenant)
             };
         }
 
         internal static MsalAccountCacheItem CreateAccountItem(
-            string tenant = TestConstants.Utid,
+            string tenant = TestConstants.TenantId,
             string homeAccountId = TestConstants.HomeAccountId)
         {
             return new MsalAccountCacheItem()
@@ -100,9 +100,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string overridenScopes = null,
             string userAssertion = null,
             bool expiredAccessTokens = false,
-            bool addSecondAt = true,
-            bool addAccessTokenOnly = false)
+            bool addSecondAt = true)
         {
+            bool addAccessTokenOnly = accessor is InMemoryPartitionedAppTokenCacheAccessor;
+
             string clientInfo = MockHelpers.CreateClientInfo(uid, utid);
             string homeAccId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
 
@@ -278,7 +279,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static void ExpireAccessTokens(ITokenCacheInternal tokenCache)
         {
-            var allAccessTokens = tokenCache.Accessor.GetAllAccessTokens();
+            IReadOnlyList<MsalAccessTokenCacheItem> allAccessTokens;
+
+            // avoid calling GetAllAccessTokens() on the strict accessors, as they will throw
+            if (tokenCache.Accessor is AppAccessorWithPartitionAsserts appPartitionedAccessor)
+            {
+                allAccessTokens = appPartitionedAccessor.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+            }
+            else if (tokenCache.Accessor is UserAccessorWithPartitionAsserts userPartitionedAccessor)
+            {
+                allAccessTokens = userPartitionedAccessor.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+            }
+            else
+            {
+                allAccessTokens = tokenCache.Accessor.GetAllAccessTokens();
+            }
 
             foreach (MsalAccessTokenCacheItem atItem in allAccessTokens)
             {

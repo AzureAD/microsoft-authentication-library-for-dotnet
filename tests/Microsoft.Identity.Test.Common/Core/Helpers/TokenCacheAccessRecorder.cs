@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
@@ -28,6 +28,12 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         public TokenCacheAccessRecorder(TokenCache tokenCache)
         {
             _tokenCache = tokenCache;
+
+            if ((tokenCache as ITokenCacheInternal).Accessor.GetType() == typeof(AppAccessorWithPartitionAsserts) ||
+                (tokenCache as ITokenCacheInternal).Accessor.GetType() == typeof(UserAccessorWithPartitionAsserts))
+            {
+                Assert.Fail("[TEST FAILURE] This is test setup issue. You cannot use TokenCacheAccessRecorder and WithCachePartitioningAsserts at the same time");
+            }
 
             var existingBeforeAccessCallback = _tokenCache.BeforeAccess;
             _tokenCache.BeforeAccess = (args) =>
