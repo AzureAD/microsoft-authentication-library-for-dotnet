@@ -394,6 +394,7 @@ namespace Microsoft.Identity.Client
                 errorCode);
 
         public static string CcsRoutingHintMissing = "Either the userObjectIdentifier or tenantIdenifier are missing. Both are needed to create the ccs routing hint. See https://aka.ms/msal-net/ccsRouting. ";
-        public static string ClientCredentialWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not reccomended. See https://aka.ms/msal-net-client-credentials for more details.";
+        public static string ClientCredentialWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not recommended. See https://aka.ms/msal-net-client-credentials for more details.";
+
     }
 }
