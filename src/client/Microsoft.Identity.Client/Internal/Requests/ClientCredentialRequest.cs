@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using System;
+using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -42,10 +43,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationResult authResult = null;
 
-            if(AuthenticationRequestParameters.Authority.TenantId.Contains("common") ||
-               AuthenticationRequestParameters.Authority.TenantId.Contains("organizations"))
+            if (AuthenticationRequestParameters.Authority is AadAuthority aadAuthority)
             {
-                logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);
+                if (aadAuthority.IsCommonOrganizationsOrConsumersTenant())
+                {
+                    logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);
+                }
             }
 
             if (!_clientParameters.ForceRefresh && 
