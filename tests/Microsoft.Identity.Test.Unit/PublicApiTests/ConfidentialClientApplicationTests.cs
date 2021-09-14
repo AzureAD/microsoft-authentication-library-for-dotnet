@@ -1370,6 +1370,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
+
+                log = string.Empty;
+                result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority(TestConstants.AuthorityConsumersTenant, true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
             }
         }
     }
