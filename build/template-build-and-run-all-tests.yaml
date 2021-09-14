@@ -18,7 +18,7 @@ jobs: #Build and stage projects
 
 - job: 'BuildAndStageProjects'
   dependsOn:
-    - 'BuildAndStageProjects'
+    - 'PreBuildCheck'
   pool:
       vmImage: 'windows-latest'
       demands:
@@ -32,7 +32,7 @@ jobs: #Build and stage projects
   # BUILD IOS APPCENTER APP PHASE
 - job: 'BuildiOSAppCenterApp'
   dependsOn:
-    - 'BuildAndStageProjects'
+    - 'PreBuildCheck'
   pool:
       name: Azure Pipelines
       vmImage: macos-10.15
@@ -45,7 +45,7 @@ jobs: #Build and stage projects
   # BUILD ANDROID APPCENTER APP PHASE
 - job: 'BuildAndroidAppCenterApp'
   dependsOn:
-    - 'BuildAndStageProjects'
+    - 'PreBuildCheck'
   pool:
       vmImage: 'windows-latest'
       demands:
@@ -60,7 +60,7 @@ jobs: #Build and stage projects
 # BUILD AND RUN CACHE COMPAT TESTS
 - job: 'BuildAndRunCacheCompatTests'
   dependsOn:
-    - 'BuildAndStageProjects'
+    - 'PreBuildCheck'
   pool:
       vmImage: 'windows-latest'
       demands:
