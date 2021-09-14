@@ -23,8 +23,16 @@ stages:
 - stage: MSALBuildAndTest
   jobs: #Build and stage projects
 
-  #Pre build analysis
-  - template: template-prebuild-code-analysis.yaml
+  - job: 'PreBuild'
+    pool:
+        vmImage: 'windows-latest'
+        demands:
+        - msbuild
+        - visualstudio
+
+    steps:
+    #Pre build analysis
+    - template: template-prebuild-code-analysis.yaml
 
   - template: template-build-and-run-all-tests.yaml
     parameters:
@@ -34,6 +42,7 @@ stages:
   - job: 'PackAndSign'
     dependsOn:
     - 'BuildAndStageProjects'
+    - 'PreBuild'
     pool:
       vmImage: 'windows-latest'
       demands:
