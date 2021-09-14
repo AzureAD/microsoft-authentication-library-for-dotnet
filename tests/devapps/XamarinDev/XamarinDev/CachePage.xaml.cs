@@ -95,7 +95,7 @@ namespace XamarinDev
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
 
             var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
-            tokenCache.Accessor.DeleteAccessToken(accessTokenCacheItem.GetKey());
+            tokenCache.Accessor.DeleteAccessToken(accessTokenCacheItem);
 
             RefreshCacheViewAsync().ConfigureAwait(true);
         }

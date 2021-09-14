@@ -83,10 +83,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 var refreshHandler = new MockHttpMessageHandler()
                 {
                     ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                      TestConstants.UniqueId,
-                      TestConstants.DisplayableId,
-                      TestConstants.s_scope.ToArray())
+                    ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
                 };
                 harness.HttpManager.AddMockHandler(refreshHandler);
 

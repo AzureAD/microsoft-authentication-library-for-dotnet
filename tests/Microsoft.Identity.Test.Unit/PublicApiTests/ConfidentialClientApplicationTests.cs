@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
                 string partitionKey = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid);
                 Assert.AreEqual(
-                    partitionKey, 
+                    partitionKey,
                     ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Single());
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
@@ -1300,7 +1300,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, expectedTimeDiff);
 
-                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addAccessTokenOnly: true);
+                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
                 app.AppTokenCache.SetAfterAccess((args) =>
                 {
                     if (args.HasStateChanged == true)

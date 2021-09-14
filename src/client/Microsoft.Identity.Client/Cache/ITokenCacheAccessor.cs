@@ -38,7 +38,9 @@ namespace Microsoft.Identity.Client.Cache
         /// If <paramref name="optionalPartitionKey"/> is specified, returns access tokens from that partition only.
         /// </summary>
         /// <remarks>
-        /// Not all classes that implement this method are required to filter by partition.
+        /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
+        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
         IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null);
 
@@ -47,7 +49,9 @@ namespace Microsoft.Identity.Client.Cache
         /// If <paramref name="optionalPartitionKey"/> is specified, returns refresh tokens from that partition only.
         /// </summary>
         /// <remarks>
-        /// Not all classes that implement this method are required to filter by partition.
+        /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
+        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
         IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null);
 
@@ -56,7 +60,9 @@ namespace Microsoft.Identity.Client.Cache
         /// If <paramref name="optionalPartitionKey"/> is specified, returns ID tokens from that partition only.
         /// </summary>
         /// <remarks>
-        /// Not all classes that implement this method are required to filter by partition.
+        /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
+        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
         IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null);
 
@@ -65,7 +71,9 @@ namespace Microsoft.Identity.Client.Cache
         /// If <paramref name="optionalPartitionKey"/> is specified, returns accounts from that partition only.
         /// </summary>
         /// <remarks>
-        /// Not all classes that implement this method are required to filter by partition.
+        /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
+        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
         IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null);
 
@@ -77,7 +85,10 @@ namespace Microsoft.Identity.Client.Cache
 
         void Clear();
 
+        /// <remarks>
+        /// WARNING: this API is slow as it loads all tokens, not just from 1 partition. 
+        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// </remarks>
         bool HasAccessOrRefreshTokens();
-
     }
 }

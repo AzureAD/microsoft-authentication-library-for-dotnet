@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Cache;
@@ -123,25 +124,29 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        // delete all cache entries with intersecting scopes.
+        // this should not happen but we have this as a safe guard
+        // against multiple matches.
         private void DeleteAccessTokensWithIntersectingScopes(
-            AuthenticationRequestParameters requestParams,
+            AuthenticationRequestParameters requestParams,            
             IEnumerable<string> environmentAliases,
             string tenantId,
             HashSet<string> scopeSet,
             string homeAccountId,
             string tokenType)
         {
-            // delete all cache entries with intersecting scopes.
-            // this should not happen but we have this as a safe guard
-            // against multiple matches.
-            requestParams.RequestContext.Logger.Info(
-                "Looking for scopes for the authority in the cache which intersect with " +
-                requestParams.Scope.AsSingleString());
+            if (requestParams.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
+            {
+                requestParams.RequestContext.Logger.Info(
+                    "Looking for scopes for the authority in the cache which intersect with " +
+                    requestParams.Scope.AsSingleString());
+            }
 
             IList<MsalAccessTokenCacheItem> accessTokenItemList = new List<MsalAccessTokenCacheItem>();
-            string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
+            var partitionKeyFromResponse = CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId);
+            Debug.Assert(partitionKeyFromResponse != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partition");
 
-            foreach (var accessToken in _accessor.GetAllAccessTokens(partitionKey))
+            foreach (var accessToken in _accessor.GetAllAccessTokens(partitionKeyFromResponse))
             {
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
@@ -191,8 +196,6 @@ namespace Microsoft.Identity.Client
 
             return homeAccIdMatch && clientIdMatch;
         }
-
-
 
         private IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
         {

@@ -1,13 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Engines;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -24,7 +22,6 @@ namespace Microsoft.Identity.Test.Performance
         private ITokenCacheInternal _cache;
         private MsalTokenResponse _response;
         private AuthenticationRequestParameters _requestParams;
-        private RequestContext _requestContext;
         private readonly Consumer _consumer = new Consumer();
 
         [Params(1, 100, 1000)]
@@ -38,11 +35,10 @@ namespace Microsoft.Identity.Test.Performance
         {
             var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isLegacyCacheEnabled: EnableLegacyCache);
 
-            _requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
             _cache = new TokenCache(serviceBundle, false);
             _response = TestConstants.CreateMsalTokenResponse(TestConstants.Utid);
 
-            _requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);           
+            _requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
             _requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
 
             AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefCacheEnvironment);
@@ -75,7 +71,7 @@ namespace Microsoft.Identity.Test.Performance
         [Benchmark(Description = "RemoveUser")]
         public async Task RemoveAdalUserTestAsync()
         {
-            await _cache.RemoveAccountAsync(_requestParams.Account, _requestContext).ConfigureAwait(true);
+            await _cache.RemoveAccountAsync(_requestParams.Account, _requestParams).ConfigureAwait(true);
         }
 
         private void AddHostToInstanceCache(IServiceBundle serviceBundle, string host)

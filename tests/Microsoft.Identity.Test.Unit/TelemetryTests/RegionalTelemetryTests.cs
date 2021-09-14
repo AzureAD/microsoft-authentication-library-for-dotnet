@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             base.TestInitialize();
 
             _harness = CreateTestHarness();
-           
+
         }
 
         [TestCleanup]
@@ -64,8 +64,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
-            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, 
-                ((int)RegionAutodetectionSource.EnvVariable).ToString(), 
+            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
+                ((int)RegionAutodetectionSource.EnvVariable).ToString(),
                 ((int)RegionOutcome.AutodetectSuccess).ToString());
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
 
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Guid step2CorrelationId = result.Correlationid;
 
             // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
-            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, 
+            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
                 ((int)RegionAutodetectionSource.Cache).ToString(),
                 ((int)RegionOutcome.AutodetectSuccess).ToString());
             AssertPreviousTelemetry(
@@ -88,9 +88,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Trace.WriteLine("Step 3. Acquire Token For Client -> Success");
             result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
 
-            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, 
+            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
                 ((int)RegionAutodetectionSource.Cache).ToString(),
-                ((int)RegionOutcome.AutodetectSuccess).ToString());         
+                ((int)RegionOutcome.AutodetectSuccess).ToString());
         }
 
         /// <summary>
@@ -221,9 +221,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                         mem.Bind(app.AppTokenCache);
                     }
 
-                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
+                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                        authority: TestConstants.AuthorityRegional,
+                        responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
                     var authResult = await app
-                        .AcquireTokenForClient(TestConstants.s_scope)                        
+                        .AcquireTokenForClient(TestConstants.s_scope)
                         .WithForceRefresh(forceRefresh)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
@@ -232,7 +234,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 case AcquireTokenForClientOutcome.FallbackToGlobal:
                     _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityTenant);
+                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                        authority: TestConstants.AuthorityTenant,
+                        responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
 
                     var app2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                      .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId, false)
@@ -252,7 +256,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 case AcquireTokenForClientOutcome.UserProvidedRegion:
 
-                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegional);
+                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                        authority: TestConstants.AuthorityRegional,
+                        responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
 
 
                     var app3 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -272,7 +278,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 case AcquireTokenForClientOutcome.UserProvidedInvalidRegion:
 
-                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority: TestConstants.AuthorityRegionalInvalidRegion);
+                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost
+                        (authority: TestConstants.AuthorityRegionalInvalidRegion,
+                        responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
 
                     var app4 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                      .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId, false)

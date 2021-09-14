@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
             string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
             string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
             string homeAccountId = GetHomeAccountId(requestParams, response, idToken);
-            string suggestedWebCacheKey = CacheKeyFactory.GetKeyFromResponse(requestParams, homeAccountId);
+            string suggestedWebCacheKey = CacheKeyFactory.GetExternalCacheKeyFromResponse(requestParams, homeAccountId);
 
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
@@ -79,6 +79,10 @@ namespace Microsoft.Identity.Client
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
             {
+                Debug.Assert(
+                    requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient, 
+                    "client_credentials flow should receive RT");
+
                 msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
                                     instanceDiscoveryMetadata.PreferredCache,
                                     requestParams.AppConfig.ClientId,
@@ -97,6 +101,10 @@ namespace Microsoft.Identity.Client
             Account account = null;
             if (idToken != null)
             {
+                Debug.Assert(
+                    requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient,
+                    "client_credentials flow should receive IdToken");
+
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem(
                     instanceDiscoveryMetadata.PreferredCache,
                     requestParams.AppConfig.ClientId,
@@ -194,9 +202,18 @@ namespace Microsoft.Identity.Client
                         _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
                     }
 
-                    UpdateAppMetadata(requestParams.AppConfig.ClientId, instanceDiscoveryMetadata.PreferredCache, response.FamilyId);
+                    UpdateAppMetadata(
+                        requestParams.AppConfig.ClientId,
+                        instanceDiscoveryMetadata.PreferredCache,
+                        response.FamilyId);
 
-                    SaveToLegacyAdalCache(requestParams, response, msalRefreshTokenCacheItem, msalIdTokenCacheItem, tenantId, instanceDiscoveryMetadata);
+                    SaveToLegacyAdalCache(
+                        requestParams,
+                        response,
+                        msalRefreshTokenCacheItem,
+                        msalIdTokenCacheItem,
+                        tenantId,
+                        instanceDiscoveryMetadata);
                 }
                 finally
                 {
@@ -389,6 +406,8 @@ namespace Microsoft.Identity.Client
             // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
             // as this method is NOT locked by the semaphore
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
+            Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partition");
+
             IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, partitionKey);
             if (tokenCacheItems.Count == 0)
             {

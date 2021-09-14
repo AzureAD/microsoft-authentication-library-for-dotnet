@@ -39,7 +39,9 @@ namespace Microsoft.Identity.Client.Cache
             return null;
         }
 
-        public static string GetKeyFromResponse(AuthenticationRequestParameters requestParameters, string homeAccountIdFromResponse)
+        public static string GetExternalCacheKeyFromResponse(
+            AuthenticationRequestParameters requestParameters, 
+            string homeAccountIdFromResponse)
         {
             if (GetOboOrAppKey(requestParameters, out string key))
             {
@@ -53,6 +55,14 @@ namespace Microsoft.Identity.Client.Cache
             }
 
             return null;
+        }
+
+        public static string GetInternalPartitionKeyFromResponse(
+            AuthenticationRequestParameters requestParameters,
+            string homeAccountIdFromResponse)
+        {
+            return GetExternalCacheKeyFromResponse(requestParameters, homeAccountIdFromResponse) ?? 
+                homeAccountIdFromResponse;
         }
 
         private static bool GetOboOrAppKey(AuthenticationRequestParameters requestParameters, out string key)
