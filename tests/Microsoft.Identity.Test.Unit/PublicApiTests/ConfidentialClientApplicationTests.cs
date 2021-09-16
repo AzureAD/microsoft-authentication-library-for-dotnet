@@ -1336,6 +1336,42 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             _serializedCache = args.TokenCache.SerializeMsalV3();
         }
+
+        [TestMethod]
+        public async Task AcquireTokenForClientAuthorityCheckTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                string log = string.Empty;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithLogging((LogLevel level, string message, bool containsPii) => log = log + message)
+                    .BuildConcrete();
+
+                var result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant, true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
+
+                log = string.Empty;
+                result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority(TestConstants.AuthorityOrganizationsTenant, true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
+            }
+        }
     }
 }
 

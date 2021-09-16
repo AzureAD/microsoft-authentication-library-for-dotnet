@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using System;
+using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -41,6 +42,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
 
             AuthenticationResult authResult = null;
+
+            if (AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
+                aadAuthority.IsCommonOrOrganizationsTenant())
+            {
+                logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);
+            }
 
             if (!_clientParameters.ForceRefresh && 
                 string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
