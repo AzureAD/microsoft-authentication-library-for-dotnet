@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -45,11 +46,18 @@ namespace Microsoft.Identity.Client
                     innerException);
             }
 
+            if (httpResponse.HeadersAsDictionary != null && httpResponse.HeadersAsDictionary.ContainsKey(ThrottleCommon.ThrottleRetryAfterHeaderResponseValue))
+            {
+                ex = new MsalServiceException(
+                    errorCode,
+                    MsalErrorMessage.AadThrottledError,
+                    innerException);
+            }
+
             if (ex == null)
             {
                 ex = new MsalServiceException(errorCode, errorMessage, innerException);
             }
-
 
             ex.ResponseBody = httpResponse?.Body;
             ex.StatusCode = httpResponse != null ? (int)httpResponse.StatusCode : 0;

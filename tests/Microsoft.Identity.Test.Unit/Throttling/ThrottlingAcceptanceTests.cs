@@ -203,7 +203,29 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             }
         }
 
+        [TestMethod]
+        public async Task RetryAfter_ConfidentialClient_ErrorMessage_Async()
+        {
+            using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
+            {
+                var httpManager = httpManagerAndBundle.HttpManager;
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
 
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var tokenResponse = httpManager.AddMockHandlerForThrottledResponseMessage();
+
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(429, ex.StatusCode);
+                Assert.IsTrue(ex.Headers.Contains("Retry-After"));
+                Assert.AreEqual(ex.Message, MsalErrorMessage.AadThrottledError);
+            }
+        }
         #endregion
 
         #region HTTP 5xx acceptance test

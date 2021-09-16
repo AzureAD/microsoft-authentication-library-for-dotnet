@@ -176,6 +176,20 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
+        public static MockHttpMessageHandler AddMockHandlerForThrottledResponseMessage(
+            this MockHttpManager httpManager)
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateTooManyRequestsNonJsonResponse()
+            };
+
+            httpManager.AddMockHandler(handler);
+
+            return handler;
+        }
+
         public static void AddFailingRequest(this MockHttpManager httpManager, Exception exceptionToThrow)
         {
             httpManager.AddMockHandler(

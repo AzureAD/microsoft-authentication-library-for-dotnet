@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Json;
 using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -273,6 +274,14 @@ namespace Microsoft.Identity.Client.OAuth2
             if (string.IsNullOrWhiteSpace(response.Body))
             {
                 return null;
+            }
+
+            if (response.HeadersAsDictionary != null && response.HeadersAsDictionary.ContainsKey(ThrottleCommon.ThrottleRetryAfterHeaderResponseValue))
+            {
+                return MsalServiceExceptionFactory.FromHttpResponse(
+                    response.StatusCode.ToString(),
+                    response.Body,
+                    response);
             }
 
             var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
