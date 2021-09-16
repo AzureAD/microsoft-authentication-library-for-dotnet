@@ -79,8 +79,9 @@ namespace Microsoft.Identity.Client
         /// Sets the certificate associated with the application
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
+        /// <param name="sendX5C">To send X5C with every request or not.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
-        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
+        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool sendX5C = false)
         {
             if (certificate == null)
             {
@@ -94,6 +95,7 @@ namespace Microsoft.Identity.Client
 
             Config.ClientCredentialCertificate = certificate;
             Config.ConfidentialClientCredentialCount++;
+            Config.SendX5C = sendX5C;
             return this;
         }
 
@@ -105,8 +107,9 @@ namespace Microsoft.Identity.Client
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
         /// <param name="mergeWithDefaultClaims">Determines whether or not to merge <paramref name="claimsToSign"/> with the default claims required for authentication.</param>
+        /// <param name="sendX5C">To send X5C with every request or not.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.</remarks>
-        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true)
+        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true, bool sendX5C = false)
         {
             if (certificate == null)
             {
@@ -122,6 +125,7 @@ namespace Microsoft.Identity.Client
             Config.ClaimsToSign = claimsToSign;
             Config.MergeWithDefaultClaims = mergeWithDefaultClaims;
             Config.ConfidentialClientCredentialCount++;
+            Config.SendX5C = sendX5C;
             return this;
         }
 
@@ -229,24 +233,6 @@ namespace Microsoft.Identity.Client
         public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
         {          
             Config.CacheSynchronizationEnabled = enableCacheSynchronization;
-
-            return this;
-        }
-
-        /// <summary>
-        /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
-        /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
-        /// this method will send the public certificate to Azure AD along with the token request,
-        /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
-        /// This saves the application admin from the need to explicitly manage the certificate rollover
-        /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
-        /// </summary>
-        /// <param name="sendX5C"><c>true</c> if the x5c should be sent. Otherwise <c>false</c>.
-        /// The default is <c>false</c></param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public ConfidentialClientApplicationBuilder WithSendX5C(bool sendX5C)
-        {
-            Config.SendX5C = sendX5C;
 
             return this;
         }

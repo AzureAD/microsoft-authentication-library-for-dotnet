@@ -115,14 +115,33 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims).ConfigureAwait(false);
         }
 
-        private async Task RunClientCredsAsync(Cloud cloud, CredentialType credentialType)
+        [TestMethod]
+        [DataRow(Cloud.Public, RunOn.NetCore)]
+        // [DataRow(Cloud.Arlington)] - cert not setup
+        public async Task WithClientClaims_SendX5C_ExtraClaims_TestAsync(Cloud cloud, RunOn runOn)
+        {
+            runOn.AssertFramework();
+            await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims, sendX5C:true).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [DataRow(Cloud.Public, RunOn.NetFx)]
+        [DataRow(Cloud.Adfs, RunOn.NetCore)]
+        // [DataRow(Cloud.Arlington)] - cert not setup
+        public async Task WithClientClaims_SendX5C_OverrideClaims_TestAsync(Cloud cloud, RunOn runOn)
+        {
+            runOn.AssertFramework();
+            await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims, sendX5C: true).ConfigureAwait(false);
+        }
+
+        private async Task RunClientCredsAsync(Cloud cloud, CredentialType credentialType, bool sendX5C = false)
         {
             Trace.WriteLine($"Running test with settings for cloud {cloud}, credential type {credentialType}");
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
 
             AuthenticationResult authResult;
 
-            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings);
+            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings, sendX5C);
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
             authResult = await confidentialApp
@@ -159,7 +178,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);        
         }
 
-        private static IConfidentialClientApplication CreateApp(CredentialType credentialType, IConfidentialAppSettings settings)
+        private static IConfidentialClientApplication CreateApp(CredentialType credentialType, IConfidentialAppSettings settings, bool sendX5C)
         {
             var builder = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
@@ -202,10 +221,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     break;
 
                 case CredentialType.ClientClaims_ExtraClaims:
-                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(true), mergeWithDefaultClaims: false);
+                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
                     break;
                 case CredentialType.ClientClaims_MergeClaims:
-                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(false), mergeWithDefaultClaims: true);
+                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
                     break;
                 default:
                     throw new NotImplementedException();

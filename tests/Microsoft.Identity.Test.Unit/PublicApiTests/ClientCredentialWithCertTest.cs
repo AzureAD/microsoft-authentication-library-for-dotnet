@@ -115,10 +115,13 @@ namespace Microsoft.Identity.Test.Unit
                 .Create(TestConstants.ClientId)
                 .WithHttpManager(harness.HttpManager);
 
-                appBuilder = appBuilder.WithCertificate(certificate); // app flag
                 if (appFlag.HasValue)
                 {
-                    appBuilder.WithSendX5C(appFlag.Value);
+                    appBuilder = appBuilder.WithCertificate(certificate, appFlag.Value); // app flag
+                }
+                else
+                {
+                    appBuilder = appBuilder.WithCertificate(certificate); // no app flag
                 }
 
                 var app = appBuilder.BuildConcrete();
@@ -165,8 +168,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
-                    .WithSendX5C(true)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -216,8 +218,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
-                    .WithSendX5C(true)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -267,8 +268,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
-                    .WithSendX5C(true)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -306,8 +306,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
-                    .WithSendX5C(true)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -349,8 +348,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri("https://login.microsoftonline.com/my-utid"),true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
-                    .WithSendX5C(true)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
