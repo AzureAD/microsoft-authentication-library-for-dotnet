@@ -81,8 +81,9 @@ namespace Microsoft.Identity.Client
         /// Sets the certificate associated with the application
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
+        /// <param name="sendX5C">To send X5C with every request or not.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
-        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
+        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool sendX5C = false)
         {
             if (certificate == null)
             {
@@ -96,6 +97,7 @@ namespace Microsoft.Identity.Client
 
             Config.ClientCredentialCertificate = certificate;
             Config.ConfidentialClientCredentialCount++;
+            Config.SendX5C = sendX5C;
             return this;
         }
 
@@ -107,8 +109,9 @@ namespace Microsoft.Identity.Client
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
         /// <param name="mergeWithDefaultClaims">Determines whether or not to merge <paramref name="claimsToSign"/> with the default claims required for authentication.</param>
-        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
-        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true)
+        /// <param name="sendX5C">To send X5C with every request or not.</param>
+        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.</remarks>
+        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true, bool sendX5C = false)
         {
             if (certificate == null)
             {
@@ -124,6 +127,7 @@ namespace Microsoft.Identity.Client
             Config.ClaimsToSign = claimsToSign;
             Config.MergeWithDefaultClaims = mergeWithDefaultClaims;
             Config.ConfidentialClientCredentialCount++;
+            Config.SendX5C = sendX5C;
             return this;
         }
 

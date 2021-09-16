@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Internal
 
             if (Certificate != null)
             {
-                Thumbprint = Base64UrlHelpers.Encode(Certificate.GetCertHash()); 
+                Thumbprint = Base64UrlHelpers.Encode(Certificate.GetCertHash());
             }
         }
 
@@ -107,6 +107,7 @@ namespace Microsoft.Identity.Client.Internal
         public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
         {
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
+            
             applicationConfiguration.ClientCredentialCertificate = certificate;
             applicationConfiguration.ConfidentialClientCredentialCount = 1;
             applicationConfiguration.ClaimsToSign = claimsToSign;

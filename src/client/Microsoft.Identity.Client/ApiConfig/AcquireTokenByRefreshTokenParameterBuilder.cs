@@ -48,6 +48,16 @@ namespace Microsoft.Identity.Client
             return ClientApplicationBaseExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
+        /// <inheritdoc/>
+        protected override void Validate()
+        {
+            base.Validate();
+            if (Parameters.SendX5C == null)
+            {
+                Parameters.SendX5C = this.ServiceBundle.Config.SendX5C;
+            }
+        }
+
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {

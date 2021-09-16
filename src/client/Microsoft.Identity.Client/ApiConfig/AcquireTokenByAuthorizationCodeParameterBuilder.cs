@@ -66,6 +66,11 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentException("AuthorizationCode can not be null or whitespace", nameof(Parameters.AuthorizationCode));
             }
+
+            if (Parameters.SendX5C == null)
+            {
+                Parameters.SendX5C = this.ServiceBundle.Config.SendX5C;
+            }
         }
 
         /// <inheritdoc />

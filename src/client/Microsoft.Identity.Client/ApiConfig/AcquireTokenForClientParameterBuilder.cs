@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client
         public AcquireTokenForClientParameterBuilder WithSendX5C(bool withSendX5C)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C, withSendX5C);
-            Parameters.SendX5C = withSendX5C;
+            Parameters.SendX5C = withSendX5C; 
             return this;
         }
 
@@ -93,6 +93,16 @@ namespace Microsoft.Identity.Client
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        protected override void Validate()
+        {
+            base.Validate();
+            if (Parameters.SendX5C == null)
+            {
+                Parameters.SendX5C = this.ServiceBundle.Config.SendX5C;
+            }
         }
 
         /// <inheritdoc />
