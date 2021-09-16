@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 #if !ANDROID && !iOS && !WINDOWS_APP 
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
@@ -122,6 +123,69 @@ namespace Microsoft.Identity.Test.Unit
                 else
                 {
                     appBuilder = appBuilder.WithCertificate(certificate); // no app flag
+                }
+
+                var app = appBuilder.BuildConcrete();
+
+                //Check for x5c claim
+                if (expectX5c)
+                {
+                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
+                }
+                else
+                {
+                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true, false));
+                }
+
+                var builder = app.AcquireTokenForClient(TestConstants.s_scope);
+
+
+                if (requestFlag != null)
+                {
+                    builder = builder.WithSendX5C(requestFlag.Value);
+                }
+
+                AuthenticationResult result = await builder
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(true, null, true)]
+        [DataRow(false, null, false)]
+        [DataRow(null, null, false)] // the default is false
+        [DataRow(null, true, true)]
+        [DataRow(null, false, false)]
+        [DataRow(true, true, true)]
+        [DataRow(false, false, false)]
+        [DataRow(true, false, false)] // request overrides
+        [DataRow(false, true, true)] // request overrides
+        public async Task JsonWebTokenWithX509PublicCertSendCertificateWithClaimsTestSendX5cCombinationsAsync(bool? appFlag, bool? requestFlag, bool expectX5c)
+        {
+            using (var harness = CreateTestHarness())
+            {
+                SetupMocks(harness.HttpManager);
+                var certificate = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                TestConstants.DefaultPassword);
+
+                IDictionary<string, string> claimsToSign = new Dictionary<string, string>();
+                claimsToSign.Add("Foo", "Bar");
+
+                var appBuilder = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithHttpManager(harness.HttpManager);
+
+                if (appFlag.HasValue)
+                {
+                    appBuilder = appBuilder.WithClientClaims(certificate, claimsToSign, sendX5C: appFlag.Value); // app flag
+                }
+                else
+                {
+                    appBuilder = appBuilder.WithClientClaims(certificate, claimsToSign); // no app flag
                 }
 
                 var app = appBuilder.BuildConcrete();
