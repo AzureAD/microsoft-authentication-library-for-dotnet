@@ -57,6 +57,18 @@ namespace Microsoft.Identity.Client.Instance
                 s_tenantlessTenantNames.Contains(tenantId);
         }
 
+        internal bool IsCommonOrOrganizationsTenant()
+        {
+            return IsCommonOrOrganizationsTenant(TenantId);
+        }
+
+        internal static bool IsCommonOrOrganizationsTenant(string tenantId)
+        {
+            return !string.IsNullOrEmpty(tenantId) && 
+                tenantId != Constants.ConsumerTenant &&
+                s_tenantlessTenantNames.Contains(tenantId);
+        }
+
         internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
             if (!string.IsNullOrEmpty(tenantId) &&

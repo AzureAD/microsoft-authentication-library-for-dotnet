@@ -44,8 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult = null;
 
             if (AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
-                aadAuthority.TenantId != Constants.ConsumerTenant &&
-                aadAuthority.IsCommonOrganizationsOrConsumersTenant())
+                aadAuthority.IsCommonOrOrganizationsTenant())
             {
                 logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);
             }
