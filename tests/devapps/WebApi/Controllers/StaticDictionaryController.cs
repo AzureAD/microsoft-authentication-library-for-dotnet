@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Internal.Logger;
+using WebApi.Misc;
 
 namespace WebApi.Controllers
 {

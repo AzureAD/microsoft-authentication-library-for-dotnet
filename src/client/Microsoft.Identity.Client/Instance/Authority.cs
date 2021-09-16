@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client.Instance
         /// Gets a tenanted authority if the current authority is tenant-less.
         /// Returns the original authority on B2C and ADFS
         /// </summary>
-        internal abstract string GetTenantedAuthority(string tenantId);
+        internal abstract string GetTenantedAuthority(string tenantId, bool forceTenantless = false);
 
         internal abstract string GetTokenEndpoint();
         internal abstract string GetAuthorizationEndpoint();

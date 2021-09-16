@@ -22,7 +22,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             bool isForceLoginPrompt,
             bool isInteractive,
-            bool isAccountInWam);
+            bool isAccountInWam, 
+            string scopeOverride=null);
 
         Task<WebTokenRequest> CreateWebTokenRequestAsync(
             WebAccountProvider provider,

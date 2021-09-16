@@ -19,16 +19,16 @@ using System.Threading;
 
 namespace Microsoft.Identity.Client
 {
-    /// <Summary>
+    /// <summary>
     /// Abstract class containing common API methods and properties. Both <see cref="Microsoft.Identity.Client.PublicClientApplication"/> and 
     /// ConfidentialClientApplication
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
-    /// </Summary>
+    /// </summary>
     public abstract partial class ClientApplicationBase : IClientApplicationBase
     {
-        /// <Summary>
+        /// <summary>
         /// Default Authority used for interactive calls.
-        /// </Summary>
+        /// </summary>
         internal const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
         internal IServiceBundle ServiceBundle { get; }
@@ -38,24 +38,25 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public IAppConfig AppConfig => ServiceBundle.Config;        
 
-        /// <Summary>
+        /// <summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
-        /// </Summary>
+        /// </summary>
         public string Authority => ServiceBundle.Config.AuthorityInfo.CanonicalAuthority; // Do not use in MSAL, use AuthorityInfo instead to avoid re-parsing
 
         internal AuthorityInfo AuthorityInfo => ServiceBundle.Config.AuthorityInfo;
 
-        /// <Summary>
-        /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used
+        /// <summary>
+        /// User token cache. It holds access tokens, id tokens and refresh tokens for accounts. It's used
         /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
         /// or one of the overrides of <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
         /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
         /// cache (see <c>IConfidentialClientApplication</c>).
-        /// </Summary>
+        /// </summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
-        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms.
+        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on mobile platforms and on UWP.
+        /// It is recommended to use token cache serialization for web site and web api scenarios.
         /// </remarks>
         public ITokenCache UserTokenCache => UserTokenCacheInternal;
 
@@ -196,12 +197,15 @@ namespace Microsoft.Identity.Client
                 await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
             }
 
-            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            if (AppConfig.IsBrokerEnabled)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
-                await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
+                if (broker.IsBrokerInstalledAndInvokable())
+                {
+                    await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
+                }
             }
         }
 
@@ -246,28 +250,31 @@ namespace Microsoft.Identity.Client
             ICacheSessionManager cacheSessionManager, 
             CancellationToken cancellationToken)
         {
-            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            if (AppConfig.IsBrokerEnabled)
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
-                var brokerAccounts =
-                    (await broker.GetAccountsAsync(
-                        AppConfig.ClientId, 
-                        AppConfig.RedirectUri, 
-                        AuthorityInfo,
-                        cacheSessionManager,
-                        ServiceBundle.InstanceDiscoveryManager).ConfigureAwait(false))
-                    ?? Enumerable.Empty<IAccount>();
-
-                if (!string.IsNullOrEmpty(homeAccountIdFilter))
+                if (broker.IsBrokerInstalledAndInvokable())
                 {
-                    brokerAccounts = brokerAccounts.Where(
-                        acc => homeAccountIdFilter.Equals(
-                            acc.HomeAccountId.Identifier,
-                            StringComparison.OrdinalIgnoreCase));
-                }
+                    var brokerAccounts =
+                        (await broker.GetAccountsAsync(
+                            AppConfig.ClientId,
+                            AppConfig.RedirectUri,
+                            AuthorityInfo,
+                            cacheSessionManager,
+                            ServiceBundle.InstanceDiscoveryManager).ConfigureAwait(false))
+                        ?? Enumerable.Empty<IAccount>();
 
-                brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts, cancellationToken).ConfigureAwait(false);
-                return brokerAccounts;
+                    if (!string.IsNullOrEmpty(homeAccountIdFilter))
+                    {
+                        brokerAccounts = brokerAccounts.Where(
+                            acc => homeAccountIdFilter.Equals(
+                                acc.HomeAccountId.Identifier,
+                                StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts, cancellationToken).ConfigureAwait(false);
+                    return brokerAccounts;
+                }
             }
 
             return Enumerable.Empty<IAccount>();

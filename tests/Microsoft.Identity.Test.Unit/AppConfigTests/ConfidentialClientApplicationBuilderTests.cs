@@ -169,8 +169,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestWithDifferentClientId()
         {
             const string ClientId = "9340c42a-f5de-4a80-aea0-874adc2ca325";
+            const string AppIdUri = "https://microsoft.onmicrosoft.com/aa3e634f-58b3-4eb7-b4ed-244c44c29c47";
             var cca = ConfidentialClientApplicationBuilder.Create(ClientId).WithClientSecret("cats").Build();
             Assert.AreEqual(ClientId, cca.AppConfig.ClientId);
+
+            cca = ConfidentialClientApplicationBuilder.Create(AppIdUri).WithClientSecret("cats").Build();
+            Assert.AreEqual(AppIdUri, cca.AppConfig.ClientId);
         }
 
         [TestMethod]

@@ -28,6 +28,9 @@ namespace Microsoft.Identity.Client.Internal
         public const string UserRealmMsaDomainName = "live.com";
 
         public const string CcsRoutingHintHeader = "x-anchormailbox";
+        public const string AadThrottledErrorCode = "AADSTS50196";
+        //Represents 5 minutes in Unit time stamp
+        public const int DefaultJitterRangeInSeconds = 300;
 
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {

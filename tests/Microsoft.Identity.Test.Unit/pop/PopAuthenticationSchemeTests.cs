@@ -47,7 +47,8 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 config.PopCryptoProvider = new InMemoryCryptoProvider();
 
                 AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config, null));
-                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration(null));
+                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration((HttpRequestMessage)null));
+                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration((Uri)null));
             }
         }
 

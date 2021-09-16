@@ -1,21 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Internal.Requests;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.TelemetryCore;
-using System.Threading;
-using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.ApiConfig.Executors;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.Cache.CacheImpl;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client
 {
@@ -50,9 +43,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            InMemoryPartitionedCacheSerializer = new InMemoryPartitionedCacheSerializer(ServiceBundle.ApplicationLogger);
-            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? 
-                new TokenCache(ServiceBundle, true, InMemoryPartitionedCacheSerializer);
+            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
             Certificate = configuration.ClientCredentialCertificate;
             
             this.ServiceBundle.ApplicationLogger.Verbose($"ConfidentialClientApplication {configuration.GetHashCode()} created");
@@ -169,10 +160,10 @@ namespace Microsoft.Identity.Client
 
         internal ClientCredentialWrapper ClientCredential => ServiceBundle.Config.ClientCredential;
 
-        /// <Summary>
+        /// <summary>
         /// Application token cache. This case holds access tokens and refresh tokens for the application. It's maintained
         /// and updated silently if needed when calling <see cref="AcquireTokenForClient(IEnumerable{string})"/>
-        /// </Summary>
+        /// </summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
         /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms
         /// </remarks>
@@ -185,12 +176,6 @@ namespace Microsoft.Identity.Client
 
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
-
-        // App token cache is serialized by default (unless the user overrides this) 
-        // the serialization stores tokens in this dictionary, where the key is the client_id + tenant_id
-        // This makes cache operations be O(1) instead of O(n), and avoids catastrophic latency of
-        // multi-tenant apps that do not serialize their cache.
-        internal InMemoryPartitionedCacheSerializer InMemoryPartitionedCacheSerializer { get; }
 
         internal override async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,

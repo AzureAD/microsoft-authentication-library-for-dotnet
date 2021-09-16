@@ -70,40 +70,23 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         validateAuthority: true);
                 requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
                 var msaRequest = new WebTokenRequest(msaProvider);
-                // step 1 - msa request
-                _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, true, false)
+              
+                _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, true, false, MsaPassthroughHandler.TransferTokenScopes)
                     .Returns(Task.FromResult(msaRequest));
 
                 var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
                 WebAccount accountFromMsaProvider = new WebAccount(msaProvider, "user@outlook.com", WebAccountState.Connected);
-                var webTokenResponse = new WebTokenResponse("v1_token", accountFromMsaProvider);
+                var webTokenResponse = new WebTokenResponse("transfer_token", accountFromMsaProvider);
                 webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
                 _wamProxy.RequestTokenForWindowAsync(IntPtr.Zero, msaRequest).Returns(webTokenResponseWrapper);
-
-                // step 2 - we have v1 token and a WebAccount, now get a transfer token
-                var transferTokenRequest = new WebTokenRequest(msaProvider);
-                _msaPlugin
-                    .CreateWebTokenRequestAsync(
-                    msaProvider,
-                    TestConstants.ClientId,
-                    MsaPassthroughHandler.TransferTokenScopes)
-                    .Returns(Task.FromResult(transferTokenRequest));
-                var webTokenResponseWrapper2 = Substitute.For<IWebTokenRequestResultWrapper>();
-                var transferTokenRequestResult = Substitute.For<IWebTokenRequestResultWrapper>();
-                transferTokenRequestResult.ResponseStatus.Returns(WebTokenRequestStatus.Success);
-                //WebAccount accountFromMsaProvider = new WebAccount(msaProvider, "user@outlook.com", WebAccountState.Connected);
-                var transferTokenResponse = new WebTokenResponse("transfer_token");
-                webTokenResponseWrapper2.ResponseData.Returns(new List<WebTokenResponse>() { transferTokenResponse });
                 _msaPlugin.ParseSuccessfullWamResponse(Arg.Any<WebTokenResponse>(), out Arg.Any<Dictionary<string, string>>())
-                    .Returns(x =>
-                {
-                    x[1] = new Dictionary<string, string>();
-                    (x[1] as Dictionary<string, string>).Add("code", "actual_transfer_token");
-                    return new MsalTokenResponse();
-                });
-
-                _wamProxy.RequestTokenForWindowAsync(IntPtr.Zero, transferTokenRequest).Returns(webTokenResponseWrapper2);
+                   .Returns(x =>
+                   {
+                       x[1] = new Dictionary<string, string>();
+                       (x[1] as Dictionary<string, string>).Add("code", "actual_transfer_token");
+                       return new MsalTokenResponse();
+                   });
 
                 // Act
                 var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenAsync(requestParams, msaProvider)
@@ -127,13 +110,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         TestConstants.AuthorityHomeTenant,
                         validateAuthority: true);
                 requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
-
-                // step 1 - msa request
                 var msaRequest = new WebTokenRequest(msaProvider);
-                _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, true, false)
+
+                _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, true, false, MsaPassthroughHandler.TransferTokenScopes)
                     .Returns(Task.FromResult(msaRequest));
 
                 var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.ProviderError);
                 _wamProxy.RequestTokenForWindowAsync(IntPtr.Zero, msaRequest).Returns(webTokenResponseWrapper);
 

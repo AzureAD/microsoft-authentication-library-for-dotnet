@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _msaPlugin = msaPlugin;
             _wamProxy = wamProxy;
             _parentHandle = parentHandle;
-        }      
+        }
 
         public async Task<string> TryFetchTransferTokenAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider accountProvider)
         {
@@ -42,11 +42,48 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             // However, some older apps have 2 incarnations, one in AAD tenant and one in MSA tenant
             // For this second case, we can't fetch the transfer token from the client_ID in AAD and this will fail
             _logger.Verbose("WAM MSA-PT - fetching transfer token");
-            string transferToken = await FetchMsaPassthroughTransferTokenAsync(
-                authenticationRequestParameters, accountProvider)
-                .ConfigureAwait(false);
 
-            return transferToken;
+            var webTokenRequestMsa = await _msaPlugin.CreateWebTokenRequestAsync(
+                accountProvider,
+                authenticationRequestParameters,
+                isForceLoginPrompt: false,
+                isInteractive: true,
+                isAccountInWam: false,
+                TransferTokenScopes)
+               .ConfigureAwait(false);
+
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequestMsa, _logger);
+
+            var transferResponse = await _wamProxy.RequestTokenForWindowAsync(_parentHandle, webTokenRequestMsa)
+                .ConfigureAwait(true);
+
+            if (!transferResponse.ResponseStatus.IsSuccessStatus())
+            {
+                var errorResp = WamAdapters.CreateMsalResponseFromWamResponse(
+                    transferResponse,
+                    _msaPlugin,
+                    authenticationRequestParameters.AppConfig.ClientId,
+                    _logger,
+                    isInteractive: true);
+
+                _logger.Warning(
+                    "WAM MSA-PT: could not get a transfer token, ussually this is because the " +
+                    "1st party app is configured for MSA-PT but not configured to login MSA users (signinaudience =2). " +
+                    "Error was: " + errorResp.Error + " " + errorResp.ErrorDescription);
+
+                return null;
+            }
+
+            _ = _msaPlugin.ParseSuccessfullWamResponse(transferResponse.ResponseData[0], out var properties);
+
+            properties.TryGetValue("code", out string code);
+
+
+            // Important: cannot use this WebAccount with the AAD provider
+            WebAccount msaPtWebAccount = transferResponse.ResponseData[0].WebAccount;
+            _logger.InfoPii($"Obtained a transfer token for {msaPtWebAccount.UserName} ?  {code != null}", $"Obtained a transfer token? {code != null}");
+
+            return code;
         }
 
         public void AddTransferTokenToRequest(
@@ -58,117 +95,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 webTokenRequest.Properties.Add("SamlAssertion", transferToken);
                 webTokenRequest.Properties.Add("SamlAssertionType", "SAMLV1");
             }
-        }
-
-        private async Task<string> FetchMsaPassthroughTransferTokenAsync(
-           AuthenticationRequestParameters authenticationRequestParameters,
-           WebAccountProvider accountProvider)
-        {
-            try
-            {
-                // step 1 - get a response from the MSA provider, just to have a WebAccount
-                _logger.Info("WAM MSA-PT: Making initial call to MSA provider");
-                WebAccount msaPtWebAccount = await TryFetchWebAccountFromMsaAsync(
-                    authenticationRequestParameters,
-                    accountProvider).ConfigureAwait(false);
-
-                if (msaPtWebAccount != null)
-                {
-                    // step 2 - get a trasnfer token 
-                    _logger.Info("WAM MSA-PT: Getting transfer token");
-                    string transferToken = await FetchTransferTokenAsync(
-                        accountProvider,
-                        msaPtWebAccount,
-                        authenticationRequestParameters.AppConfig.ClientId).ConfigureAwait(true);
-                    return transferToken;
-                }
-
-                return null;
-
-            }
-            catch (Exception ex)
-            {
-                _logger.Warning("WAM MSA-PT: Getting a transfer token failed " + ex);
-                return null; 
-            }
-
-        }
-
-        private async Task<WebAccount> TryFetchWebAccountFromMsaAsync(
-            AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider accountProvider)
-        {
-            // This response has an v1 MSA Access Token, which MSAL should expose to the user
-            var webTokenRequestMsa = await _msaPlugin.CreateWebTokenRequestAsync(
-                     accountProvider,
-                     authenticationRequestParameters,
-                     isForceLoginPrompt: false,
-                     isInteractive: true,
-                     isAccountInWam: false)
-                    .ConfigureAwait(false);
-
-            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequestMsa, _logger);
-
-            var webTokenResponseMsa = await _wamProxy.RequestTokenForWindowAsync(_parentHandle, webTokenRequestMsa)
-                .ConfigureAwait(true);
-
-            if (!webTokenResponseMsa.ResponseStatus.IsSuccessStatus())
-            {
-                var errorResp = WamAdapters.CreateMsalResponseFromWamResponse(
-                    webTokenResponseMsa, 
-                    _msaPlugin, 
-                    authenticationRequestParameters.AppConfig.ClientId, 
-                    _logger, 
-                    isInteractive: true);
-
-                _logger.Warning(
-                    "WAM MSA-PT: could not get a transfer token, ussually this is because the " +
-                    "1st party app is configured for MSA-PT but not configured to login MSA users (signinaudience =2). " +
-                    "Error was: " + errorResp.Error + " " + errorResp.ErrorDescription);
-
-                return null;
-            }
-
-            // Cannot use this WebAccount with the AAD provider
-            WebAccount msaPtWebAccount = webTokenResponseMsa.ResponseData[0].WebAccount;
-            return msaPtWebAccount;
-        }
-
-        private async Task<string> FetchTransferTokenAsync(
-            WebAccountProvider accountProvider,
-            WebAccount wamAcc,
-            string clientId)
-        {
-            var transferTokenRequest = await _msaPlugin.CreateWebTokenRequestAsync(
-                      accountProvider,
-                      clientId,
-                      TransferTokenScopes)
-                      .ConfigureAwait(true);
-
-            var transferResponse = await _wamProxy.RequestTokenForWindowAsync(
-                _parentHandle,
-                transferTokenRequest,
-                wamAcc).ConfigureAwait(false);
-
-            if (!transferResponse.ResponseStatus.IsSuccessStatus())
-            {
-                var errorResp = WamAdapters.CreateMsalResponseFromWamResponse(
-                    transferResponse, 
-                    _msaPlugin,
-                    clientId,
-                    _logger, 
-                    true);
-
-                throw new MsalServiceException(
-                    errorResp.Error,
-                    "Error fetching the MSA-PT transfer token - " + errorResp.ErrorDescription);
-            }
-
-            var resp = _msaPlugin.ParseSuccessfullWamResponse(transferResponse.ResponseData[0], out var properties);
-
-            properties.TryGetValue("code", out string code);
-            _logger.Info("WAM MSA-PT: Transfer token obtained? " + !string.IsNullOrEmpty(code));
-
-            return code;
-        }
+        }    
     }
 }

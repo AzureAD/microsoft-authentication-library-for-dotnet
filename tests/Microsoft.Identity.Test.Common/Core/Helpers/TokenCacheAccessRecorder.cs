@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,10 +16,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     public class TokenCacheAccessRecorder
     {
         private readonly TokenCache _tokenCache;
-        private int _beforeAccessCount = 0;
-        private int _beforeWriteCount = 0;
-        private int _afterAccessTotalCount = 0;
-        private int _afterAccessWriteCount = 0;
+        public int BeforeAccessCount { get; private set; } = 0;
+        public int BeforeWriteCount { get; private set; } = 0;
+        public int AfterAccessTotalCount { get; private set; } = 0;
+        public int AfterAccessWriteCount { get; private set; } = 0;
 
         public TokenCacheNotificationArgs LastBeforeAccessNotificationArgs { get; private set; }
         public TokenCacheNotificationArgs LastBeforeWriteNotificationArgs { get; private set; }
@@ -31,7 +32,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             var existingBeforeAccessCallback = _tokenCache.BeforeAccess;
             _tokenCache.BeforeAccess = (args) =>
             {
-                _beforeAccessCount++;
+                BeforeAccessCount++;
                 LastBeforeAccessNotificationArgs = args;
                 existingBeforeAccessCallback?.Invoke(args);
             };
@@ -39,7 +40,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             var existingBeforeWriteCallback = _tokenCache.BeforeWrite;
             _tokenCache.BeforeWrite = (args) =>
             {
-                _beforeWriteCount++;
+                BeforeWriteCount++;
                 LastBeforeWriteNotificationArgs = args;
 
                 existingBeforeWriteCallback?.Invoke(args);
@@ -48,12 +49,12 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             var existingAfterAccessCallback = _tokenCache.AfterAccess;
             _tokenCache.AfterAccess = (args) =>
             {
-                _afterAccessTotalCount++;
+                AfterAccessTotalCount++;
                 LastAfterAccessNotificationArgs = args;
 
                 if (args.HasStateChanged)
                 {
-                    _afterAccessWriteCount++;
+                    AfterAccessWriteCount++;
                 }
 
                 existingAfterAccessCallback?.Invoke(args);
@@ -63,11 +64,34 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public void AssertAccessCounts(int expectedReads, int expectedWrites)
         {
-            Assert.AreEqual(expectedWrites, _beforeWriteCount, "Writes");
-            Assert.AreEqual(expectedWrites, _afterAccessWriteCount, "Writes");
+            Assert.AreEqual(expectedWrites, BeforeWriteCount, "Writes");
+            Assert.AreEqual(expectedWrites, AfterAccessWriteCount, "Writes");
 
-            Assert.AreEqual(expectedReads, _afterAccessTotalCount - _afterAccessWriteCount, "Reads");
-            Assert.AreEqual(expectedReads +  expectedWrites, _beforeAccessCount, "Reads");
+            Assert.AreEqual(expectedReads, AfterAccessTotalCount - AfterAccessWriteCount, "Reads");
+            Assert.AreEqual(expectedReads +  expectedWrites, BeforeAccessCount, "Reads");
+        }
+
+        public void WaitTo_AssertAcessCounts(int expectedReads, int expectedWrites, int maxTimeInMilliSec = 30000)
+        {
+            YieldTillSatisfied(() => BeforeWriteCount == expectedWrites && AfterAccessWriteCount == expectedWrites && AfterAccessTotalCount == (expectedReads + expectedWrites) && BeforeAccessCount == (expectedReads + expectedWrites), maxTimeInMilliSec);
+            AssertAccessCounts(expectedReads, expectedWrites);
+        }
+
+        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
+        {
+            int iCount = maxTimeInMilliSec / 100;
+            while (iCount > 0)
+            {
+                if (func())
+                {
+                    return true;
+                }
+                Thread.Yield();
+                Thread.Sleep(100);
+                iCount--;
+            }
+
+            return false;
         }
     }
 }

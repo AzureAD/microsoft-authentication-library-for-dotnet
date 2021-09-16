@@ -4,14 +4,6 @@ trigger:
     include:
     - 'master'
 
-# Create a daily midnight build for CI builds on master to ensure our build functions
-schedules:
-- cron: "0 0 * * *"
-  displayName: Daily midnight build
-  branches:
-    include:
-    - master
-
 pr: none
 
 variables:

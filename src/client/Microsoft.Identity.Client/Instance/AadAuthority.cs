@@ -40,6 +40,12 @@ namespace Microsoft.Identity.Client.Instance
                   !TenantId.Equals(Constants.MsaTenantId);
         }
 
+        internal bool IsConsumers()
+        {
+            return TenantId.Equals(Constants.ConsumerTenant) ||
+                  TenantId.Equals(Constants.MsaTenantId);
+        }
+
         internal bool IsCommonOrganizationsOrConsumersTenant()
         {
             return IsCommonOrganizationsOrConsumersTenant(TenantId);
@@ -51,10 +57,10 @@ namespace Microsoft.Identity.Client.Instance
                 s_tenantlessTenantNames.Contains(tenantId);
         }
 
-        internal override string GetTenantedAuthority(string tenantId)
+        internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
             if (!string.IsNullOrEmpty(tenantId) &&
-                IsCommonOrganizationsOrConsumersTenant())
+                (forceSpecifiedTenant || IsCommonOrganizationsOrConsumersTenant()))
             {
                 var authorityUri = new Uri(AuthorityInfo.CanonicalAuthority);
 

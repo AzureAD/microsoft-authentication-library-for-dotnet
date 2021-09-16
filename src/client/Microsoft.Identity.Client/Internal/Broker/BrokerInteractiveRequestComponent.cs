@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             {
                 if (string.IsNullOrEmpty(_optionalBrokerInstallUrl))
                 {
-                    _logger.Info("Broker is required but not installed. An app URI has not been provided. ");
+                    _logger.Info("Broker is required but not installed. An app URI has not been provided. MSAL will fallback to use a browser.");
                     return null;
                 }
 

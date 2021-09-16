@@ -161,20 +161,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return AndroidBrokerFactory.CreateBroker(uiParent, Logger);
         }
 
-        public override bool CanBrokerSupportSilentAuth()
-        {
-            IBroker broker = CreateBroker(null, null);
-
-            if (broker.IsBrokerInstalledAndInvokable())
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
         {
             return new AndroidHttpClientFactory();

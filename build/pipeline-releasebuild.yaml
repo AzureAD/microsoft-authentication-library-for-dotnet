@@ -10,6 +10,7 @@ schedules:
   branches:
     include:
     - master
+  always: true
 
 variables:
   BuildPlatform: 'any cpu'
@@ -21,6 +22,7 @@ variables:
 stages:
 - stage: MSALBuildAndTest
   jobs: #Build and stage projects
+
   - template: template-build-and-run-all-tests.yaml
     parameters:
       DataFileDirectory: 'Release'
