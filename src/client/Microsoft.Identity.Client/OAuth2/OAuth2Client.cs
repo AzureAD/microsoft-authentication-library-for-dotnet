@@ -276,15 +276,22 @@ namespace Microsoft.Identity.Client.OAuth2
                 return null;
             }
 
-            if (response.HeadersAsDictionary != null && response.HeadersAsDictionary.ContainsKey(ThrottleCommon.ThrottleRetryAfterHeaderResponseValue))
-            {
-                return MsalServiceExceptionFactory.FromHttpResponse(
-                    response.StatusCode.ToString(),
-                    response.Body,
-                    response);
-            }
+            MsalTokenResponse msalTokenResponse = null;
 
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+            try
+            {
+                msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+            }
+            catch (JsonException)
+            {
+                //Throttled responses for client credential flows do not have a parsable response.
+                if ((int)response.StatusCode == 429)
+                {
+                    return MsalServiceExceptionFactory.FromThrottledCLientCredentialResponse(response);
+                }
+
+                throw;
+            }
 
             if (msalTokenResponse?.Error == null)
             {

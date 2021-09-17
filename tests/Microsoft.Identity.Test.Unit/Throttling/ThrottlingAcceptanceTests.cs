@@ -217,13 +217,14 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 httpManager.AddInstanceDiscoveryMockHandler();
                 var tokenResponse = httpManager.AddMockHandlerForThrottledResponseMessage();
 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                var serverEx = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
                     () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(429, ex.StatusCode);
-                Assert.IsTrue(ex.Headers.Contains("Retry-After"));
-                Assert.AreEqual(ex.Message, MsalErrorMessage.AadThrottledError);
+                Assert.AreEqual(serverEx.StatusCode, 429);
+                Assert.AreEqual(serverEx.ErrorCode, MsalError.RequestThrottled);
+                Assert.AreEqual(serverEx.Message, MsalErrorMessage.AadThrottledError);
+                Assert.AreEqual(serverEx.ResponseBody, MockHelpers.TooManyRequestsContent);
             }
         }
         #endregion

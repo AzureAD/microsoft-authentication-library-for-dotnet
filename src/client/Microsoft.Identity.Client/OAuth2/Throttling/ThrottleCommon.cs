@@ -12,7 +12,6 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
     {
         public const string ThrottleRetryAfterHeaderName = "x-ms-lib-capability";
         public const string ThrottleRetryAfterHeaderValue = "retry-after, h429";
-        public const string ThrottleRetryAfterHeaderResponseValue = "Retry-After";
 
         internal const string KeyDelimiter = ".";
 
