@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client
         public const string RequestTimeout = "request_timeout";
 
         /// <summary>
-        /// Service returned HTTP error code 429 which indicated that the request has been throttled.
+        /// Service returned HTTP error code 429 which indicates the request has been throttled.
         /// For more details see https://aka.ms/msal-net-throttling
         /// </summary>
         public const string RequestThrottled = "request_throttled";
