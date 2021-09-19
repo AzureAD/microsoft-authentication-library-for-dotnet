@@ -80,8 +80,8 @@ namespace Microsoft.Identity.Client
             if (!string.IsNullOrEmpty(response.RefreshToken))
             {
                 Debug.Assert(
-                    requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient, 
-                    "client_credentials flow should receive RT");
+                    requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient,
+                    "client_credentials flow should not receive a refresh token");
 
                 msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
                                     instanceDiscoveryMetadata.PreferredCache,
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client
             {
                 Debug.Assert(
                     requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient,
-                    "client_credentials flow should receive IdToken");
+                    "client_credentials flow should not receive an ID token");
 
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem(
                     instanceDiscoveryMetadata.PreferredCache,
@@ -406,7 +406,7 @@ namespace Microsoft.Identity.Client
             // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
             // as this method is NOT locked by the semaphore
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
-            Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partition");
+            Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
             IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, partitionKey);
             if (tokenCacheItems.Count == 0)

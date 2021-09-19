@@ -50,13 +50,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ClientId = TestConstants.ClientId,
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
                 HomeAccountId = homeAccountId,
-                UserAssertionHash = userAssertionHash,                
+                UserAssertionHash = userAssertionHash,
+                Secret = string.Empty
             };
         }
 
         internal static MsalIdTokenCacheItem CreateIdTokenCacheItem(
-            string tenant = TestConstants.TenantId,
-            string homeAccountId = TestConstants.HomeAccountId)
+            string tenant = TestConstants.Utid,
+            string homeAccountId = TestConstants.HomeAccountId,
+            string uid = TestConstants.Uid)
         {
             return new MsalIdTokenCacheItem()
             {
@@ -64,11 +66,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
                 HomeAccountId = homeAccountId,
                 TenantId = tenant,
+                Secret = MockHelpers.CreateIdToken(uid, TestConstants.DisplayableId, tenant)
             };
         }
 
         internal static MsalAccountCacheItem CreateAccountItem(
-            string tenant = TestConstants.TenantId,
+            string tenant = TestConstants.Utid,
             string homeAccountId = TestConstants.HomeAccountId)
         {
             return new MsalAccountCacheItem()

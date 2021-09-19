@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Performance
     /// 10,000 - 100 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
-    public class AcquireTokenForOboCacheTests
+    public class AcquireTokenForOboLargeCacheTests
     {
         readonly string _scopePrefix = "scope";
         readonly string _tenantPrefix = TestConstants.Utid;
