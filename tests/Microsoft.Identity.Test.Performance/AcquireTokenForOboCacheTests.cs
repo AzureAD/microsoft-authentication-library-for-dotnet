@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Performance
         UserAssertion _userAssertion;
 
         [ParamsSource(nameof(CacheSizeSource), Priority = 0)]
-        public (int Users, int TokensPerUser) CacheSize { get; set; };
+        public (int Users, int TokensPerUser) CacheSize { get; set; }
 
         // By default, benchmarks are run for all combinations of params.
         // This is a workaround to specify the exact param combinations to be used.
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Performance
         // If the tokens are saved with different tenants.
         // This results in ID tokens and accounts having multiple tenant profiles.
         [Params(Priority = 1)]
-        public bool IsMultiTenant { get; set; };
+        public bool IsMultiTenant { get; set; }
 
         [GlobalSetup]
         public void GlobalSetup()
