@@ -18,23 +18,75 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static long ValidExpiresIn = 28800;
         public static long ValidExtendedExpiresIn = 57600;
 
-        internal static MsalAccessTokenCacheItem CreateAccessTokenItem(string scopes = "")
+        internal static MsalAccessTokenCacheItem CreateAccessTokenItem(
+                    string scopes = TestConstants.ScopeStr,
+                    string tenant = TestConstants.Utid,
+                    string homeAccountId = TestConstants.HomeAccountId,
+                    bool isExpired = false)
         {
-            string clientInfo = MockHelpers.CreateClientInfo();
-            string homeAccId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
-
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                TestConstants.ProductionPrefCacheEnvironment,
                TestConstants.ClientId,
-               string.IsNullOrEmpty(scopes) ? TestConstants.s_scope.AsSingleString() : scopes,
-               TestConstants.Utid,
-               "",
-               new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
-               new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
+               scopes,
+               tenantId: tenant,
+               secret: string.Empty,
+               accessTokenExpiresOn: isExpired ? new DateTimeOffset(DateTime.UtcNow) : new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+               accessTokenExtendedExpiresOn: isExpired ? new DateTimeOffset(DateTime.UtcNow) : new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
                MockHelpers.CreateClientInfo(),
-               homeAccId);
+               homeAccountId);
 
             return atItem;
+        }
+
+        internal static MsalRefreshTokenCacheItem CreateRefreshTokenItem(
+            string userAssertionHash = TestConstants.UserAssertion,
+            string homeAccountId = TestConstants.HomeAccountId)
+        {
+            return new MsalRefreshTokenCacheItem()
+            {
+                ClientId = TestConstants.ClientId,
+                Environment = TestConstants.ProductionPrefCacheEnvironment,
+                HomeAccountId = homeAccountId,
+                UserAssertionHash = userAssertionHash,
+                Secret = string.Empty
+            };
+        }
+
+        internal static MsalIdTokenCacheItem CreateIdTokenCacheItem(
+            string tenant = TestConstants.Utid,
+            string homeAccountId = TestConstants.HomeAccountId,
+            string uid = TestConstants.Uid)
+        {
+            return new MsalIdTokenCacheItem()
+            {
+                ClientId = TestConstants.ClientId,
+                Environment = TestConstants.ProductionPrefCacheEnvironment,
+                HomeAccountId = homeAccountId,
+                TenantId = tenant,
+                Secret = MockHelpers.CreateIdToken(uid, TestConstants.DisplayableId, tenant)
+            };
+        }
+
+        internal static MsalAccountCacheItem CreateAccountItem(
+            string tenant = TestConstants.Utid,
+            string homeAccountId = TestConstants.HomeAccountId)
+        {
+            return new MsalAccountCacheItem()
+            {
+                Environment = TestConstants.ProductionPrefCacheEnvironment,
+                HomeAccountId = homeAccountId,
+                TenantId = tenant,
+                PreferredUsername = TestConstants.DisplayableId,
+            };
+        }
+
+        internal static MsalAppMetadataCacheItem CreateAppMetadataItem(
+            string clientId = TestConstants.ClientId)
+        {
+            return new MsalAppMetadataCacheItem(
+                clientId,
+                TestConstants.ProductionPrefCacheEnvironment,
+                null);
         }
 
         internal static void PopulateCache(
