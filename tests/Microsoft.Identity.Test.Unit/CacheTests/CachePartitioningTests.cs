@@ -41,30 +41,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        [TestMethod]
-        public async Task PCAFlows_CachePartition_TestAsync()
-        {
-            using (var harness = base.CreateTestHarness())
-            {
-                var httpManager = harness.HttpManager;
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithRedirectUri(TestConstants.RedirectUri)
-                                                              .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
-                                                              // this will fail if cache partitioning rules are broken (but not when cache serialization is also used)                                                              
-                                                              .WithCachePartitioningAsserts(harness.ServiceBundle.PlatformProxy)
-                                                              .BuildConcrete();
-
-                await RunClientCreds_Async(httpManager, app).ConfigureAwait(false);
-
-                await RunObo_Async(httpManager, app).ConfigureAwait(false);
-
-                await RunAuthCode_Async(httpManager, app).ConfigureAwait(false);
-            }
-        }
-
         private static async Task RunAuthCode_Async(MockHttpManager httpManager, ConfidentialClientApplication app)
         {
             httpManager.AddSuccessTokenResponseMockHandlerForPost();

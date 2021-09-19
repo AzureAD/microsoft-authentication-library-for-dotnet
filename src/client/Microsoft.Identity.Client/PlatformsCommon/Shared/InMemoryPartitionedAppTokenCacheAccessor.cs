@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// <summary>
         /// WARNING: if partitonKey = null, this API is slow as it loads all tokens, not just from 1 partition. 
-        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// It should only support external token caching, in the hope that the external token cache is partitioned.
         /// </summary>
         public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
         {

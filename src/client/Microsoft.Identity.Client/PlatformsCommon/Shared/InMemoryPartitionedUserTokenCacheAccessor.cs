@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             string itemKey = item.GetKey().ToString();
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
+
             RefreshTokenCacheDictionary
                 .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalRefreshTokenCacheItem>())[itemKey] = item;
         }
@@ -178,7 +179,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Get All
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
-        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// It should only support external token caching, in the hope that the external token cache is partitioned.
         public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
         {
             if (string.IsNullOrEmpty(partitionKey))
@@ -193,7 +194,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
-        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// It should only support external token caching, in the hope that the external token cache is partitioned.
         public virtual IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
         {
             if (string.IsNullOrEmpty(partitionKey))
@@ -208,7 +209,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
-        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// It should only support external token caching, in the hope that the external token cache is partitioned.
         public virtual IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
         {
             if (string.IsNullOrEmpty(partitionKey))
@@ -223,7 +224,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
-        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// It should only support external token caching, in the hope that the external token cache is partitioned.
         public virtual IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
         {
             if (string.IsNullOrEmpty(partitionKey))
@@ -258,7 +259,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// WARNING: this API is slow as it loads all tokens, not just from 1 partition. 
-        /// It should only to support external token caching, in the hope that the external token cache is partitioned.
+        /// It should only support external token caching, in the hope that the external token cache is partitioned.
         public virtual bool HasAccessOrRefreshTokens()
         {
             return RefreshTokenCacheDictionary.Any(partition => partition.Value.Count > 0) ||
