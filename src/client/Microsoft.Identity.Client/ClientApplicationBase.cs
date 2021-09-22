@@ -253,28 +253,25 @@ namespace Microsoft.Identity.Client
             if (AppConfig.IsBrokerEnabled)
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
-                if (broker.IsBrokerInstalledAndInvokable())
+                var brokerAccounts =
+                    (await broker.GetAccountsAsync(
+                        AppConfig.ClientId,
+                        AppConfig.RedirectUri,
+                        AuthorityInfo,
+                        cacheSessionManager,
+                        ServiceBundle.InstanceDiscoveryManager).ConfigureAwait(false))
+                    ?? Enumerable.Empty<IAccount>();
+
+                if (!string.IsNullOrEmpty(homeAccountIdFilter))
                 {
-                    var brokerAccounts =
-                        (await broker.GetAccountsAsync(
-                            AppConfig.ClientId,
-                            AppConfig.RedirectUri,
-                            AuthorityInfo,
-                            cacheSessionManager,
-                            ServiceBundle.InstanceDiscoveryManager).ConfigureAwait(false))
-                        ?? Enumerable.Empty<IAccount>();
-
-                    if (!string.IsNullOrEmpty(homeAccountIdFilter))
-                    {
-                        brokerAccounts = brokerAccounts.Where(
-                            acc => homeAccountIdFilter.Equals(
-                                acc.HomeAccountId.Identifier,
-                                StringComparison.OrdinalIgnoreCase));
-                    }
-
-                    brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts, cancellationToken).ConfigureAwait(false);
-                    return brokerAccounts;
+                    brokerAccounts = brokerAccounts.Where(
+                        acc => homeAccountIdFilter.Equals(
+                            acc.HomeAccountId.Identifier,
+                            StringComparison.OrdinalIgnoreCase));
                 }
+
+                brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts, cancellationToken).ConfigureAwait(false);
+                return brokerAccounts;
             }
 
             return Enumerable.Empty<IAccount>();
