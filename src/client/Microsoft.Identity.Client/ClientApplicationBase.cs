@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client
                 await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
             }
 
-            if (AppConfig.IsBrokerEnabled)
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Client
             ICacheSessionManager cacheSessionManager, 
             CancellationToken cancellationToken)
         {
-            if (AppConfig.IsBrokerEnabled)
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
                 if (broker.IsBrokerInstalledAndInvokable())
