@@ -51,15 +51,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             using (_logger.LogMethodDuration())
             {
-                if (_uIParent?.CallerViewController == null)
-                {
-                    _logger.Error(iOSBrokerConstants.CallerViewControllerIsNullCannotInvokeBroker);
-                    throw new MsalClientException(MsalError.UIViewControllerRequiredForiOSBroker, MsalErrorMessage.UIViewControllerIsRequiredToInvokeiOSBroker);
-                }
-
+                NSObject obj = new NSObject();
                 bool canStartBroker = false;
 
-                _uIParent.CallerViewController.InvokeOnMainThread(() =>
+                obj.InvokeOnMainThread(() =>
                 {
                     if (IsBrokerInstalled(BrokerParameter.UriSchemeBrokerV3))
                     {
@@ -71,7 +66,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
                 if (!canStartBroker)
                 {
-                    _uIParent.CallerViewController.InvokeOnMainThread(() =>
+                    obj.InvokeOnMainThread(() =>
                     {
                         if (IsBrokerInstalled(BrokerParameter.UriSchemeBrokerV2))
                         {
