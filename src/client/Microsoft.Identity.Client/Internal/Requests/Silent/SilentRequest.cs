@@ -45,7 +45,9 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             await UpdateRequestWithAccountAsync().ConfigureAwait(false);
-           
+
+            bool isBrokerConfigured = AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
+                                      ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
 
             try
             {
@@ -67,7 +69,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 _logger.Verbose($"Token cache could not satisfy silent request.");
 
-                if (AuthenticationRequestParameters.AppConfig.IsBrokerEnabled && ShouldTryWithBrokerError(ex.ErrorCode))
+                if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
                 {
                     _logger.Info("Attempting to use broker instead. ");                    
                     var brokerAuthResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
