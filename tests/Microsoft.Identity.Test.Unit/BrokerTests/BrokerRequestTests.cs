@@ -301,7 +301,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
             public override bool IsBrokerInstalledAndInvokable()
             {
-                return false;
+                return true;
             }
         }
 
@@ -417,11 +417,17 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (var harness = CreateTestHarness())
             {
+                var platformProxy = Substitute.For<IPlatformProxy>();
+                platformProxy.CanBrokerSupportSilentAuth().Returns(false);
+
+                harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
+
                 var builder = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
                 builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new IosBrokerMock(logger); };
+                builder.Config.PlatformProxy = platformProxy;
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
