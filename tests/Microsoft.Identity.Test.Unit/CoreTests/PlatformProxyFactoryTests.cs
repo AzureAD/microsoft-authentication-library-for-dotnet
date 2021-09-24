@@ -153,9 +153,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
 
-            Assert.IsTrue(proxy.BrokerSupportsWamAccounts);            
+            Assert.IsTrue(proxy.BrokerSupportsWamAccounts);
+            Assert.IsTrue(proxy.CanBrokerSupportSilentAuth());
 
-            
             Assert.AreSame(
                 Constants.DefaultRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", false));
