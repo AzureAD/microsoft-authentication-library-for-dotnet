@@ -13,14 +13,13 @@ namespace Microsoft.Identity.Test.Performance
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<Base64Encode>(
+            BenchmarkRunner.Run<AcquireTokenForOboCacheTests>(
                 DefaultConfig.Instance
                     .WithOptions(ConfigOptions.DontOverwriteResults)
                     .AddDiagnoser(MemoryDiagnoser.Default)
                     .AddJob(
                         Job.Default
                             .WithId("Job-PerfTests")));
-
 
             Console.ReadKey();
         }
