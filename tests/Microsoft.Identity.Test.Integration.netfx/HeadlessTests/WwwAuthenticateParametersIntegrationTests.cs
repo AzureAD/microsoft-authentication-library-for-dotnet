@@ -37,5 +37,22 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
         }
+
+        [DataRow("management.azure.com", "a645d3be-5a4a-40ef-82a1-d5f5358a424c", "login.windows.net", "72f988bf-86f1-41af-91ab-2d7cd011db47")]
+        [DataRow("api-dogfood.resources.windows-int.net", "5d04a672-05ce-492b-958f-d225b6a67926", "login.windows-ppe.net", "f686d426-8d16-42db-81b7-ab578e110ccd")]
+        [DataTestMethod]
+        public async Task CreateWwwAuthenticateResponseFromAzureResourceManagerUrlAsync(string hostName, string subscriptionId, string authority, string tenantId)
+        {
+            const string apiVersion = "2020-08-01";
+            var url = $"https://{hostName}/subscriptions/{subscriptionId}?api-version={apiVersion}";
+            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(url).ConfigureAwait(false);
+
+            Assert.IsNull(authParams.Resource);
+            Assert.AreEqual($"https://{authority}/{tenantId}", authParams.Authority);
+            Assert.IsNull(authParams.Scopes);
+            Assert.AreEqual(3, authParams.RawParameters.Count);
+            Assert.IsNull(authParams.Claims);
+            Assert.AreEqual("invalid_token", authParams.Error);
+        }
     }
 }
