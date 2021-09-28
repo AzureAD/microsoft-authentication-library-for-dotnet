@@ -163,11 +163,13 @@ namespace Microsoft.Identity.Client
                 scheme);
 
             // read the header and checks if it contains an error with insufficient_claims value.
-            if (string.Equals(parameters.Error, "insufficient_claims", StringComparison.OrdinalIgnoreCase &&
+            if (string.Equals(parameters.Error, "insufficient_claims", StringComparison.OrdinalIgnoreCase) &&
                 parameters.Claims is object)
             {
                 return parameters.Claims;
             }
+
+            return null;
         }
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values)
