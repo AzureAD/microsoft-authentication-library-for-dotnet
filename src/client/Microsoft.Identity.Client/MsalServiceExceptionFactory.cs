@@ -92,10 +92,7 @@ namespace Microsoft.Identity.Client
                 ex = new MsalServiceException(errorCode, errorMessage);
             }
 
-            if (brokerHttpResponse != null)
-            {
-                SetHttpExceptionData(ex, brokerHttpResponse);
-            }
+            SetHttpExceptionData(ex, brokerHttpResponse);
 
             ex.CorrelationId = correlationId;
             ex.SubError = subErrorCode;
@@ -116,7 +113,7 @@ namespace Microsoft.Identity.Client
             return ex;
         }
 
-        internal static MsalThrottledServiceException FromThrottledCLientCredentialResponse(HttpResponse httpResponse)
+        internal static MsalThrottledServiceException FromThrottledAuthenticationResponse(HttpResponse httpResponse)
         {
             MsalServiceException ex = new MsalServiceException(MsalError.RequestThrottled, MsalErrorMessage.AadThrottledError);
             SetHttpExceptionData(ex, httpResponse);

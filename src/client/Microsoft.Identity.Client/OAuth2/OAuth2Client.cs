@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 //Throttled responses for client credential flows do not have a parsable response.
                 if ((int)response.StatusCode == 429)
                 {
-                    return MsalServiceExceptionFactory.FromThrottledCLientCredentialResponse(response);
+                    return MsalServiceExceptionFactory.FromThrottledAuthenticationResponse(response);
                 }
 
                 throw;
