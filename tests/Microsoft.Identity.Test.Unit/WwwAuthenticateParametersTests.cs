@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit
         public void CreateWwwAuthenticateResponse(string resource, string authorizationUri)
         {
             // Arrange
-            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)401);
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", {resource}, {authorizationUri}");
 
             // Act
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit
         public void CreateWwwAuthenticateParamsFromWwwAuthenticateHeader(string clientId, string authorizationUri)
         {
             // Arrange
-            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)401);
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", {clientId}, {authorizationUri}");
 
             var wwwAuthenticateResponse = httpResponse.Headers.WwwAuthenticate.First().Parameter;
