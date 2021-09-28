@@ -2,23 +2,7 @@ parameters:
   DataFileDirectory: 'Debug'
 
 jobs: #Build and stage projects
-
-- job: 'PreBuildCheck'
-  pool:
-      vmImage: 'windows-latest'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      runCodesignValidationInjection: false
-
-  steps:
-  #Pre build analysis
-  - template: template-prebuild-code-analysis.yaml
-
 - job: 'BuildAndStageProjects'
-  dependsOn:
-    - 'PreBuildCheck'
   pool:
       vmImage: 'windows-latest'
       demands:
@@ -31,8 +15,6 @@ jobs: #Build and stage projects
 
   # BUILD IOS APPCENTER APP PHASE
 - job: 'BuildiOSAppCenterApp'
-  dependsOn:
-    - 'PreBuildCheck'
   pool:
       name: Azure Pipelines
       vmImage: macos-10.15
@@ -44,8 +26,6 @@ jobs: #Build and stage projects
 
   # BUILD ANDROID APPCENTER APP PHASE
 - job: 'BuildAndroidAppCenterApp'
-  dependsOn:
-    - 'PreBuildCheck'
   pool:
       vmImage: 'windows-latest'
       demands:
@@ -59,8 +39,6 @@ jobs: #Build and stage projects
 
 # BUILD AND RUN CACHE COMPAT TESTS
 - job: 'BuildAndRunCacheCompatTests'
-  dependsOn:
-    - 'PreBuildCheck'
   pool:
       vmImage: 'windows-latest'
       demands:
