@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                if (_scopes != null)
+                if (_scopes is object)
                 {
                     return _scopes;
                 }
@@ -134,13 +134,14 @@ namespace Microsoft.Identity.Client
         /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the un-authenticated call.</returns>
-        public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri)
+        public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
             // call this endpoint and see what the header says and return that
             HttpClient httpClient = new HttpClient();
             HttpRequestMessage httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, resourceUri);
-            HttpResponseMessage httpResponseMessage = await httpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
+            HttpResponseMessage httpResponseMessage = await httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
             var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers);
             return wwwAuthParam;
         }
@@ -160,31 +161,20 @@ namespace Microsoft.Identity.Client
                 httpResponseHeaders,
                 scheme);
 
-            try
+            // read the header and checks if it contains an error with insufficient_claims value.
+            if (string.Equals(parameters.Error, "insufficient_claims", StringComparison.OrdinalIgnoreCase &&
+                parameters.Claims is object)
             {
-                // read the header and checks if it contains an error with insufficient_claims value.
-                if (null != parameters.Error && "insufficient_claims" == parameters.Error)
-                {
-                    if (null != parameters.Claims)
-                    {
-                        return parameters.Claims;
-                    }
-                }
+                return parameters.Claims;
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            return null;
         }
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values)
         {
             WwwAuthenticateParameters wwwAuthenticateParameters = new WwwAuthenticateParameters();
             wwwAuthenticateParameters.RawParameters = values;
-            string value;
 
+            string value;
             if (values.TryGetValue("authorization_uri", out value))
             {
                 wwwAuthenticateParameters.Authority = value.Replace("/oauth2/authorize", string.Empty);
@@ -325,7 +315,7 @@ namespace Microsoft.Identity.Client
                 var decoded = Encoding.UTF8.GetString(decodedBase64Bytes);
                 return decoded;
             }
-            catch (Exception)
+            catch
             {
                 return inputString;
             }
