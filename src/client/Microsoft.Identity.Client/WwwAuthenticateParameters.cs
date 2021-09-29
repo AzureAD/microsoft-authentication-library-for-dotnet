@@ -134,13 +134,26 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
         /// </summary>
+        /// <param name="httpClientFactory">Factory to produce an instance of <see cref="HttpClient"/> to make the request with.</param>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the un-authenticated call.</returns>
-        public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
+        public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(IMsalHttpClientFactory httpClientFactory, string resourceUri, CancellationToken cancellationToken = default)
+        {
+            var httpClient = httpClientFactory.GetHttpClient();
+            return CreateFromResourceResponseAsync(httpClient, resourceUri, cancellationToken);
+        }
+
+        /// <summary>
+        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
+        /// </summary>
+        /// <param name="httpClient">Instance of <see cref="HttpClient"/> to make the request with.</param>
+        /// <param name="resourceUri">URI of the resource.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>WWW-Authenticate Parameters extracted from response to the un-authenticated call.</returns>
+        public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
         {
             // call this endpoint and see what the header says and return that
-            HttpClient httpClient = new HttpClient();
             HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);
             var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers);
             return wwwAuthParam;
