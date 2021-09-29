@@ -38,8 +38,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             Assert.IsNull(authParams.Error);
         }
 
-        [DataRow("management.azure.com", "a645d3be-5a4a-40ef-82a1-d5f5358a424c", "login.windows.net", "72f988bf-86f1-41af-91ab-2d7cd011db47")]
-        [DataRow("api-dogfood.resources.windows-int.net", "5d04a672-05ce-492b-958f-d225b6a67926", "login.windows-ppe.net", "f686d426-8d16-42db-81b7-ab578e110ccd")]
+        [DataRow("management.azure.com", "c1686c51-b717-4fe0-9af3-24a20a41fb0c", "login.windows.net", "72f988bf-86f1-41af-91ab-2d7cd011db47")]
+        [DataRow("api-dogfood.resources.windows-int.net", "1835ad3d-4585-4c5f-b55a-b0c3cbda1103", "login.windows-ppe.net", "f686d426-8d16-42db-81b7-ab578e110ccd")]
         [DataTestMethod]
         public async Task CreateWwwAuthenticateResponseFromAzureResourceManagerUrlAsync(string hostName, string subscriptionId, string authority, string tenantId)
         {
