@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client
 {
@@ -139,8 +140,8 @@ namespace Microsoft.Identity.Client
         /// <returns>WWW-Authenticate Parameters extracted from response to the un-authenticated call.</returns>
         public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
-            var httpClient = new HttpClient();
-            return CreateFromResourceResponseAsync(httpClient, resourceUri, cancellationToken);
+            var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
+            return CreateFromResourceResponseAsync(httpClientFactory, resourceUri, cancellationToken);
         }
 
         /// <summary>
