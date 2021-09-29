@@ -134,6 +134,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new iOSBroker(Logger, CryptographyManager, uiParent);
         }
 
+        public override bool CanBrokerSupportSilentAuth()
+        {
+            return false;
+        }
+
         public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
         {
             return new IosHttpClientFactory();
