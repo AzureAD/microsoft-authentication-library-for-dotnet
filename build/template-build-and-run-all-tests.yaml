@@ -13,6 +13,30 @@ jobs: #Build and stage projects
   # Bootstrap the build
   - template: template-build-and-prep-automation.yaml
 
+  # BUILD IOS APPCENTER APP PHASE
+- job: 'BuildiOSAppCenterApp'
+  pool:
+      name: Azure Pipelines
+      vmImage: macos-10.15
+  variables:
+      runCodesignValidationInjection: false
+
+  steps:
+  - template: template-build-ios-automation.yaml
+
+  # BUILD ANDROID APPCENTER APP PHASE
+- job: 'BuildAndroidAppCenterApp'
+  pool:
+      vmImage: 'windows-latest'
+      demands:
+      - msbuild
+      - visualstudio
+  variables:
+      runCodesignValidationInjection: false
+
+  steps:
+  - template: template-build-android-automation.yaml
+
 # BUILD AND RUN CACHE COMPAT TESTS
 - job: 'BuildAndRunCacheCompatTests'
   pool:
@@ -44,6 +68,36 @@ jobs: #Build and stage projects
 
   steps:
   - template: template-desktop-unit-and-automation.yaml
+
+# APP CENTER ANDROID MSAL TESTS PHASE
+- job: 'RunAppCenterAndroidMsalTests'
+  dependsOn: 
+  - 'BuildAndStageProjects'
+  - 'BuildAndroidAppCenterApp'
+  pool:
+    vmImage: 'windows-latest'
+  variables:
+    runCodesignValidationInjection: false
+
+  steps:
+  - template: template-android-appcenter-tests.yaml
+    parameters:
+      DataFileDirectory: ${{ parameters.DataFileDirectory }}
+
+# APP CENTER IOS MSAL TESTS PHASE
+- job: 'RunAppCenterIosMsalTests'
+  dependsOn:
+  - 'BuildAndStageProjects'
+  - 'BuildiOSAppCenterApp'
+  pool:
+    vmImage: 'windows-latest'
+  variables:
+    runCodesignValidationInjection: false
+
+  steps:
+  - template: template-ios-appcenter-tests.yaml
+    parameters:
+      DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
   #This task will initiate PKey Authentication tests on a dedicated virtual machine that has been preconfigured to allow device Authentication
   #using a dedicated lab account ("idlabca@msidlab8.com"). This machine is part of the "DevEx Win8 Automation" agent pool.
