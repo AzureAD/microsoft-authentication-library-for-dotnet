@@ -1,3 +1,8 @@
+4.36.2
+==========
+### Bug fix
+Authentication with the broker no longer works on iOS (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2897)
+
 4.36.1
 ==========
 ### New Features:
