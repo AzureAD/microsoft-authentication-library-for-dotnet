@@ -141,8 +141,7 @@ namespace Microsoft.Identity.Client
         {
             // call this endpoint and see what the header says and return that
             HttpClient httpClient = new HttpClient();
-            HttpRequestMessage httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, resourceUri);
-            HttpResponseMessage httpResponseMessage = await httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
+            HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);
             var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers);
             return wwwAuthParam;
         }
