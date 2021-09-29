@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Json;
 using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -275,7 +276,22 @@ namespace Microsoft.Identity.Client.OAuth2
                 return null;
             }
 
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+            MsalTokenResponse msalTokenResponse = null;
+
+            try
+            {
+                msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+            }
+            catch (JsonException)
+            {
+                //Throttled responses for client credential flows do not have a parsable response.
+                if ((int)response.StatusCode == 429)
+                {
+                    return MsalServiceExceptionFactory.FromThrottledAuthenticationResponse(response);
+                }
+
+                throw;
+            }
 
             if (msalTokenResponse?.Error == null)
             {

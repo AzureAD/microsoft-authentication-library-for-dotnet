@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -50,10 +51,7 @@ namespace Microsoft.Identity.Client
                 ex = new MsalServiceException(errorCode, errorMessage, innerException);
             }
 
-
-            ex.ResponseBody = httpResponse?.Body;
-            ex.StatusCode = httpResponse != null ? (int)httpResponse.StatusCode : 0;
-            ex.Headers = httpResponse?.Headers;
+            SetHttpExceptionData(ex, httpResponse);
 
             ex.Claims = oAuth2Response?.Claims;
             ex.CorrelationId = oAuth2Response?.CorrelationId;
@@ -94,12 +92,7 @@ namespace Microsoft.Identity.Client
                 ex = new MsalServiceException(errorCode, errorMessage);
             }
 
-            if (brokerHttpResponse != null)
-            {
-                ex.ResponseBody = brokerHttpResponse.Body;
-                ex.StatusCode = (int)brokerHttpResponse.StatusCode;
-                ex.Headers = brokerHttpResponse.Headers;
-            }
+            SetHttpExceptionData(ex, brokerHttpResponse);
 
             ex.CorrelationId = correlationId;
             ex.SubError = subErrorCode;
@@ -115,11 +108,23 @@ namespace Microsoft.Identity.Client
         {
             MsalServiceException ex = new MsalServiceException(errorCode, errorMessage, innerException);
 
+            SetHttpExceptionData(ex, httpResponse);
+
+            return ex;
+        }
+
+        internal static MsalThrottledServiceException FromThrottledAuthenticationResponse(HttpResponse httpResponse)
+        {
+            MsalServiceException ex = new MsalServiceException(MsalError.RequestThrottled, MsalErrorMessage.AadThrottledError);
+            SetHttpExceptionData(ex, httpResponse);
+            return new MsalThrottledServiceException(ex);
+        }
+
+        private static void SetHttpExceptionData(MsalServiceException ex, HttpResponse httpResponse)
+        {
             ex.ResponseBody = httpResponse?.Body;
             ex.StatusCode = httpResponse != null ? (int)httpResponse.StatusCode : 0;
             ex.Headers = httpResponse?.Headers;
-
-            return ex;
         }
 
         private static bool IsInteractionRequired(string errorCode)

@@ -120,6 +120,12 @@ namespace Microsoft.Identity.Client
         public const string RequestTimeout = "request_timeout";
 
         /// <summary>
+        /// Service returned HTTP error code 429 which indicates the request has been throttled.
+        /// For more details see https://aka.ms/msal-net-throttling
+        /// </summary>
+        public const string RequestThrottled = "request_throttled";
+
+        /// <summary>
         /// loginHint should be a UPN
         /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="T:IPublicClientApplication"/> which
         /// takes a <c>loginHint</c> as a parameters, but this login hint was not using the UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c>
