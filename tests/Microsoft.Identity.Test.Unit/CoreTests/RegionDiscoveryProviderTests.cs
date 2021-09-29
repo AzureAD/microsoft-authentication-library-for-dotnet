@@ -179,7 +179,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [DataTestMethod]
-        [DataRow("Region with spaces")]
         [DataRow("invalid`region")]
         public async Task InvalidRegionEnvVariableAsync(string region)
         {
