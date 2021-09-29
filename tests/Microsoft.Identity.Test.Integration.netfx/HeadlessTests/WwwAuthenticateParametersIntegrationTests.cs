@@ -38,17 +38,26 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             Assert.IsNull(authParams.Error);
         }
 
+        /// <summary>
+        /// Makes unauthorized call to Azure Resource Manager REST API https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/get.
+        /// Expects response 401 Unauthorized. Analyzes the WWW-Authenticate header values.
+        /// </summary>
+        /// <param name="hostName">ARM endpoint, e.g. Production or Dogfood</param>
+        /// <param name="subscriptionId">Well-known subscription ID</param>
+        /// <param name="authority">AAD endpoint, e.g. Production or PPE</param>
+        /// <param name="tenantId">Expected Tenant ID</param>
         [DataRow("management.azure.com", "c1686c51-b717-4fe0-9af3-24a20a41fb0c", "login.windows.net", "72f988bf-86f1-41af-91ab-2d7cd011db47")]
         [DataRow("api-dogfood.resources.windows-int.net", "1835ad3d-4585-4c5f-b55a-b0c3cbda1103", "login.windows-ppe.net", "f686d426-8d16-42db-81b7-ab578e110ccd")]
         [DataTestMethod]
         public async Task CreateWwwAuthenticateResponseFromAzureResourceManagerUrlAsync(string hostName, string subscriptionId, string authority, string tenantId)
         {
-            const string apiVersion = "2020-08-01";
+            const string apiVersion = "2020-08-01"; // current latest API version for /subscriptions/get
             var url = $"https://{hostName}/subscriptions/{subscriptionId}?api-version={apiVersion}";
+
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(url).ConfigureAwait(false);
 
             Assert.IsNull(authParams.Resource);
-            Assert.AreEqual($"https://{authority}/{tenantId}", authParams.Authority);
+            Assert.AreEqual($"https://{authority}/{tenantId}", authParams.Authority); // authority consists of AAD endpoint and tenant ID
             Assert.IsNull(authParams.Scopes);
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
