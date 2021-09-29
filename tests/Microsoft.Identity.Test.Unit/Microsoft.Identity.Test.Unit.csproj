@@ -4,7 +4,7 @@
     <TargetFrameworkNetDesktop461>net472</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
     <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>
-      
+
     <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet5Win)</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

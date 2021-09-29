@@ -5,8 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -138,6 +141,27 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
+        }
+
+        [TestMethod]
+        public async Task CreateFromResourceResponseAsync_HttpClientFactoryAsync()
+        {
+            const string resourceUri = "https://example.com/";
+
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedUrl = resourceUri,
+                ResponseMessage = new HttpResponseMessage()
+            };
+            var httpClient = new HttpClient(handler);
+
+            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
+            httpClientFactory.GetHttpClient().Returns(httpClient);
+
+            var _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
+
+            httpClientFactory.Received().GetHttpClient();
         }
 
         [TestMethod]
