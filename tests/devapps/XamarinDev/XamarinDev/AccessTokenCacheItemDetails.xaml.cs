@@ -32,7 +32,9 @@ namespace XamarinDev
             expiresOnLabel.Text = msalAccessTokenCacheItem.ExpiresOn.ToString(CultureInfo.InvariantCulture);
             scopesLabel.Text = msalAccessTokenCacheItem.ScopeSet.AsSingleString();
 
-            cachedAtLabel.Text = msalAccessTokenCacheItem.CachedAt.ToString();
+            cachedAtLabel.Text = CoreHelpers
+                .UnixTimestampStringToDateTime(msalAccessTokenCacheItem.CachedAt)
+                .ToString(CultureInfo.InvariantCulture);
 
             rawClientInfoLabel.Text = msalAccessTokenCacheItem.RawClientInfo;
 
