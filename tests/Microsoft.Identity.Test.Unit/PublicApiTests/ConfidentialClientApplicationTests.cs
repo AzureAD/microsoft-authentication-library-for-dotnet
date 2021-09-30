@@ -1295,8 +1295,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 InMemoryTokenCache cache = new InMemoryTokenCache();
                 cache.Bind(app.AppTokenCache);
 
-                int afterAccessCount = 1;
-                app.AppTokenCache.SetAfterAccess((args) =>
+                var cacheRecorder = app.AppTokenCache.RecordAccess();
+
+                (app.AppTokenCache as TokenCache).AfterAccess += (args) =>
                 {
                     if (args.HasStateChanged == true)
                     {
@@ -1306,7 +1307,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         var maxAtExpiration = allAts.Max(at => at.ExpiresOn);
                         Assert.AreEqual(maxAtExpiration, args.SuggestedCacheExpiry);
 
-                        switch (afterAccessCount)
+                        switch (cacheRecorder.AfterAccessWriteCount)
                         {
                             case 1:
                             case 2:
@@ -1326,31 +1327,33 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                 break;
                         }
                     }
-                });
+                };
 
+                // Add first token into the cache
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(expiresIn: "3600");
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                var result = await app.AcquireTokenForClient(new string[] { "scope1" }.ToArray())
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 CoreAssert.IsWithinRange(
                             DateTimeOffset.UtcNow + TimeSpan.FromSeconds(3600),
                             result.ExpiresOn,
-                            TimeSpan.FromSeconds(5));
+                            TimeSpan.FromSeconds(5));              
 
+                // Add second token with shorter expiration time
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(expiresIn: "1800");
-                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                    .ExecuteAsync()
-                                    .ConfigureAwait(false);
+                result = await app.AcquireTokenForClient(new string[] { "scope2" }.ToArray())
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
                 CoreAssert.IsWithinRange(
                           DateTimeOffset.UtcNow + TimeSpan.FromSeconds(1800),
                           result.ExpiresOn,
                           TimeSpan.FromSeconds(5));
 
-
+                // Add third token with the largest expiration time
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(expiresIn: "7200");
-                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                result = await app.AcquireTokenForClient(new string[] { "scope3" }.ToArray())
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

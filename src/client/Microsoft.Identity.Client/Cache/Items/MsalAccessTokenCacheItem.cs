@@ -25,8 +25,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             : this(
                 scopes: response.Scope, // token providers send pre-sorted (alphabetically) scopes
                 cachedAt: DateTimeOffset.UtcNow,
-                expiresOn: FromDuration(response.ExpiresIn),
-                extendedExpiresOn: FromDuration(response.ExtendedExpiresIn),
+                expiresOn: DateTimeOffsetFromDuration(response.ExpiresIn),
+                extendedExpiresOn: DateTimeOffsetFromDuration(response.ExtendedExpiresIn),
                 refreshOn: DateTimeOffsetFromDuration(response.RefreshIn),
                 tenantId: tenantId,
                 keyId: keyId,
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// <summary>
         /// Creates a new object with a different expires on
         /// </summary>
-        internal MsalAccessTokenCacheItem WithExpiresOn( DateTimeOffset expiresOn)
+        internal MsalAccessTokenCacheItem WithExpiresOn(DateTimeOffset expiresOn)
         {
             MsalAccessTokenCacheItem newAtItem = new MsalAccessTokenCacheItem(
                Environment,
@@ -118,12 +118,12 @@ namespace Microsoft.Identity.Client.Cache.Items
         private static DateTimeOffset? DateTimeOffsetFromDuration(long? duration)
         {
             if (duration.HasValue)
-                return FromDuration(duration.Value);
+                return DateTimeOffsetFromDuration(duration.Value);
 
             return null;
         }
 
-        private static DateTimeOffset FromDuration(long duration)
+        private static DateTimeOffset DateTimeOffsetFromDuration(long duration)
         {
             return DateTime.UtcNow + TimeSpan.FromSeconds(duration);
         }
@@ -152,10 +152,6 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal DateTimeOffset ExtendedExpiresOn { get; private set; }
 
-        /// <summary>
-        /// RefreshOn has a jitter time added to it that can be between + or - <see cref="Constants.DefaultJitterRangeInSeconds"/>.
-        /// Please take this into consideration when testing.
-        /// </summary>
         internal DateTimeOffset? RefreshOn { get; private set; }
 
         internal DateTimeOffset CachedAt { get; private set; }
@@ -255,7 +251,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             return new MsalIdTokenCacheKey(Environment, TenantId, HomeAccountId, ClientId);
         }
 
-       
+
 
         internal bool IsExpiredWithBuffer()
         {

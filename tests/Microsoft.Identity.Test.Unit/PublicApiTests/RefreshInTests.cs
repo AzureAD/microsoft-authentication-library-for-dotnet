@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = SetupPca(harness);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor);
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
@@ -93,7 +93,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [Description("AT in cache, needs refresh. AAD is unavailable when refreshing.")]
-        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2918
         public async Task ATS_NonExpired_NeedsRefresh_AADUnavailableResponse_Async()
         {
             // Arrange
@@ -103,7 +102,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = SetupPca(harness);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor);
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with a 500 error");
@@ -164,7 +163,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = SetupPca(harness, LocalLogCallback);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor);
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
 
@@ -203,7 +202,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = SetupPca(harness);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed, but is also expired");
-                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1), true);
+                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, expired: true);
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to be unavailable");
@@ -239,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app = SetupCca(harness);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
 
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
@@ -272,7 +271,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app = SetupCca(harness);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor);
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
@@ -319,10 +318,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
 
-                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
 
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
-
 
                 Trace.WriteLine("3. Configure AAD to respond with an error");
                 harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
@@ -363,7 +361,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
 
-                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
 
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
@@ -398,7 +396,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 Trace.WriteLine("1. Setup an app with a token cache with one AT = expired and needs refresh");
                 ConfidentialClientApplication app = SetupCca(harness);
-                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1), true);
+                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, expired: true);
 
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
@@ -423,32 +421,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
             ITokenCacheAccessor accessor,
-            DateTimeOffset refreshOn,
+            DateTimeOffset? refreshOn = null,
             bool expired = false)
         {
             MsalAccessTokenCacheItem atItem = accessor.GetAllAccessTokens().Single();
 
-            atItem = UpdateATWithRefreshOn(atItem, refreshOn, expired);
-
-            accessor.SaveAccessToken(atItem);
-
-            return atItem;
-        }
-
-        private static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
-            MsalAccessTokenCacheItem atItem,
-            DateTimeOffset refreshOn,
-            bool expired = false)
-        {
-            // past date on refresh on
-            
+            refreshOn = refreshOn ?? DateTimeOffset.UtcNow - TimeSpan.FromMinutes(30);
             atItem = atItem.WithRefreshOn(refreshOn);
+
             Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
 
             if (expired)
             {
                 atItem = atItem.WithExpiresOn(DateTime.UtcNow - TimeSpan.FromMinutes(1));
             }
+
+            accessor.SaveAccessToken(atItem);
 
             return atItem;
         }
