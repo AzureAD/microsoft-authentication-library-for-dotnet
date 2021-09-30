@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual bool HasAccessOrRefreshTokens()
         {
-            return AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpired()));
+            return AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
         }
     }
 }

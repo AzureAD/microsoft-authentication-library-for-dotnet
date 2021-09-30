@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Utils
 {
+
     internal static class CoreHelpers
     {
         internal static string ByteArrayToString(byte[] input)
@@ -20,75 +21,6 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             return Encoding.UTF8.GetString(input, 0, input.Length);
-        }
-
-        public static DateTime UnixTimestampToDateTime(double unixTimestamp)
-        {
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            dateTime = dateTime.AddSeconds(unixTimestamp).ToUniversalTime();
-            return dateTime;
-        }
-
-        public static DateTime UnixTimestampStringToDateTime(string str)
-        {
-            return UnixTimestampToDateTime(Convert.ToInt64(str, CultureInfo.InvariantCulture));
-        }
-
-        public static string DateTimeToUnixTimestamp(DateTimeOffset dateTimeOffset)
-        {
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            long unixTimestamp = (long)dateTimeOffset.Subtract(dateTime).TotalSeconds;
-            return unixTimestamp.ToString(CultureInfo.InvariantCulture);
-        }
-
-        public static long CurrDateTimeInUnixTimestamp()
-        {
-            var unixEpochDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            long unixTimestamp = (long)DateTime.UtcNow.Subtract(unixEpochDateTime).TotalSeconds;
-            return unixTimestamp;
-        }
-
-        public static long DateTimeToUnixTimestampMilliseconds(DateTimeOffset dateTimeOffset)
-        {
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            long unixTimestamp = (long)dateTimeOffset.Subtract(dateTime).TotalMilliseconds;
-            return unixTimestamp;
-        }
-
-        public static long GetDurationFromWindowsTimestamp(string windowsTimestampInFuture, ICoreLogger logger)
-        {
-            if (string.IsNullOrEmpty(windowsTimestampInFuture))
-            {
-                return 0;
-            }
-
-            if (!ulong.TryParse(windowsTimestampInFuture, out ulong winTimestamp) || 
-                winTimestamp <= 11644473600 ||
-                winTimestamp == ulong.MaxValue)
-            {
-                logger.Warning("Invalid Universal time " + windowsTimestampInFuture);
-                return 0;
-            }
-
-            ulong unixTimestamp = winTimestamp - 11644473600;
-
-            return (long)unixTimestamp - CurrDateTimeInUnixTimestamp();
-        }
-
-        public static long GetDurationFromNowInSeconds(string unixTimestampInFuture)
-        {
-            if (string.IsNullOrEmpty(unixTimestampInFuture))
-            {
-                return 0;
-            }
-
-            long expiresOnUnixTimestamp = long.Parse(unixTimestampInFuture, CultureInfo.InvariantCulture);
-            return expiresOnUnixTimestamp - CurrDateTimeInUnixTimestamp();
-        }
-
-        public static string CreateString(byte[] bytes)
-        {
-            return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
         }
 
         public static string UrlEncode(string message)

@@ -32,18 +32,16 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             Assert.AreEqual(val1, val3, "First and third values differ");
         }
 
-        public static void AreEqual(DateTimeOffset expected, DateTimeOffset actual, TimeSpan delta)
+        public static void AreWithinOneSecond(DateTimeOffset expected, DateTimeOffset actual, string message = "")
         {
-            TimeSpan t = expected - actual;
-            Assert.IsTrue(t < delta, 
-                $"The dates are off by {t.TotalMilliseconds}ms, which is more than the expected {delta.TotalMilliseconds}ms");
+            IsWithinRange(expected, actual, TimeSpan.FromSeconds(1), message);
         }
 
-        public static void IsWithinRange(DateTimeOffset expected, DateTimeOffset actual, TimeSpan range)
+        public static void IsWithinRange(DateTimeOffset expected, DateTimeOffset actual, TimeSpan range, string message = "")
         {
             TimeSpan t = expected - actual;
             Assert.IsTrue(t >= -range && t <= range,
-                $"The dates are off by {t.TotalMilliseconds}ms, which is more than the expected {range.TotalMilliseconds}ms");
+                $"{message} The dates are off by {t.TotalMilliseconds}ms, which is more than the expected {range.TotalMilliseconds}ms");
         }
 
         public static void AssertDictionariesAreEqual<TKey, TValue>(

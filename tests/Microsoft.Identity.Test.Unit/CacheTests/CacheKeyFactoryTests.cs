@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(idt.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(idt));
             Assert.AreEqual(acc.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(acc));
 
-            at.UserAssertionHash = "at_hash";
+            at = at.WithUserAssertion("at_hash");            
             rt.UserAssertionHash = "rt_hash";
             Assert.AreEqual("at_hash", CacheKeyFactory.GetKeyFromCachedItem(at));
             Assert.AreEqual("rt_hash", CacheKeyFactory.GetKeyFromCachedItem(rt));

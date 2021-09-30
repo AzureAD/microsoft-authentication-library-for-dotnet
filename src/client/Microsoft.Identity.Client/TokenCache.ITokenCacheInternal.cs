@@ -70,11 +70,8 @@ namespace Microsoft.Identity.Client
                         response,
                         tenantId,
                         homeAccountId,
-                        requestParams.AuthenticationScheme.KeyId)
-                    {
-                        UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
-                        IsAdfs = isAdfsAuthority
-                    };
+                        requestParams.AuthenticationScheme.KeyId,
+                        requestParams.UserAssertion?.AssertionHash);
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
@@ -317,8 +314,8 @@ namespace Microsoft.Identity.Client
         private DateTimeOffset CalculateSuggestedCacheExpiry()
         {
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
-            var unixCacheExpiry = tokenCacheItems.Max(item => item.ExpiresOnUnixTimestamp);
-            return (DateTimeOffset)CoreHelpers.UnixTimestampStringToDateTime(unixCacheExpiry);
+            DateTimeOffset cacheExpiry = tokenCacheItems.Max(item => item.ExpiresOn);
+            return cacheExpiry;
         }
 
         private string GetTenantId(IdToken idToken, AuthenticationRequestParameters requestParams)
@@ -682,6 +679,37 @@ namespace Microsoft.Identity.Client
         }
         #endregion
 
+        /// <summary>
+        /// For testing purposes only. Expires ALL access tokens in memory and fires OnAfterAccessAsync event with no cache key
+        /// </summary>
+        internal async Task ExpireAllAccessTokensForTestAsync()
+        {
+            IReadOnlyList<MsalAccessTokenCacheItem> allAccessTokens;
+            ITokenCacheInternal tokenCacheInternal = this;
+            var accessor = tokenCacheInternal.Accessor;
+
+            allAccessTokens = accessor.GetAllAccessTokens();
+            foreach (MsalAccessTokenCacheItem atItem in allAccessTokens)
+            {
+                accessor.SaveAccessToken(atItem.WithExpiresOn(DateTimeOffset.UtcNow));
+            }
+               
+            if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
+            {
+                var args = new TokenCacheNotificationArgs(
+                this,
+                ClientId,
+                null,
+                hasStateChanged: true,
+                tokenCacheInternal.IsApplicationCache,
+                tokenCacheInternal.HasTokensNoLocks(),
+                default,
+                suggestedCacheKey: null,
+                suggestedCacheExpiry: null); 
+             
+                await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+            }
+        }
 
         async Task<MsalRefreshTokenCacheItem> ITokenCacheInternal.FindRefreshTokenAsync(
             AuthenticationRequestParameters requestParams,

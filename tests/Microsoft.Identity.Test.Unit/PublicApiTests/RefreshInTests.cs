@@ -427,27 +427,29 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             MsalAccessTokenCacheItem atItem = accessor.GetAllAccessTokens().Single();
 
-            UpdateATWithRefreshOn(atItem, refreshOn, expired);
+            atItem = UpdateATWithRefreshOn(atItem, refreshOn, expired);
 
             accessor.SaveAccessToken(atItem);
 
             return atItem;
         }
 
-        private static void UpdateATWithRefreshOn(
+        private static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
             MsalAccessTokenCacheItem atItem,
             DateTimeOffset refreshOn,
             bool expired = false)
         {
             // past date on refresh on
-            atItem.RefreshOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(refreshOn);
-
+            
+            atItem = atItem.WithRefreshOn(refreshOn);
             Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
 
             if (expired)
             {
-                atItem.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                atItem = atItem.WithExpiresOn(DateTime.UtcNow - TimeSpan.FromMinutes(1));
             }
+
+            return atItem;
         }
 
         private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)

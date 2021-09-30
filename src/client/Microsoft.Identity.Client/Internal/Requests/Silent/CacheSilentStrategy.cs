@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 else
                 {
                     cacheInfoTelemetry = CacheInfoTelemetry.NoCachedAT;
-                } 
+                }
             }
             else
             {
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }
 
-            // No AT or AT.RefreshOn > Now --> refresh the RT
+            // No AT or AT neesd to be refreshed 
             try
             {
                 if (cachedAccessTokenItem == null)
@@ -81,10 +81,9 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     return await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
                 }
 
-                if(cachedAccessTokenItem.NeedsRefresh())
-                {
-                    SilentRequestHelper.ProcessFetchInBackgroundAsync(() => RefreshRtOrFailAsync(cancellationToken), logger);
-                }
+                SilentRequestHelper.ProcessFetchInBackgroundAsync(
+                    cachedAccessTokenItem , 
+                    () => RefreshRtOrFailAsync(cancellationToken), logger);
 
                 return authResult;
             }
@@ -248,6 +247,6 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
 
             return msalRefreshTokenItem;
-        }      
+        }
     }
 }

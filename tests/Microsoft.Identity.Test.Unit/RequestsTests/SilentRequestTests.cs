@@ -71,15 +71,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Account = new Account(TestConstants.HomeAccountId, TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment),
                 };
 
-                // set access tokens as expired
-                foreach (var accessItem in harness.Cache.Accessor.GetAllAccessTokens())
-                {
-                    accessItem.ExpiresOnUnixTimestamp =
-                        ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
-                        .ToString(CultureInfo.InvariantCulture);
-
-                    harness.Cache.AddAccessTokenCacheItem(accessItem);
-                }
+                TokenCacheHelper.ExpireAllAccessTokens(harness.Cache);
 
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 

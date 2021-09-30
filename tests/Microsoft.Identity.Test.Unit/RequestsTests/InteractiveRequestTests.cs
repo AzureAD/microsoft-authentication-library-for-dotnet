@@ -129,6 +129,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
+                    new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)),
                     clientInfo, 

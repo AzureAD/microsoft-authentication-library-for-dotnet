@@ -593,13 +593,13 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             MsalAccessTokenCacheItem atItem = accessor.GetAllAccessTokens().Single();
 
             // past date on refresh on
-            atItem.RefreshOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(refreshOn);
+            atItem = atItem.WithRefreshOn(refreshOn);
 
             Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
 
             if (expired)
             {
-                atItem.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                atItem = atItem.WithExpiresOn(DateTime.UtcNow - TimeSpan.FromMinutes(1));
             }
 
             accessor.SaveAccessToken(atItem);
