@@ -93,6 +93,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [Description("AT in cache, needs refresh. AAD is unavailable when refreshing.")]
+        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2918
         public async Task ATS_NonExpired_NeedsRefresh_AADUnavailableResponse_Async()
         {
             // Arrange
