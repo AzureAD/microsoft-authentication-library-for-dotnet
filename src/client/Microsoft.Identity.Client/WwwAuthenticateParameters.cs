@@ -153,6 +153,11 @@ namespace Microsoft.Identity.Client
         /// <returns>WWW-Authenticate Parameters extracted from response to the un-authenticated call.</returns>
         public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(IMsalHttpClientFactory httpClientFactory, string resourceUri, CancellationToken cancellationToken = default)
         {
+            if (httpClientFactory is null)
+            {
+                throw new ArgumentException($"'{nameof(httpClientFactory)}' cannot be null.", nameof(httpClientFactory));
+            }
+
             var httpClient = httpClientFactory.GetHttpClient();
             return CreateFromResourceResponseAsync(httpClient, resourceUri, cancellationToken);
         }
@@ -166,6 +171,15 @@ namespace Microsoft.Identity.Client
         /// <returns>WWW-Authenticate Parameters extracted from response to the un-authenticated call.</returns>
         public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
         {
+            if (httpClient is null)
+            {
+                throw new ArgumentException($"'{nameof(httpClient)}' cannot be null.", nameof(httpClient));
+            }
+            if (string.IsNullOrWhiteSpace(resourceUri))
+            {
+                throw new ArgumentException($"'{nameof(resourceUri)}' cannot be null or whitespace.", nameof(resourceUri));
+            }
+
             // call this endpoint and see what the header says and return that
             HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);
             var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers);
