@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit
             var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
             httpClientFactory.GetHttpClient().Returns(httpClient);
 
-            var _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
+            _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
 
             httpClientFactory.Received().GetHttpClient();
         }
