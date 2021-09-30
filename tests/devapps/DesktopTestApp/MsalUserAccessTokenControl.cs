@@ -25,8 +25,7 @@ namespace DesktopTestApp
         internal MsalUserAccessTokenControl(ITokenCacheInternal cache, MsalAccessTokenCacheItem item) : this()
         {
             _cache = cache;
-            _item = item;
-            accessTokenAuthorityLabel.Text = _item.Authority;
+            _item = item;            
             accessTokenScopesLabel.Text = string.Join(" ", _item.ScopeSet.ToArray());
             expiresOnLabel.Text = _item.ExpiresOn.ToString(CultureInfo.CurrentCulture);
         }
