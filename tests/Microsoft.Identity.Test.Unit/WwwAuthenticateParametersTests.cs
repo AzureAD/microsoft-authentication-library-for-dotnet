@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -16,6 +18,7 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public class WwwAuthenticateParametersTests
     {
+        private const string WwwAuthenticateHeaderName = "WWW-Authenticate";
         private const string ClientIdKey = "client_id";
         private const string ResourceIdKey = "resource_id";
         private const string ResourceKey = "resource";
@@ -43,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             // Arrange
             HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", {resource}, {authorizationUri}");
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer realm=\"\", {resource}, {authorizationUri}");
 
             // Act
             var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
@@ -70,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit
         public void CreateRawParameters(string resourceHeaderKey, string authorizationUriHeaderKey)
         {
             // Arrange
-            HttpResponseMessage httpResponse = CreateHttpResponseHeaders(resourceHeaderKey, authorizationUriHeaderKey);
+            HttpResponseMessage httpResponse = CreateGraphHttpResponse(resourceHeaderKey, authorizationUriHeaderKey);
 
             // Act
             var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
@@ -127,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             // Arrange
             HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", {clientId}, {authorizationUri}");
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer realm=\"\", {clientId}, {authorizationUri}");
 
             var wwwAuthenticateResponse = httpResponse.Headers.WwwAuthenticate.First().Parameter;
 
@@ -143,8 +146,19 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNull(authParams.Error);
         }
 
+        [DataRow(null)]
         [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactoryAsync()
+        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Null_Async(IMsalHttpClientFactory httpClientFactory)
+        {
+            const string resourceUri = "https://example.com/";
+
+            Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri);
+
+            await Assert.ThrowsExceptionAsync<ArgumentException>(action).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Async()
         {
             const string resourceUri = "https://example.com/";
 
@@ -152,7 +166,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 ExpectedMethod = HttpMethod.Get,
                 ExpectedUrl = resourceUri,
-                ResponseMessage = new HttpResponseMessage()
+                ResponseMessage = CreateInvalidTokenHttpErrorResponse()
             };
             var httpClient = new HttpClient(handler);
 
@@ -162,6 +176,63 @@ namespace Microsoft.Identity.Test.Unit
             var _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
 
             httpClientFactory.Received().GetHttpClient();
+        }
+
+        [DataRow(null)]
+        [TestMethod]
+        public async Task CreateFromResourceResponseAsync_HttpClient_Null_Async(HttpClient httpClient)
+        {
+            const string resourceUri = "https://example.com/";
+
+            Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri);
+
+            await Assert.ThrowsExceptionAsync<ArgumentException>(action).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task CreateFromResourceResponseAsync_HttpClientAsync()
+        {
+            const string resourceUri = "https://example.com/";
+
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedUrl = resourceUri,
+                ResponseMessage = CreateInvalidTokenHttpErrorResponse()
+            };
+            var httpClient = new HttpClient(handler);
+
+            var _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task CreateFromResourceResponseAsync_HttpClient_CancellationToken_Async()
+        {
+            const string resourceUri = "https://example.com/";
+
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedUrl = resourceUri,
+                ResponseMessage = CreateInvalidTokenHttpErrorResponse()
+            };
+            var httpClient = Substitute.For<HttpClient>(handler);
+
+            var cts = new CancellationTokenSource();
+
+            var _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri, cts.Token).ConfigureAwait(false);
+
+            httpClient.Received();
+        }
+
+        [DataRow(null)]
+        [DataRow("")]
+        [TestMethod]
+        public async Task CreateFromResourceResponseAsync_ResourceUri_Async(string resourceUri)
+        {
+            Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
+
+            await Assert.ThrowsExceptionAsync<ArgumentException>(action).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -194,7 +265,7 @@ namespace Microsoft.Identity.Test.Unit
         public void ExtractClaimChallengeFromHeader_IncorrectError_ReturnNull()
         {
             // Arrange
-            HttpResponseMessage httpResponse = CreateErrorHttpResponse();
+            HttpResponseMessage httpResponse = CreateClaimsHttpErrorResponse();
 
             // Act & Assert
             Assert.IsNull(WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(httpResponse.Headers));
@@ -203,22 +274,41 @@ namespace Microsoft.Identity.Test.Unit
         private static HttpResponseMessage CreateClaimsHttpResponse(string claims)
         {
             HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"insufficient_claims\", claims=\"{claims}\"");
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"insufficient_claims\", claims=\"{claims}\"");
             return httpResponse;
         }
 
-        private static HttpResponseMessage CreateErrorHttpResponse()
+        private static HttpResponseMessage CreateClaimsHttpErrorResponse()
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"some_error\", claims=\"{DecodedClaimsHeader}\"");
-            return httpResponse;
+            return new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            {
+                Headers =
+                {
+                    { WwwAuthenticateHeaderName, $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"some_error\", claims=\"{DecodedClaimsHeader}\"" }
+                }
+            };
         }
 
-        private static HttpResponseMessage CreateHttpResponseHeaders(string resourceHeaderKey, string authorizationUriHeaderKey)
+        private static HttpResponseMessage CreateGraphHttpResponse(string resourceHeaderKey, string authorizationUriHeaderKey)
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            httpResponse.Headers.Add("WWW-Authenticate", $"Bearer realm=\"\", {resourceHeaderKey}=\"{GraphGuid}\", {authorizationUriHeaderKey}=\"{AuthorizationValue}\"");
-            return httpResponse;
+            return new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            {
+                Headers =
+                {
+                    { WwwAuthenticateHeaderName, $"Bearer realm=\"\", {resourceHeaderKey}=\"{GraphGuid}\", {authorizationUriHeaderKey}=\"{AuthorizationValue}\"" }
+                }
+            };
+        }
+
+        private static HttpResponseMessage CreateInvalidTokenHttpErrorResponse()
+        {
+            return new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            {
+                Headers =
+                {
+                    { WwwAuthenticateHeaderName, "Bearer authorization_uri=\"https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47\", error=\"invalid_token\", error_description=\"The authentication failed because of missing 'Authorization' header.\"" }
+                }
+            };
         }
     }
 }

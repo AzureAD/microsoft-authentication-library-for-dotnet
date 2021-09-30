@@ -213,8 +213,10 @@ namespace Microsoft.Identity.Client
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values)
         {
-            WwwAuthenticateParameters wwwAuthenticateParameters = new WwwAuthenticateParameters();
-            wwwAuthenticateParameters.RawParameters = values;
+            WwwAuthenticateParameters wwwAuthenticateParameters = new WwwAuthenticateParameters
+            {
+                RawParameters = values
+            };
 
             string value;
             if (values.TryGetValue("authorization_uri", out value))
