@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
-            CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
+            CacheInfo cacheInfoTelemetry = CacheInfo.None;
 
             AuthenticationResult authResult = null;
 
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
 
-                cacheInfoTelemetry = CacheInfoTelemetry.RefreshIn;
+                cacheInfoTelemetry = CacheInfo.RefreshIn;
             }
             else
             {
@@ -77,15 +77,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (_clientParameters.ForceRefresh)
                 {
-                    cacheInfoTelemetry = CacheInfoTelemetry.ForceRefresh;
+                    cacheInfoTelemetry = CacheInfo.ForceRefresh;
                 }
                 else
                 {
-                    cacheInfoTelemetry = CacheInfoTelemetry.NoCachedAT;
+                    cacheInfoTelemetry = CacheInfo.NoCachedAT;
                 }
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfoTelemetry.None)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfo.None)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }

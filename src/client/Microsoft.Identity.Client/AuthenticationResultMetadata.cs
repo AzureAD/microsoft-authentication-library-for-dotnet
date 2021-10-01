@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Identity.Client.Cache;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -39,5 +41,16 @@ namespace Microsoft.Identity.Client
         /// Time, in milliseconds, MSAL spent for HTTP communication during this request.
         /// </summary>
         public long DurationInHttpInMs { get; set; }
+
+        /// <summary>
+        /// Time, in milliseconds, remaining before the token will be proactively refreshed.
+        /// This value may be null.
+        /// </summary>
+        public long? RemainingTimeBeforeRefresh { get; set; } = null;
+
+        /// <summary>
+        /// Enum describing the reason for cache refresh and fetching access token from ESTS.
+        /// </summary>
+        public CacheInfo CacheInfo { get; set; }
     }
 }

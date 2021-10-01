@@ -6,7 +6,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -102,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 PublicClientApplication pca = CreatePca(harness.HttpManager);
                 await TestAcquireTokenInteractive_Async(pca, expectedTokensFromIdp: 1, expectedTokensFromCache: 0).ConfigureAwait(false);
-                await TestAcquireTokenSilent_Async(pca, expectedTokensFromIdp: 1, expectedTokensFromCache: 1).ConfigureAwait(false);
+                await TestAcquireTokenSilent_Async(pca, expectedTokensFromIdp: 1, expectedTokensFromCache: 1, 0, refreshIn: true).ConfigureAwait(false);
             }
         }
 
@@ -140,9 +142,13 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(expectedTokensFromCache, Metrics.TotalAccessTokensFromCache);
             Assert.AreEqual(expectedTokensFromBroker, Metrics.TotalAccessTokensFromBroker);
             Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+
+            DateTimeOffset actualRefreshIn = DateTimeOffset.FromUnixTimeMilliseconds(result.AuthenticationResultMetadata.RemainingTimeBeforeRefresh.Value);
+            DateTimeOffset expectedDateTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds(2400);
+            CoreAssert.IsWithinRange(expectedDateTimeOffset, actualRefreshIn, TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
         }
 
-        private async Task TestAcquireTokenSilent_Async(PublicClientApplication pca, int expectedTokensFromIdp = 0, int expectedTokensFromCache = 0, int expectedTokensFromBroker = 0)
+        private async Task TestAcquireTokenSilent_Async(PublicClientApplication pca, int expectedTokensFromIdp = 0, int expectedTokensFromCache = 0, int expectedTokensFromBroker = 0, bool refreshIn = false)
         {
             AuthenticationResult result = await pca.AcquireTokenSilent(
                 TestConstants.s_scope.ToArray(),
@@ -159,6 +165,22 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(expectedTokensFromCache, Metrics.TotalAccessTokensFromCache);
             Assert.AreEqual(expectedTokensFromBroker, Metrics.TotalAccessTokensFromBroker);
             Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+
+            if (refreshIn)
+            {
+                //Force Refresh In
+                var at = pca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
+                at.Single().RefreshOnUnixTimestamp = "0";
+
+                result = await pca.AcquireTokenSilent(
+                    TestConstants.s_scope.ToArray(),
+                    TestConstants.DisplayableId)
+                    .WithAuthority(pca.Authority, false)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheInfo == Client.Cache.CacheInfo.RefreshIn);
+            }
         }
     }
 }

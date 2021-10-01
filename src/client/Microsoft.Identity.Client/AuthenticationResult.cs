@@ -161,6 +161,11 @@ namespace Microsoft.Identity.Client
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
+
+            if (msalAccessTokenCacheItem.RefreshOn.HasValue)
+            {
+                AuthenticationResultMetadata.RemainingTimeBeforeRefresh = msalAccessTokenCacheItem.RefreshOn.Value.Millisecond - DateTimeOffset.UtcNow.Millisecond;
+            }
         }
 
         //Default constructor for testing
