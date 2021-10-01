@@ -20,19 +20,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
     public class TokenResponseTests : TestBase
     {
         [TestMethod]
-        public void ExpirationTimeTest()
-        {
-            // Need to get timestamp here since it needs to be before we create the token.
-            // ExpireOn time is calculated from UtcNow when the object is created.
-            DateTimeOffset current = DateTimeOffset.UtcNow;
-            const long ExpiresInSeconds = 3599;
-
-            var response = TestConstants.CreateMsalTokenResponse();
-
-            Assert.IsTrue(response.AccessTokenExpiresOn.Subtract(current) >= TimeSpan.FromSeconds(ExpiresInSeconds));
-        }
-
-        [TestMethod]
         public void JsonDeserializationTest()
         {
             using (var harness = CreateTestHarness())
@@ -52,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         [TestMethod]
         public void AndroidBrokerTokenResponseParseTest()
         {
-            string unixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(40));
+            string unixTimestamp = DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(40));
             string androidBrokerResponse = TestConstants.AndroidBrokerResponse.Replace("1591196764", unixTimestamp); 
             string correlationId = Guid.NewGuid().ToString();
             // Act
@@ -65,11 +52,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             Assert.AreEqual("idT", msalTokenResponse.IdToken);
             Assert.AreEqual("User.Read openid offline_access profile", msalTokenResponse.Scope);
             Assert.AreEqual("Bearer", msalTokenResponse.TokenType);
-            Assert.IsTrue(msalTokenResponse.AccessTokenExpiresOn <= DateTimeOffset.Now + TimeSpan.FromMinutes(40));
-            Assert.IsTrue(msalTokenResponse.AccessTokenExtendedExpiresOn <= DateTimeOffset.Now + TimeSpan.FromMinutes(40));
-
-            Assert.IsTrue(msalTokenResponse.AccessTokenExpiresOn > DateTimeOffset.Now );
-            Assert.IsTrue(msalTokenResponse.AccessTokenExtendedExpiresOn > DateTimeOffset.Now );
 
             Assert.IsNull(msalTokenResponse.RefreshToken);
         }       

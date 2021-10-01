@@ -227,6 +227,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
+                    DateTimeOffset.UtcNow,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)), 
                     clientInfo, 

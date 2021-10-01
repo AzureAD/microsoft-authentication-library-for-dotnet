@@ -1292,46 +1292,76 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
-                string expectedTimeDiff = "32800";
-                string shortExpectedTimeDiff = "30800";
+                InMemoryTokenCache cache = new InMemoryTokenCache();
+                cache.Bind(app.AppTokenCache);
 
-                //Since the timeDiff is calculated using the DateTimeOffset.Now, there may be a slight variation of a few seconds depending on test environment.
-                int allowedTimeVariation = 15;
+                var cacheRecorder = app.AppTokenCache.RecordAccess();
 
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, expectedTimeDiff);
-
-                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
-                app.AppTokenCache.SetAfterAccess((args) =>
+                (app.AppTokenCache as TokenCache).AfterAccess += (args) =>
                 {
                     if (args.HasStateChanged == true)
                     {
-                        Assert.IsNotNull(args.SuggestedCacheExpiry);
-                        var timeDiff = args.SuggestedCacheExpiry.Value.ToUnixTimeSeconds() - DateTimeOffset.Now.ToUnixTimeSeconds();
+                        Assert.IsTrue(args.SuggestedCacheExpiry.HasValue);
 
-                        CoreAssert.AreEqual(
-                            CoreHelpers.UnixTimestampStringToDateTime(expectedTimeDiff),
-                            CoreHelpers.UnixTimestampStringToDateTime(timeDiff.ToString()),
-                            TimeSpan.FromSeconds(allowedTimeVariation));
+                        var allAts = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
+                        var maxAtExpiration = allAts.Max(at => at.ExpiresOn);
+                        Assert.AreEqual(maxAtExpiration, args.SuggestedCacheExpiry);
+
+                        switch (cacheRecorder.AfterAccessWriteCount)
+                        {
+                            case 1:
+                            case 2:
+                                CoreAssert.IsWithinRange(
+                                 DateTimeOffset.UtcNow + TimeSpan.FromSeconds(3600),
+                                 args.SuggestedCacheExpiry.Value,
+                                 TimeSpan.FromSeconds(5));
+                                break;
+                            case 3:
+                                CoreAssert.IsWithinRange(
+                                    DateTimeOffset.UtcNow + TimeSpan.FromSeconds(7200),
+                                    args.SuggestedCacheExpiry.Value,
+                                    TimeSpan.FromSeconds(5));
+                                break;
+                            default:
+                                Assert.Fail("Not expecting more than 3 calls");
+                                break;
+                        }
                     }
-                });
+                };
 
-                //Token cache will have one token with expiry of 1000
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(TestConstants.DefaultAccessToken, result.AccessToken);
+                // Add first token into the cache
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(expiresIn: "3600");
+                var result = await app.AcquireTokenForClient(new string[] { "scope1" }.ToArray())
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
-                //Using a shorter expiry should not change the SuggestedCacheExpiry. Should be 2 tokens in cache
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, shortExpectedTimeDiff);
-                result = await app.AcquireTokenForClient(new[] { "scope1.scope1" }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(TestConstants.DefaultAccessToken, result.AccessToken);
+                CoreAssert.IsWithinRange(
+                            DateTimeOffset.UtcNow + TimeSpan.FromSeconds(3600),
+                            result.ExpiresOn,
+                            TimeSpan.FromSeconds(5));              
 
-                //Using longer cache expiry should update the SuggestedCacheExpiry with 3 tokens in cache
-                expectedTimeDiff = "40000";
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(TestConstants.DefaultAccessToken, expectedTimeDiff);
-                result = await app.AcquireTokenForClient(new[] { "scope2.scope2" }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(TestConstants.DefaultAccessToken, result.AccessToken);
+                // Add second token with shorter expiration time
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(expiresIn: "1800");
+                result = await app.AcquireTokenForClient(new string[] { "scope2" }.ToArray())
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                CoreAssert.IsWithinRange(
+                          DateTimeOffset.UtcNow + TimeSpan.FromSeconds(1800),
+                          result.ExpiresOn,
+                          TimeSpan.FromSeconds(5));
+
+                // Add third token with the largest expiration time
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(expiresIn: "7200");
+                result = await app.AcquireTokenForClient(new string[] { "scope3" }.ToArray())
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                CoreAssert.IsWithinRange(
+                            DateTimeOffset.UtcNow + TimeSpan.FromSeconds(7200),
+                            result.ExpiresOn,
+                            TimeSpan.FromSeconds(5));
+
             }
         }
 

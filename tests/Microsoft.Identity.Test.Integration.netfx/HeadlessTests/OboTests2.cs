@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
 
             //Expire access tokens
-            TokenCacheHelper.ExpireAccessTokens(confidentialApp.UserTokenCacheInternal);
+            TokenCacheHelper.ExpireAllAccessTokens(confidentialApp.UserTokenCacheInternal);
 
             //Run OBO again. Should do token refresh since the AT is expired
             authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
@@ -260,7 +260,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithHttpClientFactory(factory)
                 .BuildConcrete();
 
-            TokenCacheHelper.ExpireAndSaveAccessToken(confidentialApp2.UserTokenCacheInternal, atItems.FirstOrDefault());
+            TokenCacheHelper.ExpireAccessToken(confidentialApp2.UserTokenCacheInternal, atItems.FirstOrDefault());
 
             //Should perform OBO flow since the access token is expired and the refresh token does not exist
             authResult = await confidentialApp2.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             AssertLastHttpContent("on_behalf_of");
 
-            TokenCacheHelper.ExpireAccessTokens(confidentialApp2.UserTokenCacheInternal);
+            TokenCacheHelper.ExpireAllAccessTokens(confidentialApp2.UserTokenCacheInternal);
             TokenCacheHelper.UpdateUserAssertions(confidentialApp2);
 
             //Should perform OBO flow since the access token and the refresh token contains the wrong user assertion hash

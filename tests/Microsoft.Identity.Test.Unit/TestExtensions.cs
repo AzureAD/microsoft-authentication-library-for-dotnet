@@ -47,8 +47,8 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     var obj = token.Children().Single() as JObject;
 
-                    obj["expires_on"] = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
-                    obj["extended_expires_on"] = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
+                    obj["expires_on"] = DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
+                    obj["extended_expires_on"] = DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
                 }
 
                 content = cacheJson.ToString();

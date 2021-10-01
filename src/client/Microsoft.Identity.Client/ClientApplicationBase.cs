@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using System.Threading;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client
 {
@@ -77,6 +78,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        
         internal virtual async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,

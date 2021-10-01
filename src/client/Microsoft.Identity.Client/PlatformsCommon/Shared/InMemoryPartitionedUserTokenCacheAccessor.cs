@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual bool HasAccessOrRefreshTokens()
         {
             return RefreshTokenCacheDictionary.Any(partition => partition.Value.Count > 0) ||
-                    AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpired()));
+                    AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
         }
     }
 }

@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Client
             (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
 #endif
         }
-
+       
         private void UpdateAppMetadata(string clientId, string environment, string familyId)
         {
             if (_featureFlags.IsFociEnabled)
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
         // this should not happen but we have this as a safe guard
         // against multiple matches.
         private void DeleteAccessTokensWithIntersectingScopes(
-            AuthenticationRequestParameters requestParams,            
+            AuthenticationRequestParameters requestParams,
             IEnumerable<string> environmentAliases,
             string tenantId,
             HashSet<string> scopeSet,
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
                     string.Equals(accessToken.TokenType ?? "", tokenType ?? "", StringComparison.OrdinalIgnoreCase) &&
-                    (accessToken.IsAdfs || accessToken.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase)) &&
+                    string.Equals(accessToken.TenantId, tenantId, StringComparison.OrdinalIgnoreCase) &&
                     accessToken.ScopeSet.Overlaps(scopeSet))
                 {
                     requestParams.RequestContext.Logger.Verbose("Intersecting scopes found");

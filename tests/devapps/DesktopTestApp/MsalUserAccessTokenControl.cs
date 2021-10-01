@@ -26,7 +26,7 @@ namespace DesktopTestApp
         {
             _cache = cache;
             _item = item;
-            accessTokenAuthorityLabel.Text = _item.Authority;
+            accessTokenAuthorityLabel.Text = _item.Environment;
             accessTokenScopesLabel.Text = string.Join(" ", _item.ScopeSet.ToArray());
             expiresOnLabel.Text = _item.ExpiresOn.ToString(CultureInfo.CurrentCulture);
         }
@@ -38,9 +38,8 @@ namespace DesktopTestApp
 
         private void expireAccessTokenButton_Click(object sender, System.EventArgs e)
         {
-            expiresOnLabel.Text = DateTimeOffset.UtcNow.ToString(CultureInfo.CurrentCulture);
-            _item.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow);
-            _cache.AddAccessTokenCacheItem(_item);
+            var newItem = _item.WithExpiresOn(DateTimeOffset.UtcNow);
+            _cache.Accessor.SaveAccessToken(newItem);
         }
 
         private void deleteAccessTokenButton_Click(object sender, EventArgs e)

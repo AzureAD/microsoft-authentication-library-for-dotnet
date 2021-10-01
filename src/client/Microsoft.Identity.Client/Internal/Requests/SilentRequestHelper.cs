@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Internal
             if (msalTokenResponse.RefreshToken == null)
             {
                 msalTokenResponse.RefreshToken = msalRefreshTokenItem.Secret;
-                authenticationRequestParameters.RequestContext.Logger.Info(
+                authenticationRequestParameters.RequestContext.Logger.Warning(
                     "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead. ");
             }
 
@@ -43,32 +43,51 @@ namespace Microsoft.Identity.Client.Internal
             return dict;
         }
 
-        internal static void ProcessFetchInBackgroundAsync(Func<Task<AuthenticationResult>> fetchAction, ICoreLogger logger)
+        internal static void ProcessFetchInBackgroundAsync(
+            MsalAccessTokenCacheItem oldAccessToken, 
+            Func<Task<AuthenticationResult>> fetchAction, ICoreLogger logger)
         {
-            _ = Task.Run(async () =>
+            
+            if (AccessTokenNeedsRefresh(oldAccessToken))
             {
-                try
+                _ = Task.Run(async () =>
                 {
-                    await fetchAction().ConfigureAwait(false);
-                }
-                catch (MsalServiceException ex)
-                {
-                    string logMsg = $"Background fetch failed with MsalServiceException. Is AAD down? { ex.IsAadUnavailable()}";
-                    if (ex.StatusCode == 400)
+                    try
                     {
-                        logger.ErrorPiiWithPrefix(ex, logMsg);
+                        await fetchAction().ConfigureAwait(false);
                     }
-                    else
+                    catch (MsalServiceException ex)
                     {
+                        string logMsg = $"Background fetch failed with MsalServiceException. Is AAD down? { ex.IsAadUnavailable()}";
+                        if (ex.StatusCode == 400)
+                        {
+                            logger.ErrorPiiWithPrefix(ex, logMsg);
+                        }
+                        else
+                        {
+                            logger.WarningPiiWithPrefix(ex, logMsg);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        string logMsg = $"Background fetch failed with exception.";
                         logger.WarningPiiWithPrefix(ex, logMsg);
                     }
-                }
-                catch (Exception ex)
-                {
-                    string logMsg = $"Background fetch failed with exception.";
-                    logger.WarningPiiWithPrefix(ex, logMsg);
-                }
-            });
+                });
+            }
+        }
+
+        private static bool AccessTokenNeedsRefresh(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        {
+            if (msalAccessTokenCacheItem.RefreshOn.HasValue)
+            {
+                Random r = new Random();
+                int jitter = r.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds);
+                DateTimeOffset refreshOnWithJitter = msalAccessTokenCacheItem.RefreshOn.Value + TimeSpan.FromSeconds(jitter);
+                return refreshOnWithJitter < DateTimeOffset.UtcNow;
+            }
+
+            return false;           
         }
     }
 }

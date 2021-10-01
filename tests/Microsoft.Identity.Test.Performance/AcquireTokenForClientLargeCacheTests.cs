@@ -87,6 +87,7 @@ namespace Microsoft.Identity.Test.Performance
                           $"{_scopePrefix}{token}",
                           $"{_tenantPrefix}{tenant}",
                           "",
+                          new DateTimeOffset(DateTime.UtcNow),
                           new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
                           new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
                           null,

@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
             // get AT via refresh_token flow
-            TokenCacheHelper.ExpireAccessTokens(app.UserTokenCacheInternal);
+            TokenCacheHelper.ExpireAllAccessTokens(app.UserTokenCacheInternal);
             var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost();
             handler.ExpectedPostData = new Dictionary<string, string> { { "grant_type", "refresh_token" } };
             result = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
