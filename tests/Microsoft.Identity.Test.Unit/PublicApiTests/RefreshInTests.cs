@@ -246,7 +246,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 refreshOnWithJitterList.Add(refreshOnWithJitter);
 
                 Assert.IsTrue(refreshOnWithJitter.HasValue);
-                CoreAssert.IsWithinRange(refreshOnFromCache, refreshOnWithJitter.Value, TimeSpan.FromMinutes(5));
+                CoreAssert.IsWithinRange(
+                    refreshOnFromCache, 
+                    refreshOnWithJitter.Value, 
+                    TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
             }
             Assert.IsTrue(refreshOnWithJitterList.Distinct().Count() >= 8, "Jitter is random, so we can only have 1-2 identical values");
         }
