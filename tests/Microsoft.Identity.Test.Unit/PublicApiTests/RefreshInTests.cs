@@ -3,6 +3,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -10,6 +11,8 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -223,6 +226,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(503, ex.StatusCode);
             }
         }
+
+        [TestMethod]
+        public void JitterIsAddedToRefreshOn()
+        {
+            var at = TokenCacheHelper.CreateAccessTokenItem();
+            var refreshOnFromCache = DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10);
+            at = at.WithRefreshOn(refreshOnFromCache);
+
+            Func<Task<AuthenticationResult>> fetchAction = () =>
+            {
+                return Task.FromResult<AuthenticationResult>(null);
+            };
+
+            List<DateTimeOffset?> refreshOnWithJitterList = new List<DateTimeOffset?>();
+            for (int i = 1; i <= 10; i++)
+            {
+                var refreshOnWithJitter = SilentRequestHelper.ProcessFetchInBackground(at, fetchAction, new NullLogger());
+                refreshOnWithJitterList.Add(refreshOnWithJitter);
+
+                Assert.IsTrue(refreshOnWithJitter.HasValue);
+                CoreAssert.IsWithinRange(refreshOnFromCache, refreshOnWithJitter.Value, TimeSpan.FromMinutes(5));
+            }
+            Assert.IsTrue(refreshOnWithJitterList.Distinct().Count() >= 8, "Jitter is random, so we can only have 1-2 identical values");
+        }
+
         #endregion
 
         #region Client Creds

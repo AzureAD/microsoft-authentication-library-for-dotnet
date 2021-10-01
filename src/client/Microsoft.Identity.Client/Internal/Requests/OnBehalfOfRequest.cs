@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else
                 {
-                    SilentRequestHelper.ProcessFetchInBackgroundAsync(
+                    SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessToken, 
                         () => RefreshRtOrFetchNewAccessTokenAsync(cancellationToken), logger);
 
