@@ -43,12 +43,18 @@ namespace Microsoft.Identity.Client.Internal
             return dict;
         }
 
-        internal static void ProcessFetchInBackgroundAsync(
+        /// <summary>
+        /// Fire and forget the fetch action on a background thread.
+        /// Do not change to Task and do not await it.
+        /// </summary>
+        internal static DateTimeOffset? ProcessFetchInBackground(
             MsalAccessTokenCacheItem oldAccessToken, 
-            Func<Task<AuthenticationResult>> fetchAction, ICoreLogger logger)
+            Func<Task<AuthenticationResult>> fetchAction, 
+            ICoreLogger logger)
         {
+            var refreshOnWithJitter = GetRefreshOnWithJitter(oldAccessToken);
             
-            if (AccessTokenNeedsRefresh(oldAccessToken))
+            if (refreshOnWithJitter.HasValue && refreshOnWithJitter.Value < DateTimeOffset.UtcNow)
             {
                 _ = Task.Run(async () =>
                 {
@@ -75,19 +81,22 @@ namespace Microsoft.Identity.Client.Internal
                     }
                 });
             }
+
+            return refreshOnWithJitter;
         }
 
-        private static bool AccessTokenNeedsRefresh(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        private static Random s_random = new Random();
+        private static DateTimeOffset? GetRefreshOnWithJitter(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             if (msalAccessTokenCacheItem.RefreshOn.HasValue)
             {
-                Random r = new Random();
-                int jitter = r.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds);
-                DateTimeOffset refreshOnWithJitter = msalAccessTokenCacheItem.RefreshOn.Value + TimeSpan.FromSeconds(jitter);
-                return refreshOnWithJitter < DateTimeOffset.UtcNow;
+                int jitter = s_random.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds);
+                var refreshOnWithJitter = msalAccessTokenCacheItem.RefreshOn.Value + TimeSpan.FromSeconds(jitter);
+                return refreshOnWithJitter;
             }
 
-            return false;           
+            
+            return null;           
         }
     }
 }

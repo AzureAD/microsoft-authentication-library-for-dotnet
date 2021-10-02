@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     return await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
                 }
 
-                SilentRequestHelper.ProcessFetchInBackgroundAsync(
+                SilentRequestHelper.ProcessFetchInBackground(
                     cachedAccessTokenItem , 
                     () => RefreshRtOrFailAsync(cancellationToken), logger);
 
