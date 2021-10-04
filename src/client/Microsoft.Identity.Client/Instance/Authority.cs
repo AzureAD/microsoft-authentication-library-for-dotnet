@@ -67,21 +67,18 @@ namespace Microsoft.Identity.Client.Instance
             {
                 // ADFS and B2C are tenant-less, no need to consider tenant
                 case AuthorityType.Adfs:
-                {
                     return requestAuthorityInfo == null ?
                         new AdfsAuthority(configAuthorityInfo) :
                         new AdfsAuthority(requestAuthorityInfo);
-                }
+
                 case AuthorityType.B2C:
-                {
                     if (requestAuthorityInfo != null)
                     {
                         return new B2CAuthority(requestAuthorityInfo);
                     }
                     return new B2CAuthority(configAuthorityInfo);
-                }
+
                 case AuthorityType.Aad:
-                {
                     if (requestAuthorityInfo == null)
                     {
                         return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
@@ -101,13 +98,11 @@ namespace Microsoft.Identity.Client.Instance
                     }
 
                     return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
-                }
+
                 default:
-                {
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,
                         "Unsupported authority type");
-                }
             }
         }
 
@@ -135,23 +130,18 @@ namespace Microsoft.Identity.Client.Instance
             switch (authorityInfo.AuthorityType)
             {
                 case AuthorityType.Adfs:
-                {
                     return new AdfsAuthority(authorityInfo);
-                }
+
                 case AuthorityType.B2C:
-                {
                     return new B2CAuthority(authorityInfo);
-                }
+
                 case AuthorityType.Aad:
-                {
                     return new AadAuthority(authorityInfo);
-                }
+
                 default:
-                {
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,
                         $"Unsupported authority type {authorityInfo.AuthorityType}");
-                }
             }
         }
 
