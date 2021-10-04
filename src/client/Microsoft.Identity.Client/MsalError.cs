@@ -1012,7 +1012,7 @@ namespace Microsoft.Identity.Client
         public const string InitializeProcessSecurityError = "initialize_process_security_error";
 
         /// <summary>
-        /// <para>What happens?</para>You configured MSAL cache serialization at the same time with a static internal cache via <see cref="AbstractApplicationBuilder{T}.WithInternalMemoryTokenCacheOptions(InternalMemoryTokenCacheOptions)"/>
+        /// <para>What happens?</para>You configured MSAL cache serialization at the same time with a static internal cache via <see cref="AbstractApplicationBuilder{T}.WithSharedTokenCache(TokenCacheAccessorOptions)"/>
         /// These are mutually exclusive.
         /// <para>Mitigation</para> Use only one option. Web site and web API scenarios should rely on external cache serialization, as internal cache serialization cannot scale. See https://aka.ms/msal-net-cca-token-cache-serialization
         /// </summary>

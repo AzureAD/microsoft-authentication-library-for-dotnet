@@ -89,7 +89,7 @@ namespace WebApi.Controllers
                 ConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
                     .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                     .WithHttpManager(httpManager)
-                    .WithInternalMemoryTokenCacheOptions(new InternalMemoryTokenCacheOptions() { UseSharedCache = true })
+                    .WithSharedTokenCache(new TokenCacheAccessorOptions() { UseSharedCache = true })
                     .WithClientSecret("secret")
                     .BuildConcrete();
 

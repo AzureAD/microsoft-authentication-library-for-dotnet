@@ -12,12 +12,12 @@ namespace Microsoft.Identity.Client
     /// Desktop apps should encrypt and persist their token cache to disk, to avoid losing tokens when app restarts. 
     /// For detailed recommendations see: https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-token-cache-serialization?tabs=aspnetcore
     /// </remarks>
-    public class InternalMemoryTokenCacheOptions
+    public class TokenCacheAccessorOptions
     {
         /// <summary>
         /// Constructor for the options with default values.
         /// </summary>
-        public InternalMemoryTokenCacheOptions()
+        public TokenCacheAccessorOptions()
         {
         }
 
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
         /// Constructor
         /// </summary>
         /// <param name="useSharedCache">Set to true to share the cache between all ClientApplication objects. The cache becomes static. </param>
-        public InternalMemoryTokenCacheOptions(bool useSharedCache)
+        public TokenCacheAccessorOptions(bool useSharedCache)
         {
             UseSharedCache = useSharedCache;
         }

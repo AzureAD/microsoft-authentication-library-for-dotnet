@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public ITokenCacheAccessor UserTokenCacheAccessorForTest { get; set; }
         public ITokenCacheAccessor AppTokenCacheAccessorForTest { get; set; }
                 
-        public virtual ITokenCacheAccessor CreateTokenCacheAccessor(InternalMemoryTokenCacheOptions tokenCacheAccessorOptions, bool isApplicationTokenCache = false)
+        public virtual ITokenCacheAccessor CreateTokenCacheAccessor(CacheOptions tokenCacheAccessorOptions, bool isApplicationTokenCache = false)
         {
             if (isApplicationTokenCache)
             {                
