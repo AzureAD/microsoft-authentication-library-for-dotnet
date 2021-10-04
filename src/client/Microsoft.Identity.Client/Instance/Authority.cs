@@ -72,6 +72,7 @@ namespace Microsoft.Identity.Client.Instance
                         new AdfsAuthority(requestAuthorityInfo);
 
                 case AuthorityType.B2C:
+
                     if (requestAuthorityInfo != null)
                     {
                         return new B2CAuthority(requestAuthorityInfo);
@@ -79,6 +80,7 @@ namespace Microsoft.Identity.Client.Instance
                     return new B2CAuthority(configAuthorityInfo);
 
                 case AuthorityType.Aad:
+
                     if (requestAuthorityInfo == null)
                     {
                         return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
