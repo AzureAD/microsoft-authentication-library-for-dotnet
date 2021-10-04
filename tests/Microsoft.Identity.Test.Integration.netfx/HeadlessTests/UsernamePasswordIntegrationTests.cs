@@ -35,8 +35,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         // HTTP Telemetry Constants
         private static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
-        private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheInfo.None:D},,,|0,1";
-        private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheInfo.None:D},,,|0,1";
+        private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheMissReason.None:D},,,|0,1";
+        private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheMissReason.None:D},,,|0,1";
         private readonly string XClientLastTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|0|||";
         private readonly string XClientLastTelemetryROPCFailure =
             $"{TelemetryConstants.HttpTelemetrySchemaVersion}|0|1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|";
@@ -257,33 +257,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
 
             Assert.Fail("Bad exception or no exception thrown");
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.ADFS)]
-        public async Task AcquireTokenRefreshInTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetSpecificUserAsync("fIDLABOC_Refresh_IN@MSIDLAB6.com").ConfigureAwait(false);
-
-            var user = labResponse.User;
-
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
-            var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithAuthority(labResponse.Lab.Authority, "organizations")
-                .WithTestLogging()
-                .Build();
-
-            AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.IsNotNull(authResult);
-            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNotNull(authResult.IdToken);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
         }
 
         private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")

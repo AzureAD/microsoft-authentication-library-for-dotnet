@@ -145,6 +145,13 @@ namespace Microsoft.Identity.Client
                     tenantProfiles: tenantProfiles);
             }
 
+            UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
+            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
+            IdToken = msalIdTokenCacheItem?.Secret;
+            CorrelationId = correlationID;
+            ApiEvent = apiEvent;
+            AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
+
             if (msalAccessTokenCacheItem != null)
             {
                 AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
@@ -153,18 +160,8 @@ namespace Microsoft.Identity.Client
                 Scopes = msalAccessTokenCacheItem.ScopeSet;
                 IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;
                 TokenType = msalAccessTokenCacheItem.TokenType;
-            }
-
-            UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
-            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
-            IdToken = msalIdTokenCacheItem?.Secret;
-            CorrelationId = correlationID;
-            ApiEvent = apiEvent;
-            AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
-
-            if (msalAccessTokenCacheItem.RefreshOn.HasValue)
-            {
-                AuthenticationResultMetadata.RemainingTimeBeforeRefresh = msalAccessTokenCacheItem.RefreshOn.Value.Millisecond - DateTimeOffset.UtcNow.Millisecond;
+                var remainingTimeMS = msalAccessTokenCacheItem.RefreshOn.Value - DateTimeOffset.UtcNow;
+                AuthenticationResultMetadata.RemainingTimeBeforeRefresh = (new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero)).AddMilliseconds(remainingTimeMS.TotalMilliseconds);
             }
         }
 

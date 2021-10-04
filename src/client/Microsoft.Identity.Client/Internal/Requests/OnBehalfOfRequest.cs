@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             AuthenticationResult authResult = null;
 
-            CacheInfo cacheInfoTelemetry;
+            CacheMissReason cacheInfoTelemetry;
             if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 // look for access token in the cache first.
@@ -77,16 +77,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
 
-                cacheInfoTelemetry = CacheInfo.RefreshIn;
+                cacheInfoTelemetry = CacheMissReason.RefreshIn;
                 logger.Verbose($"[OBO request] No valid access token found because {cacheInfoTelemetry} ");
             }
             else
             {
                 logger.Info("[OBO Request] Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
-                cacheInfoTelemetry = (msalAccessTokenItem == null) ? CacheInfo.NoCachedAT : CacheInfo.ForceRefresh;
+                cacheInfoTelemetry = (msalAccessTokenItem == null) ? CacheMissReason.NoCachedAT : CacheMissReason.ForceRefresh;
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfo.None)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheMissReason.None)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }

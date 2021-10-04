@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -27,8 +27,8 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
             string[] splitCsv = telemetryCsv.Split('|');
             string[] splitApiIdAndCacheInfo = splitCsv[1].Split(',');
             ApiId.Add(splitApiIdAndCacheInfo[0]);
-            Enum.TryParse(splitApiIdAndCacheInfo[1], out CacheInfo cacheInfoTelemetry);
-            ForceRefresh = CacheInfo.ForceRefresh == cacheInfoTelemetry;
+            Enum.TryParse(splitApiIdAndCacheInfo[1], out CacheMissReason cacheInfoTelemetry);
+            ForceRefresh = CacheMissReason.ForceRefresh == cacheInfoTelemetry;
         }
 
         public void SplitPreviousCsv(string telemetryCsv)
