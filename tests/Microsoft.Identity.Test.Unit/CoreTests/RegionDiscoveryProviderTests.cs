@@ -161,6 +161,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
+        public async Task RegionInEnvVariableIsProperlyTransformedAsync()
+        {
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, "Region With Spaces");
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"),
+                _testRequestContext).ConfigureAwait(false);
+
+            Assert.IsNotNull(regionalMetadata);
+            Assert.AreEqual($"regionwithspaces.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
+            Assert.AreEqual("regionwithspaces", _testRequestContext.ApiEvent.RegionUsed);
+            Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
+        }
+
+        [TestMethod]
         public async Task SuccessfulResponseFromRegionalizedAuthorityAsync()
         {
             var regionalizedAuthority = new Uri($"https://{TestConstants.Region}.{RegionDiscoveryProvider.PublicEnvForRegional}/common/");
@@ -178,12 +195,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
-        [DataTestMethod]
-        [DataRow("Region with spaces")]
-        [DataRow("invalid`region")]
-        public async Task InvalidRegionEnvVariableAsync(string region)
+        [TestMethod]
+        public async Task InvalidRegionEnvVariableAsync()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, region);
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, "invalid`region");
 
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region)); // IMDS will return a valid region
 
