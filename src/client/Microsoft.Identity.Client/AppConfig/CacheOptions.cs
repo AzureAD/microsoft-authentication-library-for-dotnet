@@ -7,8 +7,8 @@ namespace Microsoft.Identity.Client
     /// Options for MSAL token caches. 
     /// </summary>
     /// <remarks>
-    /// For detailed recommendations, including adding an L2 cache, see: 
-    /// https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-token-cache-serialization?tabs=aspnetcore
+    /// Detailed cache guidance for each application type and platform, including L2 options:
+    /// https://aka.ms/msal-net-token-cache-serialization
     /// </remarks>
     public class CacheOptions
     {
