@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<RegionInfo> DiscoverAsync(ICoreLogger logger, CancellationToken requestCancellationToken)
         {
-            string region = Environment.GetEnvironmentVariable("REGION_NAME");
+            string region = Environment.GetEnvironmentVariable("REGION_NAME")?.Replace(" ", string.Empty).ToLowerInvariant();
 
             if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
             {
