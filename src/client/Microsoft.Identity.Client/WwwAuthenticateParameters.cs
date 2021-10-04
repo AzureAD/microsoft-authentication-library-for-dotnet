@@ -61,6 +61,13 @@ namespace Microsoft.Identity.Client
         public string Authority { get; set; }
 
         /// <summary>
+        /// AAD tenant ID to which the Azure subscription belongs to.
+        /// </summary>
+        public string TenantId => Instance.Authority
+                                          .CreateAuthority(Authority, validateAuthority: true)
+                                          .TenantId;
+
+        /// <summary>
         /// Claims demanded by the web API.
         /// </summary>
         public string Claims { get; set; }

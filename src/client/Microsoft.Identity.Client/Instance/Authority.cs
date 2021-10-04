@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
@@ -43,9 +42,9 @@ namespace Microsoft.Identity.Client.Instance
         /// 2. If there is a request authority, try to use it.
         ///     2.1. If the request authority is not "common", then use it
         ///     2.2  If the request authority is "common", ignore it, and use 1.1
-        ///     
-        /// Special cases: 
-        /// 
+        ///
+        /// Special cases:
+        ///
         /// - if the authority is not defined at the application level and the request level is not AAD, use the request authority
         /// - if the authority is defined at app level, and the request level authority of is of different type, throw an exception
         ///
@@ -68,20 +67,21 @@ namespace Microsoft.Identity.Client.Instance
             {
                 // ADFS and B2C are tenant-less, no need to consider tenant
                 case AuthorityType.Adfs:
+                {
                     return requestAuthorityInfo == null ?
                         new AdfsAuthority(configAuthorityInfo) :
                         new AdfsAuthority(requestAuthorityInfo);
-
+                }
                 case AuthorityType.B2C:
-
+                {
                     if (requestAuthorityInfo != null)
                     {
                         return new B2CAuthority(requestAuthorityInfo);
                     }
                     return new B2CAuthority(configAuthorityInfo);
-
+                }
                 case AuthorityType.Aad:
-
+                {
                     if (requestAuthorityInfo == null)
                     {
                         return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
@@ -101,11 +101,13 @@ namespace Microsoft.Identity.Client.Instance
                     }
 
                     return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
-
+                }
                 default:
+                {
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,
                         "Unsupported authority type");
+                }
             }
         }
 
@@ -122,6 +124,7 @@ namespace Microsoft.Identity.Client.Instance
                         requestAuthorityInfo.AuthorityType));
             }
         }
+
         public static Authority CreateAuthority(string authority, bool validateAuthority = false)
         {
             return CreateAuthority(AuthorityInfo.FromAuthorityUri(authority, validateAuthority));
@@ -132,18 +135,23 @@ namespace Microsoft.Identity.Client.Instance
             switch (authorityInfo.AuthorityType)
             {
                 case AuthorityType.Adfs:
+                {
                     return new AdfsAuthority(authorityInfo);
-
+                }
                 case AuthorityType.B2C:
+                {
                     return new B2CAuthority(authorityInfo);
-
+                }
                 case AuthorityType.Aad:
+                {
                     return new AadAuthority(authorityInfo);
-
+                }
                 default:
+                {
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,
-                        "Unsupported authority type " + authorityInfo.AuthorityType);
+                        $"Unsupported authority type {authorityInfo.AuthorityType}");
+                }
             }
         }
 
@@ -183,7 +191,9 @@ namespace Microsoft.Identity.Client.Instance
         internal abstract string GetTenantedAuthority(string tenantId, bool forceTenantless = false);
 
         internal abstract string GetTokenEndpoint();
+
         internal abstract string GetAuthorizationEndpoint();
+
         internal abstract string GetDeviceCodeEndpoint();
         #endregion
 
@@ -198,6 +208,7 @@ namespace Microsoft.Identity.Client.Instance
                 {
                     throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
                 }
+
                 var authorityAliased = await IsAuthorityAliasedAsync(requestContext, requestAuthorityInfo).ConfigureAwait(false);
                 if (authorityAliased)
                 {
@@ -215,7 +226,7 @@ namespace Microsoft.Identity.Client.Instance
                 }
 
                 throw new MsalClientException(
-                    MsalError.AuthorityHostMismatch,                    
+                    MsalError.AuthorityHostMismatch,
                     $"\n\r The application is configured for cloud {configAuthorityInfo.Host} and the request for a different cloud - {requestAuthorityInfo.Host}. This is not supported - the app and the request must target the same cloud. " +
                     $"\n\rSee https://aka.ms/msal-net-authority-override for details");
             }
@@ -233,8 +244,5 @@ namespace Microsoft.Identity.Client.Instance
         {
             return new Uri(authority).Host;
         }
-
-
-    
     }
 }
