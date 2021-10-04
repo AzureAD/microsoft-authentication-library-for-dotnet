@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -34,18 +35,17 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                if (_scopes is object)
+                if (_scopes != null)
                 {
                     return _scopes;
                 }
-                else if (!string.IsNullOrEmpty(Resource))
+
+                if (!string.IsNullOrEmpty(Resource))
                 {
                     return new[] { $"{Resource}/.default" };
                 }
-                else
-                {
-                    return null;
-                }
+
+                return null;
             }
             set
             {
@@ -98,13 +98,14 @@ namespace Microsoft.Identity.Client
         /// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
         /// <param name="scheme">Authentication scheme. Default is "Bearer".</param>
         /// <returns>The parameters requested by the web API.</returns>
+        /// <remarks>Currently it only supports the Bearer scheme</remarks>
         public static WwwAuthenticateParameters CreateFromResponseHeaders(
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
         {
             if (httpResponseHeaders.WwwAuthenticate.Any())
             {
-                // TODO: could it be Pop too?
+                // TODO: add POP support
                 AuthenticationHeaderValue bearer = httpResponseHeaders.WwwAuthenticate.First(v => string.Equals(v.Scheme, scheme, StringComparison.OrdinalIgnoreCase));
                 string wwwAuthenticateValue = bearer.Parameter;
                 return CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
@@ -122,10 +123,10 @@ namespace Microsoft.Identity.Client
         {
             if (string.IsNullOrWhiteSpace(wwwAuthenticateValue))
             {
-                throw new ArgumentException($"'{nameof(wwwAuthenticateValue)}' cannot be null or whitespace.", nameof(wwwAuthenticateValue));
+                throw new ArgumentNullException(nameof(wwwAuthenticateValue));
             }
 
-            IDictionary<string, string> parameters = SplitWithQuotes(wwwAuthenticateValue, ',')
+            IDictionary<string, string> parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
                 .Select(v => ExtractKeyValuePair(v.Trim()))
                 .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
 
@@ -155,7 +156,7 @@ namespace Microsoft.Identity.Client
         {
             if (httpClientFactory is null)
             {
-                throw new ArgumentException($"'{nameof(httpClientFactory)}' cannot be null.", nameof(httpClientFactory));
+                throw new ArgumentNullException(nameof(httpClientFactory));
             }
 
             var httpClient = httpClientFactory.GetHttpClient();
@@ -173,11 +174,11 @@ namespace Microsoft.Identity.Client
         {
             if (httpClient is null)
             {
-                throw new ArgumentException($"'{nameof(httpClient)}' cannot be null.", nameof(httpClient));
+                throw new ArgumentNullException(nameof(httpClient));
             }
             if (string.IsNullOrWhiteSpace(resourceUri))
             {
-                throw new ArgumentException($"'{nameof(resourceUri)}' cannot be null or whitespace.", nameof(resourceUri));
+                throw new ArgumentNullException(nameof(resourceUri));
             }
 
             // call this endpoint and see what the header says and return that
@@ -202,8 +203,8 @@ namespace Microsoft.Identity.Client
                 scheme);
 
             // read the header and checks if it contains an error with insufficient_claims value.
-            if (string.Equals(parameters.Error, "insufficient_claims", StringComparison.OrdinalIgnoreCase) &&
-                parameters.Claims is object)
+            if (parameters.Claims != null &&
+                string.Equals(parameters.Error, "insufficient_claims", StringComparison.OrdinalIgnoreCase))
             {
                 return parameters.Claims;
             }
@@ -274,54 +275,6 @@ namespace Microsoft.Identity.Client
             return wwwAuthenticateParameters;
         }
 
-        internal static List<string> SplitWithQuotes(string input, char delimiter)
-        {
-            List<string> items = new List<string>();
-
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return items;
-            }
-
-            int startIndex = 0;
-            bool insideString = false;
-            int nestingLevel = 0;
-            string item;
-            for (int i = 0; i < input.Length; i++)
-            {
-                if (input[i] == delimiter && !insideString && nestingLevel == 0)
-                {
-                    item = input.Substring(startIndex, i - startIndex);
-                    if (!string.IsNullOrWhiteSpace(item.Trim()))
-                    {
-                        items.Add(item);
-                    }
-
-                    startIndex = i + 1;
-                }
-                else if (input[i] == '"')
-                {
-                    insideString = !insideString;
-                }
-                else if (input[i] == '{')
-                {
-                    nestingLevel++;
-                }
-                else if (input[i] == '}')
-                {
-                    nestingLevel--;
-                }
-            }
-
-            item = input.Substring(startIndex);
-            if (!string.IsNullOrWhiteSpace(item.Trim()))
-            {
-                items.Add(item);
-            }
-
-            return items;
-        }
-
         /// <summary>
         /// Extracts a key value pair from an expression of the form a=b
         /// </summary>
@@ -329,9 +282,10 @@ namespace Microsoft.Identity.Client
         /// <returns>Key Value pair</returns>
         private static KeyValuePair<string, string> ExtractKeyValuePair(string assignment)
         {
-            string[] segments = SplitWithQuotes(assignment, '=')
+            string[] segments = CoreHelpers.SplitWithQuotes(assignment, '=')
                 .Select(s => s.Trim().Trim('"'))
                 .ToArray();
+
             if (segments.Length != 2)
             {
                 throw new ArgumentException(nameof(assignment), $"{assignment} isn't of the form a=b");

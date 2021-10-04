@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit
 
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri);
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(action).ConfigureAwait(false);
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit
 
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri);
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(action).ConfigureAwait(false);
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(action).ConfigureAwait(false);
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
 
         [TestMethod]
