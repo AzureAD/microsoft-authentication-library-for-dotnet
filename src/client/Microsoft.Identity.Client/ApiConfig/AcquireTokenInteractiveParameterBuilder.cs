@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Client
         #endregion
 
         /// <inheritdoc />
-        protected internal override void Validate()
+        protected override void Validate()
         {
             base.Validate();
 #if ANDROID

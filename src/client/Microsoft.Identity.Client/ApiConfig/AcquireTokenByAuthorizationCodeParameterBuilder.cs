@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc />
-        protected internal override void Validate()
+        protected override void Validate()
         {
             base.Validate();
 
