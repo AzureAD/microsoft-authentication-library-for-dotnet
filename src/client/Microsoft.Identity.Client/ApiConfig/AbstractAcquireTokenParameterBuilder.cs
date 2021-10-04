@@ -372,7 +372,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Validates the parameters of the AcquireToken operation.
         /// </summary>
-        protected virtual void Validate()
+        protected internal virtual void Validate()
         {
         }
 

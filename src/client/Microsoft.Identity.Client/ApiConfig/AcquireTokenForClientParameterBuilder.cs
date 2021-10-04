@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
-        protected override void Validate()
+        protected internal override void Validate()
         {
             base.Validate();
             if (Parameters.SendX5C == null)

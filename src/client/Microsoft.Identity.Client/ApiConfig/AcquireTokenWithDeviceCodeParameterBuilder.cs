@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        protected override void Validate()
+        protected internal override void Validate()
         {
             base.Validate();
 
