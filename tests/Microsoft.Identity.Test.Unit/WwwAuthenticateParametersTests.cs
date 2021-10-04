@@ -201,6 +201,29 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(authParams.TenantId, tenantId);
         }
 
+        [TestMethod]
+        [DynamicData(nameof(GetAuthorities), DynamicDataSourceType.Method)]
+        public async Task CreateFromResourceResponseAsync_HttpClientFactory_TenantId_Null_Async(string authority)
+        {
+            const string resourceUri = "https://example.com/";
+            string tenantId = Guid.NewGuid().ToString();
+
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedUrl = resourceUri,
+                ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId, authority)
+            };
+            var httpClient = new HttpClient(handler);
+
+            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
+            httpClientFactory.GetHttpClient().Returns(httpClient);
+
+            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
+
+            Assert.IsNull(authParams.TenantId);
+        }
+
         [DataRow(null)]
         [TestMethod]
         public async Task CreateFromResourceResponseAsync_HttpClient_Null_Async(HttpClient httpClient)
@@ -332,15 +355,22 @@ namespace Microsoft.Identity.Test.Unit
             };
         }
 
-        private static HttpResponseMessage CreateInvalidTokenHttpErrorResponse(string tenantId)
+        private static HttpResponseMessage CreateInvalidTokenHttpErrorResponse(string tenantId, string authority = "https://login.windows.net")
         {
             return new HttpResponseMessage(HttpStatusCode.Unauthorized)
             {
                 Headers =
                 {
-                    { WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"https://login.windows.net/{tenantId}\", error=\"invalid_token\", error_description=\"The authentication failed because of missing 'Authorization' header.\"" }
+                    { WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"{authority}/{tenantId}\", error=\"invalid_token\", error_description=\"The authentication failed because of missing 'Authorization' header.\"" }
                 }
             };
+        }
+
+        public static IEnumerable<object[]> GetAuthorities()
+        {
+            yield return new object[] { TestConstants.ADFSAuthority };
+            yield return new object[] { TestConstants.ADFSAuthority2 };
+            yield return new object[] { TestConstants.B2CAuthority };
         }
     }
 }
