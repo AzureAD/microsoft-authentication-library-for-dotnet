@@ -7,17 +7,14 @@ namespace Microsoft.Identity.Client
     /// Options for MSAL token caches. 
     /// </summary>
     /// <remarks>
-    /// These option do not allow configuration of external cache serialization, for which you should use <see cref="TokenCache.SetAfterAccessAsync(System.Func{TokenCacheNotificationArgs, System.Threading.Tasks.Task})"/> and other callbacks.
-    /// For detailed recommendations see: https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-token-cache-serialization?tabs=aspnetcore
+    /// For detailed recommendations, including adding an L2 cache, see: 
+    /// https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-token-cache-serialization?tabs=aspnetcore
     /// </remarks>
     public class CacheOptions
     {
         /// <summary>
         /// Recommended options for using a static cache. 
         /// </summary>
-        /// <remarks>
-        /// May include some eviction policies in the future to keep memory in check.
-        /// </remarks>
         public static CacheOptions EnableSharedCacheOptions
         {
             get
