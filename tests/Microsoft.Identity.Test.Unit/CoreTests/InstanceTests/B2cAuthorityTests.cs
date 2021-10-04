@@ -2,11 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.IO;
-using System.Net.Http;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -56,28 +53,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void B2CLoginAuthorityEndpoints()
         {
-            using (var httpManager = new MockHttpManager())
-            {
-                var appConfig = new ApplicationConfiguration()
-                {
-                    HttpManager = httpManager,
-                    AuthorityInfo = AuthorityInfo.FromAuthorityUri(
-                        "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/", true)
-                };
+            Authority instance = Authority.CreateAuthority(
+                "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/");
 
-                Authority instance = Authority.CreateAuthority(
-                    "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/");
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
-                    
-
-                Assert.AreEqual(
-                    "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/authorize",
-                    instance.GetAuthorizationEndpoint());
-                Assert.AreEqual(
-                    "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token",
-                    instance.GetTokenEndpoint());                
-            }
+            Assert.IsNotNull(instance);
+            Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
+            Assert.AreEqual(
+                "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/authorize",
+                instance.GetAuthorizationEndpoint());
+            Assert.AreEqual(
+                "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token",
+                instance.GetTokenEndpoint());
         }
 
         [TestMethod]

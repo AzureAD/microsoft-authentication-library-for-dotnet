@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
     {
         private static readonly AuthorityInfo s_commonAuthority =
             AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true);
-        static string s_ppeCommonUri = $@"https://{TestConstants.PpeEnvironment}/{TestConstants.TenantId}";
+        private static readonly string s_ppeCommonUri = $@"https://{TestConstants.PpeEnvironment}/{TestConstants.TenantId}";
         private static readonly AuthorityInfo s_ppeAuthority =
           AuthorityInfo.FromAuthorityUri(s_ppeCommonUri, true);
         private static readonly AuthorityInfo s_utidAuthority =
@@ -54,8 +54,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public void VerifyAuthorityTest()
         {
-            var utid = TestConstants.Utid;
-            var utid2 = TestConstants.Utid2;
+            const string utid = TestConstants.Utid;
+            const string utid2 = TestConstants.Utid2;
 
             VerifyAuthority(
                 config: s_commonAuthority,
