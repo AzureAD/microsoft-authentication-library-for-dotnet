@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     internal class UserAccessorWithPartitionAsserts : InMemoryPartitionedUserTokenCacheAccessor
     {
-        public UserAccessorWithPartitionAsserts(ICoreLogger logger, InternalMemoryTokenCacheOptions tokenCacheAccessorOptions) : base(logger, tokenCacheAccessorOptions)
+        public UserAccessorWithPartitionAsserts(ICoreLogger logger, CacheOptions tokenCacheAccessorOptions) : base(logger, tokenCacheAccessorOptions)
         {
 
         }

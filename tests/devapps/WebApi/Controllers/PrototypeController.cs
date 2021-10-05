@@ -49,12 +49,12 @@ namespace WebApi.Controllers
         [HttpGet]
 #pragma warning disable UseAsyncSuffix // Use Async suffix
         public async Task<string> Get(
-            bool ccaPerRequest = true, 
-            TID tenantId = TID.A, 
-            Scope scope = Scope.S1, 
-            bool staticL1 = true, 
+            bool ccaPerRequest = true,
+            TID tenantId = TID.A,
+            Scope scope = Scope.S1,
+            bool staticL1 = true,
             bool useL2 = false)
-            
+
 #pragma warning restore UseAsyncSuffix // Use Async suffix
         {
 
@@ -63,13 +63,13 @@ namespace WebApi.Controllers
 
             ConfidentialClientApplication cca = CreateCCA(ccaPerRequest, staticL1, useL2);
 
-          
-            var res = await cca.AcquireTokenForClient(new[] { scope.ToString() })                
+
+            var res = await cca.AcquireTokenForClient(new[] { scope.ToString() })
                  .WithAuthority($"https://login.microsoftonline.com/{tid}")
                  .ExecuteAsync().ConfigureAwait(false);
 
 
-            if (!string.Equals(res.AccessToken ,tid, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(res.AccessToken, tid, StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException("failed");
             }
@@ -89,7 +89,7 @@ namespace WebApi.Controllers
                 ConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
                     .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                     .WithHttpManager(httpManager)
-                    .WithInternalMemoryTokenCacheOptions(new InternalMemoryTokenCacheOptions() { UseSharedCache = true })
+                    .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                     .WithClientSecret("secret")
                     .BuildConcrete();
 

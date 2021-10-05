@@ -91,7 +91,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new iOSLegacyCachePersistence(Logger);
         }
 
-        public override ITokenCacheAccessor CreateTokenCacheAccessor(InternalMemoryTokenCacheOptions tokenCacheAccessorOptions, bool isApplicationTokenCache = false)
+        public override ITokenCacheAccessor CreateTokenCacheAccessor(
+            CacheOptions tokenCacheAccessorOptions, 
+            bool isApplicationTokenCache = false)
         {
             return new iOSTokenCacheAccessor();
         }

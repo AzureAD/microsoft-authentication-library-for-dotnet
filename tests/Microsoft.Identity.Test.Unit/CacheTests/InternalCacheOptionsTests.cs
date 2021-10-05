@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithInternalMemoryTokenCacheOptions(new InternalMemoryTokenCacheOptions() { UseSharedCache = true })
+                                                              .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                                                               .Build();
 
             AssertExclusivity(app.UserTokenCache);
@@ -57,14 +57,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithClientSecret(TestConstants.ClientSecret)
                                                         .WithHttpManager(httpManager)
-                                                        .WithInternalMemoryTokenCacheOptions(new InternalMemoryTokenCacheOptions() { UseSharedCache = true })
+                                                        .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                                                         .BuildConcrete();
 
                 ConfidentialClientApplication app2 =
                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                        .WithClientSecret(TestConstants.ClientSecret)
                                                        .WithHttpManager(httpManager)
-                                                       .WithInternalMemoryTokenCacheOptions(new InternalMemoryTokenCacheOptions() { UseSharedCache = true })
+                                                       .WithCacheOptions(new CacheOptions() { UseSharedCache = true})
                                                        .BuildConcrete();
 
                 ConfidentialClientApplication app_withoutStaticCache =
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                      ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithClientSecret(TestConstants.ClientSecret)
                                                          .WithHttpManager(httpManager)
-                                                         .WithInternalMemoryTokenCacheOptions(new InternalMemoryTokenCacheOptions() { UseSharedCache = true })
+                                                         .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                                                          .BuildConcrete();
 
                 await ClientCredsAcquireAndAssertTokenSourceAsync(app3, "S1", TokenSource.Cache).ConfigureAwait(false);
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .Create(TestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(harness.HttpManager)
-                    .WithInternalMemoryTokenCacheOptions(new InternalMemoryTokenCacheOptions() { UseSharedCache = true })
+                    .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                     .BuildConcrete();
 
                 app1.ServiceBundle.ConfigureMockWebUI();
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                    .Create(TestConstants.ClientId)
                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                    .WithHttpManager(harness.HttpManager)
-                   .WithInternalMemoryTokenCacheOptions(new InternalMemoryTokenCacheOptions() { UseSharedCache = true })
+                   .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                    .BuildConcrete();
 
                 accounts = await app2.GetAccountsAsync().ConfigureAwait(false);

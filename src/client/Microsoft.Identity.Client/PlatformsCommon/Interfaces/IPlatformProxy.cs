@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         bool LegacyCacheRequiresSerialization { get; }
 
-        ITokenCacheAccessor CreateTokenCacheAccessor(InternalMemoryTokenCacheOptions tokenCacheAccessorOptions, bool isApplicationTokenCache = false);
+        ITokenCacheAccessor CreateTokenCacheAccessor(CacheOptions accessorOptions, bool isApplicationTokenCache = false);
 
         ICacheSerializationProvider CreateTokenCacheBlobStorage();
 
