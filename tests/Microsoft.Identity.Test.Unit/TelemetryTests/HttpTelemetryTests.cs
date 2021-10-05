@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
                 var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.None);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.NotApplicable);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
 
                 Trace.WriteLine("Step 2. Acquire Token Silent successful - AT served from cache");
@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 Trace.WriteLine("Step 3. Acquire Token Silent successful - via refresh_token flow");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheMissReason.NoCachedAT);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheMissReason.NoCachedAccessToken);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 1);
 
                 Trace.WriteLine("Step 4. Acquire Token Silent with force_refresh = true and failure = invalid_grant");
@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Guid step7CorrelationId = result.Correlationid;
 
                 // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.None);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.NotApplicable);
                 AssertPreviousTelemetry(
                     result.HttpRequest,
                     expectedSilentCount: 0,
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 8. Acquire Token Interactive -> Success");
                 result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
 
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.None);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.NotApplicable);
                 AssertPreviousTelemetry(
                     result.HttpRequest,
                     expectedSilentCount: 0,
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 Trace.WriteLine("Step 9. Acquire Token Silent with force-refresh false -> successful");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant, false).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheMissReason.NoCachedAT);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheMissReason.NoCachedAccessToken);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
             }
         }
@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
                 var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.None);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.NotApplicable);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
 
                 Trace.WriteLine("Step 2. Acquire Token Silent successful - AT served from cache");
@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 UpdateATWithRefreshOn(_app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
                 cacheAccess = _app.UserTokenCache.RecordAccess();
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheMissReason.RefreshIn, isCacheSerialized: true);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheMissReason.ProactivelyRefreshed, isCacheSerialized: true);
                 
                 // Use reflection to get the value and wait till achieved
                 HttpTelemetryManager httpTelemetryManager = (HttpTelemetryManager)_app.ServiceBundle.HttpTelemetryManager;
@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
                 var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.None, isCacheSerialized: true);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.NotApplicable, isCacheSerialized: true);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
             }
         }
@@ -308,7 +308,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                             .BuildConcrete();
 
                 var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.None, isLegacyCacheEnabled: isLegacyCacheEnabled);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheMissReason.NotApplicable, isLegacyCacheEnabled: isLegacyCacheEnabled);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
             }
         }

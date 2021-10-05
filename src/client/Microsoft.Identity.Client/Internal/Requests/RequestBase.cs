@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
                         authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
                         Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
-                        authenticationResult.AuthenticationResultMetadata.CacheInfo = (CacheMissReason)apiEvent.CacheInfo;
+                        authenticationResult.AuthenticationResultMetadata.CacheMissReason = (CacheMissReason)apiEvent.CacheInfo;
                         return authenticationResult;
                     }
                     catch (MsalException ex)
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 !AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.UsesDefaultSerialization &&
                 AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsTokenCacheSerialized();
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
-            apiEvent.CacheInfo = (int)CacheMissReason.None;
+            apiEvent.CacheInfo = (int)CacheMissReason.NotApplicable;
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);

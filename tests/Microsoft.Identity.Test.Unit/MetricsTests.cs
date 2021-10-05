@@ -143,8 +143,10 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(expectedTokensFromBroker, Metrics.TotalAccessTokensFromBroker);
             Assert.IsTrue(Metrics.TotalDurationInMs > 0);
 
-            DateTimeOffset actualRefreshIn = result.AuthenticationResultMetadata.RemainingTimeBeforeRefresh.Value;
             DateTimeOffset expectedDateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(2400);
+            var remainingTimeMS = result.AuthenticationResultMetadata.RefreshOn.Value - DateTimeOffset.UtcNow;
+            DateTimeOffset actualRefreshIn = (new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero)).AddMilliseconds(remainingTimeMS.TotalMilliseconds);
+
             CoreAssert.IsWithinRange(expectedDateTimeOffset, actualRefreshIn, TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
         }
 
@@ -180,7 +182,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheInfo == Client.CacheMissReason.RefreshIn);
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheMissReason == Client.CacheMissReason.ProactivelyRefreshed);
             }
         }
     }

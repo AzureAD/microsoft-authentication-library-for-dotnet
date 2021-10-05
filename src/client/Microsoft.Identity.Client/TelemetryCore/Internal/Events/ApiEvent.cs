@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public int CacheInfo
         {
             get => this.ContainsKey(CacheInfoKey) ?
-                (int)Enum.Parse(typeof(CacheMissReason), this[CacheInfoKey]) : (int)CacheMissReason.None;
+                (int)Enum.Parse(typeof(CacheMissReason), this[CacheInfoKey]) : (int)CacheMissReason.NotApplicable;
 
             set => this[CacheInfoKey] = value.ToString(CultureInfo.InvariantCulture);
         }

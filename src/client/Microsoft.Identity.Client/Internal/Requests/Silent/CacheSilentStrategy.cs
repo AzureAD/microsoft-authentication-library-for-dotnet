@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-            CacheMissReason cacheInfoTelemetry = CacheMissReason.None;
+            CacheMissReason cacheInfoTelemetry = CacheMissReason.NotApplicable;
 
             ThrowIfNoScopesOnB2C();
             ThrowIfCurrentBrokerAccount();
@@ -55,11 +55,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                     Metrics.IncrementTotalAccessTokensFromCache();
                     authResult = await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
-                    cacheInfoTelemetry = CacheMissReason.RefreshIn;
+                    cacheInfoTelemetry = CacheMissReason.ProactivelyRefreshed;
                 }
                 else
                 {
-                    cacheInfoTelemetry = CacheMissReason.NoCachedAT;
+                    cacheInfoTelemetry = CacheMissReason.NoCachedAccessToken;
                 } 
             }
             else
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set. ");
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheMissReason.None)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheMissReason.NotApplicable)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }

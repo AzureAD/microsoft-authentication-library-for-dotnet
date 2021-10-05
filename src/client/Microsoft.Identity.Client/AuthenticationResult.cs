@@ -160,8 +160,11 @@ namespace Microsoft.Identity.Client
                 Scopes = msalAccessTokenCacheItem.ScopeSet;
                 IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;
                 TokenType = msalAccessTokenCacheItem.TokenType;
-                var remainingTimeMS = msalAccessTokenCacheItem.RefreshOn.Value - DateTimeOffset.UtcNow;
-                AuthenticationResultMetadata.RemainingTimeBeforeRefresh = (new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero)).AddMilliseconds(remainingTimeMS.TotalMilliseconds);
+
+                if (msalAccessTokenCacheItem.RefreshOn.HasValue)
+                {
+                    AuthenticationResultMetadata.RefreshOn = msalAccessTokenCacheItem.RefreshOn;
+                }
             }
         }
 

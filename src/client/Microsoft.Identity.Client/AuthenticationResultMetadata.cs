@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client
 {
@@ -47,11 +46,11 @@ namespace Microsoft.Identity.Client
         /// Time, in milliseconds, remaining before the token will be proactively refreshed.
         /// This value may be null.
         /// </summary>
-        public DateTimeOffset? RemainingTimeBeforeRefresh { get; set; } = null;
+        public DateTimeOffset? RefreshOn { get; set; } = null;
 
         /// <summary>
         /// Enum describing the reason for cache refresh and fetching access token from ESTS.
         /// </summary>
-        public CacheMissReason CacheInfo { get; set; }
+        public CacheMissReason CacheMissReason { get; set; }
     }
 }
