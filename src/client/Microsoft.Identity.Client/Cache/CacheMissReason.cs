@@ -4,7 +4,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Enum describing the reason for cache refresh and fetching access token from ESTS.
+    /// Specifies the reason for fetching the access token from the identity provider.
     /// </summary>
     public enum CacheMissReason
     {
