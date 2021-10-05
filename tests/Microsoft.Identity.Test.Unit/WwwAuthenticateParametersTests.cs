@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_TenantId_Async()
+        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Arm_TenantId_Async()
         {
             const string resourceUri = "https://example.com/";
             string tenantId = Guid.NewGuid().ToString();
@@ -202,8 +202,31 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [DynamicData(nameof(GetAuthorities), DynamicDataSourceType.Method)]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_TenantId_Null_Async(string authority)
+        public async Task CreateFromResourceResponseAsync_HttpClientFactory_B2C_TenantId_Async()
+        {
+            const string resourceUri = "https://example.com/";
+            const string tenantId = "tenant";
+
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedUrl = resourceUri,
+                ResponseMessage = CreateInvalidTokenHttpErrorResponse(authority: TestConstants.B2CAuthority)
+            };
+            var httpClient = new HttpClient(handler);
+
+            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
+            httpClientFactory.GetHttpClient().Returns(httpClient);
+
+            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
+
+            Assert.AreEqual(authParams.TenantId, tenantId);
+        }
+
+        [TestMethod]
+        [DataRow(TestConstants.ADFSAuthority)]
+        [DataRow(TestConstants.ADFSAuthority2)]
+        public async Task CreateFromResourceResponseAsync_HttpClientFactory_ADFS_TenantId_Null_Async(string authority)
         {
             const string resourceUri = "https://example.com/";
             string tenantId = Guid.NewGuid().ToString();
@@ -355,7 +378,7 @@ namespace Microsoft.Identity.Test.Unit
             };
         }
 
-        private static HttpResponseMessage CreateInvalidTokenHttpErrorResponse(string tenantId, string authority = "https://login.windows.net")
+        private static HttpResponseMessage CreateInvalidTokenHttpErrorResponse(string tenantId = "", string authority = "https://login.windows.net")
         {
             return new HttpResponseMessage(HttpStatusCode.Unauthorized)
             {
@@ -364,13 +387,6 @@ namespace Microsoft.Identity.Test.Unit
                     { WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"{authority}/{tenantId}\", error=\"invalid_token\", error_description=\"The authentication failed because of missing 'Authorization' header.\"" }
                 }
             };
-        }
-
-        public static IEnumerable<object[]> GetAuthorities()
-        {
-            yield return new object[] { TestConstants.ADFSAuthority };
-            yield return new object[] { TestConstants.ADFSAuthority2 };
-            yield return new object[] { TestConstants.B2CAuthority };
         }
     }
 }
