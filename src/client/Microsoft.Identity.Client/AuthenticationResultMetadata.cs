@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
         public DateTimeOffset? RemainingTimeBeforeRefresh { get; set; } = null;
 
         /// <summary>
-        /// Enum describing the reason for cache refresh and fetching access token from ESTS.
+        /// Specifies the reason for fetching the access token from the identity provider.
         /// </summary>
         public CacheMissReason CacheInfo { get; set; }
     }
