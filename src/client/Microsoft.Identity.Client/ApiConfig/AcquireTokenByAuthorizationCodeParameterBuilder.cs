@@ -111,8 +111,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// To help with resiliency, AAD Cached Credential Service (CCS) operates as an AAD backup.
-        /// This will provide CCS with a routing hint to help improve performance during authentication.
+        /// To help with resiliency, the AAD backup authentication system operates as an AAD backup.
+        /// This will provide backup authentication system with a routing hint to help improve performance during authentication.
         /// </summary>
         /// <param name="userObjectIdentifier">GUID which is unique to the user, parsed from the client_info.</param>
         /// <param name="tenantIdentifier">GUID format of the tenant ID, parsed from the client_info.</param>
@@ -134,8 +134,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// To help with resiliency, AAD Cached Credential Service (CCS) operates as an AAD backup.
-        /// This will provide CCS with a routing hint to help improve performance during authentication.
+        /// To help with resiliency, the AAD backup authentication system operates as an AAD backup.
+        /// This will provide backup authentication system with a routing hint to help improve performance during authentication.
         /// </summary>
         /// <param name="userName">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <returns>The builder to chain the .With methods</returns>
