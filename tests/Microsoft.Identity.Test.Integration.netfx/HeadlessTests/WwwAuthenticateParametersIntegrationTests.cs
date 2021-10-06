@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             Assert.AreEqual("https://vault.azure.net", authParams.Resource);
             Assert.AreEqual("login.windows.net", new Uri(authParams.Authority).Host);
-            Assert.AreEqual("72f988bf-86f1-41af-91ab-2d7cd011db47", authParams.TenantId); // because the Key Vault resource belong to Microsoft Corp tenant
+            Assert.AreEqual("72f988bf-86f1-41af-91ab-2d7cd011db47", authParams.GetTenantId()); // because the Key Vault resource belong to Microsoft Corp tenant
             Assert.AreEqual("https://vault.azure.net/.default", authParams.Scopes.FirstOrDefault());
             Assert.AreEqual(2, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             Assert.AreEqual("00000003-0000-0000-c000-000000000000", authParams.Resource);
             Assert.AreEqual("https://login.microsoftonline.com/common", authParams.Authority);
-            Assert.AreEqual("common", authParams.TenantId);
+            Assert.AreEqual("common", authParams.GetTenantId());
             Assert.AreEqual("00000003-0000-0000-c000-000000000000/.default", authParams.Scopes.FirstOrDefault());
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             Assert.IsNull(authParams.Resource);
             Assert.AreEqual($"https://{authority}/{tenantId}", authParams.Authority); // authority URI consists of AAD endpoint and tenant ID
-            Assert.AreEqual(tenantId, authParams.TenantId); // tenant ID is extracted out of authority URI
+            Assert.AreEqual(tenantId, authParams.GetTenantId()); // tenant ID is extracted out of authority URI
             Assert.IsNull(authParams.Scopes);
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);

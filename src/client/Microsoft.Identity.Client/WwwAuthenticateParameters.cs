@@ -61,13 +61,6 @@ namespace Microsoft.Identity.Client
         public string Authority { get; set; }
 
         /// <summary>
-        /// AAD tenant ID to which the Azure subscription belongs to.
-        /// </summary>
-        public string TenantId => Instance.Authority
-                                          .CreateAuthority(Authority, validateAuthority: true)
-                                          .TenantId;
-
-        /// <summary>
         /// Claims demanded by the web API.
         /// </summary>
         public string Claims { get; set; }
@@ -98,6 +91,13 @@ namespace Microsoft.Identity.Client
         /// or framework specific (Microsoft.Identity.Model, Microsoft.Identity.Web).
         /// </summary>
         internal IDictionary<string, string> RawParameters { get; private set; }
+
+        /// <summary>
+        /// AAD tenant ID to which the Azure subscription belongs to.
+        /// </summary>
+        public string GetTenantId() => Instance.Authority
+                                               .CreateAuthority(Authority, validateAuthority: true)
+                                               .TenantId;
 
         /// <summary>
         /// Create WWW-Authenticate parameters from the HttpResponseHeaders.

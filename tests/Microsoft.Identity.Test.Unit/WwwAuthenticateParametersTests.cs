@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Arm_TenantId_Async()
+        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Arm_GetTenantId_Async()
         {
             const string resourceUri = "https://example.com/";
             string tenantId = Guid.NewGuid().ToString();
@@ -198,11 +198,11 @@ namespace Microsoft.Identity.Test.Unit
 
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
 
-            Assert.AreEqual(authParams.TenantId, tenantId);
+            Assert.AreEqual(authParams.GetTenantId(), tenantId);
         }
 
         [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_B2C_TenantId_Async()
+        public async Task CreateFromResourceResponseAsync_HttpClientFactory_B2C_GetTenantId_Async()
         {
             const string resourceUri = "https://example.com/";
             const string tenantId = "tenant";
@@ -220,13 +220,13 @@ namespace Microsoft.Identity.Test.Unit
 
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
 
-            Assert.AreEqual(authParams.TenantId, tenantId);
+            Assert.AreEqual(authParams.GetTenantId(), tenantId);
         }
 
         [TestMethod]
         [DataRow(TestConstants.ADFSAuthority)]
         [DataRow(TestConstants.ADFSAuthority2)]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_ADFS_TenantId_Null_Async(string authority)
+        public async Task CreateFromResourceResponseAsync_HttpClientFactory_ADFS_GetTenantId_Null_Async(string authority)
         {
             const string resourceUri = "https://example.com/";
             string tenantId = Guid.NewGuid().ToString();
@@ -244,7 +244,7 @@ namespace Microsoft.Identity.Test.Unit
 
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
 
-            Assert.IsNull(authParams.TenantId);
+            Assert.IsNull(authParams.GetTenantId());
         }
 
         [DataRow(null)]
