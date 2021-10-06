@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [DataRow(null)]
         [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Null_Async(IMsalHttpClientFactory httpClientFactory)
+        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Null_Async(Func<HttpClient> httpClientFactory)
         {
             const string resourceUri = "https://example.com/";
 
@@ -171,12 +171,16 @@ namespace Microsoft.Identity.Test.Unit
             };
             var httpClient = new HttpClient(handler);
 
-            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
-            httpClientFactory.GetHttpClient().Returns(httpClient);
+            bool called = false;
+            Func<HttpClient> httpClientFactory = () =>
+            {
+                called = true;
+                return httpClient;
+            };
 
             _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
 
-            httpClientFactory.Received().GetHttpClient();
+            Assert.IsTrue(called);
         }
 
         [TestMethod]
@@ -192,9 +196,7 @@ namespace Microsoft.Identity.Test.Unit
                 ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId)
             };
             var httpClient = new HttpClient(handler);
-
-            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
-            httpClientFactory.GetHttpClient().Returns(httpClient);
+            Func<HttpClient> httpClientFactory = () => httpClient;
 
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
 
@@ -214,9 +216,7 @@ namespace Microsoft.Identity.Test.Unit
                 ResponseMessage = CreateInvalidTokenHttpErrorResponse(authority: TestConstants.B2CAuthority)
             };
             var httpClient = new HttpClient(handler);
-
-            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
-            httpClientFactory.GetHttpClient().Returns(httpClient);
+            Func<HttpClient> httpClientFactory = () => httpClient;
 
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
 
@@ -238,9 +238,7 @@ namespace Microsoft.Identity.Test.Unit
                 ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId, authority)
             };
             var httpClient = new HttpClient(handler);
-
-            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
-            httpClientFactory.GetHttpClient().Returns(httpClient);
+            Func<HttpClient> httpClientFactory = () => httpClient;
 
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
 
@@ -306,6 +304,7 @@ namespace Microsoft.Identity.Test.Unit
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
 
+        [TestMethod]
         public async Task CreateFromResourceResponseAsync_ResourceUri_Async(string resourceUri)
         {
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
