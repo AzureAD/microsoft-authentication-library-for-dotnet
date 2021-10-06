@@ -294,22 +294,14 @@ namespace Microsoft.Identity.Test.Unit
             httpClient.Received();
         }
 
+        [TestMethod]
         [DataRow(null)]
         [DataRow("")]
-        [TestMethod]
         public async Task CreateFromResourceResponseAsync_Incorrect_ResourceUri_Async(string resourceUri)
         {
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task CreateFromResourceResponseAsync_ResourceUri_Async(string resourceUri)
-        {
-            Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
-
-            await Assert.ThrowsExceptionAsync<ArgumentException>(action).ConfigureAwait(false);
         }
 
         [TestMethod]
