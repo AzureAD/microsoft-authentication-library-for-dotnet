@@ -6,7 +6,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Specifies the reason for fetching the access token from the identity provider.
     /// </summary>
-    public enum CacheMissReason
+    public enum CacheRefreshReason
     {
         /// <summary>
         /// When the cache is not supposed to be hit to make the request (interactive call, username password call, device code flow, etc.)

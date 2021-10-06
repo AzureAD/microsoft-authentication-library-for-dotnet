@@ -409,7 +409,7 @@ namespace Microsoft.Identity.Client
             if (tokenCacheItems.Count == 0)
             {
                 logger.Verbose("No access tokens found in the cache. Skipping filtering. ");
-                requestParams.RequestContext.ApiEvent.CacheInfo = (int)CacheMissReason.NoCachedAccessToken;
+                requestParams.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.NoCachedAccessToken;
                 return null;
             }
 
@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Client
             tokenCacheItems = FilterByScopes(requestParams, tokenCacheItems);
             tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);
 
-            CacheMissReason cacheInfoTelemetry = CacheMissReason.NotApplicable;
+            CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
             // no match
             if (tokenCacheItems.Count == 0)
@@ -433,7 +433,7 @@ namespace Microsoft.Identity.Client
 
             if (msalAccessTokenCacheItem == null)
             {
-                cacheInfoTelemetry = CacheMissReason.Expired;
+                cacheInfoTelemetry = CacheRefreshReason.Expired;
             }
 
             requestParams.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;

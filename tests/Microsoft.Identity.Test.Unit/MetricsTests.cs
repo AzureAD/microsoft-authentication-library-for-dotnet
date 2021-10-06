@@ -171,8 +171,8 @@ namespace Microsoft.Identity.Test.Unit
             if (refreshIn)
             {
                 //Force Refresh In
-                var at = pca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
-                at.Single().RefreshOnUnixTimestamp = "0";
+                var at = pca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                at = TokenCacheHelper.WithRefreshOn(at, DateTimeOffset.UtcNow);
 
                 result = await pca.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheMissReason == Client.CacheMissReason.ProactivelyRefreshed);
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == Client.CacheRefreshReason.ProactivelyRefreshed);
             }
         }
     }

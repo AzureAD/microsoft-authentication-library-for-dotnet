@@ -51,6 +51,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Specifies the reason for fetching the access token from the identity provider.
         /// </summary>
-        public CacheMissReason CacheMissReason { get; set; }
+        public CacheRefreshReason CacheRefreshReason { get; set; }
     }
 }
