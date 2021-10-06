@@ -69,7 +69,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         ILegacyCachePersistence CreateLegacyCachePersistence();
 
-        ITokenCacheAccessor CreateTokenCacheAccessor();
+        bool LegacyCacheRequiresSerialization { get; }
+
+        ITokenCacheAccessor CreateTokenCacheAccessor(CacheOptions accessorOptions, bool isApplicationTokenCache = false);
 
         ICacheSerializationProvider CreateTokenCacheBlobStorage();
 
@@ -99,6 +101,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent);
 
         IDeviceAuthManager CreateDeviceAuthManager();
+
+        /// <summary>
+        /// Most brokers take care of both silent auth and interactive auth, however some (iOS) 
+        /// does not support silent auth and gives the RT back to MSAL.
+        /// </summary>
+        /// <returns></returns>
+        bool CanBrokerSupportSilentAuth();
 
         /// <summary>
         /// WAM broker has a deeper integration into MSAL because MSAL needs to store 

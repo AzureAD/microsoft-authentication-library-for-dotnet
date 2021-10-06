@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         protected static long CurrentUnixTimeMilliseconds()
         {
-            return CoreHelpers.DateTimeToUnixTimestampMilliseconds(DateTimeOffset.Now);
+            return DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(DateTimeOffset.Now);
         }
 
         public string CorrelationId

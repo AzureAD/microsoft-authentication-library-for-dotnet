@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("This is expected to be removed in MSAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public CacheData SerializeUnifiedAndAdalCache()
         {
-            GuardOnMobilePlatforms();
+            Validate();
             this.ServiceBundle.ApplicationLogger.Info($"[ADAL Caching] Legacy SerializeUnifiedAndAdalCache being called. {_semaphoreSlim.GetCurrentCountLogMessage()}.");
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             _semaphoreSlim.Wait();
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("This is expected to be removed in MSAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public void DeserializeUnifiedAndAdalCache(CacheData cacheData)
         {
-            GuardOnMobilePlatforms();
+            Validate();
             this.ServiceBundle.ApplicationLogger.Info($"[ADAL Caching] Legacy SerializeUnifiedAndAdalCache being called. Acquiring semaphore {_semaphoreSlim.GetCurrentCountLogMessage()}");
 
             _semaphoreSlim.Wait();

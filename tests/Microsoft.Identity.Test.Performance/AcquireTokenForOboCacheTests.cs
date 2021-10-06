@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Performance
     /// 10,000 - 100 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
-    public class AcquireTokenForOboCacheTests
+    public class AcquireTokenForOboLargeCacheTests
     {
         readonly string _scopePrefix = "scope";
         readonly string _tenantPrefix = TestConstants.Utid;
@@ -99,8 +99,7 @@ namespace Microsoft.Identity.Test.Performance
                     string tenant = IsMultiTenant ? $"{_tenantPrefix}{token}" : _tenantPrefix;
                     string scope = $"{_scopePrefix}{token}";
 
-                    MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(scope, tenant, homeAccountId);
-                    atItem.UserAssertionHash = userAssertionHash;
+                    MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(scope, tenant, homeAccountId, userAssertionHash: userAssertionHash);                    
                     _cca.UserTokenCacheInternal.Accessor.SaveAccessToken(atItem);
 
                     MsalRefreshTokenCacheItem rtItem = TokenCacheHelper.CreateRefreshTokenItem(userAssertionHash, homeAccountId);

@@ -280,6 +280,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             broker.IsBrokerInstalledAndInvokable().Returns(true);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
+            platformProxy.CanBrokerSupportSilentAuth().Returns(true);
             platformProxy.CreateBroker(Arg.Any<ApplicationConfiguration>(), Arg.Any<CoreUIParent>()).ReturnsForAnyArgs(broker);
 
             app.ServiceBundle.SetPlatformProxyForTest(platformProxy);
@@ -416,11 +417,17 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (var harness = CreateTestHarness())
             {
+                var platformProxy = Substitute.For<IPlatformProxy>();
+                platformProxy.CanBrokerSupportSilentAuth().Returns(false);
+
+                harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
+
                 var builder = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
                 builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new IosBrokerMock(logger); };
+                builder.Config.PlatformProxy = platformProxy;
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
@@ -445,6 +452,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
 
             var platformProxy = Substitute.For<IPlatformProxy>();
+            platformProxy.CanBrokerSupportSilentAuth().Returns(true);
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
@@ -494,6 +502,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
+                platformProxy.CanBrokerSupportSilentAuth().Returns(true);
                 platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
                 harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
@@ -547,6 +556,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
+                platformProxy.CanBrokerSupportSilentAuth().Returns(true);
                 platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
                 harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);

@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.pop
         private static void AssertTsAndJwkClaims(PoPAuthenticationConfiguration popConfig, System.Security.Claims.ClaimsPrincipal claims)
         {
             long ts = long.Parse(claims.FindAll("ts").Single().Value);
-            CoreAssert.AreEqual(DateTimeOffset.UtcNow, CoreHelpers.UnixTimestampToDateTime(ts), TimeSpan.FromSeconds(5));
+            CoreAssert.IsWithinRange(DateTimeOffset.UtcNow, DateTimeHelpers.UnixTimestampToDateTime(ts), TimeSpan.FromSeconds(5));
 
             string jwkClaim = claims.FindAll("cnf").Single().Value;
             JToken publicKey = JToken.Parse(popConfig.PopCryptoProvider.CannonicalPublicKeyJwk);

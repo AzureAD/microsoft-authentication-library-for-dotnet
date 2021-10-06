@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                                         .WithUserTokenLegacyCachePersistenceForTest(
                                                             new TestLegacyCachePersistance())
                                                         .BuildConcrete();
-
+                app.UserTokenCacheInternal.SetBeforeAccess(n => { });
 
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var accounts = app.UserTokenCacheInternal.GetAccountsAsync(reqParams).Result;
                 foreach (IAccount account in accounts)
                 {
-                    app.UserTokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
+                    (app.UserTokenCacheInternal as TokenCache).RemoveAccountInternal(account, requestContext);
                 }
 
                 Assert.AreEqual(0, httpManager.QueueSize);
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                           .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
                           .WithHttpManager(harness.HttpManager)
                           .BuildConcrete();
-
+                app.UserTokenCacheInternal.SetBeforeAccess(n => { });
                 CreateAdalCache(harness.ServiceBundle.ApplicationLogger, app.UserTokenCacheInternal.LegacyPersistence, TestConstants.s_scope.ToString());
 
                 var adalUsers =
@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 // The ADAL cache contains access tokens, but these are NOT usable by MSAL / v2 endpoint. 
                 // MSAL will however use the RT from ADAL to fetch new access tokens...
-                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_UserFlows);
                 var res = await app.AcquireTokenSilent(TestConstants.s_scope, accounts.First()).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(res);

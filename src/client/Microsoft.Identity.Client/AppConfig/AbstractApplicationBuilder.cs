@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
@@ -71,7 +70,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(instanceDiscoveryJson);
             }
-            
+
             try
             {
                 InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceDiscoveryJson);
@@ -176,6 +175,36 @@ namespace Microsoft.Identity.Client
         {
             Config.HttpManager = httpManager;
             return (T)this;
+        }
+
+        /// <summary>
+        /// Options for MSAL token caches. 
+        /// 
+        /// MSAL maintains a token cache internally in memory. By default, this cache object is part of each instance of <see cref="PublicClientApplication"/> or <see cref="ConfidentialClientApplication"/>.
+        /// This method allows customization of the in-memory token cache of MSAL. 
+        /// 
+        /// MSAL's memory cache is different than token cache serialization. Cache serialization pulls the tokens from a cache (e.g. Redis, Cosmos, or a file on disk), 
+        /// where they are stored in JSON format, into MSAL's internal memory cache. Memory cache operations do not involve JSON operations. 
+        /// 
+        /// External cache serialization remains the recommended way to handle desktop apps, web site and web APIs, as it provides persistence. These options
+        /// do not currently control external cache serialization.
+        /// 
+        /// Detailed guidance for each application type and platform:
+        /// https://aka.ms/msal-net-token-cache-serialization
+        /// </summary>
+        /// <param name="options">Options for the internal MSAL token caches. </param>
+#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
+        public T WithCacheOptions(CacheOptions options)
+        {
+#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
+            throw new PlatformNotSupportedException("WithInteralTokenCacheOptions is supported only on platforms where MSAL stores tokens in memory and not on mobile platforms or UWP.");
+#else
+
+            Config.AccessorOptions = options;
+            return (T)this;
+#endif
         }
 
         internal T WithPlatformProxy(IPlatformProxy platformProxy)
@@ -467,12 +496,12 @@ namespace Microsoft.Identity.Client
             if (string.IsNullOrWhiteSpace(Config.ClientId))
             {
                 throw new MsalClientException(MsalError.NoClientId, MsalErrorMessage.NoClientIdWasSpecified);
-            }         
+            }
 
             if (Config.CustomInstanceDiscoveryMetadata != null && Config.CustomInstanceDiscoveryMetadataUri != null)
             {
                 throw new MsalClientException(
-                    MsalError.CustomMetadataInstanceOrUri, 
+                    MsalError.CustomMetadataInstanceOrUri,
                     MsalErrorMessage.CustomMetadataInstanceOrUri);
             }
 
@@ -505,11 +534,11 @@ namespace Microsoft.Identity.Client
                     Config.AuthorityInfo.AuthorityType == AuthorityType.Aad)
                 {
                     AadAuthority aadAuthority = Authority.CreateAuthority(Config.AuthorityInfo) as AadAuthority;
-                    if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() && 
+                    if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() &&
                         !string.Equals(aadAuthority.TenantId, Config.TenantId))
                     {
                         throw new MsalClientException(
-                            MsalError.AuthorityTenantSpecifiedTwice, 
+                            MsalError.AuthorityTenantSpecifiedTwice,
                             "You specified a different tenant - once in WithAuthority() and once using WithTenant().");
                     }
 
@@ -762,7 +791,7 @@ namespace Microsoft.Identity.Client
             Config.AadAuthorityAudience = authorityAudience;
             Config.ValidateAuthority = validateAuthority;
             return (T)this;
-        }       
+        }
 
         /// <summary>
         /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs

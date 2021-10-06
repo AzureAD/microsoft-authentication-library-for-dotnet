@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             
             // Mandatory parameters
             properties.Add(new JProperty(PoPClaimTypes.Cnf, new JObject(new JProperty(PoPClaimTypes.JWK, publicKeyJWK))));
-            properties.Add(new JProperty(PoPClaimTypes.Ts, CoreHelpers.CurrDateTimeInUnixTimestamp()));
+            properties.Add(new JProperty(PoPClaimTypes.Ts, DateTimeHelpers.CurrDateTimeInUnixTimestamp()));
             properties.Add(new JProperty(PoPClaimTypes.At, msalAccessTokenCacheItem.Secret));
             properties.Add(new JProperty(PoPClaimTypes.Nonce, _popAuthenticationConfiguration.Nonce ?? CreateSimpleNonce()));
 

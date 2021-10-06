@@ -23,11 +23,11 @@ namespace Microsoft.Identity.Test.Unit
             int expectedAccountCount,
             int expectedAppMetadataCount = 0)
         {
-            Assert.AreEqual(expectedAtCount, accessor.GetAllAccessTokens().Count());
-            Assert.AreEqual(expectedRtCount, accessor.GetAllRefreshTokens().Count());
-            Assert.AreEqual(expectedIdtCount, accessor.GetAllIdTokens().Count());
-            Assert.AreEqual(expectedAccountCount, accessor.GetAllAccounts().Count());
-            Assert.AreEqual(expectedAppMetadataCount, accessor.GetAllAppMetadata().Count());
+            Assert.AreEqual(expectedAtCount, accessor.GetAllAccessTokens().Count(), "Access Tokens");
+            Assert.AreEqual(expectedRtCount, accessor.GetAllRefreshTokens().Count(), "Refresh Tokens");
+            Assert.AreEqual(expectedIdtCount, accessor.GetAllIdTokens().Count(), "Id Tokens");
+            Assert.AreEqual(expectedAccountCount, accessor.GetAllAccounts().Count(), "Accounts");
+            Assert.AreEqual(expectedAppMetadataCount, accessor.GetAllAppMetadata().Count(), "App Metadata");
         }
 
         public static void InitializeTokenCacheFromFile(this IClientApplicationBase app, string resourceFile, bool updateATExpiry = false)
@@ -47,8 +47,8 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     var obj = token.Children().Single() as JObject;
 
-                    obj["expires_on"] = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
-                    obj["extended_expires_on"] = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
+                    obj["expires_on"] = DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
+                    obj["extended_expires_on"] = DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
                 }
 
                 content = cacheJson.ToString();

@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // remove B's RT
                 var art = _appB.UserTokenCacheInternal.Accessor.GetAllRefreshTokens()
                     .Single(rt => _appB.AppConfig.ClientId == rt.ClientId && string.IsNullOrEmpty(rt.FamilyId));
-                _appB.UserTokenCacheInternal.Accessor.DeleteRefreshToken(art.GetKey());
+                _appB.UserTokenCacheInternal.Accessor.DeleteRefreshToken(art);
 
                 // B can still use the FRT
                 await SilentAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);

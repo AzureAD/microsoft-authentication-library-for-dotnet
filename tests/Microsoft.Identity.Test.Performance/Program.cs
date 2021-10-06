@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Test.Performance
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<AcquireTokenForOboCacheTests>(
+            BenchmarkRunner.Run<TokenCacheTests>(
                 DefaultConfig.Instance
                     .WithOptions(ConfigOptions.DontOverwriteResults)
                     .AddDiagnoser(MemoryDiagnoser.Default)

@@ -222,7 +222,8 @@
             "User.Read",
             "User.Read User.Read.All",
             "https://management.core.windows.net//.default",
-            "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess"});
+            "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess",
+            "https://graph.microsoft.com/.default"});
             this.cbxScopes.Location = new System.Drawing.Point(73, 69);
             this.cbxScopes.Name = "cbxScopes";
             this.cbxScopes.Size = new System.Drawing.Size(545, 21);

@@ -20,6 +20,8 @@ namespace Microsoft.Identity.Client.Cache.Keys
         private readonly string _clientId;
         private readonly string _familyId;
 
+        internal string HomeAccountId => _homeAccountId;
+
         /// <summary>
         /// Constructor
         /// </summary>

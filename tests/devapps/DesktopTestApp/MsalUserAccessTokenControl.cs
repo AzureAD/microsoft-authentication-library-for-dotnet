@@ -7,10 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 
@@ -29,7 +26,7 @@ namespace DesktopTestApp
         {
             _cache = cache;
             _item = item;
-            accessTokenAuthorityLabel.Text = _item.Authority;
+            accessTokenAuthorityLabel.Text = _item.Environment;
             accessTokenScopesLabel.Text = string.Join(" ", _item.ScopeSet.ToArray());
             expiresOnLabel.Text = _item.ExpiresOn.ToString(CultureInfo.CurrentCulture);
         }
@@ -41,14 +38,13 @@ namespace DesktopTestApp
 
         private void expireAccessTokenButton_Click(object sender, System.EventArgs e)
         {
-            expiresOnLabel.Text = DateTimeOffset.UtcNow.ToString(CultureInfo.CurrentCulture);
-            _item.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow);
-            _cache.AddAccessTokenCacheItem(_item);
+            var newItem = _item.WithExpiresOn(DateTimeOffset.UtcNow);
+            _cache.Accessor.SaveAccessToken(newItem);
         }
 
         private void deleteAccessTokenButton_Click(object sender, EventArgs e)
         {
-            _cache.Accessor.DeleteAccessToken(_item.GetKey());
+            _cache.Accessor.DeleteAccessToken(_item);
             RefreshViewAsyncDelegate?.Invoke();
         }
     }

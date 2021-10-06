@@ -123,11 +123,6 @@ namespace Microsoft.Identity.Client
         X509Certificate2 ClientCredentialCertificate { get; }
 
         /// <summary>
-        /// Send X5C for all requests
-        /// </summary>
-        bool SendX5C { get; }
-
-        /// <summary>
         /// </summary>
         Func<object> ParentActivityOrWindowFunc { get; }
 

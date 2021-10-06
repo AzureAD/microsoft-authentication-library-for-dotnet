@@ -148,28 +148,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [Description("Test unified token cache")]
-        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1037
+        [Description("Test unified token cache")]      
         public void B2C_NoTenantId_CacheFormatValidationTest()
         {
             using (var harness = CreateTestHarness())
             {
                 TestCommon.ResetInternalStaticCaches();
                 IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CNoTenantIdTestData.txt"));
-                RunCacheFormatValidation(harness);
-            }
-        }
-
-        [TestMethod]
-        [Description("Test unified token cache")]
-        [Ignore]
-        // it is not yet decided what version of tenant id should be used
-        // test data generated based on GUID, Msal uses tenantId from passed in authotiry
-        public void B2C_WithTenantId_CacheFormatValidationTest()
-        {
-            using (var harness = CreateTestHarness())
-            {
-                IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CWithTenantIdTestData.txt"));
                 RunCacheFormatValidation(harness);
             }
         }

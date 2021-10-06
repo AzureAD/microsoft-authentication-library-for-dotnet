@@ -550,7 +550,7 @@ namespace Microsoft.Identity.Client
         /// <para>What happens?</para>You did not define an authority at the application level, so it defaults to the public cloud (login.microsoft.com), but the authority at the request level is for a different cloud. Only the tenant can be changed at the request level.
         /// <para>Mitigation</para>Add .WithAuthority("https://login.windows-ppe.net/common) at the application level and specify the tenant at the request level: .WithAuthority("https://login.windows-ppe.net/1234-567-890-12345678). 
         /// </summary>
-        public const string AuthorityHostMismatch = "authority_host_mismatch";       
+        public const string AuthorityHostMismatch = "authority_host_mismatch";
 
         /// <summary>
         /// Duplicate query parameter was found in extraQueryParameters.
@@ -1010,5 +1010,12 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>For troubleshooting details, see https://aka.ms/msal-net-wam .
         /// </summary>
         public const string InitializeProcessSecurityError = "initialize_process_security_error";
+
+        /// <summary>
+        /// <para>What happens?</para>You configured MSAL cache serialization at the same time with a static internal cache via <see cref="AbstractApplicationBuilder{T}.WithSharedTokenCache(TokenCacheAccessorOptions)"/>
+        /// These are mutually exclusive.
+        /// <para>Mitigation</para> Use only one option. Web site and web API scenarios should rely on external cache serialization, as internal cache serialization cannot scale. See https://aka.ms/msal-net-cca-token-cache-serialization
+        /// </summary>
+        public const string StaticCacheWithExternalSerialization = "static_cache_with_external_serialization";
     }
 }

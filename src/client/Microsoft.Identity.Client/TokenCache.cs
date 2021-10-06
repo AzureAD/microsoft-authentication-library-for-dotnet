@@ -3,17 +3,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -32,16 +31,20 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
-        private static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);
         internal const int ExpirationTooLongInDays = 10 * 365;
 
         private readonly IFeatureFlags _featureFlags;
         private readonly ITokenCacheAccessor _accessor;
-        private bool _usesDefaultSerialization = false;
         private volatile bool _hasStateChanged;
 
         internal IServiceBundle ServiceBundle { get; }
         internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
+
+        /// <summary>
+        /// Set to true on some platforms (UWP) where MSAL adds a serializer on its own.
+        /// </summary>
+        internal bool UsesDefaultSerialization { get; set; } = false;
+
         internal string ClientId => ServiceBundle.Config.ClientId;
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
@@ -49,8 +52,6 @@ namespace Microsoft.Identity.Client
 
         private bool IsAppTokenCache { get; }
         bool ITokenCacheInternal.IsApplicationCache => IsAppTokenCache;
-
-        bool ITokenCacheInternal.UsesDefaultSerialization => _usesDefaultSerialization;
 
         private readonly OptionalSemaphoreSlim _semaphoreSlim;
         OptionalSemaphoreSlim ITokenCacheInternal.Semaphore => _semaphoreSlim;
@@ -74,10 +75,10 @@ namespace Microsoft.Identity.Client
             _semaphoreSlim = new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled);
 
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
-            _accessor = isApplicationTokenCache ? new InMemoryPartitionedTokenCacheAccessor(serviceBundle?.ApplicationLogger) : proxy.CreateTokenCacheAccessor();
+            _accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);
             _featureFlags = proxy.GetFeatureFlags();
 
-            _usesDefaultSerialization = optionalDefaultSerializer != null;
+            UsesDefaultSerialization = optionalDefaultSerializer != null;
             optionalDefaultSerializer?.Initialize(this);
 
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
@@ -113,7 +114,7 @@ namespace Microsoft.Identity.Client
             (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
 #endif
         }
-
+       
         private void UpdateAppMetadata(string clientId, string environment, string familyId)
         {
             if (_featureFlags.IsFociEnabled)
@@ -123,6 +124,9 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        // delete all cache entries with intersecting scopes.
+        // this should not happen but we have this as a safe guard
+        // against multiple matches.
         private void DeleteAccessTokensWithIntersectingScopes(
             AuthenticationRequestParameters requestParams,
             IEnumerable<string> environmentAliases,
@@ -131,18 +135,23 @@ namespace Microsoft.Identity.Client
             string homeAccountId,
             string tokenType)
         {
-            // delete all cache entries with intersecting scopes.
-            // this should not happen but we have this as a safe guard
-            // against multiple matches.
-            requestParams.RequestContext.Logger.Info("Looking for scopes for the authority in the cache which intersect with " +
-                      requestParams.Scope.AsSingleString());
+            if (requestParams.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
+            {
+                requestParams.RequestContext.Logger.Info(
+                    "Looking for scopes for the authority in the cache which intersect with " +
+                    requestParams.Scope.AsSingleString());
+            }
+
             IList<MsalAccessTokenCacheItem> accessTokenItemList = new List<MsalAccessTokenCacheItem>();
-            foreach (var accessToken in _accessor.GetAllAccessTokens(tenantId))
+            var partitionKeyFromResponse = CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId);
+            Debug.Assert(partitionKeyFromResponse != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partition");
+
+            foreach (var accessToken in _accessor.GetAllAccessTokens(partitionKeyFromResponse))
             {
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
                     string.Equals(accessToken.TokenType ?? "", tokenType ?? "", StringComparison.OrdinalIgnoreCase) &&
-                    (accessToken.IsAdfs || accessToken.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase)) &&
+                    string.Equals(accessToken.TenantId, tenantId, StringComparison.OrdinalIgnoreCase) &&
                     accessToken.ScopeSet.Overlaps(scopeSet))
                 {
                     requestParams.RequestContext.Logger.Verbose("Intersecting scopes found");
@@ -164,7 +173,7 @@ namespace Microsoft.Identity.Client
 
             foreach (var cacheItem in accessTokenItemList)
             {
-                _accessor.DeleteAccessToken(cacheItem.GetKey());
+                _accessor.DeleteAccessToken(cacheItem);
             }
         }
 
@@ -188,71 +197,25 @@ namespace Microsoft.Identity.Client
             return homeAccIdMatch && clientIdMatch;
         }
 
-        private static void UpdateMapWithAdalAccountsWithClientInfo(
-            string envFromRequest,
-            IEnumerable<string> envAliases,
-            AdalUsersForMsal adalUsers,
-            IDictionary<string, Account> clientInfoToAccountMap)
+        private IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
         {
-
-            foreach (KeyValuePair<string, AdalUserInfo> pair in adalUsers.GetUsersWithClientInfo(envAliases))
-            {
-                var clientInfo = ClientInfo.CreateFromJson(pair.Key);
-                string accountIdentifier = clientInfo.ToAccountIdentifier();
-
-                if (!clientInfoToAccountMap.ContainsKey(accountIdentifier))
-                {
-                    clientInfoToAccountMap[accountIdentifier] = new Account(
-                            accountIdentifier, pair.Value.DisplayableId, envFromRequest);
-                }
-            }
-        }
-
-        private List<IAccount> UpdateWithAdalAccountsWithoutClientInfo(
-            string envFromRequest,
-            IEnumerable<string> envAliases,
-            AdalUsersForMsal adalUsers,
-            IDictionary<string, Account> clientInfoToAccountMap)
-        {
-            var accounts = new List<IAccount>();
-            accounts.AddRange(clientInfoToAccountMap.Values);
-
-            if (ServiceBundle.Config.LegacyCacheCompatibilityEnabled)
-            {
-                var uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
-
-                foreach (AdalUserInfo user in adalUsers.GetUsersWithoutClientInfo(envAliases))
-                {
-                    if (!string.IsNullOrEmpty(user.DisplayableId) && !uniqueUserNames.Contains(user.DisplayableId))
-                    {
-                        accounts.Add(new Account(null, user.DisplayableId, envFromRequest));
-                        uniqueUserNames.Add(user.DisplayableId);
-                    }
-                }
-            }
-
-            return accounts;
-        }
-
-        private IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokensWithNoLocks(bool filterByClientId)
-        {
-            var refreshTokens = _accessor.GetAllRefreshTokens();
+            var refreshTokens = _accessor.GetAllRefreshTokens(partitionKey);
             return filterByClientId
                 ? refreshTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : refreshTokens;
         }
 
-        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string optionalTenantIdFilter = null)
+        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
         {
-            var accessTokens = _accessor.GetAllAccessTokens(optionalTenantIdFilter);
+            var accessTokens = _accessor.GetAllAccessTokens(partitionKey);
             return filterByClientId
                 ? accessTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : accessTokens;
         }
 
-        private IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokensWithNoLocks(bool filterByClientId)
+        private IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokensWithNoLocks(bool filterByClientId, string partitionKey)
         {
-            var idTokens = _accessor.GetAllIdTokens();
+            var idTokens = _accessor.GetAllIdTokens(partitionKey);
             return filterByClientId
                 ? idTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : idTokens;
@@ -261,16 +224,6 @@ namespace Microsoft.Identity.Client
         private static bool FrtExists(List<MsalRefreshTokenCacheItem> allRefreshTokens)
         {
             return allRefreshTokens.Any(rt => rt.IsFRT);
-        }
-
-        private void RemoveAdalUser(IAccount account, ICoreLogger logger)
-        {
-            CacheFallbackOperations.RemoveAdalUser(
-                logger,
-                LegacyCachePersistence,
-                ClientId,
-                account.Username,
-                account.HomeAccountId?.Identifier);
         }
     }
 }

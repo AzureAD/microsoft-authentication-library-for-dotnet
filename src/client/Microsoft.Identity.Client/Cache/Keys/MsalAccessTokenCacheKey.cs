@@ -25,6 +25,8 @@ namespace Microsoft.Identity.Client.Cache.Keys
         private readonly string[] _extraKeyParts;
 
         internal string TenantId => _tenantId;
+        internal string ClientId => _clientId;
+        internal string HomeAccountId => _homeAccountId;
 
         internal MsalAccessTokenCacheKey(
             string environment,
@@ -66,7 +68,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         public override string ToString()
         {
-
             return MsalCacheKeys.GetCredentialKey(
                 _homeAccountId,
                 _environment,

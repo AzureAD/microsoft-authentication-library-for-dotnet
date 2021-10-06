@@ -117,7 +117,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         /// <inheritdoc />
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
+        public override ITokenCacheAccessor CreateTokenCacheAccessor(
+            CacheOptions cacheOptions, 
+            bool isApplicationTokenCache = false)
         {
             return new AndroidTokenCacheAccessor();
         }
@@ -165,5 +167,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             return new AndroidHttpClientFactory();
         }
+
+        public override bool LegacyCacheRequiresSerialization => false;
     }
 }

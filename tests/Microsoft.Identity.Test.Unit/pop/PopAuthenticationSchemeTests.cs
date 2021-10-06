@@ -5,21 +5,19 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
-using Microsoft.Identity.Client.Cache.Items;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Client;
-using System.Threading;
-using Microsoft.Identity.Client.Utils;
-using System.Threading.Tasks;
-using Microsoft.Identity.Test.Common.Mocks;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.PoP
 {
@@ -106,6 +104,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
         }
 
         [TestMethod]
+        [Ignore] // bad test https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2891
         public async Task ValidateKeyExpirationAsync()
         {
             using (var harness = CreateTestHarness())
@@ -119,14 +118,11 @@ namespace Microsoft.Identity.Test.Unit.PoP
                                 .WithHttpManager(harness.HttpManager)
                                 .WithExperimentalFeatures()
                                 .WithClientSecret("some-secret")
-                                .BuildConcrete();             
+                                .BuildConcrete();
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
-                    TestConstants.AuthorityCommonTenant,
-                    null,
-                    null,
-                    false,
-                    MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
+                    authority: TestConstants.AuthorityCommonTenant,
+                    responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop"));
 
                 Guid correlationId = Guid.NewGuid();
                 TestClock testClock = new TestClock();
@@ -142,13 +138,6 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 //Advance time 7 hours. Should still be the same key
                 testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 7);
 
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
-                    TestConstants.AuthorityCommonTenant,
-                    null,
-                    null,
-                    false,
-                    MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
-
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
                 await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
@@ -158,13 +147,6 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 Assert.IsTrue(JWK == provider.CannonicalPublicKeyJwk);
                 //Advance time 2 hours. Should be a different key
                 testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 2);
-
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
-                    TestConstants.AuthorityCommonTenant,
-                    null,
-                    null,
-                    false,
-                    MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
                 await app.AcquireTokenForClient(TestConstants.s_scope)

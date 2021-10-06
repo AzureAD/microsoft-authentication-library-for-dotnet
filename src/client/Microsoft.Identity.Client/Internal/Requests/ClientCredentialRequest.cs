@@ -99,10 +99,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else
                 {
-                    if (cachedAccessTokenItem.NeedsRefresh())
-                    {
-                        SilentRequestHelper.ProcessFetchInBackgroundAsync(() => FetchNewAccessTokenAsync(cancellationToken), logger);
-                    }
+                    // may fire a request to get a new token in the background
+                    SilentRequestHelper.ProcessFetchInBackground(
+                        cachedAccessTokenItem,
+                        () => FetchNewAccessTokenAsync(cancellationToken), logger);
 
                     return authResult;
                 }
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
-        {           
+        {
             // Client credentials should not add the reserved scopes
             // "openid", "profile" and "offline_access" 
             // because AT is on behalf of an app (no profile, no IDToken, no RT)

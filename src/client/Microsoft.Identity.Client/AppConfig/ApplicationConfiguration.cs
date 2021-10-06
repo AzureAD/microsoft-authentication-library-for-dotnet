@@ -68,6 +68,8 @@ namespace Microsoft.Identity.Client
 
         public IPlatformProxy PlatformProxy { get; internal set; }
 
+        public CacheOptions AccessorOptions { get; set; }
+
         public AuthorityInfo AuthorityInfo { get; internal set; }
         public string ClientId { get; internal set; }
         public string TenantId { get; internal set; }

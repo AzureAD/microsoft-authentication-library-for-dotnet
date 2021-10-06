@@ -165,8 +165,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override ILegacyCachePersistence CreateLegacyCachePersistence() => new UapLegacyCachePersistence(Logger, CryptographyManager);
 
-        public override ITokenCacheAccessor CreateTokenCacheAccessor() => new InMemoryTokenCacheAccessor(Logger);
-
         public override ICacheSerializationProvider CreateTokenCacheBlobStorage() => 
             new SynchronizedAndEncryptedFileProvider(Logger);
 
@@ -202,5 +200,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         {
             return new NullDeviceAuthManager();
         }
+
+        public override bool LegacyCacheRequiresSerialization => false;
     }
 }

@@ -115,11 +115,8 @@ namespace UWP_standalone
             // set access tokens as expired
             foreach (var accessItem in ats)
             {
-                accessItem.ExpiresOnUnixTimestamp =
-                    ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
-                    .ToString(CultureInfo.InvariantCulture);
-
-                tokenCacheInternal.Accessor.SaveAccessToken(accessItem);
+                var newAt = accessItem.WithExpiresOn(DateTimeOffset.UtcNow);
+                tokenCacheInternal.Accessor.SaveAccessToken(newAt);
             }
 
             await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -129,8 +126,8 @@ namespace UWP_standalone
         }
 
         private async void ClearCacheAsync(object sender, RoutedEventArgs e)
-        {            
-            var pca = CreatePublicClient();            
+        {
+            var pca = CreatePublicClient();
 
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 

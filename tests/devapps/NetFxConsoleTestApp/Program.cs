@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Cache.Items;
 #if NET47
 using Microsoft.Identity.Client.Desktop;
 #endif
@@ -51,7 +52,7 @@ namespace NetFx
         private static readonly HttpMethod s_popMethod = HttpMethod.Get;
 
         private static bool s_usePoP = false;
-        private static bool s_useBroker = false;
+        private static bool s_useBroker = true;
 
         // These are not really secret as they do not protect anything, but validaton tools will complain
         // if we have secrets in the code. 
@@ -135,10 +136,10 @@ namespace NetFx
             if (s_useBroker)
             {
                 IntPtr consoleWindowHandle = GetConsoleWindow();
-                Func<IntPtr> c = () => consoleWindowHandle;
+                Func<IntPtr> consoleWindowHandleProvider = () => consoleWindowHandle;
 
                 builder = builder
-                    .WithParentActivityOrWindow(c)
+                    //.WithParentActivityOrWindow(consoleWindowHandleProvider)
                     .WithExperimentalFeatures()
                     
 
@@ -253,9 +254,10 @@ namespace NetFx
 
                             break;
                         case '4':
-                            IntPtr x = GetConsoleWindow();
+                            //IntPtr consoleWindowHandle = GetConsoleWindow();
                             var interactiveBuilder = pca
                                 .AcquireTokenInteractive(s_scopes);
+                                //.WithParentActivityOrWindow(consoleWindowHandle);
                             
 
                             AuthenticationResult authResult = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
@@ -442,13 +444,25 @@ namespace NetFx
                             var tokenCacheInternal = pca.UserTokenCache as ITokenCacheInternal;
                             var ats = tokenCacheInternal.Accessor.GetAllAccessTokens();
                             // set access tokens as expired
-                            foreach (var accessItem in ats)
+                            foreach (var atItem in ats)
                             {
-                                accessItem.ExpiresOnUnixTimestamp =
-                                    ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
-                                    .ToString(CultureInfo.InvariantCulture);
+                                MsalAccessTokenCacheItem newAtItem = new MsalAccessTokenCacheItem(
+                                   atItem.Environment,
+                                   atItem.ClientId,
+                                   atItem.ScopeString,
+                                   atItem.TenantId,
+                                   atItem.Secret,
+                                   atItem.CachedAt,
+                                   DateTimeOffset.UtcNow, // expires now
+                                   atItem.ExtendedExpiresOn,
+                                   atItem.RawClientInfo,
+                                   atItem.HomeAccountId,
+                                   atItem.KeyId,
+                                   atItem.RefreshOn,
+                                   atItem.TokenType,
+                                   atItem.UserAssertionHash);
 
-                                tokenCacheInternal.Accessor.SaveAccessToken(accessItem);
+                                tokenCacheInternal.Accessor.SaveAccessToken(newAtItem);
                             }
 
                             TokenCacheNotificationArgs args =
@@ -464,6 +478,7 @@ namespace NetFx
                             await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
 
                             break;
+                            
 
                         case 'x':
                             return;

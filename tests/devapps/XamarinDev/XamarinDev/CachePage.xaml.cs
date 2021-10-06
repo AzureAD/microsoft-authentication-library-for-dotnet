@@ -80,11 +80,8 @@ namespace XamarinDev
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
             var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
 
-            // set access token as expired
-            accessTokenCacheItem.ExpiresOnUnixTimestamp = GetCurrentTimestamp();
-
-            // update entry in the cache
-            tokenCache.AddAccessTokenCacheItem(accessTokenCacheItem);
+            var newAt = accessTokenCacheItem.WithExpiresOn(DateTimeOffset.UtcNow);
+            tokenCache.Accessor.SaveAccessToken(newAt);
 
             RefreshCacheViewAsync().ConfigureAwait(true);
         }
@@ -95,7 +92,7 @@ namespace XamarinDev
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
 
             var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
-            tokenCache.Accessor.DeleteAccessToken(accessTokenCacheItem.GetKey());
+            tokenCache.Accessor.DeleteAccessToken(accessTokenCacheItem);
 
             RefreshCacheViewAsync().ConfigureAwait(true);
         }

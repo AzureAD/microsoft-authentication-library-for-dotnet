@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using System.Threading;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client
 {
@@ -77,6 +78,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        
         internal virtual async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
@@ -190,14 +192,28 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">Cancellation token</param>
         public async Task RemoveAsync(IAccount account, CancellationToken cancellationToken = default)
         {
-            RequestContext requestContext = CreateRequestContext(Guid.NewGuid(), cancellationToken);            
+            Guid correlationId = Guid.NewGuid();
+            RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
+            requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId.ToString());
+            requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
+
+            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+              requestContext,
+              null).ConfigureAwait(false);
+
+            var authParameters = new AuthenticationRequestParameters(
+                   ServiceBundle,
+                   UserTokenCacheInternal,
+                   new AcquireTokenCommonParameters() { ApiId = requestContext.ApiEvent.ApiId },
+                   requestContext,
+                   authority);
 
             if (account != null && UserTokenCacheInternal != null)
             {
-                await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
+                await UserTokenCacheInternal.RemoveAccountAsync(account, authParameters).ConfigureAwait(false);
             }
 
-            if (AppConfig.IsBrokerEnabled)
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -250,7 +266,7 @@ namespace Microsoft.Identity.Client
             ICacheSessionManager cacheSessionManager, 
             CancellationToken cancellationToken)
         {
-            if (AppConfig.IsBrokerEnabled)
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
                 if (broker.IsBrokerInstalledAndInvokable())
