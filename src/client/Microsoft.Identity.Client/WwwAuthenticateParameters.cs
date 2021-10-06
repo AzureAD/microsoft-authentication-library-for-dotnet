@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client
         internal IDictionary<string, string> RawParameters { get; private set; }
 
         /// <summary>
-        /// AAD tenant ID to which the Azure subscription belongs to.
+        /// Gets Azure AD tenant ID.
         /// </summary>
         public string GetTenantId() => Instance.Authority
                                                .CreateAuthority(Authority, validateAuthority: true)
