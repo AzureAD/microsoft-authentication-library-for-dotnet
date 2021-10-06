@@ -306,6 +306,7 @@ namespace Microsoft.Identity.Test.Unit
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
 
+        [TestMethod]
         public async Task CreateFromResourceResponseAsync_ResourceUri_Async(string resourceUri)
         {
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
