@@ -43,8 +43,8 @@ namespace Microsoft.Identity.Client
         public long DurationInHttpInMs { get; set; }
 
         /// <summary>
-        /// Time, in milliseconds, remaining before the token will be proactively refreshed.
-        /// This value may be null.
+        /// Specifies the time when the cached token should be proactively refreshed.
+        /// This value may be null if proactive refresh is not enabled.
         /// </summary>
         public DateTimeOffset? RefreshOn { get; set; } = null;
 
