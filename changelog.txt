@@ -1,12 +1,29 @@
+4.37.0-preview
+==========
+### New Features:
+**MSAL.NET now logs an error when `common` or `organizations` authority is used in the client credentials request**. See [#2887](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2887).  
+**Added the ability to enable sending the certificate (as x5c) once when building the confidential client application**, rather than on every single request. See [#2804](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2804).  
+**Added additional methods to help create `WwwAuthenticateParameters`**. See [#2907](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2907).  
+**Added an additional async overload for `ConfidentialClientApplicationBuilder.CreateClientAssertion`**. See [#2863](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2863).  
+**Added an ability to enable a shared token cache between different MSAL client application instances**, which can be set with the new `WithCacheOptions` API call. See [Enabling shared cache](https://aka.ms/msal-net-shared-cache), [#2849](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2849).  
+
+### Bug Fixes:
+**Improved support for calling regional endpoints, especially in Azure Functions**. See [#2803](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2803).  
+**Fixed a `NullReferenceException` when calling`AcquireTokenInteractive` with a login hint in WAM**. See [#2903](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2903).  
+**Improved the error message when the application is throttled by the identity provider**. See [#2855](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2855).  
+**When proactive token refresh is enabled, MSAL.NET now refreshes the tokens on a background thread to improve performance**. See [#2795](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2795).  
+**Improved caching performance by adding partitioning to the default in-memory user cache** used in user flows (like acquire token on-behalf-of, by authorization code). See [#2861](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2861), [#2881](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2881).  
+**Improved performance by refactoring date handling when working with access tokens**. See [#2893](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2893).  
+
 4.36.2
 ==========
-### Bug fix
-Authentication with the broker no longer works on iOS (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2897)
+### Bug Fixes:
+**Fixed a regression in authentication with the iOS broker**. See [#2913](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2913).  
 
 4.36.1
 ==========
 ### New Features:
-**Added support for Application ID URIs to be used in confidential client applications**. Confidential client applications, specifically web APIs, will now be able to use either the Client ID (GUID) or the Application ID URI, in the confidential client application builder. See [#2852](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2852)
+**Added support for Application ID URIs to be used in confidential client applications**. Confidential client applications, specifically web APIs, will now be able to use either the Client ID (GUID) or the Application ID URI, in the confidential client application builder. See [#2852](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2852).  
 
 4.36.0
 ==========
