@@ -86,6 +86,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cacheInfoTelemetry = (cachedAccessToken == null) ? CacheRefreshReason.NoCachedAccessToken : CacheRefreshReason.ForceRefreshOrClaims;
             }
 
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
+            }
+
             // No AT in the cache or AT needs to be refreshed
             try
             {
@@ -100,17 +105,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     // may fire a request to get a new token in the background
                     if (shouldRefresh)
                     {
-                        cacheInfoTelemetry = CacheRefreshReason.ProactivelyRefreshed;
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.ProactivelyRefreshed;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessToken,
                         () => RefreshRtOrFetchNewAccessTokenAsync(cancellationToken), logger);
                     }
-                }
-
-                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
-                {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
                 }
 
                 return authResult;
