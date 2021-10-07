@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -159,7 +157,6 @@ namespace Microsoft.Identity.Test.Unit
                 ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId)
             };
             var httpClient = new HttpClient(handler);
-            httpClientFactory.GetHttpClient().Returns(httpClient);
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
@@ -178,7 +175,6 @@ namespace Microsoft.Identity.Test.Unit
                 ResponseMessage = CreateInvalidTokenHttpErrorResponse(authority: TestConstants.B2CAuthority)
             };
             var httpClient = new HttpClient(handler);
-            httpClientFactory.GetHttpClient().Returns(httpClient);
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
@@ -199,7 +195,6 @@ namespace Microsoft.Identity.Test.Unit
                 ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId, authority)
             };
             var httpClient = new HttpClient(handler);
-            httpClientFactory.GetHttpClient().Returns(httpClient);
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
             Assert.IsNull(authParams.GetTenantId());
@@ -214,44 +209,6 @@ namespace Microsoft.Identity.Test.Unit
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri);
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientAsync()
-        {
-            const string resourceUri = "https://example.com/";
-            var tenantId = Guid.NewGuid().ToString();
-
-            var handler = new MockHttpMessageHandler
-            {
-                ExpectedMethod = HttpMethod.Get,
-                ExpectedUrl = resourceUri,
-                ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId)
-            };
-            var httpClient = new HttpClient(handler);
-
-            _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClient_CancellationToken_Async()
-        {
-            const string resourceUri = "https://example.com/";
-            var tenantId = Guid.NewGuid().ToString();
-
-            var handler = new MockHttpMessageHandler
-            {
-                ExpectedMethod = HttpMethod.Get,
-                ExpectedUrl = resourceUri,
-                ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId)
-            };
-            var httpClient = Substitute.For<HttpClient>(handler);
-
-            var cts = new CancellationTokenSource();
-
-            _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri, cts.Token).ConfigureAwait(false);
-
-            httpClient.Received();
         }
 
         [TestMethod]
