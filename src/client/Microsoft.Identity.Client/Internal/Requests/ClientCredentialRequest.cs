@@ -68,6 +68,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             TokenSource.Cache,
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
+                else
+                {
+                    cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
+                }
             }
             else
             {
@@ -85,7 +89,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (cachedAccessTokenItem == null)
                 {
-                    cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
                     authResult = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else

@@ -293,6 +293,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 cacheAccess.WaitTo_AssertAcessCounts(1, 1);
                 Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
                 Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+
+                result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                    .ExecuteAsync()
+                                    .ConfigureAwait(false);
+
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
             }
         }
 
@@ -327,6 +333,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 cacheAccess.WaitTo_AssertAcessCounts(1, 1);
                 Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
                 Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+
+                result = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion, "assertiontype"))
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
             }
         }
 
