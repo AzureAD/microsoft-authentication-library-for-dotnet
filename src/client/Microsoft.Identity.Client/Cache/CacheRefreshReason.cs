@@ -9,13 +9,13 @@ namespace Microsoft.Identity.Client
     public enum CacheRefreshReason
     {
         /// <summary>
-        /// When the cache is not supposed to be hit to make the request (interactive call, username password call, device code flow, etc.)
+        /// When a token is found in the cache or the cache is not supposed to be hit when making the request (interactive call, username password call, device code flow, etc.)
         /// </summary>
         NotApplicable = 0,
         /// <summary>
-        /// When the token request goes to the identity provider because force_refresh was set to true
+        /// When the token request goes to the identity provider because force_refresh was set to true. Also occurs if WithClaims() is used.
         /// </summary>
-        ForceRefresh = 1,
+        ForceRefresh = 1, //ForceRefreshOrClaims TODO
         /// <summary>
         /// When the token request goes to the identity provider because no cached access token exists
         /// </summary>

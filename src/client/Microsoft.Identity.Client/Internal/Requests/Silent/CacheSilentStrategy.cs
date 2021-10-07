@@ -55,7 +55,6 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                     Metrics.IncrementTotalAccessTokensFromCache();
                     authResult = await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
-                    cacheInfoTelemetry = CacheRefreshReason.ProactivelyRefreshed;
                 }
                 else
                 {
@@ -68,22 +67,32 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set. ");
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
-            {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
-            }
-
             // No AT or AT neesd to be refreshed 
             try
             {
                 if (cachedAccessTokenItem == null)
                 {
-                    return await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
+                    authResult = await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+
+                    // may fire a request to get a new token in the background
+                    if (shouldRefresh)
+                    {
+                        cacheInfoTelemetry = CacheRefreshReason.ProactivelyRefreshed;
+
+                        SilentRequestHelper.ProcessFetchInBackground(
+                        cachedAccessTokenItem,
+                        () => RefreshRtOrFailAsync(cancellationToken), logger);
+                    }
                 }
 
-                SilentRequestHelper.ProcessFetchInBackground(
-                    cachedAccessTokenItem , 
-                    () => RefreshRtOrFailAsync(cancellationToken), logger);
+                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
+                {
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
+                }
 
                 return authResult;
             }

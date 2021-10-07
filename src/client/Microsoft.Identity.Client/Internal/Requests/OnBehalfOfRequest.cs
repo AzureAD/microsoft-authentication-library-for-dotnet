@@ -86,26 +86,34 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cacheInfoTelemetry = (cachedAccessToken == null) ? CacheRefreshReason.NoCachedAccessToken : CacheRefreshReason.ForceRefresh;
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
-            {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
-            }
-
             // No AT in the cache or AT needs to be refreshed
             try
             {
                 if (cachedAccessToken == null)
                 {
-                    return await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                    authResult = await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    SilentRequestHelper.ProcessFetchInBackground(
-                        cachedAccessToken, 
-                        () => RefreshRtOrFetchNewAccessTokenAsync(cancellationToken), logger);
+                    var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessToken);
 
-                    return authResult;
+                    // may fire a request to get a new token in the background
+                    if (shouldRefresh)
+                    {
+                        cacheInfoTelemetry = CacheRefreshReason.ProactivelyRefreshed;
+
+                        SilentRequestHelper.ProcessFetchInBackground(
+                        cachedAccessToken,
+                        () => RefreshRtOrFetchNewAccessTokenAsync(cancellationToken), logger);
+                    }
                 }
+
+                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
+                {
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
+                }
+
+                return authResult;
             }
             catch (MsalServiceException e)
             {
