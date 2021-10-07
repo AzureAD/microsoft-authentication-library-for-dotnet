@@ -67,6 +67,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set. ");
             }
 
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
+            }
+
             // No AT or AT neesd to be refreshed 
             try
             {
@@ -81,17 +86,12 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     // may fire a request to get a new token in the background
                     if (shouldRefresh)
                     {
-                        cacheInfoTelemetry = CacheRefreshReason.ProactivelyRefreshed;
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.ProactivelyRefreshed;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
                         () => RefreshRtOrFailAsync(cancellationToken), logger);
                     }
-                }
-
-                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
-                {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
                 }
 
                 return authResult;
