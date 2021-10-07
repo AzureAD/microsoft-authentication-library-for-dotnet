@@ -18,7 +18,7 @@
 4.36.2
 ==========
 ### Bug Fixes:
-**Fixed a regression in authentication with the iOS broker**. See [#2897](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2897).  
+**Fixed a regression in authentication with the iOS broker**. See [#2913](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2913).  
 
 4.36.1
 ==========
