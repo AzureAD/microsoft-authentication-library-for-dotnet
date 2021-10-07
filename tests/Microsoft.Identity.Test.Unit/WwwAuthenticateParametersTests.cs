@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -146,36 +144,60 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNull(authParams.Error);
         }
 
-        [DataRow(null)]
         [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Null_Async(IMsalHttpClientFactory httpClientFactory)
+        public async Task CreateFromResourceResponseAsync_HttpClient_Arm_GetTenantId_Async()
         {
             const string resourceUri = "https://example.com/";
-
-            Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri);
-
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Async()
-        {
-            const string resourceUri = "https://example.com/";
+            string tenantId = Guid.NewGuid().ToString();
 
             var handler = new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Get,
                 ExpectedUrl = resourceUri,
-                ResponseMessage = CreateInvalidTokenHttpErrorResponse()
+                ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId)
             };
             var httpClient = new HttpClient(handler);
+            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
-            httpClientFactory.GetHttpClient().Returns(httpClient);
+            Assert.AreEqual(authParams.GetTenantId(), tenantId);
+        }
 
-            _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
+        [TestMethod]
+        public async Task CreateFromResourceResponseAsync_HttpClient_B2C_GetTenantId_Async()
+        {
+            const string resourceUri = "https://example.com/";
+            const string tenantId = "tenant";
 
-            httpClientFactory.Received().GetHttpClient();
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedUrl = resourceUri,
+                ResponseMessage = CreateInvalidTokenHttpErrorResponse(authority: TestConstants.B2CAuthority)
+            };
+            var httpClient = new HttpClient(handler);
+            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+
+            Assert.AreEqual(authParams.GetTenantId(), tenantId);
+        }
+
+        [TestMethod]
+        [DataRow(TestConstants.ADFSAuthority)]
+        [DataRow(TestConstants.ADFSAuthority2)]
+        public async Task CreateFromResourceResponseAsync_HttpClient_ADFS_GetTenantId_Null_Async(string authority)
+        {
+            const string resourceUri = "https://example.com/";
+            string tenantId = Guid.NewGuid().ToString();
+
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedUrl = resourceUri,
+                ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId, authority)
+            };
+            var httpClient = new HttpClient(handler);
+            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+
+            Assert.IsNull(authParams.GetTenantId());
         }
 
         [DataRow(null)]
@@ -190,45 +212,9 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientAsync()
-        {
-            const string resourceUri = "https://example.com/";
-
-            var handler = new MockHttpMessageHandler
-            {
-                ExpectedMethod = HttpMethod.Get,
-                ExpectedUrl = resourceUri,
-                ResponseMessage = CreateInvalidTokenHttpErrorResponse()
-            };
-            var httpClient = new HttpClient(handler);
-
-            var _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClient_CancellationToken_Async()
-        {
-            const string resourceUri = "https://example.com/";
-
-            var handler = new MockHttpMessageHandler
-            {
-                ExpectedMethod = HttpMethod.Get,
-                ExpectedUrl = resourceUri,
-                ResponseMessage = CreateInvalidTokenHttpErrorResponse()
-            };
-            var httpClient = Substitute.For<HttpClient>(handler);
-
-            var cts = new CancellationTokenSource();
-
-            var _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri, cts.Token).ConfigureAwait(false);
-
-            httpClient.Received();
-        }
-
         [DataRow(null)]
         [DataRow("")]
-        [TestMethod]
-        public async Task CreateFromResourceResponseAsync_ResourceUri_Async(string resourceUri)
+        public async Task CreateFromResourceResponseAsync_Incorrect_ResourceUri_Async(string resourceUri)
         {
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
 
@@ -300,13 +286,13 @@ namespace Microsoft.Identity.Test.Unit
             };
         }
 
-        private static HttpResponseMessage CreateInvalidTokenHttpErrorResponse()
+        private static HttpResponseMessage CreateInvalidTokenHttpErrorResponse(string tenantId = "", string authority = "https://login.windows.net")
         {
             return new HttpResponseMessage(HttpStatusCode.Unauthorized)
             {
                 Headers =
                 {
-                    { WwwAuthenticateHeaderName, "Bearer authorization_uri=\"https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47\", error=\"invalid_token\", error_description=\"The authentication failed because of missing 'Authorization' header.\"" }
+                    { WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"{authority}/{tenantId}\", error=\"invalid_token\", error_description=\"The authentication failed because of missing 'Authorization' header.\"" }
                 }
             };
         }

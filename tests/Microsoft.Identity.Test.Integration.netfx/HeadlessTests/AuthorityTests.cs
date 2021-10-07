@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,13 +9,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -25,6 +24,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string[] s_scopes = { "User.Read" };
 
         public TestContext TestContext { get; set; }
+
 #if NET_CORE
 
         [TestMethod]
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 user.Upn,
                 new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
                 // BugBug https://identitydivision.visualstudio.com/Engineering/_workitems/edit/776308/
-                // sts.windows.net fails when doing instance discovery, e.g.: 
+                // sts.windows.net fails when doing instance discovery, e.g.:
                 // https://sts.windows.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Fsts.windows.net%2Ff645ad92-e38d-4d1a-b510-d1b09a74a8ca%2Foauth2%2Fv2.0%2Fauthorize
                 .WithAuthority("https://login.windows.net/" + labResponse.Lab.TenantId + "/")
                 .ExecuteAsync()
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("Acquire a token using a not so common authority alias");
 
-            HttpRequestException exception = await AssertException.TaskThrowsAsync<HttpRequestException>(() =>
+            _ = await AssertException.TaskThrowsAsync<HttpRequestException>(() =>
                  pca.AcquireTokenByUsernamePassword(
                     s_scopes,
                      user.Upn,
@@ -115,13 +115,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
 
         /// <summary>
-        /// If this test fails, please update the <see cref="KnownMetadataProvider"/> to 
+        /// If this test fails, please update the <see cref="KnownMetadataProvider"/> to
         /// use whatever Evo uses (i.e. the aliases, preferred network / metadata from the url below).
         /// </summary>
         [TestMethod]
         public async Task KnownInstanceMetadataIsUpToDateAsync()
         {
-            string validDiscoveryUri = @"https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.microsoftonline.com%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize";
+            const string validDiscoveryUri = @"https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.microsoftonline.com%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize";
             HttpClient httpClient = new HttpClient();
             HttpResponseMessage discoveryResponse = await httpClient.SendAsync(
                 new HttpRequestMessage(
@@ -148,23 +148,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 new InstanceDiscoveryMetadataEntryComparer());
         }
 
+        private class InstanceDiscoveryMetadataEntryComparer : IEqualityComparer<InstanceDiscoveryMetadataEntry>
+        {
+            public bool Equals(InstanceDiscoveryMetadataEntry x, InstanceDiscoveryMetadataEntry y)
+            {
+                return x != null &&
+                       y != null &&
+                       string.Equals(x.PreferredCache, y.PreferredCache, StringComparison.OrdinalIgnoreCase) &&
+                       string.Equals(x.PreferredNetwork, y.PreferredNetwork, StringComparison.OrdinalIgnoreCase) &&
+                       Enumerable.SequenceEqual(x.Aliases, y.Aliases, StringComparer.OrdinalIgnoreCase);
+            }
+
+            public int GetHashCode(InstanceDiscoveryMetadataEntry obj)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         #endif
-
-    }
-
-    internal class InstanceDiscoveryMetadataEntryComparer : IEqualityComparer<InstanceDiscoveryMetadataEntry>
-    {
-        public bool Equals(InstanceDiscoveryMetadataEntry x, InstanceDiscoveryMetadataEntry y)
-        {
-            return
-                 string.Equals(x.PreferredCache, y.PreferredCache, System.StringComparison.OrdinalIgnoreCase) &&
-                 string.Equals(x.PreferredNetwork, y.PreferredNetwork, System.StringComparison.OrdinalIgnoreCase) &&
-                 Enumerable.SequenceEqual(x.Aliases, y.Aliases);
-        }
-
-        public int GetHashCode(InstanceDiscoveryMetadataEntry obj)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }
