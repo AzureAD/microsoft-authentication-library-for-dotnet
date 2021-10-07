@@ -4,7 +4,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Specifies the reason for fetching the access token from the identity provider.
+    /// Specifies the reason for fetching the access token from the identity provider when using AcquireTokenSilent, AcquireTokenForClient or AcquireTokenOnBehalfOf.
     /// </summary>
     public enum CacheRefreshReason
     {
@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// When the token request goes to the identity provider because force_refresh was set to true. Also occurs if WithClaims() is used.
         /// </summary>
-        ForceRefresh = 1, //ForceRefreshOrClaims TODO
+        ForceRefreshOrClaims = 1,
         /// <summary>
         /// When the token request goes to the identity provider because no cached access token exists
         /// </summary>

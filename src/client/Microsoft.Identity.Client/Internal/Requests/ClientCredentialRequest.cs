@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             else
             {
-                cacheInfoTelemetry = CacheRefreshReason.ForceRefresh;
+                cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
             }
 

@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
             string[] splitApiIdAndCacheInfo = splitCsv[1].Split(',');
             ApiId.Add(splitApiIdAndCacheInfo[0]);
             Enum.TryParse(splitApiIdAndCacheInfo[1], out CacheRefreshReason cacheInfoTelemetry);
-            ForceRefresh = CacheRefreshReason.ForceRefresh == cacheInfoTelemetry;
+            ForceRefresh = CacheRefreshReason.ForceRefreshOrClaims == cacheInfoTelemetry;
         }
 
         public void SplitPreviousCsv(string telemetryCsv)

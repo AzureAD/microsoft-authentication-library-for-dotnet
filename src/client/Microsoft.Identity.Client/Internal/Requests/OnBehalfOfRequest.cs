@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             else
             {
                 logger.Info("[OBO Request] Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
-                cacheInfoTelemetry = (cachedAccessToken == null) ? CacheRefreshReason.NoCachedAccessToken : CacheRefreshReason.ForceRefresh;
+                cacheInfoTelemetry = (cachedAccessToken == null) ? CacheRefreshReason.NoCachedAccessToken : CacheRefreshReason.ForceRefreshOrClaims;
             }
 
             // No AT in the cache or AT needs to be refreshed
