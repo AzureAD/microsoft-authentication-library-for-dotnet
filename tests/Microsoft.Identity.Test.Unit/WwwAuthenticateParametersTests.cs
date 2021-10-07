@@ -146,41 +146,8 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNull(authParams.Error);
         }
 
-        [DataRow(null)]
         [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Null_Async(IMsalHttpClientFactory httpClientFactory)
-        {
-            const string resourceUri = "https://example.com/";
-
-            Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri);
-
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Async()
-        {
-            const string resourceUri = "https://example.com/";
-            var tenantId = Guid.NewGuid().ToString();
-
-            var handler = new MockHttpMessageHandler
-            {
-                ExpectedMethod = HttpMethod.Get,
-                ExpectedUrl = resourceUri,
-                ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId)
-            };
-            var httpClient = new HttpClient(handler);
-
-            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
-            httpClientFactory.GetHttpClient().Returns(httpClient);
-
-            _ = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
-
-            httpClientFactory.Received().GetHttpClient();
-        }
-
-        [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_Arm_GetTenantId_Async()
+        public async Task CreateFromResourceResponseAsync_HttpClient_Arm_GetTenantId_Async()
         {
             const string resourceUri = "https://example.com/";
             string tenantId = Guid.NewGuid().ToString();
@@ -193,16 +160,13 @@ namespace Microsoft.Identity.Test.Unit
             };
             var httpClient = new HttpClient(handler);
 
-            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
-            httpClientFactory.GetHttpClient().Returns(httpClient);
-
-            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
+            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
         }
 
         [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_B2C_GetTenantId_Async()
+        public async Task CreateFromResourceResponseAsync_HttpClient_B2C_GetTenantId_Async()
         {
             const string resourceUri = "https://example.com/";
             const string tenantId = "tenant";
@@ -215,10 +179,7 @@ namespace Microsoft.Identity.Test.Unit
             };
             var httpClient = new HttpClient(handler);
 
-            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
-            httpClientFactory.GetHttpClient().Returns(httpClient);
-
-            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
+            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
         }
@@ -226,7 +187,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         [DataRow(TestConstants.ADFSAuthority)]
         [DataRow(TestConstants.ADFSAuthority2)]
-        public async Task CreateFromResourceResponseAsync_HttpClientFactory_ADFS_GetTenantId_Null_Async(string authority)
+        public async Task CreateFromResourceResponseAsync_HttpClient_ADFS_GetTenantId_Null_Async(string authority)
         {
             const string resourceUri = "https://example.com/";
             string tenantId = Guid.NewGuid().ToString();
@@ -239,10 +200,7 @@ namespace Microsoft.Identity.Test.Unit
             };
             var httpClient = new HttpClient(handler);
 
-            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
-            httpClientFactory.GetHttpClient().Returns(httpClient);
-
-            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClientFactory, resourceUri).ConfigureAwait(false);
+            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
             Assert.IsNull(authParams.GetTenantId());
         }
