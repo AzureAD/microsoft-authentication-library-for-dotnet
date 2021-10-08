@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string LoginHint { get; set; }
         public string CodeVerifier { get; set; }
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
+        public Prompt Prompt { get; set; } = Prompt.NotSpecified;
 
         public AcquireTokenInteractiveParameters ToInteractiveParameters()
         {
@@ -23,7 +24,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 Account = Account,
                 ExtraScopesToConsent = ExtraScopesToConsent,
                 LoginHint = LoginHint,
-                Prompt = Prompt.SelectAccount,
+                Prompt = Prompt,
                 UseEmbeddedWebView = WebViewPreference.NotSpecified,
                 CodeVerifier = CodeVerifier
             };
