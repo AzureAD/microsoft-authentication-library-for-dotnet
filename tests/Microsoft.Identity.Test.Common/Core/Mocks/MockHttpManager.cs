@@ -2,12 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -27,11 +30,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             _testContext = testContext;
         }
 
-        private Queue<HttpMessageHandler> _httpMessageHandlerQueue
+        private ConcurrentQueue<HttpMessageHandler> _httpMessageHandlerQueue
         {
             get;
             set;
-        } = new Queue<HttpMessageHandler>();
+        } = new ConcurrentQueue<HttpMessageHandler>();
 
         /// <inheritdoc />
         public void Dispose()
@@ -54,11 +57,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             string testName = _testContext?.TestName ?? "";
             Trace.WriteLine($"Test {testName} adds an HttpMessageHandler for { GetExpectedUrlFromHandler(handler) }");
-            _httpMessageHandlerQueue.Enqueue(handler);
+            _httpMessageHandlerQueue.Enqueue(handler);           
+
             return handler;
         }
 
         public int QueueSize => _httpMessageHandlerQueue.Count;
+
 
         /// <inheritdoc />
 
@@ -72,13 +77,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
             else
             {
-
-                if (_httpMessageHandlerQueue.Count == 0)
+                if (!_httpMessageHandlerQueue.TryDequeue(out messageHandler))
                 {
                     Assert.Fail("The MockHttpManager's queue is empty. Cannot serve another response");
                 }
-
-                messageHandler = _httpMessageHandlerQueue.Dequeue();
             }
 
 
