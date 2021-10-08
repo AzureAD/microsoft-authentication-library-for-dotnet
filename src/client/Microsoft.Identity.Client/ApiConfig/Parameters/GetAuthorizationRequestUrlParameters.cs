@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string LoginHint { get; set; }
         public string CodeVerifier { get; set; }
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
-        public Prompt Prompt { get; set; } = Prompt.NotSpecified;
+        public Prompt Prompt { get; set; } = Prompt.SelectAccount;
 
         public AcquireTokenInteractiveParameters ToInteractiveParameters()
         {

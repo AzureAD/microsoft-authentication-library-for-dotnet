@@ -1026,8 +1026,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(uri);
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
 
-                Assert.IsTrue(qp.ContainsKey("prompt"));
-                Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp["prompt"]);
+                Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
+                Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp[TestConstants.PromptParam]); 
             }
         }
 
@@ -1036,8 +1036,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             Dictionary<string, string> qp = GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt.SelectAccount);
 
-            Assert.IsTrue(qp.ContainsKey("prompt"));
-            Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp["prompt"]);
+            Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
+            Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp[TestConstants.PromptParam]);
 
         }
 
@@ -1046,7 +1046,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             Dictionary<string, string> qp = GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt.NoPrompt);
 
-            Assert.IsFalse(qp.ContainsKey("prompt"));
+            Assert.IsFalse(qp.ContainsKey(TestConstants.PromptParam));
 
         }
 
@@ -1055,8 +1055,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             Dictionary<string, string> qp =  GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt.NotSpecified);
 
-            Assert.IsTrue(qp.ContainsKey("prompt"));
-            Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp["prompt"]);
+            Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
+            Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp[TestConstants.PromptParam]);
             
         }
 
@@ -1065,9 +1065,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             Dictionary<string, string> qp = GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt.Create);
 
-            Assert.IsTrue(qp.ContainsKey("prompt"));
-            Assert.AreEqual(Prompt.Create.PromptValue, qp["prompt"]);
-
+            Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
+            Assert.AreEqual(Prompt.Create.PromptValue, qp[TestConstants.PromptParam]);
+            
         }
 
         [TestMethod]
@@ -1075,8 +1075,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             Dictionary<string, string> qp = GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt.ForceLogin);
 
-            Assert.IsTrue(qp.ContainsKey("prompt"));
-            Assert.AreEqual(Prompt.ForceLogin.PromptValue, qp["prompt"]);
+            Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
+            Assert.AreEqual(Prompt.ForceLogin.PromptValue, qp[TestConstants.PromptParam]);
 
         }
 
