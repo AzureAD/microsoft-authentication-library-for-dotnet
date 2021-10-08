@@ -43,46 +43,54 @@ namespace Microsoft.Identity.Client.Internal
             return dict;
         }
 
+        internal static bool NeedsRefresh(MsalAccessTokenCacheItem oldAccessToken)
+        {
+            return NeedsRefresh(oldAccessToken, out _);
+        }
+
+        internal static bool NeedsRefresh(MsalAccessTokenCacheItem oldAccessToken, out DateTimeOffset? refreshOnWithJitter)
+        {
+            refreshOnWithJitter = GetRefreshOnWithJitter(oldAccessToken);
+            if (refreshOnWithJitter.HasValue && refreshOnWithJitter.Value < DateTimeOffset.UtcNow)
+            {
+                return true;
+            }
+            return false;
+        }
+
         /// <summary>
         /// Fire and forget the fetch action on a background thread.
         /// Do not change to Task and do not await it.
         /// </summary>
-        internal static DateTimeOffset? ProcessFetchInBackground(
-            MsalAccessTokenCacheItem oldAccessToken, 
-            Func<Task<AuthenticationResult>> fetchAction, 
+        internal static void ProcessFetchInBackground(
+            MsalAccessTokenCacheItem oldAccessToken,
+            Func<Task<AuthenticationResult>> fetchAction,
             ICoreLogger logger)
         {
-            var refreshOnWithJitter = GetRefreshOnWithJitter(oldAccessToken);
-            
-            if (refreshOnWithJitter.HasValue && refreshOnWithJitter.Value < DateTimeOffset.UtcNow)
+            _ = Task.Run(async () =>
             {
-                _ = Task.Run(async () =>
+                try
                 {
-                    try
+                    await fetchAction().ConfigureAwait(false);
+                }
+                catch (MsalServiceException ex)
+                {
+                    string logMsg = $"Background fetch failed with MsalServiceException. Is AAD down? { ex.IsAadUnavailable()}";
+                    if (ex.StatusCode == 400)
                     {
-                        await fetchAction().ConfigureAwait(false);
+                        logger.ErrorPiiWithPrefix(ex, logMsg);
                     }
-                    catch (MsalServiceException ex)
+                    else
                     {
-                        string logMsg = $"Background fetch failed with MsalServiceException. Is AAD down? { ex.IsAadUnavailable()}";
-                        if (ex.StatusCode == 400)
-                        {
-                            logger.ErrorPiiWithPrefix(ex, logMsg);
-                        }
-                        else
-                        {
-                            logger.WarningPiiWithPrefix(ex, logMsg);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        string logMsg = $"Background fetch failed with exception.";
                         logger.WarningPiiWithPrefix(ex, logMsg);
                     }
-                });
-            }
-
-            return refreshOnWithJitter;
+                }
+                catch (Exception ex)
+                {
+                    string logMsg = $"Background fetch failed with exception.";
+                    logger.WarningPiiWithPrefix(ex, logMsg);
+                }
+            });
         }
 
         private static Random s_random = new Random();

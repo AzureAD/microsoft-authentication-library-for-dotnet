@@ -7,7 +7,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Region;
-using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client;
 using System.Diagnostics;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public int CacheInfo
         {
             get => this.ContainsKey(CacheInfoKey) ?
-                (int)Enum.Parse(typeof(CacheInfoTelemetry), this[CacheInfoKey]) : (int)CacheInfoTelemetry.None;
+                (int)Enum.Parse(typeof(CacheRefreshReason), this[CacheInfoKey]) : (int)CacheRefreshReason.NotApplicable;
 
             set => this[CacheInfoKey] = value.ToString(CultureInfo.InvariantCulture);
         }
