@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                // Assert
+                // Assert token is proactivly refreshed
                 Assert.IsNotNull(result);
                 Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
                 Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             List<DateTimeOffset?> refreshOnWithJitterList = new List<DateTimeOffset?>();
             for (int i = 1; i <= 10; i++)
             {
-                var refreshOnWithJitter = SilentRequestHelper.ProcessFetchInBackground(at, fetchAction, new NullLogger());
+                SilentRequestHelper.NeedsRefresh(at, out DateTimeOffset? refreshOnWithJitter);
                 refreshOnWithJitterList.Add(refreshOnWithJitter);
 
                 Assert.IsTrue(refreshOnWithJitter.HasValue);

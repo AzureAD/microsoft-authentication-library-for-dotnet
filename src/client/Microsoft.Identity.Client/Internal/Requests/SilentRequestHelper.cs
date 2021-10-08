@@ -45,7 +45,12 @@ namespace Microsoft.Identity.Client.Internal
 
         internal static bool NeedsRefresh(MsalAccessTokenCacheItem oldAccessToken)
         {
-            var refreshOnWithJitter = GetRefreshOnWithJitter(oldAccessToken);
+            return NeedsRefresh(oldAccessToken, out _);
+        }
+
+        internal static bool NeedsRefresh(MsalAccessTokenCacheItem oldAccessToken, out DateTimeOffset? refreshOnWithJitter)
+        {
+            refreshOnWithJitter = GetRefreshOnWithJitter(oldAccessToken);
             if (refreshOnWithJitter.HasValue && refreshOnWithJitter.Value < DateTimeOffset.UtcNow)
             {
                 return true;
@@ -57,13 +62,11 @@ namespace Microsoft.Identity.Client.Internal
         /// Fire and forget the fetch action on a background thread.
         /// Do not change to Task and do not await it.
         /// </summary>
-        internal static DateTimeOffset? ProcessFetchInBackground(
+        internal static void ProcessFetchInBackground(
             MsalAccessTokenCacheItem oldAccessToken,
             Func<Task<AuthenticationResult>> fetchAction,
             ICoreLogger logger)
         {
-            var refreshOnWithJitter = GetRefreshOnWithJitter(oldAccessToken);
-
             _ = Task.Run(async () =>
             {
                 try
@@ -88,8 +91,6 @@ namespace Microsoft.Identity.Client.Internal
                     logger.WarningPiiWithPrefix(ex, logMsg);
                 }
             });
-
-            return refreshOnWithJitter;
         }
 
         private static Random s_random = new Random();
