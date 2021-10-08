@@ -115,7 +115,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
                 harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
 
-
                 // Act
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
                 AuthenticationResult result = await app
@@ -127,11 +126,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // The following can be indeterministic due to background threading nature
                 // So it is verified on check and wait basis
-                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
+                Assert.IsTrue(YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0), "Background refresh 1 did not execute.");
 
                 // Assert
-                Assert.IsNotNull(result, "ATS still succeeds even though AAD is unavailable");
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+
                 cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
                 // reset throttling, otherwise MSAL would block similar requests for 2 minutes 
@@ -147,11 +147,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         account)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
-                Assert.IsNotNull(result);
-                
-                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
 
-                Assert.IsTrue(YieldTillSatisfied(() => cacheAccess.AfterAccessTotalCount == 3));
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                Assert.IsTrue(YieldTillSatisfied(
+                    () => harness.HttpManager.QueueSize == 0),
+                    "Background refresh 2 did not execute.");
+                Assert.IsTrue(
+                    YieldTillSatisfied(() => cacheAccess.AfterAccessTotalCount == 3),
+                    "The background refresh executed, but the cache was not updated");
 
                 cacheAccess.WaitTo_AssertAcessCounts(2, 1); // new tokens written to cache
             }
