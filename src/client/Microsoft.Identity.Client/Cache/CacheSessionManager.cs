@@ -44,7 +44,6 @@ namespace Microsoft.Identity.Client.Cache
         {
             await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.AT).ConfigureAwait(false);
             return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
-
         }
 
         public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)

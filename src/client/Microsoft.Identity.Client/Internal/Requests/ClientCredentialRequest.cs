@@ -70,7 +70,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else
                 {
-                    cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
+                    if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != (int)CacheRefreshReason.Expired)
+                    {
+                        cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
+                    }
                 }
             }
             else
