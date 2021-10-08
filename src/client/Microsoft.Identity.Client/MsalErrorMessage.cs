@@ -400,6 +400,6 @@ namespace Microsoft.Identity.Client
             "Use only one option. Web site and web api scenarios should rely on external cache serialization, as internal cache serialization cannot scale. " +
             "See https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-token-cache-serialization?tabs=aspnetcore  ";
         
-        public static string ClientCredentialWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not reccomended. See https://aka.ms/msal-net-client-credentials for more details.";
+        public static string ClientCredentialWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not recommended. See https://aka.ms/msal-net-client-credentials for more details.";
     }
 }
