@@ -353,6 +353,28 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
+        public void TestConstructor_WithCertificate_SendX5C()
+        {
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
+
+            var app = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithCertificate(cert)
+                      .Build();
+
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).SendX5C);
+
+            app = ConfidentialClientApplicationBuilder
+                  .Create(TestConstants.ClientId)
+                  .WithCertificate(cert, true)
+                  .Build();
+
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).SendX5C);
+        }
+
+        [TestMethod]
         [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
         public void TestConstructor_WithValidInstanceDicoveryMetadata()
         {
