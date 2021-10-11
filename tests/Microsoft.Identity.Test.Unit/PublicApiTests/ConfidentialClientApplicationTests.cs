@@ -1005,7 +1005,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
 
         [TestMethod]
-        public void GetAuthorizationRequestUrlValidateDefaultPromptTest()
+        public async Task GetAuthorizationRequestUrlValidateDefaultPromptTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -1018,23 +1018,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
-                Task<Uri> task = app
+                var uri = await app
                     .GetAuthorizationRequestUrl(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None);
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
-                var uri = task.Result;
                 Assert.IsNotNull(uri);
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
 
                 Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
-                Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp[TestConstants.PromptParam]); 
+                Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp[TestConstants.PromptParam]);
             }
         }
 
         [TestMethod]
-        public void GetAuthorizationRequestUrlValidatePromptSelectAccountTest()
+        public async Task GetAuthorizationRequestUrlValidatePromptSelectAccountTestAsync()
         {
-            Dictionary<string, string> qp = GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt.SelectAccount);
+            Dictionary<string, string> qp = await GetAuthorizationRequestUrlQueryParamsWithPromptAsync(Prompt.SelectAccount).ConfigureAwait(false);
 
             Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
             Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp[TestConstants.PromptParam]);
@@ -1042,45 +1042,45 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void GetAuthorizationRequestUrlValidateNoPromptTest()
+        public async Task GetAuthorizationRequestUrlValidateNoPromptTestAsync()
         {
-            Dictionary<string, string> qp = GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt.NoPrompt);
+            Dictionary<string, string> qp = await GetAuthorizationRequestUrlQueryParamsWithPromptAsync(Prompt.NoPrompt).ConfigureAwait(false);
 
             Assert.IsFalse(qp.ContainsKey(TestConstants.PromptParam));
 
         }
 
         [TestMethod]
-        public void GetAuthorizationRequestUrlValidatePromptNotSpecifiedTest()
+        public async Task GetAuthorizationRequestUrlValidatePromptNotSpecifiedTestAsync()
         {
-            Dictionary<string, string> qp =  GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt.NotSpecified);
+            Dictionary<string, string> qp = await GetAuthorizationRequestUrlQueryParamsWithPromptAsync(Prompt.NotSpecified).ConfigureAwait(false);
 
             Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
             Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp[TestConstants.PromptParam]);
-            
+
         }
 
         [TestMethod]
-        public void GetAuthorizationRequestUrlValidatePromptCreateTest()
+        public async Task GetAuthorizationRequestUrlValidatePromptCreateTestAsync()
         {
-            Dictionary<string, string> qp = GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt.Create);
+            Dictionary<string, string> qp = await GetAuthorizationRequestUrlQueryParamsWithPromptAsync(Prompt.Create).ConfigureAwait(false);
 
             Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
             Assert.AreEqual(Prompt.Create.PromptValue, qp[TestConstants.PromptParam]);
-            
+
         }
 
         [TestMethod]
-        public void GetAuthorizationRequestUrlValidatePromptForceLoginTest()
+        public async Task GetAuthorizationRequestUrlValidatePromptForceLoginTestAsync()
         {
-            Dictionary<string, string> qp = GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt.ForceLogin);
+            Dictionary<string, string> qp = await GetAuthorizationRequestUrlQueryParamsWithPromptAsync(Prompt.ForceLogin).ConfigureAwait(false);
 
             Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
             Assert.AreEqual(Prompt.ForceLogin.PromptValue, qp[TestConstants.PromptParam]);
 
         }
 
-        private Dictionary<string, string> GetAuthorizationRequestUrlQueryParamsWithPrompt(Prompt prompt)
+        private async Task<Dictionary<string, string>> GetAuthorizationRequestUrlQueryParamsWithPromptAsync(Prompt prompt)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -1093,19 +1093,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
-                Task<Uri> task = app
+                var uri = await app
                     .GetAuthorizationRequestUrl(TestConstants.s_scope)
                     .WithPrompt(prompt)
-                    .ExecuteAsync(CancellationToken.None);
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
-                var uri = task.Result;
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
 
                 return qp;
             }
         }
 
-        
+
         [TestMethod]
         public async Task HttpRequestExceptionIsNotSuppressedAsync()
         {
