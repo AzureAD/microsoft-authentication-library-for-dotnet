@@ -375,6 +375,50 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
+        public void TestConstructor_WithClientClaims()
+        {
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
+
+            var app = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithClientClaims(cert, TestConstants.s_clientAssertionClaims)
+                      .Build();
+
+            AssertValues(true, false);
+
+            app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientClaims(cert, TestConstants.s_clientAssertionClaims, false)
+                .Build();
+
+            AssertValues(false, false);
+
+            app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientClaims(cert, TestConstants.s_clientAssertionClaims, false, true)
+                .Build();
+
+            AssertValues(false, true);
+
+            app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientClaims(cert, TestConstants.s_clientAssertionClaims, sendX5C: true)
+                .Build();
+
+            AssertValues(true, true);
+
+            void AssertValues(bool expectedMergeWithDefaultClaims, bool expectedSendX5C)
+            {
+                Assert.AreEqual(expectedSendX5C, (app.AppConfig as ApplicationConfiguration).SendX5C);
+                Assert.AreEqual(expectedMergeWithDefaultClaims, (app.AppConfig as ApplicationConfiguration).MergeWithDefaultClaims);
+                Assert.IsNotNull((app.AppConfig as ApplicationConfiguration).ClientCredentialCertificate);
+                CoreAssert.AssertDictionariesAreEqual(TestConstants.s_clientAssertionClaims, (app.AppConfig as ApplicationConfiguration).ClaimsToSign, StringComparer.Ordinal);
+            }
+        }
+
+        [TestMethod]
         [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
         public void TestConstructor_WithValidInstanceDicoveryMetadata()
         {
