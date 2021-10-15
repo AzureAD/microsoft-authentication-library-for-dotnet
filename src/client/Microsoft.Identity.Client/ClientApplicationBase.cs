@@ -44,9 +44,9 @@ namespace Microsoft.Identity.Client
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
         /// </summary>
-        public string Authority => ServiceBundle.Config.AuthorityInfo.CanonicalAuthority; // Do not use in MSAL, use AuthorityInfo instead to avoid re-parsing
+        public string Authority => ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority; // Do not use in MSAL, use AuthorityInfo instead to avoid re-parsing
 
-        internal AuthorityInfo AuthorityInfo => ServiceBundle.Config.AuthorityInfo;
+        internal AuthorityInfo AuthorityInfo => ServiceBundle.Config.Authority.AuthorityInfo;
 
         /// <summary>
         /// User token cache. It holds access tokens, id tokens and refresh tokens for accounts. It's used
@@ -368,8 +368,8 @@ namespace Microsoft.Identity.Client
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// You can set additional parameters by chaining the builder with:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
-        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithTenantId(string)"/> 
+        /// to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
         /// force refreshing the token, as well as
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
@@ -404,7 +404,7 @@ namespace Microsoft.Identity.Client
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// You can set additional parameters by chaining the builder with:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithTenantId(string)"/> or one of its
         /// overrides to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
         /// force refreshing the token, as well as

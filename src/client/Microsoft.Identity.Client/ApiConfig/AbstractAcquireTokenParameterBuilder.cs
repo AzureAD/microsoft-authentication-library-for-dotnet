@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Internal;
 using System.Net.Http;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Client
 {
@@ -24,6 +25,11 @@ namespace Microsoft.Identity.Client
     public abstract class AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
+        private const string WithAuthorityDeprecationMessage = 
+            "This method has been deprecated. Use WithTenantId at the request level instead, or rely on WithAuthority at the application level only. " +
+            "You can share the cache between all instances of application objects using WithCacheOptions. " +
+            "To change the B2C policy, use WithB2CAuthority at the request level.";
+
         internal IServiceBundle ServiceBundle { get; }
 
         /// <summary>
@@ -138,6 +144,7 @@ namespace Microsoft.Identity.Client
         /// the application registration portal.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAuthority);
@@ -162,6 +169,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">GUID of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(
             string cloudInstanceUri,
             Guid tenantId,
@@ -196,6 +204,7 @@ namespace Microsoft.Identity.Client
         /// and <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </remarks>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(
             string cloudInstanceUri,
             string tenant,
@@ -225,6 +234,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete(WithAuthorityDeprecationMessage, false)]        
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
@@ -250,6 +260,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tenant">Tenant Id of the tenant from which to sign-in users. This can also be a GUID.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,
@@ -276,6 +287,7 @@ namespace Microsoft.Identity.Client
         /// accounts.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAuthority);
@@ -297,6 +309,7 @@ namespace Microsoft.Identity.Client
         /// accounts.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete(WithAuthorityDeprecationMessage, false)]        
         public T WithAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAuthority);
@@ -310,11 +323,46 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Overrides the tenant Id specified at the application level. This operation preserves the authority host (environment).
+        /// 
+        /// If an authority was not specified at the application level, the default used is https://login.microsoftonline.com/common.
+        /// </summary>
+        /// <param name="tenantId">The tenant ID, which can be either in GUID format or in the display friendly format. Also known as the Directory ID.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if tenantId is null or an empty string</exception>
+        /// <exception cref="NotSupportedException">Thrown if the application was configured with an authority that is not AAD specific (e.g. ADFS or B2C).</exception>
+        /// <remarks>Does not affect authority validation, which is specified at the application level.</remarks>
+        public T WithTenantId(string tenantId)
+        {
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentNullException(nameof(tenantId));
+            }
+
+            if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+            {
+                throw new MsalClientException(
+                    MsalError.TenantOverrideNonAad,
+                    MsalErrorMessage.TenantOverrideNonAad);
+            }
+
+            AadAuthority aadAuthority = ServiceBundle.Config.Authority as AadAuthority;
+            string tenantedAuthority = aadAuthority.GetTenantedAuthority(tenantId, true);
+            var newAuthorityInfo = AuthorityInfo.FromAadAuthority(
+                tenantedAuthority,
+                ServiceBundle.Config.Authority.AuthorityInfo.ValidateAuthority);
+
+            CommonParameters.AuthorityOverride = newAuthorityInfo;
+
+            return (T)this;
+        }
+
+        /// <summary>
         /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs.
         /// </summary>
         /// <param name="authorityUri">Authority URL for an ADFS server.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <remarks>MSAL.NET will only support ADFS 2019 or later.</remarks>
+        /// <remarks>MSAL.NET supports ADFS 2019 or later.</remarks>
         /// <returns>The builder to chain the .With methods.</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {

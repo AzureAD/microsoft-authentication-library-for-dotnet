@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
             var authority = Authority.CreateAuthority(TestConstants.ADFSAuthority, true);
 
-            requestContext.ServiceBundle.Config.AuthorityInfo = authority.AuthorityInfo;
+            requestContext.ServiceBundle.Config.Authority = authority;
 
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {

@@ -300,7 +300,7 @@ namespace Microsoft.Identity.Client
             throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments);
         }
 
-        private static AuthorityType GetAuthorityType(string authority) // TODO: remove completely?
+        private static AuthorityType GetAuthorityType(string authority) 
         {
             string firstPathSegment = GetFirstPathSegment(authority);
 

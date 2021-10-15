@@ -284,8 +284,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             AuthenticationResult result = await pca.AcquireTokenSilent(
                 TestConstants.s_scope.ToArray(),
-                TestConstants.DisplayableId)
-                .WithAuthority(pca.Authority, false)
+                TestConstants.DisplayableId)                
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

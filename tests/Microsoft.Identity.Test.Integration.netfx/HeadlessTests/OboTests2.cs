@@ -90,7 +90,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var userCacheRecorder = _confidentialApp.UserTokenCache.RecordAccess();
 
             authenticationResult = await _confidentialApp.AcquireTokenOnBehalfOf(scopes2, userAssertion)
-                                                         .WithAuthority(PPEAuthenticationAuthority)
                                                          .ExecuteAsync().ConfigureAwait(false);
 
             Assert.IsNotNull(authenticationResult);
@@ -98,7 +97,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, authenticationResult.AuthenticationResultMetadata.TokenSource);
 
             authenticationResult = await _confidentialApp.AcquireTokenOnBehalfOf(scopes2, userAssertion)
-                                                         .WithAuthority(PPEAuthenticationAuthority)
                                                          .ExecuteAsync().ConfigureAwait(false);
 
             Assert.IsNotNull(authenticationResult);
@@ -193,11 +191,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                                  .WithHttpClientFactory(factory)
                                                                  .Build();
 
-            var builder = msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword);
-
-            builder.WithAuthority(authority);
-
-            var authResult = await builder.ExecuteAsync().ConfigureAwait(false);
+            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(confidentialClientID)
@@ -340,11 +336,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                                  .WithTestLogging()
                                                                  .Build();
 
-            var builder = msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword);
-
-            builder.WithAuthority(authority);
-
-            var authResult = await builder.ExecuteAsync().ConfigureAwait(false);
+            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(confidentialClientID)

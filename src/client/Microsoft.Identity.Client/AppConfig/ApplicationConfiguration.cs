@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -70,9 +71,8 @@ namespace Microsoft.Identity.Client
 
         public CacheOptions AccessorOptions { get; set; }
 
-        public AuthorityInfo AuthorityInfo { get; internal set; }
+        public Authority Authority { get; internal set; }
         public string ClientId { get; internal set; }
-        public string TenantId { get; internal set; }
         public string RedirectUri { get; internal set; }
         public bool EnablePiiLogging { get; internal set; }
         public LogLevel LogLevel { get; internal set; } = LogLevel.Info;
@@ -108,9 +108,12 @@ namespace Microsoft.Identity.Client
 
         #region Region
         public string AzureRegion { get; set; }
-#endregion
+        #endregion
 
-#region Authority
+        #region Authority
+        // These are all used to create the Authority when the app is built.
+
+        public string TenantId { get; internal set; }
 
         public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }
         public Uri CustomInstanceDiscoveryMetadataUri { get; set; }

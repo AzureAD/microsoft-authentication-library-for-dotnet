@@ -1017,5 +1017,18 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para> Use only one option. Web site and web API scenarios should rely on external cache serialization, as internal cache serialization cannot scale. See https://aka.ms/msal-net-cca-token-cache-serialization
         /// </summary>
         public const string StaticCacheWithExternalSerialization = "static_cache_with_external_serialization";
+
+        /// <summary>
+        /// <para>What happens?</para>You configured WithTenant at the requset level, but the application is using a non-AAD authority"/>
+        /// These are mutually exclusive.
+        /// <para>Mitigation</para> WithTenantId can only be used in conjuction with AAD authorities
+        /// </summary>
+        public const string TenantOverrideNonAad = "tenant_override_non_aad";
+
+        /// <summary>
+        /// <para>What happens?</para>You configured WithAuthority at the requset level, and also WithAzureRegion. This is not supported when the environment changes from application to request."/>
+        /// <para>Mitigation</para> Use WithTenantId at the request level instead.
+        /// </summary>
+        public const string RegionalAndAuthorityOverride = "authority_override_regional";
     }
-}
+}      

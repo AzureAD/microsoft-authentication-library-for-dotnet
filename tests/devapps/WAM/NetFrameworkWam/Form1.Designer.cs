@@ -55,6 +55,7 @@
             this.btnRemoveAccount = new System.Windows.Forms.Button();
             this.cbxBackgroundThread = new System.Windows.Forms.CheckBox();
             this.cbxListOsAccounts = new System.Windows.Forms.CheckBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // resultTbx
@@ -315,11 +316,22 @@
             this.cbxListOsAccounts.Text = "List OS accounts";
             this.cbxListOsAccounts.UseVisualStyleBackColor = true;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(10, 609);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 28;
+            this.button1.Text = "IWA";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.iwa_click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(634, 642);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.cbxListOsAccounts);
             this.Controls.Add(this.cbxBackgroundThread);
             this.Controls.Add(this.btnRemoveAccount);
@@ -381,6 +393,7 @@
         private System.Windows.Forms.Button btnRemoveAccount;
         private System.Windows.Forms.CheckBox cbxBackgroundThread;
         private System.Windows.Forms.CheckBox cbxListOsAccounts;
+        private System.Windows.Forms.Button button1;
     }
 }
 

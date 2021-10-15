@@ -167,7 +167,9 @@ namespace XamarinDev
                 
                 if (PassAuthoritySwitch.IsToggled)
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     builder = builder.WithAuthority(App.Authority);
+#pragma warning restore CS0618 // Type or member is obsolete
                 }
 
                 var res = await builder

@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Performance
         public async Task<AuthenticationResult> AcquireTokenForClient_TestAsync()
         {
             return await _cca.AcquireTokenForClient(new[] { _scope })
-              .WithAuthority($"https://login.microsoftonline.com/{_tenantId}")
+              .WithTenantId(_tenantId)
               .ExecuteAsync()
               .ConfigureAwait(false);
         }

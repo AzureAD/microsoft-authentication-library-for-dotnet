@@ -505,7 +505,7 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.CustomMetadataInstanceOrUri);
             }
 
-            if (Config.AuthorityInfo.ValidateAuthority &&
+            if (Config.Authority.AuthorityInfo.ValidateAuthority &&
                 (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
             {
                 throw new MsalClientException(MsalError.ValidateAuthorityOrCustomMetadata, MsalErrorMessage.ValidateAuthorityOrCustomMetadata);
@@ -528,12 +528,12 @@ namespace Microsoft.Identity.Client
         #region Authority
         private void ResolveAuthority()
         {
-            if (Config.AuthorityInfo != null)
+            if (Config.Authority?.AuthorityInfo != null)
             {
                 if (!string.IsNullOrEmpty(Config.TenantId) &&
-                    Config.AuthorityInfo.AuthorityType == AuthorityType.Aad)
+                    Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad)
                 {
-                    AadAuthority aadAuthority = Authority.CreateAuthority(Config.AuthorityInfo) as AadAuthority;
+                    AadAuthority aadAuthority = Config.Authority as AadAuthority;
                     if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() &&
                         !string.Equals(aadAuthority.TenantId, Config.TenantId))
                     {
@@ -542,7 +542,7 @@ namespace Microsoft.Identity.Client
                             "You specified a different tenant - once in WithAuthority() and once using WithTenant().");
                     }
 
-                    Config.AuthorityInfo = Authority.CreateAuthorityWithTenant(Config.AuthorityInfo, Config.TenantId).AuthorityInfo;
+                    Config.Authority = Authority.CreateAuthorityWithTenant(Config.Authority.AuthorityInfo, Config.TenantId);
                 }
             }
             else
@@ -550,10 +550,12 @@ namespace Microsoft.Identity.Client
                 string authorityInstance = GetAuthorityInstance();
                 string authorityAudience = GetAuthorityAudience();
 
-                Config.AuthorityInfo = new AuthorityInfo(
+                var authorityInfo = new AuthorityInfo(
                         AuthorityType.Aad,
                         new Uri($"{authorityInstance}/{authorityAudience}").ToString(),
                         Config.ValidateAuthority);
+
+                Config.Authority = new AadAuthority(authorityInfo);
             }
         }
 
@@ -645,7 +647,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(authorityUri);
             }
 
-            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri, validateAuthority);
+            Config.Authority = Authority.CreateAuthority(authorityUri, validateAuthority);
 
             return (T)this;
         }
@@ -699,10 +701,11 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(tenant));
             }
 
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(
+            var authorityInfo = AuthorityInfo.FromAadAuthority(
                 new Uri(cloudInstanceUri),
                 tenant,
                 validateAuthority);
+            Config.Authority = new AadAuthority(authorityInfo);
 
             return (T)this;
         }
@@ -802,7 +805,9 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAdfsAuthority(authorityUri, validateAuthority);
+            
+            var authorityInfo = AuthorityInfo.FromAdfsAuthority(authorityUri, validateAuthority);
+            Config.Authority = AdfsAuthority.CreateAuthority(authorityInfo);
             return (T)this;
         }
 
@@ -815,7 +820,9 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithB2CAuthority(string authorityUri)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
+            var authorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
+            Config.Authority = AdfsAuthority.CreateAuthority(authorityInfo);
+
             return (T)this;
         }
 

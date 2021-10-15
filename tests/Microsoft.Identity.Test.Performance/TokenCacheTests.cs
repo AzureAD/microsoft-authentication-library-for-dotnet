@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Performance
         readonly string _tenantPrefix = TestConstants.Utid;
         ConfidentialClientApplication _cca;
         string _scope;
-        string _authority;
+        string _tenantId;
         IAccount _account;
         string _tokenId;
         string _userId;
@@ -76,16 +76,16 @@ namespace Microsoft.Identity.Test.Performance
             _account = new Account($"{_userId}.{TestConstants.Utid}", TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment);
             _tokenId = random.Next(0, CacheSize.TokensPerUser).ToString();
             _scope = $"{_scopePrefix}{_tokenId}";
-            _authority = IsMultiTenant ?
-                $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}{_tokenId}" :
-                $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}";
+            _tenantId = IsMultiTenant ?
+                $"{_tenantPrefix}{_tokenId}" :
+                $"{_tenantPrefix}";
         }
 
         [Benchmark]
         public async Task<AuthenticationResult> AcquireTokenSilent_TestAsync()
         {
             return await _cca.AcquireTokenSilent(new string[] { _scope }, _account)
-                .WithAuthority(_authority)
+                .WithTenantId(_tenantId)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
         }

@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.pop
 
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -71,6 +71,7 @@ namespace Microsoft.Identity.Test.Unit.pop
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
+                                                              .WithAuthority(TestConstants.AuthorityUtidTenant)
                                                               .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
@@ -82,7 +83,6 @@ namespace Microsoft.Identity.Test.Unit.pop
 
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -108,6 +108,7 @@ namespace Microsoft.Identity.Test.Unit.pop
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
+                                                              .WithAuthority(TestConstants.AuthorityUtidTenant)
                                                               .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
@@ -118,7 +119,6 @@ namespace Microsoft.Identity.Test.Unit.pop
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);

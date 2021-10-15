@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
                 result = await app2.AcquireTokenSilent(TestConstants.s_scope, accounts.First())
-                                   .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, TestConstants.Utid))
+                                   .WithTenantId(TestConstants.Utid)
                                    .WithForceRefresh(false)
                                    .ExecuteAsync(CancellationToken.None)
                                    .ConfigureAwait(false);
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit
                         .AcquireTokenSilent(
                             TestConstants.s_scopeForAnotherResource,
                             (await app.GetAccountsAsync().ConfigureAwait(false)).First())
-                        .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, TestConstants.Utid))
+                        .WithTenantId(TestConstants.Utid)
                         .WithForceRefresh(false)
                         .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 }

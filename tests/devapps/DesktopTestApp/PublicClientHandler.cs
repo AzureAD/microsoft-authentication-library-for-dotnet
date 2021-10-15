@@ -80,23 +80,27 @@ namespace DesktopTestApp
             AuthenticationResult result;
             if (CurrentUser != null)
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 result = await PublicClientApplication
                     .AcquireTokenInteractive(scopes)
                     .WithAccount(CurrentUser)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams)
                     .WithAuthority(AuthorityOverride)
+#pragma warning restore CS0618 // Type or member is obsolete
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
             else
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 result = await PublicClientApplication
                     .AcquireTokenInteractive(scopes)
                     .WithLoginHint(LoginHint)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams)
                     .WithAuthority(AuthorityOverride)
+#pragma warning restore CS0618 // Type or member is obsolete
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -113,7 +117,9 @@ namespace DesktopTestApp
 
             if (!string.IsNullOrWhiteSpace(AuthorityOverride))
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 builder = builder.WithAuthority(AuthorityOverride);
+#pragma warning restore CS0618 // Type or member is obsolete
             }
 
             return await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);

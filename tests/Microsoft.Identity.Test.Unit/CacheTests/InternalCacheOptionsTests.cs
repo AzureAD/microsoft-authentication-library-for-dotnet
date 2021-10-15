@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private async Task ClientCredsAcquireAndAssertTokenSourceAsync(IConfidentialClientApplication app, string scope, TokenSource expectedSource)
         {
             var result = await app.AcquireTokenForClient(new[] { scope })
-                 .WithAuthority(TestConstants.AuthorityUtidTenant)
+                 .WithTenantId(TestConstants.Utid)
                  .ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual(
                expectedSource,

@@ -465,7 +465,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             mockBroker.GetAccountsAsync(
                 TestConstants.ClientId, 
                 TestConstants.RedirectUri,
-                (pca.AppConfig as ApplicationConfiguration).AuthorityInfo,
+                (pca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo,
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>())
                 .Returns(new[] { expectedAccount });

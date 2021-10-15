@@ -158,7 +158,6 @@ namespace NetCoreWinFormsWAM
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 return await pca.AcquireTokenSilent(GetScopes(), acc)
-                    .WithAuthority(reqAuthority)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }

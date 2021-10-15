@@ -168,13 +168,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithAuthority(TestConstants.AuthorityUtidTenant)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtid2Tenant)
+                    .WithTenantId(TestConstants.Utid2)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
@@ -208,13 +208,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithAuthority(TestConstants.AuthorityUtidTenant)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 var result = await app.AcquireTokenForClient(new[] { "scope1" })
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 // One tenant partition with one token
@@ -228,7 +228,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(new[] { "scope2" })
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 // One tenant partition with two tokens
@@ -240,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(new[] { "scope1" })
-                    .WithAuthority(TestConstants.AuthorityUtid2Tenant)
+                    .WithTenantId(TestConstants.Utid2)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 // Two tenant partitions with three tokens total
@@ -275,7 +274,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 };
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -962,7 +961,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithLoginHint(TestConstants.DisplayableId)
                     .WithExtraQueryParameters("extra=qp")
                     .WithExtraScopesToConsent(TestConstants.s_scopeForAnotherResource)
-                    .WithAuthority(TestConstants.AuthorityGuestTenant)
+                    .WithTenantId("guest")
                     .ExecuteAsync(CancellationToken.None);
 
                 var uri = task.Result;
@@ -1497,7 +1496,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityCommonTenant, true)
+                    .WithTenantId("common")
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -1506,7 +1505,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 log = string.Empty;
                 result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityOrganizationsTenant, true)
+                    .WithTenantId("organizations")
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 

@@ -43,7 +43,7 @@ namespace WebApi.Controllers
             var cca = s_ccaCreator.Value;
 
             var res = await cca.AcquireTokenForClient(new[] { "scope" })
-                 .WithAuthority($"https://login.microsoftonline.com/{tid}")
+                 .WithTenantId(tid)
                  .WithForceRefresh(!cacheHit)
                  .ExecuteAsync().ConfigureAwait(false);
 

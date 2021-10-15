@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Test.Performance
         readonly string _tenantPrefix = TestConstants.Utid;
         ConfidentialClientApplication _cca;
         string _scope;
-        string _authority;
+        string _tenantId;
         UserAssertion _userAssertion;
 
         [ParamsSource(nameof(CacheSizeSource), Priority = 0)]
@@ -74,16 +74,16 @@ namespace Microsoft.Identity.Test.Performance
             _userAssertion = new UserAssertion($"{TestConstants.DefaultAccessToken}{random.Next(0, CacheSize.Users)}");
             string id = random.Next(0, CacheSize.TokensPerUser).ToString();
             _scope = $"{_scopePrefix}{id}";
-            _authority = IsMultiTenant ?
-                $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}{id}" :
-                $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}";
+            _tenantId = IsMultiTenant ?
+                $"{_tenantPrefix}{id}" :
+                $"{_tenantPrefix}";
         }
 
         [Benchmark]
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOf_TestAsync()
         {
             return await _cca.AcquireTokenOnBehalfOf(new[] { _scope }, _userAssertion)
-                .WithAuthority(_authority)
+                .WithTenantId(_tenantId)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
         }

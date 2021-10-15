@@ -58,7 +58,6 @@ namespace CommonCache.Test.MsalV2
                     {
                         var result = await app
                             .AcquireTokenSilent(scopes, accountToReference)
-                            .WithAuthority(app.Authority)
                             .WithForceRefresh(false)
                             .ExecuteAsync(CancellationToken.None)
                             .ConfigureAwait(false);
