@@ -41,6 +41,9 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual((int)RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
+                Assert.AreEqual(
+                    "https://centralus.r.login.microsoftonline.com/common/oauth2/v2.0/token",
+                    result.AuthenticationResultMetadata.TokenEndpoint);
 
                 // try again, result will be from cache
                 result = await app
@@ -65,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual((int)RegionAutodetectionSource.Cache, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
-
+                
                 // try again, create a new app, result should still be from cache 
                 IConfidentialClientApplication app2 = CreateCca(
                     httpManager,

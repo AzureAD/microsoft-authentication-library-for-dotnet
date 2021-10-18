@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Kerberos;
+using System.Diagnostics;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -52,8 +53,11 @@ namespace Microsoft.Identity.Client.OAuth2
             using (_requestParams.RequestContext.Logger.LogMethodDuration())
             {
                 cancellationToken.ThrowIfCancellationRequested();
-
+                
                 string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Authority.GetTokenEndpoint();
+                Debug.Assert(_requestParams.RequestContext.ApiEvent != null, "The Token Client must only be called by requests.");
+                _requestParams.RequestContext.ApiEvent.TokenEndpoint = tokenEndpoint;
+
                 string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
 
                 await AddBodyParamsAndHeadersAsync(additionalBodyParameters, scopes, cancellationToken).ConfigureAwait(false);

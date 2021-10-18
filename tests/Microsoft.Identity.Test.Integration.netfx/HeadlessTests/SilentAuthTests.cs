@@ -101,6 +101,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .ConfigureAwait(false);
 
                 MsalAssert.AssertAuthResult(authResult, user);
+                Assert.AreEqual(
+                   "https://login.microsoftonline.com/organizations/oauth2/v2.0/token",
+                   authResult.AuthenticationResultMetadata.TokenEndpoint);
 
                 // simulate a restart by creating a new client
                 var pca2 = PublicClientApplicationBuilder
@@ -143,6 +146,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
             MsalAssert.AssertAuthResult(authResult, labResponse.User);
             var at2 = authResult.AccessToken;
+            Assert.AreEqual(
+                 $"https://login.microsoftonline.com/{labResponse.User.TenantId}/oauth2/v2.0/token",
+                 authResult.AuthenticationResultMetadata.TokenEndpoint);
 
             Trace.WriteLine("Part 3 - Acquire a token silently with a login hint, with forceRefresh = true");
             authResult = await pca.AcquireTokenSilent(s_scopes, labResponse.User.Upn)
@@ -156,6 +162,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsFalse(at1.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.IsFalse(at2.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(
+                $"https://login.microsoftonline.com/{labResponse.User.TenantId}/oauth2/v2.0/token",
+                authResult.AuthenticationResultMetadata.TokenEndpoint);
+
         }
 
         private static void SetCacheSerializationToFile(IPublicClientApplication pca, string filePath)

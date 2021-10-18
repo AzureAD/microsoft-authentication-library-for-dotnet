@@ -66,6 +66,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
             AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheRefreshReason.NoCachedAccessToken:D},centralus,3,4|0,1");
+            Assert.AreEqual(
+                $"https://centralus.r.login.microsoftonline.com/{settings.TenantId}/oauth2/v2.0/token",
+                result.AuthenticationResultMetadata.TokenEndpoint);
+
         }
 
         [TestMethod]

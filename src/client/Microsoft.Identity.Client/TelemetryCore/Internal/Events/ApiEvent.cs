@@ -89,6 +89,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
                 null;
         }
 
+        public string TokenEndpoint
+        {
+            get; set;
+        }
+
         public Uri Authority
         {
             set => this[AuthorityKey] = ScrubTenant(value)?.ToLowerInvariant();
