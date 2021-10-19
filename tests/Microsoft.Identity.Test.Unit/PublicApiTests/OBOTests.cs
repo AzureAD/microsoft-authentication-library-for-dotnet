@@ -34,13 +34,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var result1 = await cca.AcquireTokenOnBehalfOf(
                     new[] { "User.Read" }, 
                     new UserAssertion("jwt"))
-                    .WithAuthority(AzureCloudInstance.AzurePublic, tenant1)
+                    .WithTenantId(tenant1)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 var result2 = await cca.AcquireTokenOnBehalfOf(
                    new[] { "User.Read" },
                    new UserAssertion("jwt"))
-                   .WithAuthority(AzureCloudInstance.AzurePublic, tenant2)
+                   .WithTenantId(tenant2)
                    .ExecuteAsync().ConfigureAwait(false);
 
                 // Assert

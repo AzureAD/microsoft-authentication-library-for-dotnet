@@ -554,7 +554,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 ClientId = TestConstants.ClientId,
                 RedirectUri = TestConstants.RedirectUri,
-                AuthorityInfo = AuthorityInfo.FromAuthorityUri(TestConstants.B2CAuthority, false)
+                Authority = Authority.CreateAuthority(TestConstants.B2CAuthority, false)
             };
 
             var serviceBundle = ServiceBundle.Create(appConfig);

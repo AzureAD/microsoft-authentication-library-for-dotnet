@@ -227,8 +227,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
-                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(app.Authority, false)
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))                    
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -261,8 +260,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = await app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
-                    TestConstants.DisplayableId)
-                    .WithAuthority(app.Authority, false)
+                    TestConstants.DisplayableId)                    
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -289,7 +287,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
                     "other_login_hint@contoso.com")
-                    .WithAuthority(app.Authority, false)
                     .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.NoAccountForLoginHint, exception.ErrorCode);
@@ -318,7 +315,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () => await app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
                     TestConstants.DisplayableId)
-                    .WithAuthority(app.Authority, false)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.MultipleAccountsForLoginHint, exception.ErrorCode);
@@ -344,7 +340,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
                     new Account(null, null, null))
-                    .WithAuthority(app.Authority, false)
                     .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.NoTokensFoundError, exception.ErrorCode);
@@ -432,7 +427,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithTenantId("common")
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -458,7 +453,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant2)
+                    .WithTenantId(TestConstants.Utid2)
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -488,7 +483,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant)
+                    .WithTenantId("other_tenant")
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -515,7 +510,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant)
+                    .WithTenantId("other_tenant")
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -550,7 +545,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithTenantId("common")
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -580,7 +575,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant2)
+                    .WithTenantId(TestConstants.Utid2)
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -608,7 +603,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant)
+                    .WithTenantId("other_tenant")
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -649,7 +644,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .AcquireTokenSilent(
                             TestConstants.s_cacheMissScope,
                             new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                        .WithAuthority(app.Authority)
                         .WithForceRefresh(false)
                         .ExecuteAsync(CancellationToken.None);
 
@@ -740,9 +734,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var acc = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult result = await app
                     .AcquireTokenSilent(TestConstants.s_scope, acc)
                     .WithAuthority(ClientApplicationBase.DefaultAuthority) // this override should do nothing, it's mean to specify a tenant id
+#pragma warning restore CS0618 // Type or member is obsolete
                     .ExecuteAsync().ConfigureAwait(false);
             }
         }
