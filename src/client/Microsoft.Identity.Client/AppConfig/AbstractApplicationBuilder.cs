@@ -821,7 +821,7 @@ namespace Microsoft.Identity.Client
         public T WithB2CAuthority(string authorityUri)
         {
             var authorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
-            Config.Authority = AdfsAuthority.CreateAuthority(authorityInfo);
+            Config.Authority = B2CAuthority.CreateAuthority(authorityInfo);
 
             return (T)this;
         }

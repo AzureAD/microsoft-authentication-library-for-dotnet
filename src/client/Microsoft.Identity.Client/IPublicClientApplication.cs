@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
         /// <item>
         /// <term><see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/></term>
         /// <description>to pass
-        /// additional query parameters to the STS, and <see cref="AbstractAcquireTokenParameterBuilder{T}.WithTenantId(string)"/>
+        /// additional query parameters to the Identity Provider, and <see cref="AbstractAcquireTokenParameterBuilder{T}.WithTenantId(string)"/>
         /// in order to change the tenant of the authority set at the application construction. </description>
         /// </item>
         /// </list>

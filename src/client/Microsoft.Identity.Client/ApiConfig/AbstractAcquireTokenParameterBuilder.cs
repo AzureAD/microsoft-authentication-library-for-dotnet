@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
         internal AcquireTokenCommonParameters CommonParameters { get; } = new AcquireTokenCommonParameters();
 
         /// <summary>
-        /// Executes the Token request asynchronously, with a possibility of cancelling the
+        /// Executes the Token request asynchronously, with a possibility of canceling the
         /// asynchronous method.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token. See <see cref="CancellationToken"/> </param>
@@ -323,7 +323,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Overrides the tenant Id specified at the application level. This operation preserves the authority host (environment).
+        /// Overrides the tenant ID specified  in the authority the application level. This operation preserves the authority host (environment).
         /// 
         /// If an authority was not specified at the application level, the default used is https://login.microsoftonline.com/common.
         /// </summary>
@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.TenantOverrideNonAad);
             }
 
-            AadAuthority aadAuthority = ServiceBundle.Config.Authority as AadAuthority;
+            AadAuthority aadAuthority = (AadAuthority)ServiceBundle.Config.Authority;
             string tenantedAuthority = aadAuthority.GetTenantedAuthority(tenantId, true);
             var newAuthorityInfo = AuthorityInfo.FromAadAuthority(
                 tenantedAuthority,
