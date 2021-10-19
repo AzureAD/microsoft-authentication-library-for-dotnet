@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 SetCacheSerializationToFile(pca2, cacheFilePath);
 
                 authResult = await pca2.AcquireTokenSilent(s_scopes, user.Upn)
-                  .WithAuthority("https://login.microsoftonline.com/organizations")
+                  .WithTenantId("organizations")
                   .ExecuteAsync()
                   .ConfigureAwait(false);
 

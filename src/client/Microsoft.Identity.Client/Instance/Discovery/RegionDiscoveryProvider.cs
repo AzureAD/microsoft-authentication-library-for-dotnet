@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Region
             // already regionalized
             if (authority.Host.StartsWith($"{region}."))
             {
-                return CreateEntry(requestContext.ServiceBundle.Config.AuthorityInfo.Host, authority.Host);
+                return CreateEntry(requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host, authority.Host);
             }
 
             string regionalEnv = GetRegionalizedEnviroment(authority, region);

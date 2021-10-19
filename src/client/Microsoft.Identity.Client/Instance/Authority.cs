@@ -54,7 +54,8 @@ namespace Microsoft.Identity.Client.Instance
             AuthorityInfo requestAuthorityInfo,
             string requestHomeAccountTenantId = null)
         {
-            var configAuthorityInfo = requestContext.ServiceBundle.Config.AuthorityInfo;
+            var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
+
             if (configAuthorityInfo == null)
             {
                 throw new ArgumentNullException(nameof(configAuthorityInfo));
@@ -65,7 +66,7 @@ namespace Microsoft.Identity.Client.Instance
 
             switch (configAuthorityInfo.AuthorityType)
             {
-                // ADFS and B2C are tenant-less, no need to consider tenant
+                // ADFS is tenant-less, no need to consider tenant
                 case AuthorityType.Adfs:
                     return requestAuthorityInfo == null ?
                         new AdfsAuthority(configAuthorityInfo) :
@@ -191,7 +192,7 @@ namespace Microsoft.Identity.Client.Instance
 
         private static async Task ValidateSameHostAsync(AuthorityInfo requestAuthorityInfo, RequestContext requestContext)
         {
-            var configAuthorityInfo = requestContext.ServiceBundle.Config.AuthorityInfo;
+            var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
 
             if (requestAuthorityInfo != null &&
                 !string.Equals(requestAuthorityInfo.Host, configAuthorityInfo.Host, StringComparison.OrdinalIgnoreCase))
@@ -227,7 +228,7 @@ namespace Microsoft.Identity.Client.Instance
         private static async Task<bool> IsAuthorityAliasedAsync(RequestContext requestContext, AuthorityInfo requestAuthorityInfo)
         {
             var instanceDiscoveryManager = requestContext.ServiceBundle.InstanceDiscoveryManager;
-            var result = await instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.AuthorityInfo, requestContext).ConfigureAwait(false);
+            var result = await instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.Authority.AuthorityInfo, requestContext).ConfigureAwait(false);
 
             return result.Aliases.Any(alias => alias.Equals(requestAuthorityInfo.Host));
         }

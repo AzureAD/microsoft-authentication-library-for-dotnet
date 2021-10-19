@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             options.ClientSecret = "cats";
             var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
-            var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.AuthorityInfo;
+            var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.Authority.AuthorityInfo;
             Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authorityInfo.CanonicalAuthority);
         }
 
@@ -82,8 +82,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options)
                                                           .WithCertificate(cert)
                                                           .Build();
-            var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.AuthorityInfo;
-            Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authorityInfo.CanonicalAuthority);
+            var authority = ((ConfidentialClientApplication)app).ServiceBundle.Config.Authority;
+            Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]

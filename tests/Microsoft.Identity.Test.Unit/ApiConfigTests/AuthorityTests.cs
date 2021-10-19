@@ -16,19 +16,19 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
     [TestClass]
     public class AuthorityTests : TestBase
     {
-        private static readonly AuthorityInfo s_commonAuthority =
-            AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true);
+        private static readonly Authority s_commonAuthority =
+            Authority.CreateAuthority(TestConstants.AuthorityCommonTenant, true);
         private static readonly string s_ppeCommonUri = $@"https://{TestConstants.PpeEnvironment}/{TestConstants.TenantId}";
-        private static readonly AuthorityInfo s_ppeAuthority =
-          AuthorityInfo.FromAuthorityUri(s_ppeCommonUri, true);
-        private static readonly AuthorityInfo s_utidAuthority =
-            AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityUtidTenant, true);
-        private static readonly AuthorityInfo s_utid2Authority =
-            AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityUtid2Tenant, true);
-        private static readonly AuthorityInfo s_b2cAuthority =
-            AuthorityInfo.FromAuthorityUri(TestConstants.B2CAuthority, true);
-        private static readonly AuthorityInfo s_commonNetAuthority =
-            AuthorityInfo.FromAuthorityUri(TestConstants.PrefCacheAuthorityCommonTenant, true);
+        private static readonly Authority s_ppeAuthority =
+          Authority.CreateAuthority(s_ppeCommonUri, true);
+        private static readonly Authority s_utidAuthority =
+            Authority.CreateAuthority(TestConstants.AuthorityUtidTenant, true);
+        private static readonly Authority s_utid2Authority =
+            Authority.CreateAuthority(TestConstants.AuthorityUtid2Tenant, true);
+        private static readonly Authority s_b2cAuthority =
+            Authority.CreateAuthority(TestConstants.B2CAuthority, true);
+        private static readonly Authority s_commonNetAuthority =
+            Authority.CreateAuthority(TestConstants.PrefCacheAuthorityCommonTenant, true);
 
         private MockHttpAndServiceBundle _harness;
         private RequestContext _testRequestContext;
@@ -49,6 +49,36 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             _harness.Dispose();
             base.TestCleanup();
+        }
+
+        [TestMethod]
+        public void WithTenantIdExceptions()
+        {
+            var app1 = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAdfsAuthority(TestConstants.ADFSAuthority)
+                .WithClientSecret("secret")
+                .Build();
+
+            var ex1 = AssertException.Throws<MsalClientException>(() =>
+                app1
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                    .WithTenantId(TestConstants.TenantId));
+
+            var app2 = ConfidentialClientApplicationBuilder
+               .Create(TestConstants.ClientId)
+               .WithB2CAuthority(TestConstants.B2CAuthority)
+               .WithClientSecret("secret")
+               .Build();
+
+            var ex2 = AssertException.Throws<MsalClientException>(() =>
+                app2
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                    .WithTenantId(TestConstants.TenantId));
+
+            Assert.AreEqual(ex1.ErrorCode, MsalError.TenantOverrideNonAad);
+            Assert.AreEqual(ex2.ErrorCode, MsalError.TenantOverrideNonAad);
+
         }
 
         [TestMethod]
@@ -96,9 +126,9 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public async Task AuthorityMismatchTestAsync()
         {
-            _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_utidAuthority;
+            _testRequestContext.ServiceBundle.Config.Authority = s_utidAuthority;
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority, null))
+                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority.AuthorityInfo, null))
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.AuthorityTypeMismatch, ex.ErrorCode);
@@ -107,9 +137,9 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public async Task DefaultAuthorityDifferentTypeTestAsync()
         {
-            _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_commonAuthority;
+            _testRequestContext.ServiceBundle.Config.Authority = s_commonAuthority;
             var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
-                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority, null)).ConfigureAwait(false);
+                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority.AuthorityInfo, null)).ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex.ErrorCode);
         }
@@ -119,18 +149,18 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
             _testRequestContext.ServiceBundle.Config.HttpManager = _harness.HttpManager;
-            _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_commonAuthority;
+            _testRequestContext.ServiceBundle.Config.Authority = s_commonAuthority;
             var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
-                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_ppeAuthority, null)).ConfigureAwait(false);
+                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_ppeAuthority.AuthorityInfo, null)).ConfigureAwait(false);
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.ErrorCode);
 
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-            _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_ppeAuthority;
+            _testRequestContext.ServiceBundle.Config.Authority = s_ppeAuthority;
             var ex2 = await Assert.ThrowsExceptionAsync<MsalClientException>(
-              () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority, null)).ConfigureAwait(false);
+              () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority.AuthorityInfo, null)).ConfigureAwait(false);
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex2.ErrorCode);
 
-            _testRequestContext.ServiceBundle.Config.AuthorityInfo = AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority, true);
+            _testRequestContext.ServiceBundle.Config.Authority = Authority.CreateAuthority(TestConstants.ADFSAuthority, true);
             var ex3 = await Assert.ThrowsExceptionAsync<MsalClientException>(
              () => Authority.CreateAuthorityForRequestAsync(
                  _testRequestContext,
@@ -138,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                  null)).ConfigureAwait(false);
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex3.ErrorCode);
 
-            _testRequestContext.ServiceBundle.Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(TestConstants.B2CAuthority, true);
+            _testRequestContext.ServiceBundle.Config.Authority = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
             var ex4 = await Assert.ThrowsExceptionAsync<MsalClientException>(
                 () =>  Authority.CreateAuthorityForRequestAsync(
                    _testRequestContext,
@@ -155,9 +185,9 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2736
             _harness.HttpManager.AddInstanceDiscoveryMockHandler(TestConstants.PrefCacheAuthorityCommonTenant);
             _testRequestContext.ServiceBundle.Config.HttpManager = _harness.HttpManager;
-            _testRequestContext.ServiceBundle.Config.AuthorityInfo = s_commonNetAuthority;
-            var authority = await Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority).ConfigureAwait(false);
-            Assert.AreEqual(s_commonNetAuthority.CanonicalAuthority, authority.AuthorityInfo.CanonicalAuthority);
+            _testRequestContext.ServiceBundle.Config.Authority = s_commonNetAuthority;
+            var authority = await Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority.AuthorityInfo).ConfigureAwait(false);
+            Assert.AreEqual(s_commonNetAuthority.AuthorityInfo.CanonicalAuthority, authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]
@@ -167,19 +197,19 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 Authority.CreateAuthority(ClientApplicationBase.DefaultAuthority)
                 .AuthorityInfo.IsDefaultAuthority);
 
-            Assert.IsFalse(s_utidAuthority.IsDefaultAuthority);
-            Assert.IsFalse(s_b2cAuthority.IsDefaultAuthority);
+            Assert.IsFalse(s_utidAuthority.AuthorityInfo.IsDefaultAuthority);
+            Assert.IsFalse(s_b2cAuthority.AuthorityInfo.IsDefaultAuthority);
         }
 
         private static void VerifyAuthority(
-            AuthorityInfo config,
-            AuthorityInfo request,
+            Authority config,
+            Authority request,
             string accountTid,
             string resultTid,
             RequestContext requestContext)
         {
-            requestContext.ServiceBundle.Config.AuthorityInfo = config;
-            var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, request, accountTid).Result;
+            requestContext.ServiceBundle.Config.Authority = config;
+            var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, request?.AuthorityInfo, accountTid).Result;
             Assert.AreEqual(resultTid, resultAuthority.TenantId);
         }
     }

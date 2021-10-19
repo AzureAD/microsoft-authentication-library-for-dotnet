@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
 
         public const string UnauthorizedHttpStatusCodeExpected =
             "Unauthorized HTTP Status Code (401) was expected in the response. ";
-        
+
         internal const string iOSBrokerKeyFetchFailed = "A broker key was generated but it could not be retrieved from the KeyChain. Please capture and inspect the logs to see why the fetch operation failed. ";
 
         public const string UnauthorizedResponseExpected = "Unauthorized HTTP response (status code 401) was expected. ";
@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Client
         public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow. ";
         public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Deleting invalid ADAL cache. ";
 
-        public const string CryptoNet45 = 
+        public const string CryptoNet45 =
             "Could not use the certificate for signing. See inner exception for details. " +
             "Possible cause: this may be a known issue with apps build against .NET Desktop 4.6 or lower. " +
             "Either target a higher version of .NET desktop - 4.6.1 and above, " +
@@ -387,7 +387,7 @@ namespace Microsoft.Identity.Client
 
         public const string AuthenticationFailedWamElevatedProcess = "WAM Account Picker did not return an account. Either the user cancelled the authentication or the WAM Account Picker crashed because the app is running in an elevated process. For troubleshooting details, see https://aka.ms/msal-net-wam .";
 
-        public static string InitializeProcessSecurityError(string errorCode) => 
+        public static string InitializeProcessSecurityError(string errorCode) =>
             string.Format(
                 CultureInfo.InvariantCulture,
                 "Failure setting process security to enable WAM Account Picker in an elevated process ({0}). For troubleshooting details, see https://aka.ms/msal-net-wam .",
@@ -395,11 +395,15 @@ namespace Microsoft.Identity.Client
 
         public const string CcsRoutingHintMissing = "Either the userObjectIdentifier or tenantIdenifier are missing. Both are needed to create the ccs routing hint. See https://aka.ms/msal-net/ccsRouting. ";
 
-        public const string StaticCacheWithExternalSerialization = 
+        public const string StaticCacheWithExternalSerialization =
             "You configured MSAL cache serialization at the same time with internal caching options. These are mutually exclusive. " +
             "Use only one option. Web site and web api scenarios should rely on external cache serialization, as internal cache serialization cannot scale. " +
             "See https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-token-cache-serialization?tabs=aspnetcore  ";
-        
-        public static string ClientCredentialWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not recommended. See https://aka.ms/msal-net-client-credentials for more details.";
+
+        public const string ClientCredentialWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not recommended. See https://aka.ms/msal-net-client-credentials for more details.";
+
+        public const string TenantOverrideNonAad = "WithTenantId can only be used when an AAD authority is specified at the application level.";
+
+        public const string RegionalAndAuthorityOverride = "You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request. Use WithTenantId at the request level instead.";
     }
 }

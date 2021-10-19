@@ -814,7 +814,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
-            var authority = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.AuthorityInfo, null);
+            var authority = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.Authority.AuthorityInfo, null);
             Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authority.AuthorityInfo.CanonicalAuthority);
         }
 
@@ -828,7 +828,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .BuildConcrete();
 
             var authority = Authority.CreateAuthorityWithTenant(
-                app.ServiceBundle.Config.AuthorityInfo,
+                app.ServiceBundle.Config.Authority.AuthorityInfo,
                 TestConstants.Utid);
 
             Assert.AreEqual(TestConstants.AuthorityTestTenant, authority.AuthorityInfo.CanonicalAuthority);
@@ -876,8 +876,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var tenantProfiles = account.GetTenantProfiles();
                 
                 AuthenticationResult response = await
+#pragma warning disable CS0618 // Type or member is obsolete
                     pca.AcquireTokenSilent(new[] { "User.Read" }, account)
                     .WithAuthority(tenantedAuthority1)
+#pragma warning restore CS0618 // Type or member is obsolete
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -893,7 +895,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 account = accounts.Single(a => a.HomeAccountId.TenantId == tenant2);
                 response = await
                     pca.AcquireTokenSilent(new[] { "User.Read" }, account)
-                    .WithAuthority(tenantedAuthority2)
+                    .WithTenantId(tenant2)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -994,12 +996,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 await app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
+                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
 
                 // ATS must not update the PCA authority
                 var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
+                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
@@ -1007,7 +1009,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 await app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
+                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
             }
         }
 
@@ -1190,6 +1192,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
                 .WithAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, true)
                 .WithAuthority(AzureCloudInstance.AzurePublic, Guid.NewGuid(), true)
@@ -1199,11 +1202,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithAuthority(TestConstants.AuthorityGuestTenant, true)
                 .WithAdfsAuthority(TestConstants.AuthorityGuestTenant, true)
                 .WithB2CAuthority(TestConstants.B2CAuthority)
+                .WithTenantId(TestConstants.TenantId)
                 .WithExtraQueryParameters(
                     new Dictionary<string, string>
                     {
                         {"key1", "value1"}
                     });
+#pragma warning restore CS0618 // Type or member is obsolete
+
         }
 
         private Task<IEnumerable<IAccount>> PopulateB2CTokenCacheAsync(string userFlow, PublicClientApplication app)

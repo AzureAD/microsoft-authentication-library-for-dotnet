@@ -198,10 +198,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.AreEqual(
                 expectedAuthorityType,
-                ((ApplicationConfiguration)pca1.AppConfig).AuthorityInfo.AuthorityType);
+                ((ApplicationConfiguration)pca1.AppConfig).Authority.AuthorityInfo.AuthorityType);
             Assert.AreEqual(
                 expectedAuthorityType,
-                ((ApplicationConfiguration)pca2.AppConfig).AuthorityInfo.AuthorityType);
+                ((ApplicationConfiguration)pca2.AppConfig).Authority.AuthorityInfo.AuthorityType);
         }
 
         [TestMethod]
