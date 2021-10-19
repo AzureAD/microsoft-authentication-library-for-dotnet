@@ -413,9 +413,8 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
-            tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
-            tokenCacheItems = FilterByScopes(requestParams, tokenCacheItems);
+            tokenCacheItems = FilterLocally(requestParams, tokenCacheItems, FilterByHomeAccountTenantOrAssertion(requestParams), FilterByTokenType(requestParams), FilterByScopes(requestParams));
+
             tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
@@ -440,6 +439,36 @@ namespace Microsoft.Identity.Client
 
             return msalAccessTokenCacheItem;
         }
+
+        private static Func<MsalAccessTokenCacheItem, Boolean> FilterByScopes(AuthenticationRequestParameters requestParams)
+        {
+            var logger = requestParams.RequestContext.Logger;
+
+            String[] requestScopes = requestParams.Scope.Where(s =>
+                !OAuth2Value.ReservedScopes.Contains(s)).ToArray();
+
+            return item =>
+            {
+                bool accepted = ScopeHelper.ScopeContains(item.ScopeSet, requestScopes);
+
+                if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    logger.Verbose($"Access token with scopes {string.Join(" ", item.ScopeSet)} " +
+                        $"passes scope filter? {accepted} ");
+                }
+                return accepted;
+            };
+        }
+
+        private static IReadOnlyList<MsalAccessTokenCacheItem> FilterLocally(AuthenticationRequestParameters requestParams,
+            IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems, params Func<MsalAccessTokenCacheItem, Boolean>[] predicates)
+        {
+            return tokenCacheItems.FilterWithLogging(item =>
+            {
+                return predicates.All(p => p(item));
+            }, requestParams.RequestContext.Logger, "bulk filter").ToList();
+        }
+
 
         private static IReadOnlyList<MsalAccessTokenCacheItem> FilterByScopes(
             AuthenticationRequestParameters requestParams,
@@ -473,6 +502,17 @@ namespace Microsoft.Identity.Client
             return tokenCacheItems;
         }
 
+        private static Func<MsalAccessTokenCacheItem, Boolean> FilterByTokenType(AuthenticationRequestParameters requestParams)
+        {
+            return item =>
+            {
+               return string.Equals(
+                                item.TokenType ?? BearerAuthenticationScheme.BearerTokenType,
+                                requestParams.AuthenticationScheme.AccessTokenType,
+                                StringComparison.OrdinalIgnoreCase);
+            };
+        }
+
         private static IReadOnlyList<MsalAccessTokenCacheItem> FilterByTokenType(
             AuthenticationRequestParameters requestParams,
             IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems)
@@ -485,6 +525,64 @@ namespace Microsoft.Identity.Client
                             requestParams.RequestContext.Logger,
                             "Filtering by token type");
             return tokenCacheItems;
+        }
+
+
+        private static Func<MsalAccessTokenCacheItem, Boolean> FilterByHomeAccountTenantOrAssertion(AuthenticationRequestParameters requestParams)
+        {
+            var logger = requestParams.RequestContext.Logger;
+
+            return item =>
+            {
+                string requestTenantId = requestParams.Authority.TenantId;
+                bool filterByTenantId = true;
+
+                bool include = false;
+
+                if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
+                {
+
+                    include = !string.IsNullOrEmpty(item.UserAssertionHash) &&
+                     item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase);
+
+                    if (!include)
+                        return include;
+
+                    // OBO calls FindAccessTokenAsync directly, but we are not able to resolve the authority 
+                    // unless the developer has configured a tenanted authority. If they have configured /common
+                    // then we cannot filter by tenant and will use whatever is in the cache.
+                    filterByTenantId =
+                        !string.IsNullOrEmpty(requestTenantId) &&
+                        !AadAuthority.IsCommonOrganizationsOrConsumersTenant(requestTenantId);
+                }
+
+                if(!filterByTenantId)
+                {
+                    requestParams.RequestContext.Logger.Warning("Have not filtered by tenant ID. " +
+                          "This can happen in OBO scenario where authority is /common or /organizations. " +
+                          "Please use tenanted authority.");
+                }
+                else
+                {
+                    include = string.Equals(item.TenantId ?? string.Empty, requestTenantId ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+                }
+
+
+                if (!include)
+                    return include;
+
+
+                // Only AcquireTokenSilent has an IAccount in the request that can be used for filtering
+                if (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient &&
+                    requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
+                {
+                    include =
+                     item.HomeAccountId.Equals(
+                                    requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase);
+                }
+
+                return include;
+            };
         }
 
         private static IReadOnlyList<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(
