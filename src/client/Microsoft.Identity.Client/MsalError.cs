@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
@@ -90,6 +91,7 @@ namespace Microsoft.Identity.Client
         /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when
         /// the user cache had not been set in the application constructor. This should never happen in MSAL.NET 3.x as the cache is created by the application
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("This error code is not in use")]
         public const string TokenCacheNullError = "token_cache_null";
 
@@ -538,6 +540,7 @@ namespace Microsoft.Identity.Client
         /// or retry later
         /// </summary>
         [Obsolete("MSAL no longer throws this error - it will allow the HttpClient exceptions to propagate. App developers may write their own logic for detecting access to the network issues, for example by using Xamarin.Essentials. ")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public const string NetworkNotAvailableError = "network_not_available";
 
         /// <summary>

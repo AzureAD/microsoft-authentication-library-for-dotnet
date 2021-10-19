@@ -14,6 +14,7 @@ using System.Net.Http;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
@@ -145,6 +146,7 @@ namespace Microsoft.Identity.Client
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
         [Obsolete(WithAuthorityDeprecationMessage, false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAuthority);
@@ -169,6 +171,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">GUID of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(
             string cloudInstanceUri,
@@ -204,6 +207,7 @@ namespace Microsoft.Identity.Client
         /// and <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </remarks>
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(
             string cloudInstanceUri,
@@ -234,7 +238,8 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
-        [Obsolete(WithAuthorityDeprecationMessage, false)]        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
@@ -260,6 +265,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tenant">Tenant Id of the tenant from which to sign-in users. This can also be a GUID.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
@@ -287,6 +293,7 @@ namespace Microsoft.Identity.Client
         /// accounts.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
@@ -309,7 +316,8 @@ namespace Microsoft.Identity.Client
         /// accounts.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
-        [Obsolete(WithAuthorityDeprecationMessage, false)]        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(WithAuthorityDeprecationMessage, false)]
         public T WithAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAuthority);

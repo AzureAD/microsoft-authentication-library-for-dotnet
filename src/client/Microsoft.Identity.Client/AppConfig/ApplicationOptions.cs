@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Microsoft.Identity.Client.Kerberos;
 
 namespace Microsoft.Identity.Client
@@ -99,6 +100,7 @@ namespace Microsoft.Identity.Client
         /// Identifier of the component (libraries/SDK) consuming MSAL.NET.
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Should use ClientName and ClientVersion properties instead of Component", true)]
         public string Component { get; set; }
 
