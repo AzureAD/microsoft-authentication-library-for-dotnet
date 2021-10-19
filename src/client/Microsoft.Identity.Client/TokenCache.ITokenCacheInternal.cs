@@ -452,8 +452,8 @@ namespace Microsoft.Identity.Client
                 return tokenCacheItems;
             }
 
-            var requestScopes = requestParams.Scope.Where(s =>
-                !OAuth2Value.ReservedScopes.Contains(s));
+            String[] requestScopes = requestParams.Scope.Where(s =>
+                !OAuth2Value.ReservedScopes.Contains(s)).ToArray();
 
             tokenCacheItems = tokenCacheItems.FilterWithLogging(
                 item =>

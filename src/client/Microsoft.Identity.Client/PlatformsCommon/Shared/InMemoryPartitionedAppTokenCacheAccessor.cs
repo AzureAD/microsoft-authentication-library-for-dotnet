@@ -25,6 +25,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> AccessTokenCacheDictionary;
         internal readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> AppMetadataDictionary;
 
+        private static readonly List<MsalAccessTokenCacheItem> EmptyCacheItemList = new List<MsalAccessTokenCacheItem>(0);
+
         // static versions to support the "shared cache" mode
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> s_accessTokenCacheDictionary =
             new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
@@ -181,7 +183,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? new List<MsalAccessTokenCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList() ?? EmptyCacheItemList;
             }
         }
 
