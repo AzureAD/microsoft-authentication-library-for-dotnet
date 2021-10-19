@@ -120,6 +120,19 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Specifies the interactive experience for the user.
+        /// </summary>
+        /// <param name="prompt">Requested interactive experience. The default is <see cref="Prompt.SelectAccount"/>
+        /// </param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public GetAuthorizationRequestUrlParameterBuilder WithPrompt(Prompt prompt)
+        {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPrompt);
+            Parameters.Prompt = prompt;
+            return this;
+        }
+
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
+namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
     public class WwwAuthenticateParametersIntegrationTests

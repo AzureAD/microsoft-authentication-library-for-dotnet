@@ -57,8 +57,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string GetDefaultTokenResponse()
         {
-              return 
-            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+              return
+            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
             ",\"refresh_token\":\"" + Guid.NewGuid() +"\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +

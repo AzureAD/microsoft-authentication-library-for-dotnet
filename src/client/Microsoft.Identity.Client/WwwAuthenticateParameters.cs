@@ -144,8 +144,18 @@ namespace Microsoft.Identity.Client
         /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
+        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
+        public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri)
+        {
+            return CreateFromResourceResponseAsync(resourceUri, default);
+        }
+
+        /// <summary>
+        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
+        /// </summary>
+        /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
-        /// <returns>WWW-Authenticate Parameters extracted from response to the un-authenticated call.</returns>
+        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
         public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
             var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
@@ -159,7 +169,7 @@ namespace Microsoft.Identity.Client
         /// <param name="httpClient">Instance of <see cref="HttpClient"/> to make the request with.</param>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
-        /// <returns>WWW-Authenticate Parameters extracted from response to the un-authenticated call.</returns>
+        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
         public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
         {
             if (httpClient is null)

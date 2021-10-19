@@ -145,6 +145,13 @@ namespace Microsoft.Identity.Client
                     tenantProfiles: tenantProfiles);
             }
 
+            UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
+            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
+            IdToken = msalIdTokenCacheItem?.Secret;
+            CorrelationId = correlationID;
+            ApiEvent = apiEvent;
+            AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
+
             if (msalAccessTokenCacheItem != null)
             {
                 AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
@@ -153,14 +160,12 @@ namespace Microsoft.Identity.Client
                 Scopes = msalAccessTokenCacheItem.ScopeSet;
                 IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;
                 TokenType = msalAccessTokenCacheItem.TokenType;
-            }
 
-            UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
-            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
-            IdToken = msalIdTokenCacheItem?.Secret;
-            CorrelationId = correlationID;
-            ApiEvent = apiEvent;
-            AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
+                if (msalAccessTokenCacheItem.RefreshOn.HasValue)
+                {
+                    AuthenticationResultMetadata.RefreshOn = msalAccessTokenCacheItem.RefreshOn;
+                }
+            }
         }
 
         //Default constructor for testing

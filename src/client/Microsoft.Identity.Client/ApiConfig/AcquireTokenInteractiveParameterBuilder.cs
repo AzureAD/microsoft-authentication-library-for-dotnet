@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="options">Data object with options</param>
         /// <returns>The builder to chain the .With methods</returns>
-        #if !SUPPORTS_WEBVIEW2 // currently only WebView2 allows customization
+        #if !SUPPORTS_WIN32 // currently only WebView2 allows customization
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         #endif
         public AcquireTokenInteractiveParameterBuilder WithEmbeddedWebViewOptions(

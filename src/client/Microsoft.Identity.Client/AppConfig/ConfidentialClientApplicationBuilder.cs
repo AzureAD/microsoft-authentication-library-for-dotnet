@@ -78,12 +78,25 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the certificate associated with the application
+        /// Sets the certificate associated with the application.
+        /// </summary>
+        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
+        /// <remarks>
+        /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
+        /// Does not send the certificate (as x5c parameter) with the request by default.
+        /// </remarks>
+        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
+        {
+            return WithCertificate(certificate, false);
+        }
+
+        /// <summary>
+        /// Sets the certificate associated with the application.
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <param name="sendX5C">To send X5C with every request or not.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
-        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool sendX5C = false)
+        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool sendX5C)
         {
             if (certificate == null)
             {
@@ -99,6 +112,23 @@ namespace Microsoft.Identity.Client
             Config.ConfidentialClientCredentialCount++;
             Config.SendX5C = sendX5C;
             return this;
+        }
+
+        /// <summary>
+        /// Sets the certificate associated with the application along with the specific claims to sign.
+        /// By default, this will merge the <paramref name="claimsToSign"/> with the default required set of claims needed for authentication.
+        /// If <paramref name="mergeWithDefaultClaims"/> is set to false, you will need to provide the required default claims. See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
+        /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
+        /// <param name="mergeWithDefaultClaims">Determines whether or not to merge <paramref name="claimsToSign"/> with the default claims required for authentication.</param>
+        /// <remarks>
+        /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
+        /// Does not send the certificate (as x5c parameter) with the request by default.
+        /// </remarks>
+        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims)
+        {
+            return WithClientClaims(certificate, claimsToSign, mergeWithDefaultClaims, false);
         }
 
         /// <summary>

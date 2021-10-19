@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Client
         public T WithCacheOptions(CacheOptions options)
         {
 #if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
-            throw new PlatformNotSupportedException("WithInteralTokenCacheOptions is supported only on platforms where MSAL stores tokens in memory and not on mobile platforms or UWP.");
+            throw new PlatformNotSupportedException("WithCacheOptions is supported only on platforms where MSAL stores tokens in memory and not on mobile platforms or UWP.");
 #else
 
             Config.AccessorOptions = options;

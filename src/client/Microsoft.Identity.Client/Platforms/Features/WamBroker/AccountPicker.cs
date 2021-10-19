@@ -153,6 +153,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 splash.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
                 splash.DialogResult = System.Windows.Forms.DialogResult.OK;
+                splash.TopMost = true;
+
                 splash.Shown += async (s, e) =>
                 {
                     var windowHandle = splash.Handle;

@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             AuthenticationResult authResult = null;
 
-            CacheInfoTelemetry cacheInfoTelemetry;
+            CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
             if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 // look for access token in the cache first.
@@ -76,17 +76,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             TokenSource.Cache,
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
-
-                cacheInfoTelemetry = CacheInfoTelemetry.RefreshIn;
-                logger.Verbose($"[OBO request] No valid access token found because {cacheInfoTelemetry} ");
+                else
+                {
+                    if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != (int)CacheRefreshReason.Expired)
+                    {
+                        cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
+                    }
+                }
             }
             else
             {
                 logger.Info("[OBO Request] Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
-                cacheInfoTelemetry = (cachedAccessToken == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.ForceRefresh;
+                cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfoTelemetry.None)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }
@@ -96,16 +100,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (cachedAccessToken == null)
                 {
-                    return await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                    authResult = await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    SilentRequestHelper.ProcessFetchInBackground(
-                        cachedAccessToken, 
-                        () => RefreshRtOrFetchNewAccessTokenAsync(cancellationToken), logger);
+                    var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessToken);
 
-                    return authResult;
+                    // may fire a request to get a new token in the background
+                    if (shouldRefresh)
+                    {
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.ProactivelyRefreshed;
+
+                        SilentRequestHelper.ProcessFetchInBackground(
+                        cachedAccessToken,
+                        () => RefreshRtOrFetchNewAccessTokenAsync(cancellationToken), logger);
+                    }
                 }
+
+                return authResult;
             }
             catch (MsalServiceException e)
             {
