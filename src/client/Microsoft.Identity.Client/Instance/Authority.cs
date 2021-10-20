@@ -202,6 +202,14 @@ namespace Microsoft.Identity.Client.Instance
                     throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
                 }
 
+                // This check should be done when validating the request parameters, however we've allowed
+                // this configuration to run for a while, so this is the better place for it.
+                bool usesRegional = !string.IsNullOrEmpty(requestContext.ServiceBundle.Config.AzureRegion);
+                if (usesRegional)
+                {
+                    throw new MsalClientException(MsalError.RegionalAndAuthorityOverride, MsalErrorMessage.RegionalAndAuthorityOverride);
+                }
+
                 var authorityAliased = await IsAuthorityAliasedAsync(requestContext, requestAuthorityInfo).ConfigureAwait(false);
                 if (authorityAliased)
                 {

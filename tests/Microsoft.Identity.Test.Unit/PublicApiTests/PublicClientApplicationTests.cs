@@ -876,10 +876,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var tenantProfiles = account.GetTenantProfiles();
                 
                 AuthenticationResult response = await
-#pragma warning disable CS0618 // Type or member is obsolete
                     pca.AcquireTokenSilent(new[] { "User.Read" }, account)
                     .WithAuthority(tenantedAuthority1)
-#pragma warning restore CS0618 // Type or member is obsolete
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -1192,7 +1190,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {
-#pragma warning disable CS0618 // Type or member is obsolete
             builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
                 .WithAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, true)
                 .WithAuthority(AzureCloudInstance.AzurePublic, Guid.NewGuid(), true)
@@ -1208,8 +1205,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     {
                         {"key1", "value1"}
                     });
-#pragma warning restore CS0618 // Type or member is obsolete
-
         }
 
         private Task<IEnumerable<IAccount>> PopulateB2CTokenCacheAsync(string userFlow, PublicClientApplication app)
