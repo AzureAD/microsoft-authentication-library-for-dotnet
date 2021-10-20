@@ -312,15 +312,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Overrides the tenant ID specified  in the authority the application level. This operation preserves the authority host (environment).
+        /// Overrides the tenant ID specified in the authority at the application level. This operation preserves the authority host (environment).
         /// 
         /// If an authority was not specified at the application level, the default used is https://login.microsoftonline.com/common.
         /// </summary>
-        /// <param name="tenantId">The tenant ID, which can be either in GUID format or in the display friendly format. Also known as the Directory ID.</param>
+        /// <param name="tenantId">The tenant ID, which can be either in GUID format or a domain name. Also known as the Directory ID.</param>
         /// <returns>The builder to chain the .With methods.</returns>
         /// <exception cref="ArgumentNullException">Thrown if tenantId is null or an empty string</exception>
-        /// <exception cref="NotSupportedException">Thrown if the application was configured with an authority that is not AAD specific (e.g. ADFS or B2C).</exception>
-        /// <remarks>Does not affect authority validation, which is specified at the application level.</remarks>
+        /// <exception cref="MsalClientException">Thrown if the application was configured with an authority that is not AAD specific (e.g. ADFS or B2C).</exception>
+        /// <remarks>
+        /// The tenant should be more restrictive than the one configured at the application level, e.g. don't use "common".
+        /// Does not affect authority validation, which is specified at the application level.</remarks>
         public T WithTenantId(string tenantId)
         {
             if (string.IsNullOrEmpty(tenantId))

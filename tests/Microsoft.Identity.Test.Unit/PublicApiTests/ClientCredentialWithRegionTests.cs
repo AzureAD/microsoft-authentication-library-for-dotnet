@@ -20,6 +20,75 @@ namespace Microsoft.Identity.Test.Unit
     public class ConfidentialClientWithRegionTests : TestBase
     {
 
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            Environment.SetEnvironmentVariable("REGION_NAME", null);
+        }
+
+        [TestMethod]
+        // regression for #2837
+        public async Task AuthorityOverrideAndRegionalAsync()
+        {
+            const string region = "eastus";
+            Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+            var app = ConfidentialClientApplicationBuilder
+                             .Create(TestConstants.ClientId)
+                             .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                             .WithClientSecret(TestConstants.ClientSecret)
+                             .Build();
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                app
+                .AcquireTokenForClient(TestConstants.s_scope)
+                .WithAuthority($"https://login.microsoft.com/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+#pragma warning restore CS0618 // Type or member is obsolete
+                    .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.RegionalAndAuthorityOverride, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        // regression for #2837
+        public async Task TenantIdOverrideAndRegionalAsync()
+        {
+            // Arrange
+            const string region = "eastus";
+            Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                var tokenHttpCallHandler = new MockHttpMessageHandler()
+                {
+                    // Asserts
+                    ExpectedUrl = $"https://eastus.r.login.microsoftonline.com/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+
+                    ResponseMessage = CreateResponse(true)
+                };
+                harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority($"https://login.microsoftonline.com/common", true)
+                                 .WithHttpManager(harness.HttpManager)
+                                 .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build();
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithTenantId("17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+            }
+        }
+
         [TestMethod]
         [Description("Test for regional auth with successful instance discovery.")]
         public async Task FetchRegionFromLocalImdsCallAsync()
@@ -85,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [Description("Tokens between regional and non-regional are interchangable.")]
+        [Description("Tokens between regional and non-regional are interchangeable.")]
         public async Task TokensAreInterchangable_Regional_To_NonRegional_Async()
         {
             using (var httpManager = new MockHttpManager())
@@ -245,6 +314,7 @@ namespace Microsoft.Identity.Test.Unit
                                  .WithClientSecret(TestConstants.ClientSecret)
                                  .Build();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .WithAuthority("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
@@ -263,6 +333,7 @@ namespace Microsoft.Identity.Test.Unit
                    .WithAuthority("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
                    .ExecuteAsync()
                    .ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
@@ -270,18 +341,19 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [TestMethod]
+        [DataTestMethod]
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
         // regression: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686
-        public async Task OtherCloud_WithValidation_Async()
+        public async Task OtherCloud_WithValidation_Async(bool validateAuthority, bool authorityIsValid)
         {
             try
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", "eastus");
 
-                await RunPpeTestAsync(validateAuthority: true, authorityIsValid: true).ConfigureAwait(false);
-                await RunPpeTestAsync(validateAuthority: true, authorityIsValid: false).ConfigureAwait(false);
-                await RunPpeTestAsync(validateAuthority: false, authorityIsValid: true).ConfigureAwait(false);
-                await RunPpeTestAsync(validateAuthority: false, authorityIsValid: false).ConfigureAwait(false);
+                await RunPpeTestAsync(validateAuthority, authorityIsValid).ConfigureAwait(false);
 
             }
             finally
@@ -328,7 +400,7 @@ namespace Microsoft.Identity.Test.Unit
 
                     AuthenticationResult result = await app
                         .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithAuthority($"https://{inputEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                        .WithTenantId($"17b189bc-2b81-4ec5-aa51-3e628cbc931b")
                         .ExecuteAsync()
                         .ConfigureAwait(false);
 
@@ -337,7 +409,7 @@ namespace Microsoft.Identity.Test.Unit
 
                     result = await app
                        .AcquireTokenForClient(TestConstants.s_scope)
-                       .WithAuthority($"https://{inputEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                       .WithTenantId($"17b189bc-2b81-4ec5-aa51-3e628cbc931b")
                        .ExecuteAsync()
                        .ConfigureAwait(false);
 
@@ -381,17 +453,12 @@ namespace Microsoft.Identity.Test.Unit
                     ResponseMessage = CreateResponse(true)
                 };
 
-
-                if (authorityIsValid || !validateAuthority) // no calls because authority validation will fail
-                {
-                    harness.HttpManager.AddMockHandler(discoveryHandler);
-                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
-                }
-                else
+                if (validateAuthority)
                 {
                     harness.HttpManager.AddMockHandler(discoveryHandler);
                 }
 
+                harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
                 var app = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
                                  .WithAuthority("https://login.windows-ppe.net/common", validateAuthority)
@@ -403,9 +470,9 @@ namespace Microsoft.Identity.Test.Unit
                 if (!authorityIsValid && validateAuthority)
                 {
                     var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => app
-                   .AcquireTokenForClient(TestConstants.s_scope)
-                   .WithAuthority("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
-                   .ExecuteAsync()).ConfigureAwait(false);
+                       .AcquireTokenForClient(TestConstants.s_scope)
+                       .WithTenantId("17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                       .ExecuteAsync()).ConfigureAwait(false);
 
                     Assert.AreEqual(MsalError.InvalidInstance, ex.ErrorCode);
                     var qp = CoreHelpers.ParseKeyValueList(discoveryHandler.ActualRequestMessage.RequestUri.Query.Substring(1), '&', true, null);
@@ -415,20 +482,22 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     AuthenticationResult result = await app
                         .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithAuthority("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
-                        .ExecuteAsync()
+                        .WithTenantId("17b189bc-2b81-4ec5-aa51-3e628cbc931b").ExecuteAsync()
                         .ConfigureAwait(false);
 
                     Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
                     Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                    Assert.AreEqual(
-                        "https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F17b189bc-2b81-4ec5-aa51-3e628cbc931b%2Foauth2%2Fv2.0%2Fauthorize",
-                        discoveryHandler.ActualRequestMessage.RequestUri.AbsoluteUri,
-                        "Authority validation is made on https://login.microsoftonline.com/ and it validates the auth_endpoint of the non-regional authority");
+                    if (validateAuthority)
+                    {
+                        Assert.AreEqual(
+                            "https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F17b189bc-2b81-4ec5-aa51-3e628cbc931b%2Foauth2%2Fv2.0%2Fauthorize",
+                            discoveryHandler.ActualRequestMessage.RequestUri.AbsoluteUri,
+                            "Authority validation is made on https://login.microsoftonline.com/ and it validates the auth_endpoint of the non-regional authority");
+                    }
 
                     result = await app
                        .AcquireTokenForClient(TestConstants.s_scope)
-                       .WithAuthority("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                       .WithTenantId("17b189bc-2b81-4ec5-aa51-3e628cbc931b")
                        .ExecuteAsync()
                        .ConfigureAwait(false);
 
@@ -514,8 +583,6 @@ namespace Microsoft.Identity.Test.Unit
         {
             var builder = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
-                                 .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
-                                 .WithRedirectUri(TestConstants.RedirectUri)
                                  .WithHttpManager(httpManager)
                                  .WithClientSecret(TestConstants.ClientSecret);
 
