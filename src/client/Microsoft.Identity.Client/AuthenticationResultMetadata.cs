@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
         /// This may be different from the endpoint you'd infer from the authority configured in the application object:
         /// - if regional auth is used.
         /// - if AAD instructs MSAL to use a different environment. 
-        /// - if the authority or tenant is overriden at the request level
+        /// - if the authority or tenant is overridden at the request level.
         /// - during a refresh_token operation, when MSAL must resolve "common" and "organizations" to a tenant ID.
         /// </remarks>
         public string TokenEndpoint { get; set; }
