@@ -452,23 +452,48 @@ namespace Microsoft.Identity.Client
                 return tokenCacheItems;
             }
 
-            var requestScopes = requestParams.Scope.Where(s =>
-                !OAuth2Value.ReservedScopes.Contains(s));
-
-            tokenCacheItems = tokenCacheItems.FilterWithLogging(
-                item =>
+            // For client credentials there is one and only one scope
+            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenForClient && requestParams.Scope.Count == 1)
+            {
+                tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
                 {
-                    bool accepted = ScopeHelper.ScopeContains(item.ScopeSet, requestScopes);
+                    bool accepted = string.Equals(
+                        item.ScopeString,
+                        requestParams.Scope.Single(),
+                        StringComparison.OrdinalIgnoreCase);
 
                     if (logger.IsLoggingEnabled(LogLevel.Verbose))
                     {
-                        logger.Verbose($"Access token with scopes {string.Join(" ", item.ScopeSet)} " +
+                        logger.Verbose($"Access token with scope {string.Join(" ", item.ScopeSet)} " +
                             $"passes scope filter? {accepted} ");
                     }
+
                     return accepted;
-                },
-                logger,
+
+                }, 
+                logger, 
                 "Filtering by scopes");
+            }
+            else
+            {
+                var requestScopes = requestParams.Scope.Where(s =>
+                    !OAuth2Value.ReservedScopes.Contains(s)).ToArray();
+
+                tokenCacheItems = tokenCacheItems.FilterWithLogging(
+                    item =>
+                    {
+                        bool accepted = ScopeHelper.ScopeContains(item.ScopeSet, requestScopes);
+
+                        if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                        {
+                            logger.Verbose($"Access token with scopes {string.Join(" ", item.ScopeSet)} " +
+                                $"passes scope filter? {accepted} ");
+                        }
+                        return accepted;
+                    },
+                    logger,
+                    "Filtering by scopes");
+            }
 
             return tokenCacheItems;
         }
