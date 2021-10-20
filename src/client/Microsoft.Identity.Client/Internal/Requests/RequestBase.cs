@@ -89,15 +89,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
                         LogReturnedToken(authenticationResult);
 
-                        apiEvent.TenantId = authenticationResult.TenantId;
-                        apiEvent.AccountId = authenticationResult.UniqueId;
-                        apiEvent.WasSuccessful = true;
-
-                        authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
-                        authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
-                        authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
-                        Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
-                        authenticationResult.AuthenticationResultMetadata.CacheRefreshReason = (CacheRefreshReason)apiEvent.CacheInfo;
+                        UpdateTelemetry(sw, apiEvent, authenticationResult);
                         return authenticationResult;
                     }
                     catch (MsalException ex)
@@ -117,6 +109,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 ServiceBundle.MatsTelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
             }
+        }
+
+        private static void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)
+        {
+            apiEvent.TenantId = authenticationResult.TenantId;
+            apiEvent.AccountId = authenticationResult.UniqueId;
+            apiEvent.WasSuccessful = true;
+
+            authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
+            authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
+            authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
+            authenticationResult.AuthenticationResultMetadata.TokenEndpoint = apiEvent.TokenEndpoint;
+            authenticationResult.AuthenticationResultMetadata.CacheRefreshReason = (CacheRefreshReason)apiEvent.CacheInfo;
+
+            Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
         }
 
         protected virtual void EnrichTelemetryApiEvent(ApiEvent apiEvent)

@@ -26,6 +26,19 @@ namespace Microsoft.Identity.Client
         public TokenSource TokenSource { get; }
 
         /// <summary>
+        /// The token endpoint used to contact the Identity Provider (e.g. Azure Active Directory). 
+        /// Can be null, for example when the token comes from the cache.
+        /// </summary>
+        /// <remarks>
+        /// This may be different from the endpoint you'd infer from the authority configured in the application object:
+        /// - if regional auth is used.
+        /// - if AAD instructs MSAL to use a different environment. 
+        /// - if the authority or tenant is overridden at the request level.
+        /// - during a refresh_token operation, when MSAL must resolve "common" and "organizations" to a tenant ID.
+        /// </remarks>
+        public string TokenEndpoint { get; set; }
+
+        /// <summary>
         /// Time, in milliseconds, spent to service this request. Includes time spent making HTTP requests <see cref="DurationInHttpInMs"/>, time spent
         /// in token cache callbacks <see cref="DurationInCacheInMs"/>, time spent in MSAL and context switching.
         /// </summary>

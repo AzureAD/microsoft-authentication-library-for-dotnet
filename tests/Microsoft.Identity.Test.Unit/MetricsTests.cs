@@ -51,6 +51,9 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
                 Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/common/oauth2/v2.0/token", 
+                    result.AuthenticationResultMetadata.TokenEndpoint);
                 Assert.AreEqual(1, Metrics.TotalAccessTokensFromIdP);
                 Assert.AreEqual(0, Metrics.TotalAccessTokensFromCache);
                 Assert.AreEqual(0, Metrics.TotalAccessTokensFromBroker);
@@ -67,6 +70,8 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(1, Metrics.TotalAccessTokensFromCache);
                 Assert.AreEqual(0, Metrics.TotalAccessTokensFromBroker);
                 Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+                Assert.IsNull(result.AuthenticationResultMetadata.TokenEndpoint);
+
             }
         }
 
