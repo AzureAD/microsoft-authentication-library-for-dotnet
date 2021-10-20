@@ -558,6 +558,7 @@ namespace Microsoft.Identity.Client
 
                 if(!filterByTenantId)
                 {
+                    include = true;
                     requestParams.RequestContext.Logger.Warning("Have not filtered by tenant ID. " +
                           "This can happen in OBO scenario where authority is /common or /organizations. " +
                           "Please use tenanted authority.");
