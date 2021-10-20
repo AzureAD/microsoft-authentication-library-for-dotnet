@@ -111,10 +111,9 @@ namespace NetFx
                 .Build();
 
             //cca.AcquireTokenOnBehalfOf(null, null).WithAuthority
-            
 
-            BindCache(cca.UserTokenCache, UserCacheFile);
-            BindCache(cca.AppTokenCache, UserCacheFile);
+            //BindCache(cca.UserTokenCache, UserCacheFile);
+            //BindCache(cca.AppTokenCache, UserCacheFile);
 
             return cca;
         }
@@ -203,7 +202,8 @@ namespace NetFx
                         6. Acquire Token Silently - multiple requests in parallel
                         7. Acquire SSH Cert Interactive
                         8. Client Credentials 
-                        9. Get Account with ID
+                        *. Client Credentials multi-tenant no AAD (for profiling)
+                        9. Get Account with ID            
                         a. Acquire Token Silently with MSA passthrough workaround
                         p. Toggle POP (currently {(s_usePoP ? "ON" : "OFF")}) 
                         b. Toggle broker
@@ -395,15 +395,57 @@ namespace NetFx
                             Console.WriteLine("SSH cert: " + result.AccessToken);
 
                             break;
-                        case '8':
+                        case '*':
+                            var cca = CreateCca();
+                            const string _scopePrefix = "https://graph.microsoft.com/.default";
+                            const string _tenantPrefix = "f8cdef31-a31e-4b4a-93e4-5f571e91255";
+                            int maxScopes = 10;
+                            int maxTenants = 10000;
 
+                            for (int tenant = 0; tenant < maxTenants; tenant++)
+                            {
+                                for (int token = 0; token < maxScopes; token++)
+                                {
+                                    MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
+                                          "login.windows.net",
+                                          s_clientIdForConfidentialApp,
+                                          $"{_scopePrefix}{token}",
+                                          $"{_tenantPrefix}{tenant}",
+                                          "",
+                                          new DateTimeOffset(DateTime.UtcNow),
+                                          new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
+                                          new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
+                                          null,
+                                          null);
+                                    (cca.AppTokenCache as ITokenCacheInternal).Accessor.SaveAccessToken(atItem);
+                                    
+                                }
+                            }
+                            Random random = new Random();
+
+                            while (true)
+                            {
+                                var tenantId = $"{_tenantPrefix}{random.Next(0, maxTenants)}";
+                                var scope = $"{_scopePrefix}{random.Next(0, maxScopes)}";
+
+                                var res = await cca.AcquireTokenForClient(new[] { scope })
+                                 .WithAuthority($"https://login.microsoftonline.com/{tenantId}")
+                                 .ExecuteAsync()
+                                 .ConfigureAwait(false);
+
+                                    Console.WriteLine("Got a token");
+
+                            }
+                            break;
+
+                        case '8':
                             for (int i = 0; i < 100; i++)
                             {
-                                var cca = CreateCca();
+                                var cca2 = CreateCca();
 
-                                var resultX = await cca.AcquireTokenForClient(
+                                await cca2.AcquireTokenForClient(
                                     new[] { "https://graph.microsoft.com/.default" })
-                                    .WithForceRefresh(true)
+                                    //.WithForceRefresh(true)
                                     .ExecuteAsync()
                                     .ConfigureAwait(false);
 
