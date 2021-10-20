@@ -17,6 +17,8 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
+    rerunFailedTests: true
+    rerunMaxAttempts: '3'
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET CORE)'
@@ -29,6 +31,8 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
+    rerunFailedTests: true
+    rerunMaxAttempts: '3'
 
 - task: VSTest@2
   displayName: 'Run unit tests (NET5-WIN)'
@@ -41,3 +45,5 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
+    rerunFailedTests: true
+    rerunMaxAttempts: '3'
