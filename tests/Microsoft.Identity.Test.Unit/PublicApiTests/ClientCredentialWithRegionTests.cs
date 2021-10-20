@@ -459,17 +459,6 @@ namespace Microsoft.Identity.Test.Unit
                 }
 
                 harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
-
-
-                //if (authorityIsValid || !validateAuthority) // no calls because authority validation will fail
-                //{
-                //    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
-                //}
-                //else
-                //{
-                //    harness.HttpManager.AddMockHandler(discoveryHandler);
-                //}
-
                 var app = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
                                  .WithAuthority("https://login.windows-ppe.net/common", validateAuthority)
