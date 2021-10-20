@@ -181,7 +181,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? new List<MsalAccessTokenCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList()
+#if NETSTANDARD || NETCOREAPP || NET461
+                    ?? Array.Empty<MsalAccessTokenCacheItem>() as IReadOnlyList<MsalAccessTokenCacheItem>;
+#else               
+                    ?? new List<MsalAccessTokenCacheItem>();
+#endif
             }
         }
 
