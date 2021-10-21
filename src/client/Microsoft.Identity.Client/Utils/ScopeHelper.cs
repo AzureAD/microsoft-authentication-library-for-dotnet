@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Utils
         {
             foreach (string key in possibleContainedSet)
             {
-                if (!string.IsNullOrEmpty(key) && !outerSet.Contains(key))
+                if (!outerSet.Contains(key) && !string.IsNullOrEmpty(key))
                 {
                     return false;
                 }
@@ -28,23 +28,26 @@ namespace Microsoft.Identity.Client.Utils
             return new HashSet<string>(userScopes.Concat(OAuth2Value.ReservedScopes));
         }
 
-        private static readonly Char[] SingleSpace = new Char[] { ' ' };
-
         public static HashSet<string> ConvertStringToScopeSet(string singleString)
         {
-            String[] parts = singleString?.Split(SingleSpace, StringSplitOptions.RemoveEmptyEntries);
+            if (string.IsNullOrEmpty(singleString))
+            {
+                return new HashSet<string>();
+            }
 
-            return CreateScopeSet(parts);
+            return new HashSet<string>(
+                singleString.Split(' '),
+                StringComparer.OrdinalIgnoreCase);
         }
 
         public static HashSet<string> CreateScopeSet(IEnumerable<string> input)
         {
             if (input == null)
             {
-                return new HashSet<string>(StringComparer.Ordinal);
+                return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             }
 
-            return new HashSet<string>(input.Select(i => i.ToLower()), StringComparer.Ordinal);
+            return new HashSet<string>(input, StringComparer.OrdinalIgnoreCase);
         }
     }
 }
