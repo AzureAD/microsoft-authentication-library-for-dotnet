@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string Environment => "fs.msidlab8.com/adfs";
 
-            public string[] AppScopes => new[] { "openid", "profile" };
+            public string[] AppScopes => new[] { "openid" };
 
             public X509Certificate2 GetCertificate()
             {
