@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -69,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             _logger.Info("NullBroker - returning empty list on GetAccounts request.");
-            return Task.FromResult<IReadOnlyList<IAccount>>(new List<IAccount>()); // nop
+            return Task.FromResult(CollectionHelpers.GetEmptyReadOnlyList<IAccount>()); // nop
         }
     }
 }

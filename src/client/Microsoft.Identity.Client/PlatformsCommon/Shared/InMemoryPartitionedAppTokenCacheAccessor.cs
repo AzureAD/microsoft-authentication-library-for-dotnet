@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
@@ -181,28 +182,23 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList()
-#if NETSTANDARD || NETCOREAPP || NET461
-                    ?? Array.Empty<MsalAccessTokenCacheItem>() as IReadOnlyList<MsalAccessTokenCacheItem>;
-#else               
-                    ?? new List<MsalAccessTokenCacheItem>();
-#endif
+                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalAccessTokenCacheItem>();
             }
         }
 
         public virtual IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
         {
-            return new List<MsalRefreshTokenCacheItem>();
+            return CollectionHelpers.GetEmptyReadOnlyList<MsalRefreshTokenCacheItem>();
         }
 
         public virtual IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
         {
-            return new List<MsalIdTokenCacheItem>();
+            return CollectionHelpers.GetEmptyReadOnlyList<MsalIdTokenCacheItem>();
         }
 
         public virtual IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
         {
-            return new List<MsalAccountCacheItem>();
+            return CollectionHelpers.GetEmptyReadOnlyList<MsalAccountCacheItem>();
         }
 
         public IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata()

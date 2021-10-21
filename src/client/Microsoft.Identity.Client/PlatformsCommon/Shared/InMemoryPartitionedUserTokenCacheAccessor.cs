@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
@@ -212,7 +213,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? new List<MsalAccessTokenCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalAccessTokenCacheItem>();
             }
         }
 
@@ -227,7 +228,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 RefreshTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalRefreshTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? new List<MsalRefreshTokenCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalRefreshTokenCacheItem>();
             }
         }
 
@@ -242,7 +243,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 IdTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalIdTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? new List<MsalIdTokenCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalIdTokenCacheItem>();
             }
         }
 
@@ -257,7 +258,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 AccountCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccountCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? new List<MsalAccountCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalAccountCacheItem>();
             }
         }
 

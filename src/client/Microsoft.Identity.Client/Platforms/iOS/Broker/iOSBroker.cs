@@ -390,7 +390,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     ICacheSessionManager cacheSessionManager,
                     IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            return Task.FromResult<IReadOnlyList<IAccount>>(new List<IAccount>()); // nop
+            return Task.FromResult(CollectionHelpers.GetEmptyReadOnlyList<IAccount>()); // nop
         }
 
         /// <summary>
