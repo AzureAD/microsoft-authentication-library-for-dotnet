@@ -1,3 +1,29 @@
+4.37.0
+==========
+### New Features:
+**MSAL.NET now logs an error when `common` or `organizations` authority is used in the client credentials request**. See [#2887](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2887).  
+**Added the ability to enable sending the certificate (as x5c) once when building the confidential client application**, rather than on every single request. See [#2804](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2804).  
+**Added additional methods to help create `WwwAuthenticateParameters`**. See [#2907](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2907).  
+**Added an additional async overload for `ConfidentialClientApplicationBuilder.CreateClientAssertion`**. See [#2863](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2863).  
+**Added an ability to enable a shared token cache between different MSAL client application instances**, which can be set with the new `WithCacheOptions` API call. See [Enabling shared cache](https://aka.ms/msal-net-shared-cache), [#2849](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2849).  
+**Added an `AuthenticationResult.AuthenticationResultMetadata.TokenEndpoint` property that indicates which authority was used to fetch the token**, and which can be used to determine if regional endpoint was used. See [#2830](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2830).  
+**Added a cache refresh reason and time remaining before proactive token refresh to `AuthenticationResult.AuthenticationResultMetadata`**. See [#2832](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2832).  
+**Added the ability to specify tenant ID for the authority at the request level with `WithTenantId`**. See [#2280](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2280).  
+**Added the ability to get tenant ID in `WwwAuthenticateParameters` by calling `GetTenantId`**. See [#2922](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2922).  
+
+
+### Bug Fixes:
+**Improved support for calling regional endpoints, especially in Azure Functions**. See [#2803](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2803).  
+**Fixed a `NullReferenceException` when calling`AcquireTokenInteractive` with a login hint in WAM**. See [#2903](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2903).  
+**Improved the error message when the application is throttled by the identity provider**. See [#2855](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2855).  
+**When proactive token refresh is enabled, MSAL.NET now refreshes the tokens on a background thread to improve performance**. See [#2795](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2795).  
+**Improved caching performance by adding partitioning to the default in-memory user cache** used in user flows (like acquire token on-behalf-of, by authorization code). See [#2861](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2861), [#2881](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2881).  
+**Improved performance by refactoring date handling when working with access tokens**. See [#2893](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2893).  
+**Fixed a `Non-HTTPS URL redirect is not supported in webview` exception on Xamarin iOS for Facebook logins**. See [#2735](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2735).  
+**Enabled setting the window title in WebView1 desktop browser**. See [#2936](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2936).  
+**Added `WithPrompt` to the `GetAuthorizationRequestUrl` builder** to give the ability to specify the interaction experience for the user. See [#2896](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2896).  
+**Added a more descriptive error message when `WithAuthority` is set at the request level and `WithAzureRegion` is used**. See [#2965](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2965).  
+
 4.37.0-preview
 ==========
 ### New Features:
