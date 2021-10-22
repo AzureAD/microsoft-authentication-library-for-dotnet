@@ -1,16 +1,14 @@
 4.37.0
 ==========
 ### New Features:
-**MSAL.NET now logs an error when `common` or `organizations` authority is used in AcquireTokenForClient**. See [#2887](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2887).  
+**MSAL.NET now logs an error when `common` or `organizations` authority is used in `AcquireTokenForClient`**. See [#2887](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2887).  
 **Added the ability to enable sending the certificate (as x5c) once when building the confidential client application**, rather than on every single token acquisition request. See [#2804](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2804).  
-**Added additional methods to help create `WwwAuthenticateParameters`**. See [#2907](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2907).  
+**Added additional methods to help create `WwwAuthenticateParameters` and get tenant ID by calling `GetTenantId`**. See [#2907](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2907), [#2922](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2922).  
 **Added an additional async overload for `ConfidentialClientApplicationBuilder.CreateClientAssertion`**. See [#2863](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2863).  
 **Added an ability to enable a shared token cache between different MSAL client application instances**, which can be set with the new `WithCacheOptions` API call. See [Enabling shared cache](https://aka.ms/msal-net-shared-cache), [#2849](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2849).  
 **Added an `AuthenticationResult.AuthenticationResultMetadata.TokenEndpoint` property from which you can derive which authority was effectively used to fetch the token**. This can be used to determine if regional endpoint was used. See [#2830](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2830).  
 **Added a cache refresh reason and time remaining before proactive token refresh to `AuthenticationResult.AuthenticationResultMetadata`**. See [#2832](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2832).  
 **Added the ability to specify tenant ID instead of the full authority at the token acquisition APIs level with `WithTenantId`**. See [#2280](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2280).  
-**Added the ability to get tenant ID in `WwwAuthenticateParameters` by calling `GetTenantId`**. See [#2922](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2922).  
-
 
 ### Bug Fixes:
 **Improved support for calling regional endpoints, especially in Azure Functions**. See [#2803](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2803).  
