@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         ///  These need to be asked for to the /authorize endpoint (for consent)
         ///  but not to the /token endpoint
         /// </summary>
-        public IEnumerable<string> ExtraScopesToConsent { get; set; } = new List<string>();
+        public IEnumerable<string> ExtraScopesToConsent { get; set; } = CollectionHelpers.GetEmptyReadOnlyList<string>();
         public WebViewPreference UseEmbeddedWebView { get; set; } = WebViewPreference.NotSpecified;
         public string LoginHint { get; set; }
         public IAccount Account { get; set; }
@@ -34,7 +35,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             builder.AppendLine("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("User provided: " + (Account != null));
             builder.AppendLine("UseEmbeddedWebView: " + UseEmbeddedWebView);
-            builder.AppendLine("ExtraScopesToConsent: " + string.Join(";", ExtraScopesToConsent ?? new List<string>()));
+            builder.AppendLine("ExtraScopesToConsent: " + string.Join(";", ExtraScopesToConsent ?? CollectionHelpers.GetEmptyReadOnlyList<string>()));
             builder.AppendLine("Prompt: " + Prompt.PromptValue);
             builder.AppendLine("HasCustomWebUi: " + (CustomWebUi != null));
             UiParent.SystemWebViewOptions?.LogParameters(logger);
