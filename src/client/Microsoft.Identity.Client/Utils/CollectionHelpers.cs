@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Utils
 #endif
         public static IReadOnlyList<T> GetEmptyReadOnlyList<T>()
         {
-#if !net45
+#if !NET45
             return Array.Empty<T>();
 #else
             return new List<T>();
