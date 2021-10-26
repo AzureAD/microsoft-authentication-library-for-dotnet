@@ -20,5 +20,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// This overrides application config settings.
         /// </summary>
         public bool? SendX5C { get; set; }
+
+        public bool SpaCode { get; internal set; } = false;
     }
 }

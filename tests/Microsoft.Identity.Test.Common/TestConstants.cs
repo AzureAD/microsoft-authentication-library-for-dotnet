@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         public static readonly Dictionary<string, string> ExtraHttpHeader = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "SomeExtraHeadderKey", "SomeExtraHeadderValue" } };
+        
 
         public const string ScopeStr = "r1/scope1 r1/scope2";
         public const string ScopeStrFormat = "r{0}/scope1 r{0}/scope2";
@@ -182,6 +183,8 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                 };
             }
         }
+
+        public static readonly Dictionary<string, string> HybridSpaExtraBodyParameter = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "spa_code", "1" } };
 
         public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
         public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";

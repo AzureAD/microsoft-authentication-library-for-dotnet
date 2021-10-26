@@ -124,7 +124,8 @@ namespace Microsoft.Identity.Client
             IAuthenticationScheme authenticationScheme,
             Guid correlationID,
             TokenSource tokenSource, 
-            ApiEvent apiEvent)
+            ApiEvent apiEvent,
+            string spaCode = null)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
             
@@ -148,6 +149,8 @@ namespace Microsoft.Identity.Client
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
             TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
+            SpaCode = spaCode;
+
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
@@ -241,6 +244,11 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="CreateAuthorizationHeader"/> for getting an HTTP authorization header from an AuthenticationResult.
         /// </summary>
         public string TokenType { get; }
+
+        /// <summary>
+        /// Gets the  Id Token if returned by the service or null if no Id Token is returned.
+        /// </summary>
+        public string SpaCode { get; }
 
         /// <summary>
         /// All the claims present in the ID token.

@@ -59,6 +59,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserDataAsync(UserQuery.MsaUserQuery);
         }
 
+        public static Task<LabResponse> GetHybridSpaAccontAsync()
+        {
+            return GetLabUserDataAsync(UserQuery.HybridSpaUserQuery);
+        }
+
         public static Task<LabResponse> GetB2CLocalAccountAsync()
         {
             return GetLabUserDataAsync(UserQuery.B2CLocalAccountUserQuery);

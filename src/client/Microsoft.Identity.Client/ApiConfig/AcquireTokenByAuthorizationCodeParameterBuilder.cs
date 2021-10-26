@@ -154,5 +154,19 @@ namespace Microsoft.Identity.Client
             this.WithExtraHttpHeaders(ccsRoutingHeader);
             return this;
         }
+
+        /// <summary>
+        /// This will remove the need for a second interactive round-trip when third-party cookies are not available,
+        /// and also improve the end-to-end performance for applications to complete server-side and client-side authentication.
+        /// </summary>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithSpaCode()
+        {
+
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSpaCode);
+            Parameters.SpaCode = Constants.SpaCode;
+
+            return this;
+        }
     }
 }

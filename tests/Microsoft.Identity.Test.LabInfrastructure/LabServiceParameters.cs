@@ -91,4 +91,16 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         AzureAdMultipleOrgs,
         AzureAdAndPersonalMicrosoftAccount
     }
+
+    public enum AppPlatform
+    {
+        web,
+        spa
+    }
+
+    public enum PublicClient
+    {
+        yes,
+        no
+    }
 }

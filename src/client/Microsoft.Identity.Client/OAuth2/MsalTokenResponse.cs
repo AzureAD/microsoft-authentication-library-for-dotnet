@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string Authority = "authority";
         public const string FamilyId = "foci";
         public const string RefreshIn = "refresh_in";
+        public const string SpaCode = "spa_code";
     }
 
     [JsonObject]
@@ -69,7 +70,11 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonProperty(PropertyName = TokenResponseClaim.FamilyId)]
         public string FamilyId { get; set; }
 
+        [JsonProperty(PropertyName = TokenResponseClaim.SpaCode)]
+        public string SpaCode { get; set; }
+
         public string WamAccountId { get; set; }
+
 
         public TokenSource TokenSource { get; set; }
 
