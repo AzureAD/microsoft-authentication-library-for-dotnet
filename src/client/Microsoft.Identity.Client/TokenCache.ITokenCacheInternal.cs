@@ -183,22 +183,22 @@ namespace Microsoft.Identity.Client
                             msalAccessTokenCacheItem.HomeAccountId,
                             msalAccessTokenCacheItem.TokenType);
 
-                        _accessor.SaveAccessToken(msalAccessTokenCacheItem);
+                        Accessor.SaveAccessToken(msalAccessTokenCacheItem);
                     }
 
                     if (idToken != null)
                     {
                         requestParams.RequestContext.Logger.Info("Saving Id Token and Account in cache ...");
-                        _accessor.SaveIdToken(msalIdTokenCacheItem);
+                        Accessor.SaveIdToken(msalIdTokenCacheItem);
                         MergeWamAccountIds(msalAccountCacheItem);
-                        _accessor.SaveAccount(msalAccountCacheItem);
+                        Accessor.SaveAccount(msalAccountCacheItem);
                     }
 
                     // if server returns the refresh token back, save it in the cache.
                     if (msalRefreshTokenCacheItem != null)
                     {
                         requestParams.RequestContext.Logger.Info("Saving RT in cache...");
-                        _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                        Accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
                     }
 
                     UpdateAppMetadata(
@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Client
                     {
                         DateTimeOffset? cacheExpiry = null;
 
-                        if (!_accessor.GetAllRefreshTokens().Any())
+                        if (!Accessor.GetAllRefreshTokens().Any())
                         {
                             cacheExpiry = CalculateSuggestedCacheExpiry();
                         }
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Client
 
         private void MergeWamAccountIds(MsalAccountCacheItem msalAccountCacheItem)
         {
-            var existingAccount = _accessor.GetAccount(msalAccountCacheItem.GetKey());
+            var existingAccount = Accessor.GetAccount(msalAccountCacheItem.GetKey());
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
         }
@@ -740,7 +740,7 @@ namespace Microsoft.Identity.Client
             if (requestParams.Authority == null)
                 return null;
 
-            IReadOnlyList<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens(CacheKeyFactory.GetKeyFromRequest(requestParams));
+            IReadOnlyList<MsalRefreshTokenCacheItem> allRts = Accessor.GetAllRefreshTokens(CacheKeyFactory.GetKeyFromRequest(requestParams));
             if (allRts.Count != 0)
             {
                 var metadata =
@@ -852,7 +852,7 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            IEnumerable<MsalAppMetadataCacheItem> allAppMetadata = _accessor.GetAllAppMetadata();
+            IEnumerable<MsalAppMetadataCacheItem> allAppMetadata = Accessor.GetAllAppMetadata();
 
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                     requestParams.AuthorityInfo,
@@ -862,7 +862,7 @@ namespace Microsoft.Identity.Client
 
             var appMetadata =
                 instanceMetadata.Aliases
-                .Select(env => _accessor.GetAppMetadata(new MsalAppMetadataCacheKey(ClientId, env)))
+                .Select(env => Accessor.GetAppMetadata(new MsalAppMetadataCacheKey(ClientId, env)))
                 .FirstOrDefault(item => item != null);
 
             // From a FOCI perspective, an app has 3 states - in the family, not in the family or unknown
@@ -895,7 +895,7 @@ namespace Microsoft.Identity.Client
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParameters);
 
             IReadOnlyList<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId, partitionKey);
-            IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts(partitionKey);
+            IReadOnlyList<MsalAccountCacheItem> accountCacheItems = Accessor.GetAllAccounts(partitionKey);
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
@@ -1037,7 +1037,7 @@ namespace Microsoft.Identity.Client
 
         MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            var idToken = _accessor.GetIdToken(msalAccessTokenCacheItem);
+            var idToken = Accessor.GetIdToken(msalAccessTokenCacheItem);
             return idToken;
         }
 
@@ -1151,7 +1151,7 @@ namespace Microsoft.Identity.Client
 
         bool ITokenCacheInternal.HasTokensNoLocks()
         {
-            return _accessor.HasAccessOrRefreshTokens();
+            return Accessor.HasAccessOrRefreshTokens();
         }
 
         internal /* internal for test only */ void RemoveAccountInternal(IAccount account, RequestContext requestContext)
@@ -1179,7 +1179,7 @@ namespace Microsoft.Identity.Client
 
             foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in refreshTokensToDelete)
             {
-                _accessor.DeleteRefreshToken(refreshTokenCacheItem);
+                Accessor.DeleteRefreshToken(refreshTokenCacheItem);
             }
 
             requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
@@ -1188,7 +1188,7 @@ namespace Microsoft.Identity.Client
                 .ToList();
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
             {
-                _accessor.DeleteAccessToken(accessTokenCacheItem);
+                Accessor.DeleteAccessToken(accessTokenCacheItem);
             }
 
             requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
@@ -1198,16 +1198,16 @@ namespace Microsoft.Identity.Client
                 .ToList();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
             {
-                _accessor.DeleteIdToken(idTokenCacheItem);
+                Accessor.DeleteIdToken(idTokenCacheItem);
             }
 
             requestContext.Logger.Info("Deleted Id token count - " + allIdTokens.Count);
 
-            _accessor.GetAllAccounts(partitionKey)
+            Accessor.GetAllAccounts(partitionKey)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
                                item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase))
                 .ToList()
-                .ForEach(accItem => _accessor.DeleteAccount(accItem));
+                .ForEach(accItem => Accessor.DeleteAccount(accItem));
         }
 
         // Returns whether AcquireTokenInLongRunningProcess was called (user assertion is null in this case)

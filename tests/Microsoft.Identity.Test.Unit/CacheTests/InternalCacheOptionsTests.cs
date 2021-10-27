@@ -27,6 +27,27 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertExclusivity(app.UserTokenCache);
             AssertExclusivity(app.AppTokenCache);
 
+            var app2 =
+                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                               .WithClientSecret(TestConstants.ClientSecret)                                                               
+                                                               .Build();
+            app2.AppTokenCache.SetCacheOptions(CacheOptions.EnableSharedCacheOptions);
+            app2.UserTokenCache.SetCacheOptions(CacheOptions.EnableSharedCacheOptions);
+
+            AssertExclusivity(app2.AppTokenCache);
+            AssertExclusivity(app2.UserTokenCache);
+
+            var app3 =
+                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                               .WithClientSecret(TestConstants.ClientSecret)
+                                                               .Build();
+            app3.UserTokenCache.SetAfterAccess((n) => { });
+            app3.AppTokenCache.SetBeforeAccess((n) => { });
+            var ex = AssertException.Throws<MsalClientException>(() => app3.UserTokenCache.SetCacheOptions(CacheOptions.EnableSharedCacheOptions));
+            Assert.AreEqual(MsalError.StaticCacheWithExternalSerialization, ex.ErrorCode);
+            ex = AssertException.Throws<MsalClientException>(() => app3.AppTokenCache.SetCacheOptions(CacheOptions.EnableSharedCacheOptions));
+            Assert.AreEqual(MsalError.StaticCacheWithExternalSerialization, ex.ErrorCode);
+
             void AssertExclusivity(ITokenCache tokenCache)
             {
                 var ex = AssertException.Throws<MsalClientException>(() => tokenCache.SetAfterAccess((n) => { }));
@@ -64,8 +85,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                        .WithClientSecret(TestConstants.ClientSecret)
                                                        .WithHttpManager(httpManager)
-                                                       .WithCacheOptions(new CacheOptions() { UseSharedCache = true})
                                                        .BuildConcrete();
+
+                app2.AppTokenCache.SetCacheOptions(new CacheOptions(true));
 
                 ConfidentialClientApplication app_withoutStaticCache =
                   ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
