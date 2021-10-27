@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="claimsPrincipal">Claims from the ID token</param>
-        /// <param name="spaAuthCode">SPA Auth Code from AAD</param>
+        /// <param name="spaAuthCode">Auth Code returned by AzureAD when you use AcquireTokenByAuthorizeCode.WithSpaAuthCode(). This auth code is meant to be redeemed by the frontend code.</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Client
         public string TokenType { get; }
 
         /// <summary>
-        /// Gets the  SPA Auth Code if returned by the service or null if no Code is returned.
+        /// Gets the SPA Auth Code if returned by the service or null if no Code is returned.
         /// </summary>
         public string SpaAuthCode { get; }
 

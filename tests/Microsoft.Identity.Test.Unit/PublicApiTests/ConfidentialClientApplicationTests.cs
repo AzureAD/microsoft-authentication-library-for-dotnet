@@ -1285,6 +1285,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("1", handler.ActualRequestPostData["return_spa_code"]);
 
                 handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
+                responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetHybridSpaTokenResponse(expectedSpaCode)));
+
+                result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                .WithSpaAuthCode()
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+                Assert.AreEqual(expectedSpaCode, result.SpaAuthCode);
+                Assert.AreEqual("1", handler.ActualRequestPostData["return_spa_code"]);
+
+                handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
                 responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetHybridSpaTokenResponse(null)));
 
                 result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)

@@ -156,15 +156,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// This will remove the need for a second interactive round-trip when third-party cookies are not available,
-        /// and also improve the end-to-end performance for applications to complete server-side and client-side authentication.
+        /// Requests an auth code for the frontend (SPA using MSAL.js for instance). 
+        /// Also improves the end-to-end performance for applications to complete server-side and client-side authentication.
         /// </summary>
-        /// <param name="spaCode"><c>true</c> if Hybrid Spa Auth Code should be returned <c>false</c>.
-        /// The default is <c>false</c></param>
+        /// <param name="spaCode"><c>true</c> if Hybrid Spa Auth Code should be returned,
+        /// <c>false</c></param> otherwise.
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenByAuthorizationCodeParameterBuilder WithSpaAuthCode(bool spaCode)
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithSpaAuthCode(bool spaCode = true)
         {
-
             Parameters.SpaCode = spaCode;
 
             return this;

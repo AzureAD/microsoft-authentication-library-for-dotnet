@@ -75,7 +75,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public string WamAccountId { get; set; }
 
-
         public TokenSource TokenSource { get; set; }
 
         public HttpResponse HttpResponse { get; set; }
