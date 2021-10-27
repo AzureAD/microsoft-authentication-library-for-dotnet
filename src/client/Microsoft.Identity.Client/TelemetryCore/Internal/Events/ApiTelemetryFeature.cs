@@ -27,7 +27,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         WithSystemBrowserOptions,
         WithSSHAuthenticationScheme,
         WithPoPScheme,
-        WithAzureRegion,
-        WithSpaCode
+        WithAzureRegion
     }
 }

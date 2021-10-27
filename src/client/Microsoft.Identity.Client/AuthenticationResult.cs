@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Client
         public string TokenType { get; }
 
         /// <summary>
-        /// Gets the  Id Token if returned by the service or null if no Id Token is returned.
+        /// Gets the  SPA Auth Code if returned by the service or null if no Code is returned.
         /// </summary>
         public string SpaAuthCode { get; }
 
