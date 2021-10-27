@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (_authorizationCodeParameters.SpaCode)
             {
-                dict[OAuth2Parameter.SpaCode] = Constants.SpaCodeQueryParameterValue;
+                dict[OAuth2Parameter.SpaCode] = Constants.EnableSpaAuthCode;
             }
 
             return dict;
