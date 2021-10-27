@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public string FamilyId { get; set; }
 
         [JsonProperty(PropertyName = TokenResponseClaim.SpaCode)]
-        public string SpaCode { get; set; }
+        public string SpaAuthCode { get; set; }
 
         public string WamAccountId { get; set; }
 

@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="claimsPrincipal">Claims from the ID token</param>
+        /// <param name="spaAuthCode">SPA Auth Code from AAD</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -52,7 +53,8 @@ namespace Microsoft.Identity.Client
             Guid correlationId,
             string tokenType = "Bearer",
             AuthenticationResultMetadata authenticationResultMetadata = null, 
-            ClaimsPrincipal claimsPrincipal = null)
+            ClaimsPrincipal claimsPrincipal = null,
+            string spaAuthCode = null)
         {
             AccessToken = accessToken;
             IsExtendedLifeTimeToken = isExtendedLifeTimeToken;
@@ -67,6 +69,7 @@ namespace Microsoft.Identity.Client
             TokenType = tokenType;
             AuthenticationResultMetadata = authenticationResultMetadata;
             ClaimsPrincipal = claimsPrincipal;
+            SpaAuthCode = spaAuthCode;
         }
 
         /// <summary>
@@ -125,7 +128,7 @@ namespace Microsoft.Identity.Client
             Guid correlationID,
             TokenSource tokenSource, 
             ApiEvent apiEvent,
-            string spaCode = null)
+            string spaAuthCode = null)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
             
@@ -149,7 +152,7 @@ namespace Microsoft.Identity.Client
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
             TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
-            SpaCode = spaCode;
+            SpaAuthCode = spaAuthCode;
 
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
@@ -248,7 +251,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the  Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
-        public string SpaCode { get; }
+        public string SpaAuthCode { get; }
 
         /// <summary>
         /// All the claims present in the ID token.

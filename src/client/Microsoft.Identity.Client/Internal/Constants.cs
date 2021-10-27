@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Client.Internal
         //Represents 5 minutes in Unit time stamp
         public const int DefaultJitterRangeInSeconds = 300;
         public static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);
-        public const bool SpaCode = true;
         public const string SpaCodeQueryParameter = "return_spa_code";
         public const string SpaCodeQueryParameterValue = "1";
 

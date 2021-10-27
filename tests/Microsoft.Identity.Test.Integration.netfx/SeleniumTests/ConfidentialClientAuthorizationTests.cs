@@ -92,19 +92,28 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetHybridSpaAccontAsync().ConfigureAwait(false);
-            var result = await RunTestForUserAsync(labResponse.App.AppId, labResponse, "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", false, "http://localhost:3000/auth/implicit-redirect").ConfigureAwait(false);
 
-            Assert.IsNotNull(result.SpaCode);
+            var result = await RunTestForUserAsync(labResponse.App.AppId, labResponse, 
+                "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", false, 
+                "http://localhost:3000/auth/implicit-redirect").ConfigureAwait(false);
+
+            Assert.IsNotNull(result.SpaAuthCode);
+
+            result = await RunTestForUserAsync(labResponse.App.AppId, labResponse, 
+                "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", false, 
+                "http://localhost:3000/auth/implicit-redirect", false).ConfigureAwait(false);
+
+            Assert.IsNull(result.SpaAuthCode);
         }
 
-        private async Task<AuthenticationResult> RunTestForUserAsync(string appId, LabResponse labResponse, string authority, bool usePkce = false, string redirectUri = null)
+        private async Task<AuthenticationResult> RunTestForUserAsync(string appId, LabResponse labResponse, 
+            string authority, bool usePkce = false, string redirectUri = null, bool spaCode = true)
         {
             var cert = await s_secretProvider.GetCertificateWithPrivateMaterialAsync(
                 CertificateName, KeyVaultInstance.MsalTeam).ConfigureAwait(false);
 
             IConfidentialClientApplication cca;
-            //redirectUri = redirectUri == null ? SeleniumWebUI.FindFreeLocalhostRedirectUri() : "http://localhost:3000/auth/implicit-redirect";
-            redirectUri ??= SeleniumWebUI.FindFreeLocalhostRedirectUri();
+            redirectUri = redirectUri ?? SeleniumWebUI.FindFreeLocalhostRedirectUri();
 
             HttpSnifferClientFactory factory;
 
@@ -156,7 +165,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
              var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
                 .WithPkceCodeVerifier(codeVerifier)
                 .WithExtraHttpHeaders(TestConstants.ExtraHttpHeader)
-                .WithSpaCode()
+                .WithSpaAuthCode(spaCode)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

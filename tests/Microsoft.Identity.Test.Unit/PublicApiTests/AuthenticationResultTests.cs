@@ -53,6 +53,26 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void GetHybridSpaAuthCode()
+        {
+            var ar = new AuthenticationResult(
+                "at",
+                false,
+                "uid",
+                DateTime.UtcNow,
+                DateTime.UtcNow,
+                "tid",
+                new Account("aid", "user", "env"),
+                "idt", new[] { "scope" }, Guid.NewGuid(),
+                "SomeTokenType",
+                new AuthenticationResultMetadata(TokenSource.Cache),
+                null,
+                "SpaAuthCatCode");
+
+            Assert.AreEqual("SpaAuthCatCode", ar.SpaAuthCode);
+        }
+
+        [TestMethod]
         [Description(
             "In MSAL 4.17 we made a mistake and added AuthenticationResultMetadata with no default value before tokenType param. " +
             "To fix this breaking change, we added 2 constructors - " +

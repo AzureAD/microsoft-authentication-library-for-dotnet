@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 msalTokenResponse.TokenSource,
                 AuthenticationRequestParameters.RequestContext.ApiEvent, 
-                msalTokenResponse.SpaCode);
+                msalTokenResponse.SpaAuthCode);
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)

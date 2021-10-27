@@ -1259,6 +1259,45 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task GetAuthCode_HybridSpa_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                .WithRedirectUri(TestConstants.RedirectUri)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpManager(httpManager)
+                .BuildConcrete();
+
+
+                string expectedSpaCode = "my_spa_code";
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
+                responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetHybridSpaTokenResponse(expectedSpaCode)));
+
+                var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                .WithSpaAuthCode(true)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+                Assert.AreEqual(expectedSpaCode, result.SpaAuthCode);
+                Assert.AreEqual("1", handler.ActualRequestPostData["return_spa_code"]);
+
+                handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
+                responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetHybridSpaTokenResponse(null)));
+
+                result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                .WithSpaAuthCode(false)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+                Assert.IsTrue(string.IsNullOrEmpty(result.SpaAuthCode));
+
+            }
+        }
+
+        [TestMethod]
         public async Task AcquireTokenByRefreshTokenTestAsync()
         {
             using (var httpManager = new MockHttpManager())

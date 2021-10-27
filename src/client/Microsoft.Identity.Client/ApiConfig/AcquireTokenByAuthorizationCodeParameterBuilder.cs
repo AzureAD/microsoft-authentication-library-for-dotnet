@@ -159,12 +159,13 @@ namespace Microsoft.Identity.Client
         /// This will remove the need for a second interactive round-trip when third-party cookies are not available,
         /// and also improve the end-to-end performance for applications to complete server-side and client-side authentication.
         /// </summary>
+        /// <param name="spaCode"><c>true</c> if Hybrid Spa Auth Code should be returned <c>false</c>.
+        /// The default is <c>false</c></param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenByAuthorizationCodeParameterBuilder WithSpaCode()
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithSpaAuthCode(bool spaCode)
         {
 
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSpaCode);
-            Parameters.SpaCode = Constants.SpaCode;
+            Parameters.SpaCode = spaCode;
 
             return this;
         }
