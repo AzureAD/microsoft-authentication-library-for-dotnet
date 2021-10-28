@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool? SendX5C { get; set; }
 
         /// <summary>
-        /// if <c>true</c> then Spa Code param will be sent via Acquire Token By Auth Code
+        /// if <c>true</c> then Spa code param will be sent via AcquireTokenByAuthorizeCode
         /// </summary>
         public bool SpaCode { get; set; }
     }
