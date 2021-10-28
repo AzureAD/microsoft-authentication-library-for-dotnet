@@ -24,6 +24,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <summary>
         /// if <c>true</c> then Spa Code param will be sent via Acquire Token By Auth Code
         /// </summary>
-        public bool SpaCode { get; internal set; } = false;
+        public bool SpaCode { get; set; }
     }
 }

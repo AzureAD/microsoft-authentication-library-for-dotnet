@@ -249,7 +249,8 @@ namespace Microsoft.Identity.Client
         public string TokenType { get; }
 
         /// <summary>
-        /// Gets the SPA Auth Code if returned by the service or null if no Code is returned.
+        /// Gets the SPA Authorization Code, if it was requested using WithSpaAuthorizationCode method on the
+        /// AcquireTokenByAuthorizationCode builder. See https://aka.ms/msal-net-hybrid-spa for details.
         /// </summary>
         public string SpaAuthCode { get; }
 
