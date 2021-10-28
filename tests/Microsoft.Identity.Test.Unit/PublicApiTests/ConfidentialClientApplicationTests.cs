@@ -1277,7 +1277,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetHybridSpaTokenResponse(expectedSpaCode)));
 
                 var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                .WithSpaAuthCode(true)
+                .WithSpaAuthorizationCode(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -1288,7 +1288,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetHybridSpaTokenResponse(expectedSpaCode)));
 
                 result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                .WithSpaAuthCode()
+                .WithSpaAuthorizationCode()
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -1299,7 +1299,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetHybridSpaTokenResponse(null)));
 
                 result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                .WithSpaAuthCode(false)
+                .WithSpaAuthorizationCode(false)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

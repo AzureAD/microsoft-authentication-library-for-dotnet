@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Gets the SPA Authorization Code, if it was requested using WithSpaAuthorizationCode method on the
-        /// AcquireTokenByAuthorizationCode builder. See https://aka.ms/msal-net-hybrid-spa for details.
+        /// AcquireTokenByAuthorizationCode builder. See https://aka.ms/msal-net/spa-auth-code for details.
         /// </summary>
         public string SpaAuthCode { get; }
 

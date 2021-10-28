@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
              var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
                 .WithPkceCodeVerifier(codeVerifier)
                 .WithExtraHttpHeaders(TestConstants.ExtraHttpHeader)
-                .WithSpaAuthCode(spaCode)
+                .WithSpaAuthorizationCode(spaCode)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

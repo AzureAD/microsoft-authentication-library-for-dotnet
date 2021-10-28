@@ -157,14 +157,14 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Requests an auth code for the frontend (SPA using MSAL.js for instance). 
-        /// Also improves the end-to-end performance for applications to complete server-side and client-side authentication.
+        /// See https://aka.ms/msal-net/spa-auth-code for details.
         /// </summary>
-        /// <param name="spaCode"><c>true</c> if Hybrid Spa Auth Code should be returned,
+        /// <param name="requestSpaAuthorizationCode "><c>true</c> if Hybrid Spa Auth Code should be returned,
         /// <c>false</c></param> otherwise.
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenByAuthorizationCodeParameterBuilder WithSpaAuthCode(bool spaCode = true)
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithSpaAuthorizationCode(bool requestSpaAuthorizationCode = true)
         {
-            Parameters.SpaCode = spaCode;
+            Parameters.SpaCode = requestSpaAuthorizationCode;
 
             return this;
         }
