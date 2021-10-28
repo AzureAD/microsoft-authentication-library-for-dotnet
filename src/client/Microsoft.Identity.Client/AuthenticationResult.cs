@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="claimsPrincipal">Claims from the ID token</param>
+        /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizeCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code.</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -52,7 +53,8 @@ namespace Microsoft.Identity.Client
             Guid correlationId,
             string tokenType = "Bearer",
             AuthenticationResultMetadata authenticationResultMetadata = null, 
-            ClaimsPrincipal claimsPrincipal = null)
+            ClaimsPrincipal claimsPrincipal = null,
+            string spaAuthCode = null)
         {
             AccessToken = accessToken;
             IsExtendedLifeTimeToken = isExtendedLifeTimeToken;
@@ -67,6 +69,7 @@ namespace Microsoft.Identity.Client
             TokenType = tokenType;
             AuthenticationResultMetadata = authenticationResultMetadata;
             ClaimsPrincipal = claimsPrincipal;
+            SpaAuthCode = spaAuthCode;
         }
 
         /// <summary>
@@ -124,7 +127,8 @@ namespace Microsoft.Identity.Client
             IAuthenticationScheme authenticationScheme,
             Guid correlationID,
             TokenSource tokenSource, 
-            ApiEvent apiEvent)
+            ApiEvent apiEvent,
+            string spaAuthCode = null)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
             
@@ -148,6 +152,8 @@ namespace Microsoft.Identity.Client
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
             TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
+            SpaAuthCode = spaAuthCode;
+
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
@@ -241,6 +247,12 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="CreateAuthorizationHeader"/> for getting an HTTP authorization header from an AuthenticationResult.
         /// </summary>
         public string TokenType { get; }
+
+        /// <summary>
+        /// Gets the SPA Authorization Code, if it was requested using WithSpaAuthorizationCode method on the
+        /// AcquireTokenByAuthorizationCode builder. See https://aka.ms/msal-net/spa-auth-code for details.
+        /// </summary>
+        public string SpaAuthCode { get; }
 
         /// <summary>
         /// All the claims present in the ID token.

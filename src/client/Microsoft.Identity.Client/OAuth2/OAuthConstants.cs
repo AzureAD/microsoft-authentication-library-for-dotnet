@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public const string TokenType = "token_type"; // not a standard OAuth2 param
         public const string RequestConfirmation = "req_cnf"; // not a standard OAuth2 param
+        public const string SpaCode = "return_spa_code"; // not a standard OAuth2 param
     }
 
     internal static class OAuth2GrantType

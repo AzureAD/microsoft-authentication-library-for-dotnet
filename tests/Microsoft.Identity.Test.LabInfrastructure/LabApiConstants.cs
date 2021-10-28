@@ -33,6 +33,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string FederationProviderV2 = "federationprovider";
         public const string AzureEnvironment = "azureenvironment";
         public const string SignInAudience = "SignInAudience";
+        public const string AppPlatform = "appplatform";
+        public const string PublicClient = "publicclient";
 
         public const string True = "true";
         public const string False = "false";

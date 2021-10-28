@@ -113,6 +113,16 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.SignInAudience, query.SignInAudience.ToString());
             }
 
+            if (query.AppPlatform != null)
+            {
+                queryDict.Add(LabApiConstants.AppPlatform, query.AppPlatform.ToString());
+            }
+
+            if (query.PublicClient != null)
+            {
+                queryDict.Add(LabApiConstants.PublicClient, query.PublicClient.ToString());
+            }
+                        
             return SendLabRequestAsync(LabApiConstants.LabEndPoint, queryDict);
         }
 

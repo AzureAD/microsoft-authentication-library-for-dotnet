@@ -52,6 +52,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 dict[OAuth2Parameter.PkceCodeVerifier] = _authorizationCodeParameters.PkceCodeVerifier;
             }
 
+            if (_authorizationCodeParameters.SpaCode)
+            {
+                dict[OAuth2Parameter.SpaCode] = Constants.EnableSpaAuthCode;
+            }
+
             return dict;
         }
     }

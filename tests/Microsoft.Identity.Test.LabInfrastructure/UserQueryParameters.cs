@@ -17,12 +17,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public FederationProvider? FederationProvider { get; set; } //Requires userType to be set to federated
         public AzureEnvironment? AzureEnvironment { get; set; }
         public SignInAudience? SignInAudience { get; set; }
+        public AppPlatform? AppPlatform { get; set; }
+        public PublicClient? PublicClient { get; set; }
 
         public static UserQuery PublicAadUserQuery => new UserQuery()
             {
                 UserType = LabInfrastructure.UserType.Cloud,
                 AzureEnvironment = LabInfrastructure.AzureEnvironment.azurecloud
-            };
+        };
 
         public static UserQuery MsaUserQuery => new UserQuery
         {
@@ -59,6 +61,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             AzureEnvironment = LabInfrastructure.AzureEnvironment.azureusgovernment
         };
 
+        public static UserQuery HybridSpaUserQuery => new UserQuery
+        {
+            UserType = LabInfrastructure.UserType.Cloud,
+            AppPlatform = LabInfrastructure.AppPlatform.spa,
+            PublicClient = LabInfrastructure.PublicClient.no,
+            SignInAudience = LabInfrastructure.SignInAudience.AzureAdMyOrg
+            
+        };
+
         // generated code, re-generate or update manually if you change the members of this class !
         #region Equals and GetHashCode
         public override bool Equals(object obj)
@@ -77,7 +88,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 EqualityComparer<B2CIdentityProvider?>.Default.Equals(B2CIdentityProvider, other.B2CIdentityProvider) &&
                 EqualityComparer<FederationProvider?>.Default.Equals(FederationProvider, other.FederationProvider) &&
                 EqualityComparer<AzureEnvironment?>.Default.Equals(AzureEnvironment, other.AzureEnvironment) &&
-                EqualityComparer<SignInAudience?>.Default.Equals(SignInAudience, other.SignInAudience);
+                EqualityComparer<SignInAudience?>.Default.Equals(SignInAudience, other.SignInAudience) &&
+                EqualityComparer<AppPlatform?>.Default.Equals(AppPlatform, other.AppPlatform) &&
+                EqualityComparer<PublicClient?>.Default.Equals(PublicClient, other.PublicClient);
         }
 
         public override int GetHashCode()
@@ -92,6 +105,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             hashCode = hashCode * -1521134295 + EqualityComparer<FederationProvider?>.Default.GetHashCode(FederationProvider);
             hashCode = hashCode * -1521134295 + EqualityComparer<AzureEnvironment?>.Default.GetHashCode(AzureEnvironment);
             hashCode = hashCode * -1521134295 + EqualityComparer<SignInAudience?>.Default.GetHashCode(SignInAudience);
+            hashCode = hashCode * -1521134295 + EqualityComparer<AppPlatform?>.Default.GetHashCode(AppPlatform);
+            hashCode = hashCode * -1521134295 + EqualityComparer<PublicClient?>.Default.GetHashCode(PublicClient);
             return hashCode;
         }
         #endregion
