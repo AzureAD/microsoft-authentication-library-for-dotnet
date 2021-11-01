@@ -36,8 +36,8 @@ steps:
     SearchPattern: '${{ parameters.SymbolPublishWildcard }}'
     SymbolServerType: TeamServices
 
-  - task: PublishSymbols@2
-    displayName: 'Publish snupkg'
-    inputs:
-      SearchPattern: '**/bin/**/*.snupkg'
-      SymbolServerType: TeamServices
+- task: PublishSymbols@2
+  displayName: 'Publish snupkg'
+  inputs:
+    SearchPattern: '**/bin/**/*.snupkg'
+    SymbolServerType: TeamServices
