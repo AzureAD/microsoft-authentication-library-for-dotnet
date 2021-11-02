@@ -43,6 +43,6 @@ namespace Microsoft.Identity.Client
         /// True by default, but subject to change.
         /// Not recommended for apps that call RemoveAsync
         /// </remarks>
-        public bool EnableCacheSynchronization { get; set; } = true;
+        public bool EnableCacheSynchronization { get; set; } = false;
     }
 }
