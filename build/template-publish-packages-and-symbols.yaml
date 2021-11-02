@@ -37,7 +37,8 @@ steps:
     SymbolServerType: TeamServices
 
 - task: PublishSymbols@2
-  displayName: 'Publish snupkg'
+  displayName: 'Publish PDBs'
   inputs:
-    SearchPattern: '**/bin/**/*.snupkg'
+    SearchPattern: '**/bin/**/*.pdb'
     SymbolServerType: TeamServices
+    TreatNotIndexedAsWarning: true
