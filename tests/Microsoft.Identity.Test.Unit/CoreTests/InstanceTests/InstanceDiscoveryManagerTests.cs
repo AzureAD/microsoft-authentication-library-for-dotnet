@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     public class InstanceDiscoveryManagerTests : TestBase
     {
-        private const string Authority = "https://some_env.com/tid/";
+        private const string TestAuthority = "https://some_env.com/tid/";
         private INetworkMetadataProvider _networkMetadataProvider;
         private IKnownMetadataProvider _knownMetadataProvider;
         private INetworkCacheMetadataProvider _networkCacheMetadataProvider;
@@ -233,7 +234,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 _networkMetadataProvider);
 
             var otherEnvs = new[] { "env1", "env2" };
-            var authorityUri = new Uri(Authority);
+            var authorityUri = new Uri(TestAuthority);
 
             // No response from the static and known provider
             _knownMetadataProvider
@@ -271,7 +272,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 _networkMetadataProvider);
 
             var otherEnvs = new[] { "env1", "env2" };
-            var authorityUri = new Uri(Authority);
+            var authorityUri = new Uri(TestAuthority);
 
             // No response from the static and known provider
             _knownMetadataProvider
@@ -311,7 +312,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 _networkMetadataProvider);
 
             var otherEnvs = new[] { "env1", "env2" };
-            var authorityUri = new Uri(Authority);
+            var authorityUri = new Uri(TestAuthority);
 
             // No response from the static and known provider
             _knownMetadataProvider
@@ -340,13 +341,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             // Arrange
             var validationException = new MsalServiceException(MsalError.InvalidInstance, "authority validation failed");
-
+            
             // Inject authority in service bundle
             var httpManager = new MockHttpManager();
             var appConfig = new ApplicationConfiguration()
             {
                 HttpManager = httpManager,
-                AuthorityInfo = AuthorityInfo.FromAuthorityUri(Authority, false)
+                Authority = Authority.CreateAuthority (TestAuthority, false)
             };
 
             var serviceBundle = ServiceBundle.Create(appConfig);
@@ -363,7 +364,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 requestContext).ConfigureAwait(false);
 
             // Since the validateAuthority is set to false, proceed without alias. 
-            ValidateSingleEntryMetadata(new Uri(Authority), actualResult);
+            ValidateSingleEntryMetadata(new Uri(TestAuthority), actualResult);
         }
 
         private async Task ValidateSelfEntryAsync(Uri authority)

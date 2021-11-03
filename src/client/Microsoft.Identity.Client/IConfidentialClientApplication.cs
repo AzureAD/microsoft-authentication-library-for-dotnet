@@ -15,10 +15,10 @@ namespace Microsoft.Identity.Client
 #endif
     public partial interface IConfidentialClientApplication : IClientApplicationBase
     {
-        /// <Summary>
-        /// Application token cache. This case holds access tokens and refresh tokens for the application. It's maintained
+        /// <summary>
+        /// Application token cache. This case holds access tokens for the application. It's maintained
         /// and updated silently if needed when calling <see cref="AcquireTokenForClient(IEnumerable{string})"/>
-        /// </Summary>
+        /// </summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
         /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms.
         /// </remarks>
@@ -36,8 +36,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="authorizationCode">The authorization code received from the service authorization endpoint.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
-        /// <remarks>You can set optional parameters by chaining the builder with:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>,
+        /// <remarks>You can set optional parameters by chaining the builder with, for example 
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>,
         /// </remarks>
         AcquireTokenByAuthorizationCodeParameterBuilder AcquireTokenByAuthorizationCode(

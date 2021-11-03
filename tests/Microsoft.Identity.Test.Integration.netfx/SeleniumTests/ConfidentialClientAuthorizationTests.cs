@@ -75,8 +75,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             
-            await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common", false).ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{labResponse.User.TenantId}", false).ConfigureAwait(false);
+            await RunTestForUserAsync(ConfidentialClientID, labResponse, "https://login.microsoftonline.com/common", false).ConfigureAwait(false);
+            await RunTestForUserAsync(ConfidentialClientID, labResponse, $"https://login.microsoftonline.com/{labResponse.User.TenantId}", false).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -84,21 +84,41 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common", true).ConfigureAwait(false);
+            await RunTestForUserAsync(ConfidentialClientID, labResponse, "https://login.microsoftonline.com/common", true).ConfigureAwait(false);
         }
 
-        private async Task RunTestForUserAsync(LabResponse labResponse, string authority, bool usePkce = false)
+        [TestMethod]
+        public async Task GetTokenByAuthCode_HybridSPA_Async()
+        {
+            // Arrange
+            LabResponse labResponse = await LabUserHelper.GetHybridSpaAccontAsync().ConfigureAwait(false);
+
+            var result = await RunTestForUserAsync(labResponse.App.AppId, labResponse, 
+                "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", false, 
+                "http://localhost:3000/auth/implicit-redirect").ConfigureAwait(false);
+
+            Assert.IsNotNull(result.SpaAuthCode);
+
+            result = await RunTestForUserAsync(labResponse.App.AppId, labResponse, 
+                "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", false, 
+                "http://localhost:3000/auth/implicit-redirect", false).ConfigureAwait(false);
+
+            Assert.IsNull(result.SpaAuthCode);
+        }
+
+        private async Task<AuthenticationResult> RunTestForUserAsync(string appId, LabResponse labResponse, 
+            string authority, bool usePkce = false, string redirectUri = null, bool spaCode = true)
         {
             var cert = await s_secretProvider.GetCertificateWithPrivateMaterialAsync(
                 CertificateName, KeyVaultInstance.MsalTeam).ConfigureAwait(false);
 
             IConfidentialClientApplication cca;
-            string redirectUri = SeleniumWebUI.FindFreeLocalhostRedirectUri();
+            redirectUri = redirectUri ?? SeleniumWebUI.FindFreeLocalhostRedirectUri();
 
             HttpSnifferClientFactory factory;
 
             cca = ConfidentialClientApplicationBuilder
-                .Create(ConfidentialClientID)
+                .Create(appId)
                 .WithAuthority(authority)
                 .WithCertificate(cert)
                 .WithRedirectUri(redirectUri)
@@ -142,9 +162,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             factory.RequestsAndResponses.Clear();
 
             Trace.WriteLine("Part 3 - Get a token using the auth code, just like a website");
-            var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
+             var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
                 .WithPkceCodeVerifier(codeVerifier)
                 .WithExtraHttpHeaders(TestConstants.ExtraHttpHeader)
+                .WithSpaAuthorizationCode(spaCode)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -160,7 +181,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             AssertCacheKey(cacheAccess, result.Account.HomeAccountId.Identifier);
 
-
+            return result;
         }
 
         private static void AssertCacheKey(TokenCacheAccessRecorder cacheAccess, string expectedKey)

@@ -110,8 +110,22 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <inheritdoc />
         public abstract ILegacyCachePersistence CreateLegacyCachePersistence();
 
-        /// <inheritdoc />
-        public abstract ITokenCacheAccessor CreateTokenCacheAccessor();
+        public ITokenCacheAccessor UserTokenCacheAccessorForTest { get; set; }
+        public ITokenCacheAccessor AppTokenCacheAccessorForTest { get; set; }
+                
+        public virtual ITokenCacheAccessor CreateTokenCacheAccessor(CacheOptions tokenCacheAccessorOptions, bool isApplicationTokenCache = false)
+        {
+            if (isApplicationTokenCache)
+            {                
+                return AppTokenCacheAccessorForTest ?? 
+                    new InMemoryPartitionedAppTokenCacheAccessor(Logger, tokenCacheAccessorOptions);
+            }
+            else
+            {                
+                return UserTokenCacheAccessorForTest ?? 
+                    new InMemoryPartitionedUserTokenCacheAccessor(Logger, tokenCacheAccessorOptions);
+            }
+        }
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager => _cryptographyManager.Value;
@@ -172,7 +186,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return appConfig.BrokerCreatorFunc != null ?
                 appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
                 new NullBroker(Logger);
-        }      
+        }
+
+        public virtual bool CanBrokerSupportSilentAuth()
+        {
+            return true;
+        }
 
         public virtual bool BrokerSupportsWamAccounts => false;
 
@@ -190,5 +209,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return new SimpleHttpClientFactory();
         }
+
+        /// <summary>
+        /// On Android, iOS and UWP, MSAL will save the legacy ADAL cache in a known location.
+        /// On other platforms, the app developer must use the serialization callbacks
+        /// </summary>
+        public virtual bool LegacyCacheRequiresSerialization => true;
     }
 }

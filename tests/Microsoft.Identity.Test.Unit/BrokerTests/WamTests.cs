@@ -717,6 +717,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    .GetAccountProviderAsync(TestConstants.AuthorityOrganizationsTenant)
                    .ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
 
+                // these will not match the login hint
+                var webAccount1 = new WebAccount(wamAccountProvider, "user1@contoso.com", WebAccountState.Connected);
+                var webAccount2 = new WebAccount(wamAccountProvider, "user2@contoso.com", WebAccountState.Connected);
+                var webAccount3 = new WebAccount(wamAccountProvider, "user3@contoso.com", WebAccountState.Connected);
+
+                IReadOnlyList<WebAccount> webAccounts = new List<WebAccount>() { webAccount1, webAccount2, webAccount3 };
+                _wamProxy.FindAllWebAccountsAsync(wamAccountProvider, TestConstants.ClientId).Returns(Task.FromResult(webAccounts));
+
                 var webTokenRequest = new WebTokenRequest(wamAccountProvider);
                 _aadPlugin.CreateWebTokenRequestAsync(
                     wamAccountProvider,
@@ -732,6 +740,60 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
 
                 _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
+                    Returns(Task.FromResult(webTokenResponseWrapper));
+                _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
+
+                var atiParams = new AcquireTokenInteractiveParameters();
+
+                // Act
+                var result = await _wamBroker.AcquireTokenInteractiveAsync(requestParams, atiParams)
+                    .ConfigureAwait(false);
+
+                // Assert 
+                Assert.AreSame(_msalTokenResponse, result);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
+            }
+        }
+
+        [TestMethod] // regrssion for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2903
+        public async Task ATI_WithAadPlugin_MultipleExistingAccounts_MatchByLoginHint_Async()
+        {
+            string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
+
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var requestParams = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityOrganizationsTenant);
+                requestParams.LoginHint = "user2@contoso.com";
+
+                var wamAccountProvider = new WebAccountProvider("id", "user", null);
+                _webAccountProviderFactory
+                   .GetAccountProviderAsync(TestConstants.AuthorityOrganizationsTenant)
+                   .ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+
+                var webAccount1 = new WebAccount(wamAccountProvider, "user1@contoso.com", WebAccountState.Connected);
+                var webAccount2 = new WebAccount(wamAccountProvider, "user2@contoso.com", WebAccountState.Connected);
+                var webAccount3 = new WebAccount(wamAccountProvider, "user3@contoso.com", WebAccountState.Connected);
+
+                IReadOnlyList<WebAccount> webAccounts = new List<WebAccount>() { webAccount1, webAccount2, webAccount3 };
+                _wamProxy.FindAllWebAccountsAsync(wamAccountProvider, TestConstants.ClientId).Returns(Task.FromResult(webAccounts));
+
+                var webTokenRequest = new WebTokenRequest(wamAccountProvider);
+                _aadPlugin.CreateWebTokenRequestAsync(
+                    wamAccountProvider,
+                    requestParams,
+                    isForceLoginPrompt: false, 
+                    isInteractive: true,
+                    isAccountInWam: true)
+                    .Returns(Task.FromResult(webTokenRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest, webAccount2).
                     Returns(Task.FromResult(webTokenResponseWrapper));
                 _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
 

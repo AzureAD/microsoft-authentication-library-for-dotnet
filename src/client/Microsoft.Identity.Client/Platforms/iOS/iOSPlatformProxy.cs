@@ -91,7 +91,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new iOSLegacyCachePersistence(Logger);
         }
 
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
+        public override ITokenCacheAccessor CreateTokenCacheAccessor(
+            CacheOptions tokenCacheAccessorOptions, 
+            bool isApplicationTokenCache = false)
         {
             return new iOSTokenCacheAccessor();
         }
@@ -134,9 +136,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new iOSBroker(Logger, CryptographyManager, uiParent);
         }
 
+        public override bool CanBrokerSupportSilentAuth()
+        {
+            return false;
+        }
+
         public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
         {
             return new IosHttpClientFactory();
         }
+
+        public override bool LegacyCacheRequiresSerialization => false;
+
     }
 }

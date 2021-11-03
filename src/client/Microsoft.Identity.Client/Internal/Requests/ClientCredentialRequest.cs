@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using System;
+using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -38,41 +39,50 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
-            CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
+            CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
-            if (!_clientParameters.ForceRefresh && 
+            AuthenticationResult authResult = null;
+
+            if (AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
+                aadAuthority.IsCommonOrOrganizationsTenant())
+            {
+                logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);
+            }
+
+            if (!_clientParameters.ForceRefresh &&
                 string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
-                if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
+                if (cachedAccessTokenItem != null)
                 {
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 
                     Metrics.IncrementTotalAccessTokensFromCache();
-                    return new AuthenticationResult(
-                        cachedAccessTokenItem,
-                        null,
-                        null,
-                        AuthenticationRequestParameters.AuthenticationScheme,
-                        AuthenticationRequestParameters.RequestContext.CorrelationId,
-                        TokenSource.Cache,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent);
+                    authResult = new AuthenticationResult(
+                                                            cachedAccessTokenItem,
+                                                            null,
+                                                            null,
+                                                            AuthenticationRequestParameters.AuthenticationScheme,
+                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
+                                                            TokenSource.Cache,
+                                                            AuthenticationRequestParameters.RequestContext.ApiEvent);
                 }
-
-                cacheInfoTelemetry = (cachedAccessTokenItem == null) ? CacheInfoTelemetry.NoCachedAT : CacheInfoTelemetry.RefreshIn;
+                else
+                {
+                    if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != (int)CacheRefreshReason.Expired)
+                    {
+                        cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
+                    }
+                }
             }
             else
             {
+                cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
-
-                if (_clientParameters.ForceRefresh)
-                {
-                    cacheInfoTelemetry = CacheInfoTelemetry.ForceRefresh;
-                }
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfoTelemetry.None)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }
@@ -80,7 +90,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // No AT in the cache or AT needs to be refreshed
             try
             {
-                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                if (cachedAccessTokenItem == null)
+                {
+                    authResult = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+
+                    // may fire a request to get a new token in the background
+                    if (shouldRefresh)
+                    {
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.ProactivelyRefreshed;
+
+                        SilentRequestHelper.ProcessFetchInBackground(
+                        cachedAccessTokenItem,
+                        () => FetchNewAccessTokenAsync(cancellationToken), logger);
+                    }
+                }
+
+                return authResult;
             }
             catch (MsalServiceException e)
             {
@@ -101,7 +130,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
-        {           
+        {
             // Client credentials should not add the reserved scopes
             // "openid", "profile" and "offline_access" 
             // because AT is on behalf of an app (no profile, no IDToken, no RT)

@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("5. Third call - no more throttling");
-                httpManager.AddTokenResponse(TokenResponseType.Valid, s_throttlingHeader);
+                httpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows, s_throttlingHeader);
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync()
                        .ConfigureAwait(false);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 0);
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("5. Third call - no more throttling");
-                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid, s_throttlingHeader);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows, s_throttlingHeader);
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync()
                        .ConfigureAwait(false);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 0);
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("A different request, e.g. with other scopes, will not be throttled");
-                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid, s_throttlingHeader);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows, s_throttlingHeader);
                 await app.AcquireTokenSilent(new[] { "Other.Scopes" }, account).ExecuteAsync()
                        .ConfigureAwait(false);
             }
@@ -203,7 +203,30 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             }
         }
 
+        [TestMethod]
+        public async Task RetryAfter_ConfidentialClient_ErrorMessage_Async()
+        {
+            using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
+            {
+                var httpManager = httpManagerAndBundle.HttpManager;
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
 
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var tokenResponse = httpManager.AddMockHandlerForThrottledResponseMessage();
+
+                var serverEx = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                    () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(serverEx.StatusCode, 429);
+                Assert.AreEqual(serverEx.ErrorCode, MsalError.RequestThrottled);
+                Assert.AreEqual(serverEx.Message, MsalErrorMessage.AadThrottledError);
+                Assert.AreEqual(serverEx.ResponseBody, MockHelpers.TooManyRequestsContent);
+            }
+        }
         #endregion
 
         #region HTTP 5xx acceptance test
@@ -235,7 +258,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 1);
 
                 Trace.WriteLine("5. Third call - no more throttling");
-                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync()
                        .ConfigureAwait(false);
                 AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 0);
@@ -270,7 +293,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 1);
 
                 Trace.WriteLine("A different request, e.g. with other scopes, will not be throttled");
-                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
                 await app.AcquireTokenSilent(new[] { "Other.Scopes" }, account).ExecuteAsync()
                        .ConfigureAwait(false);
 
@@ -339,7 +362,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                     UiRequiredProvider.s_uiRequiredExpiration +
                     TimeSpan.FromSeconds(1));
 
-                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync()
                        .ConfigureAwait(false);
 
@@ -379,7 +402,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, uiRequiredEntryCount: 1);
 
                 Trace.WriteLine("If RT changes, the request passes through");
-                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
                 MsalRefreshTokenCacheItem rt = app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
                 rt.Secret = "other_secret";
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rt);
@@ -426,10 +449,10 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                     UiRequiredProvider.s_uiRequiredExpiration +
                     TimeSpan.FromSeconds(1));
 
-                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync()
                        .ConfigureAwait(false);
-                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
 
                 await app.AcquireTokenSilent(singleScope, account).WithForceRefresh(true).ExecuteAsync()
                       .ConfigureAwait(false);

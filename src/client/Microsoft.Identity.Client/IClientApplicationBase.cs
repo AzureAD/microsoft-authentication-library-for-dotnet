@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
-    /// <Summary>
+    /// <summary>
     /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>
     /// extend this class. For details see https://aka.ms/msal-net-client-applications.
-    /// </Summary>
+    /// </summary>
     public partial interface IClientApplicationBase
     {
         /// <summary>
@@ -18,22 +18,22 @@ namespace Microsoft.Identity.Client
         /// </summary>
         IAppConfig AppConfig { get; }
 
-        /// <Summary>
+        /// <summary>
         /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used
         /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
         /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
         /// cache (see <c>IConfidentialClientApplication</c>).
-        /// </Summary>
+        /// </summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
         /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms.
         /// </remarks>
         ITokenCache UserTokenCache { get; }
 
-        /// <Summary>
+        /// <summary>
         /// Gets the URL of the authority, or the security token service (STS) from which MSAL.NET will acquire security tokens.
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="ClientApplicationBase.Authority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
-        /// </Summary>
+        /// </summary>
         // TODO: move to IAppConfig like ClientId?
         string Authority { get; }
 
@@ -76,8 +76,8 @@ namespace Microsoft.Identity.Client
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// See also the additional parameters that you can set chain:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
-        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithTenantId(string)"/> 
+        /// to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
         /// force refreshing the token, as well as
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
@@ -102,8 +102,8 @@ namespace Microsoft.Identity.Client
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// See also the additional parameters that you can set chain:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
-        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithTenantId(string)"/>
+        /// to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
         /// force refreshing the token, as well as
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to

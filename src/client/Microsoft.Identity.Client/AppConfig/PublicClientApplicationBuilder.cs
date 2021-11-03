@@ -353,6 +353,12 @@ namespace Microsoft.Identity.Client
         {
             base.Validate();
 
+            //ADFS does not require client id to be in the form of a GUID.
+            if (Config.Authority.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
+            {
+                throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
+            }
+
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)

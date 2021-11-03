@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Internal
 
             try
             {
-                string payload = Base64UrlHelpers.DecodeToString(idTokenSegments[1]);
+                string payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
                 var idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);                
 
                 IdToken parsedIdToken = new IdToken();

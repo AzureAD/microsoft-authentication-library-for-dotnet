@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit
             Trace.WriteLine("Test run started");
         }
 
-        [AssemblyCleanup()]
+        [AssemblyCleanup]
         public static void AssemblyCleanup()
         {
             Trace.WriteLine("Test run finished");
@@ -60,7 +60,6 @@ namespace Microsoft.Identity.Test.Unit
                 isExtendedTokenLifetimeEnabled,
                 testContext: TestContext);
         }
-
 
         private static void EnableFileTracingOnEnvVar()
         {

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -24,6 +26,19 @@ namespace Microsoft.Identity.Client
         public TokenSource TokenSource { get; }
 
         /// <summary>
+        /// The token endpoint used to contact the Identity Provider (e.g. Azure Active Directory). 
+        /// Can be null, for example when the token comes from the cache.
+        /// </summary>
+        /// <remarks>
+        /// This may be different from the endpoint you'd infer from the authority configured in the application object:
+        /// - if regional auth is used.
+        /// - if AAD instructs MSAL to use a different environment. 
+        /// - if the authority or tenant is overridden at the request level.
+        /// - during a refresh_token operation, when MSAL must resolve "common" and "organizations" to a tenant ID.
+        /// </remarks>
+        public string TokenEndpoint { get; set; }
+
+        /// <summary>
         /// Time, in milliseconds, spent to service this request. Includes time spent making HTTP requests <see cref="DurationInHttpInMs"/>, time spent
         /// in token cache callbacks <see cref="DurationInCacheInMs"/>, time spent in MSAL and context switching.
         /// </summary>
@@ -39,5 +54,16 @@ namespace Microsoft.Identity.Client
         /// Time, in milliseconds, MSAL spent for HTTP communication during this request.
         /// </summary>
         public long DurationInHttpInMs { get; set; }
+
+        /// <summary>
+        /// Specifies the time when the cached token should be proactively refreshed.
+        /// This value may be null if proactive refresh is not enabled.
+        /// </summary>
+        public DateTimeOffset? RefreshOn { get; set; } = null;
+
+        /// <summary>
+        /// Specifies the reason for fetching the access token from the identity provider.
+        /// </summary>
+        public CacheRefreshReason CacheRefreshReason { get; set; }
     }
 }

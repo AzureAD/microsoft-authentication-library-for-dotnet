@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -63,7 +62,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Specifies if the client application should force refreshing the
         /// token from the user token cache. By default the token is taken from the
-        /// the application token cache (forceRefresh=false)
+        /// the user token cache (forceRefresh=false)
         /// </summary>
         /// <param name="forceRefresh">If <c>true</c>, ignore any access token in the user token cache
         /// and attempt to acquire new access token using the refresh token for the account
@@ -84,6 +83,16 @@ namespace Microsoft.Identity.Client
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             return ClientApplicationBaseExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        protected override void Validate()
+        {
+            base.Validate();
+            if (Parameters.SendX5C == null)
+            {
+                Parameters.SendX5C = this.ServiceBundle.Config.SendX5C;
+            }
         }
 
         /// <inheritdoc />
@@ -111,7 +120,7 @@ namespace Microsoft.Identity.Client
         public AcquireTokenSilentParameterBuilder WithSendX5C(bool withSendX5C)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
-            Parameters.SendX5C = withSendX5C;
+            Parameters.SendX5C = withSendX5C;            
             return this;
         }
 

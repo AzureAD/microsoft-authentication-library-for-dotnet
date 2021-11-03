@@ -16,19 +16,20 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using System.Threading;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client
 {
-    /// <Summary>
+    /// <summary>
     /// Abstract class containing common API methods and properties. Both <see cref="Microsoft.Identity.Client.PublicClientApplication"/> and 
     /// ConfidentialClientApplication
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
-    /// </Summary>
+    /// </summary>
     public abstract partial class ClientApplicationBase : IClientApplicationBase
     {
-        /// <Summary>
+        /// <summary>
         /// Default Authority used for interactive calls.
-        /// </Summary>
+        /// </summary>
         internal const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
         internal IServiceBundle ServiceBundle { get; }
@@ -38,24 +39,25 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public IAppConfig AppConfig => ServiceBundle.Config;        
 
-        /// <Summary>
+        /// <summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
-        /// </Summary>
-        public string Authority => ServiceBundle.Config.AuthorityInfo.CanonicalAuthority; // Do not use in MSAL, use AuthorityInfo instead to avoid re-parsing
+        /// </summary>
+        public string Authority => ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority; // Do not use in MSAL, use AuthorityInfo instead to avoid re-parsing
 
-        internal AuthorityInfo AuthorityInfo => ServiceBundle.Config.AuthorityInfo;
+        internal AuthorityInfo AuthorityInfo => ServiceBundle.Config.Authority.AuthorityInfo;
 
-        /// <Summary>
-        /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used
+        /// <summary>
+        /// User token cache. It holds access tokens, id tokens and refresh tokens for accounts. It's used
         /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
         /// or one of the overrides of <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
         /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
         /// cache (see <c>IConfidentialClientApplication</c>).
-        /// </Summary>
+        /// </summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
-        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms.
+        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on mobile platforms and on UWP.
+        /// It is recommended to use token cache serialization for web site and web api scenarios.
         /// </remarks>
         public ITokenCache UserTokenCache => UserTokenCacheInternal;
 
@@ -76,6 +78,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        
         internal virtual async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
@@ -189,14 +192,28 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">Cancellation token</param>
         public async Task RemoveAsync(IAccount account, CancellationToken cancellationToken = default)
         {
-            RequestContext requestContext = CreateRequestContext(Guid.NewGuid(), cancellationToken);            
+            Guid correlationId = Guid.NewGuid();
+            RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
+            requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId.ToString());
+            requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
+
+            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+              requestContext,
+              null).ConfigureAwait(false);
+
+            var authParameters = new AuthenticationRequestParameters(
+                   ServiceBundle,
+                   UserTokenCacheInternal,
+                   new AcquireTokenCommonParameters() { ApiId = requestContext.ApiEvent.ApiId },
+                   requestContext,
+                   authority);
 
             if (account != null && UserTokenCacheInternal != null)
             {
-                await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
+                await UserTokenCacheInternal.RemoveAccountAsync(account, authParameters).ConfigureAwait(false);
             }
 
-            if (AppConfig.IsBrokerEnabled)
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -249,7 +266,7 @@ namespace Microsoft.Identity.Client
             ICacheSessionManager cacheSessionManager, 
             CancellationToken cancellationToken)
         {
-            if (AppConfig.IsBrokerEnabled)
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
                 if (broker.IsBrokerInstalledAndInvokable())
@@ -351,8 +368,8 @@ namespace Microsoft.Identity.Client
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// You can set additional parameters by chaining the builder with:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
-        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithTenantId(string)"/> 
+        /// to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
         /// force refreshing the token, as well as
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
@@ -387,8 +404,7 @@ namespace Microsoft.Identity.Client
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// You can set additional parameters by chaining the builder with:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
-        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithTenantId(string)"/> to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
         /// force refreshing the token, as well as
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to

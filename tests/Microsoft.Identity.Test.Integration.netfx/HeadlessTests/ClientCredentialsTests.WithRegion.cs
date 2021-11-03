@@ -65,7 +65,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheInfoTelemetry.NoCachedAT:D},centralus,3,4|0,1");
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheRefreshReason.NoCachedAccessToken:D},centralus,3,4|0,1");
+            Assert.AreEqual(
+                $"https://centralus.r.login.microsoftonline.com/{settings.TenantId}/oauth2/v2.0/token",
+                result.AuthenticationResultMetadata.TokenEndpoint);
+
         }
 
         [TestMethod]
@@ -192,7 +196,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #endif
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);
-            return jwtToken.Sign(clientCredential, false);
+            return jwtToken.Sign(clientCredential, true);
         }
 
         private static X509Certificate2 GetCertificate(bool useRSACert = false)

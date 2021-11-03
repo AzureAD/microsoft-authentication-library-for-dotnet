@@ -56,11 +56,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(Cloud.Public, RunOn.NetFx | RunOn.NetCore)]
         [DataRow(Cloud.Adfs, RunOn.NetCore)]
         [DataRow(Cloud.PPE, RunOn.NetFx)]
-         //[DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithCertificate_TestAsync(Cloud cloud, RunOn runOn)
+        [DataRow(Cloud.PPE, new object[] { RunOn.NetFx, true })]
+        [DataRow(Cloud.Public, new object[] { RunOn.NetFx | RunOn.NetCore, true })]
+        //[DataRow(Cloud.Arlington)] - cert not setup
+        public async Task WithCertificate_TestAsync(Cloud cloud, RunOn runOn, bool useAppIdUri = false)
         {
             runOn.AssertFramework();
-            await RunClientCredsAsync(cloud, CredentialType.Cert).ConfigureAwait(false);
+            await RunClientCredsAsync(cloud, CredentialType.Cert, useAppIdUri).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -115,14 +117,35 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims).ConfigureAwait(false);
         }
 
-        private async Task RunClientCredsAsync(Cloud cloud, CredentialType credentialType)
+        [TestMethod]
+        [DataRow(Cloud.Public, RunOn.NetCore)]
+        // [DataRow(Cloud.Arlington)] - cert not setup
+        public async Task WithClientClaims_SendX5C_ExtraClaims_TestAsync(Cloud cloud, RunOn runOn)
+        {
+            runOn.AssertFramework();
+            await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims, sendX5C:true).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [DataRow(Cloud.Public, RunOn.NetFx)]
+        [DataRow(Cloud.Adfs, RunOn.NetCore)]
+        // [DataRow(Cloud.Arlington)] - cert not setup
+        public async Task WithClientClaims_SendX5C_OverrideClaims_TestAsync(Cloud cloud, RunOn runOn)
+        {
+            runOn.AssertFramework();
+            await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims, sendX5C: true).ConfigureAwait(false);
+        }
+
+        private async Task RunClientCredsAsync(Cloud cloud, CredentialType credentialType, bool UseAppIdUri = false, bool sendX5C = false)
         {
             Trace.WriteLine($"Running test with settings for cloud {cloud}, credential type {credentialType}");
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
 
+            settings.UseAppIdUri = UseAppIdUri;
+
             AuthenticationResult authResult;
 
-            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings);
+            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings, sendX5C);
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
             authResult = await confidentialApp
@@ -159,7 +182,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);        
         }
 
-        private static IConfidentialClientApplication CreateApp(CredentialType credentialType, IConfidentialAppSettings settings)
+        private static IConfidentialClientApplication CreateApp(CredentialType credentialType, IConfidentialAppSettings settings, bool sendX5C)
         {
             var builder = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
@@ -202,10 +225,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     break;
 
                 case CredentialType.ClientClaims_ExtraClaims:
-                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(true), mergeWithDefaultClaims: false);
+                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
                     break;
                 case CredentialType.ClientClaims_MergeClaims:
-                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(false), mergeWithDefaultClaims: true);
+                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -264,7 +287,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #endif
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);
-            return jwtToken.Sign(clientCredential, false);
+            return jwtToken.Sign(clientCredential, true);
         }
 
         private static X509Certificate2 GetCertificate(bool useRSACert = false)

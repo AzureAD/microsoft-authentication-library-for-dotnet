@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 
@@ -74,6 +75,6 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <remarks>This API is experimental and it may change in future versions of the library without an major version increment</remarks>
-        public IEnumerable<string> AllowedScopes => new List<string>();
+        public IEnumerable<string> AllowedScopes => CollectionHelpers.GetEmptyReadOnlyList<string>();
     }
 }

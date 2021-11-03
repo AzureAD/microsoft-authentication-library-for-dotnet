@@ -68,9 +68,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId);
 
             DateTime currentDate = DateTime.UtcNow;
-            string expiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
-            string extExpiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
-            string cachedAt = CoreHelpers.DateTimeToUnixTimestamp(currentDate);
+            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
+            string extExpiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
+            string cachedAt = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
             var expectedJsonObject = new JObject
@@ -241,9 +241,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId);
 
             DateTime currentDate = DateTime.UtcNow;
-            string expiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
-            string extExpiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
-            string cachedAt = CoreHelpers.DateTimeToUnixTimestamp(currentDate);
+            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
+            string extExpiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
+            string cachedAt = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
             var expectedJsonObject = new JObject
@@ -371,9 +371,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId);
 
             DateTime currentDate = DateTime.UtcNow;
-            string expiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
-            string extExpiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
-            string cachedAt = CoreHelpers.DateTimeToUnixTimestamp(currentDate);
+            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
+            string extExpiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
+            string cachedAt = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
             var expectedJsonObject = new JObject
@@ -546,9 +546,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 B2CTenantId,
                 homeAccountId);
             DateTime currentDate = DateTime.UtcNow;
-            string expiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
-            string extExpiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
-            string cachedAt = CoreHelpers.DateTimeToUnixTimestamp(currentDate);
+            string expiresOn    = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
+            string extExpiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
+            string cachedAt     = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
             var expectedJsonObject = new JObject
@@ -721,9 +721,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId);
 
             DateTime currentDate = DateTime.UtcNow;
-            string expiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
-            string extExpiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
-            string cachedAt = CoreHelpers.DateTimeToUnixTimestamp(currentDate);
+            string expiresOn    = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
+            string extExpiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
+            string cachedAt     = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
             var expectedJsonObject = new JObject

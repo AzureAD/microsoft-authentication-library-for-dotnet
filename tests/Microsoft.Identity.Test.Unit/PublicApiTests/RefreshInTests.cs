@@ -3,6 +3,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -10,6 +11,8 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -34,11 +37,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = SetupPca(harness);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                var refreshOn = UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor).RefreshOn;
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_UserFlows);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
@@ -50,11 +53,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                // Assert
+                // Assert token is proactivly refreshed
                 Assert.IsNotNull(result);
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
+                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+
+                // The following can be indeterministic due to background threading nature
+                // So it is verified on check and wait basis
+
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
+
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                cacheAccess.AssertAccessCounts(1, 1);
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
                 MsalAccessTokenCacheItem ati = app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
                 Assert.IsTrue(ati.RefreshOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
 
@@ -67,16 +78,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                   .ExecuteAsync(CancellationToken.None)
                   .ConfigureAwait(false);
                 Assert.IsNotNull(result);
+                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == ati.RefreshOn);
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
 
-                cacheAccess.AssertAccessCounts(2, 1);
+                cacheAccess.WaitTo_AssertAcessCounts(2, 1);
             }
         }
 
-        private static PublicClientApplication SetupPca(MockHttpAndServiceBundle harness)
+        private static PublicClientApplication SetupPca(MockHttpAndServiceBundle harness, LogCallback logCallback = null)
         {
             Trace.WriteLine("1. Setup an app with a token cache with one AT");
             PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                         .WithHttpManager(harness.HttpManager)
+                                                                        .WithLogging(logCallback)
                                                                         .BuildConcrete();
 
             TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false);
@@ -94,13 +108,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = SetupPca(harness);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor);
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with a 500 error");
                 harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
                 harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
-
 
                 // Act
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
@@ -111,26 +124,40 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
+                // The following can be indeterministic due to background threading nature
+                // So it is verified on check and wait basis
+                Assert.IsTrue(YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0), "Background refresh 1 did not execute.");
+
                 // Assert
-                Assert.IsNotNull(result, "ATS still succeeds even though AAD is unavailable");
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
-                cacheAccess.AssertAccessCounts(1, 0); // the refresh failed, no new data is written to the cache
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
                 // reset throttling, otherwise MSAL would block similar requests for 2 minutes 
                 // and we would still get a cached response
                 SingletonThrottlingManager.GetInstance().ResetCache();
 
                 // Now let AAD respond with tokens
-                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
 
                 result = await app
-                  .AcquireTokenSilent(
-                      TestConstants.s_scope.ToArray(),
-                      account)
-                  .ExecuteAsync(CancellationToken.None)
-                  .ConfigureAwait(false);
-                Assert.IsNotNull(result);
-                cacheAccess.AssertAccessCounts(2, 1); // new tokens written to cache
+                    .AcquireTokenSilent(
+                        TestConstants.s_scope.ToArray(),
+                        account)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                Assert.IsTrue(YieldTillSatisfied(
+                    () => harness.HttpManager.QueueSize == 0),
+                    "Background refresh 2 did not execute.");
+                Assert.IsTrue(
+                    YieldTillSatisfied(() => cacheAccess.AfterAccessTotalCount == 3),
+                    "The background refresh executed, but the cache was not updated");
+
+                cacheAccess.WaitTo_AssertAcessCounts(2, 1); // new tokens written to cache
             }
         }
 
@@ -138,14 +165,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [Description("AT in cache, needs refresh. AAD fails but is available when refreshing.")]
         public async Task ATS_NonExpired_NeedsRefresh_AADInvalidResponse_Async()
         {
+            bool wasErrorLogged = false;
             // Arrange
             using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
             {
                 Trace.WriteLine("1. Setup an app with a token cache with one AT");
-                PublicClientApplication app = SetupPca(harness);
+                PublicClientApplication app = SetupPca(harness, LocalLogCallback);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor);
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
 
@@ -154,13 +182,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
 
-                // Act
-                await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app
-                    .AcquireTokenSilent(
+                await app.AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         account)
-                    .ExecuteAsync())
+                    .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Assert.IsTrue(YieldTillSatisfied(() => wasErrorLogged == true));
+            }
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Error &&
+                    message.Contains(BackgroundFetch_Failed))
+                {
+                    wasErrorLogged = true;
+                }
             }
         }
 
@@ -175,7 +212,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = SetupPca(harness);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed, but is also expired");
-                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1), true);
+                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, expired: true);
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to be unavailable");
@@ -196,6 +233,34 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(503, ex.StatusCode);
             }
         }
+
+        [TestMethod]
+        public void JitterIsAddedToRefreshOn()
+        {
+            var at = TokenCacheHelper.CreateAccessTokenItem();
+            var refreshOnFromCache = DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10);
+            at = at.WithRefreshOn(refreshOnFromCache);
+
+            Func<Task<AuthenticationResult>> fetchAction = () =>
+            {
+                return Task.FromResult<AuthenticationResult>(null);
+            };
+
+            List<DateTimeOffset?> refreshOnWithJitterList = new List<DateTimeOffset?>();
+            for (int i = 1; i <= 10; i++)
+            {
+                SilentRequestHelper.NeedsRefresh(at, out DateTimeOffset? refreshOnWithJitter);
+                refreshOnWithJitterList.Add(refreshOnWithJitter);
+
+                Assert.IsTrue(refreshOnWithJitter.HasValue);
+                CoreAssert.IsWithinRange(
+                    refreshOnFromCache, 
+                    refreshOnWithJitter.Value, 
+                    TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
+            }
+            Assert.IsTrue(refreshOnWithJitterList.Distinct().Count() >= 8, "Jitter is random, so we can only have 1-2 identical values");
+        }
+
         #endregion
 
         #region Client Creds
@@ -211,12 +276,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app = SetupCca(harness);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                var refreshOn = UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor).RefreshOn;
 
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
@@ -225,10 +290,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.IsNotNull(result);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                cacheAccess.AssertAccessCounts(1, 1);
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
+                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+
+                result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                    .ExecuteAsync()
+                                    .ConfigureAwait(false);
+
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
             }
         }
 
@@ -243,11 +317,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app = SetupCca(harness);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                var refreshOn = UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor).RefreshOn;
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_UserFlows);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
@@ -256,19 +330,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.IsNotNull(result);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                cacheAccess.AssertAccessCounts(1, 1);
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
+                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+
+                result = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion, "assertiontype"))
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
             }
         }
 
-        private static ConfidentialClientApplication SetupCca(MockHttpAndServiceBundle harness)
+        private static ConfidentialClientApplication SetupCca(MockHttpAndServiceBundle harness, LogCallback logCallback = null)
         {
             ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                           .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                                                           .WithClientSecret(TestConstants.ClientSecret)
                                                           .WithHttpManager(harness.HttpManager)
+                                                          .WithLogging(logCallback)
                                                           .BuildConcrete();
 
             TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
@@ -288,12 +371,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
 
-                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
 
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
-
-                //UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
-
 
                 Trace.WriteLine("3. Configure AAD to respond with an error");
                 harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
@@ -306,32 +386,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.IsNotNull(result, "ClientCreds should still succeeds even though AAD is unavailable");
+                YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
-                cacheAccess.AssertAccessCounts(1, 0); // the refresh failed, no new data is written to the cache
+                cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
                 // Now let AAD respond with tokens
-                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result);
-                cacheAccess.AssertAccessCounts(2, 1); // new tokens written to cache
+
+                cacheAccess.WaitTo_AssertAcessCounts(2, 1); // new tokens written to cache
             }
         }
 
         [TestMethod]
         public async Task ClientCreds_NonExpired_NeedsRefresh_AADInvalidResponse_Async()
         {
+            bool wasErrorLogged = false;
             // Arrange
             using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
             {
                 Trace.WriteLine("1. Setup an app");
-                ConfidentialClientApplication app = SetupCca(harness);
+                ConfidentialClientApplication app = SetupCca(harness, LocalLogCallback);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
 
-                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
 
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
@@ -339,11 +422,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddAllMocks(TokenResponseType.InvalidGrant);
 
                 // Act
-                await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
-                   app.AcquireTokenForClient(TestConstants.s_scope)
-                    .ExecuteAsync())
+                await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
                     .ConfigureAwait(false);
-                cacheAccess.AssertAccessCounts(1, 0);
+
+                Assert.IsTrue(YieldTillSatisfied(() => wasErrorLogged == true));
+                cacheAccess.WaitTo_AssertAcessCounts(1, 0);
+            }
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Error &&
+                    message.Contains(BackgroundFetch_Failed))
+                {
+                    wasErrorLogged = true;
+                }
             }
         }
 
@@ -356,7 +449,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 Trace.WriteLine("1. Setup an app with a token cache with one AT = expired and needs refresh");
                 ConfidentialClientApplication app = SetupCca(harness);
-                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1), true);
+                UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, expired: true);
 
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
@@ -372,7 +465,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsFalse(ex is MsalUiRequiredException, "5xx exceptions do not translate to MsalUIRequired");
                 Assert.AreEqual(503, ex.StatusCode);
-                cacheAccess.AssertAccessCounts(1, 0);
+                cacheAccess.WaitTo_AssertAcessCounts(1, 0);
             }
         }
 
@@ -381,32 +474,43 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
             ITokenCacheAccessor accessor,
-            DateTimeOffset refreshOn,
+            DateTimeOffset? refreshOn = null,
             bool expired = false)
         {
             MsalAccessTokenCacheItem atItem = accessor.GetAllAccessTokens().Single();
 
-            UpdateATWithRefreshOn(atItem, refreshOn, expired);
+            refreshOn = refreshOn ?? DateTimeOffset.UtcNow - TimeSpan.FromMinutes(30);
+            atItem = atItem.WithRefreshOn(refreshOn);
+
+            Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
+
+            if (expired)
+            {
+                atItem = atItem.WithExpiresOn(DateTime.UtcNow - TimeSpan.FromMinutes(1));
+            }
 
             accessor.SaveAccessToken(atItem);
 
             return atItem;
         }
 
-        private static void UpdateATWithRefreshOn(
-            MsalAccessTokenCacheItem atItem,
-            DateTimeOffset refreshOn,
-            bool expired = false)
+        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
         {
-            // past date on refresh on
-            atItem.RefreshOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(refreshOn);
-
-            Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
-
-            if (expired)
+            int iCount = maxTimeInMilliSec / 100;
+            while (iCount > 0)
             {
-                atItem.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow - TimeSpan.FromMinutes(1));
+                if (func())
+                {
+                    return true;
+                }
+                Thread.Yield();
+                Thread.Sleep(100);
+                iCount--;
             }
+
+            return false;
         }
+
+        private const string BackgroundFetch_Failed = "Background fetch failed";
     }
 }

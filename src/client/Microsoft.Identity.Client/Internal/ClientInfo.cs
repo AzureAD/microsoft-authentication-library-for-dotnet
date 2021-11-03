@@ -8,6 +8,8 @@ using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Internal
 {
+
+
     [JsonObject]
     [Preserve(AllMembers = true)]
     internal class ClientInfo
@@ -29,7 +31,7 @@ namespace Microsoft.Identity.Client.Internal
 
             try
             {
-                return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlHelpers.DecodeToBytes(clientInfo));
+                return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlHelpers.DecodeBytes(clientInfo));
             }
             catch (Exception exc)
             {

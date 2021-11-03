@@ -19,16 +19,29 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
     {
         private int _statusCode;
         private bool _zoomed;
+        private readonly EmbeddedWebViewOptions _embeddedWebViewOptions;
 
         /// <summary>
         /// Default constructor
         /// </summary>
-        public WindowsFormsWebAuthenticationDialog(object ownerWindow)
+        public WindowsFormsWebAuthenticationDialog(object ownerWindow, EmbeddedWebViewOptions embeddedWebViewOptions)
             : base(ownerWindow)
         {
+
             Shown += FormShownHandler;
-            WebBrowser.DocumentTitleChanged += WebBrowserDocumentTitleChangedHandler;
+            _embeddedWebViewOptions = embeddedWebViewOptions ?? EmbeddedWebViewOptions.GetDefaultOptions();
+
+            if (string.IsNullOrEmpty(_embeddedWebViewOptions.Title))
+            {
+                WebBrowser.DocumentTitleChanged += WebBrowserDocumentTitleChangedHandler;
+            }
+            else
+            {
+                Text = _embeddedWebViewOptions.Title;
+            }
+
             WebBrowser.ObjectForScripting = this;
+            
         }
 
         /// <summary>

@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 if (!IsBrokerInstalledAndInvokable())
                 {
                     _logger.Warning("[Android broker] Broker is either not installed or is not reachable so no accounts will be returned. ");
-                    return new List<IAccount>();
+                    return CollectionHelpers.GetEmptyReadOnlyList<IAccount>();
                 }
 
                 BrokerRequest brokerRequest = new BrokerRequest() { ClientId = clientId, RedirectUri = new Uri(redirectUri) };

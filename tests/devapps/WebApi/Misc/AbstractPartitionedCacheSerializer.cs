@@ -25,8 +25,9 @@ namespace WebApi.Misc
                 throw new ArgumentNullException(nameof(tokenCache));
             }
 
-            tokenCache.BeforeAccess = OnBeforeAccess;
-            tokenCache.AfterAccess = OnAfterAccess;
+            tokenCache.SetBeforeAccess(OnBeforeAccess);
+
+            tokenCache.SetAfterAccess(OnAfterAccess);
         }
 
         /// <summary>
@@ -58,7 +59,7 @@ namespace WebApi.Misc
             if (!string.IsNullOrEmpty(args.SuggestedCacheKey))
             {
                 byte[] tokenCacheBytes = ReadCacheBytes(args.SuggestedCacheKey);
-                args.TokenCache.DeserializeMsalV3(tokenCacheBytes, shouldClearExistingCache: true);
+                args.TokenCache.DeserializeMsalV3(tokenCacheBytes, shouldClearExistingCache: false);
             }
         }
 

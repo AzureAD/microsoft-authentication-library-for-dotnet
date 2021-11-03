@@ -57,13 +57,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string GetDefaultTokenResponse()
         {
-            return
-          "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
-          "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
-          ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
-          ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-          ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
-          "\",\"id_token_expires_in\":\"3600\"}";
+              return
+            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
+            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
+            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
+            "\",\"id_token_expires_in\":\"3600\"}";
         }
 
         public static string GetPopTokenResponse()
@@ -75,6 +75,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
           ":\"" + CreateClientInfo() + "\",\"id_token\"" +
           ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
           "\",\"id_token_expires_in\":\"3600\"}";
+        }
+
+        public static string GetHybridSpaTokenResponse(string spaCode)
+        {
+            return
+            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
+            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
+            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
+            "\",\"spa_code\":\"" + spaCode + "\"" +
+            ",\"id_token_expires_in\":\"3600\"}";
         }
 
         public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid)

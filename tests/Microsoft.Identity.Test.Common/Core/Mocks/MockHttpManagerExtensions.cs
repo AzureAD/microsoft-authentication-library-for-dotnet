@@ -176,6 +176,20 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
+        public static MockHttpMessageHandler AddMockHandlerForThrottledResponseMessage(
+            this MockHttpManager httpManager)
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateTooManyRequestsNonJsonResponse()
+            };
+
+            httpManager.AddMockHandler(handler);
+
+            return handler;
+        }
+
         public static void AddFailingRequest(this MockHttpManager httpManager, Exception exceptionToThrow)
         {
             httpManager.AddMockHandler(
@@ -227,12 +241,16 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             switch (responseType)
             {
-                case TokenResponseType.Valid:
+                case TokenResponseType.Valid_UserFlows:
                     responseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                        TestConstants.UniqueId,
                        TestConstants.DisplayableId,
                        TestConstants.s_scope.ToArray());
                    
+                    break;
+                case TokenResponseType.Valid_ClientCredentials:
+                    responseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage();
+
                     break;
                 case TokenResponseType.Invalid_AADUnavailable503:
                     responseMessage = MockHelpers.CreateFailureMessage(
@@ -312,7 +330,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
     public enum TokenResponseType
     {
-        Valid,
+        Valid_UserFlows,
+        Valid_ClientCredentials,
         Invalid_AADUnavailable503,
         /// <summary>
         /// Results in a UI Required Exception

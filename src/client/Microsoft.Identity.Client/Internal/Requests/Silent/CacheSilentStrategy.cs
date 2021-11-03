@@ -37,47 +37,67 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-            CacheInfoTelemetry cacheInfoTelemetry = CacheInfoTelemetry.None;
+            CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
             ThrowIfNoScopesOnB2C();
             ThrowIfCurrentBrokerAccount();
+
+            AuthenticationResult authResult = null;
 
             if (!_silentParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
-                if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
+                if (cachedAccessTokenItem != null)
                 {
                     logger.Info("Returning access token found in cache. RefreshOn exists ? "
                         + cachedAccessTokenItem.RefreshOn.HasValue);
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                     Metrics.IncrementTotalAccessTokensFromCache();
-                    return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
+                    authResult = await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 }
-                else if (cachedAccessTokenItem == null)
-                {
-                    cacheInfoTelemetry = CacheInfoTelemetry.NoCachedAT;
-                } 
                 else
                 {
-                    cacheInfoTelemetry = CacheInfoTelemetry.RefreshIn;
-                }
+                    if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != (int)CacheRefreshReason.Expired)
+                    {
+                        cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
+                    }
+                } 
             }
             else
             {
-                cacheInfoTelemetry = CacheInfoTelemetry.ForceRefresh;
+                cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set. ");
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheInfoTelemetry.None)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
             }
 
-            // No AT or AT.RefreshOn > Now --> refresh the RT
+            // No AT or AT neesd to be refreshed 
             try
             {
-                return await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
+                if (cachedAccessTokenItem == null)
+                {
+                    authResult = await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+
+                    // may fire a request to get a new token in the background
+                    if (shouldRefresh)
+                    {
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.ProactivelyRefreshed;
+
+                        SilentRequestHelper.ProcessFetchInBackground(
+                        cachedAccessTokenItem,
+                        () => RefreshRtOrFailAsync(cancellationToken), logger);
+                    }
+                }
+
+                return authResult;
             }
             catch (MsalServiceException e)
             {
@@ -132,7 +152,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
         private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
-            var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
+            var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
             var tenantProfiles = await CacheManager.GetTenantProfilesAsync(cachedAccessTokenItem.HomeAccountId).ConfigureAwait(false);
 
             return new AuthenticationResult(
@@ -239,6 +259,6 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
 
             return msalRefreshTokenItem;
-        }      
+        }
     }
 }

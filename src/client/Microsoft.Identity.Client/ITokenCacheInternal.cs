@@ -3,13 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Cache.Keys;
-using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -23,15 +19,15 @@ namespace Microsoft.Identity.Client
         ITokenCacheAccessor Accessor { get; }
 
         #region High-Level cache operations
-        Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
+        Task RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters);
         Task<IEnumerable<IAccount>> GetAccountsAsync(AuthenticationRequestParameters requestParameters);
-      
+
         Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response);
 
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters requestParams);
-        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey);
+        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem);
 
         /// <summary>
         /// Returns a RT for the request. If familyId is specified, it tries to return the FRT.
@@ -44,16 +40,13 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
-        void RemoveMsalAccountWithNoLocks(IAccount account, RequestContext requestContext);
-
         /// <summary>
         /// FOCI - check in the app metadata to see if the app is part of the family
         /// </summary>
         /// <returns>null if unknown, true or false if app metadata has details</returns>
-        Task<bool?> IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId);     
+        Task<bool?> IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId);
 
         void SetIosKeychainSecurityGroup(string securityGroup);
-
 
         #region Cache notifications
         Task OnAfterAccessAsync(TokenCacheNotificationArgs args);
@@ -68,14 +61,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         bool HasTokensNoLocks();
 
-
-        bool IsTokenCacheSerialized();
+        /// <summary>
+        /// True when MSAL has been configured to fire the serialization events. This can be done by the app developer or by MSAL itself (on UWP).
+        /// </summary>
+        bool IsAppSubscribedToSerializationEvents();
 
         /// <summary>
-        /// MSAL adds serialziation for UWP and also for ConfidentialClient app token cache. 
-        /// If the app developer provides their own serialization, this flags is false
+        /// True when the app developer subscribed to token cache serialization events.
         /// </summary>
-        bool UsesDefaultSerialization { get; }
+        bool IsExternalSerializationConfiguredByUser();
 
         #endregion
     }

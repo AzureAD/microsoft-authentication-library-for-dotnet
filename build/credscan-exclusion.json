@@ -80,6 +80,38 @@
     {
         "file": "WsTrustEndpointTests.cs",
         "_justification": "A few dummy test constants, not actual secrets."
+    },
+    {
+      "file": "OBOParallelRequestMockHandler.cs",
+      "_justification": "Passwords and secrets used for test purposes only."
+    },
+    {
+      "file": "ConfidentialClientApplicationBuilderTests.cs",
+      "_justification": "A few dummy test constants, not actual secrets."
+    },
+    {
+      "file": "JsonHelperTests.cs",
+      "_justification": "Passwords and secrets used for test purposes only."
+    },
+    {
+      "file": "MockHelpers.cs",
+      "_justification": "Passwords and secrets used for test purposes only."
+    },
+    {
+      "file": "ClientCredentialWithCertTest.cs",
+      "_justification": "Passwords and secrets used for test purposes only."
+    },
+    {
+      "file": "ClientCredentialWrapperTests.cs",
+      "_justification": "Passwords and secrets used for test purposes only."
+    },
+    {
+      "file": "OpenidConfiguration-MissingFields-OnPremise.json",
+      "_justification": "Passwords and secrets used for test purposes only."
+    },
+    {
+      "file": "OpenidConfiguration-OnPremise.json",
+      "_justification": "Passwords and secrets used for test purposes only."
     }
 
   ]

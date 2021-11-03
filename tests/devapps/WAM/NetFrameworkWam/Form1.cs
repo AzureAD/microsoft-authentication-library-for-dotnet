@@ -26,7 +26,8 @@ namespace NetDesktopWinForms
             new ClientEntry() { Id = "1d18b3b0-251b-4714-a02a-9956cec86c2d", Name = "1d18b3b0-251b-4714-a02a-9956cec86c2d (App in 49f)"},
             new ClientEntry() { Id = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1", Name = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1 (VS)"},
             new ClientEntry() { Id = "655015be-5021-4afc-a683-a4223eb5d0e5", Name = "655015be-5021-4afc-a683-a4223eb5d0e5"},
-            new ClientEntry() { Id = "c0186a6c-0bfc-4d83-9543-c2295b676f3b", Name = "MSA-PT (lab user and tenanted only)"}
+            new ClientEntry() { Id = "c0186a6c-0bfc-4d83-9543-c2295b676f3b", Name = "MSA-PT (lab user and tenanted only)"},
+            new ClientEntry() { Id = "95de633a-083e-42f5-b444-a4295d8e9314", Name = "Whiteboard App"}
         };
 
         private BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
@@ -71,13 +72,15 @@ namespace NetDesktopWinForms
             var pca = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
-                .WithDesktopFeatures()
+                //.WithDesktopFeatures()
+                .WithWindowsBroker()
                 .WithBroker(this.useBrokerChk.Checked)
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
                 //.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
-                .WithRedirectUri("http://localhost")
-                .WithWindowsBrokerOptions(new WindowsBrokerOptions() {
+                .WithRedirectUri("ms-appx-web://microsoft.aad.brokerplugin/95de633a-083e-42f5-b444-a4295d8e9314")
+                .WithWindowsBrokerOptions(new WindowsBrokerOptions()
+                {
                     ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
                     MsaPassthrough = cbxMsaPt.Checked
                 })
@@ -132,7 +135,7 @@ namespace NetDesktopWinForms
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
             {
                 throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account");
-            }            
+            }
 
             if (!string.IsNullOrEmpty(loginHint))
             {
@@ -270,12 +273,13 @@ namespace NetDesktopWinForms
             var scopes = GetScopes();
 
             var builder = pca.AcquireTokenInteractive(scopes)
-                .WithUseEmbeddedWebView(false)
+                .WithUseEmbeddedWebView(true)
                 //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
                 //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
                 .WithEmbeddedWebViewOptions(
-                new EmbeddedWebViewOptions() { 
-                    Title = "Hello world",                     
+                new EmbeddedWebViewOptions()
+                {
+                    Title = "Hello world",
                 })
                 .WithParentActivityOrWindow(this.Handle);
 
@@ -449,7 +453,7 @@ namespace NetDesktopWinForms
 
             if (clientEntry.Id == "872cd9fa-d31f-45e0-9eab-6e460a02d1f1") // VS
             {
-                cbxScopes.SelectedItem = "https://management.core.windows.net//.default";                
+                cbxScopes.SelectedItem = "https://management.core.windows.net//.default";
             }
 
             if (clientEntry.Id == "04f0c124-f2bc-4f59-8241-bf6df9866bbd") // VS
@@ -473,31 +477,15 @@ namespace NetDesktopWinForms
             // do something that loads the cache first
             await pca.GetAccountsAsync().ConfigureAwait(false);
 
-            string expiredValue = ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
-                    .ToString(CultureInfo.InvariantCulture);
+            var m = pca.UserTokenCache.GetType().GetRuntimeMethods().Where(n => n.Name == "ExpireAllAccessTokensForTestAsync");
 
-            var accessor = pca.UserTokenCache.GetType()
-                .GetRuntimeProperties()
-                .Single(p => p.Name == "Microsoft.Identity.Client.ITokenCacheInternal.Accessor")
-                .GetValue(pca.UserTokenCache);
-
-            var internalAccessTokens = accessor.GetType().GetMethod("GetAllAccessTokens").Invoke(accessor, null) as IEnumerable<object>;
-
-            foreach (var internalAt in internalAccessTokens)
-            {
-                internalAt.GetType().GetRuntimeMethods().Single(m => m.Name == "set_ExpiresOnUnixTimestamp").Invoke(internalAt, new[] { expiredValue });
-                accessor.GetType().GetMethod("SaveAccessToken").Invoke(accessor, new[] { internalAt });
-            }
-
-            var ctor = typeof(TokenCacheNotificationArgs).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Single();
-
-            var argz = ctor.Invoke(new object[] { pca.UserTokenCache, GetClientId(), null, true, false, true, null });
-            var task = pca.UserTokenCache.GetType().GetRuntimeMethods()
-                .Single(m => m.Name == "Microsoft.Identity.Client.ITokenCacheInternal.OnAfterAccessAsync")
-                .Invoke(pca.UserTokenCache, new[] { argz });
+            var task = pca.UserTokenCache.GetType()
+                .GetRuntimeMethods()
+                .Single(n => n.Name == "ExpireAllAccessTokensForTestAsync")
+                .Invoke(pca.UserTokenCache, null);
 
             await (task as Task).ConfigureAwait(false);
-
+           
             Log("Done expiring tokens.");
         }
 

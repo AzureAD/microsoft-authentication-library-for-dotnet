@@ -349,6 +349,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
+                                                                            .WithCachePartitioningAsserts(harness.ServiceBundle.PlatformProxy)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
@@ -813,7 +814,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
-            var authority = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.AuthorityInfo, null);
+            var authority = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.Authority.AuthorityInfo, null);
             Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authority.AuthorityInfo.CanonicalAuthority);
         }
 
@@ -827,7 +828,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .BuildConcrete();
 
             var authority = Authority.CreateAuthorityWithTenant(
-                app.ServiceBundle.Config.AuthorityInfo,
+                app.ServiceBundle.Config.Authority.AuthorityInfo,
                 TestConstants.Utid);
 
             Assert.AreEqual(TestConstants.AuthorityTestTenant, authority.AuthorityInfo.CanonicalAuthority);
@@ -892,7 +893,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 account = accounts.Single(a => a.HomeAccountId.TenantId == tenant2);
                 response = await
                     pca.AcquireTokenSilent(new[] { "User.Read" }, account)
-                    .WithAuthority(tenantedAuthority2)
+                    .WithTenantId(tenant2)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -993,12 +994,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 await app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
+                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
 
                 // ATS must not update the PCA authority
                 var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
+                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
@@ -1006,7 +1007,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 await app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
+                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
             }
         }
 
@@ -1198,6 +1199,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithAuthority(TestConstants.AuthorityGuestTenant, true)
                 .WithAdfsAuthority(TestConstants.AuthorityGuestTenant, true)
                 .WithB2CAuthority(TestConstants.B2CAuthority)
+                .WithTenantId(TestConstants.TenantId)
                 .WithExtraQueryParameters(
                     new Dictionary<string, string>
                     {

@@ -14,8 +14,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class OBOTests : TestBase
     {
         [TestMethod]
-        [DeploymentItem(@"Resources\MultiTenantTokenCache.json")]
-        public async Task MultiTenantOboAsync()
+        [DeploymentItem(@"Resources\MultiTenantOBOTokenCache.json")]
+        public async Task MultiTenantOBOAsync()
         {
             const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
             const string tenant2 = "49f548d0-12b7-4169-a390-bb5304d24462";
@@ -31,13 +31,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var result1 = await cca.AcquireTokenOnBehalfOf(
                     new[] { "User.Read" },
                     new UserAssertion("jwt"))
-                    .WithAuthority(AzureCloudInstance.AzurePublic, tenant1)
+                    .WithTenantId(tenant1)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 var result2 = await cca.AcquireTokenOnBehalfOf(
                    new[] { "User.Read" },
                    new UserAssertion("jwt"))
-                   .WithAuthority(AzureCloudInstance.AzurePublic, tenant2)
+                   .WithTenantId(tenant2)
                    .ExecuteAsync().ConfigureAwait(false);
 
                 // Assert
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
            string authority = null)
         {
             const string clientIdInFile = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
-            const string tokenCacheFile = "MultiTenantTokenCache.json";
+            const string tokenCacheFile = "MultiTenantOBOTokenCache.json";
 
             var ccaBuilder = ConfidentialClientApplicationBuilder
                 .Create(clientIdInFile)

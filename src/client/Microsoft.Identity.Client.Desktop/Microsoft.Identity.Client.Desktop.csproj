@@ -26,8 +26,8 @@
     <PackageReleaseNotes>The changelog is available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/changelog.txt and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap </PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>
-      This package contains binaries needed to use the Windows broker and other features with MSAL on older
-      platforms such as .NET Framework and .NET Core 3.x
+      This package contains binaries needed to use the Windows broker and other features with MSAL on older platforms such as .NET Framework and .NET Core 3.x
+      The release notes are available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases.
     </Description>
     <PackageTags>Microsoft Authentication Library Desktop MSAL WAM broker Windows Authentication Manager</PackageTags>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>

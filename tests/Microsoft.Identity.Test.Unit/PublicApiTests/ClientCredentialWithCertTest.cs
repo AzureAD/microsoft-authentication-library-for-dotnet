@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 #if !ANDROID && !iOS && !WINDOWS_APP 
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
@@ -40,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit
             };
         }
 
-        private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithX5CValidation(bool clientCredentialFlow)
+        private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithX5CValidation(bool clientCredentialFlow, bool expectX5C = true)
         {
             return new MockHttpMessageHandler()
             {
@@ -58,8 +59,16 @@ namespace Microsoft.Identity.Test.Unit
                     var handler = new JwtSecurityTokenHandler();
                     var jsonToken = handler.ReadJwtToken(encodedJwt);
                     var x5c = jsonToken.Header.Where(header => header.Key == "x5c").FirstOrDefault();
-                    Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-                    Assert.AreEqual(x5c.Value.ToString(), TestConstants.Defaultx5cValue);
+                    if (expectX5C)
+                    {
+                        Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
+                        Assert.AreEqual(x5c.Value.ToString(), TestConstants.Defaultx5cValue);
+                    }
+                    else
+                    {
+                        Assert.IsNull(x5c.Key);
+                        Assert.IsNull(x5c.Value);
+                    }
                 }
             };
         }
@@ -84,6 +93,129 @@ namespace Microsoft.Identity.Test.Unit
             httpManager.AddInstanceDiscoveryMockHandler();
         }
 
+        [DataTestMethod]
+        [DataRow(true, null, true)]
+        [DataRow(false, null, false)]
+        [DataRow(null, null, false)] // the default is false
+        [DataRow(null, true, true)]
+        [DataRow(null, false, false)]
+        [DataRow(true, true, true)]
+        [DataRow(false, false, false)]
+        [DataRow(true, false, false)] // request overrides
+        [DataRow(false, true, true)] // request overrides
+        public async Task JsonWebTokenWithX509PublicCertSendCertificateTestSendX5cCombinationsAsync(bool? appFlag, bool? requestFlag, bool expectX5c)
+        {
+            using (var harness = CreateTestHarness())
+            {
+                SetupMocks(harness.HttpManager);
+                var certificate = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                TestConstants.DefaultPassword);
+
+                var appBuilder = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithHttpManager(harness.HttpManager);
+
+                if (appFlag.HasValue)
+                {
+                    appBuilder = appBuilder.WithCertificate(certificate, appFlag.Value); // app flag
+                }
+                else
+                {
+                    appBuilder = appBuilder.WithCertificate(certificate); // no app flag
+                }
+
+                var app = appBuilder.BuildConcrete();
+
+                //Check for x5c claim
+                if (expectX5c)
+                {
+                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
+                }
+                else
+                {
+                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true, false));
+                }
+
+                var builder = app.AcquireTokenForClient(TestConstants.s_scope);
+
+
+                if (requestFlag != null)
+                {
+                    builder = builder.WithSendX5C(requestFlag.Value);
+                }
+
+                AuthenticationResult result = await builder
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(true, null, true)]
+        [DataRow(false, null, false)]
+        [DataRow(null, null, false)] // the default is false
+        [DataRow(null, true, true)]
+        [DataRow(null, false, false)]
+        [DataRow(true, true, true)]
+        [DataRow(false, false, false)]
+        [DataRow(true, false, false)] // request overrides
+        [DataRow(false, true, true)] // request overrides
+        public async Task JsonWebTokenWithX509PublicCertSendCertificateWithClaimsTestSendX5cCombinationsAsync(bool? appFlag, bool? requestFlag, bool expectX5c)
+        {
+            using (var harness = CreateTestHarness())
+            {
+                SetupMocks(harness.HttpManager);
+                var certificate = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                TestConstants.DefaultPassword);
+
+                IDictionary<string, string> claimsToSign = new Dictionary<string, string>();
+                claimsToSign.Add("Foo", "Bar");
+
+                var appBuilder = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithHttpManager(harness.HttpManager);
+
+                if (appFlag.HasValue)
+                {
+                    appBuilder = appBuilder.WithClientClaims(certificate, claimsToSign, sendX5C: appFlag.Value); // app flag
+                }
+                else
+                {
+                    appBuilder = appBuilder.WithClientClaims(certificate, claimsToSign); // no app flag
+                }
+
+                var app = appBuilder.BuildConcrete();
+
+                //Check for x5c claim
+                if (expectX5c)
+                {
+                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
+                }
+                else
+                {
+                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true, false));
+                }
+
+                var builder = app.AcquireTokenForClient(TestConstants.s_scope);
+
+
+                if (requestFlag != null)
+                {
+                    builder = builder.WithSendX5C(requestFlag.Value);
+                }
+
+                AuthenticationResult result = await builder
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+            }
+        }
+
         [TestMethod]
         [Description("Test for client assertion with X509 public certificate using sendCertificate")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateTestAsync()
@@ -100,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -110,7 +242,6 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -151,7 +282,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -163,7 +294,6 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
                 AuthenticationResult result = await app
                     .AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
-                    .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
@@ -202,7 +332,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -214,7 +344,6 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
                 AuthenticationResult result = await app
                     .AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                    .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
@@ -241,7 +370,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate)
+                    .WithCertificate(certificate, true)
                     .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -253,7 +382,6 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
                 AuthenticationResult result = await ((IByRefreshToken)app)
                     .AcquireTokenByRefreshToken(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                    .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
@@ -284,20 +412,12 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(new System.Uri("https://login.microsoftonline.com/my-utid"),true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate).BuildConcrete();
+                    .WithCertificate(certificate, true)
+                    .BuildConcrete();
 
                 TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
-
-                app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
-                    new MsalAccessTokenCacheKey(
-                        TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.Utid,
-                        TestConstants.s_userIdentifier,
-                        TestConstants.ClientId,
-                        TestConstants.ScopeForAnotherResourceStr,
-                        TestConstants.Bearer));
 
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
@@ -306,7 +426,6 @@ namespace Microsoft.Identity.Test.Unit
                     .AcquireTokenSilent(
                         new[] { "someTestScope"},
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithSendX5C(true)
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
@@ -369,7 +488,6 @@ namespace Microsoft.Identity.Test.Unit
                 
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 

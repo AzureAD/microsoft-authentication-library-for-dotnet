@@ -30,16 +30,13 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string Authority = "authority";
         public const string FamilyId = "foci";
         public const string RefreshIn = "refresh_in";
+        public const string SpaCode = "spa_code";
     }
 
     [JsonObject]
     [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase
     {
-        private long _expiresIn;
-        private long _extendedExpiresIn;
-        private long _refreshIn;
-
         [JsonProperty(PropertyName = TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
 
@@ -59,37 +56,13 @@ namespace Microsoft.Identity.Client.OAuth2
         public string IdToken { get; set; }
 
         [JsonProperty(PropertyName = TokenResponseClaim.ExpiresIn)]
-        public long ExpiresIn
-        {
-            get => _expiresIn;
-            set
-            {
-                _expiresIn = value;
-                AccessTokenExpiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(_expiresIn);
-            }
-        }
+        public long ExpiresIn { get; set; }
 
         [JsonProperty(PropertyName = TokenResponseClaim.ExtendedExpiresIn)]
-        public long ExtendedExpiresIn
-        {
-            get => _extendedExpiresIn;
-            set
-            {
-                _extendedExpiresIn = value;
-                AccessTokenExtendedExpiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(_extendedExpiresIn);
-            }
-        }
+        public long ExtendedExpiresIn { get; set; }
 
         [JsonProperty(PropertyName = TokenResponseClaim.RefreshIn)]
-        public long RefreshIn
-        {
-            get => _refreshIn;
-            set
-            {
-                _refreshIn = value;
-                AccessTokenRefreshOn = DateTime.UtcNow + TimeSpan.FromSeconds(_refreshIn);
-            }
-        }
+        public long? RefreshIn { get; set; }
 
         /// <summary>
         /// Optional field, FOCI support.
@@ -97,12 +70,10 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonProperty(PropertyName = TokenResponseClaim.FamilyId)]
         public string FamilyId { get; set; }
 
+        [JsonProperty(PropertyName = TokenResponseClaim.SpaCode)]
+        public string SpaAuthCode { get; set; }
+
         public string WamAccountId { get; set; }
-
-        public DateTimeOffset AccessTokenExpiresOn { get; private set; }
-        public DateTimeOffset AccessTokenExtendedExpiresOn { get; private set; }
-
-        public DateTimeOffset? AccessTokenRefreshOn { get; private set; }
 
         public TokenSource TokenSource { get; set; }
 
@@ -130,7 +101,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 CorrelationId = responseDictionary[BrokerResponseConst.CorrelationId],
                 Scope = responseDictionary[BrokerResponseConst.Scope],
                 ExpiresIn = responseDictionary.TryGetValue(BrokerResponseConst.ExpiresOn, out string expiresOn) ?
-                                CoreHelpers.GetDurationFromNowInSeconds(expiresOn) :
+                                DateTimeHelpers.GetDurationFromNowInSeconds(expiresOn) :
                                 0,
                 ClientInfo = responseDictionary.ContainsKey(BrokerResponseConst.ClientInfo)
                     ? responseDictionary[BrokerResponseConst.ClientInfo]
@@ -174,8 +145,8 @@ namespace Microsoft.Identity.Client.OAuth2
                 IdToken = authResult[BrokerResponseConst.IdToken].ToString(),
                 CorrelationId = correlationId, // Android response does not expose Correlation ID
                 Scope = authResult[BrokerResponseConst.AndroidScopes].ToString(), // sadly for iOS this is "scope" and for Android "scopes"
-                ExpiresIn = CoreHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExpiresOn].ToString()),
-                ExtendedExpiresIn = CoreHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
+                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExpiresOn].ToString()),
+                ExtendedExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
                 ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
                 TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
                 TokenSource = TokenSource.Broker

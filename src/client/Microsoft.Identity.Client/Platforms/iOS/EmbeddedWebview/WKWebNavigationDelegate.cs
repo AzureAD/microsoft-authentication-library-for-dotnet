@@ -18,6 +18,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
     internal class WKWebNavigationDelegate : WKNavigationDelegate
     {
         private const string AboutBlankUri = "about:blank";
+        private const string AboutSrcDocUri = "about:srcdoc";
         private MsalAuthenticationAgentUIViewController _authenticationAgentUIViewController = null;
 
         public WKWebNavigationDelegate(MsalAuthenticationAgentUIViewController authUIViewController)
@@ -78,6 +79,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             }
 
             if (!navigationAction.Request.Url.AbsoluteString.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase)
+                && !navigationAction.Request.Url.AbsoluteString.Equals(AboutSrcDocUri, StringComparison.OrdinalIgnoreCase)
                 && !navigationAction.Request.Url.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
             {
                 AuthorizationResult result = AuthorizationResult.FromStatus(

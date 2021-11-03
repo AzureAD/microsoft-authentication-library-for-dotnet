@@ -105,15 +105,6 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             return new NullLegacyCachePersistence();
         }
 
-        /// <remarks>
-        /// Currently we do not store a token cache in the key chain for Mac. Instead,
-        /// we allow users provide custom token cache serialization.
-        /// </remarks>
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
-        {
-            return new InMemoryTokenCacheAccessor(Logger);
-        }
-
         protected override IWebUIFactory CreateWebUiFactory() => new MacUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new MacCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new ConsolePlatformLogger();

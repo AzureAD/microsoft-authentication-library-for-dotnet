@@ -102,8 +102,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// To help with resiliency, AAD Cached Credential Service (CCS) operates as an AAD backup.
-        /// This will provide CCS with a routing hint to help improve performance during authentication.
+        /// To help with resiliency, the AAD backup authentication system operates as an AAD backup.
+        /// This will provide the AAD backup authentication system with a routing hint to help improve performance during authentication.
         /// The hint created with this api will take precedence over the one created with <see cref="WithLoginHint"/>
         /// </summary>
         /// <param name="userObjectIdentifier">GUID which is unique to the user, parsed from the client_info.</param>
@@ -117,6 +117,19 @@ namespace Microsoft.Identity.Client
             }
 
             Parameters.CcsRoutingHint = new KeyValuePair<string, string>(userObjectIdentifier, tenantIdentifier) as KeyValuePair<string, string>?;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies the interactive experience for the user.
+        /// </summary>
+        /// <param name="prompt">Requested interactive experience. The default is <see cref="Prompt.SelectAccount"/>
+        /// </param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public GetAuthorizationRequestUrlParameterBuilder WithPrompt(Prompt prompt)
+        {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPrompt);
+            Parameters.Prompt = prompt;
             return this;
         }
 

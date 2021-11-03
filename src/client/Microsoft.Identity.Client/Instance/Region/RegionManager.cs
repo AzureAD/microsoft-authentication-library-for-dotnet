@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,10 +64,14 @@ namespace Microsoft.Identity.Client.Region
                 return null;
             }
 
+            Debug.Assert(
+                requestContext.ApiEvent != null,
+                "Do not call GetAzureRegionAsync outside of a request. This can happen if you perform instance discovery outside a request, for example as part of validating input params.");
+
             // MSAL always performs region auto-discovery, even if the user configured an actual region
             // in order to detect inconsistencies and report via telemetry
             var discoveredRegion = await DiscoverAndCacheAsync(azureRegionConfig, logger, requestContext.UserCancellationToken).ConfigureAwait(false);
-
+            
             RecordTelemetry(requestContext.ApiEvent, azureRegionConfig, discoveredRegion);
 
             if (IsAutoDiscoveryRequested(azureRegionConfig))
@@ -160,7 +165,7 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<RegionInfo> DiscoverAsync(ICoreLogger logger, CancellationToken requestCancellationToken)
         {
-            string region = Environment.GetEnvironmentVariable("REGION_NAME");
+            string region = Environment.GetEnvironmentVariable("REGION_NAME")?.Replace(" ", string.Empty).ToLowerInvariant();
 
             if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
             {

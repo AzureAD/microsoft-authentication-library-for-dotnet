@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
             catch (MsalServiceException ex)
             {
-                if (!requestContext.ServiceBundle.Config.AuthorityInfo.ValidateAuthority)
+                if (!requestContext.ServiceBundle.Config.Authority.AuthorityInfo.ValidateAuthority)
                 {
                     requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery as validate authority is set to false. ");
                     return CreateEntryForSingleAuthority(authorityUri);

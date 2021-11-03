@@ -19,12 +19,14 @@ namespace Microsoft.Identity.Client.Cache
         ITokenCacheInternal TokenCacheInternal { get; }
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync();
         Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse);
-        Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalIdTokenCacheKey idTokenCacheKey);
+        Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalAccessTokenCacheItem accessTokenCacheItem);
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync();
         Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId);
         Task<bool?> IsAppFociMemberAsync(string familyId);
         
         Task<IEnumerable<IAccount>> GetAccountsAsync();
         Task<IDictionary<string, TenantProfile>> GetTenantProfilesAsync(string homeAccountId);
+
+        
     }
 }

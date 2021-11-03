@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Internal;
 using System.Net.Http;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Client
 {
@@ -24,6 +25,7 @@ namespace Microsoft.Identity.Client
     public abstract class AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
+
         internal IServiceBundle ServiceBundle { get; }
 
         /// <summary>
@@ -39,7 +41,7 @@ namespace Microsoft.Identity.Client
         internal AcquireTokenCommonParameters CommonParameters { get; } = new AcquireTokenCommonParameters();
 
         /// <summary>
-        /// Executes the Token request asynchronously, with a possibility of cancelling the
+        /// Executes the Token request asynchronously, with a possibility of canceling the
         /// asynchronous method.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token. See <see cref="CancellationToken"/> </param>
@@ -310,11 +312,48 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Overrides the tenant ID specified in the authority at the application level. This operation preserves the authority host (environment).
+        /// 
+        /// If an authority was not specified at the application level, the default used is https://login.microsoftonline.com/common.
+        /// </summary>
+        /// <param name="tenantId">The tenant ID, which can be either in GUID format or a domain name. Also known as the Directory ID.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if tenantId is null or an empty string</exception>
+        /// <exception cref="MsalClientException">Thrown if the application was configured with an authority that is not AAD specific (e.g. ADFS or B2C).</exception>
+        /// <remarks>
+        /// The tenant should be more restrictive than the one configured at the application level, e.g. don't use "common".
+        /// Does not affect authority validation, which is specified at the application level.</remarks>
+        public T WithTenantId(string tenantId)
+        {
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentNullException(nameof(tenantId));
+            }
+
+            if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+            {
+                throw new MsalClientException(
+                    MsalError.TenantOverrideNonAad,
+                    MsalErrorMessage.TenantOverrideNonAad);
+            }
+
+            AadAuthority aadAuthority = (AadAuthority)ServiceBundle.Config.Authority;
+            string tenantedAuthority = aadAuthority.GetTenantedAuthority(tenantId, true);
+            var newAuthorityInfo = AuthorityInfo.FromAadAuthority(
+                tenantedAuthority,
+                ServiceBundle.Config.Authority.AuthorityInfo.ValidateAuthority);
+
+            CommonParameters.AuthorityOverride = newAuthorityInfo;
+
+            return (T)this;
+        }
+
+        /// <summary>
         /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs.
         /// </summary>
         /// <param name="authorityUri">Authority URL for an ADFS server.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <remarks>MSAL.NET will only support ADFS 2019 or later.</remarks>
+        /// <remarks>MSAL.NET supports ADFS 2019 or later.</remarks>
         /// <returns>The builder to chain the .With methods.</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {

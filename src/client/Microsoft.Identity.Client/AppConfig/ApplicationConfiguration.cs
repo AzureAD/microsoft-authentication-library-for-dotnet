@@ -5,9 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -66,9 +69,10 @@ namespace Microsoft.Identity.Client
 
         public IPlatformProxy PlatformProxy { get; internal set; }
 
-        public AuthorityInfo AuthorityInfo { get; internal set; }
+        public CacheOptions AccessorOptions { get; set; }
+
+        public Authority Authority { get; internal set; }
         public string ClientId { get; internal set; }
-        public string TenantId { get; internal set; }
         public string RedirectUri { get; internal set; }
         public bool EnablePiiLogging { get; internal set; }
         public LogLevel LogLevel { get; internal set; } = LogLevel.Info;
@@ -89,8 +93,11 @@ namespace Microsoft.Identity.Client
         public ClientCredentialWrapper ClientCredential { get; internal set; }
         public string ClientSecret { get; internal set; }
         public string SignedClientAssertion { get; internal set; }
-        public Func<string> SignedClientAssertionDelegate { get; internal set; }
+        public Func<CancellationToken, Task<string>> SignedClientAssertionDelegate { get; internal set; }
+         
         public X509Certificate2 ClientCredentialCertificate { get; internal set; }
+        public bool SendX5C { get; internal set; } = false;
+
         public IDictionary<string, string> ClaimsToSign { get; internal set; }
         public bool MergeWithDefaultClaims { get; internal set; }
         internal int ConfidentialClientCredentialCount;
@@ -101,9 +108,12 @@ namespace Microsoft.Identity.Client
 
         #region Region
         public string AzureRegion { get; set; }
-#endregion
+        #endregion
 
-#region Authority
+        #region Authority
+        // These are all used to create the Authority when the app is built.
+
+        public string TenantId { get; internal set; }
 
         public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }
         public Uri CustomInstanceDiscoveryMetadataUri { get; set; }

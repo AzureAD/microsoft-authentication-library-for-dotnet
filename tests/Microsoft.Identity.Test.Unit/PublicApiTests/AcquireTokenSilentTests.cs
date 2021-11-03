@@ -94,16 +94,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-                
+
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
-                app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
-                    new MsalAccessTokenCacheKey(
-                        TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.Utid,
-                        TestConstants.s_userIdentifier,
-                        TestConstants.ClientId,
-                        TestConstants.ScopeForAnotherResourceStr,
-                        TestConstants.Bearer));
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Task<AuthenticationResult> task = app
@@ -132,17 +124,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                
-                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
-                app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
-                    new MsalAccessTokenCacheKey(
-                        TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.Utid,
-                        TestConstants.s_userIdentifier,
-                        TestConstants.ClientId,
-                        TestConstants.ScopeForAnotherResourceStr,
-                        TestConstants.Bearer));
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
@@ -169,17 +152,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                
-                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
-                app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
-                    new MsalAccessTokenCacheKey(
-                        TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.Utid,
-                        TestConstants.s_userIdentifier,
-                        TestConstants.ClientId,
-                        TestConstants.ScopeForAnotherResourceStr,
-                        TestConstants.Bearer));
 
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 httpManager.AddMockHandler(
@@ -233,16 +207,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
-                
-                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
-                app.UserTokenCacheInternal.Accessor.DeleteAccessToken(new MsalAccessTokenCacheKey(
-                    TestConstants.ProductionPrefNetworkEnvironment,
-                    TestConstants.Utid,
-                    TestConstants.s_userIdentifier,
-                    TestConstants.ClientId,
-                    TestConstants.ScopeForAnotherResourceStr,
-                    TestConstants.Bearer));
+                TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 if (expectNetworkDiscovery)
                 {
@@ -261,8 +227,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
-                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(app.Authority, false)
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))                    
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -289,14 +254,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-                
+
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 AuthenticationResult result = await app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
-                    TestConstants.DisplayableId)
-                    .WithAuthority(app.Authority, false)
+                    TestConstants.DisplayableId)                    
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -317,13 +281,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-                
+
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
                     "other_login_hint@contoso.com")
-                    .WithAuthority(app.Authority, false)
                     .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.NoAccountForLoginHint, exception.ErrorCode);
@@ -343,7 +306,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
-                
+
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid1", "utid");
@@ -352,7 +315,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () => await app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
                     TestConstants.DisplayableId)
-                    .WithAuthority(app.Authority, false)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.MultipleAccountsForLoginHint, exception.ErrorCode);
@@ -372,13 +334,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-                
+
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
                     new Account(null, null, null))
-                    .WithAuthority(app.Authority, false)
                     .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.NoTokensFoundError, exception.ErrorCode);
@@ -399,7 +360,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                
+
                 TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
@@ -445,7 +406,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
-                
+
                 TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -466,7 +427,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithTenantId("common")
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -492,7 +453,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant2)
+                    .WithTenantId(TestConstants.Utid2)
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -522,7 +483,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant)
+                    .WithTenantId("other_tenant")
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -549,7 +510,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant)
+                    .WithTenantId("other_tenant")
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -577,14 +538,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 // PopulateCache() creates two access tokens
-                
+
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithTenantId("common")
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -614,7 +575,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant2)
+                    .WithTenantId(TestConstants.Utid2)
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -642,7 +603,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant)
+                    .WithTenantId("other_tenant")
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -668,7 +629,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
                 httpManager.AddInstanceDiscoveryMockHandler();
                 //populate cache
-                
+
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 httpManager.AddMockHandler(
@@ -683,7 +644,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .AcquireTokenSilent(
                             TestConstants.s_cacheMissScope,
                             new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                        .WithAuthority(app.Authority)
                         .WithForceRefresh(false)
                         .ExecuteAsync(CancellationToken.None);
 
@@ -774,9 +734,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var acc = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult result = await app
                     .AcquireTokenSilent(TestConstants.s_scope, acc)
                     .WithAuthority(ClientApplicationBase.DefaultAuthority) // this override should do nothing, it's mean to specify a tenant id
+#pragma warning restore CS0618 // Type or member is obsolete
                     .ExecuteAsync().ConfigureAwait(false);
             }
         }

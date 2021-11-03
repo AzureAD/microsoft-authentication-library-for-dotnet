@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
-            requestParams.SendX5C = authorizationCodeParameters.SendX5C;
+            requestParams.SendX5C = authorizationCodeParameters.SendX5C ?? false;
 
             var handler = new ConfidentialAuthCodeRequest(
                 ServiceBundle,
@@ -57,9 +57,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.AppTokenCacheInternal).ConfigureAwait(false);
-
-            requestParams.SendX5C = clientParameters.SendX5C;
-
+       
+            requestParams.SendX5C = clientParameters.SendX5C ?? false;
+            
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
                 requestParams,
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
 
-            requestParams.SendX5C = onBehalfOfParameters.SendX5C;
+            requestParams.SendX5C = onBehalfOfParameters.SendX5C ?? false;
             requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
             requestParams.OboCacheKey = onBehalfOfParameters.OboCacheKey;
 

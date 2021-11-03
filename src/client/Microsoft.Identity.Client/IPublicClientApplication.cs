@@ -60,9 +60,8 @@ namespace Microsoft.Identity.Client
         /// <item>
         /// <term><see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/></term>
         /// <description>to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
-        /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction</description>
+        /// additional query parameters to the Identity Provider, and <see cref="AbstractAcquireTokenParameterBuilder{T}.WithTenantId(string)"/>
+        /// in order to change the tenant of the authority set at the application construction. </description>
         /// </item>
         /// </list>
         /// </remarks>
@@ -87,9 +86,8 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// You can also pass optional parameters by calling:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
-        /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction.
+        /// additional query parameters to the Identity Provider, and <see cref="AbstractAcquireTokenParameterBuilder{T}.WithTenantId(string)"/>
+        /// in order to change the tenant of the authority set at the application construction. 
         /// </remarks>
         AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(
             IEnumerable<string> scopes,

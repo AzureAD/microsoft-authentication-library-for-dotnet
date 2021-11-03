@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             options.ClientSecret = "cats";
             var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
-            var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.AuthorityInfo;
+            var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.Authority.AuthorityInfo;
             Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authorityInfo.CanonicalAuthority);
         }
 
@@ -82,8 +82,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options)
                                                           .WithCertificate(cert)
                                                           .Build();
-            var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.AuthorityInfo;
-            Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authorityInfo.CanonicalAuthority);
+            var authority = ((ConfidentialClientApplication)app).ServiceBundle.Config.Authority;
+            Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]
@@ -169,8 +169,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestWithDifferentClientId()
         {
             const string ClientId = "9340c42a-f5de-4a80-aea0-874adc2ca325";
+            const string AppIdUri = "https://microsoft.onmicrosoft.com/aa3e634f-58b3-4eb7-b4ed-244c44c29c47";
             var cca = ConfidentialClientApplicationBuilder.Create(ClientId).WithClientSecret("cats").Build();
             Assert.AreEqual(ClientId, cca.AppConfig.ClientId);
+
+            cca = ConfidentialClientApplicationBuilder.Create(AppIdUri).WithClientSecret("cats").Build();
+            Assert.AreEqual(AppIdUri, cca.AppConfig.ClientId);
         }
 
         [TestMethod]
@@ -345,6 +349,72 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             {
                 Assert.IsNotNull(e);
                 Assert.AreEqual(MsalError.CertWithoutPrivateKey, e.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
+        public void TestConstructor_WithCertificate_SendX5C()
+        {
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
+
+            var app = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithCertificate(cert)
+                      .Build();
+
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).SendX5C);
+
+            app = ConfidentialClientApplicationBuilder
+                  .Create(TestConstants.ClientId)
+                  .WithCertificate(cert, true)
+                  .Build();
+
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).SendX5C);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
+        public void TestConstructor_WithClientClaims()
+        {
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
+
+            var app = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithClientClaims(cert, TestConstants.s_clientAssertionClaims)
+                      .Build();
+
+            AssertValues(true, false);
+
+            app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientClaims(cert, TestConstants.s_clientAssertionClaims, false)
+                .Build();
+
+            AssertValues(false, false);
+
+            app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientClaims(cert, TestConstants.s_clientAssertionClaims, false, true)
+                .Build();
+
+            AssertValues(false, true);
+
+            app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientClaims(cert, TestConstants.s_clientAssertionClaims, sendX5C: true)
+                .Build();
+
+            AssertValues(true, true);
+
+            void AssertValues(bool expectedMergeWithDefaultClaims, bool expectedSendX5C)
+            {
+                Assert.AreEqual(expectedSendX5C, (app.AppConfig as ApplicationConfiguration).SendX5C);
+                Assert.AreEqual(expectedMergeWithDefaultClaims, (app.AppConfig as ApplicationConfiguration).MergeWithDefaultClaims);
+                Assert.IsNotNull((app.AppConfig as ApplicationConfiguration).ClientCredentialCertificate);
+                CoreAssert.AssertDictionariesAreEqual(TestConstants.s_clientAssertionClaims, (app.AppConfig as ApplicationConfiguration).ClaimsToSign, StringComparer.Ordinal);
             }
         }
 

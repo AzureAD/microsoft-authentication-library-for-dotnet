@@ -120,6 +120,12 @@ namespace Microsoft.Identity.Client
         public const string RequestTimeout = "request_timeout";
 
         /// <summary>
+        /// Service returned HTTP error code 429 which indicates the request has been throttled.
+        /// For more details see https://aka.ms/msal-net-throttling
+        /// </summary>
+        public const string RequestThrottled = "request_throttled";
+
+        /// <summary>
         /// loginHint should be a UPN
         /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="T:IPublicClientApplication"/> which
         /// takes a <c>loginHint</c> as a parameters, but this login hint was not using the UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c>
@@ -1007,6 +1013,26 @@ namespace Microsoft.Identity.Client
         public const string InitializeProcessSecurityError = "initialize_process_security_error";
 
         /// <summary>
+        /// <para>What happens?</para>You configured MSAL cache serialization at the same time with a static internal cache via <see cref="AbstractApplicationBuilder{T}.WithCacheOptions(CacheOptions)"/>
+        /// These are mutually exclusive.
+        /// <para>Mitigation</para> Use only one option. Web site and web API scenarios should rely on external cache serialization, as internal cache serialization cannot scale. See https://aka.ms/msal-net-cca-token-cache-serialization
+        /// </summary>
+        public const string StaticCacheWithExternalSerialization = "static_cache_with_external_serialization";
+
+        /// <summary>
+        /// <para>What happens?</para>You configured WithTenant at the request level, but the application is using a non-AAD authority
+        /// These are mutually exclusive.
+        /// <para>Mitigation</para> WithTenantId can only be used in conjunction with AAD authorities
+        /// </summary>
+        public const string TenantOverrideNonAad = "tenant_override_non_aad";
+
+        /// <summary>
+        /// <para>What happens?</para>You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request."/>
+        /// <para>Mitigation</para> Use WithTenantId at the request level instead.
+        /// </summary>
+        public const string RegionalAndAuthorityOverride = "authority_override_regional";
+
+        /// <summary>
         /// <para>What happens?</para>The token cache already contains a token with an OBO cache key that
         /// matches the <c>longRunningProcessSessionKey</c> passed into <see cref="IConfidentialClientApplication.AcquireTokenInLongRunningProcess"/>.
         /// <para>Mitigation</para>Call <see cref="IConfidentialClientApplication.InitiateLongRunningProcessInWebApi"/> with a new <c>longRunningProcessSessionKey</c>
@@ -1024,4 +1050,4 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string OboCacheKeyNotInCacheError = "obo_cache_key_not_in_cache_error";
     }
-}
+}      

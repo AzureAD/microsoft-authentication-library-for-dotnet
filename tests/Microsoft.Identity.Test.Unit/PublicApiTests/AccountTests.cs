@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             pcaDe.UserTokenCacheInternal.Accessor.GetAllAccounts()
                 .Where(a => a.Environment != "login.microsoftonline.de")
                 .ToList()
-                .ForEach(a => pcaDe.UserTokenCacheInternal.Accessor.DeleteAccount(a.GetKey()));
+                .ForEach(a => pcaDe.UserTokenCacheInternal.Accessor.DeleteAccount(a));
             var cacheAccessRecorder = pcaDe.UserTokenCache.RecordAccess();
 
             // Act
@@ -227,6 +227,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
+                    DateTimeOffset.UtcNow,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)), 
                     clientInfo, 

@@ -35,8 +35,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         // HTTP Telemetry Constants
         private static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
-        private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheInfoTelemetry.None:D},,,|0,1";
-        private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheInfoTelemetry.None:D},,,|0,1";
+        private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1";
+        private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1";
         private readonly string XClientLastTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|0|||";
         private readonly string XClientLastTelemetryROPCFailure =
             $"{TelemetryConstants.HttpTelemetrySchemaVersion}|0|1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|";

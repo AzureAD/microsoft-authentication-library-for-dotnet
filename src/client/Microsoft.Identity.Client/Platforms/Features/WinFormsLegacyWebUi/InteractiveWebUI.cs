@@ -15,13 +15,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             OwnerWindow = parent?.OwnerWindow;
             SynchronizationContext = parent?.SynchronizationContext;
             RequestContext = requestContext;
+            EmbeddedWebViewOptions = parent?.EmbeddedWebviewOptions;
         }
+
+        public EmbeddedWebViewOptions EmbeddedWebViewOptions { get; }
 
         protected override AuthorizationResult OnAuthenticate()
         {
             AuthorizationResult result;
 
-            using (_dialog = new WindowsFormsWebAuthenticationDialog(OwnerWindow) { RequestContext = RequestContext })
+            using (_dialog = new WindowsFormsWebAuthenticationDialog(OwnerWindow, EmbeddedWebViewOptions) { RequestContext = RequestContext })
             {
                 result = _dialog.AuthenticateAAD(RequestUri, CallbackUri);
             }

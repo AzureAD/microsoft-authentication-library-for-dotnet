@@ -6,15 +6,11 @@ using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    internal class AcquireTokenForClientParameters : IAcquireTokenParameters
+    internal class AcquireTokenForClientParameters : AbstractAcquireTokenConfidentialClientParameters, IAcquireTokenParameters
     {
         /// <summary>
         /// </summary>
         public bool ForceRefresh { get; set; }
-
-        /// <summary>
-        /// </summary>
-        public bool SendX5C { get; set; }
 
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)

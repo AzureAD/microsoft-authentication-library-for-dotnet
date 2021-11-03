@@ -393,7 +393,18 @@ namespace Microsoft.Identity.Client
                 "Failure setting process security to enable WAM Account Picker in an elevated process ({0}). For troubleshooting details, see https://aka.ms/msal-net-wam .",
                 errorCode);
 
-        public static string CcsRoutingHintMissing = "Either the userObjectIdentifier or tenantIdenifier are missing. Both are needed to create the ccs routing hint. See https://aka.ms/msal-net/ccsRouting. ";
+        public const string CcsRoutingHintMissing = "Either the userObjectIdentifier or tenantIdenifier are missing. Both are needed to create the ccs routing hint. See https://aka.ms/msal-net/ccsRouting. ";
+
+        public const string StaticCacheWithExternalSerialization =
+            "You configured MSAL cache serialization at the same time with internal caching options. These are mutually exclusive. " +
+            "Use only one option. Web site and web api scenarios should rely on external cache serialization, as internal cache serialization cannot scale. " +
+            "See https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-token-cache-serialization?tabs=aspnetcore  ";
+
+        public const string ClientCredentialWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not recommended. See https://aka.ms/msal-net-client-credentials for more details.";
+
+        public const string TenantOverrideNonAad = "WithTenantId can only be used when an AAD authority is specified at the application level.";
+
+        public const string RegionalAndAuthorityOverride = "You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request. Use WithTenantId at the request level instead.";
 
         public const string OboCacheKeyAlreadyInCache = "The token cache already contains a token with an OBO cache key that matches the longRunningProcessSessionKey passed into IConfidentialClientApplication.AcquireTokenInLongRunningProcess method. Call IConfidentialClientApplication.InitiateLongRunningProcessInWebApi method with a new longRunningProcessSessionKey that does not exist in the token cache or call IConfidentialClientApplication.AcquireTokenInLongRunningProcess method with an already used longRunningProcessSessionKey.";
 

@@ -45,9 +45,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [DataTestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
-        public async Task WithLegacyCacheCompatibilityTest_Async(bool enableLegacyCacheCompatibility)
+        [DataRow(true, true, true)]
+        [DataRow(true, false, false)]
+        [DataRow(false, true, false)]
+        [DataRow(false, true, false)]        
+        public async Task WithLegacyCacheCompatibilityTest_Async(
+            bool enableLegacyCacheCompatibility, 
+            bool serializeCache, 
+            bool expectToCallAdalLegacyCache)
         {
             // Arrange
             var legacyCachePersistence = Substitute.For<ILegacyCachePersistence>();
@@ -55,8 +60,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
             var response = TestConstants.CreateMsalTokenResponse();
 
-            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);            
             ((TokenCache)cache).LegacyCachePersistence = legacyCachePersistence;
+            if (serializeCache) // no point in invoking the Legacy ADAL cache if you're only keeping it memory
+            {
+                cache.SetBeforeAccess((n) => { });
+            }
 
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
             requestParams.AuthorityManager = new AuthorityManager(
@@ -70,10 +79,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
             await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
             await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
-            await cache.RemoveAccountAsync(requestParams.Account, requestContext).ConfigureAwait(true);
+            await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
 
             // Assert
-            if (enableLegacyCacheCompatibility)
+            if (expectToCallAdalLegacyCache)
             {
                 legacyCachePersistence.ReceivedWithAnyArgs().LoadCache();
                 legacyCachePersistence.ReceivedWithAnyArgs().WriteCache(Arg.Any<byte[]>());
@@ -91,21 +100,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = CreateTestHarness())
             {
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
-                var atItem = new MsalAccessTokenCacheItem(
-                    TestConstants.ProductionPrefNetworkEnvironment,
-                    TestConstants.ClientId,
-                    TestConstants.s_scope.AsSingleString(),
-                    TestConstants.Utid,
-                    "",
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
-                    _clientInfo,
-                    _homeAccountId);
-
-                // create key out of access token cache item and then
-                // set it as the value of the access token.
-                string atKey = atItem.GetKey().ToString();
-                atItem.Secret = atKey;
+                var atItem = TokenCacheHelper.CreateAccessTokenItem();
 
                 cache.Accessor.SaveAccessToken(atItem);
                 var item = cache.FindAccessTokenAsync(
@@ -116,7 +111,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                         account: TestConstants.s_user)).Result;
 
                 Assert.IsNotNull(item);
-                Assert.AreEqual(atKey, item.Secret);
             }
         }
 
@@ -126,23 +120,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = CreateTestHarness())
             {
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
-
-                var atItem = new MsalAccessTokenCacheItem(
-                    TestConstants.ProductionPrefNetworkEnvironment,
-                    TestConstants.ClientId,
-                    TestConstants.s_scope.AsSingleString(),
-                    TestConstants.Utid,
-                    null,
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    _clientInfo,
-                    _homeAccountId);
-
-                // create key out of access token cache item and then
-                // set it as the value of the access token.
-                string atKey = atItem.GetKey().ToString();
-                atItem.Secret = atKey;
-
+                var atItem = TokenCacheHelper.CreateAccessTokenItem("r1/scope1 r1/scope2");
+              
                 cache.Accessor.SaveAccessToken(atItem);
                 var param = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
@@ -154,7 +133,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var item = cache.FindAccessTokenAsync(param).Result;
 
                 Assert.IsNotNull(item);
-                Assert.AreEqual(atKey, item.Secret);
             }
         }
 
@@ -198,8 +176,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     cachedAtScopes,
                     TestConstants.Utid,
                     null,
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
+                    DateTimeOffset.UtcNow,
+                    DateTimeOffset.UtcNow + TimeSpan.FromHours(1),
+                    DateTimeOffset.UtcNow + TimeSpan.FromHours(2),
                     _clientInfo,
                     _homeAccountId);
 
@@ -233,22 +212,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
-                var atItem = new MsalAccessTokenCacheItem(
-                    TestConstants.ProductionPrefNetworkEnvironment,
-                    TestConstants.ClientId,
-                    TestConstants.s_scope.AsSingleString(),
-                    TestConstants.Utid,
-                    null,
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    _clientInfo,
-                    _homeAccountId);
-
-                // create key out of access token cache item and then
-                // set it as the value of the access token.
-                string atKey = atItem.GetKey().ToString();
-                atItem.Secret = atKey;
-
+                var atItem = TokenCacheHelper.CreateAccessTokenItem();
                 cache.Accessor.SaveAccessToken(atItem);
 
                 var param = harness.CreateAuthenticationRequestParameters(
@@ -289,10 +253,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(tokenResponse.TokenType, at.TokenType);
             Assert.IsNull(at.KeyId);
             Assert.IsTrue(at.RefreshOn.HasValue);
-            CoreAssert.AreEqual(
+            CoreAssert.IsWithinRange(
                 at.RefreshOn.Value,
-                (at.CachedAtOffset + TimeSpan.FromSeconds(1800)),
-                TimeSpan.FromSeconds(1));
+                (at.CachedAt + TimeSpan.FromSeconds(1800)),
+                TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
         }
 
 
@@ -337,7 +301,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TestConstants.TenantId);
 
             // Assert
-            Assert.AreEqual(0, tokenResponse.RefreshIn);
+            Assert.IsNull(tokenResponse.RefreshIn);
             Assert.IsFalse(at.RefreshOn.HasValue);
         }
 
@@ -354,12 +318,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
-                    new DateTimeOffset(DateTime.UtcNow),
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
+                    DateTimeOffset.UtcNow - TimeSpan.FromMinutes(30),
+                    DateTimeOffset.UtcNow,
+                    DateTimeOffset.UtcNow + TimeSpan.FromHours(2),
                     _clientInfo,
                     _homeAccountId);
 
-                atItem.Secret = atItem.GetKey().ToString();
                 cache.Accessor.SaveAccessToken(atItem);
 
                 var param = harness.CreateAuthenticationRequestParameters(
@@ -386,11 +350,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
-                    accessTokenExpiresOn: new DateTimeOffset(
+                    cachedAt: DateTimeOffset.UtcNow,
+                    expiresOn: new DateTimeOffset(
                         DateTime.UtcNow +
                         TimeSpan.FromDays(TokenCache.ExpirationTooLongInDays) +
                         TimeSpan.FromMinutes(5)),
-                    accessTokenExtendedExpiresOn: DateTimeOffset.Now,
+                    extendedExpiresOn: DateTimeOffset.UtcNow,
                     _clientInfo,
                     _homeAccountId);
 
@@ -408,38 +373,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        public void ValidateAccessTokenRefeshOnHasJitterTest()
-        {
-            using (var harness = CreateTestHarness())
-            {
-                //Arrange
-                int jitterRange = Constants.DefaultJitterRangeInSeconds;
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
-                var expiresOn = new DateTimeOffset(DateTime.MinValue + TimeSpan.FromMinutes(120));
-                var refreshIn = new DateTimeOffset(DateTime.MinValue + TimeSpan.FromMinutes(60));
-
-                //Act
-                var accessToken = new MsalAccessTokenCacheItem(
-                    TestConstants.ProductionPrefNetworkEnvironment,
-                    TestConstants.ClientId,
-                    TestConstants.s_scope.AsSingleString(),
-                    TestConstants.Utid,
-                    null,
-                    accessTokenExpiresOn: expiresOn,
-                    accessTokenExtendedExpiresOn: new DateTimeOffset(DateTime.MinValue + TimeSpan.FromHours(360)),
-                    _clientInfo,
-                    _homeAccountId,
-                    null,
-                    accessTokenRefreshOn: refreshIn);
-
-                //Assert
-                var timeDiff = refreshIn.ToUnixTimeSeconds() - ((DateTimeOffset)accessToken.RefreshOn).ToUnixTimeSeconds();
-                Assert.IsTrue(jitterRange >= timeDiff && timeDiff >= -jitterRange);
-                Assert.IsTrue(refreshIn != accessToken.RefreshOn);
-            }
-        }
-
-        [TestMethod]
         public void GetExpiredAccessToken_WithExtendedExpireStillValid_Test()
         {
             using (var harness = CreateTestHarness(isExtendedTokenLifetimeEnabled: true))
@@ -452,6 +385,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
+                    new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
@@ -488,6 +422,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     "",
+                    new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromMinutes(4)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
@@ -573,14 +508,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-#if !WINDOWS_APP && !ANDROID && !iOS // Confidential Client N/A
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void GetAppTokenFromCacheTest()
+        public async Task GetAppTokenFromCacheTestAsync()
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, true);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -588,6 +522,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
+                    new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
                     _clientInfo,
@@ -604,13 +539,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     cache,
                     apiId: ApiEvent.ApiIds.AcquireTokenForClient);
 
-                var cacheItem = cache.FindAccessTokenAsync(authParams).Result;
+                var cacheItem = await cache.FindAccessTokenAsync(authParams).ConfigureAwait(false);
 
                 Assert.IsNotNull(cacheItem);
                 Assert.AreEqual(atItem.GetKey().ToString(), cacheItem.GetKey().ToString());
             }
         }
-#endif
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
@@ -620,7 +554,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 ClientId = TestConstants.ClientId,
                 RedirectUri = TestConstants.RedirectUri,
-                AuthorityInfo = AuthorityInfo.FromAuthorityUri(TestConstants.B2CAuthority, false)
+                Authority = Authority.CreateAuthority(TestConstants.B2CAuthority, false)
             };
 
             var serviceBundle = ServiceBundle.Create(appConfig);
@@ -666,6 +600,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
+                    new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
@@ -713,6 +648,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = CreateTestHarness())
             {
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
+                string assertion = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash("T");
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -720,10 +656,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
+                    new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
-                    _homeAccountId);
+                    _homeAccountId, 
+                    userAssertionHash: assertion);
 
                 // create key out of access token cache item and then
                 // set it as the value of the access token.
@@ -769,13 +707,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = CreateTestHarness())
             {
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
-
+                string assertionHash = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash("T"); 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
                     TestConstants.s_scope.AsSingleString(),
                     TestConstants.Utid,
                     null,
+                    new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
@@ -786,6 +725,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 string atKey = atItem.GetKey().ToString();
                 atItem.Secret = atKey;
                 atItem.OboCacheKey = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
+                    _homeAccountId,
+                    userAssertionHash: assertionHash);
 
                 cache.Accessor.SaveAccessToken(atItem);
 
@@ -815,10 +756,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var itemRT = cache.FindRefreshTokenAsync(authParams).Result;
 
                 Assert.IsNotNull(itemAT);
-                Assert.AreEqual(atKey, itemAT.Secret);
-
                 Assert.IsNotNull(itemRT);
-                Assert.AreEqual(rtKey, itemRT.Secret);
             }
         }
 
@@ -1157,7 +1095,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.Accessor.ClearAccessTokens();
             cache.Accessor.ClearRefreshTokens();
-
+            
             Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
 
@@ -1176,7 +1114,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var atItem = (cache.Accessor.GetAllAccessTokens()).First();
             Assert.AreEqual(response.AccessToken, atItem.Secret);
-            Assert.AreEqual(TestConstants.AuthorityTestTenant, atItem.Authority);
+            Assert.AreEqual(TestConstants.Utid, atItem.TenantId);
+            Assert.AreEqual(TestConstants.ProductionPrefNetworkEnvironment, atItem.Environment);
             Assert.AreEqual(TestConstants.ClientId, atItem.ClientId);
             Assert.AreEqual(response.Scope, atItem.ScopeSet.AsSingleString());
 

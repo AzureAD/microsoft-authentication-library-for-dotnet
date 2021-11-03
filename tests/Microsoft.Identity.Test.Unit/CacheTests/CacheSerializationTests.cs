@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -39,23 +40,29 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             StorageJsonKeys.FamilyId
         };
 
-        private MsalAccessTokenCacheItem CreateAccessTokenItem()
+        private MsalAccessTokenCacheItem CreateAccessTokenItem(
+            string kid = null, 
+            string tokenType = "Bearer", 
+            DateTimeOffset? cachedAt = null,
+            DateTimeOffset? expiresOn = null,
+            DateTimeOffset? extendedExpiresOn = null)
         {
-            return new MsalAccessTokenCacheItem(TestConstants.ScopeStr)
-            {
-                ClientId = TestConstants.ClientId,
-                Environment = "env",
-                ExpiresOnUnixTimestamp = "12345",
-                ExtendedExpiresOnUnixTimestamp = "23456",
-                CachedAt = "34567",
-                HomeAccountId = TestConstants.HomeAccountId,
-                IsExtendedLifeTimeToken = false,
-                Secret = "access_token_secret",
-                TenantId = "the_tenant_id",
-                RawClientInfo = string.Empty,
-                OboCacheKey = "assertion_hash",
-                TokenType = StorageJsonValues.TokenTypeBearer
-            };
+            var item =  new MsalAccessTokenCacheItem(
+                preferredCacheEnv: "env",
+                clientId: TestConstants.ClientId,
+                scopes: TestConstants.ScopeStr,
+                tenantId: "the_tenant_id",
+                secret: "access_token_secret",
+                cachedAt: cachedAt.HasValue ? cachedAt.Value : DateTimeOffset.UtcNow,
+                expiresOn: expiresOn.HasValue ? expiresOn.Value : DateTimeOffset.UtcNow + TimeSpan.FromHours(1),
+                extendedExpiresOn: extendedExpiresOn.HasValue ? extendedExpiresOn.Value : DateTimeOffset.UtcNow + TimeSpan.FromHours(1),
+                rawClientInfo: string.Empty,
+                homeAccountId: TestConstants.HomeAccountId, 
+                keyId: kid,
+                tokenType: tokenType, 
+                oboCacheKey: "assertion_hash");
+
+            return item;
         }
 
         private MsalRefreshTokenCacheItem CreateRefreshTokenItem(bool isFrt = false)
@@ -135,11 +142,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             int numIdTokens,
             int numAccounts)
         {
-            var accessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null);
 
             for (int i = 1; i <= numAccessTokens; i++)
             {
-                var item = CreateAccessTokenItem();
+                var item = CreateAccessTokenItem(
+                    cachedAt: DateTimeHelpers.UnixTimestampToDateTime(34567),
+                    expiresOn: DateTimeHelpers.UnixTimestampToDateTime(12345),
+                    extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(23456));
+
                 item.Environment = item.Environment + $"_{keyPrefix}{i}"; // ensure we get unique cache keys
                 accessor.SaveAccessToken(item);
             }
@@ -217,13 +228,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSerializeMsalAccessTokenCacheItem_WithRefreshOn()
         {
-            string refreshOn = "123456";
             var item = CreateAccessTokenItem();
-            item.RefreshOnUnixTimestamp = refreshOn;
+            
+            item.WithRefreshOn(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(30));
             string asJson = item.ToJsonString();
             var item2 = MsalAccessTokenCacheItem.FromJsonString(asJson);
 
-            AssertAccessTokenCacheItemsAreEqual(item, item2, refreshOn);
+            AssertAccessTokenCacheItemsAreEqual(item, item2, "123"); // TODO: fix this
         }
 
 
@@ -233,13 +244,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var item = CreateAccessTokenItem();
             Assert.AreEqual(StorageJsonValues.TokenTypeBearer, item.TokenType);
 
-            item.KeyId = "kid";
-            item.TokenType = "pop";
+            var item2 = CreateAccessTokenItem("kid","pop" );
 
-            string asJson = item.ToJsonString();
-            var item2 = MsalAccessTokenCacheItem.FromJsonString(asJson);
+            string asJson = item2.ToJsonString();
+            var item3 = MsalAccessTokenCacheItem.FromJsonString(asJson);
 
-            AssertAccessTokenCacheItemsAreEqual(item, item2);
+            AssertAccessTokenCacheItemsAreEqual(item2, item3);
         }
 
         [TestMethod]
@@ -477,7 +487,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize(null);
             string json = new UTF8Encoding().GetString(bytes);
 
-            var otherAccessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
+            var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null);
             var s2 = new TokenCacheDictionarySerializer(otherAccessor);
             s2.Deserialize(bytes, false);
 
@@ -496,7 +506,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string jsonContent = File.ReadAllText(jsonFilePath);
             byte[] cache = Encoding.UTF8.GetBytes(jsonContent);
 
-            var tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle(), true);
+            var tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle(), false);
             tokenCache.SetBeforeAccess(notificationArgs =>
             {
                 notificationArgs.TokenCache.DeserializeMsalV3(cache);
@@ -536,7 +546,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson), JObject.Parse(expectedJson)));
 
-            var otherAccessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
+            var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null);
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
             s2.Deserialize(bytes, false);
 
@@ -645,7 +655,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DeploymentItem(@"Resources\cachecompat_dotnet_dictionary.bin")]
         public void TestMsalNet2XCacheSerializationInterop()
         {
-            var accessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null);
             var s = new TokenCacheDictionarySerializer(accessor);
             string binFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_dotnet_dictionary.bin");
             byte[] bytes = File.ReadAllBytes(binFilePath);
@@ -657,20 +667,22 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, accessor.GetAllAccounts().Count());
             Assert.AreEqual(0, accessor.GetAllAppMetadata().Count());
 
-            var expectedAccessTokenItem = new MsalAccessTokenCacheItem("User.Read User.ReadBasic.All profile openid email")
-            {
-                AdditionalFieldsJson = "{\r\n  \"access_token_type\": \"Bearer\"\r\n}",
-                Environment = "login.windows.net",
-                HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
-                RawClientInfo = string.Empty,
-                ClientId = "b945c513-3946-4ecd-b179-6499803a2167",
-                TenantId = "26039cce-489d-4002-8293-5b0c5134eacb",
-                CachedAt = "1548803419",
-                ExpiresOnUnixTimestamp = "1548846619",
-                ExtendedExpiresOnUnixTimestamp = "1548846619",
-                OboCacheKey = string.Empty,
-                TokenType = StorageJsonValues.TokenTypeBearer
-            };
+            MsalAccessTokenCacheItem expectedAccessTokenItem = new MsalAccessTokenCacheItem(
+               "login.windows.net",
+               "b945c513-3946-4ecd-b179-6499803a2167",
+               "User.Read User.ReadBasic.All profile openid email",
+               "26039cce-489d-4002-8293-5b0c5134eacb",
+               secret: "",
+               cachedAt: DateTimeHelpers.UnixTimestampToDateTime(1548803419),
+               expiresOn: DateTimeHelpers.UnixTimestampToDateTime(1548846619),
+               extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(1548846619),
+               rawClientInfo: string.Empty,
+               homeAccountId: "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
+               oboCacheKey: string.Empty
+               );
+
+            expectedAccessTokenItem.AdditionalFieldsJson = "{\r\n  \"access_token_type\": \"Bearer\"\r\n}";
+
             AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.GetAllAccessTokens().First());
 
             var expectedRefreshTokenItem = new MsalRefreshTokenCacheItem
@@ -820,22 +832,26 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(expected.CredentialType, actual.CredentialType, nameof(actual.CredentialType));
         }
 
-        private void AssertAccessTokenCacheItemsAreEqual(MsalAccessTokenCacheItem expected, MsalAccessTokenCacheItem actual, string refreshOnTimeStamp = "")
+        private void AssertAccessTokenCacheItemsAreEqual(
+            MsalAccessTokenCacheItem expected, 
+            MsalAccessTokenCacheItem actual, 
+            string refreshOnTimeStamp = "")
         {
             AssertCredentialCacheItemBaseItemsAreEqual(expected, actual);
 
-            Assert.AreEqual(expected.Authority, actual.Authority, nameof(actual.Authority));
-            Assert.AreEqual(expected.ExpiresOnUnixTimestamp, actual.ExpiresOnUnixTimestamp, nameof(actual.ExpiresOnUnixTimestamp));
-            Assert.AreEqual(expected.ExtendedExpiresOnUnixTimestamp, actual.ExtendedExpiresOnUnixTimestamp, nameof(actual.ExtendedExpiresOnUnixTimestamp));
-            Assert.AreEqual(expected.CachedAt, actual.CachedAt, nameof(actual.CachedAt));
-            Assert.AreEqual(expected.ExpiresOn, actual.ExpiresOn, nameof(actual.ExpiresOn));
-            Assert.AreEqual(expected.ExtendedExpiresOn, actual.ExtendedExpiresOn, nameof(actual.ExtendedExpiresOn));
+            Assert.AreEqual(expected.Environment, actual.Environment, nameof(actual.Environment));
+
+            // since MSAL has to transform unix timestamp (i.e. time in seconds since 1 jan 1970) to datetime, the precision is 1 second
+            CoreAssert.AreWithinOneSecond(expected.ExpiresOn, actual.ExpiresOn, nameof(actual.ExpiresOn));
+            CoreAssert.AreWithinOneSecond(expected.ExtendedExpiresOn, actual.ExtendedExpiresOn, nameof(actual.ExtendedExpiresOn));
+            CoreAssert.AreWithinOneSecond(expected.CachedAt, actual.CachedAt, nameof(actual.CachedAt));
+
             Assert.AreEqual(expected.IsExtendedLifeTimeToken, actual.IsExtendedLifeTimeToken, nameof(actual.IsExtendedLifeTimeToken));
             Assert.AreEqual(expected.GetKey().ToString(), actual.GetKey().ToString());
             CollectionAssert.AreEqual(expected.ScopeSet.ToList(), actual.ScopeSet.ToList(), nameof(actual.ScopeSet));
             Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
             Assert.AreEqual(expected.OboCacheKey, actual.OboCacheKey, nameof(actual.OboCacheKey));
-            Assert.AreEqual(expected.RefreshOnUnixTimestamp, actual.RefreshOnUnixTimestamp, nameof(actual.RefreshOnUnixTimestamp));
+            Assert.AreEqual(expected.RefreshOn, actual.RefreshOn, nameof(actual.RefreshOn));
             Assert.AreEqual(expected.KeyId, actual.KeyId, nameof(actual.KeyId));
             Assert.AreEqual(expected.TokenType, actual.TokenType, nameof(actual.TokenType));
 

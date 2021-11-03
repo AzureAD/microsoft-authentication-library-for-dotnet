@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Common
                 LogLevel = LogLevel.Verbose,
                 EnablePiiLogging = enablePiiLogging,
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled,
-                AuthorityInfo = AuthorityInfo.FromAuthorityUri(authority, validateAuthority),
+                Authority = Authority.CreateAuthority(authority, validateAuthority),
                 LegacyCacheCompatibilityEnabled = isLegacyCacheEnabled
             };            
             return new ServiceBundle(appConfig, clearCaches);

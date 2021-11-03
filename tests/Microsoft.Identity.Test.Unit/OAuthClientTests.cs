@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(429, serverEx.StatusCode);
                     Assert.AreEqual(MockHelpers.TooManyRequestsContent, serverEx.ResponseBody);
                     Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
-                    Assert.AreEqual(MsalError.NonParsableOAuthError, serverEx.ErrorCode);
+                    Assert.AreEqual(MsalError.RequestThrottled, serverEx.ErrorCode);
                 }).ConfigureAwait(false);
         }
 

@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Kerberos
             }
 
             // decodes the second section containing the Kerberos Ticket claim if exists.
-            byte[] payloadBytes = Base64UrlHelpers.DecodeToBytes(sections[1]);
+            byte[] payloadBytes = Base64UrlHelpers.DecodeBytes(sections[1]);
             string payload = Encoding.UTF8.GetString(payloadBytes);
             if (string.IsNullOrEmpty(payload))
             {

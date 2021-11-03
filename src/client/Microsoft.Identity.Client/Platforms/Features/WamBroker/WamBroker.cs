@@ -637,7 +637,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     matchedAccountByLoginHint = wamAccount;
                 }
 
-                if (string.Equals(account.Username, wamAccount.UserName, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(account?.Username) && 
+                    string.Equals(account.Username, wamAccount.UserName, StringComparison.OrdinalIgnoreCase))
                 {
                     matchedAccountByLoginHint = wamAccount;
                 }

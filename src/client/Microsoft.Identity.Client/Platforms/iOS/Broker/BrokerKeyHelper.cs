@@ -107,8 +107,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         internal static string DecryptBrokerResponse(string encryptedBrokerResponse, ICoreLogger logger)
         {
-            byte[] outputBytes = Base64UrlHelpers.DecodeToBytes(encryptedBrokerResponse);
-            string plaintext = string.Empty;
+            byte[] outputBytes = Base64UrlHelpers.DecodeBytes(encryptedBrokerResponse);
 
             if (TryGetBrokerKey(out byte[] key))
             {
@@ -125,7 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                         CryptoStreamMode.Read);
                     using (StreamReader srDecrypt = new StreamReader(cryptoStream))
                     {
-                        plaintext = srDecrypt.ReadToEnd();
+                        string plaintext = srDecrypt.ReadToEnd();
                         return plaintext;
                     }
                 }

@@ -16,6 +16,8 @@ namespace Microsoft.Identity.Client.Cache.Keys
         private readonly string _clientId;
         private readonly string _tenantId;
 
+        internal string HomeAccountId => _homeAccountId;
+
         public MsalIdTokenCacheKey(
             string environment,
             string tenantId,

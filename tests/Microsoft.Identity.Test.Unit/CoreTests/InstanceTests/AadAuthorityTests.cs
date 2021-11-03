@@ -3,21 +3,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Mocks;
-using Microsoft.Identity.Client.UI;
-using System.Threading;
-using System.Web;
 using Microsoft.Identity.Client.Internal;
-using System.Threading.Tasks;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
@@ -27,7 +25,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [DeploymentItem("Resources\\OpenidConfigurationCommon.json")]
     public class AadAuthorityTests : TestBase
     {
-
         [TestMethod]
         public void ImmutableTest()
         {
@@ -39,66 +36,62 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void CreateEndpointsWithCommonTenantTest()
         {
-            using (var harness = CreateTestHarness())
-            {
-                Authority instance = Authority.CreateAuthority("https://login.microsoftonline.com/common");
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+            using var harness = CreateTestHarness();
 
-                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
-                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", instance.GetTokenEndpoint());
-            }
+            Authority instance = Authority.CreateAuthority("https://login.microsoftonline.com/common");
+            Assert.IsNotNull(instance);
+            Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+
+            Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
+            Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", instance.GetTokenEndpoint());
         }
-
 
         [TestMethod]
         public async Task FailedValidationTestAsync()
         {
-            using (var harness = CreateTestHarness())
-            {
-                // add mock response for instance validation
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
+            using var harness = CreateTestHarness();
+
+            // add mock response for instance validation
+            harness.HttpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
+                    ExpectedQueryParams = new Dictionary<string, string>
                     {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
-                        ExpectedQueryParams = new Dictionary<string, string>
+                        {"api-version", "1.1"},
                         {
-                            {"api-version", "1.1"},
-                            {
-                                "authorization_endpoint",
-                                "https%3A%2F%2Flogin.microsoft0nline.com%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"
-                            },
+                            "authorization_endpoint",
+                            "https%3A%2F%2Flogin.microsoft0nline.com%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"
                         },
-                        ResponseMessage = MockHelpers.CreateFailureMessage(
-                            HttpStatusCode.BadRequest,
-                            "{\"error\":\"invalid_instance\"," + "\"error_description\":\"AADSTS50049: " +
-                            "Unknown or invalid instance. Trace " + "ID: b9d0894d-a9a4-4dba-b38e-8fb6a009bc00 " +
-                            "Correlation ID: 34f7b4cf-4fa2-4f35-a59b" + "-54b6f91a9c94 Timestamp: 2016-08-23 " +
-                            "20:45:49Z\",\"error_codes\":[50049]," + "\"timestamp\":\"2016-08-23 20:45:49Z\"," +
-                            "\"trace_id\":\"b9d0894d-a9a4-4dba-b38e-8f" + "b6a009bc00\",\"correlation_id\":\"34f7b4cf-" +
-                            "4fa2-4f35-a59b-54b6f91a9c94\"}")
-                    });
+                    },
+                    ResponseMessage = MockHelpers.CreateFailureMessage(
+                        HttpStatusCode.BadRequest,
+                        "{\"error\":\"invalid_instance\"," + "\"error_description\":\"AADSTS50049: " +
+                        "Unknown or invalid instance. Trace " + "ID: b9d0894d-a9a4-4dba-b38e-8fb6a009bc00 " +
+                        "Correlation ID: 34f7b4cf-4fa2-4f35-a59b" + "-54b6f91a9c94 Timestamp: 2016-08-23 " +
+                        "20:45:49Z\",\"error_codes\":[50049]," + "\"timestamp\":\"2016-08-23 20:45:49Z\"," +
+                        "\"trace_id\":\"b9d0894d-a9a4-4dba-b38e-8f" + "b6a009bc00\",\"correlation_id\":\"34f7b4cf-" +
+                        "4fa2-4f35-a59b-54b6f91a9c94\"}")
+                });
 
-                Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com", true);
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+            Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com", true);
+            Assert.IsNotNull(instance);
+            Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
 
-                TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority, validateAuthority: true);
-                try
-                {
-                    AuthorityManager am = new AuthorityManager(new RequestContext(harness.ServiceBundle, Guid.NewGuid()), instance);
-                    await am.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
-                    Assert.Fail("validation should have failed here");
-                }
-                catch (Exception exc)
-                {
-                    Assert.IsTrue(exc is MsalServiceException);
-                    Assert.AreEqual(((MsalServiceException)exc).ErrorCode, "invalid_instance");
-                }
+            TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority, validateAuthority: true);
+            try
+            {
+                AuthorityManager am = new AuthorityManager(new RequestContext(harness.ServiceBundle, Guid.NewGuid()), instance);
+                await am.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
+                Assert.Fail("validation should have failed here");
+            }
+            catch (Exception exc)
+            {
+                Assert.IsTrue(exc is MsalServiceException);
+                Assert.AreEqual(((MsalServiceException)exc).ErrorCode, "invalid_instance");
             }
         }
-
 
         [TestMethod]
         public void CanonicalAuthorityInitTest()
@@ -197,26 +190,28 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         private static void ValidateAuthorityType(string inputAuthority, AuthorityType expectedAuthorityType)
         {
             var pca1 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                     .WithAuthority(new Uri(inputAuthority)).BuildConcrete();
+                                                     .WithAuthority(new Uri(inputAuthority))
+                                                     .BuildConcrete();
             var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                   .WithAuthority(inputAuthority).BuildConcrete();
+                                                     .WithAuthority(inputAuthority)
+                                                     .BuildConcrete();
 
             Assert.AreEqual(
                 expectedAuthorityType,
-                (pca1.AppConfig as ApplicationConfiguration).AuthorityInfo.AuthorityType);
+                ((ApplicationConfiguration)pca1.AppConfig).Authority.AuthorityInfo.AuthorityType);
             Assert.AreEqual(
                 expectedAuthorityType,
-                (pca2.AppConfig as ApplicationConfiguration).AuthorityInfo.AuthorityType);
+                ((ApplicationConfiguration)pca2.AppConfig).Authority.AuthorityInfo.AuthorityType);
         }
-      
+
         [TestMethod]
         public void CreateAuthorityFromTenantedWithTenantTest()
         {
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl("https://login.microsoft.com/tid");
 
             string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
-            Assert.AreEqual("https://login.microsoft.com/tid/", updatedAuthority, "Not changed, original authority aleady has tenant id");
-            
+            Assert.AreEqual("https://login.microsoft.com/tid/", updatedAuthority, "Not changed, original authority already has tenant id");
+
             string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
             Assert.AreEqual("https://login.microsoft.com/other_tenant_id/", updatedAuthority2, "Changed with forced flag");
         }
@@ -256,34 +251,31 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         //Test for bug #1292 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1292)
         public void AuthorityCustomPortTest()
         {
-            var customPortAuthority = "https://localhost:5215/common/";
+            const string customPortAuthority = "https://localhost:5215/common/";
 
-            using (var harness = CreateTestHarness())
-            {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler(customPortAuthority);
+            using var harness = CreateTestHarness();
+            harness.HttpManager.AddInstanceDiscoveryMockHandler(customPortAuthority);
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(customPortAuthority), false)
-                                                                            .WithHttpManager(harness.HttpManager)
-                                                                            .BuildConcrete();
+            PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                        .WithAuthority(new Uri(customPortAuthority), false)
+                                                                        .WithHttpManager(harness.HttpManager)
+                                                                        .BuildConcrete();
 
-                //Ensure that the PublicClientApplication init does not remove the port from the authority
-                Assert.AreEqual(customPortAuthority, app.Authority);
+            //Ensure that the PublicClientApplication init does not remove the port from the authority
+            Assert.AreEqual(customPortAuthority, app.Authority);
 
 
-                app.ServiceBundle.ConfigureMockWebUI(
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+            app.ServiceBundle.ConfigureMockWebUI(
+                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(customPortAuthority);
+            harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(customPortAuthority);
 
-                AuthenticationResult result = app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
+            AuthenticationResult result = app.AcquireTokenInteractive(TestConstants.s_scope)
+                                             .ExecuteAsync(CancellationToken.None)
+                                             .Result;
 
-                //Ensure that acquiring a token does not remove the port from the authority
-                Assert.AreEqual(customPortAuthority, app.Authority);
-            }
+            //Ensure that acquiring a token does not remove the port from the authority
+            Assert.AreEqual(customPortAuthority, app.Authority);
         }
     }
 }

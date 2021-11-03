@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
@@ -71,7 +70,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(instanceDiscoveryJson);
             }
-            
+
             try
             {
                 InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceDiscoveryJson);
@@ -178,12 +177,41 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+        /// <summary>
+        /// Options for MSAL token caches. 
+        /// 
+        /// MSAL maintains a token cache internally in memory. By default, this cache object is part of each instance of <see cref="PublicClientApplication"/> or <see cref="ConfidentialClientApplication"/>.
+        /// This method allows customization of the in-memory token cache of MSAL. 
+        /// 
+        /// MSAL's memory cache is different than token cache serialization. Cache serialization pulls the tokens from a cache (e.g. Redis, Cosmos, or a file on disk), 
+        /// where they are stored in JSON format, into MSAL's internal memory cache. Memory cache operations do not involve JSON operations. 
+        /// 
+        /// External cache serialization remains the recommended way to handle desktop apps, web site and web APIs, as it provides persistence. These options
+        /// do not currently control external cache serialization.
+        /// 
+        /// Detailed guidance for each application type and platform:
+        /// https://aka.ms/msal-net-token-cache-serialization
+        /// </summary>
+        /// <param name="options">Options for the internal MSAL token caches. </param>
+#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
+        public T WithCacheOptions(CacheOptions options)
+        {
+#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
+            throw new PlatformNotSupportedException("WithCacheOptions is supported only on platforms where MSAL stores tokens in memory and not on mobile platforms or UWP.");
+#else
+
+            Config.AccessorOptions = options;
+            return (T)this;
+#endif
+        }
+
         internal T WithPlatformProxy(IPlatformProxy platformProxy)
         {
             Config.PlatformProxy = platformProxy;
             return (T)this;
         }
-
 
         internal T WithUserTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {
@@ -468,22 +496,16 @@ namespace Microsoft.Identity.Client
             if (string.IsNullOrWhiteSpace(Config.ClientId))
             {
                 throw new MsalClientException(MsalError.NoClientId, MsalErrorMessage.NoClientIdWasSpecified);
-            }         
-
-            //ADFS does not require client id to be in the form of a GUID.
-            if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
-            {
-                throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
             if (Config.CustomInstanceDiscoveryMetadata != null && Config.CustomInstanceDiscoveryMetadataUri != null)
             {
                 throw new MsalClientException(
-                    MsalError.CustomMetadataInstanceOrUri, 
+                    MsalError.CustomMetadataInstanceOrUri,
                     MsalErrorMessage.CustomMetadataInstanceOrUri);
             }
 
-            if (Config.AuthorityInfo.ValidateAuthority &&
+            if (Config.Authority.AuthorityInfo.ValidateAuthority &&
                 (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
             {
                 throw new MsalClientException(MsalError.ValidateAuthorityOrCustomMetadata, MsalErrorMessage.ValidateAuthorityOrCustomMetadata);
@@ -506,21 +528,21 @@ namespace Microsoft.Identity.Client
         #region Authority
         private void ResolveAuthority()
         {
-            if (Config.AuthorityInfo != null)
+            if (Config.Authority?.AuthorityInfo != null)
             {
                 if (!string.IsNullOrEmpty(Config.TenantId) &&
-                    Config.AuthorityInfo.AuthorityType == AuthorityType.Aad)
+                    Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad)
                 {
-                    AadAuthority aadAuthority = Authority.CreateAuthority(Config.AuthorityInfo) as AadAuthority;
-                    if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() && 
+                    AadAuthority aadAuthority = Config.Authority as AadAuthority;
+                    if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() &&
                         !string.Equals(aadAuthority.TenantId, Config.TenantId))
                     {
                         throw new MsalClientException(
-                            MsalError.AuthorityTenantSpecifiedTwice, 
+                            MsalError.AuthorityTenantSpecifiedTwice,
                             "You specified a different tenant - once in WithAuthority() and once using WithTenant().");
                     }
 
-                    Config.AuthorityInfo = Authority.CreateAuthorityWithTenant(Config.AuthorityInfo, Config.TenantId).AuthorityInfo;
+                    Config.Authority = Authority.CreateAuthorityWithTenant(Config.Authority.AuthorityInfo, Config.TenantId);
                 }
             }
             else
@@ -528,10 +550,12 @@ namespace Microsoft.Identity.Client
                 string authorityInstance = GetAuthorityInstance();
                 string authorityAudience = GetAuthorityAudience();
 
-                Config.AuthorityInfo = new AuthorityInfo(
+                var authorityInfo = new AuthorityInfo(
                         AuthorityType.Aad,
                         new Uri($"{authorityInstance}/{authorityAudience}").ToString(),
                         Config.ValidateAuthority);
+
+                Config.Authority = new AadAuthority(authorityInfo);
             }
         }
 
@@ -623,7 +647,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(authorityUri);
             }
 
-            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri, validateAuthority);
+            Config.Authority = Authority.CreateAuthority(authorityUri, validateAuthority);
 
             return (T)this;
         }
@@ -677,10 +701,11 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(tenant));
             }
 
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(
+            var authorityInfo = AuthorityInfo.FromAadAuthority(
                 new Uri(cloudInstanceUri),
                 tenant,
                 validateAuthority);
+            Config.Authority = new AadAuthority(authorityInfo);
 
             return (T)this;
         }
@@ -769,7 +794,7 @@ namespace Microsoft.Identity.Client
             Config.AadAuthorityAudience = authorityAudience;
             Config.ValidateAuthority = validateAuthority;
             return (T)this;
-        }       
+        }
 
         /// <summary>
         /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs
@@ -780,7 +805,9 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAdfsAuthority(authorityUri, validateAuthority);
+            
+            var authorityInfo = AuthorityInfo.FromAdfsAuthority(authorityUri, validateAuthority);
+            Config.Authority = AdfsAuthority.CreateAuthority(authorityInfo);
             return (T)this;
         }
 
@@ -793,7 +820,9 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithB2CAuthority(string authorityUri)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
+            var authorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
+            Config.Authority = B2CAuthority.CreateAuthority(authorityInfo);
+
             return (T)this;
         }
 

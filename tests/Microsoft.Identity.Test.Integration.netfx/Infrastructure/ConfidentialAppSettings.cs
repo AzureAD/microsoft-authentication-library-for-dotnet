@@ -30,13 +30,14 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         string Authority { get; }
 
         Cloud Cloud { get; }
+        bool UseAppIdUri { get; set; }
     }    
 
     public class ConfidentialAppSettings
     {
         private class PublicCloudConfidentialAppSettings : IConfidentialAppSettings
         {
-            public string ClientId => "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+            public string ClientId => UseAppIdUri? "https://microsoft.onmicrosoft.com/aa3e634f-58b3-4eb7-b4ed-244c44c29c47" : "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
 
             public string TenantId => "72f988bf-86f1-41af-91ab-2d7cd011db47";
 
@@ -47,6 +48,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public string Authority => $@"https://{Environment}/{TenantId}";
 
             public Cloud Cloud => Cloud.Public;
+
+            public bool UseAppIdUri { get; set; }
 
             public X509Certificate2 GetCertificate()
             {
@@ -92,11 +95,12 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public Cloud Cloud => Cloud.Adfs;
 
+            public bool UseAppIdUri { get; set; }
         }
 
         private class PpeConfidentialAppSettings : IConfidentialAppSettings
         {
-            public string ClientId => "9793041b-9078-4942-b1d2-babdc472cc0c";
+            public string ClientId => UseAppIdUri? "api://microsoft.identity.9793041b-9078-4942-b1d2-babdc472cc0c" : "9793041b-9078-4942-b1d2-babdc472cc0c";
 
             public string TenantId => "f686d426-8d16-42db-81b7-ab578e110ccd";
 
@@ -116,6 +120,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public string Authority => $@"https://{Environment}/{TenantId}";
 
             public Cloud Cloud => Cloud.PPE;
+
+            public bool UseAppIdUri { get; set; }
         }
 
         private class ArlingtonConfidentialAppSettings : IConfidentialAppSettings
@@ -142,6 +148,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public Cloud Cloud => Cloud.Arlington;
 
+            public bool UseAppIdUri { get; set; }
         }   
 
         private static Lazy<IConfidentialAppSettings> s_publicCloudSettings =
@@ -169,8 +176,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
                     throw new NotImplementedException();
             }
         }
-
-       
 
         private static Lazy<string> GetSecretLazy(string secretName) => new Lazy<string>(() =>
         {

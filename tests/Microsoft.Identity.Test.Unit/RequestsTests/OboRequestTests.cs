@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual("some-access-token", result.AccessToken);
 
                 //Expire access tokens
-                TokenCacheHelper.ExpireAccessTokens(cca.UserTokenCacheInternal);
+                TokenCacheHelper.ExpireAllAccessTokens(cca.UserTokenCacheInternal);
 
                 MockHttpMessageHandler mockTokenRequestHttpHandlerRefresh = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
                 mockTokenRequestHttpHandlerRefresh.ExpectedPostData = new Dictionary<string, string> { { "grant_type", "refresh_token" } };

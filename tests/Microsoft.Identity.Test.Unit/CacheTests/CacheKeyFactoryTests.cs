@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
@@ -10,12 +11,13 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
-    public class SuggestedWebCacheKeyTests
+    public class CacheKeyFactoryTests
     {
         private IServiceBundle _serviceBundle;
 
@@ -33,7 +35,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
             var authority = Authority.CreateAuthority(TestConstants.ADFSAuthority, true);
 
-            requestContext.ServiceBundle.Config.AuthorityInfo = authority.AuthorityInfo;
+            requestContext.ServiceBundle.Config.Authority = authority;
 
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {
@@ -48,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 authority);
 
             // Act
-            var actualKey = SuggestedWebCacheKeyFactory.GetKeyFromRequest(parameters);
+            var actualKey = CacheKeyFactory.GetKeyFromRequest(parameters);
 
             // Assert
             Assert.IsNotNull(actualKey);
@@ -77,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Authority.CreateAuthority(tenantAuthority));
 
             // Act
-            var actualKey = SuggestedWebCacheKeyFactory.GetKeyFromRequest(parameters);
+            var actualKey = CacheKeyFactory.GetKeyFromRequest(parameters);
 
             // Assert
             Assert.IsNotNull(actualKey);
@@ -110,11 +112,36 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             };
 
             // Act
-            var actualKey = SuggestedWebCacheKeyFactory.GetKeyFromRequest(parameters);
+            var actualKey = CacheKeyFactory.GetKeyFromRequest(parameters);
 
             // Assert
             Assert.IsNotNull(actualKey);
             Assert.AreEqual(parameters.HomeAccountId, actualKey);
+        }
+
+        [TestMethod]
+        public void PartitionKeyForCache()
+        {
+            var cache = new TokenCache(_serviceBundle, isApplicationTokenCache: false);
+            var accessor = (cache as ITokenCacheInternal).Accessor;
+            TokenCacheHelper.PopulateCache((cache as ITokenCacheInternal).Accessor);
+
+            var at = accessor.GetAllAccessTokens().First();
+            var rt = accessor.GetAllRefreshTokens().First();
+            var idt = accessor.GetAllIdTokens().First();
+            var acc = accessor.GetAllAccounts().First();
+
+            Assert.AreEqual(at.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(at));
+            Assert.AreEqual(rt.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(rt));
+            Assert.AreEqual(idt.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(idt));
+            Assert.AreEqual(acc.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(acc));
+
+            at = at.WithUserAssertion("at_hash");            
+            rt.UserAssertionHash = "rt_hash";
+            Assert.AreEqual("at_hash", CacheKeyFactory.GetKeyFromCachedItem(at));
+            Assert.AreEqual("rt_hash", CacheKeyFactory.GetKeyFromCachedItem(rt));
+            Assert.AreEqual(idt.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(idt));
+            Assert.AreEqual(acc.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(acc));
         }
 
         [TestMethod]

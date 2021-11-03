@@ -46,15 +46,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 proxy.CreateLegacyCachePersistence());
 
             Assert.AreNotSame(
-                proxy.CreateTokenCacheAccessor(),
-                proxy.CreateTokenCacheAccessor());
+                proxy.CreateTokenCacheAccessor(null),
+                proxy.CreateTokenCacheAccessor(null));
 
             Assert.AreSame(
                 proxy.CryptographyManager,
                 proxy.CryptographyManager);
-
         }
-
 
         [TestMethod]
         public void PlatformProxy_HttpClient()
@@ -153,9 +151,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
 
-            Assert.IsTrue(proxy.BrokerSupportsWamAccounts);            
+            Assert.IsTrue(proxy.BrokerSupportsWamAccounts);
+            Assert.IsTrue(proxy.CanBrokerSupportSilentAuth());
 
-            
             Assert.AreSame(
                 Constants.DefaultRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", false));
