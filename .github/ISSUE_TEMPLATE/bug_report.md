@@ -53,5 +53,6 @@ A clear and concise description of what happens, e.g. exception is thrown, UI fr
 **Possible solution**
 <!--- Only if you have suggestions on a fix for the bug -->
 
-**Additional context / logs / screenshots**
-Add any other context about the problem here, such as logs and screenshots. 
+**Additional context / logs / screenshots / links to code**
+<!-- Please do not include any customer data or Personal Identifiable Information (PII) in any content posted to GitHub. See https://docs.microsoft.com/en-us/compliance/regulatory/gdpr#gdpr-faqs for more info on PII.-->
+Add any other context about the problem here, such as logs and screenshots, and even links to code. 
