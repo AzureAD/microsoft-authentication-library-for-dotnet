@@ -661,13 +661,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
                     _homeAccountId, 
-                    userAssertionHash: assertion);
+                    oboCacheKey: assertion);
 
-                // create key out of access token cache item and then
-                // set it as the value of the access token.
-                string atKey = atItem.GetKey().ToString();
-                atItem.Secret = atKey;
-                atItem.OboCacheKey = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
                 cache.Accessor.SaveAccessToken(atItem);
 
                 var rtItem = new MsalRefreshTokenCacheItem(
@@ -680,7 +675,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 string rtKey = rtItem.GetKey().ToString();
                 rtItem.Secret = rtKey;
-                rtItem.OboCacheKey = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
+                rtItem.OboCacheKey = assertion;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -693,7 +688,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var itemAT = cache.FindAccessTokenAsync(authParams).Result;
                 var itemRT = cache.FindRefreshTokenAsync(authParams).Result;
 
-                // cache lookup should fail because there was userassertion hash did not match the one
+                // cache lookup should fail because there was user assertion hash did not match the one
                 // stored in token cache item.
                 Assert.IsNull(itemAT);
                 Assert.IsNull(itemRT);
@@ -718,15 +713,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
-                    _homeAccountId);
-
-                // create key out of access token cache item and then
-                // set it as the value of the access token.
-                string atKey = atItem.GetKey().ToString();
-                atItem.Secret = atKey;
-                atItem.OboCacheKey = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
                     _homeAccountId,
-                    userAssertionHash: assertionHash);
+                    oboCacheKey: assertionHash);
 
                 cache.Accessor.SaveAccessToken(atItem);
 
@@ -738,9 +726,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     _homeAccountId);
 
-                string rtKey = rtItem.GetKey().ToString();
-                rtItem.Secret = rtKey;
-                rtItem.OboCacheKey = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey);
+                rtItem.OboCacheKey = assertionHash;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -749,7 +735,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     cache,
                     apiId: ApiEvent.ApiIds.AcquireTokenOnBehalfOf,
                     account: new Account(_homeAccountId, null, TestConstants.ProductionPrefNetworkEnvironment));
-                authParams.UserAssertion = new UserAssertion(atKey);
+                authParams.UserAssertion = new UserAssertion("T");
 
                 ((TokenCache)cache).AfterAccess = AfterAccessNoChangeNotification;
                 var itemAT = cache.FindAccessTokenAsync(authParams).Result;

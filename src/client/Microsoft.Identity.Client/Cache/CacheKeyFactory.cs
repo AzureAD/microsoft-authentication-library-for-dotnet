@@ -92,8 +92,8 @@ namespace Microsoft.Identity.Client.Cache
 
         public static string GetKeyFromCachedItem(MsalAccessTokenCacheItem accessTokenCacheItem)
         {            
-            string partitionKey = !string.IsNullOrEmpty(accessTokenCacheItem.UserAssertionHash) ?
-              accessTokenCacheItem.UserAssertionHash : 
+            string partitionKey = !string.IsNullOrEmpty(accessTokenCacheItem.OboCacheKey) ?
+              accessTokenCacheItem.OboCacheKey : 
               accessTokenCacheItem.HomeAccountId;
 
             return partitionKey;
@@ -101,8 +101,8 @@ namespace Microsoft.Identity.Client.Cache
 
         public static string GetKeyFromCachedItem(MsalRefreshTokenCacheItem refreshTokenCacheItem)
         {
-            string partitionKey = !string.IsNullOrEmpty(refreshTokenCacheItem.UserAssertionHash) ?
-              refreshTokenCacheItem.UserAssertionHash : 
+            string partitionKey = !string.IsNullOrEmpty(refreshTokenCacheItem.OboCacheKey) ?
+              refreshTokenCacheItem.OboCacheKey : 
               refreshTokenCacheItem.HomeAccountId;
 
             return partitionKey;

@@ -17,8 +17,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public const string TooManyRequestsContent = "Too many requests error";
         public static readonly TimeSpan TestRetryAfterDuration = TimeSpan.FromSeconds(120);
 
-
-
         public static readonly string B2CTokenResponseWithoutAT =
             "{\"id_token\":\"" + CreateIdTokenForB2C(TestConstants.Uid, TestConstants.Utid, TestConstants.B2CSignUpSignIn) + "  \"," +
             "\"token_type\":\"Bearer\",\"not_before\":1585658742," +

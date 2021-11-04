@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(acc.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(acc));
 
             at = at.WithUserAssertion("at_hash");            
-            rt.UserAssertionHash = "rt_hash";
+            rt.OboCacheKey = "rt_hash";
             Assert.AreEqual("at_hash", CacheKeyFactory.GetKeyFromCachedItem(at));
             Assert.AreEqual("rt_hash", CacheKeyFactory.GetKeyFromCachedItem(rt));
             Assert.AreEqual(idt.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(idt));
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             };
 
             // Act
-            var actualKey = SuggestedWebCacheKeyFactory.GetKeyFromRequest(parameters);
+            var actualKey = CacheKeyFactory.GetKeyFromRequest(parameters);
 
             // Assert
             Assert.IsNotNull(actualKey);
@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             };
 
             // Act
-            var actualKey = SuggestedWebCacheKeyFactory.GetKeyFromRequest(parameters);
+            var actualKey = CacheKeyFactory.GetKeyFromRequest(parameters);
 
             // Assert
             Assert.IsNotNull(actualKey);

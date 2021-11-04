@@ -605,25 +605,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        private MsalAccessTokenCacheItem CreateAccessTokenItem(
-            string tenant = TestConstants.AuthorityUtidTenant,
-            string scopes = TestConstants.ScopeStr)
-        {
-            return new MsalAccessTokenCacheItem(scopes)
-            {
-                ClientId = TestConstants.ClientId,
-                Environment = "env",
-                ExpiresOnUnixTimestamp = "12345",
-                ExtendedExpiresOnUnixTimestamp = "23456",
-                CachedAt = "34567",
-                HomeAccountId = TestConstants.HomeAccountId,
-                IsExtendedLifeTimeToken = false,
-                Secret = "access_token_secret",
-                TenantId = tenant,
-                RawClientInfo = string.Empty,
-                OboCacheKey = "assertion_hash",
-                TokenType = StorageJsonValues.TokenTypeBearer
-            };
         private ConcurrentDictionary<string, MsalAppMetadataCacheItem> GetAppMetadataCache(ITokenCacheAccessor accessor, bool isAppCache)
         {
             if (isAppCache)

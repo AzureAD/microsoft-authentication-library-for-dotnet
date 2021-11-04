@@ -74,15 +74,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var cca = ccaBuilder.BuildConcrete();
             cca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile), true);
-            cca.UserTokenCacheInternal.Accessor.AssertItemCount(3, 2, 3, 3, 1);
-            foreach (var at in cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens())
-            {
-                at.OboCacheKey = "_JPLB-GtkomFJxAOWKHPHR5_ZemiZqb4fzyE_rVBx7M"; // the hash of "jwt"
-            }
-
-            cca.UserTokenCacheInternal.Accessor.DeleteAccessToken(
-                cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single(
-                    at => at.HomeAccountId == "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462").GetKey());
+            cca.UserTokenCacheInternal.Accessor.AssertItemCount(2, 2, 3, 3, 1);
 
             return cca;
         }

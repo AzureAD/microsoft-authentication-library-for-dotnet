@@ -70,10 +70,8 @@ namespace Microsoft.Identity.Client
                         response,
                         tenantId,
                         homeAccountId,
-                        requestParams.AuthenticationScheme.KeyId)
-                    {
-                        OboCacheKey = !string.IsNullOrEmpty(requestParams.OboCacheKey) ? requestParams.OboCacheKey : requestParams.UserAssertion?.AssertionHash,
-                    };
+                        requestParams.AuthenticationScheme.KeyId,
+                        !string.IsNullOrEmpty(requestParams.OboCacheKey) ? requestParams.OboCacheKey : requestParams.UserAssertion?.AssertionHash);
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
