@@ -135,6 +135,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 var initialToken = result.AccessToken;
 
                 var JWK = provider.CannonicalPublicKeyJwk;
+
                 //Advance time 7 hours. Should still be the same key and token
                 testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 7);
 
@@ -143,13 +144,6 @@ namespace Microsoft.Identity.Test.Unit.PoP
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
-
-                var handler = new JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadJwtToken(result.AccessToken);
-
-                var jwtDecoded = Base64UrlHelpers.Decode(jsonToken.EncodedPayload);
-                var jObj = JObject.Parse(jsonToken.Payload.First().Value.ToString());
-                var at = jObj["jwk"]["n"].ToString();
 
                 Assert.AreEqual(GetAccessTokenFromPopToken(result.AccessToken), GetAccessTokenFromPopToken(initialToken));
                 Assert.IsTrue(JWK == provider.CannonicalPublicKeyJwk);
