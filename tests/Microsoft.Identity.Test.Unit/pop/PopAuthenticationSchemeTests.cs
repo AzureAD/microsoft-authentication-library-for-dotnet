@@ -104,7 +104,6 @@ namespace Microsoft.Identity.Test.Unit.PoP
         }
 
         [TestMethod]
-        [Ignore] // bad test https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2891
         public async Task ValidateKeyExpirationAsync()
         {
             using (var harness = CreateTestHarness())
@@ -129,33 +128,55 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 testClock.TestTime = DateTime.UtcNow;
                 var provider = PoPProviderFactory.GetOrCreateProvider(testClock);
 
-                await app.AcquireTokenForClient(TestConstants.s_scope)
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+                var initialToken = result.AccessToken;
 
                 var JWK = provider.CannonicalPublicKeyJwk;
-                //Advance time 7 hours. Should still be the same key
+                //Advance time 7 hours. Should still be the same key and token
                 testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 7);
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
-                await app.AcquireTokenForClient(TestConstants.s_scope)
+                result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadJwtToken(result.AccessToken);
+
+                var jwtDecoded = Base64UrlHelpers.Decode(jsonToken.EncodedPayload);
+                var jObj = JObject.Parse(jsonToken.Payload.First().Value.ToString());
+                var at = jObj["jwk"]["n"].ToString();
+
+                Assert.AreEqual(GetAccessTokenFromPopToken(result.AccessToken), GetAccessTokenFromPopToken(initialToken));
                 Assert.IsTrue(JWK == provider.CannonicalPublicKeyJwk);
+                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+
                 //Advance time 2 hours. Should be a different key
                 testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 2);
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
-                await app.AcquireTokenForClient(TestConstants.s_scope)
+                result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
                 Assert.IsTrue(JWK != provider.CannonicalPublicKeyJwk);
+                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
             }
+        }
+
+        private string GetAccessTokenFromPopToken(string popToken)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadJwtToken(popToken);
+
+            var jwtDecoded = Base64UrlHelpers.Decode(jsonToken.EncodedPayload);
+            var jObj = JObject.Parse(jsonToken.Payload.First().Value.ToString());
+            return jObj["jwk"]["n"].ToString();
         }
 
         private static string AssertSimpleClaim(JwtSecurityToken jwt, string expectedKey, string optionalExpectedValue = null)
