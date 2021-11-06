@@ -29,7 +29,8 @@ namespace Microsoft.Identity.Client
         : ClientApplicationBase,
             IConfidentialClientApplication,
             IConfidentialClientApplicationWithCertificate,
-            IByRefreshToken
+            IByRefreshToken,
+            ILongRunningWebApi
     {
         /// <summary>
         /// Instructs MSAL to try to auto discover the Azure region.
@@ -130,7 +131,7 @@ namespace Microsoft.Identity.Client
             string userToken,
             ref string longRunningProcessSessionKey)
         {
-            if (userToken == null)
+            if (string.IsNullOrEmpty(userToken))
             {
                 throw new ArgumentNullException(nameof(userToken));
             }
@@ -154,7 +155,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string longRunningProcessSessionKey)
         {
-            if (longRunningProcessSessionKey == null)
+            if (string.IsNullOrEmpty(longRunningProcessSessionKey))
             {
                 throw new ArgumentNullException(nameof(longRunningProcessSessionKey));
             }

@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
-                key = requestParameters.UserAssertion.AssertionHash;
+                key = GetOboKey(requestParameters.OboCacheKey, requestParameters.UserAssertion);
                 return true;
             }
 
@@ -90,21 +90,25 @@ namespace Microsoft.Identity.Client.Cache
             return $"{clientId}_{tenantId}_AppTokenCache";
         }
 
+        public static string GetOboKey(string oboCacheKey, UserAssertion userAssertion)
+        {
+            return !string.IsNullOrEmpty(oboCacheKey) ? oboCacheKey : userAssertion?.AssertionHash;
+        }
+
+        public static string GetOboKey(string oboCacheKey, string homeAccountId)
+        {
+            return !string.IsNullOrEmpty(oboCacheKey) ? oboCacheKey : homeAccountId;
+        }
+
         public static string GetKeyFromCachedItem(MsalAccessTokenCacheItem accessTokenCacheItem)
         {            
-            string partitionKey = !string.IsNullOrEmpty(accessTokenCacheItem.OboCacheKey) ?
-              accessTokenCacheItem.OboCacheKey : 
-              accessTokenCacheItem.HomeAccountId;
-
+            string partitionKey = GetOboKey(accessTokenCacheItem.OboCacheKey, accessTokenCacheItem.HomeAccountId);
             return partitionKey;
         }
 
         public static string GetKeyFromCachedItem(MsalRefreshTokenCacheItem refreshTokenCacheItem)
         {
-            string partitionKey = !string.IsNullOrEmpty(refreshTokenCacheItem.OboCacheKey) ?
-              refreshTokenCacheItem.OboCacheKey : 
-              refreshTokenCacheItem.HomeAccountId;
-
+            string partitionKey = GetOboKey(refreshTokenCacheItem.OboCacheKey, refreshTokenCacheItem.HomeAccountId);
             return partitionKey;
         }
 

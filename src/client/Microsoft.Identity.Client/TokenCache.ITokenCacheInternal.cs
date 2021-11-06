@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
                         tenantId,
                         homeAccountId,
                         requestParams.AuthenticationScheme.KeyId,
-                        !string.IsNullOrEmpty(requestParams.OboCacheKey) ? requestParams.OboCacheKey : requestParams.UserAssertion?.AssertionHash);
+                        CacheKeyFactory.GetOboKey(requestParams.OboCacheKey, requestParams.UserAssertion));
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client
                                     response,
                                     homeAccountId)
                 {
-                    OboCacheKey = !string.IsNullOrEmpty(requestParams.OboCacheKey) ? requestParams.OboCacheKey : requestParams.UserAssertion?.AssertionHash,
+                    OboCacheKey = CacheKeyFactory.GetOboKey(requestParams.OboCacheKey, requestParams.UserAssertion),
                 };
 
                 if (!_featureFlags.IsFociEnabled)
@@ -408,6 +408,10 @@ namespace Microsoft.Identity.Client
             IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, partitionKey);
             if (tokenCacheItems.Count == 0)
             {
+
+                logger.Verbose("No access tokens found in the cache. Skipping filtering. ");
+                requestParams.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.NoCachedAccessToken;
+
                 // Validates correct AcquireTokenInLongRunningProcess call (user assertion is null in this case)
                 if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf && requestParams.UserAssertion == null && !string.IsNullOrEmpty(requestParams.OboCacheKey))
                 {
@@ -415,8 +419,6 @@ namespace Microsoft.Identity.Client
                     throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
                 }
 
-                logger.Verbose("No access tokens found in the cache. Skipping filtering. ");
-                requestParams.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.NoCachedAccessToken;
                 return null;
             }
 
@@ -524,10 +526,10 @@ namespace Microsoft.Identity.Client
                     tokenCacheItems.FilterWithLogging(item =>
                         !string.IsNullOrEmpty(item.OboCacheKey) &&
                         item.OboCacheKey.Equals(
-                            requestParams.OboCacheKey ?? requestParams.UserAssertion.AssertionHash,
+                            !string.IsNullOrEmpty(requestParams.OboCacheKey) ? requestParams.OboCacheKey : requestParams.UserAssertion.AssertionHash,
                             StringComparison.OrdinalIgnoreCase),
                         requestParams.RequestContext.Logger,
-                        requestParams.OboCacheKey != null ?
+                        !string.IsNullOrEmpty(requestParams.OboCacheKey) ?
                             $"Filtering AT by user-provided cache key: {requestParams.OboCacheKey}" :
                             $"Filtering AT by user assertion: {requestParams.UserAssertion.AssertionHash}");
 
@@ -816,10 +818,10 @@ namespace Microsoft.Identity.Client
                 rtCacheItems = rtCacheItems.FilterWithLogging(item =>
                                 !string.IsNullOrEmpty(item.OboCacheKey) &&
                                 item.OboCacheKey.Equals(
-                                    requestParams.OboCacheKey ?? requestParams.UserAssertion.AssertionHash,
+                                !string.IsNullOrEmpty(requestParams.OboCacheKey) ? requestParams.OboCacheKey : requestParams.UserAssertion.AssertionHash,
                                     StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
-                                requestParams.OboCacheKey != null ?
+                                !string.IsNullOrEmpty(requestParams.OboCacheKey) ?
                                 $"Filtering RT by user-provided cache key: {requestParams.OboCacheKey}" :
                                 $"Filtering RT by user assertion: {requestParams.UserAssertion.AssertionHash}");
             }
