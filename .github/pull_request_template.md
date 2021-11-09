@@ -1,4 +1,4 @@
-Fixes # .
+Fixes # 
 <!-- Add the issue number above. If this PR only partially fixes the issue, remove the Fixes word above so that the issue is not automatically closed. -->
 
 **Changes proposed in this request**
@@ -8,6 +8,7 @@ Fixes # .
 
 **Testing**
 <!-- Have unit, integration, etc. tests been added? Describe any relevant testing that has been done. -->
+<!-- Mention if any and what extra manual testing is needed during the release. -->
 
 **Performance impact**
 <!-- Describe any applicable performance impact or performance testing done. -->
