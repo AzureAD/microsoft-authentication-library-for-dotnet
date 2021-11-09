@@ -53,7 +53,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         public string FamilyId { get; set; }
 
         /// <summary>
-        /// Used to find the token in the cache. Can be a token assertion hash or a user provided key.
+        /// Used to find the token in the cache.
+        /// Can be a token assertion hash (normal OBO flow) or a user provided key (long-running OBO flow).
         /// </summary>
         internal string OboCacheKey { get; set; }
 

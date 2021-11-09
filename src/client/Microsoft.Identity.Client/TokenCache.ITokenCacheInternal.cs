@@ -412,8 +412,7 @@ namespace Microsoft.Identity.Client
                 logger.Verbose("No access tokens found in the cache. Skipping filtering. ");
                 requestParams.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.NoCachedAccessToken;
 
-                // Validates correct AcquireTokenInLongRunningProcess call (user assertion is null in this case)
-                if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf && requestParams.UserAssertion == null && !string.IsNullOrEmpty(requestParams.OboCacheKey))
+                if (AcquireTokenInLongRunningOboWasCalled(requestParams))
                 {
                     logger.Error("[FindAccessTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
                     throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
@@ -429,21 +428,16 @@ namespace Microsoft.Identity.Client
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
-            // Verify appropriate scenario for OBO tokens in long running process
-            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
+            if (AcquireTokenInLongRunningOboWasCalled(requestParams) && tokenCacheItems.Count == 0)
             {
-                // Validates correct AcquireTokenInLongRunningProcess call (user assertion is null in this case)
-                if (requestParams.UserAssertion == null && !string.IsNullOrEmpty(requestParams.OboCacheKey) && tokenCacheItems.Count == 0)
-                {
-                    logger.Error("[FindAccessTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
-                    throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
-                }
-                // Validates correct InitiateLongRunningProcessInWebAPI call (user assertion is specified in this case)
-                if (requestParams.UserAssertion != null && !string.IsNullOrEmpty(requestParams.OboCacheKey) && tokenCacheItems.Count > 0)
-                {
-                    logger.Error("[FindAccessTokenAsync] InitiateLongRunningProcessInWebAPI was called and OBO token was already found in the cache.");
-                    throw new MsalClientException(MsalError.OboCacheKeyAlreadyInCacheError, MsalErrorMessage.OboCacheKeyAlreadyInCache);
-                }
+                logger.Error("[FindAccessTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
+                throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
+            }
+
+            if (InitiateLongRunningOboWasCalled(requestParams) && tokenCacheItems.Count > 0)
+            {
+                logger.Error("[FindAccessTokenAsync] InitiateLongRunningProcessInWebApi was called and OBO token was already found in the cache.");
+                throw new MsalClientException(MsalError.OboCacheKeyAlreadyInCacheError, MsalErrorMessage.OboCacheKeyAlreadyInCache);
             }
 
             // no match
@@ -775,8 +769,7 @@ namespace Microsoft.Identity.Client
             {
                 requestParams.RequestContext.Logger.Verbose("No RTs found in the MSAL cache ");
 
-                // Validates correct AcquireTokenInLongRunningProcess call (user assertion is null in this case)
-                if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf && requestParams.UserAssertion == null && !string.IsNullOrEmpty(requestParams.OboCacheKey))
+                if (AcquireTokenInLongRunningOboWasCalled(requestParams))
                 {
                     requestParams.RequestContext.Logger.Error("[FindRefreshTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
                     throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
@@ -1213,6 +1206,22 @@ namespace Microsoft.Identity.Client
                                item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase))
                 .ToList()
                 .ForEach(accItem => _accessor.DeleteAccount(accItem));
+        }
+
+        // Returns whether InitiateLongRunningProcessInWebAPI was called (user assertion is specified in this case)
+        private bool InitiateLongRunningOboWasCalled(AuthenticationRequestParameters requestParameters)
+        {
+            return requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf &&
+                requestParameters.UserAssertion != null &&
+                !string.IsNullOrEmpty(requestParameters.OboCacheKey);
+        }
+
+        // Returns whether AcquireTokenInLongRunningProcess was called (user assertion is null in this case)
+        private bool AcquireTokenInLongRunningOboWasCalled(AuthenticationRequestParameters requestParameters)
+        {
+            return requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf &&
+                requestParameters.UserAssertion == null &&
+                !string.IsNullOrEmpty(requestParameters.OboCacheKey);
         }
     }
 }

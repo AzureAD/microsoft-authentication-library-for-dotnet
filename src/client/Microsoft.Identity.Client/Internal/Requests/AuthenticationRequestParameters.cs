@@ -159,7 +159,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #endif
             }
         }
+
+        /// <remarks>
+        /// Is null when <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/> is called.
+        /// </remarks>
         public UserAssertion UserAssertion { get; set; }
+
+        /// <summary>
+        /// User-provided cache key for long-running OBO flow.
+        /// </summary>
         public string OboCacheKey { get; set; }
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
