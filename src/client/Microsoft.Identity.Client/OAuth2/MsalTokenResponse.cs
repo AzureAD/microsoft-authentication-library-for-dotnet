@@ -31,6 +31,8 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string FamilyId = "foci";
         public const string RefreshIn = "refresh_in";
         public const string SpaCode = "spa_code";
+        public const string ErrorSubcode = "error_subcode";
+        public const string ErrorSubcodeCancel = "cancel";
     }
 
     [JsonObject]
