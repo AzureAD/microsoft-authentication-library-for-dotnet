@@ -132,7 +132,6 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 TestClock testClock = new TestClock();
                 testClock.TestTime = DateTime.UtcNow;
                 PoPProviderFactory.TimeService = testClock;
-                var provider = PoPProviderFactory.GetOrCreateProvider();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
@@ -140,13 +139,10 @@ namespace Microsoft.Identity.Test.Unit.PoP
                     .ConfigureAwait(false);
                 var initialToken = result.AccessToken;
 
-                var JWK = provider.CannonicalPublicKeyJwk;
-
                 //Advance time 7 hours. Should still be the same key and token
-                testClock.TestTime = testClock.TestTime + TimeSpan.FromHours(7);
-
+                testClock.TestTime +=TimeSpan.FromHours(7);
                 PoPProviderFactory.TimeService = testClock;
-                provider = PoPProviderFactory.GetOrCreateProvider();
+
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
@@ -154,20 +150,17 @@ namespace Microsoft.Identity.Test.Unit.PoP
 
                 Assert.AreEqual(GetAccessTokenFromPopToken(result.AccessToken), GetAccessTokenFromPopToken(initialToken));
                 Assert.AreEqual(GetModulusFromPopToken(result.AccessToken), GetModulusFromPopToken(initialToken));
-                Assert.IsTrue(JWK == provider.CannonicalPublicKeyJwk);
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
 
                 //Advance time 2 hours. Should be a different key
-                testClock.TestTime = testClock.TestTime + TimeSpan.FromHours(2);
-
+                testClock.TestTime +=TimeSpan.FromHours(2);
                 PoPProviderFactory.TimeService = testClock;
-                provider = PoPProviderFactory.GetOrCreateProvider();
+
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                Assert.IsTrue(JWK != provider.CannonicalPublicKeyJwk);
                 Assert.AreNotEqual(GetModulusFromPopToken(result.AccessToken), GetModulusFromPopToken(initialToken));
                 Assert.AreNotEqual(GetAccessTokenFromPopToken(result.AccessToken), GetAccessTokenFromPopToken(initialToken));
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);

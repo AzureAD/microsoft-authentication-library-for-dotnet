@@ -16,17 +16,12 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         private static readonly TimeSpan s_expirationTimespan = TimeSpan.FromHours(8);
         private static object s_lock = new object();
 
-        internal static ITimeService TimeService { get; set; }
+        internal static ITimeService TimeService { get; set; } = new TimeService();
 
         public static InMemoryCryptoProvider GetOrCreateProvider()
         {
             lock (s_lock)
             {
-                if (TimeService == null)
-                {
-                    TimeService = new TimeService();
-                }
-
                 if (s_currentProvider != null && s_providerExpiration > TimeService.GetUtcNow())
                 {
                     return s_currentProvider;
