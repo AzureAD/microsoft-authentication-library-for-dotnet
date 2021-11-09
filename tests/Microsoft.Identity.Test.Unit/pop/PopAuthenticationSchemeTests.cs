@@ -111,7 +111,6 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
                 popConfig.HttpMethod = HttpMethod.Get;
-                popConfig.PopCryptoProvider = new InMemoryCryptoProvider();
 
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithHttpManager(harness.HttpManager)
@@ -119,14 +118,21 @@ namespace Microsoft.Identity.Test.Unit.PoP
                                 .WithClientSecret("some-secret")
                                 .BuildConcrete();
 
+                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
+
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     authority: TestConstants.AuthorityCommonTenant,
-                    responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop"));
+                    responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token:$"header.{Guid.NewGuid()}.signature", tokenType: "pop"));
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    authority: TestConstants.AuthorityCommonTenant,
+                    responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token: $"header.{Guid.NewGuid()}.signature", tokenType: "pop"));
 
                 Guid correlationId = Guid.NewGuid();
                 TestClock testClock = new TestClock();
                 testClock.TestTime = DateTime.UtcNow;
-                var provider = PoPProviderFactory.GetOrCreateProvider(testClock);
+                PoPProviderFactory.TimeService = testClock;
+                var provider = PoPProviderFactory.GetOrCreateProvider();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
@@ -137,33 +143,45 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 var JWK = provider.CannonicalPublicKeyJwk;
 
                 //Advance time 7 hours. Should still be the same key and token
-                testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 7);
+                testClock.TestTime = testClock.TestTime + TimeSpan.FromHours(7);
 
-                provider = PoPProviderFactory.GetOrCreateProvider(testClock);
+                PoPProviderFactory.TimeService = testClock;
+                provider = PoPProviderFactory.GetOrCreateProvider();
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(GetAccessTokenFromPopToken(result.AccessToken), GetAccessTokenFromPopToken(initialToken));
+                Assert.AreEqual(GetModulusFromPopToken(result.AccessToken), GetModulusFromPopToken(initialToken));
                 Assert.IsTrue(JWK == provider.CannonicalPublicKeyJwk);
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
 
                 //Advance time 2 hours. Should be a different key
-                testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 2);
+                testClock.TestTime = testClock.TestTime + TimeSpan.FromHours(2);
 
-                provider = PoPProviderFactory.GetOrCreateProvider(testClock);
+                PoPProviderFactory.TimeService = testClock;
+                provider = PoPProviderFactory.GetOrCreateProvider();
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
                 Assert.IsTrue(JWK != provider.CannonicalPublicKeyJwk);
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+                Assert.AreNotEqual(GetModulusFromPopToken(result.AccessToken), GetModulusFromPopToken(initialToken));
+                Assert.AreNotEqual(GetAccessTokenFromPopToken(result.AccessToken), GetAccessTokenFromPopToken(initialToken));
+                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
             }
         }
 
         private string GetAccessTokenFromPopToken(string popToken)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadJwtToken(popToken);
+            return jsonToken.Payload["at"].ToString();
+        }
+
+        private string GetModulusFromPopToken(string popToken)
         {
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadJwtToken(popToken);
