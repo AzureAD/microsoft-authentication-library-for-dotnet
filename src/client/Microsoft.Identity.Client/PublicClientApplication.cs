@@ -27,10 +27,6 @@ namespace Microsoft.Identity.Client
         internal PublicClientApplication(ApplicationConfiguration configuration)
             : base(configuration)
         {
-            if (!configuration.CacheSynchronizationEnabled.HasValue)
-            {
-                configuration.CacheSynchronizationEnabled = true;
-            }
         }
 
         private const string CurrentOSAccountDescriptor = "current_os_account";

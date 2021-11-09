@@ -47,11 +47,6 @@ namespace Microsoft.Identity.Client
             Certificate = configuration.ClientCredentialCertificate;
             
             this.ServiceBundle.ApplicationLogger.Verbose($"ConfidentialClientApplication {configuration.GetHashCode()} created");
-
-            if (!configuration.CacheSynchronizationEnabled.HasValue)
-            {
-                configuration.CacheSynchronizationEnabled = false;
-            }
         }
 
         /// <summary>

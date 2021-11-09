@@ -74,7 +74,9 @@ namespace Microsoft.Identity.Client
             ConfidentialClientApplication.GuardMobileFrameworks();
 
             var config = new ApplicationConfiguration();
-            return new ConfidentialClientApplicationBuilder(config).WithClientId(clientId);
+            return new ConfidentialClientApplicationBuilder(config)
+                .WithClientId(clientId)
+                .WithCacheSynchronization(false);
         }
 
         /// <summary>
@@ -291,7 +293,6 @@ namespace Microsoft.Identity.Client
         public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
         {          
             Config.CacheSynchronizationEnabled = enableCacheSynchronization;
-
             return this;
         }
 

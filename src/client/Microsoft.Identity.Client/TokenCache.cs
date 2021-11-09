@@ -72,8 +72,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(serviceBundle));
 
             // useRealSemaphore= false for MyApps and potentially for all apps when using non-singleton MSAL
-            _semaphoreSlim = new OptionalSemaphoreSlim(
-                useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled.HasValue ? serviceBundle.Config.CacheSynchronizationEnabled.Value : true);
+            _semaphoreSlim = new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled);
 
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             _accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);

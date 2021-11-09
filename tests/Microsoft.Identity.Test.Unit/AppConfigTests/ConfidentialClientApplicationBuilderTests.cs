@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 ClientId = TestConstants.ClientId,
             };
             var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
-            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled.Value);
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
 
             options = new ConfidentialClientApplicationOptions
             {
@@ -124,10 +124,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(true, (app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
 
             app = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString()).WithClientSecret(TestConstants.ClientSecret).BuildConcrete();
-            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled.Value);
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
 
             var app2 = PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString()).BuildConcrete();
-            Assert.IsTrue((app2.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled.Value);
+            Assert.IsTrue((app2.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
         [DataTestMethod]
