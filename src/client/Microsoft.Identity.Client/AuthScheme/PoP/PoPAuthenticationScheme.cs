@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Identity.Client.AppConfig;
@@ -22,6 +20,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
+        private IPoPCryptoProvider _popCryptoProvider;
 
         /// <summary>
         /// Creates POP tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -39,9 +38,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
             _popAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            _popAuthenticationConfiguration.PopCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
+            _popCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
 
-            var keyThumbprint = ComputeThumbprint(_popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
+            var keyThumbprint = ComputeThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
@@ -67,7 +66,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         {
             JObject header = new JObject
             {
-                { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, _popAuthenticationConfiguration.PopCryptoProvider.CryptographicAlgorithm },
+                { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, _popCryptoProvider.CryptographicAlgorithm },
                 { JsonWebTokenConstants.ReservedHeaderParameters.KeyId, KeyId },
                 { JsonWebTokenConstants.ReservedHeaderParameters.Type, PoPRequestParameters.PoPTokenType}
             };
@@ -80,7 +79,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         private JObject CreateBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            JToken publicKeyJWK = JToken.Parse(_popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
+            JToken publicKeyJWK = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
             List<JProperty> properties = new List<JProperty>(8);
             
             // Mandatory parameters
@@ -153,7 +152,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             string headerAndPayload = sb.ToString();
 
             sb.Append(".");
-            sb.Append(Base64UrlHelpers.Encode(_popAuthenticationConfiguration.PopCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
+            sb.Append(Base64UrlHelpers.Encode(_popCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
 
             return sb.ToString();
         }
