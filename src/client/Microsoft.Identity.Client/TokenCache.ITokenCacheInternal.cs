@@ -238,35 +238,38 @@ namespace Microsoft.Identity.Client
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
 
-                        IEnumerable<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
-                        IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
-                        IReadOnlyList<MsalIdTokenCacheItem> idTokenCacheItems = GetAllIdTokensWithNoLocks(filterByClientId: false, partitionKey: null);
-                        IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
-
-                        requestParams.RequestContext.Logger.Info($"Total number of access tokens in cache: {accessTokenCacheItems.Count()}");
-                        requestParams.RequestContext.Logger.Info($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count()}");
-                        requestParams.RequestContext.Logger.Info($"Total number of id tokens in cache: {idTokenCacheItems.Count()}");
-                        requestParams.RequestContext.Logger.Info($"Total number of accounts in cache: {accountCacheItems.Count()}");
-
-                        if (requestParams.RequestContext.Logger.LogLevel == LogLevel.Verbose)
+                        if (requestParams.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
                         {
-                            IEnumerable<MsalAccessTokenCacheKey> accessTokenCacheKeys = accessTokenCacheItems.Select(item => item.GetKey());
+                            IEnumerable<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
+                            IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
+                            IReadOnlyList<MsalIdTokenCacheItem> idTokenCacheItems = GetAllIdTokensWithNoLocks(filterByClientId: false, partitionKey: null);
+                            IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
 
-                            string tokenCacheKeyDump = string.Empty;
+                            requestParams.RequestContext.Logger.Info($"Total number of access tokens in cache: {accessTokenCacheItems.Count()}");
+                            requestParams.RequestContext.Logger.Info($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count()}");
+                            requestParams.RequestContext.Logger.Info($"Total number of id tokens in cache: {idTokenCacheItems.Count()}");
+                            requestParams.RequestContext.Logger.Info($"Total number of accounts in cache: {accountCacheItems.Count()}");
 
-                            foreach(MsalAccessTokenCacheKey cacheKey in accessTokenCacheKeys)
+                            if (requestParams.RequestContext.Logger.IsLoggingEnabled(LogLevel.Verbose))
                             {
-                                if (requestParams.RequestContext.Logger.PiiLoggingEnabled)
-                                {
-                                    tokenCacheKeyDump += $"\nCache Key: {cacheKey.ToString()}";
-                                }
-                                else
-                                {
-                                    tokenCacheKeyDump += $"\nCache Key: {cacheKey.ToScrubbedString()}";
-                                }
-                            }
+                                IEnumerable<MsalAccessTokenCacheKey> accessTokenCacheKeys = accessTokenCacheItems.Select(item => item.GetKey());
 
-                            requestParams.RequestContext.Logger.Verbose($"Token cache dump of the first 10 cache keys\n{tokenCacheKeyDump}");
+                                string tokenCacheKeyDump = string.Empty;
+
+                                foreach (MsalAccessTokenCacheKey cacheKey in accessTokenCacheKeys)
+                                {
+                                    if (requestParams.RequestContext.Logger.PiiLoggingEnabled)
+                                    {
+                                        tokenCacheKeyDump += $"\nCache Key: {cacheKey.ToString()}";
+                                    }
+                                    else
+                                    {
+                                        tokenCacheKeyDump += $"\nCache Key: {cacheKey.ToScrubbedString()}";
+                                    }
+                                }
+
+                                requestParams.RequestContext.Logger.Verbose($"Token cache dump of the first 10 cache keys\n{tokenCacheKeyDump}");
+                            }
                         }
                     }
 #pragma warning disable CS0618 // Type or member is obsolete
