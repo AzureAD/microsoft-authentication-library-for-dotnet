@@ -16,7 +16,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
     {
         private readonly IPlatformLogger _platformLogger;
         private readonly LogCallback _loggingCallback;
-        private readonly LogLevel _minLogLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
         private static readonly Lazy<ICoreLogger> s_nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
 
@@ -34,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     : " - " + correlationId;
             PiiLoggingEnabled = enablePiiLogging;
             _loggingCallback = loggingCallback;
-            _minLogLevel = logLevel;
+            LogLevel = logLevel;
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
 
             _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
@@ -81,6 +80,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public string ClientVersion { get; }
 
         internal string ClientInformation { get; }
+
+        internal LogLevel LogLevel { get; }
 
         public void Info(string messageScrubbed)
         {

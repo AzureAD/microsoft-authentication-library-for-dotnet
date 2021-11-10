@@ -78,6 +78,18 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 _extraKeyParts);
         }
 
+        public string ToScrubbedString()
+        {
+            return MsalCacheKeys.GetCredentialKey(
+                "****",
+                _environment,
+                _credentialDescriptor,
+                _clientId,
+                _tenantId,
+                _normalizedScopes,
+                _extraKeyParts);
+        }
+
         #region iOS
 
         public string iOSAccount => MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
