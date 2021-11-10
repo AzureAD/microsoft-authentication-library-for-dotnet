@@ -238,18 +238,19 @@ namespace Microsoft.Identity.Client
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
 
-                        if(requestParams.RequestContext.Logger.LogLevel == LogLevel.Verbose)
-                        {
-                            IEnumerable<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
-                            IEnumerable<MsalAccessTokenCacheKey> accessTokenCacheKeys = accessTokenCacheItems.Select(item => item.GetKey());
-                            IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
-                            IReadOnlyList<MsalIdTokenCacheItem> idTokenCacheItems = GetAllIdTokensWithNoLocks(filterByClientId: false, partitionKey: null);
-                            IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
+                        IEnumerable<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
+                        IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
+                        IReadOnlyList<MsalIdTokenCacheItem> idTokenCacheItems = GetAllIdTokensWithNoLocks(filterByClientId: false, partitionKey: null);
+                        IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
 
-                            requestParams.RequestContext.Logger.Info($"Total number of access tokens in cache: {accessTokenCacheItems.Count()}");
-                            requestParams.RequestContext.Logger.Info($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count()}");
-                            requestParams.RequestContext.Logger.Info($"Total number of id tokens in cache: {idTokenCacheItems.Count()}");
-                            requestParams.RequestContext.Logger.Info($"Total number of accounts in cache: {accountCacheItems.Count()}");
+                        requestParams.RequestContext.Logger.Info($"Total number of access tokens in cache: {accessTokenCacheItems.Count()}");
+                        requestParams.RequestContext.Logger.Info($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count()}");
+                        requestParams.RequestContext.Logger.Info($"Total number of id tokens in cache: {idTokenCacheItems.Count()}");
+                        requestParams.RequestContext.Logger.Info($"Total number of accounts in cache: {accountCacheItems.Count()}");
+
+                        if (requestParams.RequestContext.Logger.LogLevel == LogLevel.Verbose)
+                        {
+                            IEnumerable<MsalAccessTokenCacheKey> accessTokenCacheKeys = accessTokenCacheItems.Select(item => item.GetKey());
 
                             string tokenCacheKeyDump = string.Empty;
 
