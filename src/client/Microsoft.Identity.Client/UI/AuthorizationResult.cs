@@ -73,9 +73,12 @@ namespace Microsoft.Identity.Client.UI
         {
             if (parameters.ContainsKey(TokenResponseClaim.Error))
             {
-                if (parameters.ContainsKey(TokenResponseClaim.ErrorSubcode) && parameters[TokenResponseClaim.ErrorSubcode].Equals(TokenResponseClaim.ErrorSubcodeCancel, StringComparison.OrdinalIgnoreCase))
+                if (parameters.TryGetValue(TokenResponseClaim.ErrorSubcode, out string subcode))
                 {
-                    return FromStatus(AuthorizationStatus.UserCancel);
+                    if (TokenResponseClaim.ErrorSubcodeCancel.Equals(subcode, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return FromStatus(AuthorizationStatus.UserCancel);
+                    }
                 }
 
                 return FromStatus(AuthorizationStatus.ProtocolError,
