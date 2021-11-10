@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Authority.CreateAuthority(tenantAuthority))
             {
                 UserAssertion = new UserAssertion(TestConstants.UserAssertion),
-                OboCacheKey = oboCacheKey
+                LongRunningOboCacheKey = oboCacheKey
             };
 
             // Act

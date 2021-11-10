@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             requestParams.SendX5C = onBehalfOfParameters.SendX5C ?? false;
             requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
-            requestParams.OboCacheKey = onBehalfOfParameters.OboCacheKey;
+            requestParams.LongRunningOboCacheKey = onBehalfOfParameters.LongRunningOboCacheKey;
 
             var handler = new OnBehalfOfRequest(
                 ServiceBundle,

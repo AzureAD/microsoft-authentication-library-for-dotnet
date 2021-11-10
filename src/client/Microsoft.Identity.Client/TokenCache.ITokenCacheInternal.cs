@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
                         tenantId,
                         homeAccountId,
                         requestParams.AuthenticationScheme.KeyId,
-                        CacheKeyFactory.GetOboKey(requestParams.OboCacheKey, requestParams.UserAssertion));
+                        CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion));
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client
                                     response,
                                     homeAccountId)
                 {
-                    OboCacheKey = CacheKeyFactory.GetOboKey(requestParams.OboCacheKey, requestParams.UserAssertion),
+                    OboCacheKey = CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                 };
 
                 if (!_featureFlags.IsFociEnabled)
@@ -520,11 +520,11 @@ namespace Microsoft.Identity.Client
                     tokenCacheItems.FilterWithLogging(item =>
                         !string.IsNullOrEmpty(item.OboCacheKey) &&
                         item.OboCacheKey.Equals(
-                            !string.IsNullOrEmpty(requestParams.OboCacheKey) ? requestParams.OboCacheKey : requestParams.UserAssertion.AssertionHash,
+                            !string.IsNullOrEmpty(requestParams.LongRunningOboCacheKey) ? requestParams.LongRunningOboCacheKey : requestParams.UserAssertion.AssertionHash,
                             StringComparison.OrdinalIgnoreCase),
                         requestParams.RequestContext.Logger,
-                        !string.IsNullOrEmpty(requestParams.OboCacheKey) ?
-                            $"Filtering AT by user-provided cache key: {requestParams.OboCacheKey}" :
+                        !string.IsNullOrEmpty(requestParams.LongRunningOboCacheKey) ?
+                            $"Filtering AT by user-provided cache key: {requestParams.LongRunningOboCacheKey}" :
                             $"Filtering AT by user assertion: {requestParams.UserAssertion.AssertionHash}");
 
                 // OBO calls FindAccessTokenAsync directly, but we are not able to resolve the authority 
@@ -811,11 +811,11 @@ namespace Microsoft.Identity.Client
                 rtCacheItems = rtCacheItems.FilterWithLogging(item =>
                                 !string.IsNullOrEmpty(item.OboCacheKey) &&
                                 item.OboCacheKey.Equals(
-                                !string.IsNullOrEmpty(requestParams.OboCacheKey) ? requestParams.OboCacheKey : requestParams.UserAssertion.AssertionHash,
+                                !string.IsNullOrEmpty(requestParams.LongRunningOboCacheKey) ? requestParams.LongRunningOboCacheKey : requestParams.UserAssertion.AssertionHash,
                                     StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
-                                !string.IsNullOrEmpty(requestParams.OboCacheKey) ?
-                                $"Filtering RT by user-provided cache key: {requestParams.OboCacheKey}" :
+                                !string.IsNullOrEmpty(requestParams.LongRunningOboCacheKey) ?
+                                $"Filtering RT by user-provided cache key: {requestParams.LongRunningOboCacheKey}" :
                                 $"Filtering RT by user assertion: {requestParams.UserAssertion.AssertionHash}");
             }
             else
@@ -1213,7 +1213,7 @@ namespace Microsoft.Identity.Client
         {
             return requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf &&
                 requestParameters.UserAssertion != null &&
-                !string.IsNullOrEmpty(requestParameters.OboCacheKey);
+                !string.IsNullOrEmpty(requestParameters.LongRunningOboCacheKey);
         }
 
         // Returns whether AcquireTokenInLongRunningProcess was called (user assertion is null in this case)
@@ -1221,7 +1221,7 @@ namespace Microsoft.Identity.Client
         {
             return requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf &&
                 requestParameters.UserAssertion == null &&
-                !string.IsNullOrEmpty(requestParameters.OboCacheKey);
+                !string.IsNullOrEmpty(requestParameters.LongRunningOboCacheKey);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <summary>
         /// User-provided cache key for long-running OBO flow.
         /// </summary>
-        public string OboCacheKey { get; set; }
+        public string LongRunningOboCacheKey { get; set; }
         public bool ForceRefresh { get; set; }
 
         /// <inheritdoc />
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             builder.AppendLine("SendX5C: " + SendX5C);
             builder.AppendLine("ForceRefresh: " + ForceRefresh);
             builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
-            builder.AppendLine("OboCacheKey set: " + !string.IsNullOrWhiteSpace(OboCacheKey));
+            builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
             logger.Info(builder.ToString());
         }
     }

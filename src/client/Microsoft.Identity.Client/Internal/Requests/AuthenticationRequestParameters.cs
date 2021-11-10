@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <summary>
         /// User-provided cache key for long-running OBO flow.
         /// </summary>
-        public string OboCacheKey { get; set; }
+        public string LongRunningOboCacheKey { get; set; }
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
 
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("HomeAccountId - " + HomeAccountId);
             builder.AppendLine("CorrelationId - " + CorrelationId);
             builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
-            builder.AppendLine("OboCacheKey set: " + !string.IsNullOrWhiteSpace(OboCacheKey));
+            builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
 
             string messageWithPii = builder.ToString();
 
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));
             builder.AppendLine("CorrelationId - " + CorrelationId);
             builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
-            builder.AppendLine("OboCacheKey set: " + !string.IsNullOrWhiteSpace(OboCacheKey));
+            builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
 
             logger.InfoPii(messageWithPii, builder.ToString());
         }

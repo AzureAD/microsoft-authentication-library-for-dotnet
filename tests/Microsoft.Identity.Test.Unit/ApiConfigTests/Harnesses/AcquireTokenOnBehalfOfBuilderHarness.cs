@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
             Assert.AreEqual(expectedSendX5C, OnBehalfOfParametersReceived.SendX5C);
             Assert.AreEqual(expectedUserAssertion, OnBehalfOfParametersReceived.UserAssertion?.Assertion);
             Assert.AreEqual(expectedForceRefresh, OnBehalfOfParametersReceived.ForceRefresh);
-            Assert.AreEqual(expectedOboCacheKey, OnBehalfOfParametersReceived.OboCacheKey);
+            Assert.AreEqual(expectedOboCacheKey, OnBehalfOfParametersReceived.LongRunningOboCacheKey);
         }
     }
 }
