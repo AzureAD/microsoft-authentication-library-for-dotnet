@@ -280,8 +280,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string[] scope,
             bool foci = false,
             string utid = TestConstants.Utid,
-            string accessToken = TestConstants.ATSecret,
-            string refreshToken = TestConstants.RTSecret)
+            string accessToken = "some-access-token",
+            string refreshToken = "OAAsomethingencrypedQwgAA")
         {
             string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);

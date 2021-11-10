@@ -214,6 +214,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             MsalAssert.AssertAuthResult(authResult, user);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
             //Run OBO again. Should get token from cache
             authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
@@ -232,7 +233,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Expire access tokens
             TokenCacheHelper.ExpireAllAccessTokens(confidentialApp.UserTokenCacheInternal);
 
-            //Run OBO again. Should do token refresh since the AT is expired
+            //Run OBO again. Should do OBO flow since the AT is expired and RTs aren't cached for normal OBO flow
             authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
@@ -244,7 +245,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
-            AssertLastHttpContent("refresh_token");
+            AssertLastHttpContent("on_behalf_of");
 
             //creating second app with no refresh tokens
             var atItems = confidentialApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens();

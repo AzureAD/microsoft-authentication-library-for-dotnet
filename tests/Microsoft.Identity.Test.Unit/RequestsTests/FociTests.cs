@@ -293,7 +293,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     IsError(serverTokenResponse) ?
                         MockHelpers.CreateInvalidGrantTokenResponseMessage(GetSubError(serverTokenResponse)) :
                         MockHelpers.CreateSuccessTokenResponseMessage(
-                            TestConstants.UniqueId,
+                            TestConstants.Uid,
                             TestConstants.DisplayableId,
                             TestConstants.s_scope.ToArray(),
                             foci: serverTokenResponse == ServerTokenResponse.FociToken)

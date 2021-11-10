@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 case TokenResponseType.Valid_UserFlows:
                     responseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                       TestConstants.UniqueId,
+                       TestConstants.Uid,
                        TestConstants.DisplayableId,
                        TestConstants.s_scope.ToArray());
                    

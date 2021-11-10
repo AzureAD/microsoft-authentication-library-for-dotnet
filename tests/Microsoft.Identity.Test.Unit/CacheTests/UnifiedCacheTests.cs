@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                             {"grant_type", "refresh_token"}
                         },
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            TestConstants.UniqueId,
+                            TestConstants.Uid,
                             TestConstants.DisplayableId,
                             TestConstants.s_scope.ToArray())
                     });

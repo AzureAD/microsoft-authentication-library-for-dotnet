@@ -677,8 +677,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                expiresOn: DateTimeHelpers.UnixTimestampToDateTime(1548846619),
                extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(1548846619),
                rawClientInfo: string.Empty,
-               homeAccountId: "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
-               oboCacheKey: string.Empty
+               homeAccountId: "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb"
                );
 
             expectedAccessTokenItem.AdditionalFieldsJson = "{\r\n  \"access_token_type\": \"Bearer\"\r\n}";

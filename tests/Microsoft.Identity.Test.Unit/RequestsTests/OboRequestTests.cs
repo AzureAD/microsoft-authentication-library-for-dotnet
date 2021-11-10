@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -44,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenByObo_AccessTokenExpiredRefreshTokenAvailable_TestAsync()
+        public async Task AcquireTokenByObo_AccessTokenExpiredRefreshTokenNotAvailable_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -69,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 TokenCacheHelper.ExpireAllAccessTokens(cca.UserTokenCacheInternal);
 
                 MockHttpMessageHandler mockTokenRequestHttpHandlerRefresh = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
-                mockTokenRequestHttpHandlerRefresh.ExpectedPostData = new Dictionary<string, string> { { "grant_type", "refresh_token" } };
+                mockTokenRequestHttpHandlerRefresh.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer } };
 
                 result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
@@ -148,9 +149,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 userCacheAccess.AssertAccessCounts(2, 1);
 
                 MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
-                MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
                 Assert.AreEqual(userAssertion.AssertionHash, cachedAccessToken.OboCacheKey);
-                Assert.AreEqual(userAssertion.AssertionHash, cachedRefreshToken.OboCacheKey);
+                Assert.AreEqual(0, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
             }
         }
 
