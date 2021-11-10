@@ -246,10 +246,10 @@ namespace Microsoft.Identity.Client
                             IReadOnlyList<MsalIdTokenCacheItem> idTokenCacheItems = GetAllIdTokensWithNoLocks(filterByClientId: false, partitionKey: null);
                             IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
 
-                            requestParams.RequestContext.Logger.Verbose($"Total number of access tokens in cache: {accessTokenCacheItems.Count()}");
-                            requestParams.RequestContext.Logger.Verbose($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count()}");
-                            requestParams.RequestContext.Logger.Verbose($"Total number of id tokens in cache: {idTokenCacheItems.Count()}");
-                            requestParams.RequestContext.Logger.Verbose($"Total number of accounts in cache: {accountCacheItems.Count()}");
+                            requestParams.RequestContext.Logger.Info($"Total number of access tokens in cache: {accessTokenCacheItems.Count()}");
+                            requestParams.RequestContext.Logger.Info($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count()}");
+                            requestParams.RequestContext.Logger.Info($"Total number of id tokens in cache: {idTokenCacheItems.Count()}");
+                            requestParams.RequestContext.Logger.Info($"Total number of accounts in cache: {accountCacheItems.Count()}");
 
                             string tokenCacheKeyDump = string.Empty;
 
