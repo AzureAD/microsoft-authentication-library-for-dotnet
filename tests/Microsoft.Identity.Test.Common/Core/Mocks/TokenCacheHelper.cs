@@ -8,6 +8,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
@@ -43,6 +44,22 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             return atItem;
         }
+
+        internal static MsalTokenResponse CreateMsalTokenResponse()
+        {
+                    return new MsalTokenResponse
+                    {
+                        IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                        AccessToken = "access-token",
+                        ClientInfo = MockHelpers.CreateClientInfo(),
+                        ExpiresIn = 3599,
+                        CorrelationId = "correlation-id",
+                        RefreshToken = null, // brokers don't return RT
+                        Scope = TestConstants.s_scope.AsSingleString(),
+                        TokenType = "Bearer",
+                        WamAccountId = "wam_account_id",
+                    };
+    }
 
         internal static MsalRefreshTokenCacheItem CreateRefreshTokenItem(
             string userAssertionHash = TestConstants.UserAssertion,
@@ -197,6 +214,29 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
                 accessor.SaveAppMetadata(appMetadataItem);
             }
+        }
+
+        internal static IEnumerable<Tuple<MsalAccessTokenCacheItem, 
+                                          MsalRefreshTokenCacheItem, 
+                                          MsalIdTokenCacheItem, 
+                                          MsalAccountCacheItem>> PopulateCacheWithAccessTokens(ITokenCacheAccessor accessor, int tokensQuantity = 1)
+        {
+            IList<Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem>> tokens 
+                                        = new List<Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem>>();
+
+            for (int i = 1; i <= tokensQuantity; i++)
+            {
+                var result = PopulateCacheWithOneAccessToken(accessor);
+                Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem> token = 
+                    new Tuple<MsalAccessTokenCacheItem, 
+                              MsalRefreshTokenCacheItem, 
+                              MsalIdTokenCacheItem, 
+                              MsalAccountCacheItem>(result.Item1, result.Item2, result.Item3, result.Item4);
+
+                tokens.Add(token);
+            }
+
+            return tokens;
         }
 
         internal static (MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem) PopulateCacheWithOneAccessToken(ITokenCacheAccessor accessor)

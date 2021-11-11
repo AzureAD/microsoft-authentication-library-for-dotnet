@@ -45,19 +45,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private WamBroker _wamBroker;
         private SynchronizationContext _synchronizationContext;
 
-        private MsalTokenResponse _msalTokenResponse = new MsalTokenResponse
-        {
-            IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-            AccessToken = "access-token",
-            ClientInfo = MockHelpers.CreateClientInfo(),
-            ExpiresIn = 3599,
-            CorrelationId = "correlation-id",
-            RefreshToken = null, // brokers don't return RT
-            Scope = TestConstants.s_scope.AsSingleString(),
-            TokenType = "Bearer",
-            WamAccountId = "wam_account_id",
-        };
-
+        private MsalTokenResponse _msalTokenResponse = TokenCacheHelper.CreateMsalTokenResponse();
 
         [TestInitialize]
         public void Init()

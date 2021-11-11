@@ -1272,6 +1272,56 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public async void ValidateTokenCacheIsDumpedToLogsTestAsync()
+        {
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                string dump = string.Empty;
+                LogCallback callback = (LogLevel level, string message, bool containsPii) =>
+                                        {
+                                            Console.WriteLine($"MSAL {level} {containsPii} {message}");
+                                            if (level == LogLevel.Verbose)
+                                            {
+                                                dump += $"MSAL Test: {message}";
+                                            }
+                                        };
+
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, logCallback: callback);
+                ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+
+                var ex = TokenCacheHelper.PopulateCacheWithAccessTokens(cache.Accessor, 20);
+
+                var requestParams = TestCommon.CreateAuthenticationRequestParameters(
+                    serviceBundle,
+                    scopes: new HashSet<string>());
+                requestParams.Account = TestConstants.s_user;
+                requestParams.RequestContext.ApiEvent = new ApiEvent(
+                    serviceBundle.ApplicationLogger,
+                    serviceBundle.PlatformProxy.CryptographyManager,
+                    Guid.NewGuid().AsMatsCorrelationId());
+
+                var response = TokenCacheHelper.CreateMsalTokenResponse();
+
+                await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
+
+                Assert.IsTrue(dump != string.Empty);
+                Assert.IsTrue(dump.Contains("Total number of access tokens in cache: 10"));
+                Assert.IsTrue(dump.Contains("Total number of refresh tokens in cache: 10"));
+                Assert.IsTrue(dump.Contains("Total number of id tokens in cache: 10"));
+                Assert.IsTrue(dump.Contains("Total number of accounts in cache: 10"));
+                Assert.IsTrue(dump.Contains("Token cache dump of the first 10 cache keys"));
+
+                foreach (MsalAccessTokenCacheItem item in cache.Accessor.GetAllAccessTokens())
+                {
+                    Assert.IsTrue(dump.Contains(item.GetKey().ToScrubbedString()));
+                }
+            }
+        }
+
         private void ValidateIsFociMember(
             ITokenCacheInternal cache,
             AuthenticationRequestParameters requestParams,
