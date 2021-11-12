@@ -121,18 +121,21 @@ namespace Microsoft.Identity.Client.Cache
                             using (_requestParams.RequestContext.CreateTelemetryHelper(cacheEvent))
                             {
                                 string key = CacheKeyFactory.GetKeyFromRequest(_requestParams);
+                                
 
                                 try
                                 {
                                     var args = new TokenCacheNotificationArgs(
-                                       TokenCacheInternal,
-                                       _requestParams.AppConfig.ClientId,
-                                       _requestParams.Account,
-                                       hasStateChanged: false,
-                                       TokenCacheInternal.IsApplicationCache,
-                                       hasTokens: TokenCacheInternal.HasTokensNoLocks(),
-                                       _requestParams.RequestContext.UserCancellationToken,
-                                       suggestedCacheKey: key);
+                                      TokenCacheInternal,
+                                      _requestParams.AppConfig.ClientId,
+                                      _requestParams.Account,
+                                      hasStateChanged: false,
+                                      isApplicationCache: TokenCacheInternal.IsApplicationCache,
+                                      suggestedCacheKey: key,
+                                      hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                      cancellationToken: _requestParams.RequestContext.UserCancellationToken,
+                                      suggestedCacheExpiry: null,
+                                      correlationId: _requestParams.RequestContext.CorrelationId);
 
                                     stopwatch.Start();
                                     await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -140,18 +143,22 @@ namespace Microsoft.Identity.Client.Cache
                                 }
                                 finally
                                 {
-                                    var args = new TokenCacheNotificationArgs(
-                                        TokenCacheInternal,
-                                       _requestParams.AppConfig.ClientId,
-                                       _requestParams.Account,
-                                       hasStateChanged: false,
-                                       TokenCacheInternal.IsApplicationCache,
-                                       hasTokens: TokenCacheInternal.HasTokensNoLocks(),
-                                       _requestParams.RequestContext.UserCancellationToken,
-                                       suggestedCacheKey: key);
-
+                                    
                                     stopwatch.Reset();
                                     stopwatch.Start();
+
+                                    var args = new TokenCacheNotificationArgs(
+                                      TokenCacheInternal,
+                                      _requestParams.AppConfig.ClientId,
+                                      _requestParams.Account,
+                                      hasStateChanged: false,
+                                      isApplicationCache: TokenCacheInternal.IsApplicationCache,
+                                      suggestedCacheKey: key,
+                                      hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                      cancellationToken: _requestParams.RequestContext.UserCancellationToken,
+                                      suggestedCacheExpiry: null,
+                                      correlationId: _requestParams.RequestContext.CorrelationId);
+
                                     await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                                     RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
 

@@ -147,9 +147,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings, sendX5C);
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
-
+            Guid correlationId = Guid.NewGuid();
             authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
+                .WithCorrelationId(correlationId)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -158,6 +159,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(correlationId, appCacheRecorder.LastAfterAccessNotificationArgs.CorrelationId);
+            Assert.AreEqual(correlationId, appCacheRecorder.LastBeforeAccessNotificationArgs.CorrelationId);
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
             Assert.AreEqual(
@@ -177,6 +180,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreNotEqual(correlationId, appCacheRecorder.LastAfterAccessNotificationArgs.CorrelationId);
+            Assert.AreNotEqual(correlationId, appCacheRecorder.LastBeforeAccessNotificationArgs.CorrelationId);
             Assert.AreEqual(
                GetExpectedCacheKey(settings.ClientId, settings.TenantId),
                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);        
