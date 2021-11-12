@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Test.Unit.pop
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request);
+                var provider = PoPProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
@@ -57,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.pop
                 var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
 
                 Assert.IsTrue(!string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
-                AssertSingedHttpRequestClaims(popConfig, claims);
+                AssertSingedHttpRequestClaims(provider, claims);
 
             }
         }
@@ -76,6 +77,7 @@ namespace Microsoft.Identity.Test.Unit.pop
 
                 // no HTTP method binding, but custom nonce
                 var popConfig = new PoPAuthenticationConfiguration() { Nonce = CustomNonce };
+                var provider = PoPProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
@@ -91,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit.pop
                 var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
 
                 Assert.AreEqual(CustomNonce, claims.FindAll("nonce").Single().Value);
-                AssertTsAndJwkClaims(popConfig, claims);
+                AssertTsAndJwkClaims(provider, claims);
 
                 Assert.IsFalse(claims.FindAll("m").Any());
                 Assert.IsFalse(claims.FindAll("u").Any());
@@ -113,6 +115,7 @@ namespace Microsoft.Identity.Test.Unit.pop
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request) { Nonce = CustomNonce };
+                var provider = PoPProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
@@ -127,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.pop
                 var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
 
                 Assert.AreEqual(CustomNonce, claims.FindAll("nonce").Single().Value);
-                AssertSingedHttpRequestClaims(popConfig, claims);
+                AssertSingedHttpRequestClaims(provider, claims);
             }
         }
 
@@ -149,22 +152,22 @@ namespace Microsoft.Identity.Test.Unit.pop
             Assert.AreEqual("www.contoso.com:5555", popConfig.HttpHost);
             Assert.AreEqual("/path1/path2", popConfig.HttpPath);
         }
-        private static void AssertSingedHttpRequestClaims(PoPAuthenticationConfiguration popConfig, System.Security.Claims.ClaimsPrincipal claims)
+        private static void AssertSingedHttpRequestClaims(IPoPCryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
         {
             Assert.AreEqual("GET", claims.FindAll("m").Single().Value);
             Assert.AreEqual("www.contoso.com", claims.FindAll("u").Single().Value);
             Assert.AreEqual("/path1/path2", claims.FindAll("p").Single().Value);
 
-            AssertTsAndJwkClaims(popConfig, claims);
+            AssertTsAndJwkClaims(popCryptoProvider, claims);
         }
 
-        private static void AssertTsAndJwkClaims(PoPAuthenticationConfiguration popConfig, System.Security.Claims.ClaimsPrincipal claims)
+        private static void AssertTsAndJwkClaims(IPoPCryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
         {
             long ts = long.Parse(claims.FindAll("ts").Single().Value);
             CoreAssert.IsWithinRange(DateTimeOffset.UtcNow, DateTimeHelpers.UnixTimestampToDateTime(ts), TimeSpan.FromSeconds(5));
 
             string jwkClaim = claims.FindAll("cnf").Single().Value;
-            JToken publicKey = JToken.Parse(popConfig.PopCryptoProvider.CannonicalPublicKeyJwk);
+            JToken publicKey = JToken.Parse(popCryptoProvider.CannonicalPublicKeyJwk);
             JObject jwkInConfig = new JObject(new JProperty(PoPClaimTypes.JWK, publicKey));
             var jwkInToken = JObject.Parse(jwkClaim);
 

@@ -47,6 +47,15 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
+        public void FromUri_Onback_ReturnsCancel()
+        {
+            var authResult = AuthorizationResult.FromUri($"urn:ietf:wg:oauth:2.0:oob?error=access_denied&error_subcode=cancel&state=5f5c0853-8a53-48de-b47a-afd0c33301f90170c6b7-b956-4aab-b99b-0e6a067dad0b");
+
+            Assert.AreEqual(AuthorizationStatus.UserCancel, authResult.Status);
+            Assert.AreEqual(MsalError.AuthenticationCanceledError, authResult.Error);
+        }
+
+        [TestMethod]
         public void FromPostData()
         {
             var authResult = AuthorizationResult.FromPostData(_queryParams.ToQueryParameter().ToByteArray());
