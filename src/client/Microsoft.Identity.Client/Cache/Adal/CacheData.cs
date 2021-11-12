@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -12,6 +13,7 @@ namespace Microsoft.Identity.Client.Cache
     /// (for instance ADAL and MSAL for objective C in iOS)
     /// </summary>
     [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public class CacheData
     {
         /// <summary>
