@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Cache is empty or token with the same scopes, OBO cache key, etc. not in cache -> AT and RT are retrieved from IdP and saved
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-                Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
                 MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
                 Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
@@ -256,13 +256,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(TestConstants.RTSecret, cachedRefreshToken.Secret);
                 userCacheAccess.AssertAccessCounts(1, 1);
 
-                // Token with the same scopes, OBO cache key, etc. exists in the cache -> throw error
-                var exception = await AssertException.TaskThrowsAsync<MsalClientException>(
-                    () => cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
-                    .ExecuteAsync())
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.OboCacheKeyAlreadyInCacheError, exception.ErrorCode);
+                // Token with the same scopes, OBO cache key, etc. exists in the cache -> AT is retrieved from the cache
+                result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
+                Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
+                Assert.AreEqual(oboCacheKey, cachedRefreshToken.OboCacheKey);
+                Assert.AreEqual(TestConstants.RTSecret, cachedRefreshToken.Secret);
                 userCacheAccess.AssertAccessCounts(2, 1);
 
                 AddMockHandlerAadSuccess(httpManager,

@@ -406,8 +406,6 @@ namespace Microsoft.Identity.Client
 
         public const string RegionalAndAuthorityOverride = "You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request. Use WithTenantId at the request level instead.";
 
-        public const string OboCacheKeyAlreadyInCache = "The token cache already contains a token with an OBO cache key that matches the longRunningProcessSessionKey passed into IConfidentialClientApplication.AcquireTokenInLongRunningProcess method. Call IConfidentialClientApplication.InitiateLongRunningProcessInWebApi method with a new longRunningProcessSessionKey that does not exist in the token cache or call IConfidentialClientApplication.AcquireTokenInLongRunningProcess method with an already used longRunningProcessSessionKey.";
-
         public const string OboCacheKeyNotInCache = "The token cache does not contain a token with an OBO cache key that matches the longRunningProcessSessionKey passed into IConfidentialClientApplication.AcquireTokenInLongRunningProcess method. Call IConfidentialClientApplication.InitiateLongRunningProcessInWebApi method with a new longRunningProcessSessionKey that does not exist in the token cache or call IConfidentialClientApplication.AcquireTokenInLongRunningProcess method with an already used longRunningProcessSessionKey.";
     }
 }

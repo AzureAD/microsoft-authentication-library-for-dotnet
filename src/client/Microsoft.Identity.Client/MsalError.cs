@@ -1033,15 +1033,6 @@ namespace Microsoft.Identity.Client
         public const string RegionalAndAuthorityOverride = "authority_override_regional";
 
         /// <summary>
-        /// <para>What happens?</para>The token cache already contains a token with an OBO cache key that
-        /// matches the <c>longRunningProcessSessionKey</c> passed into <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/>.
-        /// <para>Mitigation</para>Call <see cref="ILongRunningWebApi.InitiateLongRunningProcessInWebApi"/> with a new <c>longRunningProcessSessionKey</c>
-        /// that does not exist in the token cache or call <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/> with an already used
-        /// <c>longRunningProcessSessionKey</c>.
-        /// </summary>
-        public const string OboCacheKeyAlreadyInCacheError = "obo_cache_key_already_in_cache_error";
-
-        /// <summary>
         /// <para>What happens?</para>The token cache does not contain a token with an OBO cache key that
         /// matches the <c>longRunningProcessSessionKey</c> passed into <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/>.
         /// <para>Mitigation</para>Call <see cref="ILongRunningWebApi.InitiateLongRunningProcessInWebApi"/> with a new <c>longRunningProcessSessionKey</c>
@@ -1050,4 +1041,4 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string OboCacheKeyNotInCacheError = "obo_cache_key_not_in_cache_error";
     }
-}      
+}

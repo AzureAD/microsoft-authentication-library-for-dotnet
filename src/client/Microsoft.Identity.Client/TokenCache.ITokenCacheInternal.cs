@@ -434,12 +434,6 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
             }
 
-            if (InitiateLongRunningOboWasCalled(requestParams) && tokenCacheItems.Count > 0)
-            {
-                logger.Error("[FindAccessTokenAsync] InitiateLongRunningProcessInWebApi was called and OBO token was already found in the cache.");
-                throw new MsalClientException(MsalError.OboCacheKeyAlreadyInCacheError, MsalErrorMessage.OboCacheKeyAlreadyInCache);
-            }
-
             // no match
             if (tokenCacheItems.Count == 0)
             {
@@ -717,7 +711,7 @@ namespace Microsoft.Identity.Client
             {
                 accessor.SaveAccessToken(atItem.WithExpiresOn(DateTimeOffset.UtcNow));
             }
-               
+
             if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
             {
                 var args = new TokenCacheNotificationArgs(
@@ -729,8 +723,8 @@ namespace Microsoft.Identity.Client
                 tokenCacheInternal.HasTokensNoLocks(),
                 default,
                 suggestedCacheKey: null,
-                suggestedCacheExpiry: null); 
-             
+                suggestedCacheExpiry: null);
+
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
         }
@@ -1206,14 +1200,6 @@ namespace Microsoft.Identity.Client
                                item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase))
                 .ToList()
                 .ForEach(accItem => _accessor.DeleteAccount(accItem));
-        }
-
-        // Returns whether InitiateLongRunningProcessInWebAPI was called (user assertion is specified in this case)
-        private bool InitiateLongRunningOboWasCalled(AuthenticationRequestParameters requestParameters)
-        {
-            return requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf &&
-                requestParameters.UserAssertion != null &&
-                !string.IsNullOrEmpty(requestParameters.LongRunningOboCacheKey);
         }
 
         // Returns whether AcquireTokenInLongRunningProcess was called (user assertion is null in this case)

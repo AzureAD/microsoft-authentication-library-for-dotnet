@@ -36,6 +36,8 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="longRunningProcessSessionKey">Key by which to look up the token in the cache</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
+        /// <exception cref="MsalClientException"> is thrown if the token cache does not contain a token
+        /// with an OBO cache key that matches the <paramref name="longRunningProcessSessionKey"/>.</exception>
         AcquireTokenOnBehalfOfParameterBuilder AcquireTokenInLongRunningProcess(IEnumerable<string> scopes, string longRunningProcessSessionKey);
     }
 }
