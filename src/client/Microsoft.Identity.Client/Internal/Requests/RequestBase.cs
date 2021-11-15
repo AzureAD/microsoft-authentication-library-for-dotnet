@@ -1,4 +1,4 @@
-﻿error// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -356,7 +356,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 !CacheManager.TokenCacheInternal.IsAppSubscribedToSerializationEvents())
             {
                 authenticationRequestParameters.RequestContext.Logger.Warning(
-                    "Only in-memory caching is used. The cache is not persisted and will be lost if the machine is restarted. It also does not scale for a web app or web api, where the number of users can grow large. In production, web apps and web apis should use distributed caching like Redis. See https://aka.ms/msal-net-cca-token-cache-serialization");
+                    "Only in-memory caching is used. The cache is not persisted and will be lost if the machine is restarted. It also does not scale for a web app or web API, where the number of users can grow large. In production, web apps and web APIs should use distributed caching like Redis. See https://aka.ms/msal-net-cca-token-cache-serialization");
             }
         }
 
