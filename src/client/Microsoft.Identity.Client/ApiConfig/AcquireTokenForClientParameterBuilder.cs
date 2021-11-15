@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -74,6 +75,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use WithAzureRegion on the ConfidentialClientApplicationBuilder object", true)]
         public AcquireTokenForClientParameterBuilder WithAzureRegion(bool useAzureRegion)
         {
@@ -83,6 +85,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>        
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use WithAzureRegion on the ConfidentialClientApplicationBuilder object", true)]
         public AcquireTokenForClientParameterBuilder WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true)
         {

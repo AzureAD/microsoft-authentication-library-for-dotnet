@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -62,6 +63,7 @@ namespace Microsoft.Identity.Client
         /// and <c>IConfidentialClientApplication.AppTokenCache</c> once the app is created.
         /// </summary>
         [Obsolete("The recommended way to get a cache is by using IClientApplicationBase.UserTokenCache or IClientApplicationBase.AppTokenCache")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public TokenCache() : this((IServiceBundle)null, false, null)
         {
         }
