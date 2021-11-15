@@ -355,7 +355,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 !authenticationRequestParameters.IsClientCredentialRequest &&
                 !CacheManager.TokenCacheInternal.IsAppSubscribedToSerializationEvents())
             {
-                authenticationRequestParameters.RequestContext.Logger.Error("The default token cache provided by MSAL is not designed to be performant when used in confidential client applications. Please use token cache serialization. See https://aka.ms/msal-net-cca-token-cache-serialization.");
+                authenticationRequestParameters.RequestContext.Logger.Warning(
+                    "Only in-memory caching is used. The cache is not persisted and will be lost if the machine is restarted. It also does not scale for a web app or web API, where the number of users can grow large. In production, web apps and web APIs should use distributed caching like Redis. See https://aka.ms/msal-net-cca-token-cache-serialization");
             }
         }
 
