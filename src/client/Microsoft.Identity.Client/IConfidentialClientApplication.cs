@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
@@ -92,6 +93,7 @@ namespace Microsoft.Identity.Client
 
         /// <inheritdoc/>
         [Obsolete("Use GetAccountAsync in web apps and web APIs, and use a token cache serializer for better security and performance. See https://aka.ms/msal-net-cca-token-cache-serialization.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         new Task<IEnumerable<IAccount>> GetAccountsAsync();
     }
 }

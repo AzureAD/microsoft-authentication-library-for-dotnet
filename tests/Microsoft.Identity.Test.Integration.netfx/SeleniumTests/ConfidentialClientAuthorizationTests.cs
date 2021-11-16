@@ -123,6 +123,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .WithCertificate(cert)
                 .WithRedirectUri(redirectUri)
                 .WithTestLogging(out factory)
+                .WithExperimentalFeatures(true)
                 .Build();
 
             var cacheAccess = (cca as ConfidentialClientApplication).UserTokenCache.RecordAccess();

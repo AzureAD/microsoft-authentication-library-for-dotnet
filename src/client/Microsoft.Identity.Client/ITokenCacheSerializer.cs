@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
@@ -81,6 +82,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
         [Obsolete("Support for the MSAL v2 token cache format will be dropped in the next major version", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         byte[] SerializeMsalV2();
 
         /// <summary>
@@ -94,6 +96,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
         [Obsolete("Support for the MSAL v2 token cache format will be dropped in the next major version", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void DeserializeMsalV2(byte[] msalV2State);
     }
 }
