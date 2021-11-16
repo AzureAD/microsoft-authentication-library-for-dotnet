@@ -261,16 +261,16 @@ namespace Microsoft.Identity.Client
         {
             if (requestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Verbose))
             {
-                IEnumerable<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
+                IReadOnlyList<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
                 IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
-                IEnumerable<MsalAccessTokenCacheKey> accessTokenCacheKeys = accessTokenCacheItems.Select(item => item.GetKey());
+                IList<MsalAccessTokenCacheKey> accessTokenCacheKeys = accessTokenCacheItems.Select(item => item.GetKey()).ToList();
 
                 requestParameters.RequestContext.Logger.Verbose($"Total number of access tokens in cache: {accessTokenCacheItems.Count()}");
                 requestParameters.RequestContext.Logger.Verbose($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count()}");
 
                 StringBuilder tokenCacheKeyDump = new StringBuilder();
 
-                int count = accessTokenCacheKeys.Count() < 10 ? accessTokenCacheKeys.Count() : 10;
+                int count = accessTokenCacheKeys.Count < 10 ? accessTokenCacheKeys.Count : 10;
                 for (int i = 0; i < count; i++)
                 {
                     var cacheKey = accessTokenCacheKeys.ElementAt(i);
