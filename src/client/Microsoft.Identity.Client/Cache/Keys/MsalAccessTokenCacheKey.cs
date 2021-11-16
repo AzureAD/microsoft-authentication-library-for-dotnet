@@ -78,10 +78,10 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 _extraKeyParts);
         }
 
-        public string ToScrubbedString()
+        public string ToLogString(bool piiEnabled = false)
         {
             return MsalCacheKeys.GetCredentialKey(
-                "****",
+                piiEnabled? _homeAccountId : _homeAccountId.GetHashCode().ToString(),
                 _environment,
                 _credentialDescriptor,
                 _clientId,

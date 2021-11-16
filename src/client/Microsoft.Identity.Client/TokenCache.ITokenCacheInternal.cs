@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
 using Microsoft.Identity.Client.Cache;
@@ -238,35 +239,7 @@ namespace Microsoft.Identity.Client
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
 
-                        if (requestParams.RequestContext.Logger.IsLoggingEnabled(LogLevel.Verbose))
-                        {
-                            IEnumerable<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
-                            IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
-                            IReadOnlyList<MsalIdTokenCacheItem> idTokenCacheItems = GetAllIdTokensWithNoLocks(filterByClientId: false, partitionKey: null);
-                            IReadOnlyList<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
-                            IEnumerable<MsalAccessTokenCacheKey> accessTokenCacheKeys = accessTokenCacheItems.Select(item => item.GetKey());
-
-                            requestParams.RequestContext.Logger.Info($"Total number of access tokens in cache: {accessTokenCacheItems.Count()}");
-                            requestParams.RequestContext.Logger.Info($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count()}");
-                            requestParams.RequestContext.Logger.Info($"Total number of id tokens in cache: {idTokenCacheItems.Count()}");
-                            requestParams.RequestContext.Logger.Info($"Total number of accounts in cache: {accountCacheItems.Count()}");
-
-                            string tokenCacheKeyDump = string.Empty;
-
-                            foreach (MsalAccessTokenCacheKey cacheKey in accessTokenCacheKeys)
-                            {
-                                if (requestParams.RequestContext.Logger.PiiLoggingEnabled)
-                                {
-                                    tokenCacheKeyDump += $"\nCache Key: {cacheKey.ToString()}";
-                                }
-                                else
-                                {
-                                    tokenCacheKeyDump += $"\nCache Key: {cacheKey.ToScrubbedString()}";
-                                }
-                            }
-
-                            requestParams.RequestContext.Logger.Verbose($"Token cache dump of the first 10 cache keys\n{tokenCacheKeyDump}");
-                        }
+                        DumpCacheToLogs(requestParams);
 
                     }
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -280,6 +253,32 @@ namespace Microsoft.Identity.Client
             {
                 _semaphoreSlim.Release();
                 requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
+            }
+        }
+
+        //This method pulls all of the acceess and refresh tokens from the cache and can therefore be very impactful on performance.
+        private void DumpCacheToLogs(AuthenticationRequestParameters requestParameters)
+        {
+            if (requestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
+                IEnumerable<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
+                IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
+                IEnumerable<MsalAccessTokenCacheKey> accessTokenCacheKeys = accessTokenCacheItems.Select(item => item.GetKey());
+
+                requestParameters.RequestContext.Logger.Verbose($"Total number of access tokens in cache: {accessTokenCacheItems.Count()}");
+                requestParameters.RequestContext.Logger.Verbose($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count()}");
+
+                StringBuilder tokenCacheKeyDump = new StringBuilder();
+
+                int count = accessTokenCacheKeys.Count() < 10 ? accessTokenCacheKeys.Count() : 10;
+                for (int i = 0; i < count; i++)
+                {
+                    var cacheKey = accessTokenCacheKeys.ElementAt(i);
+
+                    tokenCacheKeyDump.AppendLine($"Msal Cache Key: {cacheKey.ToLogString(requestParameters.RequestContext.Logger.PiiLoggingEnabled)}");
+                }
+
+                requestParameters.RequestContext.Logger.Verbose($"Token cache dump of the first {count} cache keys\n{tokenCacheKeyDump.ToString()}");
             }
         }
 

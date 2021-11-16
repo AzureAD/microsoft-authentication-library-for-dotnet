@@ -45,21 +45,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return atItem;
         }
 
-        internal static MsalTokenResponse CreateMsalTokenResponse()
+        internal static MsalTokenResponse CreateMsalTokenResponse(bool includeRefreshToken = false)
         {
-                    return new MsalTokenResponse
-                    {
-                        IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                        AccessToken = "access-token",
-                        ClientInfo = MockHelpers.CreateClientInfo(),
-                        ExpiresIn = 3599,
-                        CorrelationId = "correlation-id",
-                        RefreshToken = null, // brokers don't return RT
-                        Scope = TestConstants.s_scope.AsSingleString(),
-                        TokenType = "Bearer",
-                        WamAccountId = "wam_account_id",
-                    };
-    }
+            return new MsalTokenResponse
+            {
+                IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                AccessToken = "access-token",
+                ClientInfo = MockHelpers.CreateClientInfo(),
+                ExpiresIn = 3599,
+                CorrelationId = "correlation-id",
+                RefreshToken = includeRefreshToken ? "refresh-token" : null, // brokers don't return RT
+                Scope = TestConstants.s_scope.AsSingleString(),
+                TokenType = "Bearer",
+                WamAccountId = "wam_account_id",
+            };
+        }
 
         internal static MsalRefreshTokenCacheItem CreateRefreshTokenItem(
             string userAssertionHash = TestConstants.UserAssertion,
@@ -224,9 +224,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             IList<Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem>> tokens 
                                         = new List<Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem>>();
 
+            bool randomizeClientInfo = tokensQuantity > 1 ? true : false;
+
             for (int i = 1; i <= tokensQuantity; i++)
             {
-                var result = PopulateCacheWithOneAccessToken(accessor);
+                var result = PopulateCacheWithOneAccessToken(accessor, randomizeClientInfo);
                 Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem> token = 
                     new Tuple<MsalAccessTokenCacheItem, 
                               MsalRefreshTokenCacheItem, 
@@ -239,9 +241,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return tokens;
         }
 
-        internal static (MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem) PopulateCacheWithOneAccessToken(ITokenCacheAccessor accessor)
+        internal static (MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem) PopulateCacheWithOneAccessToken(ITokenCacheAccessor accessor, bool randomizeClientInfo = false)
         {
-            string clientInfo = MockHelpers.CreateClientInfo();
+            string uid = randomizeClientInfo ? Guid.NewGuid().ToString() : TestConstants.Uid;
+            string utid = randomizeClientInfo ? Guid.NewGuid().ToString() : TestConstants.Utid;
+
+            string clientInfo = MockHelpers.CreateClientInfo(uid, utid);
             string homeAccountId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
 
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
@@ -282,7 +287,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 null);
 
             accessor.SaveAccount(accountCacheItem);
-            var rt = AddRefreshTokenToCache(accessor, TestConstants.Uid, TestConstants.Utid);
+            var rt = AddRefreshTokenToCache(accessor, uid, utid);
 
             return (atItem, rt, idTokenCacheItem, accountCacheItem);
         }

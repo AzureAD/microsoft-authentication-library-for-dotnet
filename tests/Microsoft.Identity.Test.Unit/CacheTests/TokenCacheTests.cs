@@ -1274,26 +1274,27 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public async void ValidateTokenCacheIsDumpedToLogsTestAsync()
+        public async Task ValidateTokenCacheIsDumpedToLogsTestAsync()
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
+                //Arrange
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 string dump = string.Empty;
                 LogCallback callback = (LogLevel level, string message, bool containsPii) =>
                                         {
-                                            Console.WriteLine($"MSAL {level} {containsPii} {message}");
                                             if (level == LogLevel.Verbose)
                                             {
-                                                dump += $"MSAL Test: {message}";
+                                                dump += $"MSAL Test: {message}\n";
                                             }
                                         };
 
                 var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, logCallback: callback);
                 ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+                cache.SetAfterAccess((args) => { return; });
 
-                var ex = TokenCacheHelper.PopulateCacheWithAccessTokens(cache.Accessor, 20);
+                var ex = TokenCacheHelper.PopulateCacheWithAccessTokens(cache.Accessor, 19);
 
                 var requestParams = TestCommon.CreateAuthenticationRequestParameters(
                     serviceBundle,
@@ -1304,20 +1305,25 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     serviceBundle.PlatformProxy.CryptographyManager,
                     Guid.NewGuid().AsMatsCorrelationId());
 
-                var response = TokenCacheHelper.CreateMsalTokenResponse();
+                var response = TokenCacheHelper.CreateMsalTokenResponse(true);
 
+                //Act
                 await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
-
+                
+                //Assert
                 Assert.IsTrue(dump != string.Empty);
-                Assert.IsTrue(dump.Contains("Total number of access tokens in cache: 10"));
-                Assert.IsTrue(dump.Contains("Total number of refresh tokens in cache: 10"));
-                Assert.IsTrue(dump.Contains("Total number of id tokens in cache: 10"));
-                Assert.IsTrue(dump.Contains("Total number of accounts in cache: 10"));
+                Assert.IsTrue(dump.Contains("Total number of access tokens in cache: 20"));
+                Assert.IsTrue(dump.Contains("Total number of refresh tokens in cache: 20"));
                 Assert.IsTrue(dump.Contains("Token cache dump of the first 10 cache keys"));
 
-                foreach (MsalAccessTokenCacheItem item in cache.Accessor.GetAllAccessTokens())
+                var accessTokens = cache.Accessor.GetAllAccessTokens().ToList();
+                foreach (MsalAccessTokenCacheItem item in accessTokens)
                 {
-                    Assert.IsTrue(dump.Contains(item.GetKey().ToScrubbedString()));
+                    Assert.IsTrue(dump.Contains(item.GetKey().ToLogString()));
+                    if (accessTokens.IndexOf(item) >= 9)
+                    {
+                        break;
+                    }
                 }
             }
         }
