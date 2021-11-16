@@ -872,7 +872,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var atsParams = new AcquireTokenSilentParameters();
                 _webAccountProviderFactory.GetAccountProviderAsync("organizations").ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
 
-                // Act Assert
+                
+                // This assertion ensures that WebAccount.SignOutAsync() is called. Since the WebAccount is fake, it throws a specific exception.
+                // This can be improved with a extra layer of abstraction over WebAccount, but it is sufficient for testing
+
                 await AssertException.TaskThrowsAsync<FileNotFoundException>( // Since WebAccount is a real object, it throws this exception
                     () => _wamBroker.RemoveAccountAsync(harness.ServiceBundle.Config, requestParams.Account))
                     .ConfigureAwait(false);

@@ -702,14 +702,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string homeTenantId = account?.HomeAccountId?.TenantId;
             if (!string.IsNullOrEmpty(homeTenantId))
             {                
-                bool isMsa = await IsMsaRequestAsync(
+                bool isMsaRequest = await IsMsaRequestAsync(
                    appConfig.Authority,
                    appConfig.TenantId,
                    _wamOptions.MsaPassthrough).ConfigureAwait(false);
 
-                IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
+                IWamPlugin wamPlugin = isMsaRequest ? _msaPlugin : _aadPlugin;
                 WebAccountProvider provider;
-                if (isMsa)
+                if (isMsaRequest)
                 {
                     provider = await _webAccountProviderFactory.GetAccountProviderAsync("consumers").ConfigureAwait(false);
                 }
