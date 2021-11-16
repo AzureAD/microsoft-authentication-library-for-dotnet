@@ -50,6 +50,8 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "client_ip", "some_ip" }, { "aud", "some_audience" }};
         public const string RTSecret = "someRT";
         public const string ATSecret = "some-access-token";
+        public const string RTSecret2 = "someRT2";
+        public const string ATSecret2 = "some-access-token2";
 
         public const string HomeAccountId = Uid + "." + Utid;
 

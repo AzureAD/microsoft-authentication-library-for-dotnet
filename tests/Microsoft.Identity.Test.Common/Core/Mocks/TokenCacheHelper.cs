@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string tenant = TestConstants.Utid,
             string homeAccountId = TestConstants.HomeAccountId,
             bool isExpired = false,
-            string userAssertionHash = null)
+            string oboCacheKey = null)
         {
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                TestConstants.ProductionPrefCacheEnvironment,
@@ -39,13 +39,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                extendedExpiresOn: isExpired ? new DateTimeOffset(DateTime.UtcNow) : new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
                MockHelpers.CreateClientInfo(),
                homeAccountId, 
-               userAssertionHash: userAssertionHash);
+               oboCacheKey: oboCacheKey);
 
             return atItem;
         }
 
         internal static MsalRefreshTokenCacheItem CreateRefreshTokenItem(
-            string userAssertionHash = TestConstants.UserAssertion,
+            string oboCacheKey = TestConstants.UserAssertion,
             string homeAccountId = TestConstants.HomeAccountId)
         {
             return new MsalRefreshTokenCacheItem()
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ClientId = TestConstants.ClientId,
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
                 HomeAccountId = homeAccountId,
-                UserAssertionHash = userAssertionHash,
+                OboCacheKey = oboCacheKey,
                 Secret = string.Empty
             };
         }
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 extendedAccessTokenExpiresOn,
                 clientInfo,
                 homeAccId, 
-                userAssertionHash: userAssertionHash);
+                oboCacheKey: userAssertionHash);
 
             // add access token
             accessor.SaveAccessToken(atItem);
@@ -337,7 +337,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                atItem.KeyId,
                refreshOn,
                atItem.TokenType, 
-               atItem.UserAssertionHash);
+               atItem.OboCacheKey);
 
             return newAtItem;
         }
@@ -387,7 +387,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             foreach (var rtItem in rtItems)
             {
-                rtItem.UserAssertionHash = assertion;
+                rtItem.OboCacheKey = assertion;
                 tokenCache.Accessor.SaveRefreshToken(rtItem);
             }
         }

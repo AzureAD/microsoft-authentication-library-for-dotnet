@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client
 
         internal static AcquireTokenOnBehalfOfParameterBuilder Create(
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
-            IEnumerable<string> scopes, 
+            IEnumerable<string> scopes,
             UserAssertion userAssertion)
         {
             return new AcquireTokenOnBehalfOfParameterBuilder(confidentialClientApplicationExecutor)
@@ -44,10 +44,43 @@ namespace Microsoft.Identity.Client
                    .WithUserAssertion(userAssertion);
         }
 
+        internal static AcquireTokenOnBehalfOfParameterBuilder Create(
+            IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
+            IEnumerable<string> scopes,
+            UserAssertion userAssertion,
+            string cacheKey)
+        {
+            return new AcquireTokenOnBehalfOfParameterBuilder(confidentialClientApplicationExecutor)
+                   .WithScopes(scopes)
+                   .WithUserAssertion(userAssertion)
+                   .WithCacheKey(cacheKey);
+        }
+
+        internal static AcquireTokenOnBehalfOfParameterBuilder Create(
+            IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
+            IEnumerable<string> scopes,
+            string cacheKey)
+        {
+            return new AcquireTokenOnBehalfOfParameterBuilder(confidentialClientApplicationExecutor)
+                   .WithScopes(scopes)
+                   .WithCacheKey(cacheKey);
+        }
+
         private AcquireTokenOnBehalfOfParameterBuilder WithUserAssertion(UserAssertion userAssertion)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithUserAssertion);
             Parameters.UserAssertion = userAssertion;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies a key by which to look up the token in the cache instead of searching by an assertion.
+        /// </summary>
+        /// <param name="cacheKey">Key by which to look up the token in the cache</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
+        private AcquireTokenOnBehalfOfParameterBuilder WithCacheKey(string cacheKey)
+        {
+            Parameters.LongRunningOboCacheKey = cacheKey ?? throw new ArgumentNullException(nameof(cacheKey));
             return this;
         }
 

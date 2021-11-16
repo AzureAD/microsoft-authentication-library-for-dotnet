@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 using System;
 using System.Linq;
 using Microsoft.Identity.Client;
@@ -46,7 +49,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 requestContext,
                 authority);
 
-
             // Act
             var actualKey = CacheKeyFactory.GetKeyFromRequest(parameters);
 
@@ -75,7 +77,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 acquireTokenCommonParameters,
                 requestContext,
                 Authority.CreateAuthority(tenantAuthority));
-
 
             // Act
             var actualKey = CacheKeyFactory.GetKeyFromRequest(parameters);
@@ -136,11 +137,78 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(acc.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(acc));
 
             at = at.WithUserAssertion("at_hash");            
-            rt.UserAssertionHash = "rt_hash";
+            rt.OboCacheKey = "rt_hash";
             Assert.AreEqual("at_hash", CacheKeyFactory.GetKeyFromCachedItem(at));
             Assert.AreEqual("rt_hash", CacheKeyFactory.GetKeyFromCachedItem(rt));
             Assert.AreEqual(idt.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(idt));
             Assert.AreEqual(acc.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(acc));
+        }
+
+        [TestMethod]
+        public void TestCacheKeyForObo()
+        {
+            // Arrange
+            var userTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: false);
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
+            var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: TestConstants.AadTenantId, validateAuthority: false);
+            var acquireTokenCommonParameters = new AcquireTokenCommonParameters
+            {
+                ApiId = ApiEvent.ApiIds.AcquireTokenOnBehalfOf,
+                AuthorityOverride = tenantAuthority
+            };
+
+            UserAssertion userAssertion = new UserAssertion(TestConstants.UserAssertion);
+
+            var parameters = new AuthenticationRequestParameters(
+                _serviceBundle,
+                userTokenCache,
+                acquireTokenCommonParameters,
+                requestContext,
+                Authority.CreateAuthority(tenantAuthority))
+            {
+                UserAssertion = userAssertion
+            };
+
+            // Act
+            var actualKey = CacheKeyFactory.GetKeyFromRequest(parameters);
+
+            // Assert
+            Assert.IsNotNull(actualKey);
+            Assert.AreEqual(userAssertion.AssertionHash, actualKey);
+        }
+
+        [TestMethod]
+        public void TestCacheKeyForObo_WithCacheKey()
+        {
+            // Arrange
+            var userTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: false);
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
+            var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: TestConstants.AadTenantId, validateAuthority: false);
+            var acquireTokenCommonParameters = new AcquireTokenCommonParameters
+            {
+                ApiId = ApiEvent.ApiIds.AcquireTokenOnBehalfOf,
+                AuthorityOverride = tenantAuthority
+            };
+
+            string oboCacheKey = "obo-cache-key";
+
+            var parameters = new AuthenticationRequestParameters(
+                _serviceBundle,
+                userTokenCache,
+                acquireTokenCommonParameters,
+                requestContext,
+                Authority.CreateAuthority(tenantAuthority))
+            {
+                UserAssertion = new UserAssertion(TestConstants.UserAssertion),
+                LongRunningOboCacheKey = oboCacheKey
+            };
+
+            // Act
+            var actualKey = CacheKeyFactory.GetKeyFromRequest(parameters);
+
+            // Assert
+            Assert.IsNotNull(actualKey);
+            Assert.AreEqual(oboCacheKey, actualKey);
         }
     }
 }

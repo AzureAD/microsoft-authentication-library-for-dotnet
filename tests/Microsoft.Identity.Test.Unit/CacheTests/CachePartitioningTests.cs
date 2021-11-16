@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -66,10 +67,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             result = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
-            // get AT via refresh_token flow
+            // get AT via OBO flow (no RT cached for OBO)
             TokenCacheHelper.ExpireAllAccessTokens(app.UserTokenCacheInternal);
             var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost();
-            handler.ExpectedPostData = new Dictionary<string, string> { { "grant_type", "refresh_token" } };
+            handler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer } };
             result = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
         }

@@ -60,8 +60,8 @@ namespace Microsoft.Identity.Client
         AcquireTokenForClientParameterBuilder AcquireTokenForClient(IEnumerable<string> scopes);
 
         /// <summary>
-        /// [V3 API] Acquires an access token for this application (usually a Web API) from the authority configured in the application,
-        /// in order to access another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
+        /// [V3 API] Acquires an access token for this application (usually a web API) from the authority configured in the application,
+        /// in order to access another downstream protected web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
         /// See https://aka.ms/msal-net-on-behalf-of.
         /// This confidential client application was itself called with a token which will be provided in the
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.

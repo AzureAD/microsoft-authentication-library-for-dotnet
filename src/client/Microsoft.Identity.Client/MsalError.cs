@@ -996,6 +996,7 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para> For troubleshooting details, see https://aka.ms/msal-net-webview2 .
         /// </summary>
         public const string WebView2LoaderNotFound = "webview2loader_not_found";
+
         /// <summary>
         /// <para>What happens?</para>You configured both Regional Authority and Authority Validation. Authority validation is not currently supported for regional authorities.
         /// <para>Mitigation</para>Set the validateAuthority flag to false to use Azure Regional authority. Do not disable authority validation if you read the authority from an untrusted source, 
@@ -1033,5 +1034,13 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para> Use WithTenantId at the request level instead.
         /// </summary>
         public const string RegionalAndAuthorityOverride = "authority_override_regional";
+
+        /// <summary>
+        /// <para>What happens?</para>The token cache does not contain a token with an OBO cache key that
+        /// matches the <c>longRunningProcessSessionKey</c> passed into <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/>.
+        /// <para>Mitigation</para> Call <see cref="ILongRunningWebApi.InitiateLongRunningProcessInWebApi"/> with this <c>longRunningProcessSessionKey</c> 
+        /// first or call <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/> with an already used <c>longRunningProcessSessionKey</c>.
+        /// </summary>
+        public const string OboCacheKeyNotInCacheError = "obo_cache_key_not_in_cache_error";
     }
-}      
+}

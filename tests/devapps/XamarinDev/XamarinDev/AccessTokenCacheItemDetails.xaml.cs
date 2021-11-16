@@ -27,7 +27,7 @@ namespace XamarinDev
             tenantIdLabel.Text = msalAccessTokenCacheItem.TenantId;
 
             userIdentifierLabel.Text = msalAccessTokenCacheItem.HomeAccountId;
-            userAssertionHashLabel.Text = msalAccessTokenCacheItem.UserAssertionHash;
+            userAssertionHashLabel.Text = msalAccessTokenCacheItem.OboCacheKey;
 
             expiresOnLabel.Text = msalAccessTokenCacheItem.ExpiresOn.ToString(CultureInfo.InvariantCulture);
             scopesLabel.Text = msalAccessTokenCacheItem.ScopeSet.AsSingleString();

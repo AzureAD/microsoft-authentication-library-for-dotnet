@@ -17,10 +17,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public const string TooManyRequestsContent = "Too many requests error";
         public static readonly TimeSpan TestRetryAfterDuration = TimeSpan.FromSeconds(120);
 
-      
-
         public static readonly string B2CTokenResponseWithoutAT =
-            "{\"id_token\":\""+ CreateIdTokenForB2C(TestConstants.Uid, TestConstants.Utid, TestConstants.B2CSignUpSignIn) +"  \"," +
+            "{\"id_token\":\"" + CreateIdTokenForB2C(TestConstants.Uid, TestConstants.Utid, TestConstants.B2CSignUpSignIn) + "  \"," +
             "\"token_type\":\"Bearer\",\"not_before\":1585658742," +
             "\"client_info\":\"" + CreateClientInfo(TestConstants.Uid + "-" + TestConstants.B2CSignUpSignIn, TestConstants.Utid) + "\"," +
             "\"scope\":\"\"," +
@@ -36,7 +34,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string GetFociTokenResponse()
         {
-            return 
+            return
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
             ",\"foci\":\"1\"" +
@@ -60,7 +58,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
               return
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
-            ",\"refresh_token\":\"" + Guid.NewGuid() +"\",\"client_info\"" +
+            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
@@ -156,7 +154,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             return CreateSuccessResponseMessage(
                 foci ? GetFociTokenResponse() : GetDefaultTokenResponse());
-        }        
+        }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessageWithUid(
             string uid, string utid, string displayableName)
@@ -268,24 +266,31 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage(
-            string token = "header.payload.signature", 
-            string expiry = "3599", 
+            string token = "header.payload.signature",
+            string expiry = "3599",
             string tokenType = "Bearer")
         {
             return CreateSuccessResponseMessage(
-                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"client_info\":\"" + CreateClientInfo() + "\",\"access_token\":\"" + token + "\"}");                
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"client_info\":\"" + CreateClientInfo() + "\",\"access_token\":\"" + token + "\"}");
         }
 
-        public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope, bool foci = false)
+        public static HttpResponseMessage CreateSuccessTokenResponseMessage(
+            string uniqueId,
+            string displayableId,
+            string[] scope,
+            bool foci = false,
+            string utid = TestConstants.Utid,
+            string accessToken = "some-access-token",
+            string refreshToken = "OAAsomethingencrypedQwgAA")
         {
             string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             string stringContent = "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":\"" +
                                   scope.AsSingleString() +
-                                  "\",\"access_token\":\"some-access-token\",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\":\"" +
+                                  "\",\"access_token\":\"" + accessToken + "\",\"refresh_token\":\"" + refreshToken + "\",\"id_token\":\"" +
                                   idToken +
                                   (foci ? "\",\"foci\":\"1" : "") +
-                                  "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"" + CreateClientInfo() + "\"}";
+                                  "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"" + CreateClientInfo(uniqueId, utid) + "\"}";
             HttpContent content = new StringContent(stringContent);
             responseMessage.Content = content;
             return responseMessage;
@@ -315,21 +320,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         private static string CreateIdTokenForB2C(string uniqueId, string tenantId, string policy)
         {
-            string id = "{" + 
-                        "  \"exp\": 1585662342," + 
-                        "  \"nbf\": 1585658742," + 
-                        "  \"ver\": \"1.0\"," + 
-                        $"  \"iss\": \"https://fabrikamb2c.b2clogin.com/{tenantId}/v2.0/\"," + 
-                        "  \"sub\": \"52f6cad9-b822-4492-b742-e60cd2d55ee2\"," + 
-                        "  \"aud\": \"841e1190-d73a-450c-9d68-f5cf16b78e81\"," + 
-                        $"  \"acr\": \"{policy}\"," + 
-                        "  \"iat\": 1585658742," + 
-                        "  \"auth_time\": 1585658742," + 
-                        "  \"idp\": \"live.com\"," + 
-                        "  \"name\": \"John Bob\"," + 
-                        "  \"oid\": \""+ uniqueId + "\"," + 
-                        "  \"emails\": [" + 
-                        "    \"john.bob@outlook.com\"" + 
+            string id = "{" +
+                        "  \"exp\": 1585662342," +
+                        "  \"nbf\": 1585658742," +
+                        "  \"ver\": \"1.0\"," +
+                        $"  \"iss\": \"https://fabrikamb2c.b2clogin.com/{tenantId}/v2.0/\"," +
+                        "  \"sub\": \"52f6cad9-b822-4492-b742-e60cd2d55ee2\"," +
+                        "  \"aud\": \"841e1190-d73a-450c-9d68-f5cf16b78e81\"," +
+                        $"  \"acr\": \"{policy}\"," +
+                        "  \"iat\": 1585658742," +
+                        "  \"auth_time\": 1585658742," +
+                        "  \"idp\": \"live.com\"," +
+                        "  \"name\": \"John Bob\"," +
+                        "  \"oid\": \"" + uniqueId + "\"," +
+                        "  \"emails\": [" +
+                        "    \"john.bob@outlook.com\"" +
                         "  ]}";
 
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));

@@ -460,7 +460,7 @@ namespace NetFx
                                    atItem.KeyId,
                                    atItem.RefreshOn,
                                    atItem.TokenType,
-                                   atItem.UserAssertionHash);
+                                   atItem.OboCacheKey);
 
                                 tokenCacheInternal.Accessor.SaveAccessToken(newAtItem);
                             }

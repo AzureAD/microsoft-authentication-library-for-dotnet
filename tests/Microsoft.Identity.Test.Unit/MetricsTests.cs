@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     ExpectedMethod = HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                        TestConstants.UniqueId,
+                        TestConstants.Uid,
                         TestConstants.DisplayableId,
                         TestConstants.s_scope.ToArray())
                 });

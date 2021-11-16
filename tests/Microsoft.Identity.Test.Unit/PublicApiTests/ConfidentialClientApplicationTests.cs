@@ -1411,6 +1411,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                        .WithSendX5C(true);
             PublicClientApplicationTests.CheckBuilderCommonMethods(onBehalfOfBuilder);
 
+            var oboCacheKey = "oboCacheKey";
+            var longRunningOboBuilder = ((ILongRunningWebApi)app).InitiateLongRunningProcessInWebApi(
+                               TestConstants.s_scope.ToArray(),
+                               TestConstants.DefaultClientAssertion,
+                               ref oboCacheKey);
+            PublicClientApplicationTests.CheckBuilderCommonMethods(longRunningOboBuilder);
+
+            longRunningOboBuilder = ((ILongRunningWebApi)app).AcquireTokenInLongRunningProcess(
+                               TestConstants.s_scope.ToArray(),
+                               oboCacheKey);
+            PublicClientApplicationTests.CheckBuilderCommonMethods(longRunningOboBuilder);
+
             var silentBuilder = app.AcquireTokenSilent(TestConstants.s_scope, "user@contoso.com")
                 .WithForceRefresh(false);
 

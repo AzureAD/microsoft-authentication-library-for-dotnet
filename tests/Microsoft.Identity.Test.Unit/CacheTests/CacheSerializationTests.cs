@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId: TestConstants.HomeAccountId, 
                 keyId: kid,
                 tokenType: tokenType, 
-                userAssertionHash: "assertion_hash");
+                oboCacheKey: "assertion_hash");
 
             return item;
         }
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 HomeAccountId = TestConstants.HomeAccountId,
                 Secret = "access_token_secret",
                 RawClientInfo = string.Empty,
-                UserAssertionHash = "assertion_hash"
+                OboCacheKey = "assertion_hash"
             };
         }
 
@@ -677,7 +677,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                expiresOn: DateTimeHelpers.UnixTimestampToDateTime(1548846619),
                extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(1548846619),
                rawClientInfo: string.Empty,
-               homeAccountId: "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb");
+               homeAccountId: "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb"
+               );
 
             expectedAccessTokenItem.AdditionalFieldsJson = "{\r\n  \"access_token_type\": \"Bearer\"\r\n}";
 
@@ -689,7 +690,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
                 RawClientInfo = string.Empty,
                 ClientId = "b945c513-3946-4ecd-b179-6499803a2167",
-                UserAssertionHash = string.Empty
+                OboCacheKey = string.Empty
             };
             AssertRefreshTokenCacheItemsAreEqual(expectedRefreshTokenItem, accessor.GetAllRefreshTokens().First());
 
@@ -848,7 +849,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(expected.GetKey().ToString(), actual.GetKey().ToString());
             CollectionAssert.AreEqual(expected.ScopeSet.ToList(), actual.ScopeSet.ToList(), nameof(actual.ScopeSet));
             Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
-            Assert.AreEqual(expected.UserAssertionHash, actual.UserAssertionHash, nameof(actual.UserAssertionHash));
+            Assert.AreEqual(expected.OboCacheKey, actual.OboCacheKey, nameof(actual.OboCacheKey));
             Assert.AreEqual(expected.RefreshOn, actual.RefreshOn, nameof(actual.RefreshOn));
             Assert.AreEqual(expected.KeyId, actual.KeyId, nameof(actual.KeyId));
             Assert.AreEqual(expected.TokenType, actual.TokenType, nameof(actual.TokenType));
@@ -873,13 +874,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.AreEqual(expected.FamilyId, actual.FamilyId);
             }
 
-            if (string.IsNullOrEmpty(expected.UserAssertionHash))
+            if (string.IsNullOrEmpty(expected.OboCacheKey))
             {
-                Assert.IsTrue(string.IsNullOrEmpty(actual.UserAssertionHash));
+                Assert.IsTrue(string.IsNullOrEmpty(actual.OboCacheKey));
             }
             else
             {
-                Assert.AreEqual(expected.UserAssertionHash, actual.UserAssertionHash);
+                Assert.AreEqual(expected.OboCacheKey, actual.OboCacheKey);
             }
         }
 

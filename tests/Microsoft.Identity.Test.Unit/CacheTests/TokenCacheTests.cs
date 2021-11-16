@@ -661,7 +661,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
                     _homeAccountId, 
-                    userAssertionHash: assertion);
+                    oboCacheKey: assertion);
 
                 cache.Accessor.SaveAccessToken(atItem);
 
@@ -675,7 +675,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 string rtKey = rtItem.GetKey().ToString();
                 rtItem.Secret = rtKey;
-                rtItem.UserAssertionHash = assertion;
+                rtItem.OboCacheKey = assertion;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -683,12 +683,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.s_scope,
                     cache,
                     apiId: ApiEvent.ApiIds.AcquireTokenOnBehalfOf);
-                authParams.UserAssertion = new UserAssertion(atItem.UserAssertionHash + "-random");
+                authParams.UserAssertion = new UserAssertion(atItem.OboCacheKey + "-random");
 
                 var itemAT = cache.FindAccessTokenAsync(authParams).Result;
                 var itemRT = cache.FindRefreshTokenAsync(authParams).Result;
 
-                // cache lookup should fail because there was userassertion hash did not match the one
+                // cache lookup should fail because there was user assertion hash did not match the one
                 // stored in token cache item.
                 Assert.IsNull(itemAT);
                 Assert.IsNull(itemRT);
@@ -714,7 +714,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
                     _homeAccountId,
-                    userAssertionHash: assertionHash);
+                    oboCacheKey: assertionHash);
 
                 cache.Accessor.SaveAccessToken(atItem);
 
@@ -726,7 +726,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     _homeAccountId);
 
-                rtItem.UserAssertionHash = assertionHash;
+                rtItem.OboCacheKey = assertionHash;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(

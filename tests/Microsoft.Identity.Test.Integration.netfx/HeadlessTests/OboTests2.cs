@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string[] s_publicCloudOBOServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
         private static readonly string[] s_arlingtonOBOServiceScope = { "https://arlmsidlab1.us/IDLABS_APP_Confidential_Client/user_impersonation" };
 
-        //TODO: acquire scenario specific client ids from the lab resonse
+        //TODO: acquire scenario specific client ids from the lab response
         private const string PublicCloudPublicClientIDOBO = "be9b0186-7dfd-448a-a944-f771029105bf";
         private const string PublicCloudConfidentialClientIDOBO = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
         private const string ArlingtonConfidentialClientIDOBO = "c0555d2d-02f2-4838-802e-3463422e571d";
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ClientCreds_ServicePrincipal_OBO_PPE_Async()
         {
-            //An explination of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
+            //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
             X509Certificate2 cert = GetCertificate();
             IReadOnlyList<string> scopes = new List<string>() { OBOServicePpeClientID + "/.default" };
             IReadOnlyList<string> scopes2 = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
@@ -214,6 +214,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             MsalAssert.AssertAuthResult(authResult, user);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
             //Run OBO again. Should get token from cache
             authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
@@ -232,7 +233,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Expire access tokens
             TokenCacheHelper.ExpireAllAccessTokens(confidentialApp.UserTokenCacheInternal);
 
-            //Run OBO again. Should do token refresh since the AT is expired
+            //Run OBO again. Should do OBO flow since the AT is expired and RTs aren't cached for normal OBO flow
             authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
@@ -244,7 +245,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
-            AssertLastHttpContent("refresh_token");
+            AssertLastHttpContent("on_behalf_of");
 
             //creating second app with no refresh tokens
             var atItems = confidentialApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens();

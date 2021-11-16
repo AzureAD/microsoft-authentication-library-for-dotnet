@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Performance
             string tenant = IsMultiTenant ? $"{_tenantPrefix}{tokenId}" : _tenantPrefix;
             string scope = $"{_scopePrefix}{tokenId}";
 
-            MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(scope, tenant, homeAccountId, userAssertionHash: userAssertionHash);
+            MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(scope, tenant, homeAccountId, oboCacheKey: userAssertionHash);
             
             _cca.UserTokenCacheInternal.Accessor.SaveAccessToken(atItem);
 
