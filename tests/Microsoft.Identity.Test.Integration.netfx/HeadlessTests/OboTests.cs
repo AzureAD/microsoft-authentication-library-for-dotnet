@@ -82,7 +82,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync().ConfigureAwait(false);
 
             // Cache has 1 partition (user-provided key) with 1 token
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -90,7 +89,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             result = await cca.AcquireTokenOnBehalfOf(s_scopes, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
             // Cache has 2 partitions (user-provided key, assertion) with 1 token each
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(2, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -98,13 +96,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Returns long-running token
             result = await cca.AcquireTokenInLongRunningProcess(s_scopes, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
             // Returns normal token
             result = await cca.AcquireTokenOnBehalfOf(s_scopes, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
         }
 
@@ -136,7 +132,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
                                     .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
+            Assert.AreEqual(userAssertion.AssertionHash, oboCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -144,13 +140,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // AcquireLR - AT from cache
             result = await cca.AcquireTokenInLongRunningProcess(s_scopes, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
             // AcquireNormal - AT from cache
             result = await cca.AcquireTokenOnBehalfOf(s_scopes, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
             // Expire AT
@@ -160,7 +154,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
                                 .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -171,7 +164,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // AcquireLR - AT from IdP via RT flow (new AT, RT cached)
             result = await cca.AcquireTokenInLongRunningProcess(s_scopes, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -182,7 +174,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // AcquireNormal - AT from IdP via OBO flow (only new AT cached, old RT still left in cache)
             result = await cca.AcquireTokenOnBehalfOf(s_scopes, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -215,7 +206,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // AcquireNormal - AT from IdP via OBO flow (only new AT cached, no RT in cache)
             var result = await cca.AcquireTokenOnBehalfOf(s_scopes, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(0, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -223,7 +213,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // AcquireLR - AT from cache
             result = await cca.AcquireTokenInLongRunningProcess(s_scopes, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
             // Expire AT
@@ -244,7 +233,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
                     .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -255,7 +243,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // AcquireLR - AT from IdP via RT flow (new AT, RT cached)
             result = await cca.AcquireTokenInLongRunningProcess(s_scopes, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -288,7 +275,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // AcquireNormal - AT from IdP via OBO flow(only new AT cached, no RT in cache)
             var result = await cca.AcquireTokenOnBehalfOf(s_scopes, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(0, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -297,7 +283,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
                 .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
             // Expire AT
@@ -307,7 +292,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
                 .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
@@ -318,7 +302,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // AcquireLR - AT from IdP via RT flow(new AT, RT cached)
             result = await cca.AcquireTokenInLongRunningProcess(s_scopes, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);

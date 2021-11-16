@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     internal class AcquireTokenOnBehalfOfParameters : AbstractAcquireTokenConfidentialClientParameters, IAcquireTokenParameters
     {
         /// <remarks>
-        /// Is null when <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/> is called.
+        /// User assertion is null when <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/> is called.
         /// </remarks>
         public UserAssertion UserAssertion { get; set; }
         /// <summary>

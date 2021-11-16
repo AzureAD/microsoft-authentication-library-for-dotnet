@@ -124,8 +124,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
 
         // This should be set on a per-application basis, but can be overridden on a per-request basis should it be needed. 
-        public bool SendX5C { get; set; } 
-        
+        public bool SendX5C { get; set; }
+
         public string LoginHint
         {
             get
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         /// <remarks>
-        /// Is null when <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/> is called.
+        /// User assertion is null when <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/> is called.
         /// </remarks>
         public UserAssertion UserAssertion { get; set; }
 

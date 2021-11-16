@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Acquires an access token for this web API from the authority configured in the application,
         /// in order to access another downstream protected web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
-        /// See https://aka.ms/msal-net-on-behalf-of.
+        /// See https://aka.ms/msal-net-long-running-obo .
         /// This confidential client application was itself called with a token which will be provided in the
         /// <paramref name="userToken">userToken</paramref> parameter.
         /// </summary>
@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Retrieves an access token from the cache using the provided cache key that can be used to
         /// access another downstream protected web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
-        /// See https://aka.ms/msal-net-on-behalf-of.
+        /// See https://aka.ms/msal-net-long-running-obo .
         /// </summary>
         /// <remarks>
         /// This method is intended to be used in the long running processes inside of web APIs.
