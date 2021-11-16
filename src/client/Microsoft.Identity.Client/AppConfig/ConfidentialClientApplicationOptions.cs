@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
         /// when ConfidentialClientApplication objects are reused.
         /// </summary>
         /// <remarks>
-        /// Fasle by default.
+        /// False by default.
         /// Not recommended for apps that call RemoveAsync
         /// </remarks>
         public bool EnableCacheSynchronization { get; set; } = false;
