@@ -95,8 +95,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void CacheSynchronizationWithDefault()
+        public void CacheSynchronizationWithDefaultCCA()
         {
+            //Validate CacheSynchronizationEnabled when app is created from ApplicaitonOptions for CCA
             var options = new ConfidentialClientApplicationOptions()
             {
                 ClientSecret = "secret",
@@ -123,10 +124,20 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
             Assert.AreEqual(true, (app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
 
+            //Validate CacheSynchronizationEnabled is false by default when app is created from ConfidentialClientApplicationBuilder
             app = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString()).WithClientSecret(TestConstants.ClientSecret).BuildConcrete();
             Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
 
-            var app2 = PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString()).BuildConcrete();
+            //Validate CacheSynchronizationEnabled when app is created from ApplicaitonOptions for PCA
+            var options2 = new PublicClientApplicationOptions()
+            {
+                ClientId = TestConstants.ClientId
+            };
+            var app2 = PublicClientApplicationBuilder.CreateWithApplicationOptions(options2).Build();
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+
+            //Validate CacheSynchronizationEnabled is true by default when app is created from PublicClientApplicationBuilder
+            app2 = PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString()).BuildConcrete();
             Assert.IsTrue((app2.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
