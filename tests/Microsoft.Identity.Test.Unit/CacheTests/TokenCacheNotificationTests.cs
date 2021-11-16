@@ -242,15 +242,20 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
                 var cacheAccessRecorder2 = app.UserTokenCache.RecordAccess();
-
+                Guid correlationId = Guid.NewGuid();
                 await app
                     .AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithCorrelationId(correlationId)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 Assert.IsFalse(cacheAccessRecorder2.LastBeforeAccessNotificationArgs.HasTokens);
                 Assert.IsFalse(cacheAccessRecorder2.LastBeforeWriteNotificationArgs.HasTokens);
                 Assert.IsTrue(cacheAccessRecorder2.LastAfterAccessNotificationArgs.HasTokens);
+
+                Assert.AreEqual(correlationId, cacheAccessRecorder2.LastBeforeAccessNotificationArgs.CorrelationId);
+                Assert.AreEqual(correlationId, cacheAccessRecorder2.LastBeforeWriteNotificationArgs.CorrelationId);
+                Assert.AreEqual(correlationId, cacheAccessRecorder2.LastAfterAccessNotificationArgs.CorrelationId);
 
                 Trace.WriteLine("Step 3 - call GetAccounts - now with 1 account");
                 var cacheAccessRecorder3 = app.UserTokenCache.RecordAccess();

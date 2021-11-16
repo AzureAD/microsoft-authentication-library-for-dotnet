@@ -391,7 +391,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the correlation id to be used in the authentication request.
+        /// Sets the correlation id to be used in the authentication request. Used to track a request in the logs of both the SDK and the Identity Provider service.
+        /// If not set, a random one will be generated. 
         /// </summary>
         /// <param name="correlationId">Correlation id of the authentication request.</param>
         /// <returns>The builder to chain the .With methods.</returns>

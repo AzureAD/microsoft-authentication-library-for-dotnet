@@ -440,46 +440,8 @@ namespace NetFx
                             break;
 
                         case 'e': // expire all ATs
-
-                            var tokenCacheInternal = pca.UserTokenCache as ITokenCacheInternal;
-                            var ats = tokenCacheInternal.Accessor.GetAllAccessTokens();
-                            // set access tokens as expired
-                            foreach (var atItem in ats)
-                            {
-                                MsalAccessTokenCacheItem newAtItem = new MsalAccessTokenCacheItem(
-                                   atItem.Environment,
-                                   atItem.ClientId,
-                                   atItem.ScopeString,
-                                   atItem.TenantId,
-                                   atItem.Secret,
-                                   atItem.CachedAt,
-                                   DateTimeOffset.UtcNow, // expires now
-                                   atItem.ExtendedExpiresOn,
-                                   atItem.RawClientInfo,
-                                   atItem.HomeAccountId,
-                                   atItem.KeyId,
-                                   atItem.RefreshOn,
-                                   atItem.TokenType,
-                                   atItem.OboCacheKey);
-
-                                tokenCacheInternal.Accessor.SaveAccessToken(newAtItem);
-                            }
-
-                            TokenCacheNotificationArgs args =
-                                new TokenCacheNotificationArgs(
-                                pca.UserTokenCache as ITokenCacheInternal,
-                                s_clientIdForPublicApp,
-                                null,
-                                true,
-                                false,
-                                true,
-                                CancellationToken.None);
-
-                            await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
-
+                            await (pca.UserTokenCache as TokenCache).ExpireAllAccessTokensForTestAsync().ConfigureAwait(false);
                             break;
-                            
-
                         case 'x':
                             return;
                         default:

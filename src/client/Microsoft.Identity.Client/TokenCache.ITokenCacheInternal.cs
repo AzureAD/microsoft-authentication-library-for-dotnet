@@ -153,14 +153,16 @@ namespace Microsoft.Identity.Client
                     if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
                         var args = new TokenCacheNotificationArgs(
-                            this,
-                            ClientId,
-                            account,
+                            tokenCache: this,
+                            clientId: ClientId,
+                            account: account,
                             hasStateChanged: true,
                             tokenCacheInternal.IsApplicationCache,
+                            suggestedCacheKey: suggestedWebCacheKey,
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
-                            requestParams.RequestContext.UserCancellationToken,
-                            suggestedCacheKey: suggestedWebCacheKey);
+                            suggestedCacheExpiry: null,
+                            cancellationToken: requestParams.RequestContext.UserCancellationToken,
+                            correlationId: requestParams.RequestContext.CorrelationId);
 
                         Stopwatch sw = Stopwatch.StartNew();
 
@@ -224,15 +226,16 @@ namespace Microsoft.Identity.Client
                         }
 
                         var args = new TokenCacheNotificationArgs(
-                            this,
-                            ClientId,
-                            account,
+                            tokenCache: this,
+                            clientId: ClientId,
+                            account: account,
                             hasStateChanged: true,
                             tokenCacheInternal.IsApplicationCache,
-                            tokenCacheInternal.HasTokensNoLocks(),
-                            requestParams.RequestContext.UserCancellationToken,
                             suggestedCacheKey: suggestedWebCacheKey,
-                            suggestedCacheExpiry: cacheExpiry);
+                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                            suggestedCacheExpiry: cacheExpiry,
+                            cancellationToken: requestParams.RequestContext.UserCancellationToken,
+                            correlationId: requestParams.RequestContext.CorrelationId);                       
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -715,16 +718,17 @@ namespace Microsoft.Identity.Client
             if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
             {
                 var args = new TokenCacheNotificationArgs(
-                this,
-                ClientId,
-                null,
-                hasStateChanged: true,
-                tokenCacheInternal.IsApplicationCache,
-                tokenCacheInternal.HasTokensNoLocks(),
-                default,
-                suggestedCacheKey: null,
-                suggestedCacheExpiry: null);
-
+                            tokenCache: this,
+                            clientId: ClientId,
+                            account: null,
+                            hasStateChanged: true,
+                            tokenCacheInternal.IsApplicationCache,
+                            suggestedCacheKey: null,
+                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                            suggestedCacheExpiry: null,
+                            cancellationToken: default,
+                            correlationId: default);              
+             
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
         }
@@ -1089,14 +1093,16 @@ namespace Microsoft.Identity.Client
                     if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
                         var args = new TokenCacheNotificationArgs(
-                            this,
-                            ClientId,
-                            account,
-                            true,
+                            tokenCache: this,
+                            clientId: ClientId,
+                            account: account,
+                            hasStateChanged: true,
                             tokenCacheInternal.IsApplicationCache,
-                            tokenCacheInternal.HasTokensNoLocks(),
-                            requestParameters.RequestContext.UserCancellationToken,
-                            account.HomeAccountId.Identifier);
+                            suggestedCacheKey: account.HomeAccountId.Identifier,
+                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                            suggestedCacheExpiry: null,
+                            cancellationToken: requestParameters.RequestContext.UserCancellationToken,
+                            correlationId: requestParameters.RequestContext.CorrelationId);
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
@@ -1117,17 +1123,19 @@ namespace Microsoft.Identity.Client
                 {
                     if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
-                        var afterAccessArgs = new TokenCacheNotificationArgs(
-                            this,
-                            ClientId,
-                            account,
-                            true,
-                            tokenCacheInternal.IsApplicationCache,
-                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
-                            requestParameters.RequestContext.UserCancellationToken,
-                            account.HomeAccountId.Identifier);
+                        var args = new TokenCacheNotificationArgs(
+                           tokenCache: this,
+                           clientId: ClientId,
+                           account: account,
+                           hasStateChanged: true,
+                           tokenCacheInternal.IsApplicationCache,
+                           suggestedCacheKey: account.HomeAccountId.Identifier,
+                           hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                           suggestedCacheExpiry: null,
+                           cancellationToken: requestParameters.RequestContext.UserCancellationToken,
+                           correlationId: requestParameters.RequestContext.CorrelationId);
 
-                        await tokenCacheInternal.OnAfterAccessAsync(afterAccessArgs).ConfigureAwait(false);
+                        await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     }
                 }
             }

@@ -93,36 +93,10 @@ namespace UWP_standalone
         private async void ExpireAtsAsync(object sender, RoutedEventArgs e)
         {
             var pca = CreatePublicClient();
-            var tokenCacheInternal = pca.UserTokenCache as ITokenCacheInternal;
 
-            TokenCacheNotificationArgs args =
-                 new TokenCacheNotificationArgs(
-                 pca.UserTokenCache as ITokenCacheInternal,
-                 s_clientID,
-                 null,
-                 true,
-                 false,
-                 true,
-                 CancellationToken.None);
+            await (pca.UserTokenCache as TokenCache).ExpireAllAccessTokensForTestAsync().ConfigureAwait(false);
 
-            await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
-
-            var ats = tokenCacheInternal.Accessor.GetAllAccessTokens();
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Expiring tokens ...");
-
-            // set access tokens as expired
-            foreach (var accessItem in ats)
-            {
-                var newAt = accessItem.WithExpiresOn(DateTimeOffset.UtcNow);
-                tokenCacheInternal.Accessor.SaveAccessToken(newAt);
-            }
-
-            await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
-
-            sb.AppendLine("Done expiring tokens.");
-            await DisplayMessageAsync(sb.ToString()).ConfigureAwait(false);
+            await DisplayMessageAsync("Done expiring tokens.").ConfigureAwait(false);
         }
 
         private async void ClearCacheAsync(object sender, RoutedEventArgs e)
