@@ -844,6 +844,45 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public async Task RemoveGuestAADAccountAsync()
+        {
+            string aadHomeAccId = $"{TestConstants.Uid}.{TestConstants.MsaTenantId}";
+
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityOrganizationsTenant);
+                // configure msa-pt
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
+
+                requestParams.Account = new Account(
+                                    aadHomeAccId, 
+                                    "user@outlook.com", // matching is not on UPN
+                                    null); // account does not have wam_id, might be coming directly from WAM
+
+                var webAccount = new WebAccount(wamAccountProvider, "user@outlook.com", WebAccountState.Connected);
+                IReadOnlyList<WebAccount> webAccounts = new List<WebAccount>() { webAccount };
+
+                _wamProxy.FindAllWebAccountsAsync(wamAccountProvider, TestConstants.ClientId).Returns(Task.FromResult(webAccounts));
+
+                // WAM can give MSAL the home account ID of a Wam account, which MSAL matches to a WAM account
+                _aadPlugin.GetHomeAccountIdOrNull(webAccount).Returns(aadHomeAccId);
+
+                var atsParams = new AcquireTokenSilentParameters();
+                _webAccountProviderFactory.GetAccountProviderAsync("organizations").ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+
+                
+                // This assertion ensures that WebAccount.SignOutAsync() is called. Since the WebAccount is fake, it throws a specific exception.
+                // This can be improved with a extra layer of abstraction over WebAccount, but it is sufficient for testing
+
+                await AssertException.TaskThrowsAsync<FileNotFoundException>( // Since WebAccount is a real object, it throws this exception
+                    () => _wamBroker.RemoveAccountAsync(harness.ServiceBundle.Config, requestParams.Account))
+                    .ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
         public async Task GetAccounts_DoesNotCallPlugins_Async()
         {
             string aadHomeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
