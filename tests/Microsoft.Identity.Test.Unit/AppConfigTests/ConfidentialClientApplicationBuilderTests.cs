@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 ClientId = TestConstants.ClientId
             };
             var app2 = PublicClientApplicationBuilder.CreateWithApplicationOptions(options2).Build();
-            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+            Assert.IsTrue((app2.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
 
             //Validate CacheSynchronizationEnabled is true by default when app is created from PublicClientApplicationBuilder
             app2 = PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString()).BuildConcrete();
