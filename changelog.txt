@@ -8,7 +8,7 @@
 
 ### Bug Fixes:
 ==========
-**Fixed issue where the authentication browser pop up would fail to show but no exception is thrown** See [2839](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2839)
+**Fixed issue where the authentication browser pop up would fail to show without an exception being thrown** See [2839](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2839)
 **MSAL WAM now properly signs out guest accounts** See (3016)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3016]
 **Reworded in-memory cache warning for web apps not using serialization** See (2990)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2990]
 **Fixed issue where Pop token does not rotate properly for CCA** See [3003](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3003)
