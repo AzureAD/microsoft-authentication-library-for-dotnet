@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Threading;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -69,6 +70,23 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Trace.Listeners.Add(new TextWriterTraceListener(traceFile, "testListener"));
             }
+        }
+
+        public static bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
+        {
+            int iCount = maxTimeInMilliSec / 100;
+            while (iCount > 0)
+            {
+                if (func())
+                {
+                    return true;
+                }
+                Thread.Yield();
+                Thread.Sleep(100);
+                iCount--;
+            }
+
+            return false;
         }
     }
 }

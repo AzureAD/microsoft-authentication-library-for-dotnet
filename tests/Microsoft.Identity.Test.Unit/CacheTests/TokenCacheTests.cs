@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -1309,10 +1310,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 //Act
                 await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
-                
+
                 //Assert
                 Assert.IsTrue(dump != string.Empty);
-                Assert.IsTrue(dump.Contains("Total number of access tokens in cache: 20"));
+                Assert.IsTrue(YieldTillSatisfied(() => dump.Contains("Total number of access tokens in cache: 20")));
                 Assert.IsTrue(dump.Contains("Total number of refresh tokens in cache: 20"));
                 Assert.IsTrue(dump.Contains("Token cache dump of the first 10 cache keys"));
 

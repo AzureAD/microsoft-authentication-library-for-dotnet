@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             IList<Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem>> tokens 
                                         = new List<Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem>>();
 
-            bool randomizeClientInfo = tokensQuantity > 1 ? true : false;
+            bool randomizeClientInfo = tokensQuantity > 1;
 
             for (int i = 1; i <= tokensQuantity; i++)
             {
@@ -233,7 +233,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     new Tuple<MsalAccessTokenCacheItem, 
                               MsalRefreshTokenCacheItem, 
                               MsalIdTokenCacheItem, 
-                              MsalAccountCacheItem>(result.Item1, result.Item2, result.Item3, result.Item4);
+                              MsalAccountCacheItem>(result.AT, result.RT, result.ID, result.Account);
 
                 tokens.Add(token);
             }
@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return tokens;
         }
 
-        internal static (MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem) PopulateCacheWithOneAccessToken(ITokenCacheAccessor accessor, bool randomizeClientInfo = false)
+        internal static (MsalAccessTokenCacheItem AT, MsalRefreshTokenCacheItem RT, MsalIdTokenCacheItem ID, MsalAccountCacheItem Account) PopulateCacheWithOneAccessToken(ITokenCacheAccessor accessor, bool randomizeClientInfo = false)
         {
             string uid = randomizeClientInfo ? Guid.NewGuid().ToString() : TestConstants.Uid;
             string utid = randomizeClientInfo ? Guid.NewGuid().ToString() : TestConstants.Utid;
