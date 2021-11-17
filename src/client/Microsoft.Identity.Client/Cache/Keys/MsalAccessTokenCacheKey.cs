@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
         public string ToLogString(bool piiEnabled = false)
         {
             return MsalCacheKeys.GetCredentialKey(
-                piiEnabled? _homeAccountId : _homeAccountId.GetHashCode().ToString(),
+                piiEnabled? _homeAccountId : _homeAccountId?.GetHashCode().ToString(),
                 _environment,
                 _credentialDescriptor,
                 _clientId,
