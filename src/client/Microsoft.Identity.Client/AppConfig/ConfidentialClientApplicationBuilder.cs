@@ -74,7 +74,9 @@ namespace Microsoft.Identity.Client
             ConfidentialClientApplication.GuardMobileFrameworks();
 
             var config = new ApplicationConfiguration();
-            return new ConfidentialClientApplicationBuilder(config).WithClientId(clientId);
+            return new ConfidentialClientApplicationBuilder(config)
+                .WithClientId(clientId)
+                .WithCacheSynchronization(false);
         }
 
         /// <summary>
@@ -285,13 +287,12 @@ namespace Microsoft.Identity.Client
         /// when ConfidentialClientApplication objects are reused.
         /// </summary>
         /// <remarks>
-        /// True by default, but subject to change.
+        /// False by default.
         /// Not recommended for apps that call RemoveAsync
         /// </remarks>
         public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
         {          
             Config.CacheSynchronizationEnabled = enableCacheSynchronization;
-
             return this;
         }
 
