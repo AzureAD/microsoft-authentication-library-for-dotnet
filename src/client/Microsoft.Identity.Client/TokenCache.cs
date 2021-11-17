@@ -35,8 +35,9 @@ namespace Microsoft.Identity.Client
         internal const int ExpirationTooLongInDays = 10 * 365;
 
         private readonly IFeatureFlags _featureFlags;
-        private readonly ITokenCacheAccessor _accessor;
         private volatile bool _hasStateChanged;
+
+        internal ITokenCacheAccessor Accessor { get; set; }
 
         internal IServiceBundle ServiceBundle { get; }
         internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
@@ -48,10 +49,10 @@ namespace Microsoft.Identity.Client
 
         internal string ClientId => ServiceBundle.Config.ClientId;
 
-        ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
+        ITokenCacheAccessor ITokenCacheInternal.Accessor => Accessor;
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
 
-        private bool IsAppTokenCache { get; }
+        internal bool IsAppTokenCache { get; }
         bool ITokenCacheInternal.IsApplicationCache => IsAppTokenCache;
 
         private readonly OptionalSemaphoreSlim _semaphoreSlim;
@@ -77,7 +78,7 @@ namespace Microsoft.Identity.Client
             _semaphoreSlim = new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled);
 
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
-            _accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);
+            Accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);
             _featureFlags = proxy.GetFeatureFlags();
 
             UsesDefaultSerialization = optionalDefaultSerializer != null;
@@ -112,7 +113,7 @@ namespace Microsoft.Identity.Client
         public void SetIosKeychainSecurityGroup(string securityGroup)
         {
 #if iOS
-            _accessor.SetiOSKeychainSecurityGroup(securityGroup);
+            Accessor.SetiOSKeychainSecurityGroup(securityGroup);
             (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
 #endif
         }
@@ -122,7 +123,7 @@ namespace Microsoft.Identity.Client
             if (_featureFlags.IsFociEnabled)
             {
                 var metadataCacheItem = new MsalAppMetadataCacheItem(clientId, environment, familyId);
-                _accessor.SaveAppMetadata(metadataCacheItem);
+                Accessor.SaveAppMetadata(metadataCacheItem);
             }
         }
 
@@ -148,7 +149,7 @@ namespace Microsoft.Identity.Client
             var partitionKeyFromResponse = CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId);
             Debug.Assert(partitionKeyFromResponse != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partition");
 
-            foreach (var accessToken in _accessor.GetAllAccessTokens(partitionKeyFromResponse))
+            foreach (var accessToken in Accessor.GetAllAccessTokens(partitionKeyFromResponse))
             {
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
@@ -175,7 +176,7 @@ namespace Microsoft.Identity.Client
 
             foreach (var cacheItem in accessTokenItemList)
             {
-                _accessor.DeleteAccessToken(cacheItem);
+                Accessor.DeleteAccessToken(cacheItem);
             }
         }
 
@@ -201,7 +202,7 @@ namespace Microsoft.Identity.Client
 
         private IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
         {
-            var refreshTokens = _accessor.GetAllRefreshTokens(partitionKey);
+            var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
             return filterByClientId
                 ? refreshTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : refreshTokens;
@@ -209,7 +210,7 @@ namespace Microsoft.Identity.Client
 
         private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
         {
-            var accessTokens = _accessor.GetAllAccessTokens(partitionKey);
+            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
             return filterByClientId
                 ? accessTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : accessTokens;
@@ -217,7 +218,7 @@ namespace Microsoft.Identity.Client
 
         private IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokensWithNoLocks(bool filterByClientId, string partitionKey)
         {
-            var idTokens = _accessor.GetAllIdTokens(partitionKey);
+            var idTokens = Accessor.GetAllIdTokens(partitionKey);
             return filterByClientId
                 ? idTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : idTokens;

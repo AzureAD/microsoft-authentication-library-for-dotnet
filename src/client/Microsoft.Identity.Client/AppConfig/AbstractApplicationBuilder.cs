@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="options">Options for the internal MSAL token caches. </param>
 #if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
-        [EditorBrowsable(EditorBrowsableState.Never)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
         public T WithCacheOptions(CacheOptions options)
         {
@@ -525,7 +525,7 @@ namespace Microsoft.Identity.Client
             return Config;
         }
 
-        #region Authority
+#region Authority
         private void ResolveAuthority()
         {
             if (Config.Authority?.AuthorityInfo != null)
@@ -826,7 +826,7 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-        #endregion
+#endregion
 
         private static string GetValueIfNotEmpty(string original, string value)
         {

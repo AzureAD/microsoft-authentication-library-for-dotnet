@@ -24,17 +24,17 @@ namespace Microsoft.Identity.Client
 
         byte[] ITokenCacheSerializer.SerializeMsalV2()
         {
-            return new TokenCacheDictionarySerializer(_accessor).Serialize(_unknownNodes);
+            return new TokenCacheDictionarySerializer(Accessor).Serialize(_unknownNodes);
         }
 
         void ITokenCacheSerializer.DeserializeMsalV2(byte[] msalV2State)
         {
-            _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State, false);
+            _unknownNodes = new TokenCacheDictionarySerializer(Accessor).Deserialize(msalV2State, false);
         }
 
         byte[] ITokenCacheSerializer.SerializeMsalV3()
         {
-            return new TokenCacheJsonSerializer(_accessor).Serialize(_unknownNodes);
+            return new TokenCacheJsonSerializer(Accessor).Serialize(_unknownNodes);
         }
 
         void ITokenCacheSerializer.DeserializeMsalV3(byte[] msalV3State, bool shouldClearExistingCache)
@@ -43,11 +43,11 @@ namespace Microsoft.Identity.Client
             {
                 if (shouldClearExistingCache)
                 {
-                    _accessor.Clear();
+                    Accessor.Clear();
                 }
                 return;
             }
-            _unknownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State, shouldClearExistingCache);
+            _unknownNodes = new TokenCacheJsonSerializer(Accessor).Deserialize(msalV3State, shouldClearExistingCache);
         }
     }
 }
