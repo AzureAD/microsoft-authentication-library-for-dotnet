@@ -189,6 +189,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             }
             else if (DesktopOsHelper.IsLinux())
             {
+                string sudoUser = Environment.GetEnvironmentVariable("SUDO_USER");
+                if (!string.IsNullOrWhiteSpace(sudoUser))
+                {
+                    throw new MsalClientException(MsalError.LinuxXdgOpen, MsalErrorMessage.LinuxOpenAsSudoNotSupported);
+                }
+
                 try
                 {
                     ProcessStartInfo psi = null;
