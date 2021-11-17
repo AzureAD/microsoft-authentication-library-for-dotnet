@@ -1,3 +1,20 @@
+4.38.0
+==========
+### New Features:
+**Disabling cache syncronization for confidential client apps by default** See [2848](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2848)
+**MSAL will now provide the correlation id as part of cache callback (TokenCacheNotificationArgs)** See [3008](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3008)
+**MSAL now provides a key to access the OBO token for long running process** See (2733)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2733]
+**Added hybrid SPA support to MSAL** See (2920)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2920]
+
+### Bug Fixes:
+==========
+**Fixed issue where the authentication browser pop up would fail to show but no exception is thrown** See [2839](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2839)
+**MSAL WAM now properly signs out guest accounts** See (3016)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3016]
+**Reworded in-memory cache warning for web apps not using serialization** See (2990)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2990]
+**Fixed issue where Pop token does not rotate properly for CCA** See [3003](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3003)
+**MSAL now throws exception when the back button is pressed during authentication** See [2991](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2991)
+**WithAuthority at app level and add WithTenantId have been depricated** See [2837](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2837)
+
 4.37.0
 ==========
 ### New Features:
