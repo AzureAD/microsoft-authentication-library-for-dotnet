@@ -2,7 +2,7 @@
 ==========
 ### New Features:
 **Disabling cache synchronization for confidential client apps by default** to improve performance. See [2848](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2848)
-**MSAL will now provide the correlation id as part of cache callback (TokenCacheNotificationArgs)** See [3008](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3008)
+**MSAL will now provide the correlation id used to call Azure AD, as part of cache callback (TokenCacheNotificationArgs)** See [3008](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3008)
 **MSAL now provides a key to access the OBO token for long running process** See (2733)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2733]
 **Added hybrid SPA support to MSAL** See (2920)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2920]
 
