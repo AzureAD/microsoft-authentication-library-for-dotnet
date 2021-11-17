@@ -1313,7 +1313,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 //Assert
                 Assert.IsTrue(dump != string.Empty);
-                Assert.IsTrue(YieldTillSatisfied(() => dump.Contains("Total number of access tokens in cache: 20")));
+                Assert.IsTrue(dump.Contains("Total number of access tokens in cache: 20"));
                 Assert.IsTrue(dump.Contains("Total number of refresh tokens in cache: 20"));
                 Assert.IsTrue(dump.Contains("Token cache dump of the first 10 cache keys"));
 

@@ -494,6 +494,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             return atItem;
         }
 
+        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
+        {
+            int iCount = maxTimeInMilliSec / 100;
+            while (iCount > 0)
+            {
+                if (func())
+                {
+                    return true;
+                }
+                Thread.Yield();
+                Thread.Sleep(100);
+                iCount--;
+            }
+
+            return false;
+        }
+
         private const string BackgroundFetch_Failed = "Background fetch failed";
     }
 }

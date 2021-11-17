@@ -260,31 +260,28 @@ namespace Microsoft.Identity.Client
         //This will run on a background thread to mitigate this.
         private void DumpCacheToLogs(AuthenticationRequestParameters requestParameters)
         {
-            _ = Task.Run( () =>
+
+            if (requestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Verbose))
             {
+                IReadOnlyList<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
+                IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
+                IList<MsalAccessTokenCacheKey> accessTokenCacheKeys = accessTokenCacheItems.Take(10).Select(item => item.GetKey()).ToList();
 
-                if (requestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Verbose))
+                StringBuilder tokenCacheKeyDump = new StringBuilder();
+
+                tokenCacheKeyDump.AppendLine($"Total number of access tokens in cache: {accessTokenCacheItems.Count}");
+                tokenCacheKeyDump.AppendLine($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count}");
+
+                tokenCacheKeyDump.AppendLine($"Token cache dump of the first {accessTokenCacheKeys.Count} cache keys");
+                for (int i = 0; i < accessTokenCacheKeys.Count; i++)
                 {
-                    IReadOnlyList<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
-                    IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
-                    IList<MsalAccessTokenCacheKey> accessTokenCacheKeys = accessTokenCacheItems.Take(10).Select(item => item.GetKey()).ToList();
+                    var cacheKey = accessTokenCacheKeys.ElementAt(i);
 
-                    StringBuilder tokenCacheKeyDump = new StringBuilder();
-
-                    tokenCacheKeyDump.AppendLine($"Total number of access tokens in cache: {accessTokenCacheItems.Count}");
-                    tokenCacheKeyDump.AppendLine($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count}");
-
-                    tokenCacheKeyDump.AppendLine($"Token cache dump of the first {accessTokenCacheKeys.Count} cache keys");
-                    for (int i = 0; i < accessTokenCacheKeys.Count; i++)
-                    {
-                        var cacheKey = accessTokenCacheKeys.ElementAt(i);
-
-                        tokenCacheKeyDump.AppendLine($"Msal Cache Key: {cacheKey.ToLogString(requestParameters.RequestContext.Logger.PiiLoggingEnabled)}");
-                    }
-
-                    requestParameters.RequestContext.Logger.Verbose(tokenCacheKeyDump.ToString());
+                    tokenCacheKeyDump.AppendLine($"Msal Cache Key: {cacheKey.ToLogString(requestParameters.RequestContext.Logger.PiiLoggingEnabled)}");
                 }
-            });
+
+                requestParameters.RequestContext.Logger.Verbose(tokenCacheKeyDump.ToString());
+            }
         }
 
         private bool IsLegacyAdalCacheEnabled(AuthenticationRequestParameters requestParams)
