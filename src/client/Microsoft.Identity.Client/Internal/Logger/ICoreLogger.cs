@@ -13,6 +13,8 @@ namespace Microsoft.Identity.Client.Core
         string ClientName { get; }
         string ClientVersion { get; }
         bool PiiLoggingEnabled { get; }
+        void HealthMetric(string messageScrubbed);
+        void HealthMetricPii(string messageWithPii, string messageScrubbed);
         void Error(string messageScrubbed);
         void ErrorPii(string messageWithPii, string messageScrubbed);
         void ErrorPii(Exception exWithPii);

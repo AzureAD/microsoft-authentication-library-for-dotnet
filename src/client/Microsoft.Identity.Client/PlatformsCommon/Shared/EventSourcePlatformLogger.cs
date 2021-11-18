@@ -14,6 +14,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         internal static MsalEventSource MsalEventSource { get; }
 
+        public void Healthmetric(string message)
+        {
+            MsalEventSource.Error(message);
+        }
+
         public void Error(string message)
         {
             MsalEventSource.Error(message);

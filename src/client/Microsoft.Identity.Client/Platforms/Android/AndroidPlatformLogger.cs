@@ -9,6 +9,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
 {
     internal class AndroidPlatformLogger : IPlatformLogger
     {
+        public void Healthmetric(string message)
+        {
+            //NoOp
+        }
+
         public void Error(string errorMessage)
         {
             Log.Error(null, errorMessage);

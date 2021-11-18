@@ -10,23 +10,28 @@ namespace Microsoft.Identity.Client
     public enum LogLevel
     {
         /// <summary>
+        ///     HealthMetric Log Level
+        /// </summary>
+        HealthMetric = 0,
+
+        /// <summary>
         ///     Error Log level
         /// </summary>
-        Error = 0,
+        Error = 1,
 
         /// <summary>
         ///     Warning Log level
         /// </summary>
-        Warning = 1,
+        Warning = 2,
 
         /// <summary>
         ///     Information Log level
         /// </summary>
-        Info = 2,
+        Info = 3,
 
         /// <summary>
         ///     Verbose Log level
         /// </summary>
-        Verbose = 3
+        Verbose = 4
     }
 }

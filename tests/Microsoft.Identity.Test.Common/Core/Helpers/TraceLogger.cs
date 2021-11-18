@@ -27,6 +27,16 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public bool PiiLoggingEnabled => true;
 
+        public void HealthMetric(string messageScrubbed)
+        {
+            Trace.WriteLine($"{_prefix}[HealthMetric] {messageScrubbed}");
+        }
+
+        public void HealthMetricPii(string messageWithPii, string messageScrubbed)
+        {
+            Trace.WriteLine($"{_prefix}[HealthMetricPii] {messageWithPii}");
+        }
+
         public void Error(string messageScrubbed)
         {
             Trace.WriteLine($"{_prefix}[Error] {messageScrubbed}");

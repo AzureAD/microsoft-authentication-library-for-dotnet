@@ -10,6 +10,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     #if !WINDOWS_APP
     class ConsolePlatformLogger : IPlatformLogger
     {
+        public void Healthmetric(string message)
+        {
+            Console.WriteLine(message);
+        }
+
         public void Error(string message)
         {
             Console.WriteLine(message);
