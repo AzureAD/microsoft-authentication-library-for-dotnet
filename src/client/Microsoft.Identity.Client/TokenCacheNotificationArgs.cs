@@ -18,6 +18,32 @@ namespace Microsoft.Identity.Client
         /// This constructor is for test purposes only. It allows apps to unit test their MSAL token cache implementation code.
         /// </summary>
         public TokenCacheNotificationArgs(
+          ITokenCacheSerializer tokenCache,
+          string clientId,
+          IAccount account,
+          bool hasStateChanged,
+          bool isApplicationCache,
+          string suggestedCacheKey,
+          bool hasTokens,
+          DateTimeOffset? suggestedCacheExpiry,
+          CancellationToken cancellationToken)
+            : this(tokenCache,
+                   clientId,
+                   account,
+                   hasStateChanged,
+                   isApplicationCache,
+                   suggestedCacheKey,
+                   hasTokens,
+                   suggestedCacheExpiry,
+                   cancellationToken,
+                   default)
+            {
+            }
+
+        /// <summary>
+        /// This constructor is for test purposes only. It allows apps to unit test their MSAL token cache implementation code.
+        /// </summary>
+        public TokenCacheNotificationArgs(
             ITokenCacheSerializer tokenCache, 
             string clientId, 
             IAccount account, 
@@ -39,8 +65,8 @@ namespace Microsoft.Identity.Client
             CancellationToken = cancellationToken;
             CorrelationId = correlationId;
             SuggestedCacheExpiry = suggestedCacheExpiry;
-        }      
-
+        }
+        
         /// <summary>
         /// Gets the <see cref="ITokenCacheSerializer"/> involved in the transaction
         /// </summary>
