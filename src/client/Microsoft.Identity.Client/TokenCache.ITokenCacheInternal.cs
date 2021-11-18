@@ -456,7 +456,7 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            requestParams.RequestContext.Logger.HealthMetric($"Discovered {tokenCacheItems.Count} refresh tokens in cache using key: {partitionKey}");
+            requestParams.RequestContext.Logger.HealthMetric($"Discovered {tokenCacheItems.Count} access tokens in cache using partition key: {partitionKey}");
 
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
