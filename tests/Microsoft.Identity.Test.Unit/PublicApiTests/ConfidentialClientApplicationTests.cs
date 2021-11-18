@@ -899,6 +899,34 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task AcquireTokenByAuthorizationCode_IgnoresRegion_Async(bool autodetectRegion)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // MSAL should not auto-detect, but if it does, this test should fail because a call to IMDS is configured
+                string region = autodetectRegion ? ConfidentialClientApplication.AttemptRegionDiscovery : TestConstants.Region;
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithAzureRegion(region)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", result.AuthenticationResultMetadata.TokenEndpoint);
+            }
+        }
+
         [TestMethod]
         public async Task GetAuthorizationRequestUrlDuplicateParamsTestAsync()
         {
@@ -1504,7 +1532,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 CoreAssert.IsWithinRange(
                             DateTimeOffset.UtcNow + TimeSpan.FromSeconds(3600),
                             result.ExpiresOn,
-                            TimeSpan.FromSeconds(5));              
+                            TimeSpan.FromSeconds(5));
 
                 // Add second token with shorter expiration time
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(expiresIn: "1800");

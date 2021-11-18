@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 _harness.ServiceBundle.ApplicationLogger,
                 _harness.ServiceBundle.PlatformProxy.CryptographyManager,
                 Guid.NewGuid().AsMatsCorrelationId());
+            _apiEvent.ApiId = ApiEvent.ApiIds.AcquireTokenForClient;
             _testRequestContext.ApiEvent = _apiEvent;
             _regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, true);
         }
