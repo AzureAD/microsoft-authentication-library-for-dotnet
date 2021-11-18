@@ -7,13 +7,12 @@
 **Added hybrid SPA support to MSAL**. See https://aka.ms/msal-net/spa-auth-code and [2920](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2920)
 
 ### Bug Fixes:
-==========
-**Fixed issue where the authentication browser pop up would fail to show without an exception being thrown** See [2839](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2839)
-**MSAL WAM now properly signs out guest accounts** See (3016)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3016]
-**Reworded in-memory cache warning for web apps not using serialization** See (2990)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2990]
-**Fixed issue where Pop token does not rotate properly for CCA** See [3003](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3003)
-**MSAL now throws exception when the back button is pressed during authentication** See [2991](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2991)
-**WithAuthority at app level and add WithTenantId have been deprecated** See [2837](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2837)
+**Fixed issue where the authentication browser pop up would fail to show without an exception being thrown**. See [2839](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2839)  
+**MSAL WAM now properly signs out guest accounts**. See [3016](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3016)  
+**Reworded in-memory cache warning for web apps not using serialization**. See [2990](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2990)  
+**Fixed issue where Proof-of-Possession token does not rotate properly for confidential client applications**. See [3003](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3003)  
+**MSAL now returns a more descriptive exception when the browser back button is pressed during authentication**. See [2991](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2991)  
+**On the request builder, `WithAuthority` has been deprecated and `WithTenantId` was added as an alternative instead**. See [2837](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2837)  
 
 4.37.0
 ==========
