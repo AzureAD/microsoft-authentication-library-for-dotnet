@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security;
@@ -51,6 +52,69 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         #endregion
+
+        [TestMethod]
+        public async Task OboAndClientWithRegionalTestAsync()
+        {
+            // Reuse the same CCA with regional for OBO and for client in different orders
+
+            // Setup: Get lab users, create PCA and get user tokens
+            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var certificate = CertificateHelper.FindCertificateByThumbprint(TestConstants.AutomationTestThumbprint);
+            Dictionary<string, string> queryParams = new Dictionary<string, string>
+            {
+                ["allowestsrnonmsi"] = "true" // allow regional for testing
+            };
+
+            var pca = PublicClientApplicationBuilder
+                    .Create(PublicClientID)
+                    .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                    .Build();
+
+            var userResult = await pca
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, new NetworkCredential("", user1.GetOrFetchPassword()).SecurePassword)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(OboConfidentialClientID)
+                .WithAuthority(new Uri($"https://login.microsoftonline.com/{userResult.TenantId}"), true)
+                .WithClientSecret(_confidentialClientSecret)
+                .WithAzureRegion(TestConstants.Region)
+                .WithExtraQueryParameters(queryParams)
+                .WithLegacyCacheCompatibility(false)
+                .Build();
+
+            // OBO uses global - IdP
+            var oboResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(userResult.AccessToken))
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, oboResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsFalse(oboResult.AuthenticationResultMetadata.TokenEndpoint.Contains(TestConstants.Region));
+
+            // Client uses regional - IdP
+            var clientResult = await cca.AcquireTokenForClient(new string[] { "https://graph.microsoft.com/.default" })
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, clientResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsTrue(clientResult.AuthenticationResultMetadata.TokenEndpoint.Contains(TestConstants.Region));
+
+            // OBO from cache
+            var oboResult1 = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(userResult.AccessToken))
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, oboResult1.AuthenticationResultMetadata.TokenSource);
+
+            // Client from cache
+            var clientResult2 = await cca.AcquireTokenForClient(new string[] { "https://graph.microsoft.com/.default" })
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, clientResult2.AuthenticationResultMetadata.TokenSource);
+        }
 
         /// <summary>
         /// Tests the behavior when calling both, long-running and normal OBO methods.
