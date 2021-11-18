@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Region
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             string region = null;
-            if (requestContext.ApiEvent?.ApiId != TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
+            if (requestContext.ApiEvent?.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
                 region = await _regionManager.GetAzureRegionAsync(requestContext).ConfigureAwait(false);
             }
