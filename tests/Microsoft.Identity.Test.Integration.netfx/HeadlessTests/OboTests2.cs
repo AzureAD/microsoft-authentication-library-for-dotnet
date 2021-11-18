@@ -129,8 +129,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             if (_keyVault == null)
             {
                 _keyVault = new KeyVaultSecretsProvider();
-                // s_publicCloudCcaSecret = _keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
-                // s_arlingtonCCASecret = _keyVault.GetSecret(TestConstants.MsalArlingtonCCAKeyVaultUri).Value;
             }
         }
 
@@ -333,7 +331,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID)
                                                                  .WithAuthority(authority)
-                                                                 .WithRedirectUri(TestConstants.RedirectUri)
+                                                                 .WithRedirectUri(TestConstants.RedirectUri)                                                                 
                                                                  .WithTestLogging()
                                                                  .Build();
 
@@ -341,9 +339,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
+            var ccaAuthority = new Uri(oboHost + authResult.TenantId);
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(confidentialClientID)
-                .WithAuthority(new Uri(oboHost + authResult.TenantId), true)
+                .WithAuthority(ccaAuthority, true)
+                .WithAzureRegion(TestConstants.Region) // should be ignored by OBO
                 .WithClientSecret(secret)
                 .WithTestLogging()
                 .Build();
@@ -360,6 +360,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             MsalAssert.AssertAuthResult(authResult, user);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                ccaAuthority.ToString() + "/oauth2/v2.0/token",
+                authResult.AuthenticationResultMetadata.TokenEndpoint,
+                "OBO does not obey region");
 
 #pragma warning disable CS0618 // Type or member is obsolete
             await confidentialApp.GetAccountsAsync().ConfigureAwait(false);

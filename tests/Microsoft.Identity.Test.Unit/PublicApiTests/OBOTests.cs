@@ -51,6 +51,36 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        public async Task OBO_SkipsRegional_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                
+                AddMockHandlerAadSuccess(httpManager);
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAzureRegion("eastus1")
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+                var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                                      .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(
+                    TokenSource.IdentityProvider, 
+                    result.AuthenticationResultMetadata.TokenSource);
+                
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/common/oauth2/v2.0/token", // no region
+                    result.AuthenticationResultMetadata.TokenEndpoint);
+            }
+        }
+
+        [TestMethod]
         public async Task AcquireTokenByObo_AccessTokenExpiredRefreshTokenNotAvailable_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
