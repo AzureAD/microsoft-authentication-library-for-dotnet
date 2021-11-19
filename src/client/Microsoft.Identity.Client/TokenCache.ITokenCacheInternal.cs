@@ -456,7 +456,7 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            requestParams.RequestContext.Logger.HealthMetric($"Discovered {tokenCacheItems.Count} access tokens in cache using partition key: {partitionKey}");
+            requestParams.RequestContext.Logger.LogAlways($"Discovered {tokenCacheItems.Count} access tokens in cache using partition key: {partitionKey}");
 
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
@@ -775,11 +775,10 @@ namespace Microsoft.Identity.Client
                 return null;
 
             var requestKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
-
             IReadOnlyList<MsalRefreshTokenCacheItem> allRts = Accessor.GetAllRefreshTokens(requestKey);
             if (allRts.Count != 0)
             {
-                requestParams.RequestContext.Logger.HealthMetric($"Discovered {allRts.Count} refresh tokens in cache using key: {requestKey}");
+                requestParams.RequestContext.Logger.LogAlways($"Discovered {allRts.Count} refresh tokens in cache using key: {requestKey}");
                 var metadata =
                     await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                         requestParams.AuthorityInfo,

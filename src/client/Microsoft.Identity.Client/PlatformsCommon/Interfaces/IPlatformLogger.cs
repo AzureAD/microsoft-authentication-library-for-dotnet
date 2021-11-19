@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 {
     internal interface IPlatformLogger
     {
-        void Healthmetric(string message);
+        void LogAlways(string message);
         void Error(string message);
         void Warning(string message);
         void Verbose(string message);
