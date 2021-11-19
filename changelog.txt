@@ -1,3 +1,20 @@
+4.38.0
+==========
+### New Features:
+**Disabling cache synchronization for confidential client apps by default** to improve performance. See [2848](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2848)
+**MSAL now provides the correlation ID used in a to call Azure AD as part of cache callback (`TokenCacheNotificationArgs`)**. See [3008](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3008)
+**MSAL now provides a new specific API for long running web APIs, in addition to `AcquireTokenOnBehalfOf`**, which no longer requests refresh tokens. The advantage is that the On-Behalf-Of token cache is now smaller and automatically has an eviction, and long running web APIs are easier to write. See https://aka.ms/msal-net-long-running-obo and [2733](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2733)
+**Added hybrid SPA support to MSAL**. See https://aka.ms/msal-net/spa-auth-code and [2920](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2920)
+
+### Bug Fixes:
+**Fixed issue where the authentication browser pop up would fail to show without an exception being thrown**. See [2839](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2839)  
+**MSAL WAM now properly signs out guest accounts**. See [3016](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3016)  
+**Reworded in-memory cache warning for web apps not using serialization**. See [2990](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2990)  
+**Fixed issue where Proof-of-Possession token does not rotate properly for confidential client applications**. See [3003](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3003)  
+**MSAL now returns a more descriptive exception when the browser back button is pressed during authentication**. See [2991](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2991)  
+**On the request builder, `WithAuthority` has been deprecated and `WithTenantId` was added as an alternative instead**. See [2837](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2837)
+**MSAL will now only perform regional look up for client credential flows** See [3029](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3029)
+
 4.37.0
 ==========
 ### New Features:
