@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
     {
         public void LogAlways(string message)
         {
-            //NoOp
+            Log.Info(null, message);
         }
 
         public void Error(string errorMessage)

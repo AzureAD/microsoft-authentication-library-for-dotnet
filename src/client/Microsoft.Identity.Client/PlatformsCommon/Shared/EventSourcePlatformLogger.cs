@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public void LogAlways(string message)
         {
-            MsalEventSource.Error(message);
+            MsalEventSource.Information(message);
         }
 
         public void Error(string message)

@@ -441,6 +441,9 @@ namespace Microsoft.Identity.Client
             Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
             IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, partitionKey);
+
+            requestParams.RequestContext.Logger.LogAlways($"Discovered {tokenCacheItems.Count} access tokens in cache using partition key: {partitionKey}");
+
             if (tokenCacheItems.Count == 0)
             {
 
@@ -455,8 +458,6 @@ namespace Microsoft.Identity.Client
 
                 return null;
             }
-
-            requestParams.RequestContext.Logger.LogAlways($"Discovered {tokenCacheItems.Count} access tokens in cache using partition key: {partitionKey}");
 
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
