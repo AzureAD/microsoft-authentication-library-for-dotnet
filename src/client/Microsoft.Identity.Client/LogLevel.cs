@@ -10,9 +10,9 @@ namespace Microsoft.Identity.Client
     public enum LogLevel
     {
         /// <summary>
-        ///     LogAlways Log Level
+        ///     Always Log Level
         /// </summary>
-        LogAlways = -1,
+        Always = -1,
 
         /// <summary>
         ///     Error Log level

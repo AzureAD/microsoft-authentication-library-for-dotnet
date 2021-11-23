@@ -442,7 +442,7 @@ namespace Microsoft.Identity.Client
 
             IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true, partitionKey);
 
-            requestParams.RequestContext.Logger.LogAlways($"Discovered {tokenCacheItems.Count} access tokens in cache using partition key: {partitionKey}");
+            requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {tokenCacheItems.Count} access tokens in cache using partition key: {partitionKey}");
 
             if (tokenCacheItems.Count == 0)
             {
@@ -777,9 +777,10 @@ namespace Microsoft.Identity.Client
 
             var requestKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             IReadOnlyList<MsalRefreshTokenCacheItem> allRts = Accessor.GetAllRefreshTokens(requestKey);
+            requestParams.RequestContext.Logger.Always($"[FindRefreshTokenAsync] Discovered {allRts.Count} refresh tokens in cache using key: {requestKey}");
+
             if (allRts.Count != 0)
             {
-                requestParams.RequestContext.Logger.LogAlways($"Discovered {allRts.Count} refresh tokens in cache using key: {requestKey}");
                 var metadata =
                     await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                         requestParams.AuthorityInfo,

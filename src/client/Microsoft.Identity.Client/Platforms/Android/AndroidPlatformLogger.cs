@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 {
     internal class AndroidPlatformLogger : IPlatformLogger
     {
-        public void LogAlways(string message)
+        public void Always(string message)
         {
             Log.Info(null, message);
         }

@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     #if !WINDOWS_APP
     class ConsolePlatformLogger : IPlatformLogger
     {
-        public void LogAlways(string message)
+        public void Always(string message)
         {
             Console.WriteLine(message);
         }

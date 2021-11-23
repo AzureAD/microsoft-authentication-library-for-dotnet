@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         internal static MsalEventSource MsalEventSource { get; }
 
-        public void LogAlways(string message)
+        public void Always(string message)
         {
             MsalEventSource.Information(message);
         }

@@ -27,14 +27,14 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public bool PiiLoggingEnabled => true;
 
-        public void LogAlways(string messageScrubbed)
+        public void Always(string messageScrubbed)
         {
-            Trace.WriteLine($"{_prefix}[LogAlways] {messageScrubbed}");
+            Trace.WriteLine($"{_prefix}[Always] {messageScrubbed}");
         }
 
-        public void LogAlwaysPii(string messageWithPii, string messageScrubbed)
+        public void AlwaysPii(string messageWithPii, string messageScrubbed)
         {
-            Trace.WriteLine($"{_prefix}[LogAlwaysPii] {messageWithPii}");
+            Trace.WriteLine($"{_prefix}[AlwaysPii] {messageWithPii}");
         }
 
         public void Error(string messageScrubbed)
