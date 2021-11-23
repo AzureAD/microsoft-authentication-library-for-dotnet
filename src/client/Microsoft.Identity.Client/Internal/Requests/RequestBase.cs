@@ -115,11 +115,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ICoreLogger logger)
         {
-            logger.Always($"[LogMetricsFromAuthResult] Cache Refresh Reason: {authenticationResult.AuthenticationResultMetadata.CacheRefreshReason.ToString()}");
-            logger.Always($"[LogMetricsFromAuthResult] DurationInCacheInMs: {authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs.ToString()}");
-            logger.Always($"[LogMetricsFromAuthResult] DurationTotalInMs: {authenticationResult.AuthenticationResultMetadata.DurationTotalInMs.ToString()}");
-            logger.Always($"[LogMetricsFromAuthResult] DurationInHttpInMs: {authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs.ToString()}");
-            logger.AlwaysPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint.ToString()}",
+            logger.Always($"[LogMetricsFromAuthResult] Cache Refresh Reason: {authenticationResult.AuthenticationResultMetadata.CacheRefreshReason}");
+            logger.Always($"[LogMetricsFromAuthResult] DurationInCacheInMs: {authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs}");
+            logger.Always($"[LogMetricsFromAuthResult] DurationTotalInMs: {authenticationResult.AuthenticationResultMetadata.DurationTotalInMs}");
+            logger.Always($"[LogMetricsFromAuthResult] DurationInHttpInMs: {authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs}");
+            logger.AlwaysPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint?? ""}",
                                 $"TokenEndpoint: ****");
         }
 
