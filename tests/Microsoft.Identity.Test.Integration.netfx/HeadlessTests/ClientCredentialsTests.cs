@@ -283,32 +283,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        private static string GetSignedClientAssertionUsingMsalInternal(string clientId, IDictionary<string, string> claims)
-        {
-#if NET_CORE
-            var manager = new Client.Platforms.netcore.NetCoreCryptographyManager();
-#else
-            var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
-#endif
-            var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
-            var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);
-            return jwtToken.Sign(clientCredential, true);
-        }
-
-        private static X509Certificate2 GetCertificate(bool useRSACert = false)
-        {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(useRSACert ?
-                TestConstants.RSATestCertThumbprint :
-                TestConstants.AutomationTestThumbprint);
-            if (cert == null)
-            {
-                throw new InvalidOperationException(
-                    "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
-            }
-
-            return cert;
-        }
-
         private static string GetSignedClientAssertionUsingWilson(
             string issuer,
             string aud,
@@ -335,7 +309,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             return signedClientAssertion;
         }
 
-       
         private static string GetSignedClientAssertionManual(
             string issuer, // client ID
             string audience, // ${authority}/oauth2/v2.0/token for AAD or ${authority}/oauth2/token for ADFS
