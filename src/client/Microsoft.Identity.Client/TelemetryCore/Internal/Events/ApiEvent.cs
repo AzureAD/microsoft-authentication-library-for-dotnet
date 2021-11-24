@@ -7,8 +7,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Region;
-using Microsoft.Identity.Client;
-using System.Diagnostics;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -78,13 +76,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public ApiIds ApiId
         {
-            get => (ApiIds)Enum.Parse(typeof(ApiIds), this[MsalTelemetryBlobEventNames.ApiIdConstStrKey]);
+            get => TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiIdString) ? (ApiIds)Enum.Parse(typeof(ApiIds), apiIdString) : ApiIds.None;
+
             set => this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] = ((int) value).ToString(CultureInfo.InvariantCulture);
         }
 
         public string ApiIdString
         {
-            get => this.ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey) ? 
+            get => ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey) ? 
                 this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] : 
                 null;
         }
