@@ -195,22 +195,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
 #endif
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
-            var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);
+            var cert = ConfidentialAppSettings.GetSettings(Cloud.Public).GetCertificate();
+            var clientCredential = ClientCredentialWrapper.CreateWithCertificate(cert, claims);
             return jwtToken.Sign(clientCredential, true);
-        }
-
-        private static X509Certificate2 GetCertificate(bool useRSACert = false)
-        {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(useRSACert ?
-                TestConstants.RSATestCertThumbprint :
-                TestConstants.AutomationTestThumbprint);
-            if (cert == null)
-            {
-                throw new InvalidOperationException(
-                    "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
-            }
-
-            return cert;
         }
     }
 }

@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Test.Unit
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
         public const string AutomationTestThumbprint = "378938210C976692D7F523B8C4FFBB645D17CE92";
-        public const string RSATestCertThumbprint = "A7F68F87199F412451BF0FB364A3358A949D2CA8";
 
         public static readonly SortedSet<string> s_scopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" }, StringComparer.OrdinalIgnoreCase);
         public static readonly SortedSet<string> s_cacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" }, StringComparer.OrdinalIgnoreCase);

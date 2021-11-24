@@ -27,6 +27,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -64,7 +65,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ClientCreds_ServicePrincipal_OBO_PPE_Async()
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
-            X509Certificate2 cert = GetCertificate();
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            var cert = settings.GetCertificate(); 
+
             IReadOnlyList<string> scopes = new List<string>() { OBOServicePpeClientID + "/.default" };
             IReadOnlyList<string> scopes2 = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
 
@@ -105,20 +108,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.Cache, authenticationResult.AuthenticationResultMetadata.TokenSource);
-        }
-
-        private static X509Certificate2 GetCertificate(bool useRSACert = false)
-        {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(useRSACert ?
-                TestConstants.RSATestCertThumbprint :
-                TestConstants.AutomationTestThumbprint);
-            if (cert == null)
-            {
-                throw new InvalidOperationException(
-                    "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
-            }
-
-            return cert;
         }
 
         [TestInitialize]
