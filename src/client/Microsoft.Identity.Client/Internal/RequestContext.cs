@@ -34,7 +34,6 @@ namespace Microsoft.Identity.Client.Internal
         public TelemetryHelper CreateTelemetryHelper(EventBase eventToStart)
         {
             return new TelemetryHelper(
-                ServiceBundle.MatsTelemetryManager,
                 ServiceBundle.HttpTelemetryManager,
                 eventToStart);
         }

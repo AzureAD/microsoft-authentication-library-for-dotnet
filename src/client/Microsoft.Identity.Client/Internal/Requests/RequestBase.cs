@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -51,8 +50,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
         }
 
-
-
         /// <summary>
         /// Return a custom set of scopes to override the default MSAL logic of merging
         /// input scopes with reserved scopes (openid, profile etc.)
@@ -79,38 +76,32 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
-            try
+
+            using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
             {
-                using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
+                try
                 {
-                    try
-                    {
-                        AuthenticationRequestParameters.LogParameters();
-                        LogRequestStarted(AuthenticationRequestParameters);
+                    AuthenticationRequestParameters.LogParameters();
+                    LogRequestStarted(AuthenticationRequestParameters);
 
-                        AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
-                        LogReturnedToken(authenticationResult);
+                    AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                    LogReturnedToken(authenticationResult);
 
-                        UpdateTelemetry(sw, apiEvent, authenticationResult);
-                        LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
-                        return authenticationResult;
-                    }
-                    catch (MsalException ex)
-                    {
-                        apiEvent.ApiErrorCode = ex.ErrorCode;
-                        AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
-                        throw;
-                    }
+                    UpdateTelemetry(sw, apiEvent, authenticationResult);
+                    LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
+                    return authenticationResult;
                 }
-            }
-            finally
-            {
-                ServiceBundle.MatsTelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
+                catch (MsalException ex)
+                {
+                    apiEvent.ApiErrorCode = ex.ErrorCode;
+                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                    throw;
+                }
             }
         }
 
@@ -156,11 +147,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AccountId = accountId ?? "",
                 WasSuccessful = false
             };
-
-            foreach (var kvp in AuthenticationRequestParameters.GetApiTelemetryFeatures().ToList())
-            {
-                apiEvent[kvp.Key] = kvp.Value;
-            }
 
             if (AuthenticationRequestParameters.AuthorityInfo != null)
             {

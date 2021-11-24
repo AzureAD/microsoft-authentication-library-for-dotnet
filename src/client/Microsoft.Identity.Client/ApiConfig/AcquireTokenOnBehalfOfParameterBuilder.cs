@@ -68,7 +68,6 @@ namespace Microsoft.Identity.Client
 
         private AcquireTokenOnBehalfOfParameterBuilder WithUserAssertion(UserAssertion userAssertion)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithUserAssertion);
             Parameters.UserAssertion = userAssertion;
             return this;
         }
@@ -97,8 +96,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenOnBehalfOfParameterBuilder WithSendX5C(bool withSendX5C)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C, withSendX5C);
-            Parameters.SendX5C = withSendX5C; 
+            Parameters.SendX5C = withSendX5C;
             return this;
         }
 
@@ -117,7 +115,6 @@ namespace Microsoft.Identity.Client
         /// avoid negatively affecting the performance of your application</remarks>
         public AcquireTokenOnBehalfOfParameterBuilder WithForceRefresh(bool forceRefresh)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithForceRefresh, forceRefresh);
             Parameters.ForceRefresh = forceRefresh;
             return this;
         }

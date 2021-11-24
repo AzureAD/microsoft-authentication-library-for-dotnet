@@ -1,23 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Json;
-using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.OAuth2.Throttling;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -119,8 +117,6 @@ namespace Microsoft.Identity.Client.OAuth2
                     requestContext.ApiEvent.DurationInHttpInMs += _httpManager.LastRequestDurationInMs;
                 }
 
-                DecorateHttpEvent(method, requestContext, response, httpEvent);
-
                 if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
                 {
                     requestContext.Logger.Verbose("[Oauth2Client] Processing error response ");
@@ -169,36 +165,6 @@ namespace Microsoft.Identity.Client.OAuth2
             if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientVersion))
             {
                 _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
-            }
-        }
-
-        private void DecorateHttpEvent(HttpMethod method, RequestContext requestContext, HttpResponse response, HttpEvent httpEvent)
-        {
-            httpEvent.HttpResponseStatus = (int)response.StatusCode;
-            httpEvent.UserAgent = response.UserAgent;
-            httpEvent.HttpMethod = method.Method;
-
-            IDictionary<string, string> headersAsDictionary = response.HeadersAsDictionary;
-            if (headersAsDictionary.ContainsKey("x-ms-request-id") &&
-                headersAsDictionary["x-ms-request-id"] != null)
-            {
-                httpEvent.RequestIdHeader = headersAsDictionary["x-ms-request-id"];
-            }
-
-            if (headersAsDictionary.ContainsKey("x-ms-clitelem") &&
-                headersAsDictionary["x-ms-clitelem"] != null)
-            {
-                XmsCliTelemInfo xmsCliTeleminfo = new XmsCliTelemInfoParser().ParseXMsTelemHeader(
-                    headersAsDictionary["x-ms-clitelem"],
-                    requestContext.Logger);
-
-                if (xmsCliTeleminfo != null)
-                {
-                    httpEvent.TokenAge = xmsCliTeleminfo.TokenAge;
-                    httpEvent.SpeInfo = xmsCliTeleminfo.SpeInfo;
-                    httpEvent.ServerErrorCode = xmsCliTeleminfo.ServerErrorCode;
-                    httpEvent.ServerSubErrorCode = xmsCliTeleminfo.ServerSubErrorCode;
-                }
             }
         }
 

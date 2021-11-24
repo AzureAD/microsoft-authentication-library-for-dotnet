@@ -64,11 +64,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public ApiTelemetryId ApiTelemId => _commonParameters.ApiTelemId;
 
-        public IEnumerable<KeyValuePair<string, string>> GetApiTelemetryFeatures()
-        {
-            return _commonParameters.GetApiTelemetryFeatures();
-        }
-
         public ApiEvent.ApiIds ApiId => _commonParameters.ApiId;
 
         public RequestContext RequestContext { get; }
@@ -115,7 +110,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return _commonParameters.Claims;
             }
         }
-
 
         public IAuthenticationScheme AuthenticationScheme => _commonParameters.AuthenticationScheme;
 

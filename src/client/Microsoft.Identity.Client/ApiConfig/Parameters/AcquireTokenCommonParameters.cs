@@ -6,15 +6,12 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
     internal class AcquireTokenCommonParameters
     {
-        private readonly Dictionary<string, string> _apiTelemetry = new Dictionary<string, string>();
         public ApiEvent.ApiIds ApiId { get; set; } = ApiEvent.ApiIds.None;
         public Guid CorrelationId { get; set; }
         public Guid UserProvidedCorrelationId { get; set; }
@@ -28,26 +25,5 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IDictionary<string, string> ExtraHttpHeaders { get; set; }
 
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
-
-        public void AddApiTelemetryFeature(ApiTelemetryFeature feature)
-        {
-            _apiTelemetry[MatsConverter.AsString(feature)] = TelemetryConstants.True;
-        }
-
-        public void AddApiTelemetryFeature(ApiTelemetryFeature feature, bool isTrue)
-        {
-            string telemetryEnabled = TelemetryConstants.False;
-            if (isTrue)
-            {
-                telemetryEnabled = TelemetryConstants.True;
-            }
-
-            _apiTelemetry[MatsConverter.AsString(feature)] = telemetryEnabled;
-        }
-
-        public IEnumerable<KeyValuePair<string, string>> GetApiTelemetryFeatures()
-        {
-            return _apiTelemetry;
-        }
     }
 }

@@ -80,7 +80,6 @@ namespace Microsoft.Identity.Client
 #endif
         public AcquireTokenByRefreshTokenParameterBuilder WithSendX5C(bool withSendX5C)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
             Parameters.SendX5C = withSendX5C;
             return this;
         }

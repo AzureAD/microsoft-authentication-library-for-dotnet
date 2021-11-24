@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenByIntegratedWindowsAuthParameterBuilder WithUsername(string username)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithUsername);
             Parameters.Username = username;
             return this;
         }

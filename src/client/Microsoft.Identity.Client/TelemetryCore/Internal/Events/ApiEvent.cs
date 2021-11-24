@@ -4,9 +4,9 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Region;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -32,14 +32,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public enum ApiIds
         {
             None = 0,
-
-            // TODO: These are all new ids, one for each of the flows.
-            // These are differentiated from the existing IDs because of the new construct of having
-            // the TelemetryFeature bits to avoid geometric permutations of ID values and allow more robust filtering
-            // on the server side.
-
-            // If these arrive, then the permutations of "with behavior/hint/scope/refresh/etc" are all
-            // bits sent as separate fields via ApiTelemetryFeature values.
             AcquireTokenByAuthorizationCode = 1000,
             AcquireTokenByRefreshToken = 1001,
             AcquireTokenByIntegratedWindowsAuth = 1002,
@@ -50,7 +42,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             AcquireTokenSilent = 1007,
             AcquireTokenByDeviceCode = 1008,
             GetAuthorizationRequestUrl = 1009,
-
             GetAccounts = 1010,
             GetAccountById = 1011,
             GetAccountsByUserFlow = 1012,
@@ -66,25 +57,25 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             string correlationId) : base(EventNamePrefix + "api_event", correlationId)
         {
             _logger = logger;
-            _cryptographyManager = cryptographyManager;            
+            _cryptographyManager = cryptographyManager;
         }
 
         public ApiTelemetryId ApiTelemId
         {
-            set => this[MsalTelemetryBlobEventNames.ApiTelemIdConstStrKey] = ((int) value).ToString(CultureInfo.InvariantCulture);
+            set => this[MsalTelemetryBlobEventNames.ApiTelemIdConstStrKey] = ((int)value).ToString(CultureInfo.InvariantCulture);
         }
 
         public ApiIds ApiId
         {
             get => TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiIdString) ? (ApiIds)Enum.Parse(typeof(ApiIds), apiIdString) : ApiIds.None;
 
-            set => this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] = ((int) value).ToString(CultureInfo.InvariantCulture);
+            set => this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] = ((int)value).ToString(CultureInfo.InvariantCulture);
         }
 
         public string ApiIdString
         {
-            get => ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey) ? 
-                this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] : 
+            get => ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey) ?
+                this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] :
                 null;
         }
 
@@ -144,9 +135,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         {
 #pragma warning disable CA1305 // Specify IFormatProvider
             get
-            {  return this.ContainsKey(IsAccessTokenCacheHitKey) ?
-                    (this[IsAccessTokenCacheHitKey] == true.ToString().ToLowerInvariant()) : 
-                    false; }
+            {
+                return this.ContainsKey(IsAccessTokenCacheHitKey) ?
+                     (this[IsAccessTokenCacheHitKey] == true.ToString().ToLowerInvariant()) :
+                     false;
+            }
             set { this[IsAccessTokenCacheHitKey] = value.ToString().ToLowerInvariant(); }
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
@@ -165,7 +158,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
                                          : null;
         }
 
-#region Region
+        #region Region
         public string RegionUsed
         {
             get => this.ContainsKey(RegionUsedKey) ? this[RegionUsedKey] : null;
@@ -174,7 +167,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public int RegionAutodetectionSource
         {
-            get => this.ContainsKey(RegionSourceKey) ? 
+            get => this.ContainsKey(RegionSourceKey) ?
                 (int)Enum.Parse(typeof(RegionAutodetectionSource), this[RegionSourceKey]) : 0;
             set => this[RegionSourceKey] = (value).ToString(CultureInfo.InvariantCulture);
         }
@@ -185,7 +178,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
                 (int)Enum.Parse(typeof(RegionOutcome), this[RegionOutcomeKey]) : 0;
             set => this[RegionOutcomeKey] = (value).ToString(CultureInfo.InvariantCulture);
         }
-#endregion
+        #endregion
 
         public bool IsTokenCacheSerialized
         {

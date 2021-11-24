@@ -1039,7 +1039,7 @@ namespace Microsoft.Identity.Client
         public const string TenantOverrideNonAad = "tenant_override_non_aad";
 
         /// <summary>
-        /// <para>What happens?</para>You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request."/>
+        /// <para>What happens?</para>You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request.
         /// <para>Mitigation</para> Use WithTenantId at the request level instead.
         /// </summary>
         public const string RegionalAndAuthorityOverride = "authority_override_regional";
