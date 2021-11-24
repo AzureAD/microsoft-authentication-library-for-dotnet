@@ -12,8 +12,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
 
@@ -87,67 +85,55 @@ namespace Microsoft.Identity.Client.OAuth2
 
             HttpResponse response = null;
             Uri endpointUri = AddExtraQueryParams(endPoint);
-            var httpEvent = new HttpEvent(requestContext.CorrelationId.AsMatsCorrelationId())
+
+            using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
             {
-                HttpPath = endpointUri,
-                QueryParams = endpointUri.Query
-            };
-
-            using (requestContext.CreateTelemetryHelper(httpEvent))
-            {
-                using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
+                if (method == HttpMethod.Post)
                 {
-                    if (method == HttpMethod.Post)
-                    {
-                        response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
-                                                    .ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        response = await _httpManager.SendGetAsync(
-                            endpointUri,
-                            _headers,
-                            requestContext.Logger,
-                            cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
-                    }
+                    response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
+                                                .ConfigureAwait(false);
                 }
-
-                if (requestContext.ApiEvent != null)
+                else
                 {
-                    requestContext.ApiEvent.DurationInHttpInMs += _httpManager.LastRequestDurationInMs;
-                }
-
-                if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
-                {
-                    requestContext.Logger.Verbose("[Oauth2Client] Processing error response ");
-
-                    try
-                    {
-                        httpEvent.OauthErrorCode = MsalError.UnknownError;
-                        // In cases where the end-point is not found (404) response.body will be empty.
-                        // CreateResponse handles throwing errors - in the case of HttpStatusCode <> and ErrorResponse will be created.
-                        if (!string.IsNullOrWhiteSpace(response.Body))
-                        {
-                            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
-                            if (msalTokenResponse != null)
-                            {
-                                httpEvent.OauthErrorCode = msalTokenResponse?.Error;
-                            }
-
-                            if (response.StatusCode == HttpStatusCode.OK &&
-                                expectErrorsOn200OK &&
-                                !string.IsNullOrEmpty(msalTokenResponse?.Error))
-                            {
-                                ThrowServerException(response, requestContext);
-                            }
-                        }
-                    }
-                    catch (JsonException) // in the rare case we get an error response we cannot deserialize
-                    {
-                        // CreateErrorResponse does the same validation. Will be logging the error there.
-                    }
+                    response = await _httpManager.SendGetAsync(
+                        endpointUri,
+                        _headers,
+                        requestContext.Logger,
+                        cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
                 }
             }
+
+            if (requestContext.ApiEvent != null)
+            {
+                requestContext.ApiEvent.DurationInHttpInMs += _httpManager.LastRequestDurationInMs;
+            }
+
+            if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
+            {
+                requestContext.Logger.Verbose("[Oauth2Client] Processing error response ");
+
+                try
+                {
+                    // In cases where the end-point is not found (404) response.body will be empty.
+                    // CreateResponse handles throwing errors - in the case of HttpStatusCode <> and ErrorResponse will be created.
+                    if (!string.IsNullOrWhiteSpace(response.Body))
+                    {
+                        var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+
+                        if (response.StatusCode == HttpStatusCode.OK &&
+                            expectErrorsOn200OK &&
+                            !string.IsNullOrEmpty(msalTokenResponse?.Error))
+                        {
+                            ThrowServerException(response, requestContext);
+                        }
+                    }
+                }
+                catch (JsonException) // in the rare case we get an error response we cannot deserialize
+                {
+                    // CreateErrorResponse does the same validation. Will be logging the error there.
+                }
+            }
+
 
             return CreateResponse<T>(response, requestContext);
         }
