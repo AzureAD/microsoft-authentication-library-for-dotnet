@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             return secret;
         });
 
-        private static Lazy<X509Certificate2> GetCertificateLazy(string thumbprint) => new Lazy<X509Certificate2>(() =>
+        public static Lazy<X509Certificate2> GetCertificateLazy(string thumbprint) => new Lazy<X509Certificate2>(() =>
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(thumbprint);
             if (cert == null)
