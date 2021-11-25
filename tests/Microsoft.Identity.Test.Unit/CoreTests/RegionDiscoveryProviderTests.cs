@@ -11,7 +11,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Region;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -45,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             _apiEvent = new ApiEvent(
                 _harness.ServiceBundle.ApplicationLogger,
                 _harness.ServiceBundle.PlatformProxy.CryptographyManager,
-                Guid.NewGuid().AsMatsCorrelationId());
+                Guid.NewGuid());
             _apiEvent.ApiId = ApiEvent.ApiIds.AcquireTokenForClient;
             _testRequestContext.ApiEvent = _apiEvent;
             _regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, true);

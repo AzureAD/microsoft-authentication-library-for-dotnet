@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
                 failedRequests.Append(ev.ApiIdString);
                 failedRequests.Append(",");
-                failedRequests.Append(ev.CorrelationId);
+                failedRequests.Append(ev.CorrelationId.ToString());
 
                 firstFailure = false;
             }

@@ -3,13 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Client.Instance;
-using System.Globalization;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
-using Microsoft.Identity.Client.Instance.Discovery;
 using System.Diagnostics;
+using System.Globalization;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -23,14 +22,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         private readonly long _startTimestamp;
         public const string TenantPlaceHolder = "<tenant>"; // It is used to replace the real tenant in telemetry info
 
-        public EventBase(string eventName, string correlationId)
+        public EventBase(string eventName)
         {
             this[EventNameKey] = eventName;
             _startTimestamp = CurrentUnixTimeMilliseconds();
             this[StartTimeKey] = _startTimestamp.ToString(CultureInfo.InvariantCulture);
             this[ElapsedTimeKey] = "-1";
-            CorrelationId = correlationId;
-            EventId = Guid.NewGuid().AsMatsCorrelationId();  // used to uniquely identify this particular event index for start/stop matching.
+            EventId = Guid.NewGuid().ToString("D");  // used to uniquely identify this particular event index for start/stop matching.
         }
 
         public string EventId { get; }
@@ -38,12 +36,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         protected static long CurrentUnixTimeMilliseconds()
         {
             return DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(DateTimeOffset.Now);
-        }
-
-        public string CorrelationId
-        {
-            get => this[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey];
-            set => this[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey] = value;
         }
 
         public void Stop()

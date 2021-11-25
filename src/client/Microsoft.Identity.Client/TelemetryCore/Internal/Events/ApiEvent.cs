@@ -54,11 +54,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public ApiEvent(
             ICoreLogger logger,
             ICryptographyManager cryptographyManager,
-            string correlationId) : base(EventNamePrefix + "api_event", correlationId)
+            Guid correlationId) : base(EventNamePrefix + "api_event")
         {
             _logger = logger;
             _cryptographyManager = cryptographyManager;
+            CorrelationId = correlationId;
         }
+
+        public Guid CorrelationId { get; set; }
 
         public ApiIds ApiId
         {

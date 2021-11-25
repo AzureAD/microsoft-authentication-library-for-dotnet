@@ -13,7 +13,6 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -140,7 +139,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ApiEvent apiEvent = new ApiEvent(
                 AuthenticationRequestParameters.RequestContext.Logger,
                 ServiceBundle.PlatformProxy.CryptographyManager,
-                AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId())
+                AuthenticationRequestParameters.RequestContext.CorrelationId)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
                 AccountId = accountId ?? "",
