@@ -83,12 +83,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         IPoPCryptoProvider GetDefaultPoPCryptoProvider();
 
-        // MATS related data
-        string GetDevicePlatformTelemetryId();
-        string GetDeviceNetworkState();
-        int GetMatsOsPlatformCode();
-        string GetMatsOsPlatform();
-
         IFeatureFlags GetFeatureFlags();
 
         void /* for test */ SetFeatureFlags(IFeatureFlags featureFlags);

@@ -18,7 +18,6 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Platforms.net45.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Win32;
 
@@ -211,57 +210,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc />
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetDesktopCryptographyManager();
 
-        public override string GetDeviceNetworkState()
-        {
-            // TODO(mats):
-            return string.Empty;
-        }
-
-        public override string GetDevicePlatformTelemetryId()
-        {
-            const int NameSamCompatible = 2;
-
-            var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\SQMClient", false);
-            object val = key.GetValue("MachineId");
-            if (val == null)
-            {
-                return string.Empty;
-            }
-
-            string win32DeviceId = val.ToString();
-
-            string userName = GetUserPrincipalName(NameSamCompatible);
-
-            // NameSamCompatible might include an email address. remove the domain before hashing.
-            int atIdx = userName.IndexOf('@');
-            if (atIdx >= 0)
-            {
-                userName = userName.Substring(0, atIdx);
-            }
-
-            string unhashedDpti = win32DeviceId + userName;
-
-            var hashedBytes = InternalGetCryptographyManager().CreateSha256HashBytes(unhashedDpti);
-            var sb = new StringBuilder();
-
-            foreach (var b in hashedBytes)
-            {
-                sb.Append($"{b:x2}");
-            }
-
-            string dptiOutput = sb.ToString();
-            return dptiOutput;
-        }
-
-        public override string GetMatsOsPlatform()
-        {
-            return MatsConverter.AsString(OsPlatform.Win32);
-        }
-
-        public override int GetMatsOsPlatformCode()
-        {
-            return MatsConverter.AsInt(OsPlatform.Win32);
-        }
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
         protected override IFeatureFlags CreateFeatureFlags() => new NetDesktopFeatureFlags();

@@ -172,27 +172,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
-        public override string GetDeviceNetworkState()
-        {
-            // TODO(mats):
-            return string.Empty;
-        }
-
-        public override string GetDevicePlatformTelemetryId()
-        {
-            // TODO(mats):
-            return string.Empty;
-        }
-
-        public override string GetMatsOsPlatform()
-        {
-            return MatsConverter.AsString(OsPlatform.Win32);
-        }
-
-        public override int GetMatsOsPlatformCode()
-        {
-            return MatsConverter.AsInt(OsPlatform.Win32);
-        }
         protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
        
 
