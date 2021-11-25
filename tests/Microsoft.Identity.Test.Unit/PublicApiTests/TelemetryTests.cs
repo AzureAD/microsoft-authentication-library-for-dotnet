@@ -8,7 +8,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -85,24 +84,5 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 #endif
-
-        [TestMethod]
-        [TestCategory("TelemetryInternalAPI")]
-        public void TelemetryScrubTenantFromUri()
-        {
-            Assert.AreEqual("https://login.microsoftonline.com/<tenant>/oauth2/v2.0/token",
-                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/token")));
-
-            Assert.AreEqual("https://login.microsoftonline.com/tfp/<tenant>/oauth2/v2.0/token",
-                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/tfp/contoso/oauth2/v2.0/token")));
-
-            Assert.AreEqual("https://login.microsoftonline.com/<tenant>",
-                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/common")));
-
-            Assert.AreEqual("https://login.microsoftonline.com/tfp/<tenant>",
-                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/tfp/contoso")));
-
-            Assert.AreEqual(null, EventBase.ScrubTenant(new Uri("https://login.contoso.com/adfs")));
-        }
     }
 }

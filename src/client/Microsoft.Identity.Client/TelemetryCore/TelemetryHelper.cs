@@ -8,12 +8,12 @@ namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal sealed class TelemetryHelper : IDisposable
     {
-        private readonly EventBase _eventToEnd;
+        private readonly ApiEvent _eventToEnd;
         private readonly IHttpTelemetryManager _httpTelemetryManager;
 
         public TelemetryHelper(
             IHttpTelemetryManager httpTelemetryManager,
-            EventBase eventBase)
+            ApiEvent eventBase)
         {
             _httpTelemetryManager = httpTelemetryManager;
             _eventToEnd = eventBase;
@@ -29,8 +29,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             {
                 if (disposing)
                 {
-                    if (_eventToEnd is ApiEvent apiEvent)
-                        _httpTelemetryManager?.RecordStoppedEvent(apiEvent);
+                    _httpTelemetryManager?.RecordStoppedEvent(_eventToEnd);
                 }
 
                 _disposedValue = true;

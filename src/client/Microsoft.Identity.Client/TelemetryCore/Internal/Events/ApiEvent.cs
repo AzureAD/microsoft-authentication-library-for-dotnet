@@ -5,30 +5,11 @@ using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.Region;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
-    internal class ApiEvent : EventBase
+    internal class ApiEvent
     {
-        public const string AuthorityKey = EventNamePrefix + "authority";
-        public const string AuthorityTypeKey = EventNamePrefix + "authority_type";
-        public const string PromptKey = EventNamePrefix + "ui_behavior";
-        public const string TenantIdKey = EventNamePrefix + "tenant_id";
-        public const string UserIdKey = EventNamePrefix + "user_id";
-        public const string WasSuccessfulKey = EventNamePrefix + "was_successful";
-        public const string IsConfidentialClientKey = EventNamePrefix + "is_confidential_client";
-        public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
-        public const string LoginHintKey = EventNamePrefix + "login_hint";
-        public const string IsAccessTokenCacheHitKey = EventNamePrefix + "at_cache_hit";
-        public const string RegionUsedKey = EventNamePrefix + "region_used";
-        public const string RegionSourceKey = EventNamePrefix + "region_source";
-        public const string IsTokenCacheSerializedKey = EventNamePrefix + "is_token_cache_serialized";
-        public const string IsLegacyCacheEnabledKey = EventNamePrefix + "is_legacy_cache_enabled";
-        public const string CacheInfoKey = EventNamePrefix + "cache_info";
-        public const string RegionOutcomeKey = EventNamePrefix + "region_outcome";
-
         public enum ApiIds
         {
             None = 0,
@@ -54,7 +35,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public ApiEvent(
             ICoreLogger logger,
             ICryptographyManager cryptographyManager,
-            Guid correlationId) : base(EventNamePrefix + "api_event")
+            Guid correlationId)
         {
             _logger = logger;
             _cryptographyManager = cryptographyManager;
@@ -63,155 +44,93 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public Guid CorrelationId { get; set; }
 
-        public ApiIds ApiId
-        {
-            get => TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiIdString) ? (ApiIds)Enum.Parse(typeof(ApiIds), apiIdString) : ApiIds.None;
-
-            set => this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] = ((int)value).ToString(CultureInfo.InvariantCulture);
-        }
+        public ApiIds ApiId { get; set; }
 
         public string ApiIdString
         {
-            get => ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey) ?
-                this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] :
-                null;
+            get => ((int)ApiId).ToString(CultureInfo.InvariantCulture);
         }
 
-        public string TokenEndpoint
-        {
-            get; set;
-        }
+        public string TokenEndpoint { get; set; }
 
-        public Uri Authority
-        {
-            set => this[AuthorityKey] = ScrubTenant(value)?.ToLowerInvariant();
-        }
+        // Some of these properties like Authority, TenantId, LoginHint, etc.
+        // were set only, never used, maybe can be removed?
+        public Uri Authority { get; set; }
 
-        public string AuthorityType
-        {
-            set => this[AuthorityTypeKey] = value?.ToLowerInvariant();
-        }
+        public string AuthorityType { get; set; }
 
-        public string Prompt
-        {
-            set => this[PromptKey] = value?.ToLowerInvariant();
-        }
+        public string Prompt { get; set; }
 
-        public string TenantId
-        {
-            set =>
-                this[TenantIdKey] = value != null && _logger.PiiLoggingEnabled
-                                        ? HashPersonalIdentifier(_cryptographyManager, value)
-                                        : null;
-        }
+        public string TenantId { get; set; }
 
-        public string AccountId
-        {
-            set =>
-                this[UserIdKey] = value != null && _logger.PiiLoggingEnabled
-                                      ? HashPersonalIdentifier(_cryptographyManager, value)
-                                      : null;
-        }
+        public string AccountId { get; set; }
 
-        public bool WasSuccessful
-        {
-#pragma warning disable CA1305 // .net standard does not have an overload for ToString() with Culture
-            set { this[WasSuccessfulKey] = value.ToString().ToLowerInvariant(); }
-            get { return this[WasSuccessfulKey] == true.ToString().ToLowerInvariant(); }
-#pragma warning restore CA1305 // Specify IFormatProvider
+        public bool WasSuccessful { get; set; }
 
-        }
+        public bool IsConfidentialClient { get; set; }
 
-        public bool IsConfidentialClient
-        {
-#pragma warning disable CA1305 // Specify IFormatProvider
-            set { this[IsConfidentialClientKey] = value.ToString().ToLowerInvariant(); }
-#pragma warning restore CA1305 // Specify IFormatProvider
-        }
+        public bool IsAccessTokenCacheHit { get; set; }
 
-        public bool IsAccessTokenCacheHit
-        {
-#pragma warning disable CA1305 // Specify IFormatProvider
-            get
-            {
-                return this.ContainsKey(IsAccessTokenCacheHitKey) ?
-                     (this[IsAccessTokenCacheHitKey] == true.ToString().ToLowerInvariant()) :
-                     false;
-            }
-            set { this[IsAccessTokenCacheHitKey] = value.ToString().ToLowerInvariant(); }
-#pragma warning restore CA1305 // Specify IFormatProvider
-        }
+        public string ApiErrorCode { get; set; }
 
-        public string ApiErrorCode
-        {
-            get => this.ContainsKey(ApiErrorCodeKey) ? this[ApiErrorCodeKey] : null;
-            set => this[ApiErrorCodeKey] = value;
-        }
-
-        public string LoginHint
-        {
-            set =>
-                this[LoginHintKey] = value != null && _logger.PiiLoggingEnabled
-                                         ? HashPersonalIdentifier(_cryptographyManager, value)
-                                         : null;
-        }
+        public string LoginHint { get; set; }
 
         #region Region
-        public string RegionUsed
-        {
-            get => this.ContainsKey(RegionUsedKey) ? this[RegionUsedKey] : null;
-            set => this[RegionUsedKey] = value;
-        }
+        public string RegionUsed { get; set; }
 
+        private int? _regionAutodetectionSource;
         public int RegionAutodetectionSource
         {
-            get => this.ContainsKey(RegionSourceKey) ?
-                (int)Enum.Parse(typeof(RegionAutodetectionSource), this[RegionSourceKey]) : 0;
-            set => this[RegionSourceKey] = (value).ToString(CultureInfo.InvariantCulture);
+            get { return _regionAutodetectionSource.HasValue ? _regionAutodetectionSource.Value : 0; }
+            set { _regionAutodetectionSource = value; }
         }
 
+        public string RegionAutodetectionSourceString
+        {
+            get => _regionAutodetectionSource.HasValue ? _regionAutodetectionSource.Value.ToString(CultureInfo.InvariantCulture) : null;
+        }
+
+        private int? _regionOutcome;
         public int RegionOutcome
         {
-            get => this.ContainsKey(RegionOutcomeKey) ?
-                (int)Enum.Parse(typeof(RegionOutcome), this[RegionOutcomeKey]) : 0;
-            set => this[RegionOutcomeKey] = (value).ToString(CultureInfo.InvariantCulture);
+            get { return _regionOutcome.HasValue ? _regionOutcome.Value : 0; }
+            set { _regionOutcome = value; }
+        }
+
+        public string RegionOutcomeString
+        {
+            get => _regionOutcome.HasValue ? _regionOutcome.Value.ToString(CultureInfo.InvariantCulture) : null;
         }
         #endregion
 
-        public bool IsTokenCacheSerialized
+        public bool IsTokenCacheSerialized { get; set; }
+
+        public string IsTokenCacheSerializedString
         {
-#pragma warning disable CA1305 // .net standard does not have an overload for ToString() with Culture
-            set { this[IsTokenCacheSerializedKey] = value.ToString().ToLowerInvariant(); }
-            get { return this[IsTokenCacheSerializedKey] == true.ToString().ToLowerInvariant(); }
-#pragma warning restore CA1305 // Specify IFormatProvider
+            get => IsTokenCacheSerialized.ToString().ToLowerInvariant();
         }
 
-        public bool IsLegacyCacheEnabled
+        public bool IsLegacyCacheEnabled { get; set; }
+
+        public string IsLegacyCacheEnabledString
         {
-#pragma warning disable CA1305 // .NET Standard does not have an overload for ToString() with culture
-            set { this[IsLegacyCacheEnabledKey] = value.ToString().ToLowerInvariant(); }
-            get { return this[IsLegacyCacheEnabledKey] == true.ToString().ToLowerInvariant(); }
-#pragma warning restore CA1305 // Specify IFormatProvider
+            get => IsLegacyCacheEnabled.ToString().ToLowerInvariant();
         }
 
+        private int? _cacheInfo;
         public int CacheInfo
         {
-            get => this.ContainsKey(CacheInfoKey) ?
-                (int)Enum.Parse(typeof(CacheRefreshReason), this[CacheInfoKey]) : (int)CacheRefreshReason.NotApplicable;
-
-            set => this[CacheInfoKey] = value.ToString(CultureInfo.InvariantCulture);
+            get { return _cacheInfo.HasValue ? _cacheInfo.Value : (int)CacheRefreshReason.NotApplicable; }
+            set { _cacheInfo = value; }
         }
 
-        public long DurationInHttpInMs
+        public string CacheInfoString
         {
-            get;
-            set;
+            get => _cacheInfo.HasValue ? _cacheInfo.Value.ToString(CultureInfo.InvariantCulture) : null;
         }
 
-        public long DurationInCacheInMs
-        {
-            get;
-            set;
-        }
+        public long DurationInHttpInMs { get; set; }
+
+        public long DurationInCacheInMs { get; set; }
     }
 }
