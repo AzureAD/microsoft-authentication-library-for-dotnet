@@ -98,8 +98,6 @@ namespace Microsoft.Identity.Client
             return ApiEvent.ApiIds.AcquireTokenSilent;
         }
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenSilent;
-
         /// <summary>
         /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
         /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:

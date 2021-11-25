@@ -112,7 +112,6 @@ namespace Microsoft.Identity.Client.Cache
                         {
                             string key = CacheKeyFactory.GetKeyFromRequest(_requestParams);
 
-
                             try
                             {
                                 var args = new TokenCacheNotificationArgs(

@@ -51,8 +51,6 @@ namespace Microsoft.Identity.Client
 
         internal abstract ApiEvent.ApiIds CalculateApiEventId();
 
-        internal abstract ApiTelemetryId ApiTelemetryId { get; }
-
         /// <summary>
         /// Executes the Token request asynchronously.
         /// </summary>
@@ -365,7 +363,6 @@ namespace Microsoft.Identity.Client
         {
             Validate();
             CommonParameters.ApiId = CalculateApiEventId();
-            CommonParameters.ApiTelemId = ApiTelemetryId;
             CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
         }
 

@@ -20,8 +20,6 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenWithDeviceCodeParameters Parameters { get; } = new AcquireTokenWithDeviceCodeParameters();
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenWithDeviceCode;
-
         /// <inheritdoc />
         internal AcquireTokenWithDeviceCodeParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
             : base(publicClientApplicationExecutor)
@@ -73,7 +71,7 @@ namespace Microsoft.Identity.Client
             if (Parameters.DeviceCodeResultCallback == null)
             {
                 throw new ArgumentNullException(
-                    nameof(Parameters.DeviceCodeResultCallback), 
+                    nameof(Parameters.DeviceCodeResultCallback),
                     "A deviceCodeResultCallback must be provided for Device Code authentication to work properly");
             }
         }

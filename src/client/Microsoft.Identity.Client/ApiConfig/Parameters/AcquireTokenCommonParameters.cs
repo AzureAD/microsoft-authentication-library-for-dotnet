@@ -20,10 +20,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IDictionary<string, string> ExtraQueryParameters { get; set; }
         public string Claims { get; set; }
         public AuthorityInfo AuthorityOverride { get; set; }
-        public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
         public IDictionary<string, string> ExtraHttpHeaders { get; set; }
-
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
     }
 }

@@ -62,8 +62,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public ApplicationConfiguration AppConfig => _serviceBundle.Config;
 
-        public ApiTelemetryId ApiTelemId => _commonParameters.ApiTelemId;
-
         public ApiEvent.ApiIds ApiId => _commonParameters.ApiId;
 
         public RequestContext RequestContext { get; }

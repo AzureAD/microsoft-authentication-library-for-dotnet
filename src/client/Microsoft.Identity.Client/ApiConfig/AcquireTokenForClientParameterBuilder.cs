@@ -24,8 +24,6 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenForClientParameters Parameters { get; } = new AcquireTokenForClientParameters();
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenForClient;
-
         /// <inheritdoc />
         internal AcquireTokenForClientParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor)

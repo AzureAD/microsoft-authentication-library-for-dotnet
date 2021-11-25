@@ -19,8 +19,6 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenByRefreshTokenParameters Parameters { get; } = new AcquireTokenByRefreshTokenParameters();
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenByRefreshToken;
-
         /// <inheritdoc />
         internal AcquireTokenByRefreshTokenParameterBuilder(IClientApplicationBaseExecutor clientApplicationBaseExecutor)
             : base(clientApplicationBaseExecutor)

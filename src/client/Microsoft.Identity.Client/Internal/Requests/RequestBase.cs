@@ -143,7 +143,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId())
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
-                ApiTelemId = AuthenticationRequestParameters.ApiTelemId,
                 AccountId = accountId ?? "",
                 WasSuccessful = false
             };

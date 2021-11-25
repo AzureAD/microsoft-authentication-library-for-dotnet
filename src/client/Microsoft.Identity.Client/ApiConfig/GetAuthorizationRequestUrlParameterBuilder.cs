@@ -25,8 +25,6 @@ namespace Microsoft.Identity.Client
     {
         private GetAuthorizationRequestUrlParameters Parameters { get; } = new GetAuthorizationRequestUrlParameters();
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.GetAuthorizationRequestUrl;
-
         internal GetAuthorizationRequestUrlParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationexecutor)
             : base(confidentialClientApplicationexecutor)
         {
