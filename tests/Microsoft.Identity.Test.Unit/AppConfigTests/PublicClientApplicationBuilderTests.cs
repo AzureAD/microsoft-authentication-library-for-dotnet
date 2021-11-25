@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
@@ -40,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNull(pca.AppConfig.LoggingCallback);
             Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
             Assert.IsNull(pca.AppConfig.TenantId);
-            Assert.IsNull(pca.AppConfig.TelemetryConfig);
             Assert.IsNull(pca.AppConfig.ParentActivityOrWindowFunc);
         }
 
@@ -534,40 +532,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void MatsAndTelemetryCallbackCannotBothBeConfiguredAtTheSameTime()
-        {
-            try
-            {
-                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithTelemetry((List<Dictionary<string, string>> events) => { })
-                    .WithTelemetry(new TelemetryConfig())
-                    .Build();
-                Assert.Fail("Should not reach here, exception should be thrown");
-            }
-            catch (Exception ex)
-            {
-                Assert.IsTrue(ex is MsalClientException);
-                Assert.AreEqual(MsalErrorMessage.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously, ex.Message);
-            }
-        }
-
-        [TestMethod]
-        public void MatsCanBeProperlyConfigured()
-        {
-            var telemetryConfig = new TelemetryConfig
-            {
-                SessionId = "some session id"
-            };
-
-            var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithTelemetry(telemetryConfig)
-                .Build();
-
-            Assert.IsNotNull(app.AppConfig.TelemetryConfig);
-            Assert.AreEqual<string>(telemetryConfig.SessionId, app.AppConfig.TelemetryConfig.SessionId);
-        }
-
-        [TestMethod]
         public void WithClientCapabilities()
         {
             var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -629,7 +593,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             options2.TenantId = TestConstants.TenantId;
 
             var app4 = PublicClientApplicationBuilder
-                .CreateWithApplicationOptions(options2)                
+                .CreateWithApplicationOptions(options2)
                 .WithAuthority("https://login.microsoftonline.com/common")
                .Build();
 

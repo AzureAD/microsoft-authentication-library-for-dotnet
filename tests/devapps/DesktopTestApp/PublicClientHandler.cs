@@ -20,9 +20,6 @@ namespace DesktopTestApp
                 .WithClientName(_clientName)
                 .WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
                 .WithLogging(logCallback, LogLevel.Verbose, true)
-#if ARIA_TELEMETRY_ENABLED
-                .WithTelemetry((new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
-#endif
                 .BuildConcrete();
 
 

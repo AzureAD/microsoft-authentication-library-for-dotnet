@@ -10,8 +10,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
@@ -68,7 +66,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(ClientIdInFile)
                 .WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.PersonalMicrosoftAccount)
                 .WithHttpClientFactory(factoryThatThrows)
-                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath("SingleCloudTokenCache.json"));
@@ -208,14 +205,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 IEnumerable<IAccount> accounts = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(accounts);
                 Assert.IsFalse(accounts.Any());
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
-                
+
                 accounts = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(accounts);
                 Assert.AreEqual(1, accounts.Count());
@@ -229,8 +225,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     null,
                     DateTimeOffset.UtcNow,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)), 
-                    clientInfo, 
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)),
+                    clientInfo,
                     homeAccountId);
 
                 atItem.Secret = atItem.GetKey().ToString();
@@ -244,9 +240,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 MsalRefreshTokenCacheItem rtItem = new MsalRefreshTokenCacheItem(
                     TestConstants.ProductionPrefCacheEnvironment,
                     TestConstants.ClientId,
-                    "someRT", 
-                    clientInfo2, 
-                    null, 
+                    "someRT",
+                    clientInfo2,
+                    null,
                     homeAccountId2);
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
@@ -255,7 +251,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TestConstants.ProductionPrefCacheEnvironment,
                     TestConstants.ClientId,
                     MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                    clientInfo2, 
+                    clientInfo2,
                     homeAccountId: homeAccountId2,
                     tenantId: "uTId1");
 
@@ -264,13 +260,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem(
                     TestConstants.ProductionPrefCacheEnvironment,
                     null,
-                    clientInfo2, 
+                    clientInfo2,
                     homeAccountId2,
                     null,
                     null,
                     "uTId1",
                     null,
-                    null, 
+                    null,
                     null);
 
                 app.UserTokenCacheInternal.Accessor.SaveAccount(accountCacheItem);
@@ -288,8 +284,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TestConstants.SovereignNetworkEnvironment,
                     TestConstants.ClientId,
                     "someRT",
-                    clientInfo3, 
-                    null, 
+                    clientInfo3,
+                    null,
                     homeAccountId3);
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
@@ -304,10 +300,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task TestAccountAcrossMultipleClientIdsAsync()
         {
             // Arrange
-            
+
             PublicClientApplication app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             // Populate with tokens tied to ClientId2
@@ -327,7 +322,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Assert 
             Assert.IsFalse(accounts.Any(), "No accounts should be returned because the existing account to a different client");
             cacheAccessRecorder.AssertAccessCounts(1, 0);
-            
+
             // Arrange
 
             // Populate for clientid2
@@ -362,9 +357,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             PublicClientApplication app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
-            
+
             TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
             foreach (var user in app.GetAccountsAsync().Result)
@@ -419,7 +413,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                   .Create(ClientIdInFile)
                   .WithAuthority(cloud, AadAuthorityAudience.PersonalMicrosoftAccount)
                   .WithHttpManager(httpManager)
-                  .WithTelemetry(new TraceTelemetryConfig())
                   .BuildConcrete();
 
             pca.InitializeTokenCacheFromString(tokenCacheString);

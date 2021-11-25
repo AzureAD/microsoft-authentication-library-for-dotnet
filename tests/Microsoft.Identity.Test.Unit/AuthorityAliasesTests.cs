@@ -44,7 +44,6 @@ namespace Microsoft.Identity.Test.Unit
             PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                         .WithAuthority(authorityUri, validateAuthority: true)
                                                                         .WithHttpManager(httpManager)
-                                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                                         .WithDebugLoggingCallback()
                                                                         .BuildConcrete();
 
@@ -77,7 +76,6 @@ namespace Microsoft.Identity.Test.Unit
                 var app2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority($"https://{envAlias}/common", validateAuthority: true)
                                                          .WithHttpManager(httpManager)
-                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                          .WithDebugLoggingCallback()
                                                          .BuildConcrete();
 
@@ -118,7 +116,6 @@ namespace Microsoft.Identity.Test.Unit
                            .Create(TestConstants.ClientId)
                                  .WithAuthority($"https://{envAlias}/common", true)
                                  .WithHttpManager(httpManager)
-                                 .WithTelemetry(new TraceTelemetryConfig())
                                  .WithDebugLoggingCallback()
                                  .BuildConcrete();
 
@@ -152,7 +149,6 @@ namespace Microsoft.Identity.Test.Unit
             PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                         .WithAuthority(new Uri(TestConstants.AuthorityCommonPpeAuthority), true)
                                                                         .WithHttpManager(harness.HttpManager)
-                                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                                         .BuildConcrete();
             app.ServiceBundle.ConfigureMockWebUI();
 

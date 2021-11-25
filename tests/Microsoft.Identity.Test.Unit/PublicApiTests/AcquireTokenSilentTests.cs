@@ -2,27 +2,19 @@
 // Licensed under the MIT License.
 
 
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -34,7 +26,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             IPublicClientApplication app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithTelemetry(new TraceTelemetryConfig())
                 .Build();
 
             await AssertException.TaskThrowsAsync<ArgumentNullException>(
@@ -50,10 +41,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task AcquireTokenSilentScopeAndEmptyCacheTestAsync()
         {
-            var receiver = new MyReceiver();
             PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                                        .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                         .BuildConcrete();
 
             try
@@ -70,14 +59,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalError.NoTokensFoundError, exc.ErrorCode);
                 Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exc.Classification);
             }
-
-            Assert.IsNotNull(
-                receiver.EventsReceived.Find(
-                    anEvent => // Expect finding such an event
-                        anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                        anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1007" &&
-                        anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
-                        anEvent[ApiEvent.ApiErrorCodeKey] == "no_tokens_found"));
         }
 
         [TestMethod]
@@ -92,7 +73,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
@@ -121,7 +101,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
 
@@ -149,7 +128,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.AuthorityGuestTenant), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
 
@@ -198,13 +176,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private void RunAcquireTokenSilentCacheOnlyTest(string authority, bool expectNetworkDiscovery)
         {
-            var receiver = new MyReceiver();
             using (MockHttpAndServiceBundle testHarness = base.CreateTestHarness())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(authority, true)
                                                                             .WithHttpManager(testHarness.HttpManager)
-                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
 
@@ -227,7 +203,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
-                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))                    
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -238,9 +214,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
-                Assert.IsNotNull(receiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                    anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "true"
-                    && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1007"));
             }
         }
 
@@ -252,7 +225,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
@@ -260,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = await app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
-                    TestConstants.DisplayableId)                    
+                    TestConstants.DisplayableId)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -279,7 +251,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
@@ -297,13 +268,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task AcquireTokenSilent_LoginHint_MultipleAccountsAsync()
         {
-            var receiver = new MyReceiver();
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
 
@@ -332,7 +301,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
@@ -357,7 +325,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
 
@@ -534,7 +501,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 // PopulateCache() creates two access tokens
@@ -625,7 +591,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 httpManager.AddInstanceDiscoveryMockHandler();
                 //populate cache
@@ -669,7 +634,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 var cacheAccess = app.UserTokenCache.RecordAccess();
