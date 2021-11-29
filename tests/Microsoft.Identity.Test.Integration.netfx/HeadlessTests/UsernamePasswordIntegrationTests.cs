@@ -44,6 +44,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             "1003,ad8c894a-557f-48c0-b045-c129590c344e";
         private const string InvalidGrantError = "invalid_grant";
         private const string UPApiId = "1003";
+        private const string B2CROPCAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ROPC_Auth";
+        private static readonly string[] s_b2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -157,6 +159,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(MsalError.RopcDoesNotSupportMsaAccounts, result.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.RopcDoesNotSupportMsaAccounts, result.Message);
 
+        }
+
+        [TestMethod]
+        public async Task ROPC_B2C_Async()
+        {
+            var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
+            await RunB2CHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -296,6 +305,42 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
         }
 
+        private async Task RunB2CHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
+        {
+            var factory = new HttpSnifferClientFactory();
+            var user = labResponse.User;
+
+            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
+
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithB2CAuthority(B2CROPCAuthority)
+                .WithTestLogging()
+                .WithHttpClientFactory(factory)
+                .Build();
+
+            AuthenticationResult authResult = await msalPublicClient
+                .AcquireTokenByUsernamePassword(s_b2cScopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                .WithCorrelationId(CorrelationId)
+                .WithFederationMetadata(federationMetadata)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+            AssertCcsRoutingInformationIsNotSent(factory);
+
+            // If test fails with "user needs to consent to the application, do an interactive request" error,
+            // Do the following: 
+            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
+            // string password = ((LabUser)user).GetPassword();
+            // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
+            // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
+            // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
+        }
+
         private async Task<AuthenticationResult> GetAuthenticationResultWithAssertAsync(
             LabResponse labResponse,
             HttpSnifferClientFactory factory,
@@ -325,6 +370,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var CcsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
             Assert.AreEqual($"x-anchormailbox:upn:{labResponse.User.Upn}", $"{CcsHeader.Key}:{CcsHeader.Value.FirstOrDefault()}");
+        }
+
+        private void AssertCcsRoutingInformationIsNotSent(HttpSnifferClientFactory factory)
+        {
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
+               x.Item2.StatusCode == HttpStatusCode.OK);
+
+            Assert.IsTrue(!req.Headers.Any(h => h.Key == Constants.CcsRoutingHintHeader));
         }
 
         private void AssertTenantProfiles(IEnumerable<TenantProfile> tenantProfiles, string tenantId)

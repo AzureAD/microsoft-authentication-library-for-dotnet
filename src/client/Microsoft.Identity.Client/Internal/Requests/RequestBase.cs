@@ -323,12 +323,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return GetCcsUpnHeader(AuthenticationRequestParameters.LoginHint);
             }
 
-            return new KeyValuePair<string, string>();
+            return null;
         }
 
         protected KeyValuePair<string, string>? GetCcsUpnHeader(string upnHeader)
         {
+            if (AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
+            {
+                return null;
+            }
+
             string OidCcsHeader = CoreHelpers.GetCcsUpnHint(upnHeader);
+
             return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader) as KeyValuePair<string, string>?;
         }
 
