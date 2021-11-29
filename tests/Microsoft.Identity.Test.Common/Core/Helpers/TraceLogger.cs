@@ -27,6 +27,16 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public bool PiiLoggingEnabled => true;
 
+        public void Always(string messageScrubbed)
+        {
+            Trace.WriteLine($"{_prefix}[Always] {messageScrubbed}");
+        }
+
+        public void AlwaysPii(string messageWithPii, string messageScrubbed)
+        {
+            Trace.WriteLine($"{_prefix}[AlwaysPii] {messageWithPii}");
+        }
+
         public void Error(string messageScrubbed)
         {
             Trace.WriteLine($"{_prefix}[Error] {messageScrubbed}");

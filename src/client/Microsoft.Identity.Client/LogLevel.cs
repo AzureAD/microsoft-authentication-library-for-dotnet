@@ -10,6 +10,11 @@ namespace Microsoft.Identity.Client
     public enum LogLevel
     {
         /// <summary>
+        ///     Always Log Level
+        /// </summary>
+        Always = -1,
+
+        /// <summary>
         ///     Error Log level
         /// </summary>
         Error = 0,

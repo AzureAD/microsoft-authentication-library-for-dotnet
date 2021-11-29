@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
@@ -90,6 +91,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         LogReturnedToken(authenticationResult);
 
                         UpdateTelemetry(sw, apiEvent, authenticationResult);
+                        LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                         return authenticationResult;
                     }
                     catch (MsalException ex)
@@ -109,6 +111,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 ServiceBundle.MatsTelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
             }
+        }
+
+        private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ICoreLogger logger)
+        {
+            logger.Always($"[LogMetricsFromAuthResult] Cache Refresh Reason: {authenticationResult.AuthenticationResultMetadata.CacheRefreshReason}");
+            logger.Always($"[LogMetricsFromAuthResult] DurationInCacheInMs: {authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs}");
+            logger.Always($"[LogMetricsFromAuthResult] DurationTotalInMs: {authenticationResult.AuthenticationResultMetadata.DurationTotalInMs}");
+            logger.Always($"[LogMetricsFromAuthResult] DurationInHttpInMs: {authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs}");
+            logger.AlwaysPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint?? ""}",
+                                $"TokenEndpoint: ****");
         }
 
         private static void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)

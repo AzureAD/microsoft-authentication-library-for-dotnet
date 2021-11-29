@@ -15,6 +15,14 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public Guid CorrelationId { get; } = Guid.Empty;
         public bool PiiLoggingEnabled { get; } = false;
 
+        public void Always(string messageScrubbed)
+        {
+        }
+
+        public void AlwaysPii(string messageWithPii, string messageScrubbed)
+        {
+        }
+
         public void Error(string messageScrubbed)
         {
         }

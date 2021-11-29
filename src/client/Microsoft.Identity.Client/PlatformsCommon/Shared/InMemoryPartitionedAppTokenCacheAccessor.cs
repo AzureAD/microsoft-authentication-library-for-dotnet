@@ -175,6 +175,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
         {
+            _logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
             if (string.IsNullOrEmpty(partitionKey))
             {
                 return AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
@@ -215,6 +216,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual void Clear()
         {
             AccessTokenCacheDictionary.Clear();
+            _logger.Always("[Clear] Clearing access token cache data.");
             // app metadata isn't removable
         }
 

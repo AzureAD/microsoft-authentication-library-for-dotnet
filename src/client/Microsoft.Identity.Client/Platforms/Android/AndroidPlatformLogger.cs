@@ -9,6 +9,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
 {
     internal class AndroidPlatformLogger : IPlatformLogger
     {
+        public void Always(string message)
+        {
+            Log.Info(null, message);
+        }
+
         public void Error(string errorMessage)
         {
             Log.Error(null, errorMessage);

@@ -137,7 +137,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
             Log(LogLevel.Error, string.Empty, messageScrubbed);
         }
 
-
         public void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
         {
             Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
@@ -151,6 +150,16 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public void ErrorPii(Exception exWithPii)
         {
             Log(LogLevel.Error, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
+        }
+
+        public void Always(string messageScrubbed)
+        {
+            Log(LogLevel.Always, string.Empty, messageScrubbed);
+        }
+
+        public void AlwaysPii(string messageWithPii, string messageScrubbed)
+        {
+            Log(LogLevel.Always, messageWithPii, messageScrubbed);
         }
 
         private static Lazy<string> s_osLazy = new Lazy<string>(() =>
@@ -189,6 +198,9 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 {
                     switch (logLevel)
                     {
+                        case LogLevel.Always:
+                            _platformLogger.Always(log);
+                            break;
                         case LogLevel.Error:
                             _platformLogger.Error(log);
                             break;
