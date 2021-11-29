@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -119,7 +120,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             logger.Always($"[LogMetricsFromAuthResult] DurationInCacheInMs: {authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs}");
             logger.Always($"[LogMetricsFromAuthResult] DurationTotalInMs: {authenticationResult.AuthenticationResultMetadata.DurationTotalInMs}");
             logger.Always($"[LogMetricsFromAuthResult] DurationInHttpInMs: {authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs}");
-            logger.AlwaysPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint?? ""}",
+            logger.AlwaysPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint ?? ""}",
                                 $"TokenEndpoint: ****");
         }
 
@@ -156,7 +157,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 WasSuccessful = false
             };
 
-            foreach (var kvp in AuthenticationRequestParameters.GetApiTelemetryFeatures())
+            foreach (var kvp in AuthenticationRequestParameters.GetApiTelemetryFeatures().ToList())
             {
                 apiEvent[kvp.Key] = kvp.Value;
             }
@@ -209,7 +210,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 msalTokenResponse.TokenSource,
-                AuthenticationRequestParameters.RequestContext.ApiEvent, 
+                AuthenticationRequestParameters.RequestContext.ApiEvent,
                 msalTokenResponse.SpaAuthCode);
         }
 
