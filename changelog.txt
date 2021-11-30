@@ -1,7 +1,7 @@
 4.39.0
 ==========
 ### New Features:
-**Added new `LogLevel.Always` and logging of important health metrics** to help with diagnostics of MSAL. See [3004](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3004).  
+**Added new `LogLevel.Always` and logging of important health metrics** to help with diagnostics of MSAL. See [3004](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3004) and [MSAL logging](https://aka.ms/msal-net-logging).  
 
 ### Bug Fixes:
 **Fixed a crash in telemetry API when `AcquireToken*` builder is reused`**. See [3024](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3024).  
