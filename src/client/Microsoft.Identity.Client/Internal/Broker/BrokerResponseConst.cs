@@ -34,6 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Account = "mAccount";
         public const string HomeAccountId = "home_account_id";
         public const string LocalAccountId = "local_account_id";
+        public const string TenantId = "tenant_id";
         public const string UserName = "username";
         public const string iOSBrokerNonce = "broker_nonce"; // included in request and response with iOS Broker v3
         public const string Environment = "environment";

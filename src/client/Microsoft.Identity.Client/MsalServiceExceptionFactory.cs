@@ -75,6 +75,11 @@ namespace Microsoft.Identity.Client
         {
             MsalServiceException ex = null;
 
+            if (IsPolicyProtectionRequired(errorCode, subErrorCode))
+            {
+                ex = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode);
+            }
+
             if (IsInvalidGrant(errorCode, subErrorCode) || IsInteractionRequired(errorCode))
             {
                 ex = new MsalUiRequiredException(errorCode, errorMessage);
@@ -136,6 +141,12 @@ namespace Microsoft.Identity.Client
         {
             return string.Equals(errorCode, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase)
                              && IsInvalidGrantSubError(subErrorCode);
+        }
+
+        private static bool IsPolicyProtectionRequired(string errorCode, string subErrorCode)
+        {
+            return string.Equals(errorCode, MsalError.UnauthorizedClient, StringComparison.OrdinalIgnoreCase)
+                             && string.Equals(subErrorCode, MsalError.ProtectionPolicyRequired, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsInvalidGrantSubError(string subError)

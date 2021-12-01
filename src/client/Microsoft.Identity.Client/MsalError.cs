@@ -162,6 +162,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidAuthorityType = "invalid_authority_type";
 
+
+        /// <summary>
+        /// The client is unauthorized to access resource. The error is returned in case of MAM. 
+        /// </summary>
+        public const string UnauthorizedClient = "unauthorized_client";
+
         /// <summary>
         /// Unknown Error occurred.
         /// <para>Mitigation</para> None. You might want to inform the end user.

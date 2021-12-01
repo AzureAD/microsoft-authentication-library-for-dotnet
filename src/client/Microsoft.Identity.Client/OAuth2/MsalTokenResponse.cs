@@ -33,6 +33,9 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string SpaCode = "spa_code";
         public const string ErrorSubcode = "error_subcode";
         public const string ErrorSubcodeCancel = "cancel";
+        public const string TenantId = "tenant_id";
+        public const string UPN = "username";
+        public const string LocalAccountId = "local_account_id";
     }
 
     [JsonObject]
@@ -74,6 +77,18 @@ namespace Microsoft.Identity.Client.OAuth2
 
         [JsonProperty(PropertyName = TokenResponseClaim.SpaCode)]
         public string SpaAuthCode { get; set; }
+
+        [JsonProperty(PropertyName = TokenResponseClaim.Authority)]
+        public string AuthorityUrl { get; set; }
+
+        [JsonProperty(PropertyName = TokenResponseClaim.TenantId)]
+        public string TenantId { get; set; }
+
+        [JsonProperty(PropertyName = TokenResponseClaim.UPN)]
+        public string UPN { get; set; }
+
+        [JsonProperty(PropertyName = TokenResponseClaim.LocalAccountId)]
+        public string AccountUserId { get; set; }
 
         public string WamAccountId { get; set; }
 
@@ -151,7 +166,11 @@ namespace Microsoft.Identity.Client.OAuth2
                 ExtendedExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
                 ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
                 TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
-                TokenSource = TokenSource.Broker
+                TokenSource = TokenSource.Broker,
+                AuthorityUrl = authResult[BrokerResponseConst.Authority].ToString(),
+                TenantId = authResult[BrokerResponseConst.TenantId].ToString(),
+                UPN = authResult[BrokerResponseConst.UserName].ToString(),
+                AccountUserId = authResult[BrokerResponseConst.LocalAccountId].ToString(),
             };
 
             return msalTokenResponse;
