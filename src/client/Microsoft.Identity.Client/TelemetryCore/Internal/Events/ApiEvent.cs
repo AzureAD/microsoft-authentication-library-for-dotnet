@@ -79,17 +79,17 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public string IsTokenCacheSerializedString
         {
-            get => IsTokenCacheSerialized.ToString().ToLowerInvariant();
+            get => IsTokenCacheSerialized ? TelemetryConstants.One : TelemetryConstants.Zero;
         }
 
         public bool IsLegacyCacheEnabled { get; set; }
 
         public string IsLegacyCacheEnabledString
         {
-            get => IsLegacyCacheEnabled.ToString().ToLowerInvariant();
+            get => IsLegacyCacheEnabled ? TelemetryConstants.One : TelemetryConstants.Zero;
         }
 
-        private int? _cacheInfo;
+        private CacheRefreshReason? _cacheInfo;
         public int CacheInfo
         {
             get { return _cacheInfo.HasValue ? _cacheInfo.Value : (int)CacheRefreshReason.NotApplicable; }

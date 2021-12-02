@@ -111,22 +111,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             string isLegacyCacheEnabled = eventInProgress.IsLegacyCacheEnabledString;
 
             var platformConfig = new StringBuilder();
-            platformConfig.Append(ConvertFromStringToBitwise(isTokenCacheSerialized) + ",");
-            platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled));
+            platformConfig.Append(isTokenCacheSerialized + ",");
+            platformConfig.Append(isLegacyCacheEnabled);
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion}" +
                 $"|{apiId},{cacheInfo},{regionUsed},{regionSource},{regionOutcome}" +
                 $"|{platformConfig}";
-        }
-
-        private string ConvertFromStringToBitwise(string value)
-        {
-            if (string.IsNullOrEmpty(value) || value == TelemetryConstants.False)
-            {
-                return TelemetryConstants.Zero;
-            }
-
-            return TelemetryConstants.One;
         }
     }
 }
