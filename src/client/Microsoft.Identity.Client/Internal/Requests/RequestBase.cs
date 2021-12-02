@@ -116,10 +116,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private static void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)
         {
-            apiEvent.TenantId = authenticationResult.TenantId;
-            apiEvent.AccountId = authenticationResult.UniqueId;
-            apiEvent.WasSuccessful = true;
-
             authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
             authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
             authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
@@ -136,21 +132,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private ApiEvent InitializeApiEvent(string accountId)
         {
-            ApiEvent apiEvent = new ApiEvent(
-                AuthenticationRequestParameters.RequestContext.Logger,
-                ServiceBundle.PlatformProxy.CryptographyManager,
-                AuthenticationRequestParameters.RequestContext.CorrelationId)
+            ApiEvent apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.CorrelationId)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
-                AccountId = accountId ?? "",
-                WasSuccessful = false
             };
-
-            if (AuthenticationRequestParameters.AuthorityInfo != null)
-            {
-                apiEvent.Authority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
-                apiEvent.AuthorityType = AuthenticationRequestParameters.AuthorityInfo.AuthorityType.ToString();
-            }
 
             apiEvent.IsTokenCacheSerialized = AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsExternalSerializationConfiguredByUser();
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;

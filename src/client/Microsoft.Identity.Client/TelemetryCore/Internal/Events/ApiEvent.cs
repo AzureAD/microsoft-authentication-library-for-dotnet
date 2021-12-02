@@ -3,8 +3,6 @@
 
 using System;
 using System.Globalization;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -29,16 +27,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             RemoveAccount = 1013
         }
 
-        private readonly ICryptographyManager _cryptographyManager;
-        private readonly ICoreLogger _logger;
-
-        public ApiEvent(
-            ICoreLogger logger,
-            ICryptographyManager cryptographyManager,
-            Guid correlationId)
+        public ApiEvent(Guid correlationId)
         {
-            _logger = logger;
-            _cryptographyManager = cryptographyManager;
             CorrelationId = correlationId;
         }
 
@@ -53,27 +43,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public string TokenEndpoint { get; set; }
 
-        // Some of these properties like Authority, TenantId, LoginHint, etc.
-        // were set only, never used, maybe can be removed?
-        public Uri Authority { get; set; }
-
-        public string AuthorityType { get; set; }
-
-        public string Prompt { get; set; }
-
-        public string TenantId { get; set; }
-
-        public string AccountId { get; set; }
-
-        public bool WasSuccessful { get; set; }
-
-        public bool IsConfidentialClient { get; set; }
-
         public bool IsAccessTokenCacheHit { get; set; }
 
         public string ApiErrorCode { get; set; }
-
-        public string LoginHint { get; set; }
 
         #region Region
         public string RegionUsed { get; set; }

@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Client
         {
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
-            requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId);
+            requestContext.ApiEvent = new ApiEvent(correlationId);
             requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
 
             var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Client
         {
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
-            requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId);
+            requestContext.ApiEvent = new ApiEvent(correlationId);
             requestContext.ApiEvent.ApiId = apiId;
 
             var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(

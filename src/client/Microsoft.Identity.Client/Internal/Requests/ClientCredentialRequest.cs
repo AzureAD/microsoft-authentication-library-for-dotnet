@@ -5,13 +5,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.Utils;
-using System;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -122,11 +119,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
-        }
-
-        protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)
-        {
-            apiEvent.IsConfidentialClient = true;
         }
 
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)

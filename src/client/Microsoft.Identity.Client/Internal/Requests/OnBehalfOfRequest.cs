@@ -1,15 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -160,7 +157,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
         {
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
-            
+
             // We always retrieve a refresh token in OBO but we don't want to cache it for normal OBO flow, only for long-running OBO
             if (!IsLongRunningObo())
             {
@@ -175,11 +172,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
-        }
-
-        protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)
-        {
-            apiEvent.IsConfidentialClient = true;
         }
 
         private Dictionary<string, string> GetBodyParameters()

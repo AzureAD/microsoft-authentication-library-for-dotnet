@@ -72,10 +72,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     Account = account,
                 };
 
-            authenticationRequestParameters.RequestContext.ApiEvent = new ApiEvent(
-                authenticationRequestParameters.RequestContext.Logger,
-                ServiceBundle.PlatformProxy.CryptographyManager,
-                Guid.NewGuid());
+            authenticationRequestParameters.RequestContext.ApiEvent = new ApiEvent(Guid.NewGuid());
 
             return authenticationRequestParameters;
         }
