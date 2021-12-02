@@ -116,6 +116,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private static void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)
         {
+            apiEvent.TenantId = authenticationResult.TenantId;
+            apiEvent.AccountId = authenticationResult.UniqueId;
             apiEvent.WasSuccessful = true;
 
             authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
@@ -140,7 +142,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.CorrelationId)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
+                AccountId = accountId ?? "",
+                WasSuccessful = false
             };
+
+            if (AuthenticationRequestParameters.AuthorityInfo != null)
+            {
+                apiEvent.Authority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
+                apiEvent.AuthorityType = AuthenticationRequestParameters.AuthorityInfo.AuthorityType.ToString();
+            }
 
             apiEvent.IsTokenCacheSerialized = AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsExternalSerializationConfiguredByUser();
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;

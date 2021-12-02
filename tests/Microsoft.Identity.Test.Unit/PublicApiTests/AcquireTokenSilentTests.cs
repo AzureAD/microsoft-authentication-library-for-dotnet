@@ -53,6 +53,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+
+                Assert.Fail("Should not reach here. Exception was not thrown.");
             }
             catch (MsalUiRequiredException exc)
             {
