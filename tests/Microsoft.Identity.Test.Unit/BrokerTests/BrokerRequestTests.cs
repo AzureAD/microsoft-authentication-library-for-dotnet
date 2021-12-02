@@ -73,6 +73,15 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public void InteractiveStrategy_ProtectionPolicyNotEnabled_Throws_IntuneAppProtectionPolicyRequiredException()
+        {
+            ProtectionPolicyNotEnabled_Throws_IntuneAppProtectionPolicyRequiredException_Common((msalToken) =>
+            {
+                _brokerInteractiveRequest.ValidateResponseFromBroker(msalToken);
+            });
+        }
+
+        [TestMethod]
         public void BrokerErrorResponseTest()
         {
             using (CreateBrokerHelper())
@@ -675,6 +684,49 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 catch (MsalUiRequiredException ex)
                 {
                     Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidInvalidRefreshToken);
+                    return;
+                }
+
+                Assert.Fail("Wrong Exception thrown. ");
+            }
+        }
+
+        [TestMethod]
+        public void SilentStrategy_ProtectionPolicyNotEnabled_Throws_IntuneAppProtectionPolicyRequiredException()
+        {
+            ProtectionPolicyNotEnabled_Throws_IntuneAppProtectionPolicyRequiredException_Common((msalToken) =>
+            {
+                _brokerSilentAuthStrategy.ValidateResponseFromBroker(msalToken);
+            });
+        }
+
+        private void ProtectionPolicyNotEnabled_Throws_IntuneAppProtectionPolicyRequiredException_Common(Action<MsalTokenResponse> action)
+        {
+            using (var harness = CreateBrokerHelper())
+            {
+                try
+                {
+                    // Arrange
+                    MsalTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
+                    msalTokenResponse.SubError = BrokerResponseConst.AndroidProtectionPolicyRequired;
+                    msalTokenResponse.TenantId = TestConstants.TenantId;
+                    msalTokenResponse.UPN = TestConstants.Username;
+                    msalTokenResponse.AccountUserId = TestConstants.LocalAccountId;
+                    msalTokenResponse.AuthorityUrl = TestConstants.AuthorityUtid2Tenant;
+
+                    // Act
+                    action(msalTokenResponse);
+                }
+                catch (IntuneAppProtectionPolicyRequiredException ex)
+                {
+                    // Assert
+                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidUnauthorizedClient);
+                    Assert.IsTrue(ex.SubError == BrokerResponseConst.AndroidProtectionPolicyRequired);
+
+                    Assert.AreEqual(TestConstants.TenantId, ex.TenantId);
+                    Assert.AreEqual(TestConstants.Username, ex.Upn);
+                    Assert.AreEqual(TestConstants.LocalAccountId, ex.AccountUserId);
+                    Assert.AreEqual(TestConstants.AuthorityUtid2Tenant, ex.AuthorityUrl);
                     return;
                 }
 

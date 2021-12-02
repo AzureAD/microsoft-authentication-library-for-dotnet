@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
                                                                      string.IsNullOrEmpty(msalTokenResponse.SubError)?
                                                                      MsalError.UnknownBrokerError : msalTokenResponse.SubError,
                                                                      msalTokenResponse.CorrelationId,
-                                                                     msalTokenResponse.HttpResponse);
+                                                                     msalTokenResponse);
             }
 
             _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);

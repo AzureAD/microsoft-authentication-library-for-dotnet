@@ -46,6 +46,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
         //Error codes returned from Android broker
         public const string AndroidNoTokenFound = "no_tokens_found";
         public const string AndroidNoAccountFound = "no_account_found";
+        public const string AndroidUnauthorizedClient = "unauthorized_client";
         public const string AndroidInvalidRefreshToken = "Broker refresh token is invalid";
+        public const string AndroidProtectionPolicyRequired = "protection_policy_required";
     }
 }
