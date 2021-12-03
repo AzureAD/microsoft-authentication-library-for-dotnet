@@ -102,21 +102,27 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 return string.Empty;
             }
 
-            string apiId = eventInProgress.ApiIdString;
-            string cacheInfo = eventInProgress.CacheInfoString;
-            string regionUsed = eventInProgress.RegionUsed;
-            string regionSource = eventInProgress.RegionAutodetectionSourceString;
-            string regionOutcome = eventInProgress.RegionOutcomeString;
-            string isTokenCacheSerialized = eventInProgress.IsTokenCacheSerializedString;
-            string isLegacyCacheEnabled = eventInProgress.IsLegacyCacheEnabledString;
+            var sb = new StringBuilder();
+            // Version
+            sb.Append(TelemetryConstants.HttpTelemetrySchemaVersion);
+            // Main values
+            sb.Append(TelemetryConstants.HttpTelemetryPipe);
+            sb.Append(eventInProgress.ApiIdString);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.CacheInfoString);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.RegionUsed);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.RegionAutodetectionSourceString);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.RegionOutcomeString);
+            // Platform config
+            sb.Append(TelemetryConstants.HttpTelemetryPipe);
+            sb.Append(eventInProgress.IsTokenCacheSerializedString);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.IsLegacyCacheEnabledString);
 
-            var platformConfig = new StringBuilder();
-            platformConfig.Append(isTokenCacheSerialized + ",");
-            platformConfig.Append(isLegacyCacheEnabled);
-
-            return $"{TelemetryConstants.HttpTelemetrySchemaVersion}" +
-                $"|{apiId},{cacheInfo},{regionUsed},{regionSource},{regionOutcome}" +
-                $"|{platformConfig}";
+            return sb.ToString();
         }
     }
 }
