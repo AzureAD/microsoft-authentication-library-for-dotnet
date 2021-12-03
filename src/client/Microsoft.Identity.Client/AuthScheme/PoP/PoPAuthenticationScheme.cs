@@ -64,6 +64,11 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
+            if (_popAuthenticationConfiguration.DoNotSignHttpRequest)
+            {
+                return msalAccessTokenCacheItem.Secret;
+            }
+
             JObject header = new JObject
             {
                 { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, _popCryptoProvider.CryptographicAlgorithm },

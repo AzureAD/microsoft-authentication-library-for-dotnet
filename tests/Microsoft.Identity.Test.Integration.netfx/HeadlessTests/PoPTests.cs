@@ -24,6 +24,8 @@ using Microsoft.Identity.Test.Integration.net45;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
+using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -282,6 +284,64 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        public async Task PopTest_ExternalWilsonSigning_Async()
+        {
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
+                .WithExperimentalFeatures()
+                .WithAuthority(PublicCloudTestAuthority)
+                .WithClientSecret(s_publicCloudCcaSecret)
+                .Build();
+
+            // Create an RSA key Wilson style (SigningCredentials)
+            var key = CreateRsaSecurityKey();
+            var popCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
+
+            var popConfig = new PoPAuthenticationConfiguration() 
+            {                 
+                PopCryptoProvider = new SigningCredentialsToPopCryptoProviderAdapter(popCredentials, true),                
+                DoNotSignHttpRequest = true,
+            };
+
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPossession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("pop", result.TokenType);
+            Assert.AreEqual(
+                TokenSource.IdentityProvider, 
+                result.AuthenticationResultMetadata.TokenSource);
+
+            SignedHttpRequestDescriptor signedHttpRequestDescriptor =
+                new SignedHttpRequestDescriptor(
+                    result.AccessToken,
+                    new IdentityModel.Protocols.HttpRequestData()
+                    {
+                        Uri = new Uri(ProtectedUrl),
+                        Method = HttpMethod.Post.ToString()
+                    },
+                    popCredentials);
+            var signedHttpRequestHandler = new SignedHttpRequestHandler();
+            string req = signedHttpRequestHandler.CreateSignedHttpRequest(signedHttpRequestDescriptor);
+
+            await VerifyPoPTokenAsync(
+                PublicCloudConfidentialClientID,
+                 ProtectedUrl,
+                 HttpMethod.Post,
+                 req, "pop").ConfigureAwait(false);
+
+            var result2 = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+             .WithProofOfPossession(popConfig)
+             .ExecuteAsync(CancellationToken.None)
+             .ConfigureAwait(false);
+            Assert.AreEqual(
+                TokenSource.Cache, 
+                result2.AuthenticationResultMetadata.TokenSource);
+
+        }
+
+        [TestMethod]
         public async Task PopTestWithECDAsync()
         {
             var confidentialApp = ConfidentialClientApplicationBuilder
@@ -336,13 +396,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// This calls a special endpoint that validates any POP token against a configurable HTTP request.
         /// The HTTP request is configured through headers.
         /// </summary>
-        private async Task VerifyPoPTokenAsync(string clientId, string requestUri, HttpMethod method, AuthenticationResult result)
+        private Task VerifyPoPTokenAsync(string clientId, string requestUri, HttpMethod method, AuthenticationResult result)
+        {
+            return VerifyPoPTokenAsync(clientId, requestUri, method, result.AccessToken, result.TokenType);
+        }
+
+        private async Task VerifyPoPTokenAsync(string clientId, string requestUri, HttpMethod method, string token, string tokenType)
         {
             var httpClient = new HttpClient();
             HttpResponseMessage response;
             var request = new HttpRequestMessage(HttpMethod.Post, PoPValidatorEndpoint);
 
-            var authHeader = new AuthenticationHeaderValue(result.TokenType, result.AccessToken);
+            var authHeader = new AuthenticationHeaderValue(tokenType, token);
 
             request.Headers.Add("Secret", _popValidationEndpointSecret);
             request.Headers.Add("Authority", "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/");
@@ -378,6 +443,30 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 }
             });
         }
+
+        private static RsaSecurityKey CreateRsaSecurityKey()
+        {
+#if NET_FX
+            RSA rsa = RSA.Create(2048);
+#else
+            RSA rsa = new RSACryptoServiceProvider(2048);
+#endif
+            // the reason for creating the RsaSecurityKey from RSAParameters is so that a SignatureProvider created with this key
+            // will own the RSA object and dispose it. If we pass a RSA object, the SignatureProvider does not own the object, the RSA object will not be disposed.
+            RSAParameters rsaParameters = rsa.ExportParameters(true);
+            RsaSecurityKey rsaSecuirtyKey = new RsaSecurityKey(rsaParameters) { KeyId = CreateRsaKeyId(rsaParameters) };
+            rsa.Dispose();
+            return rsaSecuirtyKey;
+        }
+
+        private static string CreateRsaKeyId(RSAParameters rsaParameters)
+        {
+            byte[] kidBytes = new byte[rsaParameters.Exponent.Length + rsaParameters.Modulus.Length];
+            Array.Copy(rsaParameters.Exponent, 0, kidBytes, 0, rsaParameters.Exponent.Length);
+            Array.Copy(rsaParameters.Modulus, 0, kidBytes, rsaParameters.Exponent.Length, rsaParameters.Modulus.Length);
+            using (var sha2 = SHA256.Create())
+                return Base64UrlEncoder.Encode(sha2.ComputeHash(kidBytes));
+        }
     }
 
     public class RSACertificatePopCryptoProvider : IPoPCryptoProvider
@@ -411,12 +500,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
 
         /// <summary>
-        /// Creates the cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
+        /// Creates the canonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
         /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint
         /// </summary>
         private static string ComputeCannonicalJwk(RSAParameters rsaPublicKey)
         {
-            return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
+            return $@"{{""e"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""kty"":""RSA"",""n"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
         }
     }
+
 }
