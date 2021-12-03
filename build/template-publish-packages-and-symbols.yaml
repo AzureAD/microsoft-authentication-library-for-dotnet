@@ -15,6 +15,11 @@ steps:
     arguments: 'verify -Signature ${{ parameters.NugetPackagesWildcard }}'
   continueOnError: true
 
+- task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+  displayName: 'Generation Task'
+  inputs:
+       BuildDropPath: '$(System.ArtifactsDirectory)/buildOutput'
+
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: packages'
   inputs:
