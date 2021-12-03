@@ -22,6 +22,11 @@ steps:
     MsalClientSemVer: $(MsalClientSemVer)
     Solution: 'LibsAndSamples.sln'
 
+- task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+  displayName: 'Generation Task'
+  inputs:
+       BuildDropPath: '$(System.ArtifactsDirectory)/buildOutput'
+
 - task: DownloadSecureFile@1
   displayName: 'Download Xamarin Ui Test Tools'
   inputs:
