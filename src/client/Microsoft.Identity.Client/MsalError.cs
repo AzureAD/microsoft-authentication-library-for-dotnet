@@ -61,7 +61,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string UserAssertionNullError = "user_assertion_null";
 
-
         /// <summary>
         /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when the 
         /// <see cref="PublicClientApplication.OperatingSystemAccount"/> user is passed as the <c>account</c> parameter. Only some brokers (WAM) can login the current user.
@@ -162,9 +161,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidAuthorityType = "invalid_authority_type";
 
-
         /// <summary>
-        /// The client is unauthorized to access resource. The error is returned in case of MAM. 
+        /// The client is unauthorized to access resource.
+        /// This commonly happens in case of MAM. MSAL will throw an exception in that case with SubError protection_policy_required.
+        /// <para>Mitigation</para>
+        /// Catch the exception and use the properties in it to obtain the right parameters from Intune SDK.
+        /// <see cref="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Exceptions/#IntuneAppProtectionPolicyRequiredException"/>
         /// </summary>
         public const string UnauthorizedClient = "unauthorized_client";
 
