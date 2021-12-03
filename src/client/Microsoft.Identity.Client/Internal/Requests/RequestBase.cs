@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
             authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
             authenticationResult.AuthenticationResultMetadata.TokenEndpoint = apiEvent.TokenEndpoint;
-            authenticationResult.AuthenticationResultMetadata.CacheRefreshReason = (CacheRefreshReason)apiEvent.CacheInfo;
+            authenticationResult.AuthenticationResultMetadata.CacheRefreshReason = apiEvent.CacheInfo;
 
             Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
         }
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             apiEvent.IsTokenCacheSerialized = AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsExternalSerializationConfiguredByUser();
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
-            apiEvent.CacheInfo = (int)CacheRefreshReason.NotApplicable;
+            apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);

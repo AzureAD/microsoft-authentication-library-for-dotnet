@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else
                 {
-                    if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != (int)CacheRefreshReason.Expired)
+                    if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
                     {
                         cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
                     }
@@ -79,9 +79,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == (int)CacheRefreshReason.NotApplicable)
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.NotApplicable)
             {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
             }
 
             // No AT in the cache or AT needs to be refreshed
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     // may fire a request to get a new token in the background
                     if (shouldRefresh)
                     {
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.ProactivelyRefreshed;
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,

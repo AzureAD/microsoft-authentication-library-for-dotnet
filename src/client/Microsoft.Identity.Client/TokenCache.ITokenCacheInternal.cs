@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: cacheExpiry,
                             cancellationToken: requestParams.RequestContext.UserCancellationToken,
-                            correlationId: requestParams.RequestContext.CorrelationId);                       
+                            correlationId: requestParams.RequestContext.CorrelationId);
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -448,7 +448,7 @@ namespace Microsoft.Identity.Client
             {
 
                 logger.Verbose("No access tokens found in the cache. Skipping filtering. ");
-                requestParams.RequestContext.ApiEvent.CacheInfo = (int)CacheRefreshReason.NoCachedAccessToken;
+                requestParams.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
 
                 if (AcquireTokenInLongRunningOboWasCalled(requestParams))
                 {
@@ -488,7 +488,7 @@ namespace Microsoft.Identity.Client
                 cacheInfoTelemetry = CacheRefreshReason.Expired;
             }
 
-            requestParams.RequestContext.ApiEvent.CacheInfo = (int)cacheInfoTelemetry;
+            requestParams.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
 
             return msalAccessTokenCacheItem;
         }
@@ -762,8 +762,8 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: default,
-                            correlationId: default);              
-             
+                            correlationId: default);
+
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
         }
