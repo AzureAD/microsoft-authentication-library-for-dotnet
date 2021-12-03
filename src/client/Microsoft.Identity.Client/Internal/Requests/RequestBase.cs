@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -106,12 +107,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ICoreLogger logger)
         {
-            logger.Always($"[LogMetricsFromAuthResult] Cache Refresh Reason: {authenticationResult.AuthenticationResultMetadata.CacheRefreshReason}");
-            logger.Always($"[LogMetricsFromAuthResult] DurationInCacheInMs: {authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs}");
-            logger.Always($"[LogMetricsFromAuthResult] DurationTotalInMs: {authenticationResult.AuthenticationResultMetadata.DurationTotalInMs}");
-            logger.Always($"[LogMetricsFromAuthResult] DurationInHttpInMs: {authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs}");
+            var sb = new StringBuilder(250);
+            sb.AppendLine();
+            sb.Append("[LogMetricsFromAuthResult] Cache Refresh Reason: ");
+            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason.ToString());
+            sb.Append("[LogMetricsFromAuthResult] DurationInCacheInMs: ");
+            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs.ToString());
+            sb.Append("[LogMetricsFromAuthResult] DurationTotalInMs: ");
+            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs.ToString());
+            sb.Append("[LogMetricsFromAuthResult] DurationInHttpInMs: ");
+            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs.ToString());
+            logger.Always(sb.ToString());
             logger.AlwaysPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint ?? ""}",
-                                $"TokenEndpoint: ****");
+                                "TokenEndpoint: ****");
         }
 
         private static void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)
