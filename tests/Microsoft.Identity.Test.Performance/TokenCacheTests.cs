@@ -49,12 +49,12 @@ namespace Microsoft.Identity.Test.Performance
             (1, 100000),
             (100, 10000),
             (1000, 1000),
-            (10000, 100), };
+           (10000, 100), };
 
         // If the tokens are saved with different tenants.
         // This results in ID tokens and accounts having multiple tenant profiles.
-        [ParamsAllValues(Priority = 1)]
-        public bool IsMultiTenant { get; set; }
+        //[ParamsAllValues(Priority = 1)]
+        public bool IsMultiTenant { get; set; } = false;
 
         [GlobalSetup]
         public void GlobalSetup()
@@ -63,6 +63,7 @@ namespace Microsoft.Identity.Test.Performance
                 .Create(TestConstants.ClientId)
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
+                .WithLegacyCacheCompatibility(false)
                 .BuildConcrete();
 
             PopulateUserCache(CacheSize.Users, CacheSize.TokensPerUser);
@@ -147,7 +148,7 @@ namespace Microsoft.Identity.Test.Performance
             string scope = $"{_scopePrefix}{tokenId}";
 
             MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(scope, tenant, homeAccountId, oboCacheKey: userAssertionHash);
-            
+
             _cca.UserTokenCacheInternal.Accessor.SaveAccessToken(atItem);
 
             MsalRefreshTokenCacheItem rtItem = TokenCacheHelper.CreateRefreshTokenItem(userAssertionHash, homeAccountId);
