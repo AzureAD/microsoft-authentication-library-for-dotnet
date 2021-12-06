@@ -101,8 +101,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// App developers can use a package like Microsoft.IdentityModel.Protocols.SignedHttpRequest to later create and sign the envelope. 
         /// </summary>
         /// <remarks>
-        /// If set to true, you do not need to implement the <see cref="IPoPCryptoProvider.Sign(byte[])"/> method when using custom keys. 
+        /// If set to false, you do not need to implement the <see cref="IPoPCryptoProvider.Sign(byte[])"/> method when using custom keys. 
         /// </remarks>
-        public bool DoNotSignHttpRequest { get; set; } = false;
+        public bool SignHttpRequest { get; set; } = true;
     }
 }

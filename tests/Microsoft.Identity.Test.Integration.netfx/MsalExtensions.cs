@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Integration
             }
 
             var popAuthenticationConfiguration
-                = new PoPAuthenticationConfiguration() { DoNotSignHttpRequest = true };
+                = new PoPAuthenticationConfiguration() { SignHttpRequest = false };
 
             if (popCredentials != null)
             {

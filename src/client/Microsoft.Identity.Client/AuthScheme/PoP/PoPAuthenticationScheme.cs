@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            if (_popAuthenticationConfiguration.DoNotSignHttpRequest)
+            if (!_popAuthenticationConfiguration.SignHttpRequest)
             {
                 return msalAccessTokenCacheItem.Secret;
             }
