@@ -163,10 +163,10 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// The client is unauthorized to access resource.
-        /// This commonly happens in case of MAM. MSAL will throw an exception in that case with SubError protection_policy_required.
+        /// This commonly happens when Mobile App Management (MAM) policies are enabled. MSAL will throw an exception in that case with <c>protection_policy_required</c> sub-error.
         /// <para>Mitigation</para>
         /// Catch the exception and use the properties in it to obtain the right parameters from Intune SDK.
-        /// <see cref="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Exceptions/#IntuneAppProtectionPolicyRequiredException"/>
+        /// <see href="https://aka.ms/msal-net-trueMAM">IntuneAppProtectionPolicyRequiredException</see>
         /// </summary>
         public const string UnauthorizedClient = "unauthorized_client";
 

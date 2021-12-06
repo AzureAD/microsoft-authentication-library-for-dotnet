@@ -30,6 +30,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -86,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (CreateBrokerHelper())
             {
-                var response = new MsalTokenResponse
+                var response = new MobileTokenResponse
                 {
                     Error = "MSALErrorDomain",
                     ErrorDescription = "error_description: Server returned less scopes than requested"
@@ -111,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (CreateBrokerHelper())
             {
 
-                var response = new MsalTokenResponse
+                var response = new MobileTokenResponse
                 {
                     Error = MsalError.InteractionRequired,
                     ErrorDescription = MsalError.InteractionRequired,
@@ -139,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (CreateBrokerHelper())
             {
 
-                var response = new MsalTokenResponse
+                var response = new MobileTokenResponse
                 {
                     Error = MsalError.InvalidGrantError,
                     ErrorDescription = MsalError.InvalidGrantError,
@@ -707,10 +708,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 try
                 {
                     // Arrange
-                    MsalTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
+                    MobileTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
                     msalTokenResponse.SubError = BrokerResponseConst.AndroidProtectionPolicyRequired;
                     msalTokenResponse.TenantId = TestConstants.TenantId;
-                    msalTokenResponse.UPN = TestConstants.Username;
+                    msalTokenResponse.Upn = TestConstants.Username;
                     msalTokenResponse.AccountUserId = TestConstants.LocalAccountId;
                     msalTokenResponse.AuthorityUrl = TestConstants.AuthorityUtid2Tenant;
 
@@ -720,9 +721,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 catch (IntuneAppProtectionPolicyRequiredException ex)
                 {
                     // Assert
-                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidUnauthorizedClient);
-                    Assert.IsTrue(ex.SubError == BrokerResponseConst.AndroidProtectionPolicyRequired);
-
+                    Assert.AreEqual(BrokerResponseConst.AndroidUnauthorizedClient, ex.ErrorCode);
+                    Assert.AreEqual(BrokerResponseConst.AndroidProtectionPolicyRequired, ex.SubError);
                     Assert.AreEqual(TestConstants.TenantId, ex.TenantId);
                     Assert.AreEqual(TestConstants.Username, ex.Upn);
                     Assert.AreEqual(TestConstants.LocalAccountId, ex.AccountUserId);
@@ -734,9 +734,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-        private static MsalTokenResponse CreateErrorResponse(string errorCode)
+        private static MobileTokenResponse CreateErrorResponse(string errorCode)
         {
-            return new MsalTokenResponse
+            return new MobileTokenResponse
             {
                 Scope = TestConstants.s_scope.AsSingleString(),
                 TokenType = TestConstants.Bearer,

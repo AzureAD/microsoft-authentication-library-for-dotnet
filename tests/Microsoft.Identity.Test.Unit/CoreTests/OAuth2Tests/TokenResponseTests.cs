@@ -43,22 +43,22 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             string androidBrokerResponse = TestConstants.AndroidBrokerResponse.Replace("1591196764", unixTimestamp); 
             string correlationId = Guid.NewGuid().ToString();
             // Act
-            var msalTokenResponse = MsalTokenResponse.CreateFromAndroidBrokerResponse(androidBrokerResponse, correlationId);
+            var mobileTokenResponse = MobileTokenResponse.CreateFromAndroidBrokerResponse(androidBrokerResponse, correlationId);
 
             // Assert
-            Assert.AreEqual("secretAt", msalTokenResponse.AccessToken);
-            Assert.AreEqual(correlationId, msalTokenResponse.CorrelationId);
-            Assert.AreEqual("clientInfo", msalTokenResponse.ClientInfo);
-            Assert.AreEqual("idT", msalTokenResponse.IdToken);
-            Assert.AreEqual("User.Read openid offline_access profile", msalTokenResponse.Scope);
-            Assert.AreEqual("Bearer", msalTokenResponse.TokenType);
+            Assert.AreEqual("secretAt", mobileTokenResponse.AccessToken);
+            Assert.AreEqual(correlationId, mobileTokenResponse.CorrelationId);
+            Assert.AreEqual("clientInfo", mobileTokenResponse.ClientInfo);
+            Assert.AreEqual("idT", mobileTokenResponse.IdToken);
+            Assert.AreEqual("User.Read openid offline_access profile", mobileTokenResponse.Scope);
+            Assert.AreEqual("Bearer", mobileTokenResponse.TokenType);
             
-            Assert.AreEqual("49f548d0-12b7-4169-a390-bb5304d24462", msalTokenResponse.TenantId);
-            Assert.AreEqual("some_user@contoso.com", msalTokenResponse.UPN);
-            Assert.AreEqual("ae821e4d-f408-451a-af82-882691148603", msalTokenResponse.AccountUserId);
-            Assert.AreEqual("https://login.microsoftonline.com/common", msalTokenResponse.AuthorityUrl);
+            Assert.AreEqual("49f548d0-12b7-4169-a390-bb5304d24462", mobileTokenResponse.TenantId);
+            Assert.AreEqual("some_user@contoso.com", mobileTokenResponse.Upn);
+            Assert.AreEqual("ae821e4d-f408-451a-af82-882691148603", mobileTokenResponse.AccountUserId);
+            Assert.AreEqual("https://login.microsoftonline.com/common", mobileTokenResponse.AuthorityUrl);
 
-            Assert.IsNull(msalTokenResponse.RefreshToken);
+            Assert.IsNull(mobileTokenResponse.RefreshToken);
         }       
     }
 }

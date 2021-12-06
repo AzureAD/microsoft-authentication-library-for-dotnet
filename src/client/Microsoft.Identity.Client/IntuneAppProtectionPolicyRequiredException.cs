@@ -2,9 +2,10 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// This exception is thrown when Intune requires App protection policy.
-    /// Properties in it can be used by app to obtain the required enrollmentID from MAM SDK
-    /// https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Exceptions/#IntuneAppProtectionPolicyRequiredException
+    /// This exception is thrown when Intune requires app protection policy.
+    /// The information in this exception can be used by app to obtain the required 
+    /// enrollment ID from Mobile App Management (MAM) SDK.
+    /// See https://aka.ms/msal-net-trueMAM
     /// </summary>
     public class IntuneAppProtectionPolicyRequiredException : MsalServiceException
     {

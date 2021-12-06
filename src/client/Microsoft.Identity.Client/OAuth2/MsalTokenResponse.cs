@@ -33,9 +33,6 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string SpaCode = "spa_code";
         public const string ErrorSubcode = "error_subcode";
         public const string ErrorSubcodeCancel = "cancel";
-        public const string TenantIdAndroidBrokerOnly = "tenant_id";
-        public const string UPNAndroidBrokerOnly = "username";
-        public const string LocalAccountIdAndroidBrokerOnly = "local_account_id";
     }
 
     [JsonObject]
@@ -77,18 +74,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
         [JsonProperty(PropertyName = TokenResponseClaim.SpaCode)]
         public string SpaAuthCode { get; set; }
-
-        [JsonProperty(PropertyName = TokenResponseClaim.Authority)]
-        public string AuthorityUrl { get; set; }
-
-        [JsonProperty(PropertyName = TokenResponseClaim.TenantIdAndroidBrokerOnly)]
-        public string TenantId { get; set; }
-
-        [JsonProperty(PropertyName = TokenResponseClaim.UPNAndroidBrokerOnly)]
-        public string UPN { get; set; }
-
-        [JsonProperty(PropertyName = TokenResponseClaim.LocalAccountIdAndroidBrokerOnly)]
-        public string AccountUserId { get; set; }
 
         public string WamAccountId { get; set; }
 
@@ -134,50 +119,6 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             return response;
-        }
-
-        /// <remarks>
-        /// This method does not belong here - it is more tied to the Android code. However, that code is
-        /// not unit testable, and this one is. 
-        /// The values of the JSON response are based on 
-        /// https://github.com/AzureAD/microsoft-authentication-library-common-for-android/blob/dev/common/src/main/java/com/microsoft/identity/common/internal/broker/BrokerResult.java
-        /// </remarks>
-        internal static MsalTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
-        {
-            JObject authResult = JObject.Parse(jsonResponse);
-            var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
-
-            if (!string.IsNullOrEmpty(errorCode))
-            {
-                return new MsalTokenResponse
-                {
-                    Error = errorCode,
-                    ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage]?.ToString(),
-                    AuthorityUrl = authResult[BrokerResponseConst.Authority].ToString(),
-                    TenantId = authResult[BrokerResponseConst.TenantId].ToString(),
-                    UPN = authResult[BrokerResponseConst.UserName].ToString(),
-                    AccountUserId = authResult[BrokerResponseConst.LocalAccountId].ToString(),
-                };
-            }
-
-            MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
-            {
-                AccessToken = authResult[BrokerResponseConst.AccessToken].ToString(),
-                IdToken = authResult[BrokerResponseConst.IdToken].ToString(),
-                CorrelationId = correlationId, // Android response does not expose Correlation ID
-                Scope = authResult[BrokerResponseConst.AndroidScopes].ToString(), // sadly for iOS this is "scope" and for Android "scopes"
-                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExpiresOn].ToString()),
-                ExtendedExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
-                ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
-                TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
-                TokenSource = TokenSource.Broker,
-                AuthorityUrl = authResult[BrokerResponseConst.Authority].ToString(),
-                TenantId = authResult[BrokerResponseConst.TenantId].ToString(),
-                UPN = authResult[BrokerResponseConst.UserName].ToString(),
-                AccountUserId = authResult[BrokerResponseConst.LocalAccountId].ToString(),
-            };
-
-            return msalTokenResponse;
         }
 
         public void Log(ICoreLogger logger, LogLevel logLevel)

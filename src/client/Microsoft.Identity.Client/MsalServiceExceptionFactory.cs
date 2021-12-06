@@ -71,19 +71,19 @@ namespace Microsoft.Identity.Client
           string errorMessage,
           string subErrorCode,
           string correlationId,
-          MsalTokenResponse msalResponse)
+          MobileTokenResponse msalResponse)
         {
             MsalServiceException ex = null;
 
             if (IsPolicyProtectionRequired(errorCode, subErrorCode))
             {
-                var exIntune = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode);
-                exIntune.Upn = msalResponse.UPN;
-                exIntune.AccountUserId = msalResponse.AccountUserId;
-                exIntune.TenantId = msalResponse.TenantId;
-                exIntune.AuthorityUrl = msalResponse.AuthorityUrl;
-
-                ex = exIntune;
+                ex = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode)
+                {
+                    Upn = msalResponse.Upn,
+                    AccountUserId = msalResponse.AccountUserId,
+                    TenantId = msalResponse.TenantId,
+                    AuthorityUrl = msalResponse.AuthorityUrl,
+                };
             }
 
             if (IsInvalidGrant(errorCode, subErrorCode) || IsInteractionRequired(errorCode))
