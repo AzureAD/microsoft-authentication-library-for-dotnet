@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
           string errorMessage,
           string subErrorCode,
           string correlationId,
-          MobileTokenResponse msalResponse)
+          MobileBrokerTokenResponse msalResponse)
         {
             MsalServiceException ex = null;
 

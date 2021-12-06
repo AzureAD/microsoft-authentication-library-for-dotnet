@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
             if (msalTokenResponse.Error != null)
             {
-                var brokerTokenResponse = (MobileTokenResponse)msalTokenResponse;
+                var brokerTokenResponse = (MobileBrokerTokenResponse)msalTokenResponse;
                 _logger.Info(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
 

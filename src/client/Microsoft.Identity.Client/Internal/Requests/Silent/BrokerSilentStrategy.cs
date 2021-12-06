@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     throw new MsalUiRequiredException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription);
                 }
 
-                var brokerTokenResponse = (MobileTokenResponse)msalTokenResponse;
+                var brokerTokenResponse = (MobileBrokerTokenResponse)msalTokenResponse;
                 throw MsalServiceExceptionFactory.FromBrokerResponse(brokerTokenResponse.Error,
                                                      MsalErrorMessage.BrokerResponseError + brokerTokenResponse.ErrorDescription,
                                                      string.IsNullOrEmpty(brokerTokenResponse.SubError) ?

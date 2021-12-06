@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         unreliableLogger?.Info("[Android broker] Response received, decoding... ");
 
                         InteractiveBrokerTokenResponse =
-                            MobileTokenResponse.CreateFromAndroidBrokerResponse(
+                            MobileBrokerTokenResponse.CreateFromAndroidBrokerResponse(
                                 data.GetStringExtra(BrokerConstants.BrokerResultV2),
                                 InteractiveRequestCorrelationId);
                         break;

@@ -10,7 +10,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal class MobileTokenResponseClaim : TokenResponseClaim
+    internal class MobileBrokerTokenResponseClaim : TokenResponseClaim
     {
         public const string TenantIdAndroidBrokerOnly = "tenant_id";
         public const string UpnAndroidBrokerOnly = "username";
@@ -19,28 +19,28 @@ namespace Microsoft.Identity.Client.Internal
 
     [JsonObject]
     [Preserve(AllMembers = true)]
-    internal class MobileTokenResponse : MsalTokenResponse
+    internal class MobileBrokerTokenResponse : MsalTokenResponse
     {
         [JsonProperty(PropertyName = TokenResponseClaim.Authority)]
         public string AuthorityUrl { get; set; }
 
-        [JsonProperty(PropertyName = MobileTokenResponseClaim.TenantIdAndroidBrokerOnly)]
+        [JsonProperty(PropertyName = MobileBrokerTokenResponseClaim.TenantIdAndroidBrokerOnly)]
         public string TenantId { get; set; }
 
-        [JsonProperty(PropertyName = MobileTokenResponseClaim.UpnAndroidBrokerOnly)]
+        [JsonProperty(PropertyName = MobileBrokerTokenResponseClaim.UpnAndroidBrokerOnly)]
         public string Upn { get; set; }
 
-        [JsonProperty(PropertyName = MobileTokenResponseClaim.LocalAccountIdAndroidBrokerOnly)]
+        [JsonProperty(PropertyName = MobileBrokerTokenResponseClaim.LocalAccountIdAndroidBrokerOnly)]
         public string AccountUserId { get; set; }
 
-        internal static MobileTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
+        internal static MobileBrokerTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
         {
             JObject authResult = JObject.Parse(jsonResponse);
             var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
 
             if (!string.IsNullOrEmpty(errorCode))
             {
-                return new MobileTokenResponse
+                return new MobileBrokerTokenResponse
                 {
                     Error = errorCode,
                     ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage]?.ToString(),
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal
                 };
             }
 
-            MobileTokenResponse mobileTokenResponse = new MobileTokenResponse()
+            MobileBrokerTokenResponse mobileTokenResponse = new MobileBrokerTokenResponse()
             {
                 AccessToken = authResult[BrokerResponseConst.AccessToken].ToString(),
                 IdToken = authResult[BrokerResponseConst.IdToken].ToString(),

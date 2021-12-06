@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (CreateBrokerHelper())
             {
-                var response = new MobileTokenResponse
+                var response = new MobileBrokerTokenResponse
                 {
                     Error = "MSALErrorDomain",
                     ErrorDescription = "error_description: Server returned less scopes than requested"
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (CreateBrokerHelper())
             {
 
-                var response = new MobileTokenResponse
+                var response = new MobileBrokerTokenResponse
                 {
                     Error = MsalError.InteractionRequired,
                     ErrorDescription = MsalError.InteractionRequired,
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (CreateBrokerHelper())
             {
 
-                var response = new MobileTokenResponse
+                var response = new MobileBrokerTokenResponse
                 {
                     Error = MsalError.InvalidGrantError,
                     ErrorDescription = MsalError.InvalidGrantError,
@@ -708,7 +708,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 try
                 {
                     // Arrange
-                    MobileTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
+                    MobileBrokerTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
                     msalTokenResponse.SubError = BrokerResponseConst.AndroidProtectionPolicyRequired;
                     msalTokenResponse.TenantId = TestConstants.TenantId;
                     msalTokenResponse.Upn = TestConstants.Username;
@@ -734,9 +734,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-        private static MobileTokenResponse CreateErrorResponse(string errorCode)
+        private static MobileBrokerTokenResponse CreateErrorResponse(string errorCode)
         {
-            return new MobileTokenResponse
+            return new MobileBrokerTokenResponse
             {
                 Scope = TestConstants.s_scope.AsSingleString(),
                 TokenType = TestConstants.Bearer,
