@@ -8,26 +8,17 @@ using System.Security.Cryptography.X509Certificates;
 using Android.Accounts;
 using Android.App;
 using Android.Content;
-using Android.OS;
 using Android.Content.PM;
+using Android.OS;
 using Android.Util;
 using Java.Security;
-using Java.Util.Concurrent;
-using Signature = Android.Content.PM.Signature;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
-using System.Threading.Tasks;
-using OperationCanceledException = Android.Accounts.OperationCanceledException;
-using AndroidUri = Android.Net.Uri;
-using Android.Database;
-using Microsoft.Identity.Json.Utilities;
-using System.Threading;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Http;
 using AndroidNative = Android;
-using System.Linq;
+using Signature = Android.Content.PM.Signature;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -424,14 +415,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        public MsalTokenResponse HandleSilentAuthenticationResult(string silentResult, string correlationId)
+        public MobileBrokerTokenResponse HandleSilentAuthenticationResult(string silentResult, string correlationId)
         {
             if (!string.IsNullOrEmpty(silentResult))
             {
-                return MsalTokenResponse.CreateFromAndroidBrokerResponse(silentResult, correlationId);
+                return MobileBrokerTokenResponse.CreateFromAndroidBrokerResponse(silentResult, correlationId);
             }
 
-            return new MsalTokenResponse
+            return new MobileBrokerTokenResponse
             {
                 Error = MsalError.BrokerResponseReturnedError,
                 ErrorDescription = "[Android broker] Unknown broker error. Failed to acquire token silently from the broker. " + MsalErrorMessage.AndroidBrokerCannotBeInvoked,
