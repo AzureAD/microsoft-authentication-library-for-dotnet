@@ -13,18 +13,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration
 {
-    /// <summary>
-    /// Helper methods for creating 
-    /// </summary>
     internal static class MsalExtensions
     {
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="popCredentials"></param>
-        /// <returns></returns>
         public static AcquireTokenForClientParameterBuilder WithPoPSignedRequest(
             this AcquireTokenForClientParameterBuilder builder,
             SigningCredentials popCredentials) // TODO: this only supports RSA for now
@@ -41,13 +31,11 @@ namespace Microsoft.Identity.Test.Integration
             }
 
             var popAuthenticationConfiguration
-                = new PoPAuthenticationConfiguration() { SignHttpRequest = false };
-
-            if (popCredentials != null)
-            {
-                popAuthenticationConfiguration.PopCryptoProvider =
-                    new SigningCredentialsToPopCryptoProviderAdapter(popCredentials, assertNotSigned: true);
-            }
+                = new PoPAuthenticationConfiguration()
+                {
+                    SignHttpRequest = false,
+                    PopCryptoProvider = new SigningCredentialsToPopCryptoProviderAdapter(popCredentials, assertNotSigned: true)
+                };
 
             return builder.WithProofOfPossession(popAuthenticationConfiguration);
         }
@@ -94,7 +82,7 @@ namespace Microsoft.Identity.Test.Integration
         {
             if (_assertNotSigned)
             {
-                Assert.Fail("Sign call is not expected");
+                Assert.Fail("Sing call is not expected");
             }
 
             var cryptoFactory = _popCredentials.CryptoProviderFactory;
