@@ -300,7 +300,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var popConfig = new PoPAuthenticationConfiguration() 
             {                 
                 PopCryptoProvider = new SigningCredentialsToPopCryptoProviderAdapter(popCredentials, true),                
-                SignHttpRequest = true,
+                SignHttpRequest = false,
             };
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)

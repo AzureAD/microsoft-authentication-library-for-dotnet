@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Integration
         {
             if (_assertNotSigned)
             {
-                Assert.Fail("Sing call is not expected");
+                Assert.Fail("Sign call is not expected");
             }
 
             var cryptoFactory = _popCredentials.CryptoProviderFactory;

@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public string Nonce { get; set; }
 
         /// <summary>
-        /// Allows app developers to bypass the creation of the SingedHttpRequest envelope by setting this property to true.
+        /// Allows app developers to bypass the creation of the SignedHttpRequest envelope by setting this property to true.
         /// App developers can use a package like Microsoft.IdentityModel.Protocols.SignedHttpRequest to later create and sign the envelope. 
         /// </summary>
         /// <remarks>
