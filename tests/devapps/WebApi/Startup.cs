@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using WebApi.Misc;
+using WebApi.Misc.R9;
 
 namespace WebApi
 {
@@ -31,6 +34,16 @@ namespace WebApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApi", Version = "v1" });
+            });
+
+            services.AddSingleton<IMsalTokenEncryptor, MsalTokenEncryptor>();
+            services.AddSingleton<IExtendedDistributedCache, FilePartitionedR9DistributedCache>();
+            services.AddSingleton<IMemoryCache, MemoryCache>();
+            services.AddSingleton<IMsalTelemetryService, MsalTelemetryService>();
+            services.AddCachingForMsalTokens(msalAuthenticationOptions =>
+            {
+                msalAuthenticationOptions.TokenEncryptionKey = "token_encryption_key";
+                msalAuthenticationOptions.CacheType = MsalTokenCacheType.All;
             });
         }
 
