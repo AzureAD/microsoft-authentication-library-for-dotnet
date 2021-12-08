@@ -46,10 +46,9 @@ namespace Microsoft.Identity.Test.Performance
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10000),
-            (1, 100000),
             (100, 10000),
             (1000, 1000),
-           (10000, 100), };
+        };
 
         // If the tokens are saved with different tenants.
         // This results in ID tokens and accounts having multiple tenant profiles.
@@ -82,7 +81,8 @@ namespace Microsoft.Identity.Test.Performance
                 $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}";
         }
 
-        [Benchmark]
+        [Benchmark(Description = "AcquireTokenSilent")]
+        [BenchmarkCategory("With cache")]
         public async Task<AuthenticationResult> AcquireTokenSilent_TestAsync()
         {
             return await _cca.AcquireTokenSilent(new string[] { _scope }, _account)
@@ -91,14 +91,16 @@ namespace Microsoft.Identity.Test.Performance
                 .ConfigureAwait(false);
         }
 
-        [Benchmark]
+        [Benchmark(Description = "GetAccount")]
+        [BenchmarkCategory("With cache")]
         public async Task<IAccount> GetAccountAsync_TestAsync()
         {
             return await _cca.GetAccountAsync(_account.HomeAccountId.Identifier)
                 .ConfigureAwait(false);
         }
 
-        [Benchmark]
+        [Benchmark(Description = "GetAccounts")]
+        [BenchmarkCategory("With cache")]
         public async Task<IAccount> GetAccountsAsync_TestAsync()
         {
             var result = await _cca.GetAccountsAsync()
@@ -106,7 +108,8 @@ namespace Microsoft.Identity.Test.Performance
             return result.FirstOrDefault();
         }
 
-        [Benchmark]
+        [Benchmark(Description = "RemoveAccount")]
+        [BenchmarkCategory("With cache")]
         public async Task RemoveAccountAsync_TestAsync()
         {
             await _cca.RemoveAsync(_account)
