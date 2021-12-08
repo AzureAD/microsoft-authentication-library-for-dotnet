@@ -7,11 +7,11 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
-using WebApi.Misc.R9;
+//using WebApi.Misc.R9;
 
 namespace WebApi.Misc
 {
-    internal class FilePartitionedR9DistributedCache : IExtendedDistributedCache
+    internal class FilePartitionedR9DistributedCache 
     {
         private readonly string _filePath;
         private readonly Func<string, string> _expandKey;
