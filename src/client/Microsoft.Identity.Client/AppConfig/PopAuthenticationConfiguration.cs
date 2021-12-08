@@ -21,8 +21,8 @@ namespace Microsoft.Identity.Client.AppConfig
     public class PoPAuthenticationConfiguration
     {
         /// <summary>
-        /// Creates a configuration using the default key management. Use the properties <see cref="HttpMethod"/>, <see cref="HttpHost"/> etc. 
-        /// to control which elements of the request should be included in the POP token.
+        /// Creates a configuration using the default key management - an RSA key will be created in memory and rotated every 8h.
+        /// Uses <see cref="HttpMethod"/>, <see cref="HttpHost"/> etc. to control which elements of the request should be included in the POP token.
         /// </summary>
         /// <remarks>
         /// See https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#page-3 for details about signed HTTP requests.
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
             HttpMethod = httpRequestMessage.Method;
             HttpHost = httpRequestMessage.RequestUri.Authority; // this includes the optional port
-            HttpPath = httpRequestMessage.RequestUri.AbsolutePath; 
+            HttpPath = httpRequestMessage.RequestUri.AbsolutePath;
         }
 
         /// <summary>
@@ -95,5 +95,14 @@ namespace Microsoft.Identity.Client.AppConfig
         /// or as part of the AuthorityInfo header associated with 200 response. Set it here to make it part of the Signed HTTP Request part of the POP token.
         /// </summary>
         public string Nonce { get; set; }
+
+        /// <summary>
+        /// Allows app developers to bypass the creation of the SignedHttpRequest envelope by setting this property to true.
+        /// App developers can use a package like Microsoft.IdentityModel.Protocols.SignedHttpRequest to later create and sign the envelope. 
+        /// </summary>
+        /// <remarks>
+        /// If set to false, you do not need to implement the <see cref="IPoPCryptoProvider.Sign(byte[])"/> method when using custom keys. 
+        /// </remarks>
+        public bool SignHttpRequest { get; set; } = true;
     }
 }
