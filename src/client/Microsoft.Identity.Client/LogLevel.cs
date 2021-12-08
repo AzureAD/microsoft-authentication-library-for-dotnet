@@ -4,33 +4,33 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     Level of the log messages.
-    ///     For details see https://aka.ms/msal-net-logging
+    /// Represents log level in MSAL.
+    /// For details, see <see href="https://aka.ms/msal-net-logging">MSAL logging</see>.
     /// </summary>
     public enum LogLevel
     {
         /// <summary>
-        ///     Always Log Level
+        /// Includes logs of important health metrics to help with diagnostics of MSAL operations.
         /// </summary>
         Always = -1,
 
         /// <summary>
-        ///     Error Log level
+        /// Includes logs when something has gone wrong and an error was generated. Used for debugging and identifying problems.
         /// </summary>
         Error = 0,
 
         /// <summary>
-        ///     Warning Log level
+        /// Includes logs in scenarios when there hasn't necessarily been an error or failure, but are intended for diagnostics and pinpointing problems.
         /// </summary>
         Warning = 1,
 
         /// <summary>
-        ///     Information Log level
+        /// Default. Includes logs of general events intended for informational purposes, not necessarily intended for debugging.
         /// </summary>
         Info = 2,
 
         /// <summary>
-        ///     Verbose Log level
+        /// Includes logs of the full details of library behavior.
         /// </summary>
         Verbose = 3
     }
