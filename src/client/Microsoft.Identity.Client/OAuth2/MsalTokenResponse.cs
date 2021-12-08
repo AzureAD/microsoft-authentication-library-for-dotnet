@@ -11,6 +11,7 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Core;
 using System.Text;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -81,18 +82,25 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public HttpResponse HttpResponse { get; set; }
 
-        internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
+        internal static MobileBrokerTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
         {
             if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
-                return new MsalTokenResponse
+                return new MobileBrokerTokenResponse
                 {
                     Error = errorCode,
-                    ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription])
+                    ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription]),
+                    AccessToken = responseDictionary[BrokerResponseConst.AccessToken],
+                    RefreshToken = responseDictionary.ContainsKey(BrokerResponseConst.RefreshToken)
+                    ? responseDictionary[BrokerResponseConst.RefreshToken]
+                    : null,
+                    TenantId = responseDictionary[BrokerResponseConst.iOSBrokerTenantId],
+                    Upn = responseDictionary[BrokerResponseConst.UserName],
+                    AccountUserId = responseDictionary[BrokerResponseConst.LocalAccountId],
                 };
             }
 
-            var response = new MsalTokenResponse
+            var response = new MobileBrokerTokenResponse
             {
                 AccessToken = responseDictionary[BrokerResponseConst.AccessToken],
                 RefreshToken = responseDictionary.ContainsKey(BrokerResponseConst.RefreshToken)
@@ -108,7 +116,11 @@ namespace Microsoft.Identity.Client.OAuth2
                 ClientInfo = responseDictionary.ContainsKey(BrokerResponseConst.ClientInfo)
                     ? responseDictionary[BrokerResponseConst.ClientInfo]
                     : null,
-                TokenSource = TokenSource.Broker
+                TokenSource = TokenSource.Broker,
+
+                TenantId = responseDictionary[BrokerResponseConst.iOSBrokerTenantId],
+                Upn = responseDictionary[BrokerResponseConst.UserName],
+                AccountUserId = responseDictionary[BrokerResponseConst.LocalAccountId],
             };
 
             if (responseDictionary.ContainsKey(TokenResponseClaim.RefreshIn))

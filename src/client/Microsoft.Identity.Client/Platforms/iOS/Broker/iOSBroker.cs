@@ -40,6 +40,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private string _brokerRequestNonce;
         private bool _brokerV3Installed = false;
 
+        private string _accessToken;
+        private string _refreshToken;
+
         public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
         {
             _logger = logger;
@@ -240,9 +243,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 return ResultFromBrokerResponse(responseDictionary);
             }
         }
-        private MsalTokenResponse ResultFromBrokerResponse(Dictionary<string, string> responseDictionary)
+        private MobileBrokerTokenResponse ResultFromBrokerResponse(Dictionary<string, string> responseDictionary)
         {
-            MsalTokenResponse brokerTokenResponse;
+            MobileBrokerTokenResponse brokerTokenResponse;
 
             string expectedHash = responseDictionary[iOSBrokerConstants.ExpectedHash];
             string encryptedResponse = responseDictionary[iOSBrokerConstants.EncryptedResponsed];
@@ -257,7 +260,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
                 if (!ValidateBrokerResponseNonceWithRequestNonce(responseDictionary))
                 {
-                    return new MsalTokenResponse
+                    return new MobileBrokerTokenResponse
                     {
                         Error = MsalError.BrokerNonceMismatch,
                         ErrorDescription = MsalErrorMessage.BrokerNonceMismatch
@@ -271,17 +274,27 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                         responseDictionary[iOSBrokerConstants.ApplicationToken]);
                 }
 
-                if (responseDictionary.ContainsKey(BrokerResponseConst.BrokerErrorCode) &&
-                    responseDictionary[BrokerResponseConst.BrokerErrorCode] == BrokerResponseConst.iOSBrokerUserCancellationErrorCode)
-                {
-                    responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.AuthenticationCanceledError;
-                }
-
                 brokerTokenResponse = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
+                _accessToken = string.Empty;
+                _refreshToken = string.Empty;
+
+                if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errCode))
+                {
+                    if(errCode == BrokerResponseConst.iOSBrokerUserCancellationErrorCode)
+                    {
+                        responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.AuthenticationCanceledError;
+                    }
+                    else if (errCode == BrokerResponseConst.iOSBrokerProtectionPoliciesRequired)
+                    {
+                        responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.ProtectionPolicyRequired;
+                        _accessToken = responseDictionary[BrokerResponseConst.AccessToken];
+                        _refreshToken = responseDictionary[BrokerResponseConst.RefreshToken];
+                    }
+                }
             }
             else
             {
-                brokerTokenResponse = new MsalTokenResponse
+                brokerTokenResponse = new MobileBrokerTokenResponse
                 {
                     Error = MsalError.BrokerResponseHashMismatch,
                     ErrorDescription = MsalErrorMessage.BrokerResponseHashMismatch
