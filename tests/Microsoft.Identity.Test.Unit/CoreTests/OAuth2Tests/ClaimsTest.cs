@@ -135,7 +135,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 var mockUi =
@@ -168,7 +167,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithHttpManager(harness.HttpManager)
-                              .WithTelemetry(new TraceTelemetryConfig())
                               .WithClientCapabilities(TestConstants.ClientCapabilities)
                               .BuildConcrete();
 
@@ -204,7 +202,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithHttpManager(harness.HttpManager)
                                 .WithClientCapabilities(TestConstants.ClientCapabilities)
-                                .WithTelemetry(new TraceTelemetryConfig())
                                 .BuildConcrete();
 
                 var mockUi =

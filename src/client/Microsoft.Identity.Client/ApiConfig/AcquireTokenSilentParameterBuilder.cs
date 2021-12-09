@@ -47,14 +47,12 @@ namespace Microsoft.Identity.Client
 
         private AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAccount);
             Parameters.Account = account;
             return this;
         }
 
         private AcquireTokenSilentParameterBuilder WithLoginHint(string loginHint)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithLoginHint);
             Parameters.LoginHint = loginHint;
             return this;
         }
@@ -74,7 +72,6 @@ namespace Microsoft.Identity.Client
         /// avoid negatively affecting the performance of your application</remarks>
         public AcquireTokenSilentParameterBuilder WithForceRefresh(bool forceRefresh)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithForceRefresh, forceRefresh);
             Parameters.ForceRefresh = forceRefresh;
             return this;
         }
@@ -101,8 +98,6 @@ namespace Microsoft.Identity.Client
             return ApiEvent.ApiIds.AcquireTokenSilent;
         }
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenSilent;
-
         /// <summary>
         /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
         /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
@@ -119,8 +114,7 @@ namespace Microsoft.Identity.Client
 #endif
         public AcquireTokenSilentParameterBuilder WithSendX5C(bool withSendX5C)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
-            Parameters.SendX5C = withSendX5C;            
+            Parameters.SendX5C = withSendX5C;
             return this;
         }
 
@@ -148,7 +142,6 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPoPScheme);
             CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
 
             return this;

@@ -19,8 +19,6 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenByRefreshTokenParameters Parameters { get; } = new AcquireTokenByRefreshTokenParameters();
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenByRefreshToken;
-
         /// <inheritdoc />
         internal AcquireTokenByRefreshTokenParameterBuilder(IClientApplicationBaseExecutor clientApplicationBaseExecutor)
             : base(clientApplicationBaseExecutor)
@@ -80,7 +78,6 @@ namespace Microsoft.Identity.Client
 #endif
         public AcquireTokenByRefreshTokenParameterBuilder WithSendX5C(bool withSendX5C)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
             Parameters.SendX5C = withSendX5C;
             return this;
         }

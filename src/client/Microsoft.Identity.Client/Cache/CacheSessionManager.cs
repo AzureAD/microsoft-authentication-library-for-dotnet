@@ -6,12 +6,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -42,7 +39,7 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync()
         {
-            await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.AT).ConfigureAwait(false);
+            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
             return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
@@ -53,19 +50,19 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<IDictionary<string, TenantProfile>> GetTenantProfilesAsync(string homeAccountId)
         {
-            await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.ID).ConfigureAwait(false);
+            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
             return await TokenCacheInternal.GetTenantProfilesAsync(_requestParams, homeAccountId).ConfigureAwait(false);
         }
 
         public async Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
-            await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.ID).ConfigureAwait(false);
+            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
             return TokenCacheInternal.GetIdTokenCacheItem(accessTokenCacheItem);
         }
 
         public async Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)
         {
-            await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.RT).ConfigureAwait(false);
+            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(familyId))
             {
@@ -77,19 +74,19 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync()
         {
-            await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.RT).ConfigureAwait(false);
+            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
             return await TokenCacheInternal.FindRefreshTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
         public async Task<bool?> IsAppFociMemberAsync(string familyId)
         {
-            await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.AppMetadata).ConfigureAwait(false);
+            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
             return await TokenCacheInternal.IsFociMemberAsync(_requestParams, familyId).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.Account).ConfigureAwait(false);
+            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
             return await TokenCacheInternal.GetAccountsAsync(_requestParams).ConfigureAwait(false);
         }
 
@@ -98,17 +95,12 @@ namespace Microsoft.Identity.Client.Cache
         /// <remarks>
         /// Possibly refreshes the internal cache by calling OnBeforeAccessAsync and OnAfterAccessAsync delegates.
         /// </remarks>
-        private async Task RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes cacheEventType)
+        private async Task RefreshCacheForReadOperationsAsync()
         {
             if (TokenCacheInternal.IsAppSubscribedToSerializationEvents())
             {
                 if (!_cacheRefreshedForRead)
                 {
-                    var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup, _requestParams.RequestContext.CorrelationId.AsMatsCorrelationId())
-                    {
-                        TokenType = cacheEventType
-                    };
-
                     _requestParams.RequestContext.Logger.Verbose($"[Cache Session Manager] Entering the cache semaphore. { TokenCacheInternal.Semaphore.GetCurrentCountLogMessage()}");
                     await TokenCacheInternal.Semaphore.WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
                     _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Entered cache semaphore");
@@ -118,54 +110,51 @@ namespace Microsoft.Identity.Client.Cache
                     {
                         if (!_cacheRefreshedForRead) // double check locking
                         {
-                            using (_requestParams.RequestContext.CreateTelemetryHelper(cacheEvent))
+                            string key = CacheKeyFactory.GetKeyFromRequest(_requestParams);
+
+                            try
                             {
-                                string key = CacheKeyFactory.GetKeyFromRequest(_requestParams);
-                                
+                                var args = new TokenCacheNotificationArgs(
+                                  TokenCacheInternal,
+                                  _requestParams.AppConfig.ClientId,
+                                  _requestParams.Account,
+                                  hasStateChanged: false,
+                                  isApplicationCache: TokenCacheInternal.IsApplicationCache,
+                                  suggestedCacheKey: key,
+                                  hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                  cancellationToken: _requestParams.RequestContext.UserCancellationToken,
+                                  suggestedCacheExpiry: null,
+                                  correlationId: _requestParams.RequestContext.CorrelationId);
 
-                                try
-                                {
-                                    var args = new TokenCacheNotificationArgs(
-                                      TokenCacheInternal,
-                                      _requestParams.AppConfig.ClientId,
-                                      _requestParams.Account,
-                                      hasStateChanged: false,
-                                      isApplicationCache: TokenCacheInternal.IsApplicationCache,
-                                      suggestedCacheKey: key,
-                                      hasTokens: TokenCacheInternal.HasTokensNoLocks(),
-                                      cancellationToken: _requestParams.RequestContext.UserCancellationToken,
-                                      suggestedCacheExpiry: null,
-                                      correlationId: _requestParams.RequestContext.CorrelationId);
-
-                                    stopwatch.Start();
-                                    await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
-                                    RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
-                                }
-                                finally
-                                {
-                                    
-                                    stopwatch.Reset();
-                                    stopwatch.Start();
-
-                                    var args = new TokenCacheNotificationArgs(
-                                      TokenCacheInternal,
-                                      _requestParams.AppConfig.ClientId,
-                                      _requestParams.Account,
-                                      hasStateChanged: false,
-                                      isApplicationCache: TokenCacheInternal.IsApplicationCache,
-                                      suggestedCacheKey: key,
-                                      hasTokens: TokenCacheInternal.HasTokensNoLocks(),
-                                      cancellationToken: _requestParams.RequestContext.UserCancellationToken,
-                                      suggestedCacheExpiry: null,
-                                      correlationId: _requestParams.RequestContext.CorrelationId);
-
-                                    await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
-                                    RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
-
-                                }
-
-                                _cacheRefreshedForRead = true;
+                                stopwatch.Start();
+                                await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
+                                RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
                             }
+                            finally
+                            {
+
+                                stopwatch.Reset();
+                                stopwatch.Start();
+
+                                var args = new TokenCacheNotificationArgs(
+                                  TokenCacheInternal,
+                                  _requestParams.AppConfig.ClientId,
+                                  _requestParams.Account,
+                                  hasStateChanged: false,
+                                  isApplicationCache: TokenCacheInternal.IsApplicationCache,
+                                  suggestedCacheKey: key,
+                                  hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                  cancellationToken: _requestParams.RequestContext.UserCancellationToken,
+                                  suggestedCacheExpiry: null,
+                                  correlationId: _requestParams.RequestContext.CorrelationId);
+
+                                await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                                RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
+
+                            }
+
+                            _cacheRefreshedForRead = true;
+
                         }
                     }
                     finally

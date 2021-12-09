@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
@@ -9,6 +11,8 @@ namespace Microsoft.Identity.Client
     /// Data that represents a single snapshot in the series of events that are collected
     /// </summary>
     /// <remarks>This API is experimental and it may change in future versions of the library without an major version increment</remarks>
+    [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public interface ITelemetryEventPayload
     {
         /// <summary>

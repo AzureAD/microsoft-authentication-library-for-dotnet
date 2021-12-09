@@ -4,10 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Instance;
@@ -16,7 +14,6 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -32,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     {
         public static long ValidExpiresIn = 3600;
         public static long ValidExtendedExpiresIn = 7200;
-        
+
         private string _clientInfo;
         private string _homeAccountId;
 
@@ -49,10 +46,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DataRow(true, true, true)]
         [DataRow(true, false, false)]
         [DataRow(false, true, false)]
-        [DataRow(false, true, false)]        
+        [DataRow(false, true, false)]
         public async Task WithLegacyCacheCompatibilityTest_Async(
-            bool enableLegacyCacheCompatibility, 
-            bool serializeCache, 
+            bool enableLegacyCacheCompatibility,
+            bool serializeCache,
             bool expectToCallAdalLegacyCache)
         {
             // Arrange
@@ -61,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
             var response = TestConstants.CreateMsalTokenResponse();
 
-            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);            
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
             ((TokenCache)cache).LegacyCachePersistence = legacyCachePersistence;
             if (serializeCache) // no point in invoking the Legacy ADAL cache if you're only keeping it memory
             {
@@ -122,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
                 var atItem = TokenCacheHelper.CreateAccessTokenItem("r1/scope1 r1/scope2");
-              
+
                 cache.Accessor.SaveAccessToken(atItem);
                 var param = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
@@ -661,7 +658,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
-                    _homeAccountId, 
+                    _homeAccountId,
                     oboCacheKey: assertion);
 
                 cache.Accessor.SaveAccessToken(atItem);
@@ -703,7 +700,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = CreateTestHarness())
             {
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
-                string assertionHash = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash("T"); 
+                string assertionHash = harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash("T");
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
@@ -1019,7 +1016,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(
                 serviceBundle,
                 Authority.CreateAuthority(TestConstants.AuthorityHomeTenant));
-            
+
 
 
             AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefNetworkEnvironment);
@@ -1082,7 +1079,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.Accessor.ClearAccessTokens();
             cache.Accessor.ClearRefreshTokens();
-            
+
             Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
 
@@ -1166,7 +1163,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             requestParams.RequestContext.ApiEvent = new ApiEvent(
                 serviceBundle.ApplicationLogger,
                 serviceBundle.PlatformProxy.CryptographyManager,
-                Guid.NewGuid().AsMatsCorrelationId());
+                Guid.NewGuid());
 
             string scopeInCache = TestConstants.s_scope.FirstOrDefault();
 
@@ -1304,7 +1301,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 requestParams.RequestContext.ApiEvent = new ApiEvent(
                     serviceBundle.ApplicationLogger,
                     serviceBundle.PlatformProxy.CryptographyManager,
-                    Guid.NewGuid().AsMatsCorrelationId());
+                    Guid.NewGuid());
 
                 var response = TokenCacheHelper.CreateMsalTokenResponse(true);
 

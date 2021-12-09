@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Threading;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -51,12 +50,10 @@ namespace Microsoft.Identity.Test.Unit
         public TestContext TestContext { get; set; }
 
         internal MockHttpAndServiceBundle CreateTestHarness(
-            TelemetryCallback telemetryCallback = null,
             LogCallback logCallback = null,
             bool isExtendedTokenLifetimeEnabled = false)
         {
             return new MockHttpAndServiceBundle(
-                telemetryCallback,
                 logCallback,
                 isExtendedTokenLifetimeEnabled,
                 testContext: TestContext);

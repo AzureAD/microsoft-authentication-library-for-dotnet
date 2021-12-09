@@ -3,11 +3,9 @@
 
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.WsTrust;
 
@@ -16,7 +14,7 @@ namespace Microsoft.Identity.Client.Internal
     internal interface IServiceBundle
     {
         ApplicationConfiguration Config { get; }
-        
+
         /// <summary>
         /// When outside of a request, the normal logger (requestContext.Logger) is not available. 
         /// This logger is at the app level - it is just not tied to a correlation ID.
@@ -29,11 +27,7 @@ namespace Microsoft.Identity.Client.Internal
         IDeviceAuthManager DeviceAuthManager { get; }
         IThrottlingProvider ThrottlingManager { get; }
 
-        #region Telemetry
         IHttpTelemetryManager HttpTelemetryManager { get; }
-        ITelemetryClient Mats { get; } // experimental / deprecated? 
-        IMatsTelemetryManager MatsTelemetryManager { get; } // experimental / deprecated?         
-        #endregion
 
         #region Testing
         void SetPlatformProxyForTest(IPlatformProxy platformProxy);

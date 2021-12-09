@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,6 +63,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public KerberosTicketContainer TicketContainer { get; set; } = KerberosTicketContainer.IdToken;
 
+        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ITelemetryConfig TelemetryConfig { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }
@@ -79,7 +81,6 @@ namespace Microsoft.Identity.Client
         public bool IsDefaultPlatformLoggingEnabled { get; internal set; }
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
-        public TelemetryCallback TelemetryCallback { get; internal set; }
         public LogCallback LoggingCallback { get; internal set; }
         public string Component { get; internal set; }
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
@@ -94,7 +95,7 @@ namespace Microsoft.Identity.Client
         public string ClientSecret { get; internal set; }
         public string SignedClientAssertion { get; internal set; }
         public Func<CancellationToken, Task<string>> SignedClientAssertionDelegate { get; internal set; }
-         
+
         public X509Certificate2 ClientCredentialCertificate { get; internal set; }
         public bool SendX5C { get; internal set; } = false;
 
@@ -138,16 +139,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-#endregion
+        #endregion
 
-#region Test Hooks
+        #region Test Hooks
         public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
-#endregion
+        #endregion
 
     }
 }

@@ -1,24 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
-using Android.App;
-using Android.Content;
-using Android.Content.PM;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.Android.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Platforms.Android.Broker;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -131,32 +123,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         protected override ICryptographyManager InternalGetCryptographyManager() => new AndroidCryptographyManager();
+
         protected override IPlatformLogger InternalGetPlatformLogger() => new AndroidPlatformLogger();
 
-        public override string GetDeviceNetworkState()
-        {
-            // TODO(mats):
-            return string.Empty;
-        }
-
-        public override string GetDevicePlatformTelemetryId()
-        {
-            // TODO(mats):
-            return string.Empty;
-        }
-
-        public override string GetMatsOsPlatform()
-        {
-            return MatsConverter.AsString(OsPlatform.Android);
-        }
-
-        public override int GetMatsOsPlatformCode()
-        {
-            return MatsConverter.AsInt(OsPlatform.Android);
-        }
-        protected override IFeatureFlags CreateFeatureFlags() => new AndroidFeatureFlags();
-
-       
+        protected override IFeatureFlags CreateFeatureFlags() => new AndroidFeatureFlags();     
 
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {

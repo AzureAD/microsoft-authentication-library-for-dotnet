@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Text;
 
 using Microsoft.Identity.Client;
@@ -20,7 +19,6 @@ using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -58,7 +56,6 @@ namespace Microsoft.Identity.Test.Common
 
         public static IServiceBundle CreateServiceBundleWithCustomHttpManager(
             IHttpManager httpManager,
-            TelemetryCallback telemetryCallback = null,
             LogCallback logCallback = null,
             string authority = ClientApplicationBase.DefaultAuthority,
             bool isExtendedTokenLifetimeEnabled = false,
@@ -68,20 +65,19 @@ namespace Microsoft.Identity.Test.Common
             bool validateAuthority = true,
             bool isLegacyCacheEnabled = true)
         {
-            
+
             var appConfig = new ApplicationConfiguration()
             {
                 ClientId = clientId,
                 HttpManager = httpManager,
                 RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(clientId),
-                TelemetryCallback = telemetryCallback,
                 LoggingCallback = logCallback,
                 LogLevel = LogLevel.Verbose,
                 EnablePiiLogging = enablePiiLogging,
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled,
                 Authority = Authority.CreateAuthority(authority, validateAuthority),
                 LegacyCacheCompatibilityEnabled = isLegacyCacheEnabled
-            };            
+            };
             return new ServiceBundle(appConfig, clearCaches);
         }
 
@@ -114,7 +110,7 @@ namespace Microsoft.Identity.Test.Common
                 ApiEvent = new Client.TelemetryCore.Internal.Events.ApiEvent(
                     serviceBundle.ApplicationLogger,
                     serviceBundle.PlatformProxy.CryptographyManager,
-                    Guid.NewGuid().ToString())
+                    Guid.NewGuid())
             };
 
             return new AuthenticationRequestParameters(

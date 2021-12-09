@@ -3,20 +3,18 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.Requests;
 using System.Linq;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Internal;
-using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Cache.CacheImpl;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using System.Threading;
-using Microsoft.Identity.Client.Cache.Items;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.CacheImpl;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Client
 {
@@ -37,7 +35,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Details on the configuration of the ClientApplication for debugging purposes.
         /// </summary>
-        public IAppConfig AppConfig => ServiceBundle.Config;        
+        public IAppConfig AppConfig => ServiceBundle.Config;
 
         /// <summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
@@ -78,7 +76,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        
+
         internal virtual async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
@@ -96,7 +94,7 @@ namespace Microsoft.Identity.Client
                 authority);
         }
 
-#region Accounts
+        #region Accounts
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
@@ -194,7 +192,7 @@ namespace Microsoft.Identity.Client
         {
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
-            requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId.ToString());
+            requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId);
             requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
 
             var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
@@ -229,7 +227,7 @@ namespace Microsoft.Identity.Client
         {
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
-            requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId.ToString());
+            requestContext.ApiEvent = new ApiEvent(requestContext.Logger, requestContext.ServiceBundle.PlatformProxy.CryptographyManager, correlationId);
             requestContext.ApiEvent.ApiId = apiId;
 
             var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
@@ -263,7 +261,7 @@ namespace Microsoft.Identity.Client
 
         private async Task<IEnumerable<IAccount>> GetAccountsFromBrokerAsync(
             string homeAccountIdFilter,
-            ICacheSessionManager cacheSessionManager, 
+            ICacheSessionManager cacheSessionManager,
             CancellationToken cancellationToken)
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
@@ -349,7 +347,7 @@ namespace Microsoft.Identity.Client
             return new RequestContext(ServiceBundle, correlationId, cancellationToken);
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.

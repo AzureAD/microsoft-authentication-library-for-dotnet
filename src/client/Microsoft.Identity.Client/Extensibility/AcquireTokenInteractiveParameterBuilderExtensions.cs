@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-
 namespace Microsoft.Identity.Client.Extensibility
 {
     /// <summary>
@@ -21,7 +19,6 @@ namespace Microsoft.Identity.Client.Extensibility
             this AcquireTokenInteractiveParameterBuilder builder,
             ICustomWebUi customWebUi)
         {
-            builder.CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithCustomWebUi);
             builder.SetCustomWebUi(customWebUi);
             return builder;
         }

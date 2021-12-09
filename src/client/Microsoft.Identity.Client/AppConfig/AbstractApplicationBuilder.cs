@@ -313,15 +313,10 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the method was already
         /// called on the application builder.
-
+        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         internal T WithTelemetry(TelemetryCallback telemetryCallback)
         {
-            if (Config.TelemetryCallback != null)
-            {
-                throw new InvalidOperationException(MsalErrorMessage.TelemetryCallbackAlreadySet);
-            }
-
-            Config.TelemetryCallback = telemetryCallback;
             return (T)this;
         }
 
@@ -485,9 +480,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="telemetryConfig"></param>
         /// <returns></returns>
+        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithTelemetry(ITelemetryConfig telemetryConfig)
         {
-            Config.TelemetryConfig = telemetryConfig;
             return (T)this;
         }
 
@@ -510,12 +506,6 @@ namespace Microsoft.Identity.Client
             {
                 throw new MsalClientException(MsalError.ValidateAuthorityOrCustomMetadata, MsalErrorMessage.ValidateAuthorityOrCustomMetadata);
             }
-
-            if (Config.TelemetryCallback != null && Config.TelemetryConfig != null)
-            {
-                throw new MsalClientException(MsalError.TelemetryConfigOrTelemetryCallback,
-                    MsalErrorMessage.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously);
-            }
         }
 
         internal ApplicationConfiguration BuildConfiguration()
@@ -525,7 +515,7 @@ namespace Microsoft.Identity.Client
             return Config;
         }
 
-#region Authority
+        #region Authority
         private void ResolveAuthority()
         {
             if (Config.Authority?.AuthorityInfo != null)
@@ -805,7 +795,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
-            
+
             var authorityInfo = AuthorityInfo.FromAdfsAuthority(authorityUri, validateAuthority);
             Config.Authority = AdfsAuthority.CreateAuthority(authorityInfo);
             return (T)this;
@@ -826,7 +816,7 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-#endregion
+        #endregion
 
         private static string GetValueIfNotEmpty(string original, string value)
         {

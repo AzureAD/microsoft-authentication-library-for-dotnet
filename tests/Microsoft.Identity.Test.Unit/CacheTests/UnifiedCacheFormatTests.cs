@@ -8,10 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Keys;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -148,7 +146,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [Description("Test unified token cache")]      
+        [Description("Test unified token cache")]
         public void B2C_NoTenantId_CacheFormatValidationTest()
         {
             using (var harness = CreateTestHarness())
@@ -165,7 +163,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                           .Create(_clientId)
                                           .WithAuthority(new Uri(_requestAuthority), true)
                                           .WithHttpManager(harness.HttpManager)
-                                          .WithTelemetry(new TraceTelemetryConfig())
                                           .BuildConcrete();
 
             app.ServiceBundle.ConfigureMockWebUI(

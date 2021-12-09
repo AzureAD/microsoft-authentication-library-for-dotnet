@@ -5,11 +5,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
     internal static class ClientExecutorFactory
     {
-        private static bool IsMatsEnabled(ClientApplicationBase clientApplicationBase)
-        {
-            return clientApplicationBase.ServiceBundle.Mats != null;
-        }
-
         public static IPublicClientApplicationExecutor CreatePublicClientExecutor(
             PublicClientApplication publicClientApplication)
         {
@@ -17,16 +12,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 publicClientApplication.ServiceBundle,
                 publicClientApplication);
 
-            if (IsMatsEnabled(publicClientApplication))
-            {
-                executor = new TelemetryPublicClientExecutor(executor, publicClientApplication.ServiceBundle.Mats);
-            }
-
             return executor;
         }
 
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
         public static IConfidentialClientApplicationExecutor CreateConfidentialClientExecutor(
             ConfidentialClientApplication confidentialClientApplication)
@@ -37,11 +27,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 confidentialClientApplication.ServiceBundle,
                 confidentialClientApplication);
 
-            if (IsMatsEnabled(confidentialClientApplication))
-            {
-                executor = new TelemetryConfidentialClientExecutor(executor, confidentialClientApplication.ServiceBundle.Mats);
-            }
-
             return executor;
         }
 
@@ -51,11 +36,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             IClientApplicationBaseExecutor executor = new ClientApplicationBaseExecutor(
                 clientApplicationBase.ServiceBundle,
                 clientApplicationBase);
-
-            if (IsMatsEnabled(clientApplicationBase))
-            {
-                executor = new TelemetryClientApplicationBaseExecutor(executor, clientApplicationBase.ServiceBundle.Mats);
-            }
 
             return executor;
         }

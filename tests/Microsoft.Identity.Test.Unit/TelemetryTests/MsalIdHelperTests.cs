@@ -2,15 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
@@ -28,7 +25,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                                 .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                                 .WithHttpManager(harness.HttpManager)
-                                                                                .WithTelemetry(new TraceTelemetryConfig())
                                                                                 .BuildConcrete();
                     app.ServiceBundle.ConfigureMockWebUI();
 

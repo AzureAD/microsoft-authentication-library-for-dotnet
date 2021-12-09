@@ -33,10 +33,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithAuthority(new Uri("https://login.windows.net/common/"), false)
                     .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                     .WithHttpManager(harness.HttpManager)
-                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
-                
+
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
@@ -73,7 +72,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithAuthority(new Uri(@"https://sts.windows.net/common/"), false)
                     .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                     .WithHttpManager(harness.HttpManager)
-                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
                 var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() => app
@@ -106,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-                
+
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 

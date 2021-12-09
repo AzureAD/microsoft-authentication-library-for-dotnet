@@ -31,10 +31,9 @@ namespace Microsoft.Identity.Client.Internal
             UserCancellationToken = cancellationToken;
         }
 
-        public TelemetryHelper CreateTelemetryHelper(EventBase eventToStart)
+        public TelemetryHelper CreateTelemetryHelper(ApiEvent eventToStart)
         {
             return new TelemetryHelper(
-                ServiceBundle.MatsTelemetryManager,
                 ServiceBundle.HttpTelemetryManager,
                 eventToStart);
         }
