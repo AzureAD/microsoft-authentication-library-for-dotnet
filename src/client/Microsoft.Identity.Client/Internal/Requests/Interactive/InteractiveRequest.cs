@@ -8,7 +8,6 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -41,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters requestParams,
             AcquireTokenInteractiveParameters interactiveParameters,
             /* for test */ IAuthCodeRequestComponent authCodeRequestComponentOverride = null,
-            /* for test */ ITokenRequestComponent authCodeExchangeComponentOverride = null, 
+            /* for test */ ITokenRequestComponent authCodeExchangeComponentOverride = null,
             /* for test */ ITokenRequestComponent brokerExchangeComponentOverride = null) :
             base(requestParams?.RequestContext?.ServiceBundle,
                 requestParams,
@@ -66,15 +65,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 .ConfigureAwait(false);
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(tokenResponse)
                 .ConfigureAwait(false);
-        }
-
-        protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)
-        {
-            apiEvent.Prompt = _interactiveParameters.Prompt.PromptValue;
-            if (_interactiveParameters.LoginHint != null)
-            {
-                apiEvent.LoginHint = _interactiveParameters.LoginHint;
-            }
         }
         #endregion
 
@@ -121,7 +111,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            IAuthCodeRequestComponent authorizationFetcher = 
+            IAuthCodeRequestComponent authorizationFetcher =
                 _authCodeRequestComponentOverride ??
                 new AuthCodeRequestComponent(
                     _requestParams,
@@ -158,7 +148,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> RunBrokerWithInstallUriAsync(string brokerInstallUri, CancellationToken cancellationToken)
         {
-            _logger.Info("Based on the auth code, the broker flow is required. " + 
+            _logger.Info("Based on the auth code, the broker flow is required. " +
                 "Starting broker flow knowing the broker installation app link. ");
 
             cancellationToken.ThrowIfCancellationRequested();

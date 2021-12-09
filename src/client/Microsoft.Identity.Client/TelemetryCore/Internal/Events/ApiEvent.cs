@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Globalization;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -29,16 +27,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             RemoveAccount = 1013
         }
 
-        private readonly ICryptographyManager _cryptographyManager;
-        private readonly ICoreLogger _logger;
-
-        public ApiEvent(
-            ICoreLogger logger,
-            ICryptographyManager cryptographyManager,
-            Guid correlationId)
+        public ApiEvent(Guid correlationId)
         {
-            _logger = logger;
-            _cryptographyManager = cryptographyManager;
             CorrelationId = correlationId;
         }
 
@@ -48,58 +38,40 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public string ApiIdString
         {
-            get => ((int)ApiId).ToString(CultureInfo.InvariantCulture);
+            get => ApiId.ToString("D");
         }
 
         public string TokenEndpoint { get; set; }
-
-        // Some of these properties like Authority, TenantId, LoginHint, etc.
-        // were set only, never used, maybe can be removed?
-        public Uri Authority { get; set; }
-
-        public string AuthorityType { get; set; }
-
-        public string Prompt { get; set; }
-
-        public string TenantId { get; set; }
-
-        public string AccountId { get; set; }
-
-        public bool WasSuccessful { get; set; }
-
-        public bool IsConfidentialClient { get; set; }
 
         public bool IsAccessTokenCacheHit { get; set; }
 
         public string ApiErrorCode { get; set; }
 
-        public string LoginHint { get; set; }
-
         #region Region
         public string RegionUsed { get; set; }
 
-        private int? _regionAutodetectionSource;
-        public int RegionAutodetectionSource
+        private RegionAutodetectionSource? _regionAutodetectionSource;
+        public RegionAutodetectionSource RegionAutodetectionSource
         {
-            get { return _regionAutodetectionSource.HasValue ? _regionAutodetectionSource.Value : 0; }
+            get { return _regionAutodetectionSource ?? RegionAutodetectionSource.None; }
             set { _regionAutodetectionSource = value; }
         }
 
         public string RegionAutodetectionSourceString
         {
-            get => _regionAutodetectionSource.HasValue ? _regionAutodetectionSource.Value.ToString(CultureInfo.InvariantCulture) : null;
+            get => _regionAutodetectionSource.HasValue ? _regionAutodetectionSource.Value.ToString("D") : null;
         }
 
-        private int? _regionOutcome;
-        public int RegionOutcome
+        private RegionOutcome? _regionOutcome;
+        public RegionOutcome RegionOutcome
         {
-            get { return _regionOutcome.HasValue ? _regionOutcome.Value : 0; }
+            get { return _regionOutcome ?? RegionOutcome.None; }
             set { _regionOutcome = value; }
         }
 
         public string RegionOutcomeString
         {
-            get => _regionOutcome.HasValue ? _regionOutcome.Value.ToString(CultureInfo.InvariantCulture) : null;
+            get => _regionOutcome.HasValue ? _regionOutcome.Value.ToString("D") : null;
         }
         #endregion
 
@@ -107,26 +79,26 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public string IsTokenCacheSerializedString
         {
-            get => IsTokenCacheSerialized.ToString().ToLowerInvariant();
+            get => IsTokenCacheSerialized ? TelemetryConstants.One : TelemetryConstants.Zero;
         }
 
         public bool IsLegacyCacheEnabled { get; set; }
 
         public string IsLegacyCacheEnabledString
         {
-            get => IsLegacyCacheEnabled.ToString().ToLowerInvariant();
+            get => IsLegacyCacheEnabled ? TelemetryConstants.One : TelemetryConstants.Zero;
         }
 
-        private int? _cacheInfo;
-        public int CacheInfo
+        private CacheRefreshReason? _cacheInfo;
+        public CacheRefreshReason CacheInfo
         {
-            get { return _cacheInfo.HasValue ? _cacheInfo.Value : (int)CacheRefreshReason.NotApplicable; }
+            get { return _cacheInfo ?? CacheRefreshReason.NotApplicable; }
             set { _cacheInfo = value; }
         }
 
         public string CacheInfoString
         {
-            get => _cacheInfo.HasValue ? _cacheInfo.Value.ToString(CultureInfo.InvariantCulture) : null;
+            get => _cacheInfo.HasValue ? _cacheInfo.Value.ToString("D") : null;
         }
 
         public long DurationInHttpInMs { get; set; }

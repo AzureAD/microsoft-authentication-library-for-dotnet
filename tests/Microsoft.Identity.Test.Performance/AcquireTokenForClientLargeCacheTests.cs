@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Test.Performance
                 .Create(TestConstants.ClientId)
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
+                .WithLegacyCacheCompatibility(false)
                 .BuildConcrete();
 
             PopulateAppCache(_cca, CacheSize.Tenants, CacheSize.TokensPerTenant);

@@ -1160,10 +1160,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 serviceBundle,
                 scopes: new HashSet<string>());
             requestParams.Account = TestConstants.s_user;
-            requestParams.RequestContext.ApiEvent = new ApiEvent(
-                serviceBundle.ApplicationLogger,
-                serviceBundle.PlatformProxy.CryptographyManager,
-                Guid.NewGuid());
+            requestParams.RequestContext.ApiEvent = new ApiEvent(Guid.NewGuid());
 
             string scopeInCache = TestConstants.s_scope.FirstOrDefault();
 
@@ -1298,10 +1295,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     serviceBundle,
                     scopes: new HashSet<string>());
                 requestParams.Account = TestConstants.s_user;
-                requestParams.RequestContext.ApiEvent = new ApiEvent(
-                    serviceBundle.ApplicationLogger,
-                    serviceBundle.PlatformProxy.CryptographyManager,
-                    Guid.NewGuid());
+                requestParams.RequestContext.ApiEvent = new ApiEvent(Guid.NewGuid());
 
                 var response = TokenCacheHelper.CreateMsalTokenResponse(true);
 
