@@ -22,10 +22,8 @@ namespace Microsoft.Identity.Test.Performance
     /// Testing combinations
     /// Partitions - Tokens per partition - Total tokens
     /// 1 - 10,000 - 10,000
-    /// 1 - 100,000 - 100,000
     /// 100 - 10,000 - 1,000,000
     /// 1,000 - 1,000 - 1,000,000
-    /// 10,000 - 100 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class TokenCacheTests
@@ -52,7 +50,6 @@ namespace Microsoft.Identity.Test.Performance
 
         // If the tokens are saved with different tenants.
         // This results in ID tokens and accounts having multiple tenant profiles.
-        //[ParamsAllValues(Priority = 1)]
         public bool IsMultiTenant { get; set; } = false;
 
         [GlobalSetup]
