@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
 
-                await AddBodyParamsAndHeadersAsync(additionalBodyParameters, scopes, cancellationToken).ConfigureAwait(false);
+                AddBodyParamsAndHeaders(additionalBodyParameters, scopes);
                 AddThrottlingHeader();
 
                 _serviceBundle.ThrottlingManager.TryThrottle(_requestParams, _oAuth2Client.GetBodyParameters());
@@ -120,26 +120,17 @@ namespace Microsoft.Identity.Client.OAuth2
                 ThrottleCommon.ThrottleRetryAfterHeaderValue);
         }
 
-        private async Task AddBodyParamsAndHeadersAsync(
+        internal void AddBodyParameter(KeyValuePair<string, string> kvp)
+        {
+            _oAuth2Client.AddBodyParameter(kvp);
+        }
+
+        private void AddBodyParamsAndHeaders(
             IDictionary<string, string> additionalBodyParameters, 
-            string scopes, 
-            CancellationToken cancellationToken)
+            string scopes)
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
-            _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
-
-
-            if (_serviceBundle.Config.ClientCredential != null)
-            {
-                await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
-                    _oAuth2Client,
-                    _requestParams.RequestContext.Logger,
-                    _serviceBundle.PlatformProxy.CryptographyManager,                    
-                    _requestParams.AppConfig.ClientId,
-                    _requestParams.Authority,
-                    _requestParams.SendX5C, 
-                    cancellationToken).ConfigureAwait(false);
-            }
+            
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
 
@@ -153,9 +144,13 @@ namespace Microsoft.Identity.Client.OAuth2
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
-            foreach (var kvp in _requestParams.AuthenticationScheme.GetTokenRequestParams())
+            var authSchemeBodyParams = _requestParams.AuthenticationScheme.GetTokenRequestParams();
+            if (authSchemeBodyParams != null)
             {
-                _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
+                foreach (var kvp in authSchemeBodyParams)
+                {
+                    _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
+                }
             }
 
             _oAuth2Client.AddHeader(
@@ -192,6 +187,11 @@ namespace Microsoft.Identity.Client.OAuth2
                     _oAuth2Client.AddHeader(pair.Key, pair.Value);
                 }
             }
+        }
+
+        public void AddBodyParameter(string key, string value)
+        {
+            _oAuth2Client.AddBodyParameter(key, value);
         }
 
         public void AddHeaderToClient(string name, string value)
@@ -268,5 +268,7 @@ namespace Microsoft.Identity.Client.OAuth2
             set.UnionWith(OAuth2Value.ReservedScopes);
             return set.AsSingleString();
         }
+
+        
     }
 }

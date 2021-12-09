@@ -23,5 +23,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
         public IDictionary<string, string> ExtraHttpHeaders { get; set; }
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
+
+        /// <summary>
+        /// If set, the client assertion parameters should be ignored and these parameters should be set.
+        /// The input string is the token endpoint.
+        /// </summary>
+        public Func<string, IReadOnlyList<KeyValuePair<string, string>>> ClientAssertionOverride { get; internal set; }
+
     }
 }

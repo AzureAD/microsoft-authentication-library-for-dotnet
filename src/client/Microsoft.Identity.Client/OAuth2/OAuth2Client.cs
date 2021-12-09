@@ -138,6 +138,11 @@ namespace Microsoft.Identity.Client.OAuth2
             return CreateResponse<T>(response, requestContext);
         }
 
+        internal void AddBodyParameter(KeyValuePair<string, string> kvp)
+        {
+            _bodyParameters.Add(kvp);
+        }
+
         private void AddCommonHeaders(RequestContext requestContext)
         {
             _headers.Add(OAuth2Header.CorrelationId, requestContext.CorrelationId.ToString());

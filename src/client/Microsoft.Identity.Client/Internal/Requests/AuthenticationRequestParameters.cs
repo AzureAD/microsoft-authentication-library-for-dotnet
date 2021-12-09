@@ -58,6 +58,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _serviceBundle.Config.ClientCapabilities);
 
             HomeAccountId = homeAccountId;
+
+            ClientAssertionOverride = commonParameters.ClientAssertionOverride;
         }
 
         public ApplicationConfiguration AppConfig => _serviceBundle.Config;
@@ -135,6 +137,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IAccount Account { get; set; }
 
         public string HomeAccountId { get; }
+
+        /// <summary>
+        /// in: token endpoint string
+        /// out: parameters to be used instead of client_credentials body params
+        /// </summary>
+        public Func<string, IReadOnlyList<KeyValuePair<string, string>>> ClientAssertionOverride { get; }
 
         public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 

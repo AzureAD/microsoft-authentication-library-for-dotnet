@@ -129,6 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             unionScope.UnionWith(AuthenticationRequestParameters.Scope);
             dict[OAuth2Parameter.Scope] = unionScope.AsSingleString();
+            dict[OAuth2Parameter.ClientInfo] = "1";
 
             return dict;
         }

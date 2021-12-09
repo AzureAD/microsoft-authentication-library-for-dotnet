@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -411,8 +412,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             int tokenResponses,
             CredentialType credentialType = CredentialType.Certificate)
         {
-            var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+            var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)                              
                               .WithRedirectUri(TestConstants.RedirectUri)
                               .WithHttpManager(httpManager);
 
@@ -456,6 +456,73 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
 
             return app;
+        }
+
+        [TestMethod]
+        public async Task CertificateOverrideAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                              .WithAuthority("https://login.microsoftonline.com/tid/")
+                              .WithExperimentalFeatures(true)
+                              .WithHttpManager(httpManager)                              
+                              .Build();
+
+                Func<string, IReadOnlyList<KeyValuePair<string, string>>> clientAssertionOverride =
+                    (tokenEndpoint) =>
+                    {
+                        Assert.AreEqual("https://login.microsoftonline.com/tid/oauth2/v2.0/token", tokenEndpoint);
+                        return new List<KeyValuePair<string, string>>()
+                        {
+                            new KeyValuePair<string, string>("param1", "val1"),
+                            new KeyValuePair<string, string>("param2", "val2"),                            
+                        };
+                    };
+                MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();                
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithKeyId("key1")
+                    .WithClientAssertion(clientAssertionOverride)                        
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("Bearer", result.TokenType);
+
+                Assert.AreEqual("val1", handler.ActualRequestPostData["param1"]);
+                Assert.AreEqual("val2", handler.ActualRequestPostData["param2"]);
+                Assert.IsFalse(handler.ActualRequestPostData.ContainsKey(OAuth2Parameter.ClientAssertion));
+                Assert.IsFalse(handler.ActualRequestPostData.ContainsKey(OAuth2Parameter.ClientAssertionType));
+                Assert.AreEqual("key1", (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
+
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithKeyId("key1")
+                    .WithClientAssertion(clientAssertionOverride)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                
+                Assert.AreEqual("Bearer", result.TokenType);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                Assert.AreEqual(
+                    "key1", 
+                    (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
+
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())                 
+                 .WithClientAssertion(clientAssertionOverride)
+                 .ExecuteAsync()
+                 .ConfigureAwait(false);
+
+                Assert.AreEqual("Bearer", result.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNull((app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
+            }
         }
 
         [TestMethod]

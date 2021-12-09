@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return tokenResponse;
         }
 
-        protected Task<MsalTokenResponse> SendTokenRequestAsync(
+        protected async Task<MsalTokenResponse> SendTokenRequestAsync(
             string tokenEndpoint,
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
@@ -261,11 +261,40 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 tokenClient.AddHeaderToClient(CcsHeader.Value.Key, CcsHeader.Value.Value);
             }
 
-            return tokenClient.SendTokenRequestAsync(
+            await AddClientAssertionBodyParametersAsync(tokenEndpoint, tokenClient, cancellationToken).ConfigureAwait(false);
+
+            return await tokenClient.SendTokenRequestAsync(
                 additionalBodyParameters,
                 scopes,
                 tokenEndpoint,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task AddClientAssertionBodyParametersAsync(string tokenEndpoint, TokenClient tokenClient, CancellationToken cancellationToken)
+        {
+            if (AuthenticationRequestParameters.ClientAssertionOverride != null)
+            {
+                IReadOnlyList<KeyValuePair<string, string>> assertionBodyParameters =
+                    AuthenticationRequestParameters.ClientAssertionOverride(tokenEndpoint);
+                if (assertionBodyParameters != null)
+                {
+                    foreach (var assertionBodyParameter in assertionBodyParameters)
+                    {
+                        tokenClient.AddBodyParameter(assertionBodyParameter);
+                    }
+                }
+            }
+            else if (ServiceBundle.Config.ClientCredential != null)
+            {
+                await ServiceBundle.Config.ClientCredential.AddClientAssertionBodyParametersAsync(
+                    tokenClient,
+                    AuthenticationRequestParameters.RequestContext.Logger,
+                    ServiceBundle.PlatformProxy.CryptographyManager,
+                    ServiceBundle.Config.ClientId,
+                    tokenEndpoint,
+                    AuthenticationRequestParameters.SendX5C,
+                    cancellationToken).ConfigureAwait(false);
+            }
         }
 
         //The AAD backup authentication system header is used by the AAD backup authentication system service
