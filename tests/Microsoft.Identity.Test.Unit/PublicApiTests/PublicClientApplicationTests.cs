@@ -350,12 +350,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
                 result = await app
-                    .AcquireTokenSilent(new[] { "resource/scope1" }, accounts.Single())
+                    .AcquireTokenSilent(new[] { "resource/scope2" }, accounts.Single())
                     .ExecuteAsync().ConfigureAwait(false);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource, "Second token can be obtained silently via refresh_token flow");
 
                 result = await app
-                    .AcquireTokenSilent(new[] { "resource/scope2" }, accounts.Single())
+                    .AcquireTokenSilent(new[] { "resource/scope1" }, accounts.Single())
                     .ExecuteAsync().ConfigureAwait(false);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource, "First token should still be in the cache");
 
