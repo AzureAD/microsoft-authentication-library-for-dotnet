@@ -34,7 +34,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithAuthority(settings.Authority, true)                
+                .WithAuthority(settings.Authority, true)
+                .WithCertificate(clientCredsCert)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();

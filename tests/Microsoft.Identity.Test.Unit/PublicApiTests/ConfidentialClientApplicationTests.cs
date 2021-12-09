@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -178,7 +179,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
-                string partitionKey = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid);
+                string partitionKey = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid, null);
                 Assert.AreEqual(
                     partitionKey,
                     ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Single());
@@ -191,7 +192,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
                 Assert.AreEqual(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
-                string partitionKey2 = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid2);
+                string partitionKey2 = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid2, null);
 
                 Assert.IsTrue(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(partitionKey)));
                 Assert.IsTrue(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(partitionKey2)));
@@ -220,7 +221,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // One tenant partition with one token
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
                 Assert.AreEqual(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
-                string partitionKey = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid);
+                string partitionKey = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid, null);
 
                 Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey]);
                 Assert.AreEqual(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey].Count);
@@ -245,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Two tenant partitions with three tokens total
                 Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                string partitionKey2 = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid2);
+                string partitionKey2 = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid2, null);
 
                 Assert.AreEqual(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
                 Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey2]);
@@ -526,6 +527,79 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("Bearer", result.TokenType);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.IsNull((app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
+            }
+        }
+
+        [TestMethod]
+        public async Task CertificateOverrideAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                              .WithAuthority("https://login.microsoftonline.com/tid/")
+                              .WithExperimentalFeatures(true)
+                              .WithHttpManager(httpManager)                              
+                              .Build();
+
+                Func<string, IReadOnlyList<KeyValuePair<string, string>>> clientAssertionOverride =
+                    (tokenEndpoint) =>
+                    {
+                        Assert.AreEqual("https://login.microsoftonline.com/tid/oauth2/v2.0/token", tokenEndpoint);
+                        return new List<KeyValuePair<string, string>>()
+                        {
+                            new KeyValuePair<string, string>("param1", "val1"),
+                            new KeyValuePair<string, string>("param2", "val2"),                            
+                        };
+                    };
+                MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();                
+
+                Trace.WriteLine("Step 1 - fetch a token bound to key1");
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithKeyId("key1")
+                    .WithClientAssertion(clientAssertionOverride)                        
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("Bearer", result.TokenType);
+
+                Assert.AreEqual("val1", handler.ActualRequestPostData["param1"]);
+                Assert.AreEqual("val2", handler.ActualRequestPostData["param2"]);
+                Assert.IsFalse(handler.ActualRequestPostData.ContainsKey(OAuth2Parameter.ClientAssertion));
+                Assert.IsFalse(handler.ActualRequestPostData.ContainsKey(OAuth2Parameter.ClientAssertionType));
+                Assert.AreEqual("key1", (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
+
+                Trace.WriteLine("Step 2 - fetch the token bound to key1 again - it should be in the cache already");
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithKeyId("key1")
+                    .WithClientAssertion(clientAssertionOverride)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                
+                Assert.AreEqual("Bearer", result.TokenType);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                Assert.AreEqual(
+                    "key1", 
+                    (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
+
+
+                Trace.WriteLine("Step 3 - fetch a token not bound to key1 again - it should miss the cache");
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())                 
+                 .WithClientAssertion(clientAssertionOverride)
+                 .ExecuteAsync()
+                 .ConfigureAwait(false);
+
+                Assert.AreEqual("Bearer", result.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                IReadOnlyList<Client.Cache.Items.MsalAccessTokenCacheItem> ats = (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens();
+                Assert.AreEqual(2, ats.Count);
+                Assert.IsTrue(ats.Single(at => at.KeyId == "key1") != null);
+                Assert.IsTrue(ats.Single(at => at.KeyId == null) != null);
             }
         }
 

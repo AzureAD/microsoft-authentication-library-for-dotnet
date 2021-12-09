@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Globalization;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -40,7 +41,7 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         public static string GetExternalCacheKeyFromResponse(
-            AuthenticationRequestParameters requestParameters, 
+            AuthenticationRequestParameters requestParameters,
             string homeAccountIdFromResponse)
         {
             if (GetOboOrAppKey(requestParameters, out string key))
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Client.Cache
             AuthenticationRequestParameters requestParameters,
             string homeAccountIdFromResponse)
         {
-            return GetExternalCacheKeyFromResponse(requestParameters, homeAccountIdFromResponse) ?? 
+            return GetExternalCacheKeyFromResponse(requestParameters, homeAccountIdFromResponse) ??
                 homeAccountIdFromResponse;
         }
 
@@ -76,8 +77,8 @@ namespace Microsoft.Identity.Client.Cache
             if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
                 string tenantId = requestParameters.Authority.TenantId ?? "";
-                key = GetClientCredentialKey(requestParameters.AppConfig.ClientId, tenantId);
-                    
+                key = GetClientCredentialKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId);
+
                 return true;
             }
 
@@ -85,9 +86,14 @@ namespace Microsoft.Identity.Client.Cache
             return false;
         }
 
-        public static string GetClientCredentialKey(string clientId, string tenantId)
-        {                
-            return $"{clientId}_{tenantId}_AppTokenCache";
+        public static string GetClientCredentialKey(string clientId, string tenantId, string popKid)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture, 
+                "{0}{1}_{2}_AppTokenCache",
+                popKid,
+                clientId,
+                tenantId);
         }
 
         public static string GetOboKey(string oboCacheKey, UserAssertion userAssertion)
@@ -101,7 +107,7 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         public static string GetKeyFromCachedItem(MsalAccessTokenCacheItem accessTokenCacheItem)
-        {            
+        {
             string partitionKey = GetOboKey(accessTokenCacheItem.OboCacheKey, accessTokenCacheItem.HomeAccountId);
             return partitionKey;
         }

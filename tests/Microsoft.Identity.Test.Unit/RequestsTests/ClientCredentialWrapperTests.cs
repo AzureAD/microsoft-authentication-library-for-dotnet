@@ -11,6 +11,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using static Microsoft.Identity.Client.Internal.ClientCredentialWrapper;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Client.Core;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -30,12 +32,23 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void CCACreatedWithoutAuthenticationType_Throws()
+        public async Task CCACreatedWithoutAuthenticationType_ThrowsAsync()
         {
             ApplicationConfiguration config = new ApplicationConfiguration();
 
-           Assert.ThrowsException<MsalClientException>(
-               () => new ClientCredentialWrapper(config));
+            try
+            {
+                var ccw = new ClientCredentialWrapper(config);
+                 await ccw.AddClientAssertionBodyParametersAsync(
+                     null,
+                     NSubstitute.Substitute.For<ICoreLogger>(), null, null, null, true, default).ConfigureAwait(false);
+            }
+            catch (MsalClientException ex)
+            {
+                Assert.AreEqual(
+                    MsalError.ClientCredentialAuthenticationTypeMustBeDefined,
+                    ex.ErrorCode);
+            }
         }
 
         [TestMethod]

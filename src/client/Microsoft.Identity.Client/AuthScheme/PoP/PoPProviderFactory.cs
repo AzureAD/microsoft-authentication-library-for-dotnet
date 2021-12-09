@@ -13,7 +13,10 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     {
         private static InMemoryCryptoProvider s_currentProvider;
         private static DateTime s_providerExpiration;
-        private static readonly TimeSpan s_expirationTimespan = TimeSpan.FromHours(8);
+
+        public /* public for test only */ static TimeSpan KeyRotationInterval { get; } 
+            = TimeSpan.FromHours(8);
+
         private static object s_lock = new object();
 
         internal static ITimeService TimeService { get; set; } = new TimeService();
@@ -28,9 +31,15 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                 }
 
                 s_currentProvider = new InMemoryCryptoProvider();
-                s_providerExpiration = TimeService.GetUtcNow() + s_expirationTimespan;
+                s_providerExpiration = TimeService.GetUtcNow() + KeyRotationInterval;
                 return s_currentProvider;
             }
+        }
+
+        public static void TestReset()
+        {
+            s_currentProvider = null;
+            TimeService = new TimeService();
         }
     }
 }

@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
@@ -66,6 +68,31 @@ namespace Microsoft.Identity.Client
         public AcquireTokenForClientParameterBuilder WithSendX5C(bool withSendX5C)
         {
             Parameters.SendX5C = withSendX5C;
+            return this;
+        }
+
+        /// <summary>
+        ///  Modifies the token acquisition request so that the acquired token is a Proof of Possession token (PoP), rather than a Bearer token. 
+        ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
+        ///  See https://aka.ms/msal-net-pop
+        /// </summary>
+        /// <param name="popAuthenticationConfiguration">Configuration properties used to construct a proof of possession request.</param>
+        /// <returns>The builder.</returns>
+        /// <remarks>
+        /// <list type="bullet">
+        /// <item><description>An Authentication header is automatically added to the request</description></item>
+        /// <item><description>The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters).</description></item>
+        /// <item><description>MSAL creates, reads and stores a key in memory that will be cycled every 8 hours.</description></item>
+        /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
+        /// </list>
+        /// </remarks>
+        public AcquireTokenForClientParameterBuilder WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));            
+            CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
+
             return this;
         }
 
