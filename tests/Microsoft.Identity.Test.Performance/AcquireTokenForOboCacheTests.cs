@@ -23,13 +23,11 @@ namespace Microsoft.Identity.Test.Performance
     /// Testing combinations
     /// Users - Tokens - Total tokens
     /// 1 - 10,000 - 10,000
-    /// 1 - 100,000 - 100,000
     /// 100 - 10,000 - 1,000,000
     /// 1,000 - 1,000 - 1,000,000
-    /// 10,000 - 100 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
-    public class AcquireTokenForOboLargeCacheTests
+    public class AcquireTokenForOboCacheTests
     {
         readonly string _scopePrefix = "scope";
         readonly string _tenantPrefix = TestConstants.Utid;
@@ -45,14 +43,12 @@ namespace Microsoft.Identity.Test.Performance
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10000),
-            (1, 100000),
             (100, 10000),
             (1000, 1000),
-            (10000, 100), };
+        };
 
         // If the tokens are saved with different tenants.
         // This results in ID tokens and accounts having multiple tenant profiles.
-        //[Params(Priority = 1)]
         public bool IsMultiTenant { get; set; } = false;
 
         [GlobalSetup]
@@ -80,7 +76,8 @@ namespace Microsoft.Identity.Test.Performance
                 $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}";
         }
 
-        [Benchmark]
+        [Benchmark(Description = "AcquireTokenForOBO")]
+        [BenchmarkCategory("With cache")]
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOf_TestAsync()
         {
             return await _cca.AcquireTokenOnBehalfOf(new[] { _scope }, _userAssertion)

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Desktop;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using NetCoreTestApp.Experimental;
 
 namespace NetCoreTestApp
@@ -24,14 +25,12 @@ namespace NetCoreTestApp
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
 
         // Confidential client app with access to https://graph.microsoft.com/.default
-        private static readonly string s_clientIdForConfidentialApp =
-            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID");
+        private static string s_clientIdForConfidentialApp;
 
         // App secret for app above 
-        private static readonly string s_confidentialClientSecret =
-            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET");
+        private static string s_confidentialClientSecret;
 
-        private const string CcaAuthority = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47";
+        private static string s_ccaAuthority;
 
         private static readonly IEnumerable<string> s_scopes = new[] {
             "user.read", "openid" }; // used for WIA and U/P, can be empty
@@ -52,6 +51,11 @@ namespace NetCoreTestApp
 
         public static void Main(string[] args)
         {
+            var ccaSettings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            s_clientIdForConfidentialApp = ccaSettings.ClientId;
+            s_ccaAuthority = ccaSettings.Authority;
+            s_confidentialClientSecret = ccaSettings.GetSecret();
+
             var pca = CreatePca();
             RunConsoleAppLogicAsync(pca).Wait();
         }
@@ -293,7 +297,7 @@ namespace NetCoreTestApp
         {
             IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
                 .Create(s_clientIdForConfidentialApp)
-                .WithAuthority(CcaAuthority)
+                .WithAuthority(s_ccaAuthority)
                 .WithClientSecret(s_confidentialClientSecret)
                 .Build();
 
@@ -434,7 +438,7 @@ namespace NetCoreTestApp
                     {
                         Task<AuthenticationResult> authenticationResultTask = Task.Run(() =>
                             AcquireTokenBuilder
-                                .WithAuthority(CcaAuthority, true)
+                                .WithAuthority(s_ccaAuthority, true)
                                 .ExecuteAsync());
 
                         authenticationResultTask.Wait();

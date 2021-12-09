@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security;
@@ -51,6 +52,180 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         #endregion
+
+        /// <summary>
+        /// Tests the behavior when calling OBO and silent in different orders with multiple users.
+        /// OBO calls should return tokens for correct users, silent calls should throw.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        public async Task OboAndSilent_Async(bool serializeCache, bool usePartitionedSerializationCache)
+        {
+            // Setup: Get lab users, create PCA and get user tokens
+            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user2 = (await LabUserHelper.GetSpecificUserAsync("idlab@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var partitionedInMemoryTokenCache = new InMemoryPartitionedTokenCache();
+            var nonPartitionedInMemoryTokenCache = new InMemoryTokenCache();
+            var oboTokens = new HashSet<string>();
+
+            var pca = PublicClientApplicationBuilder
+                .Create(PublicClientID)
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .Build();
+
+            var user1AuthResult = await pca
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, new NetworkCredential("", user1.GetOrFetchPassword()).SecurePassword)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            var user2AuthResult = await pca
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user2.Upn, new NetworkCredential("", user2.GetOrFetchPassword()).SecurePassword)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(user1AuthResult.TenantId, user2AuthResult.TenantId);
+
+            var cca = CreateCCA();
+
+            // Asserts
+            // Silent calls should throw
+            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+                cca.AcquireTokenSilent(s_scopes, user1.Upn)
+                    .ExecuteAsync(CancellationToken.None)
+            ).ConfigureAwait(false);
+
+            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+                cca.AcquireTokenSilent(s_scopes, user2.Upn)
+                    .ExecuteAsync(CancellationToken.None)
+            ).ConfigureAwait(false);
+
+
+            // User1 - no AT, RT in cache - retrieves from IdP
+            var authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(user1AuthResult.AccessToken))
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, authResult.AuthenticationResultMetadata.CacheRefreshReason);
+            oboTokens.Add(authResult.AccessToken);
+
+            // User1 - finds AT in cache
+            authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(user1AuthResult.AccessToken))
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(CacheRefreshReason.NotApplicable, authResult.AuthenticationResultMetadata.CacheRefreshReason);
+            oboTokens.Add(authResult.AccessToken);
+
+            // User2 - no AT, RT - retrieves from IdP
+            authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(user2AuthResult.AccessToken))
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, authResult.AuthenticationResultMetadata.CacheRefreshReason);
+            oboTokens.Add(authResult.AccessToken);
+
+            // User2 - finds AT in cache
+            authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(user2AuthResult.AccessToken))
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(CacheRefreshReason.NotApplicable, authResult.AuthenticationResultMetadata.CacheRefreshReason);
+            oboTokens.Add(authResult.AccessToken);
+
+            Assert.AreEqual(2, oboTokens.Count);
+
+            // Silent calls should throw
+            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+                cca.AcquireTokenSilent(s_scopes, user1.Upn)
+                    .ExecuteAsync(CancellationToken.None)
+            ).ConfigureAwait(false);
+
+            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+                cca.AcquireTokenSilent(s_scopes, user2.Upn)
+                    .ExecuteAsync(CancellationToken.None)
+            ).ConfigureAwait(false);
+
+
+            IConfidentialClientApplication CreateCCA()
+            {
+                var app = ConfidentialClientApplicationBuilder
+                .Create(OboConfidentialClientID)
+                .WithAuthority(new Uri($"https://login.microsoftonline.com/{user1AuthResult.TenantId}"), true)
+                .WithClientSecret(_confidentialClientSecret)
+                .WithLegacyCacheCompatibility(false)
+                .Build();
+
+                if (serializeCache)
+                {
+                    if (usePartitionedSerializationCache)
+                    {
+                        partitionedInMemoryTokenCache.Bind(app.UserTokenCache);
+                    }
+                    else
+                    {
+                        nonPartitionedInMemoryTokenCache.Bind(app.UserTokenCache);
+                    }
+                }
+
+                return app;
+            }
+        }
+
+        /// <summary>
+        /// Reuse the same CCA with regional for OBO and for client calls in different orders.
+        /// Client calls should go to regional, OBO calls should go to global
+        /// </summary>
+        [TestMethod]
+        public async Task OboAndClient_WithRegional_TestAsync()
+        {
+            // Setup: Get lab user, create PCA and get user tokens
+            var user = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+
+            var pca = PublicClientApplicationBuilder
+                    .Create(PublicClientID)
+                    .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                    .Build();
+
+            var userResult = await pca
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            // Act and Assert different scenarios
+            var cca = BuildCCA(userResult.TenantId, true);
+
+            // OBO uses global - IdP
+            var oboResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(userResult.AccessToken))
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, oboResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsFalse(oboResult.AuthenticationResultMetadata.TokenEndpoint.Contains(TestConstants.Region));
+
+            // Client uses regional - IdP
+            var clientResult = await cca.AcquireTokenForClient(new string[] { "https://graph.microsoft.com/.default" })
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, clientResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsTrue(clientResult.AuthenticationResultMetadata.TokenEndpoint.Contains(TestConstants.Region));
+
+            // OBO from cache
+            oboResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(userResult.AccessToken))
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, oboResult.AuthenticationResultMetadata.TokenSource);
+
+            // Client from cache
+            clientResult = await cca.AcquireTokenForClient(new string[] { "https://graph.microsoft.com/.default" })
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, clientResult.AuthenticationResultMetadata.TokenSource);
+        }
 
         /// <summary>
         /// Tests the behavior when calling both, long-running and normal OBO methods.
@@ -406,14 +581,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("oid:597f86cd-13f3-44c0-bece-a1e77ba43228@f645ad92-e38d-4d1a-b510-d1b09a74a8ca", values.First());
         }
 
-        private ConfidentialClientApplication BuildCCA(string tenantId)
+        private ConfidentialClientApplication BuildCCA(string tenantId, bool withRegion = false)
         {
-            return ConfidentialClientApplicationBuilder
+            var builder = ConfidentialClientApplicationBuilder
              .Create(OboConfidentialClientID)
              .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), true)
              .WithClientSecret(_confidentialClientSecret)
-             .WithLegacyCacheCompatibility(false)
-             .BuildConcrete();
+             .WithLegacyCacheCompatibility(false);
+
+            if (withRegion)
+            {
+                builder
+                    .WithAzureRegion(TestConstants.Region)
+                    .WithExtraQueryParameters(new Dictionary<string, string>
+                    {
+                        ["allowestsrnonmsi"] = "true" // allow regional for testing
+                    });
+            }
+
+            return builder.BuildConcrete();
         }
     }
 }
