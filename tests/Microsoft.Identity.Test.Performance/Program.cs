@@ -9,19 +9,31 @@ using BenchmarkDotNet.Running;
 
 namespace Microsoft.Identity.Test.Performance
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            BenchmarkRunner.Run<TokenCacheTests>(
-                DefaultConfig.Instance
-                    .WithOptions(ConfigOptions.DontOverwriteResults)
-                    .AddDiagnoser(MemoryDiagnoser.Default)
-                    .AddJob(
-                        Job.Default
-                            .WithId("Job-PerfTests")));
+            Logger.Log("Started running performance tests.");
 
-            Console.ReadKey();
+            BenchmarkSwitcher.FromTypes(new[] {
+                typeof(TokenCacheTests),
+                typeof(AcquireTokenForClientCacheTests),
+                typeof(AcquireTokenForOboCacheTests),
+                }).RunAll(DefaultConfig.Instance
+                        .WithOptions(ConfigOptions.DisableLogFile)
+                        // .WithOptions(ConfigOptions.DontOverwriteResults) // Helpful when running manually
+                        .AddDiagnoser(MemoryDiagnoser.Default)
+                        .AddJob(
+                            Job.Default
+                                .WithId("Job-PerfTests")));
+
+            Logger.Log("Completed running performance tests.");
         }
+    }
+
+    public static class Logger
+    {
+        private const string LogPrefix = "[Microsoft.Identity.Test.Performance]";
+        public static void Log(string message) => Console.WriteLine($"{LogPrefix} {message}");
     }
 }

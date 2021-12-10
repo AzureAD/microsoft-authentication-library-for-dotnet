@@ -29,15 +29,15 @@ namespace Microsoft.Identity.Test.Performance
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenForOboCacheTests
     {
-        readonly string _scopePrefix = "scope";
-        readonly string _tenantPrefix = TestConstants.Utid;
+        readonly string _tenantPrefix = "l6a331n5-4fh7-7788-a78a-";
+        readonly string _scopePrefix = "https://resource.com/.default";
         ConfidentialClientApplication _cca;
         string _scope;
         string _authority;
         UserAssertion _userAssertion;
 
         [ParamsSource(nameof(CacheSizeSource), Priority = 0)]
-        public (int Users, int TokensPerUser) CacheSize { get; set; }
+        public (int TotalUsers, int TokensPerUser) CacheSize { get; set; }
 
         // By default, benchmarks are run for all combinations of params.
         // This is a workaround to specify the exact param combinations to be used.
@@ -61,14 +61,14 @@ namespace Microsoft.Identity.Test.Performance
                 .WithLegacyCacheCompatibility(false)
                 .BuildConcrete();
 
-            PopulateUserCache(CacheSize.Users, CacheSize.TokensPerUser);
+            PopulateUserCache(CacheSize.TotalUsers, CacheSize.TokensPerUser);
         }
 
         [IterationSetup]
         public void IterationSetup_AcquireTokenOnBehalfOf()
         {
             Random random = new Random();
-            _userAssertion = new UserAssertion($"{TestConstants.DefaultAccessToken}{random.Next(0, CacheSize.Users)}");
+            _userAssertion = new UserAssertion($"{TestConstants.DefaultAccessToken}{random.Next(0, CacheSize.TotalUsers)}");
             string id = random.Next(0, CacheSize.TokensPerUser).ToString();
             _scope = $"{_scopePrefix}{id}";
             _authority = IsMultiTenant ?
@@ -86,14 +86,14 @@ namespace Microsoft.Identity.Test.Performance
                 .ConfigureAwait(false);
         }
 
-        private void PopulateUserCache(int usersNumber, int tokensNumber)
+        private void PopulateUserCache(int totalUsers, int tokensPerUser)
         {
-            for (int user = 0; user < usersNumber; user++)
+            for (int user = 0; user < totalUsers; user++)
             {
-                for (int token = 0; token < tokensNumber; token++)
+                for (int token = 0; token < tokensPerUser; token++)
                 {
                     string userAssertionHash = new UserAssertion($"{TestConstants.DefaultAccessToken}{user}").AssertionHash;
-                    string homeAccountId = $"{user}.{TestConstants.Utid}";
+                    string homeAccountId = $"{user}.{_tenantPrefix}";
                     string tenant = IsMultiTenant ? $"{_tenantPrefix}{token}" : _tenantPrefix;
                     string scope = $"{_scopePrefix}{token}";
 
