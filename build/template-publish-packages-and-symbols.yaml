@@ -18,7 +18,7 @@ steps:
 - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
   displayName: 'Get Software Bill Of Materials (SBOM)'
   inputs:
-       BuildDropPath: '$(System.ArtifactsDirectory)'
+       BuildDropPath: '${{ parameters.ArtifactPublishPath }}'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: packages'
