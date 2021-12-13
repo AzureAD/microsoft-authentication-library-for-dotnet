@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Internal;
 using System.Threading;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
@@ -290,6 +291,7 @@ namespace Microsoft.Identity.Client
         /// False by default.
         /// Not recommended for apps that call RemoveAsync
         /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
         {          
             Config.CacheSynchronizationEnabled = enableCacheSynchronization;
