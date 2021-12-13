@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -34,9 +36,16 @@ namespace Microsoft.Identity.Client
         /// Constructor
         /// </summary>
         /// <param name="useSharedCache">Set to true to share the cache between all ClientApplication objects. The cache becomes static. <see cref="UseSharedCache"/> for a detailed description. </param>
-        public CacheOptions(bool useSharedCache)
+        /// <param name="accessTokenExpirationScanFrequency">Sets to non-null to enable expiration of access tokens. <see cref="AccessTokenExpirationScanFrequency"/> for a detailed description. </param>
+        public CacheOptions(bool useSharedCache, TimeSpan? accessTokenExpirationScanFrequency = null)
         {
+            if (accessTokenExpirationScanFrequency.HasValue && accessTokenExpirationScanFrequency.Value <= TimeSpan.Zero)
+            {
+                throw new ArgumentException("accessTokenExpirationScanFrequency must be a positive TimeSpan", nameof(accessTokenExpirationScanFrequency));
+            }
+
             UseSharedCache = useSharedCache;
+            AccessTokenExpirationScanFrequency = accessTokenExpirationScanFrequency;
         }
 
         /// <summary>
@@ -49,6 +58,11 @@ namespace Microsoft.Identity.Client
         /// ADAL used a static cache by default.
         /// </remarks>
         public bool UseSharedCache { get; set; }
+
+        /// <summary>
+        /// The minimum time between scans for expired access tokens. Defaults to null meaning no expiration scans are performed.
+        /// </summary>
+        public TimeSpan? AccessTokenExpirationScanFrequency { get; }
 
     }
 }

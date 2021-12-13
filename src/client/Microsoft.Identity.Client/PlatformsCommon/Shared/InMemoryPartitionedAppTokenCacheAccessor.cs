@@ -5,6 +5,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
@@ -23,12 +26,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     {
         // perf: do not use ConcurrentDictionary.Values as it takes a lock
         // internal for test only
-        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> AccessTokenCacheDictionary;
+        internal readonly CacheWrapper AccessTokenCacheWrapper;
         internal readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> AppMetadataDictionary;
 
         // static versions to support the "shared cache" mode
-        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> s_accessTokenCacheDictionary =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
+        private static readonly CacheWrapper s_accessTokenCacheWrapper = new CacheWrapper(null);
         private static readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> s_appMetadataDictionary =
            new ConcurrentDictionary<string, MsalAppMetadataCacheItem>(1, 1);
 
@@ -44,12 +46,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             if (_tokenCacheAccessorOptions.UseSharedCache)
             {
-                AccessTokenCacheDictionary = s_accessTokenCacheDictionary;
+                AccessTokenCacheWrapper = s_accessTokenCacheWrapper;
                 AppMetadataDictionary = s_appMetadataDictionary;
+                if (_tokenCacheAccessorOptions.AccessTokenExpirationScanFrequency.HasValue)
+                {
+                    AccessTokenCacheWrapper.UpdateFrequencyIfLower(_tokenCacheAccessorOptions.AccessTokenExpirationScanFrequency.Value);
+                }
             }
             else
             {
-                AccessTokenCacheDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
+                AccessTokenCacheWrapper = new CacheWrapper(_tokenCacheAccessorOptions.AccessTokenExpirationScanFrequency);
                 AppMetadataDictionary = new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
             }
         }
@@ -61,8 +67,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId);
 
             // if a conflict occurs, pick the latest value
-            AccessTokenCacheDictionary
+            AccessTokenCacheWrapper.AccessTokenCacheDictionary
                 .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccessTokenCacheItem>())[itemKey] = item;
+
+            AccessTokenCacheWrapper.StartScanForExpiredItemsIfNeeded();
         }
 
         /// <summary>
@@ -130,7 +138,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             var partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId);
 
-            AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
+            AccessTokenCacheWrapper.AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
             if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
             {
                 _logger.InfoPii(
@@ -175,14 +183,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
         {
-            _logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
+            _logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting access tokens: {AccessTokenCacheWrapper.AccessTokenCacheDictionary.Count}");
+            AccessTokenCacheWrapper.StartScanForExpiredItemsIfNeeded();
             if (string.IsNullOrEmpty(partitionKey))
             {
-                return AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+                return AccessTokenCacheWrapper.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
             }
             else
             {
-                AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
+                AccessTokenCacheWrapper.AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
                 return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalAccessTokenCacheItem>();
             }
         }
@@ -215,14 +224,84 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual void Clear()
         {
-            AccessTokenCacheDictionary.Clear();
+            AccessTokenCacheWrapper.AccessTokenCacheDictionary.Clear();
             _logger.Always("[Clear] Clearing access token cache data.");
             // app metadata isn't removable
         }
 
         public virtual bool HasAccessOrRefreshTokens()
         {
-            return AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
+            return AccessTokenCacheWrapper.AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
+        }
+
+        internal class CacheWrapper
+        {
+            // perf: do not use ConcurrentDictionary.Values as it takes a lock
+            // internal for test only
+            internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> AccessTokenCacheDictionary;
+
+            private DateTimeOffset _lastExpirationScan;
+
+            private TimeSpan? _expirationScanFrequency;
+
+            internal CacheWrapper(TimeSpan? expirationScanFrequency)
+            {
+                _expirationScanFrequency = expirationScanFrequency;
+                _lastExpirationScan = DateTimeOffset.UtcNow;
+                AccessTokenCacheDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
+            }
+
+            internal void UpdateFrequencyIfLower(TimeSpan expirationScanFrequency)
+            {
+                if (!_expirationScanFrequency.HasValue || _expirationScanFrequency.Value > expirationScanFrequency)
+                {
+                    _expirationScanFrequency = expirationScanFrequency;
+                }
+            }
+
+            // Called by multiple actions to see how long it's been since we last checked for expired items.
+            // If sufficient time has elapsed then a scan is initiated on a background task.
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal void StartScanForExpiredItemsIfNeeded()
+            {
+
+                if (_expirationScanFrequency.HasValue)
+                {
+                    var utcNow = DateTimeOffset.UtcNow;
+                    if (_expirationScanFrequency.Value < utcNow - _lastExpirationScan)
+                    {
+                        ScheduleTask(utcNow);
+                    }
+                }
+
+                void ScheduleTask(DateTimeOffset utcNow)
+                {
+                    _lastExpirationScan = utcNow;
+                    Task.Factory.StartNew(state => ScanForExpiredItems((CacheWrapper)state), this,
+                        CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+                }
+            }
+
+            private static void ScanForExpiredItems(CacheWrapper cacheWrapper)
+            {
+                DateTimeOffset now = cacheWrapper._lastExpirationScan = DateTimeOffset.UtcNow;
+
+                foreach (KeyValuePair<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> partitionItem in cacheWrapper.AccessTokenCacheDictionary)
+                {
+                    var partitionItemValue = partitionItem.Value;
+                    foreach (KeyValuePair<string, MsalAccessTokenCacheItem> item in partitionItemValue)
+                    {
+                        if (item.Value.ExpiresOn < now)
+                        {
+                            partitionItemValue.TryRemove(item.Key, out _);
+                        }
+                    }
+                    if (partitionItemValue.IsEmpty)
+                    {
+                        cacheWrapper.AccessTokenCacheDictionary.TryRemove(partitionItem.Key, out _);
+                    }
+                }
+            }
         }
     }
 }

@@ -344,7 +344,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             // avoid calling GetAllAccessTokens() on the strict accessors, as they will throw
             if (tokenCache.Accessor is AppAccessorWithPartitionAsserts appPartitionedAccessor)
             {
-                allAccessTokens = appPartitionedAccessor.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+                allAccessTokens = appPartitionedAccessor.AccessTokenCacheWrapper.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
             }
             else if (tokenCache.Accessor is UserAccessorWithPartitionAsserts userPartitionedAccessor)
             {

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal.Logger;
@@ -465,6 +466,27 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
         #endregion
 
+        #region Expired token cleanup tests
+        [TestMethod]
+        public void AccessToken_Expire_Test()
+        {
+            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(),
+                new Client.CacheOptions(false, TimeSpan.FromMilliseconds(50)));
+            accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem().WithExpiresOn(DateTimeOffset.UtcNow));
+
+            Assert.AreEqual(1, accessor.AccessTokenCacheWrapper.AccessTokenCacheDictionary.Count);
+
+            Thread.Sleep(50);
+
+            accessor.AccessTokenCacheWrapper.StartScanForExpiredItemsIfNeeded();
+
+            Thread.Sleep(50);
+
+            Assert.AreEqual(0, accessor.AccessTokenCacheWrapper.AccessTokenCacheDictionary.Count);
+        }
+
+        #endregion
+
         #region Other tests
         [TestMethod]
         public void ClearCache_AppCache_Test()
@@ -472,11 +494,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), null);
             accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem());
 
-            Assert.AreEqual(1, accessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(1, accessor.AccessTokenCacheWrapper.AccessTokenCacheDictionary.Count);
 
             accessor.Clear();
 
-            Assert.AreEqual(0, accessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(0, accessor.AccessTokenCacheWrapper.AccessTokenCacheDictionary.Count);
         }
 
         [TestMethod]
@@ -597,7 +619,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             if (isAppCache)
             {
-                return (accessor as InMemoryPartitionedAppTokenCacheAccessor)?.AccessTokenCacheDictionary;
+                return (accessor as InMemoryPartitionedAppTokenCacheAccessor)?.AccessTokenCacheWrapper.AccessTokenCacheDictionary;
             }
             else
             {
