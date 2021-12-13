@@ -27,8 +27,7 @@ namespace Microsoft.Identity.Client
 #endif
     public sealed partial class ConfidentialClientApplication
         : ClientApplicationBase,
-            IConfidentialClientApplication,
-            IConfidentialClientApplicationWithCertificate,
+            IConfidentialClientApplication,            
             IByRefreshToken,
             ILongRunningWebApi
     {
