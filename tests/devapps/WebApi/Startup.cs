@@ -35,16 +35,6 @@ namespace WebApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApi", Version = "v1" });
             });
-
-            //services.AddSingleton<IMsalTokenEncryptor, MsalTokenEncryptor>();
-            //services.AddSingleton<IExtendedDistributedCache, FilePartitionedR9DistributedCache>();
-            //services.AddSingleton<IMemoryCache, MemoryCache>();
-            //services.AddSingleton<IMsalTelemetryService, MsalTelemetryService>();
-            //services.AddCachingForMsalTokens(msalAuthenticationOptions =>
-            //{
-            //    msalAuthenticationOptions.TokenEncryptionKey = "token_encryption_key";
-            //    msalAuthenticationOptions.CacheType = MsalTokenCacheType.All;
-            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -7,7 +7,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
-//using WebApi.Misc.R9;
 
 namespace WebApi.Misc
 {
@@ -98,23 +97,10 @@ namespace WebApi.Misc
 
             if (File.Exists(file))
             {
-                //_logger.Verbose($"[InMemoryPartitionedTokenCache] ReadCacheBytes found cacheKey {cacheKey}");
                 return await File.ReadAllBytesAsync(file).ConfigureAwait(false);
             }
 
-            //_logger.Verbose($"[InMemoryPartitionedTokenCache] ReadCacheBytes did not find cacheKey {cacheKey}");
-
             return null;
-            //var results = await _db.ListRangeAsync(expandedKey).ConfigureAwait(false);
-            //if (results.Length == 0)
-            //{
-            //    // key not found
-            //    return null;
-            //}
-
-            //var (absExpiration, slidingWindow) = ExtractExpiration(results, SlidingWindowValue);
-            //await RefreshAsync(expandedKey, absExpiration, slidingWindow).ConfigureAwait(false);
-            //return results[DataValue];
         }
 
         private string GetPath(string cacheKey)
