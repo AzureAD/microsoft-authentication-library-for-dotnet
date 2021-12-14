@@ -364,9 +364,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 int appHashCode = AuthenticationRequestParameters.AppConfig.GetHashCode();
                 string scopes = string.Join(" ", result.Scopes);
                 Uri canonicalAuthority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
-                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                    $"Fetched access token from host {canonicalAuthority.Host}. Endpoint {canonicalAuthority}. ",
-                    $"Fetched access token from host {canonicalAuthority.Host}. ");
+
+                if (result.AuthenticationResultMetadata.TokenSource != TokenSource.Cache)
+                {
+                    AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
+                        $"Fetched access token from host {canonicalAuthority.Host}. Endpoint {canonicalAuthority}. ",
+                        $"Fetched access token from host {canonicalAuthority.Host}. ");
+                }
 
                 AuthenticationRequestParameters.RequestContext.Logger.Info("\n\t=== Token Acquisition finished successfully:");
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
