@@ -1,16 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using System;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests.Silent
 {
@@ -62,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 }
 
                 _logger.Verbose("Attempting to acquire token using using local cache...");
-                return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);          
+                return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
 
             }
             catch (MsalException ex)
@@ -71,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
                 if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
                 {
-                    _logger.Info("Attempting to use broker instead. ");                    
+                    _logger.Info("Attempting to use broker instead. ");
                     var brokerAuthResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     if (brokerAuthResult != null)
                     {
@@ -95,14 +94,6 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         private static bool ShouldTryWithBrokerError(string errorCode)
         {
             return s_tryWithBrokerErrors.Contains(errorCode);
-        }
-
-        protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)
-        {
-            if (_silentParameters.LoginHint != null)
-            {
-                apiEvent.LoginHint = _silentParameters.LoginHint;
-            }
         }
 
         internal new async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response)
@@ -130,7 +121,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 AuthenticationRequestParameters.AuthorityOverride,
                 account?.HomeAccountId?.TenantId).ConfigureAwait(false);
 
-            AuthenticationRequestParameters.AuthorityManager = 
+            AuthenticationRequestParameters.AuthorityManager =
                 new AuthorityManager(
                     AuthenticationRequestParameters.RequestContext,
                     tenantedAuthority);

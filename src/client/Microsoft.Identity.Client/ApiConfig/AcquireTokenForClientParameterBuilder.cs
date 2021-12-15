@@ -24,8 +24,6 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenForClientParameters Parameters { get; } = new AcquireTokenForClientParameters();
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenForClient;
-
         /// <inheritdoc />
         internal AcquireTokenForClientParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor)
@@ -49,7 +47,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithForceRefresh(bool forceRefresh)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithForceRefresh, forceRefresh);
             Parameters.ForceRefresh = forceRefresh;
             return this;
         }
@@ -67,8 +64,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithSendX5C(bool withSendX5C)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C, withSendX5C);
-            Parameters.SendX5C = withSendX5C; 
+            Parameters.SendX5C = withSendX5C;
             return this;
         }
 
@@ -89,7 +85,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use WithAzureRegion on the ConfidentialClientApplicationBuilder object", true)]
         public AcquireTokenForClientParameterBuilder WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true)
         {
-            throw new NotImplementedException();            
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />

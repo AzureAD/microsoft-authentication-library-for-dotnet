@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -14,7 +14,6 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -51,8 +50,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
         }
 
-
-
         /// <summary>
         /// Return a custom set of scopes to override the default MSAL logic of merging
         /// input scopes with reserved scopes (openid, profile etc.)
@@ -79,62 +76,59 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
-            try
+
+            using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
             {
-                using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
+                try
                 {
-                    try
-                    {
-                        AuthenticationRequestParameters.LogParameters();
-                        LogRequestStarted(AuthenticationRequestParameters);
+                    AuthenticationRequestParameters.LogParameters();
+                    LogRequestStarted(AuthenticationRequestParameters);
 
-                        AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
-                        LogReturnedToken(authenticationResult);
+                    AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                    LogReturnedToken(authenticationResult);
 
-                        UpdateTelemetry(sw, apiEvent, authenticationResult);
-                        LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
-                        return authenticationResult;
-                    }
-                    catch (MsalException ex)
-                    {
-                        apiEvent.ApiErrorCode = ex.ErrorCode;
-                        AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
-                        throw;
-                    }
+                    UpdateTelemetry(sw, apiEvent, authenticationResult);
+                    LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
+                    return authenticationResult;
                 }
-            }
-            finally
-            {
-                ServiceBundle.MatsTelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
+                catch (MsalException ex)
+                {
+                    apiEvent.ApiErrorCode = ex.ErrorCode;
+                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                    throw;
+                }
             }
         }
 
         private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ICoreLogger logger)
         {
-            logger.Always($"[LogMetricsFromAuthResult] Cache Refresh Reason: {authenticationResult.AuthenticationResultMetadata.CacheRefreshReason}");
-            logger.Always($"[LogMetricsFromAuthResult] DurationInCacheInMs: {authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs}");
-            logger.Always($"[LogMetricsFromAuthResult] DurationTotalInMs: {authenticationResult.AuthenticationResultMetadata.DurationTotalInMs}");
-            logger.Always($"[LogMetricsFromAuthResult] DurationInHttpInMs: {authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs}");
+            var sb = new StringBuilder(250);
+            sb.AppendLine();
+            sb.Append("[LogMetricsFromAuthResult] Cache Refresh Reason: ");
+            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason.ToString());
+            sb.Append("[LogMetricsFromAuthResult] DurationInCacheInMs: ");
+            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs.ToString());
+            sb.Append("[LogMetricsFromAuthResult] DurationTotalInMs: ");
+            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs.ToString());
+            sb.Append("[LogMetricsFromAuthResult] DurationInHttpInMs: ");
+            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs.ToString());
+            logger.Always(sb.ToString());
             logger.AlwaysPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint ?? ""}",
-                                $"TokenEndpoint: ****");
+                                "TokenEndpoint: ****");
         }
 
         private static void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)
         {
-            apiEvent.TenantId = authenticationResult.TenantId;
-            apiEvent.AccountId = authenticationResult.UniqueId;
-            apiEvent.WasSuccessful = true;
-
             authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
             authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
             authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
             authenticationResult.AuthenticationResultMetadata.TokenEndpoint = apiEvent.TokenEndpoint;
-            authenticationResult.AuthenticationResultMetadata.CacheRefreshReason = (CacheRefreshReason)apiEvent.CacheInfo;
+            authenticationResult.AuthenticationResultMetadata.CacheRefreshReason = apiEvent.CacheInfo;
 
             Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
         }
@@ -146,31 +140,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private ApiEvent InitializeApiEvent(string accountId)
         {
-            ApiEvent apiEvent = new ApiEvent(
-                AuthenticationRequestParameters.RequestContext.Logger,
-                ServiceBundle.PlatformProxy.CryptographyManager,
-                AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId())
+            ApiEvent apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.CorrelationId)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
-                ApiTelemId = AuthenticationRequestParameters.ApiTelemId,
-                AccountId = accountId ?? "",
-                WasSuccessful = false
             };
-
-            foreach (var kvp in AuthenticationRequestParameters.GetApiTelemetryFeatures().ToList())
-            {
-                apiEvent[kvp.Key] = kvp.Value;
-            }
-
-            if (AuthenticationRequestParameters.AuthorityInfo != null)
-            {
-                apiEvent.Authority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
-                apiEvent.AuthorityType = AuthenticationRequestParameters.AuthorityInfo.AuthorityType.ToString();
-            }
 
             apiEvent.IsTokenCacheSerialized = AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsExternalSerializationConfiguredByUser();
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
-            apiEvent.CacheInfo = (int)CacheRefreshReason.NotApplicable;
+            apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);
@@ -384,19 +361,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (result.AccessToken != null &&
                 AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
-                int appHashCode = AuthenticationRequestParameters.AppConfig.GetHashCode();
                 string scopes = string.Join(" ", result.Scopes);
-                Uri canonicalAuthority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
-                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                    $"Fetched access token from host {canonicalAuthority.Host}. Endpoint {canonicalAuthority}. ",
-                    $"Fetched access token from host {canonicalAuthority.Host}. ");
-
+                
                 AuthenticationRequestParameters.RequestContext.Logger.Info("\n\t=== Token Acquisition finished successfully:");
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes} " +
-                            $"source {result.AuthenticationResultMetadata.TokenSource} from {canonicalAuthority} appHashCode {appHashCode}",
-                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes} " +
-                            $"source {result.AuthenticationResultMetadata.TokenSource} from {canonicalAuthority.Host} appHashCode {appHashCode}");
+                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes}" +
+                            $"source {result.AuthenticationResultMetadata.TokenSource}",
+                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes}" +
+                            $"source {result.AuthenticationResultMetadata.TokenSource}");
+
+                if (result.AuthenticationResultMetadata.TokenSource != TokenSource.Cache)
+                {
+                    Uri canonicalAuthority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
+
+                    AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
+                        $"Fetched access token from host {canonicalAuthority.Host}. Endpoint {canonicalAuthority}. ",
+                        $"Fetched access token from host {canonicalAuthority.Host}. ");
+                }
             }
         }
 

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Android.Content;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Json.Linq;
@@ -42,7 +43,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         unreliableLogger?.Info("[Android broker] Response received, decoding... ");
 
                         InteractiveBrokerTokenResponse =
-                            MsalTokenResponse.CreateFromAndroidBrokerResponse(
+                            MobileBrokerTokenResponse.CreateFromAndroidBrokerResponse(
                                 data.GetStringExtra(BrokerConstants.BrokerResultV2),
                                 InteractiveRequestCorrelationId);
                         break;

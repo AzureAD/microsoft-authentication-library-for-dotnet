@@ -15,8 +15,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -411,14 +409,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             MockHttpManager httpManager,
             X509Certificate2 cert,
             int tokenResponses,
-            CredentialType credentialType = CredentialType.Certificate,
-            TelemetryCallback telemetryCallback = null)
+            CredentialType credentialType = CredentialType.Certificate)
         {
             var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                               .WithRedirectUri(TestConstants.RedirectUri)
-                              .WithHttpManager(httpManager)
-                              .WithTelemetry(telemetryCallback);
+                              .WithHttpManager(httpManager);
 
             ConfidentialClientApplication app;
 
@@ -673,36 +669,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 await AssertException.TaskThrowsAsync<OperationCanceledException>(
                     () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .ExecuteAsync(cancellationTokenSource.Token)).ConfigureAwait(false);
-            }
-        }
-
-        [TestMethod]
-        public async Task ConfidentialClientUsingCertificateTelemetryTestAsync()
-        {
-            var receiver = new MyReceiver();
-
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, cert, 1, CredentialType.Certificate, receiver.HandleTelemetryEvents);
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                Assert.IsNotNull(
-                    receiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("http_event") &&
-                            anEvent[HttpEvent.ResponseCodeKey] == "200" && anEvent[HttpEvent.HttpPathKey]
-                                .Contains(
-                                    EventBase
-                                        .TenantPlaceHolder) // The tenant info is expected to be replaced by a holder
-                    ));
-
-                Assert.IsNotNull(
-                    receiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.WasSuccessfulKey] == "true" && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1004"));
             }
         }
 
@@ -1193,8 +1159,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task ForceRefreshParameterTrueTestAsync()
         {
-            var receiver = new MyReceiver();
-
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -1205,7 +1169,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithTelemetry(receiver.HandleTelemetryEvents)
                     .BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
@@ -1235,11 +1198,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                          .ToList().FirstOrDefault();
 
                 Assert.AreEqual(TokenRetrievedFromNetCall, accessTokenInCache.Secret);
-                Assert.IsNotNull(
-                    receiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.WasSuccessfulKey] == "true" && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1004"));
             }
         }
 

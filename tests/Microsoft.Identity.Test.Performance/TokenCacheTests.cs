@@ -22,10 +22,8 @@ namespace Microsoft.Identity.Test.Performance
     /// Testing combinations
     /// Partitions - Tokens per partition - Total tokens
     /// 1 - 10,000 - 10,000
-    /// 1 - 100,000 - 100,000
     /// 100 - 10,000 - 1,000,000
     /// 1,000 - 1,000 - 1,000,000
-    /// 10,000 - 100 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class TokenCacheTests
@@ -46,15 +44,13 @@ namespace Microsoft.Identity.Test.Performance
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10000),
-            (1, 100000),
             (100, 10000),
             (1000, 1000),
-            (10000, 100), };
+        };
 
         // If the tokens are saved with different tenants.
         // This results in ID tokens and accounts having multiple tenant profiles.
-        [ParamsAllValues(Priority = 1)]
-        public bool IsMultiTenant { get; set; }
+        public bool IsMultiTenant { get; set; } = false;
 
         [GlobalSetup]
         public void GlobalSetup()
@@ -63,6 +59,7 @@ namespace Microsoft.Identity.Test.Performance
                 .Create(TestConstants.ClientId)
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
+                .WithLegacyCacheCompatibility(false)
                 .BuildConcrete();
 
             PopulateUserCache(CacheSize.Users, CacheSize.TokensPerUser);
@@ -81,7 +78,8 @@ namespace Microsoft.Identity.Test.Performance
                 $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}";
         }
 
-        [Benchmark]
+        [Benchmark(Description = "AcquireTokenSilent")]
+        [BenchmarkCategory("With cache")]
         public async Task<AuthenticationResult> AcquireTokenSilent_TestAsync()
         {
             return await _cca.AcquireTokenSilent(new string[] { _scope }, _account)
@@ -90,14 +88,16 @@ namespace Microsoft.Identity.Test.Performance
                 .ConfigureAwait(false);
         }
 
-        [Benchmark]
+        [Benchmark(Description = "GetAccount")]
+        [BenchmarkCategory("With cache")]
         public async Task<IAccount> GetAccountAsync_TestAsync()
         {
             return await _cca.GetAccountAsync(_account.HomeAccountId.Identifier)
                 .ConfigureAwait(false);
         }
 
-        [Benchmark]
+        [Benchmark(Description = "GetAccounts")]
+        [BenchmarkCategory("With cache")]
         public async Task<IAccount> GetAccountsAsync_TestAsync()
         {
             var result = await _cca.GetAccountsAsync()
@@ -105,7 +105,8 @@ namespace Microsoft.Identity.Test.Performance
             return result.FirstOrDefault();
         }
 
-        [Benchmark]
+        [Benchmark(Description = "RemoveAccount")]
+        [BenchmarkCategory("With cache")]
         public async Task RemoveAccountAsync_TestAsync()
         {
             await _cca.RemoveAsync(_account)
@@ -147,7 +148,7 @@ namespace Microsoft.Identity.Test.Performance
             string scope = $"{_scopePrefix}{tokenId}";
 
             MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(scope, tenant, homeAccountId, oboCacheKey: userAssertionHash);
-            
+
             _cca.UserTokenCacheInternal.Accessor.SaveAccessToken(atItem);
 
             MsalRefreshTokenCacheItem rtItem = TokenCacheHelper.CreateRefreshTokenItem(userAssertionHash, homeAccountId);

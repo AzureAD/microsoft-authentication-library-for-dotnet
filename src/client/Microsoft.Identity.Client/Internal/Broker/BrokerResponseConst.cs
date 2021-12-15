@@ -34,6 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Account = "mAccount";
         public const string HomeAccountId = "home_account_id";
         public const string LocalAccountId = "local_account_id";
+        public const string TenantId = "tenant_id";
         public const string UserName = "username";
         public const string iOSBrokerNonce = "broker_nonce"; // included in request and response with iOS Broker v3
         public const string Environment = "environment";
@@ -45,6 +46,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
         //Error codes returned from Android broker
         public const string AndroidNoTokenFound = "no_tokens_found";
         public const string AndroidNoAccountFound = "no_account_found";
+        public const string AndroidUnauthorizedClient = "unauthorized_client";
         public const string AndroidInvalidRefreshToken = "Broker refresh token is invalid";
+        public const string AndroidProtectionPolicyRequired = "protection_policy_required";
     }
 }

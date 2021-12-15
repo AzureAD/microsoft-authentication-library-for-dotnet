@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
@@ -37,7 +36,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .WithUserTokenLegacyCachePersistenceForTest(
                                                             new TestLegacyCachePersistance())
                                                         .BuildConcrete();
@@ -65,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid());
 
                 var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
-                    requestContext, null).Result;                    
+                    requestContext, null).Result;
 
                 AuthenticationRequestParameters reqParams = new AuthenticationRequestParameters(
                     mocks.ServiceBundle,
@@ -120,7 +118,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 app.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
@@ -153,7 +150,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var app1 = PublicClientApplicationBuilder.Create(TestConstants.ClientId2)
                                                          .WithHttpManager(httpManager)
-                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                          .WithAuthority(
                                                              new Uri(ClientApplicationBase.DefaultAuthority),
                                                              true).BuildConcrete();
@@ -258,7 +254,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                           .Create(TestConstants.ClientId)
                           .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                           .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
-                          .WithTelemetry(new TraceTelemetryConfig())
                           .BuildConcrete();
 
                 CreateAdalCache(harness.ServiceBundle.ApplicationLogger, app.UserTokenCacheInternal.LegacyPersistence, TestConstants.s_scope.ToString());

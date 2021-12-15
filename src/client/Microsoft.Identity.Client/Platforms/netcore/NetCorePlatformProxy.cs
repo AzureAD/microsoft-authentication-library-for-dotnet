@@ -142,29 +142,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetCoreCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
-        public override string GetDeviceNetworkState()
-        {
-            // TODO(mats):
-            return string.Empty;
-        }
-
-        public override string GetDevicePlatformTelemetryId()
-        {
-            // TODO(mats):
-            return string.Empty;
-        }
-
-        public override string GetMatsOsPlatform()
-        {
-            // TODO(mats): need to detect operating system and switch on it to determine proper enum
-            return MatsConverter.AsString(OsPlatform.Win32);
-        }
-
-        public override int GetMatsOsPlatformCode()
-        {
-            // TODO(mats): need to detect operating system and switch on it to determine proper enum
-            return MatsConverter.AsInt(OsPlatform.Win32);
-        }
         protected override IFeatureFlags CreateFeatureFlags() => new NetCoreFeatureFlags();
 
         public override Task StartDefaultOsBrowserAsync(string url)

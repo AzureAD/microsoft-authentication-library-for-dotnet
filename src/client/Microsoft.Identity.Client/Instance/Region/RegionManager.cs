@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Region
             // MSAL always performs region auto-discovery, even if the user configured an actual region
             // in order to detect inconsistencies and report via telemetry
             var discoveredRegion = await DiscoverAndCacheAsync(azureRegionConfig, logger, requestContext.UserCancellationToken).ConfigureAwait(false);
-            
+
             RecordTelemetry(requestContext.ApiEvent, azureRegionConfig, discoveredRegion);
 
             if (IsAutoDiscoveryRequested(azureRegionConfig))
@@ -105,14 +105,14 @@ namespace Microsoft.Identity.Client.Region
             }
 
             bool isAutoDiscoveryRequested = IsAutoDiscoveryRequested(azureRegionConfig);
-            apiEvent.RegionAutodetectionSource = (int)discoveredRegion.RegionSource;
+            apiEvent.RegionAutodetectionSource = discoveredRegion.RegionSource;
 
             if (isAutoDiscoveryRequested)
             {
                 apiEvent.RegionUsed = discoveredRegion.Region;
                 apiEvent.RegionOutcome = discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery ?
-                    (int)RegionOutcome.FallbackToGlobal :
-                    (int)RegionOutcome.AutodetectSuccess;
+                    RegionOutcome.FallbackToGlobal :
+                    RegionOutcome.AutodetectSuccess;
             }
             else
             {
@@ -120,14 +120,14 @@ namespace Microsoft.Identity.Client.Region
 
                 if (discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery)
                 {
-                    apiEvent.RegionOutcome = (int)RegionOutcome.UserProvidedAutodetectionFailed;
+                    apiEvent.RegionOutcome = RegionOutcome.UserProvidedAutodetectionFailed;
                 }
 
                 if (!string.IsNullOrEmpty(discoveredRegion.Region))
                 {
                     apiEvent.RegionOutcome = string.Equals(discoveredRegion.Region, azureRegionConfig, StringComparison.OrdinalIgnoreCase) ?
-                        (int)RegionOutcome.UserProvidedValid :
-                        (int)RegionOutcome.UserProvidedInvalid;
+                        RegionOutcome.UserProvidedValid :
+                        RegionOutcome.UserProvidedInvalid;
                 }
             }
         }
@@ -136,8 +136,8 @@ namespace Microsoft.Identity.Client.Region
         {
             return
                 !(string.IsNullOrEmpty(apiEvent.RegionUsed) &&
-                 apiEvent.RegionAutodetectionSource == (int)(default(RegionAutodetectionSource)) &&
-                 apiEvent.RegionOutcome == (int)(default(RegionOutcome)));
+                 apiEvent.RegionAutodetectionSource == default(RegionAutodetectionSource) &&
+                 apiEvent.RegionOutcome == default(RegionOutcome));
         }
 
         private async Task<RegionInfo> DiscoverAndCacheAsync(string azureRegionConfig, ICoreLogger logger, CancellationToken requestCancellationToken)

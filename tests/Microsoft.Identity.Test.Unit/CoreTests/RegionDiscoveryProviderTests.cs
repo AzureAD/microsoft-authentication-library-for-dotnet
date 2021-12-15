@@ -11,7 +11,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Region;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -42,10 +41,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 _harness.ServiceBundle,
                 Guid.NewGuid(),
                 _userCancellationTokenSource.Token);
-            _apiEvent = new ApiEvent(
-                _harness.ServiceBundle.ApplicationLogger,
-                _harness.ServiceBundle.PlatformProxy.CryptographyManager,
-                Guid.NewGuid().AsMatsCorrelationId());
+            _apiEvent = new ApiEvent(Guid.NewGuid());
             _apiEvent.ApiId = ApiEvent.ApiIds.AcquireTokenForClient;
             _testRequestContext.ApiEvent = _apiEvent;
             _regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, true);
@@ -123,8 +119,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual($"centralus.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
 
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.UserProvidedAutodetectionFailed, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.UserProvidedAutodetectionFailed, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]
@@ -139,8 +135,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsNotNull(regionalMetadata);
             Assert.AreEqual($"centralus.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.UserProvidedValid, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.UserProvidedValid, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]
@@ -157,8 +153,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsNotNull(regionalMetadata);
             Assert.AreEqual($"user_region.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
             Assert.AreEqual("user_region", _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.UserProvidedInvalid, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.UserProvidedInvalid, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]
@@ -174,8 +170,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsNotNull(regionalMetadata);
             Assert.AreEqual($"regionwithspaces.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
             Assert.AreEqual("regionwithspaces", _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]
@@ -192,8 +188,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             ValidateInstanceMetadata(regionalMetadata);
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]
@@ -256,8 +252,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             // Assert
             Assert.IsNull(regionalMetadata, "Discovery requested, but it failed.");
             Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]
@@ -273,8 +269,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsNull(regionalMetadata, "Discovery requested, but it failed.");
 
             Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]
@@ -293,8 +289,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             // Assert
             ValidateInstanceMetadata(regionalMetadata);
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.Imds, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.Imds, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]
@@ -311,8 +307,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             // Assert
             Assert.IsNull(regionalMetadata, "Discovery requested, but it failed.");
             Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
         }
 
         [TestMethod]
@@ -331,8 +327,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsNull(regionalMetadata, "Discovery requested, but it failed.");
 
             Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual((int)RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual((int)RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
 
         }
 

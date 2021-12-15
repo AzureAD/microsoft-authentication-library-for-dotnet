@@ -1,23 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Json;
-using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.OAuth2.Throttling;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -89,69 +85,55 @@ namespace Microsoft.Identity.Client.OAuth2
 
             HttpResponse response = null;
             Uri endpointUri = AddExtraQueryParams(endPoint);
-            var httpEvent = new HttpEvent(requestContext.CorrelationId.AsMatsCorrelationId())
+
+            using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
             {
-                HttpPath = endpointUri,
-                QueryParams = endpointUri.Query
-            };
-
-            using (requestContext.CreateTelemetryHelper(httpEvent))
-            {
-                using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
+                if (method == HttpMethod.Post)
                 {
-                    if (method == HttpMethod.Post)
-                    {
-                        response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
-                                                    .ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        response = await _httpManager.SendGetAsync(
-                            endpointUri,
-                            _headers,
-                            requestContext.Logger,
-                            cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
-                    }
+                    response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
+                                                .ConfigureAwait(false);
                 }
-
-                if (requestContext.ApiEvent != null)
+                else
                 {
-                    requestContext.ApiEvent.DurationInHttpInMs += _httpManager.LastRequestDurationInMs;
-                }
-
-                DecorateHttpEvent(method, requestContext, response, httpEvent);
-
-                if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
-                {
-                    requestContext.Logger.Verbose("[Oauth2Client] Processing error response ");
-
-                    try
-                    {
-                        httpEvent.OauthErrorCode = MsalError.UnknownError;
-                        // In cases where the end-point is not found (404) response.body will be empty.
-                        // CreateResponse handles throwing errors - in the case of HttpStatusCode <> and ErrorResponse will be created.
-                        if (!string.IsNullOrWhiteSpace(response.Body))
-                        {
-                            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
-                            if (msalTokenResponse != null)
-                            {
-                                httpEvent.OauthErrorCode = msalTokenResponse?.Error;
-                            }
-
-                            if (response.StatusCode == HttpStatusCode.OK &&
-                                expectErrorsOn200OK &&
-                                !string.IsNullOrEmpty(msalTokenResponse?.Error))
-                            {
-                                ThrowServerException(response, requestContext);
-                            }
-                        }
-                    }
-                    catch (JsonException) // in the rare case we get an error response we cannot deserialize
-                    {
-                        // CreateErrorResponse does the same validation. Will be logging the error there.
-                    }
+                    response = await _httpManager.SendGetAsync(
+                        endpointUri,
+                        _headers,
+                        requestContext.Logger,
+                        cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
                 }
             }
+
+            if (requestContext.ApiEvent != null)
+            {
+                requestContext.ApiEvent.DurationInHttpInMs += _httpManager.LastRequestDurationInMs;
+            }
+
+            if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
+            {
+                requestContext.Logger.Verbose("[Oauth2Client] Processing error response ");
+
+                try
+                {
+                    // In cases where the end-point is not found (404) response.body will be empty.
+                    // CreateResponse handles throwing errors - in the case of HttpStatusCode <> and ErrorResponse will be created.
+                    if (!string.IsNullOrWhiteSpace(response.Body))
+                    {
+                        var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+
+                        if (response.StatusCode == HttpStatusCode.OK &&
+                            expectErrorsOn200OK &&
+                            !string.IsNullOrEmpty(msalTokenResponse?.Error))
+                        {
+                            ThrowServerException(response, requestContext);
+                        }
+                    }
+                }
+                catch (JsonException) // in the rare case we get an error response we cannot deserialize
+                {
+                    // CreateErrorResponse does the same validation. Will be logging the error there.
+                }
+            }
+
 
             return CreateResponse<T>(response, requestContext);
         }
@@ -169,36 +151,6 @@ namespace Microsoft.Identity.Client.OAuth2
             if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientVersion))
             {
                 _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
-            }
-        }
-
-        private void DecorateHttpEvent(HttpMethod method, RequestContext requestContext, HttpResponse response, HttpEvent httpEvent)
-        {
-            httpEvent.HttpResponseStatus = (int)response.StatusCode;
-            httpEvent.UserAgent = response.UserAgent;
-            httpEvent.HttpMethod = method.Method;
-
-            IDictionary<string, string> headersAsDictionary = response.HeadersAsDictionary;
-            if (headersAsDictionary.ContainsKey("x-ms-request-id") &&
-                headersAsDictionary["x-ms-request-id"] != null)
-            {
-                httpEvent.RequestIdHeader = headersAsDictionary["x-ms-request-id"];
-            }
-
-            if (headersAsDictionary.ContainsKey("x-ms-clitelem") &&
-                headersAsDictionary["x-ms-clitelem"] != null)
-            {
-                XmsCliTelemInfo xmsCliTeleminfo = new XmsCliTelemInfoParser().ParseXMsTelemHeader(
-                    headersAsDictionary["x-ms-clitelem"],
-                    requestContext.Logger);
-
-                if (xmsCliTeleminfo != null)
-                {
-                    httpEvent.TokenAge = xmsCliTeleminfo.TokenAge;
-                    httpEvent.SpeInfo = xmsCliTeleminfo.SpeInfo;
-                    httpEvent.ServerErrorCode = xmsCliTeleminfo.ServerErrorCode;
-                    httpEvent.ServerSubErrorCode = xmsCliTeleminfo.ServerSubErrorCode;
-                }
             }
         }
 
