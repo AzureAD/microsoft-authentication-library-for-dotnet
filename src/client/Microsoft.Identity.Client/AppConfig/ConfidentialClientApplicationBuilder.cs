@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.Internal;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -94,9 +94,15 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Sets the certificate associated with the application.
+        /// This method allows to specify if the x5c claim (public key of the certificate) should be sent to Azure AD.
+        /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
+        /// this method will send the public certificate to Azure AD along with the token request,
+        /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
+        /// This saves the application admin from the need to explicitly manage the certificate rollover
+        /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
-        /// <param name="sendX5C">To send X5C with every request or not.</param>
+        /// <param name="sendX5C">To send X5C with every request or not. The default is <c>false</c></param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool sendX5C)
         {
@@ -216,7 +222,7 @@ namespace Microsoft.Identity.Client
             }
 
             Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate = (_) =>
-            {                
+            {
                 return Task.FromResult(clientAssertionDelegate());
             };
 
@@ -235,7 +241,7 @@ namespace Microsoft.Identity.Client
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate)
         {
-            
+
             if (clientAssertionAsyncDelegate == null)
             {
                 throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
@@ -291,7 +297,7 @@ namespace Microsoft.Identity.Client
         /// Not recommended for apps that call RemoveAsync
         /// </remarks>
         public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
-        {          
+        {
             Config.CacheSynchronizationEnabled = enableCacheSynchronization;
             return this;
         }
@@ -317,7 +323,7 @@ namespace Microsoft.Identity.Client
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
-            }           
+            }
         }
 
         /// <summary>
