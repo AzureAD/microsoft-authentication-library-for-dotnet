@@ -20,9 +20,12 @@ namespace NetDesktopWinForms
         private readonly SynchronizationContext _syncContext;
 
 
+
+
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
             new ClientEntry() { Id = "04f0c124-f2bc-4f59-8241-bf6df9866bbd", Name = "04f0c124-f2bc-4f59-8241-bf6df9866bbd (new VS)"},
+            new ClientEntry() { Id = "d735b71b-9eee-4a4f-ad23-421660877ba6", Name = "d735b71b-9eee-4a4f-ad23-421660877ba6 (new GCM)"},
             new ClientEntry() { Id = "1d18b3b0-251b-4714-a02a-9956cec86c2d", Name = "1d18b3b0-251b-4714-a02a-9956cec86c2d (App in 49f)"},
             new ClientEntry() { Id = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1", Name = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1 (VS)"},
             new ClientEntry() { Id = "655015be-5021-4afc-a683-a4223eb5d0e5", Name = "655015be-5021-4afc-a683-a4223eb5d0e5"},
@@ -77,8 +80,8 @@ namespace NetDesktopWinForms
                 .WithBroker(this.useBrokerChk.Checked)
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
-                //.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
-                .WithRedirectUri("ms-appx-web://microsoft.aad.brokerplugin/95de633a-083e-42f5-b444-a4295d8e9314")
+                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
+                //.WithRedirectUri("ms-appx-web://microsoft.aad.brokerplugin/95de633a-083e-42f5-b444-a4295d8e9314")
                 .WithWindowsBrokerOptions(new WindowsBrokerOptions()
                 {
                     ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
@@ -447,6 +450,7 @@ namespace NetDesktopWinForms
             Log("Done clearing the cache.");
         }
 
+
         private void clientIdCbx_SelectedIndexChanged(object sender, EventArgs e)
         {
             ClientEntry clientEntry = (ClientEntry)clientIdCbx.SelectedItem;
@@ -454,11 +458,19 @@ namespace NetDesktopWinForms
             if (clientEntry.Id == "872cd9fa-d31f-45e0-9eab-6e460a02d1f1") // VS
             {
                 cbxScopes.SelectedItem = "https://management.core.windows.net//.default";
+                authorityCbx.SelectedItem = "https://login.microsoftonline.com/organizations";
             }
 
             if (clientEntry.Id == "04f0c124-f2bc-4f59-8241-bf6df9866bbd") // VS
             {
                 cbxScopes.SelectedItem = "https://management.core.windows.net//.default";
+                authorityCbx.SelectedItem = "https://login.microsoftonline.com/organizations";
+            }
+
+            if (clientEntry.Id == "d735b71b-9eee-4a4f-ad23-421660877ba6") // new GCM
+            {
+                cbxScopes.SelectedItem = "499b84ac-1321-427f-aa17-267ca6975798/vso.code_full";
+                authorityCbx.SelectedItem = "https://login.microsoftonline.com/organizations";
             }
 
             if (clientEntry.Id == "c0186a6c-0bfc-4d83-9543-c2295b676f3b") // MSA-PT app
