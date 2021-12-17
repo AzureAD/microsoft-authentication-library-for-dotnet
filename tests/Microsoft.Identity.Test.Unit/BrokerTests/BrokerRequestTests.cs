@@ -44,6 +44,29 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private AcquireTokenSilentParameters _acquireTokenSilentParameters;
         private HttpResponse _brokerHttpResponse;
 
+        [TestMethod] // regression
+        public void BrokerResponseWithErrorTest()
+        {
+            using (CreateBrokerHelper())
+            {
+                var response = new MsalTokenResponse
+                {
+                    Error = "MSALErrorDomain",
+                    ErrorDescription = "error_description: Server returned less scopes than requested"
+                };
+
+                // Act
+                ValidateBrokerResponse(
+                   response,
+                   exception =>
+                   {
+                       var exc = exception as MsalServiceException;
+                       Assert.IsNotNull(exc);
+                       Assert.AreEqual(response.Error, exc.ErrorCode);
+                       Assert.AreEqual(MsalErrorMessage.BrokerResponseError + response.ErrorDescription, exc.Message);
+                   });
+            }
+        }
 
         [TestMethod]
         public void BrokerResponseTest()
@@ -87,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (CreateBrokerHelper())
             {
-                var response = new MobileBrokerTokenResponse
+                var response = new AndroidBrokerTokenResponse
                 {
                     Error = "MSALErrorDomain",
                     ErrorDescription = "error_description: Server returned less scopes than requested"
@@ -112,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (CreateBrokerHelper())
             {
 
-                var response = new MobileBrokerTokenResponse
+                var response = new AndroidBrokerTokenResponse
                 {
                     Error = MsalError.InteractionRequired,
                     ErrorDescription = MsalError.InteractionRequired,
@@ -140,7 +163,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (CreateBrokerHelper())
             {
 
-                var response = new MobileBrokerTokenResponse
+                var response = new AndroidBrokerTokenResponse
                 {
                     Error = MsalError.InvalidGrantError,
                     ErrorDescription = MsalError.InvalidGrantError,
@@ -708,7 +731,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 try
                 {
                     // Arrange
-                    MobileBrokerTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
+                    AndroidBrokerTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
                     msalTokenResponse.SubError = BrokerResponseConst.AndroidProtectionPolicyRequired;
                     msalTokenResponse.TenantId = TestConstants.TenantId;
                     msalTokenResponse.Upn = TestConstants.Username;
@@ -734,9 +757,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-        private static MobileBrokerTokenResponse CreateErrorResponse(string errorCode)
+        private static AndroidBrokerTokenResponse CreateErrorResponse(string errorCode)
         {
-            return new MobileBrokerTokenResponse
+            return new AndroidBrokerTokenResponse
             {
                 Scope = TestConstants.s_scope.AsSingleString(),
                 TokenType = TestConstants.Bearer,

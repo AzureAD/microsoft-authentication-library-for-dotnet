@@ -89,23 +89,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (msalTokenResponse.Error != null)
             {
-                _logger.Info(
-                    LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
-
-                if (msalTokenResponse.Error == BrokerResponseConst.AndroidNoTokenFound ||
-                    msalTokenResponse.Error == BrokerResponseConst.AndroidNoAccountFound ||
-                    msalTokenResponse.Error == BrokerResponseConst.AndroidInvalidRefreshToken)
-                {
-                    throw new MsalUiRequiredException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription);
-                }
-
-                var brokerTokenResponse = (MobileBrokerTokenResponse)msalTokenResponse;
-                throw MsalServiceExceptionFactory.FromBrokerResponse(brokerTokenResponse.Error,
-                                                     MsalErrorMessage.BrokerResponseError + brokerTokenResponse.ErrorDescription,
-                                                     string.IsNullOrEmpty(brokerTokenResponse.SubError) ?
-                                                     MsalError.UnknownBrokerError : brokerTokenResponse.SubError,
-                                                     brokerTokenResponse.CorrelationId,
-                                                     brokerTokenResponse);
+                _logger.Info(LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
+                throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse);
             }
 
             _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);

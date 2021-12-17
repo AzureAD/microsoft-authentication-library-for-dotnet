@@ -77,16 +77,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
             if (msalTokenResponse.Error != null)
             {
-                var brokerTokenResponse = (MobileBrokerTokenResponse)msalTokenResponse;
-                _logger.Info(
-                    LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
-
-                throw MsalServiceExceptionFactory.FromBrokerResponse(brokerTokenResponse.Error,
-                                                                     MsalErrorMessage.BrokerResponseError + brokerTokenResponse.ErrorDescription,
-                                                                     string.IsNullOrEmpty(brokerTokenResponse.SubError)?
-                                                                     MsalError.UnknownBrokerError : brokerTokenResponse.SubError,
-                                                                     brokerTokenResponse.CorrelationId,
-                                                                     brokerTokenResponse);
+                _logger.Error(LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
+                throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse);
             }
 
             _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);

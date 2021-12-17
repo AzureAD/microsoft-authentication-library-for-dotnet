@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
@@ -66,24 +67,35 @@ namespace Microsoft.Identity.Client
                oAuth2Response.ErrorDescription.StartsWith(Constants.AadThrottledErrorCode);
         }
 
-        internal static MsalServiceException FromBrokerResponse(
-          string errorCode,
-          string errorMessage,
-          string subErrorCode,
-          string correlationId,
-          MobileBrokerTokenResponse msalResponse)
+        internal static MsalServiceException FromBrokerResponse(MsalTokenResponse brokerResponse)
         {
+            string errorCode = brokerResponse.Error;
+            string errorMessage = MsalErrorMessage.BrokerResponseError + brokerResponse.ErrorDescription;
+            string subErrorCode = string.IsNullOrEmpty(brokerResponse.SubError) ?
+                MsalError.UnknownBrokerError : brokerResponse.SubError;
+            string correlationId = brokerResponse.CorrelationId;
+
             MsalServiceException ex = null;
 
-            if (IsPolicyProtectionRequired(errorCode, subErrorCode))
+            if (brokerResponse is AndroidBrokerTokenResponse androidBrokerTokenResponse)
             {
-                ex = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode)
+                if (IsPolicyProtectionRequired(errorCode, subErrorCode))
                 {
-                    Upn = msalResponse.Upn,
-                    AccountUserId = msalResponse.AccountUserId,
-                    TenantId = msalResponse.TenantId,
-                    AuthorityUrl = msalResponse.AuthorityUrl,
-                };
+                    ex = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode)
+                    {
+                        Upn = androidBrokerTokenResponse.Upn,
+                        AccountUserId = androidBrokerTokenResponse.AccountUserId,
+                        TenantId = androidBrokerTokenResponse.TenantId,
+                        AuthorityUrl = androidBrokerTokenResponse.AuthorityUrl,
+                    };
+                }
+
+                if (brokerResponse.Error == BrokerResponseConst.AndroidNoTokenFound ||
+                    brokerResponse.Error == BrokerResponseConst.AndroidNoAccountFound ||
+                    brokerResponse.Error == BrokerResponseConst.AndroidInvalidRefreshToken)
+                {
+                    ex = new MsalUiRequiredException(brokerResponse.Error, brokerResponse.ErrorDescription);
+                }
             }
 
             if (IsInvalidGrant(errorCode, subErrorCode) || IsInteractionRequired(errorCode))
@@ -103,7 +115,7 @@ namespace Microsoft.Identity.Client
                 ex = new MsalServiceException(errorCode, errorMessage);
             }
 
-            SetHttpExceptionData(ex, msalResponse.HttpResponse);
+            SetHttpExceptionData(ex, brokerResponse.HttpResponse);
 
             ex.CorrelationId = correlationId;
             ex.SubError = subErrorCode;
