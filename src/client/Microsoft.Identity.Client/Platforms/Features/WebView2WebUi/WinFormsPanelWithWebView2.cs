@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 )
             {
 
-                _logger.Error($"Redirection to non-HTTPS scheme ({url}) found! WebView2 will fail...");
+                _logger.Error($"[WebView2Control] Redirection to non-HTTPS url: {url} - WebView2 will fail...");
 
                 _result = AuthorizationResult.FromStatus(
                     AuthorizationStatus.ErrorHttp,
