@@ -71,20 +71,9 @@ namespace Microsoft.Identity.Client
           string errorMessage,
           string subErrorCode,
           string correlationId,
-          MobileBrokerTokenResponse msalResponse)
+          HttpResponse brokerHttpResponse)
         {
             MsalServiceException ex = null;
-
-            if (IsPolicyProtectionRequired(errorCode, subErrorCode))
-            {
-                ex = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode)
-                {
-                    Upn = msalResponse.Upn,
-                    AccountUserId = msalResponse.AccountUserId,
-                    TenantId = msalResponse.TenantId,
-                    AuthorityUrl = msalResponse.AuthorityUrl,
-                };
-            }
 
             if (IsInvalidGrant(errorCode, subErrorCode) || IsInteractionRequired(errorCode))
             {
@@ -103,7 +92,7 @@ namespace Microsoft.Identity.Client
                 ex = new MsalServiceException(errorCode, errorMessage);
             }
 
-            SetHttpExceptionData(ex, msalResponse.HttpResponse);
+            SetHttpExceptionData(ex, brokerHttpResponse);
 
             ex.CorrelationId = correlationId;
             ex.SubError = subErrorCode;
@@ -147,12 +136,6 @@ namespace Microsoft.Identity.Client
         {
             return string.Equals(errorCode, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase)
                              && IsInvalidGrantSubError(subErrorCode);
-        }
-
-        private static bool IsPolicyProtectionRequired(string errorCode, string subErrorCode)
-        {
-            return string.Equals(errorCode, MsalError.UnauthorizedClient, StringComparison.OrdinalIgnoreCase)
-                             && string.Equals(subErrorCode, MsalError.ProtectionPolicyRequired, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsInvalidGrantSubError(string subError)
