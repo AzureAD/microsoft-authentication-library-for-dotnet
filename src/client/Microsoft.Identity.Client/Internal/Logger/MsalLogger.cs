@@ -192,7 +192,19 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 bool isLoggingPii = messageWithPiiExists && PiiLoggingEnabled;
                 string messageToLog = isLoggingPii ? messageWithPii : messageScrubbed;
 
-                string log = $"{isLoggingPii} MSAL {s_msalVersionLazy.Value} {s_skuLazy.Value} {s_runtimeVersionLazy.Value} {s_osLazy.Value} [{DateTime.UtcNow:MM/dd HH:mm:ss.ff}{_correlationId}]{ClientInformation} {messageToLog}";
+                string log = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0} MSAL {1} {2} {3} {4} [{5}{6}]{7} {8}",
+                    isLoggingPii,
+                    s_msalVersionLazy.Value,
+                    s_skuLazy.Value,
+                    s_runtimeVersionLazy.Value,
+                    s_osLazy.Value,
+                    DateTime.UtcNow.ToString("u"),
+                    _correlationId,
+                    ClientInformation,
+                    messageToLog);
+
 
                 if (_isDefaultPlatformLoggingEnabled)
                 {
