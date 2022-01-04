@@ -1,8 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
+using Microsoft.Identity.Client.ApiConfig;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -12,19 +11,22 @@ namespace Microsoft.Identity.Client.Extensibility
     public static class AbstractConfidentialClientAcquireTokenParameterBuilderExtension
     {
         /// <summary>
-        /// Overrides the client credentials parameters (e.g. client_assertion) and optionally ties the 
-        /// resulting token to a key id, similar to POP tokens.
+        /// Overrides the client credentials parameters (e.g. client_assertion) 
         /// </summary>
-        /// <param name="clientAssertionDelegate">A lambda which receives a string representing the value of the token endpoint and which needs to return key value pairs to be added to the POST payload</param>
+        /// <param name="clientAssertionProvider">A provider which you define to return the key / value parameters which will be added to the token endpoint</param>
         /// <param name="builder">Builder to chain config options to</param>
         /// <returns>The builder</returns>
+        /// <remarks>
+        /// This is an advanced API. See https://docs.microsoft.com/en-gb/azure/active-directory/develop/msal-net-client-assertions for 
+        /// the common use cases such as using a certificate.
+        /// </remarks>
         public static AbstractConfidentialClientAcquireTokenParameterBuilder<T> WithClientAssertion<T>
             (this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
-            Func<string, IReadOnlyList<KeyValuePair<string, string>>> clientAssertionDelegate)
+            IClientAssertionProvider clientAssertionProvider)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
             builder.ValidateUseOfExperimentalFeature();
-            builder.CommonParameters.ClientAssertionOverride = clientAssertionDelegate;
+            builder.CommonParameters.ClientAssertionParametersProvider = clientAssertionProvider;
 
             return builder;
         }

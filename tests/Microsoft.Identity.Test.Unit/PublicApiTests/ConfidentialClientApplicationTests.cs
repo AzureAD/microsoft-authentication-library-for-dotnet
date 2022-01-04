@@ -11,6 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
@@ -458,6 +459,20 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             return app;
         }
 
+        private class TestAssertionProvider : IClientAssertionProvider
+        {
+            public Task<IReadOnlyList<KeyValuePair<string, string>>> GetClientAssertionParametersAsync(string clientId, string tokenEndpoint, CancellationToken cancellationToken)
+            {
+                Assert.AreEqual("https://login.microsoftonline.com/tid/oauth2/v2.0/token", tokenEndpoint);
+                IReadOnlyList<KeyValuePair<string, string>> result = new List<KeyValuePair<string, string>>()
+                        {
+                            new KeyValuePair<string, string>("param1", "val1"),
+                            new KeyValuePair<string, string>("param2", "val2"),
+                        };
+                return Task.FromResult(result);
+            }
+        }
+
         [TestMethod]
         public async Task CertificateOverrideAsync()
         {
@@ -473,21 +488,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                               .WithHttpManager(httpManager)                              
                               .Build();
 
-                Func<string, IReadOnlyList<KeyValuePair<string, string>>> clientAssertionOverride =
-                    (tokenEndpoint) =>
-                    {
-                        Assert.AreEqual("https://login.microsoftonline.com/tid/oauth2/v2.0/token", tokenEndpoint);
-                        return new List<KeyValuePair<string, string>>()
-                        {
-                            new KeyValuePair<string, string>("param1", "val1"),
-                            new KeyValuePair<string, string>("param2", "val2"),                            
-                        };
-                    };
-                MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();                
-
+               
+                MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                TestAssertionProvider testAssertionProvider = new TestAssertionProvider();
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithKeyId("key1")
-                    .WithClientAssertion(clientAssertionOverride)                        
+                    .WithClientAssertion(testAssertionProvider)                        
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -501,7 +507,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithKeyId("key1")
-                    .WithClientAssertion(clientAssertionOverride)
+                    .WithClientAssertion(testAssertionProvider)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 
@@ -515,7 +521,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())                 
-                 .WithClientAssertion(clientAssertionOverride)
+                 .WithClientAssertion(testAssertionProvider)
                  .ExecuteAsync()
                  .ConfigureAwait(false);
 

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
@@ -59,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             HomeAccountId = homeAccountId;
 
-            ClientAssertionOverride = commonParameters.ClientAssertionOverride;
+            ClientAssertionParametersProvider = commonParameters.ClientAssertionParametersProvider;
         }
 
         public ApplicationConfiguration AppConfig => _serviceBundle.Config;
@@ -139,10 +140,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string HomeAccountId { get; }
 
         /// <summary>
-        /// in: token endpoint string
-        /// out: parameters to be used instead of client_credentials body params
+        /// If set, MSAL should add the key / value pairs from the provider to the token endpoint instead of generating a client assertion
         /// </summary>
-        public Func<string, IReadOnlyList<KeyValuePair<string, string>>> ClientAssertionOverride { get; }
+        public IClientAssertionProvider ClientAssertionParametersProvider { get; }
 
         public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 

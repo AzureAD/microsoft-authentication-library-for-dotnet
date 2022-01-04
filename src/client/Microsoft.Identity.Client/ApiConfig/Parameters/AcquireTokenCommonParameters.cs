@@ -25,10 +25,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
 
         /// <summary>
-        /// If set, the client assertion parameters should be ignored and these parameters should be set.
+        /// If set, the client credentials parameters from the config should be ignored and these parameters should be set.
         /// The input string is the token endpoint.
         /// </summary>
-        public Func<string, IReadOnlyList<KeyValuePair<string, string>>> ClientAssertionOverride { get; internal set; }
+        public IClientAssertionProvider ClientAssertionParametersProvider { get; internal set; }
 
     }
 }

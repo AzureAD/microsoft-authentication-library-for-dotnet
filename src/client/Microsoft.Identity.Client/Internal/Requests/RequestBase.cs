@@ -272,10 +272,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task AddClientAssertionBodyParametersAsync(string tokenEndpoint, TokenClient tokenClient, CancellationToken cancellationToken)
         {
-            if (AuthenticationRequestParameters.ClientAssertionOverride != null)
+            ApiConfig.IClientAssertionProvider clientAssertionProvider = AuthenticationRequestParameters.ClientAssertionParametersProvider;
+            if (clientAssertionProvider != null)
             {
                 IReadOnlyList<KeyValuePair<string, string>> assertionBodyParameters =
-                    AuthenticationRequestParameters.ClientAssertionOverride(tokenEndpoint);
+                    await clientAssertionProvider.GetClientAssertionParametersAsync(tokenEndpoint).ConfigureAwait(false);
+
                 if (assertionBodyParameters != null)
                 {
                     foreach (var assertionBodyParameter in assertionBodyParameters)
@@ -299,13 +301,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         //The AAD backup authentication system header is used by the AAD backup authentication system service
         //to help route requests to resources in Azure during requests to speed up authentication.
-        //It consists of either the ObjectId.TenantId or the upn of the account signign in.
+        //It consists of either the ObjectId.TenantId or the upn of the account signing in.
         //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
         protected virtual KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
             if (AuthenticationRequestParameters?.Account?.HomeAccountId != null)
             {
-                if (!String.IsNullOrEmpty(AuthenticationRequestParameters.Account.HomeAccountId.Identifier))
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Account.HomeAccountId.Identifier))
                 {
                     var userObjectId = AuthenticationRequestParameters.Account.HomeAccountId.ObjectId;
                     var userTenantID = AuthenticationRequestParameters.Account.HomeAccountId.TenantId;
@@ -314,7 +316,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader);
                 }
 
-                if (!String.IsNullOrEmpty(AuthenticationRequestParameters.Account.Username))
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Account.Username))
                 {
                     return GetCcsUpnHeader(AuthenticationRequestParameters.Account.Username);
                 }
@@ -325,7 +327,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return GetCcsUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
             }
 
-            if (!String.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
+            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
             {
                 return GetCcsUpnHeader(AuthenticationRequestParameters.LoginHint);
             }
