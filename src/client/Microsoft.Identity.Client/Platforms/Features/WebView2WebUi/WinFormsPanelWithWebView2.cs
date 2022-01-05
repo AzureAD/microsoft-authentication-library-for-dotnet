@@ -211,15 +211,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 readyToClose = true;
             }
 
-            if (!readyToClose &&
-                !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
-                !url.AbsoluteUri.Equals("about:blank", StringComparison.OrdinalIgnoreCase) &&
-                !url.Scheme.Equals("javascript", StringComparison.OrdinalIgnoreCase) &&
-                !url.Scheme.Equals("res", StringComparison.OrdinalIgnoreCase) // IE error pages
-                )
+            if (!readyToClose && !EmbeddedUiCommon.IsAllowedIeOrEdgeAuthorizationRedirect(url)) 
             {
-
-                _logger.Error($"[WebView2Control] Redirection to non-HTTPS url: {url} - WebView2 will fail...");
+                _logger.Error($"[WebView2Control] Redirection to url: {url} is not permitted - WebView2 will fail...");
 
                 _result = AuthorizationResult.FromStatus(
                     AuthorizationStatus.ErrorHttp,

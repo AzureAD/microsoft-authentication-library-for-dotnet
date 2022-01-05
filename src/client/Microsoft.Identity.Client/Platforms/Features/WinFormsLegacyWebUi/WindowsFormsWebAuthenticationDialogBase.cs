@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 readyToClose = true;
             }
 
-            if (!readyToClose && EmbeddedUiCommon.IsAllowedIeOrEdgeAuthorizationUri(url)) // IE error pages                
+            if (!readyToClose && !EmbeddedUiCommon.IsAllowedIeOrEdgeAuthorizationRedirect(url)) // IE error pages                
             {
                 RequestContext.Logger.Error(string.Format(CultureInfo.InvariantCulture,
                     "[Legacy WebView] Redirection to non-HTTPS uri: {0} - WebView1 will fail...", url));
