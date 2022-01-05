@@ -121,6 +121,42 @@ namespace Microsoft.Identity.Client.OAuth2
             return response;
         }
 
+        /// <remarks>
+        /// This method does not belong here - it is more tied to the Android code. However, that code is
+        /// not unit testable, and this one is. 
+        /// The values of the JSON response are based on 
+        /// https://github.com/AzureAD/microsoft-authentication-library-common-for-android/blob/dev/common/src/main/java/com/microsoft/identity/common/internal/broker/BrokerResult.java
+        /// </remarks>
+        internal static MsalTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
+        {
+            JObject authResult = JObject.Parse(jsonResponse);
+            var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+
+            if (!string.IsNullOrEmpty(errorCode))
+            {
+                return new MsalTokenResponse
+                {
+                    Error = errorCode,
+                    ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage]?.ToString(),
+                };
+            }
+
+            MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
+            {
+                AccessToken = authResult[BrokerResponseConst.AccessToken].ToString(),
+                IdToken = authResult[BrokerResponseConst.IdToken].ToString(),
+                CorrelationId = correlationId, // Android response does not expose Correlation ID
+                Scope = authResult[BrokerResponseConst.AndroidScopes].ToString(), // sadly for iOS this is "scope" and for Android "scopes"
+                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExpiresOn].ToString()),
+                ExtendedExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
+                ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
+                TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
+                TokenSource = TokenSource.Broker
+            };
+
+            return msalTokenResponse;
+        }
+
         public void Log(ICoreLogger logger, LogLevel logLevel)
         {
             if (logger.IsLoggingEnabled(logLevel))
