@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             var result = await cca.AcquireTokenForClient(settings.AppScopes)
                 .WithKeyId(popKey.KeyId)
                 .WithClientAssertion(
-                    (tokenEndpoint) => CreateMs10ATPOPBodyParams(settings.ClientId, tokenEndpoint, clientCredsCert, popKey, true))                
+                    (clientId, tokenEndpoint, _) => CreateMs10ATPOPBodyParamsAsync(clientId, tokenEndpoint, clientCredsCert, popKey, true))                
                 .ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             MsalAccessTokenCacheItem at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             result = await cca.AcquireTokenForClient(settings.AppScopes)
                 .WithKeyId(popKey.KeyId)
                 .WithClientAssertion(
-                    (tokenEndpoint) => CreateMs10ATPOPBodyParams(settings.ClientId, tokenEndpoint, clientCredsCert, popKey, true))
+                    (clientId, tokenEndpoint, _) => CreateMs10ATPOPBodyParamsAsync(clientId, tokenEndpoint, clientCredsCert, popKey, true))
                 .ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             result = await cca.AcquireTokenForClient(settings.AppScopes)
                 .WithKeyId(popKey2.KeyId)
                 .WithClientAssertion(
-                     (tokenEndpoint) => CreateMs10ATPOPBodyParams(settings.ClientId, tokenEndpoint, clientCredsCert, popKey2, true))
+                    (clientId, tokenEndpoint, _) => CreateMs10ATPOPBodyParamsAsync(clientId, tokenEndpoint, clientCredsCert, popKey, true))
              .ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
                 return Base64UrlEncoder.Encode(sha2.ComputeHash(kidBytes));
         }
 
-        private static IReadOnlyList<KeyValuePair<string, string>> CreateMs10ATPOPBodyParams(
+        private static Task<IReadOnlyDictionary<string, string>> CreateMs10ATPOPBodyParamsAsync(
            string clientId,
            string audience,
            X509Certificate2 clientCredCert,
@@ -104,7 +104,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         {
             var clientCredsSigningCredentials = new SigningCredentials(new X509SecurityKey(clientCredCert), SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
             string request = CreateMs10ATPOPAssertion(clientId, audience, clientCredsSigningCredentials, popKey, includeX5cClaim);
-            return new List<KeyValuePair<string, string>>(1) { new KeyValuePair<string, string>("request", request) };
+            var result = new Dictionary<string, string> { { "request", request } };
+            return Task.FromResult<IReadOnlyDictionary<string, string>>(result);
         }
 
         private static string CreateMs10ATPOPAssertion(
@@ -177,14 +178,4 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         }
     }
 
-    public class LegacyPopAssertionProvider : IClientAssertionProvider
-    {
-        public Task<IReadOnlyList<KeyValuePair<string, string>>> GetClientAssertionParametersAsync(
-            string clientId, 
-            string tokenEndpoint, 
-            CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }

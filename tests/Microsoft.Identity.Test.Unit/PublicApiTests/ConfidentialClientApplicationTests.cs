@@ -413,7 +413,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             int tokenResponses,
             CredentialType credentialType = CredentialType.Certificate)
         {
-            var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)                              
+            var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithRedirectUri(TestConstants.RedirectUri)
                               .WithHttpManager(httpManager);
 
@@ -459,18 +459,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             return app;
         }
 
-        private class TestAssertionProvider : IClientAssertionProvider
+
+        private static Task<IReadOnlyDictionary<string, string>> GetClientAssertionParametersAsync(string clientId, string tokenEndpoint, CancellationToken cancellationToken)
         {
-            public Task<IReadOnlyList<KeyValuePair<string, string>>> GetClientAssertionParametersAsync(string clientId, string tokenEndpoint, CancellationToken cancellationToken)
-            {
-                Assert.AreEqual("https://login.microsoftonline.com/tid/oauth2/v2.0/token", tokenEndpoint);
-                IReadOnlyList<KeyValuePair<string, string>> result = new List<KeyValuePair<string, string>>()
+            Assert.AreEqual("https://login.microsoftonline.com/tid/oauth2/v2.0/token", tokenEndpoint);
+            IReadOnlyDictionary<string, string> result = new Dictionary<string, string>()
                         {
-                            new KeyValuePair<string, string>("param1", "val1"),
-                            new KeyValuePair<string, string>("param2", "val2"),
+                            { "param1", "val1" },
+                            { "param2", "val2" },                            
                         };
-                return Task.FromResult(result);
-            }
+            return Task.FromResult(result);
         }
 
         [TestMethod]
@@ -485,15 +483,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithAuthority("https://login.microsoftonline.com/tid/")
                               .WithExperimentalFeatures(true)
-                              .WithHttpManager(httpManager)                              
+                              .WithHttpManager(httpManager)
                               .Build();
 
-               
+
                 MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                TestAssertionProvider testAssertionProvider = new TestAssertionProvider();
+                
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithKeyId("key1")
-                    .WithClientAssertion(testAssertionProvider)                        
+                    .WithClientAssertion(GetClientAssertionParametersAsync)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -507,21 +505,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithKeyId("key1")
-                    .WithClientAssertion(testAssertionProvider)
+                    .WithClientAssertion(GetClientAssertionParametersAsync)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
-                
+
                 Assert.AreEqual("Bearer", result.TokenType);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
                 Assert.AreEqual(
-                    "key1", 
+                    "key1",
                     (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
 
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())                 
-                 .WithClientAssertion(testAssertionProvider)
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                 .WithClientAssertion(GetClientAssertionParametersAsync)
                  .ExecuteAsync()
                  .ConfigureAwait(false);
 

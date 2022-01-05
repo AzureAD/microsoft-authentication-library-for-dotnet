@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -272,11 +273,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task AddClientAssertionBodyParametersAsync(string tokenEndpoint, TokenClient tokenClient, CancellationToken cancellationToken)
         {
-            ApiConfig.IClientAssertionProvider clientAssertionProvider = AuthenticationRequestParameters.ClientAssertionParametersProvider;
+            ClientAssertionProviderAsync clientAssertionProvider = AuthenticationRequestParameters.ClientAssertionParametersProvider;
             if (clientAssertionProvider != null)
             {
-                IReadOnlyList<KeyValuePair<string, string>> assertionBodyParameters =
-                    await clientAssertionProvider.GetClientAssertionParametersAsync(tokenEndpoint).ConfigureAwait(false);
+                IReadOnlyDictionary<string, string> assertionBodyParameters =
+                    await clientAssertionProvider(ServiceBundle.Config.ClientId, tokenEndpoint, cancellationToken).ConfigureAwait(false);
 
                 if (assertionBodyParameters != null)
                 {

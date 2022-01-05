@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -142,7 +143,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <summary>
         /// If set, MSAL should add the key / value pairs from the provider to the token endpoint instead of generating a client assertion
         /// </summary>
-        public IClientAssertionProvider ClientAssertionParametersProvider { get; }
+        public ClientAssertionProviderAsync ClientAssertionParametersProvider { get; }
 
         public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 

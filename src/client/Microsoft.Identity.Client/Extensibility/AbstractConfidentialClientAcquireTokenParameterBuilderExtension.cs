@@ -1,10 +1,27 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
+    /// <summary>
+    /// A delegate which return returns the key - value parameters which will be added to the token endpoint when used in WithClientAssertion.
+    /// Implementers may use the input parameters clientId and tokenEndpoint which MSAL computes.
+    /// </summary>
+    /// <param name="clientId">The client id configured in the application. May be used as issuer claim in a JWT assertion.</param>
+    /// <param name="tokenEndpoint">The token endpoint where the request will be made. May be used as audience claim in a JWT assertion.</param>
+    /// <param name="cancellationToken">The cancellation token used by the token request, if any.</param>
+    /// <returns></returns>
+    /// <remarks>For a certificate based JWT assertion, see For the JWT-Bearer assertion format see https://docs.microsoft.com/en-gb/azure/active-directory/develop/active-directory-certificate-credentials#assertion-format</remarks>
+    public delegate Task<IReadOnlyDictionary<string, string>> ClientAssertionProviderAsync(
+        string clientId, 
+        string tokenEndpoint, 
+        CancellationToken cancellationToken);
+
     /// <summary>
     /// Extensions for <see cref="AcquireTokenForClientParameterBuilder"/>
     /// </summary>
@@ -22,7 +39,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </remarks>
         public static AbstractConfidentialClientAcquireTokenParameterBuilder<T> WithClientAssertion<T>
             (this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
-            IClientAssertionProvider clientAssertionProvider)
+            ClientAssertionProviderAsync clientAssertionProvider)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
             builder.ValidateUseOfExperimentalFeature();
@@ -31,4 +48,5 @@ namespace Microsoft.Identity.Client.Extensibility
             return builder;
         }
     }
+
 }

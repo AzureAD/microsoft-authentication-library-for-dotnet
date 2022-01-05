@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
@@ -28,7 +29,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// If set, the client credentials parameters from the config should be ignored and these parameters should be set.
         /// The input string is the token endpoint.
         /// </summary>
-        public IClientAssertionProvider ClientAssertionParametersProvider { get; internal set; }
+        public ClientAssertionProviderAsync ClientAssertionParametersProvider { get; internal set; }
 
     }
 }
