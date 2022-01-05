@@ -30,21 +30,5 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         }
 #endif
 
-        [TestMethod]
-        public async Task HybridSpaExperimentalFeatureExceptionAsync()
-        {
-            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                .WithRedirectUri(TestConstants.RedirectUri)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .BuildConcrete();
-
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => cca.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                        .WithSpaAuthorizationCode(true).ExecuteAsync())
-                        .ConfigureAwait(false);
-            
-            Assert.AreEqual(MsalError.ExperimentalFeature, ex.ErrorCode);
-        }
     }
 }

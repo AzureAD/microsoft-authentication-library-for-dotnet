@@ -156,15 +156,12 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Requests an auth code for the frontend (SPA using MSAL.js for instance). 
         /// See https://aka.ms/msal-net/spa-auth-code for details.
-        /// This is an experimental API. The method signature may change in the future without involving a major version upgrade.
         /// </summary>
         /// <param name="requestSpaAuthorizationCode "><c>true</c> if a SPA Authorization Code should be returned,
         /// <c>false</c></param> otherwise.
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenByAuthorizationCodeParameterBuilder WithSpaAuthorizationCode(bool requestSpaAuthorizationCode = true)
         {
-            ValidateUseOfExperimentalFeature();
-
             Parameters.SpaCode = requestSpaAuthorizationCode;
 
             return this;
