@@ -1254,7 +1254,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithHttpManager(httpManager)
-                .WithExperimentalFeatures(true)
                 .BuildConcrete();
 
 
