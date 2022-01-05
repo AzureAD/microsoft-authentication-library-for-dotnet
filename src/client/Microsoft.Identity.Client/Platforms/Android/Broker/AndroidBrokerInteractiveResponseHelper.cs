@@ -43,12 +43,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         unreliableLogger?.Info("[Android broker] Response received, decoding... ");
 
                         InteractiveBrokerTokenResponse =
-                            MobileBrokerTokenResponse.CreateFromAndroidBrokerResponse(
+                            AndroidBrokerTokenResponse.CreateFromJson(
                                 data.GetStringExtra(BrokerConstants.BrokerResultV2),
                                 InteractiveRequestCorrelationId);
                         break;
                     case (int)BrokerResponseCode.UserCancelled:
-                        unreliableLogger?.Info("[Android broker] Response received - user cancelled. ");
+                        unreliableLogger?.Info("[Android broker] Response received - user canceled. ");
 
                         InteractiveBrokerTokenResponse = new MsalTokenResponse
                         {

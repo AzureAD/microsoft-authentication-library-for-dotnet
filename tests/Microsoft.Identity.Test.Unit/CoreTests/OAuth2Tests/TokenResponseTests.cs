@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             string androidBrokerResponse = TestConstants.AndroidBrokerResponse.Replace("1591196764", unixTimestamp); 
             string correlationId = Guid.NewGuid().ToString();
             // Act
-            var mobileTokenResponse = AndroidBrokerTokenResponse.CreateFromAndroidBrokerResponse(androidBrokerResponse, correlationId);
+            var mobileTokenResponse = AndroidBrokerTokenResponse.CreateFromJson(androidBrokerResponse, correlationId);
 
             // Assert
             Assert.AreEqual("secretAt", mobileTokenResponse.AccessToken);

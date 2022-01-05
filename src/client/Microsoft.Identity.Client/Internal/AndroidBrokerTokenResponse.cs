@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal
         [JsonProperty(PropertyName = MobileBrokerTokenResponseClaim.LocalAccountIdAndroidBrokerOnly)]
         public string AccountUserId { get; set; }
 
-        internal static AndroidBrokerTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
+        internal static AndroidBrokerTokenResponse CreateFromJson(string jsonResponse, string correlationId)
         {
             JObject authResult = JObject.Parse(jsonResponse);
             var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();

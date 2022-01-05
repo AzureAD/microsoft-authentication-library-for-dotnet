@@ -419,7 +419,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             if (!string.IsNullOrEmpty(silentResult))
             {
-                return AndroidBrokerTokenResponse.CreateFromAndroidBrokerResponse(silentResult, correlationId);
+                return AndroidBrokerTokenResponse.CreateFromJson(silentResult, correlationId);
             }
 
             return new AndroidBrokerTokenResponse
