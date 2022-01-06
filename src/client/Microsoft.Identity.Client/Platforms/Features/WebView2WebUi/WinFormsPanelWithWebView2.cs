@@ -211,13 +211,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 readyToClose = true;
             }
 
-            if (!readyToClose &&
-                !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
-                !url.AbsoluteUri.Equals("about:blank", StringComparison.OrdinalIgnoreCase) &&
-                !url.Scheme.Equals("javascript", StringComparison.OrdinalIgnoreCase))
+            if (!readyToClose && !EmbeddedUiCommon.IsAllowedIeOrEdgeAuthorizationRedirect(url)) 
             {
-
-                _logger.Error($"Redirection to non-HTTPS scheme ({url.Scheme}) found! WebView will fail...");
+                _logger.Error($"[WebView2Control] Redirection to url: {url} is not permitted - WebView2 will fail...");
 
                 _result = AuthorizationResult.FromStatus(
                     AuthorizationStatus.ErrorHttp,
