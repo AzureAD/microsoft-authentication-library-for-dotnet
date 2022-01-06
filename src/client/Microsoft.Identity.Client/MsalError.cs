@@ -538,7 +538,7 @@ namespace Microsoft.Identity.Client
         /// Non HTTPS redirects are not supported
         /// <para>What happens?</para>This error happens when the authorization flow, which collects user credentials, gets redirected 
         /// to an page that is not supported, for example if the redirect occurs over http. 
-        /// This error does trigger for the final redirect, which can be http://localhost, but for intermediary redirects.
+        /// This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects.
         /// <para>Mitigation</para>This usually happens when using a federated directory which is not setup correctly. 
         /// </summary>
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
