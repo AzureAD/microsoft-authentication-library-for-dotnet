@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Client
         public const string NonHttpsRedirectNotSupported = "Non-HTTPS URL redirect is not supported in webview. " +
             "This error happens when the authorization flow, which collects user credentials, gets redirected " +
             "to a page that is not supported, for example if the redirect occurs over http. " +
-            "This error does trigger for the final redirect, which can be http://localhost, but for intermediary redirects." + 
+            "This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects." + 
             "Mitigation: This usually happens when using a federated directory which is not setup correctly. ";
 
         public const string IDTokenMustHaveTwoParts = "ID Token must have a valid JWT format. ";
