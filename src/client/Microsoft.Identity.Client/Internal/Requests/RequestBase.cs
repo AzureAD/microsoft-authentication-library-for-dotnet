@@ -361,19 +361,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (result.AccessToken != null &&
                 AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
-                int appHashCode = AuthenticationRequestParameters.AppConfig.GetHashCode();
                 string scopes = string.Join(" ", result.Scopes);
-                Uri canonicalAuthority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
-                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                    $"Fetched access token from host {canonicalAuthority.Host}. Endpoint {canonicalAuthority}. ",
-                    $"Fetched access token from host {canonicalAuthority.Host}. ");
-
+                
                 AuthenticationRequestParameters.RequestContext.Logger.Info("\n\t=== Token Acquisition finished successfully:");
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes} " +
-                            $"source {result.AuthenticationResultMetadata.TokenSource} from {canonicalAuthority} appHashCode {appHashCode}",
-                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes} " +
-                            $"source {result.AuthenticationResultMetadata.TokenSource} from {canonicalAuthority.Host} appHashCode {appHashCode}");
+                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes}" +
+                            $"source {result.AuthenticationResultMetadata.TokenSource}",
+                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes}" +
+                            $"source {result.AuthenticationResultMetadata.TokenSource}");
+
+                if (result.AuthenticationResultMetadata.TokenSource != TokenSource.Cache)
+                {
+                    Uri canonicalAuthority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
+
+                    AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
+                        $"Fetched access token from host {canonicalAuthority.Host}. Endpoint {canonicalAuthority}. ",
+                        $"Fetched access token from host {canonicalAuthority.Host}. ");
+                }
             }
         }
 

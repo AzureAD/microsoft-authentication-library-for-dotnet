@@ -288,6 +288,57 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task AcquireTokenDifferentResourcesAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .BuildConcrete();
+                app.ServiceBundle.ConfigureMockWebUI();
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                            "resource/scope1",
+                            MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                            MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
+                    });
+
+                AuthenticationResult result;
+                result = await app
+                    .AcquireTokenInteractive(new[] { "resource/scope1" })
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                harness.HttpManager.AddMockHandler(
+                   new MockHttpMessageHandler
+                   {
+                       ExpectedMethod = HttpMethod.Post,
+                       ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                           "resource/scope1 resource/scope2",
+                           MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                           MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
+                   });
+
+                var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+                result = await app
+                    .AcquireTokenSilent(new[] { "resource/scope2" }, accounts.Single())
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource, "Second token can be obtained silently via refresh_token flow");
+
+                result = await app
+                    .AcquireTokenSilent(new[] { "resource/scope1" }, accounts.Single())
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource, "First token should still be in the cache");
+
+            }
+        }
+
+        [TestMethod]
         public void AcquireTokenWithDefaultRedirectURITest()
         {
             using (var harness = CreateTestHarness())

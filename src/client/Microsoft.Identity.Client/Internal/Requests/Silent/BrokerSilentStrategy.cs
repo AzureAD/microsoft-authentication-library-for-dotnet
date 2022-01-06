@@ -99,13 +99,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     throw new MsalUiRequiredException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription);
                 }
 
-                var brokerTokenResponse = (MobileBrokerTokenResponse)msalTokenResponse;
-                throw MsalServiceExceptionFactory.FromBrokerResponse(brokerTokenResponse.Error,
-                                                     MsalErrorMessage.BrokerResponseError + brokerTokenResponse.ErrorDescription,
-                                                     string.IsNullOrEmpty(brokerTokenResponse.SubError) ?
-                                                     MsalError.UnknownBrokerError : brokerTokenResponse.SubError,
-                                                     brokerTokenResponse.CorrelationId,
-                                                     brokerTokenResponse);
+                throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse.Error,
+                                                     MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription,
+                                                     string.IsNullOrEmpty(msalTokenResponse.SubError) ?
+                                                     MsalError.UnknownBrokerError : msalTokenResponse.SubError,
+                                                     msalTokenResponse.CorrelationId,
+                                                     msalTokenResponse.HttpResponse);
             }
 
             _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);

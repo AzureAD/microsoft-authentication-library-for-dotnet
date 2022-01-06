@@ -8,6 +8,14 @@ using Microsoft.Identity.Client.Cache.CacheImpl;
 
 namespace WebApi.Misc
 {
+    internal interface ICacheSerializationProvider
+    {
+        // Important - do not use SetBefore / SetAfter methods, as these are reserved for app developers
+        // Instead, use AfterAccess = x, BeforeAccess = y
+        // See UapTokenCacheBlobStorage for an example
+        void Initialize(ITokenCache tokenCache);
+    }
+
     /// <summary>
     /// A token cache base that is useful for ConfidentialClient scenarios, as it partitions the cache using the SuggestedWebKey
     /// </summary>
@@ -18,7 +26,7 @@ namespace WebApi.Misc
         /// Important - do not use SetBefore / SetAfter methods, as these are reserved for app developers
         /// Instead, use AfterAccess = x, BeforeAccess = y        
         /// </summary>
-        public void Initialize(TokenCache tokenCache)
+        public void Initialize(ITokenCache tokenCache)
         {
             if (tokenCache == null)
             {
@@ -59,7 +67,7 @@ namespace WebApi.Misc
             if (!string.IsNullOrEmpty(args.SuggestedCacheKey))
             {
                 byte[] tokenCacheBytes = ReadCacheBytes(args.SuggestedCacheKey);
-                args.TokenCache.DeserializeMsalV3(tokenCacheBytes, shouldClearExistingCache: false);
+                args.TokenCache.DeserializeMsalV3(tokenCacheBytes, shouldClearExistingCache: true);
             }
         }
 
