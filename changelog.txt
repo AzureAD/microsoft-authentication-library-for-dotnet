@@ -5,7 +5,7 @@
 ** [Hybrid SPA Sample](https://aka.ms/msal-net/hybrid-spa-sample)
 ** Allow POP token envelope to be created externally [3059](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3059)
 ** Remove obsolete MATS telemetry. [3043](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3043)
-** Windows Form are referenced only in Desktop [3071](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/c240dad04ead8cb7a729ffcb5d23f0b02bf582b5)
+** Windows Forms are referenced only in Desktop [3071](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/c240dad04ead8cb7a729ffcb5d23f0b02bf582b5)
 ** Log clarification in several places.
 
 ### Bug Fixes:
