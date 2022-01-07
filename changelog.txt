@@ -1,17 +1,17 @@
 4.40.0
 ==========
 ### New Features:
-** Hybrid SPA is now production ready!! [2920]( https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2920)
-** [Hybrid SPA Sample](https://aka.ms/msal-net/hybrid-spa-sample)
+**Authorization Code for Single Page Applications (SPA) feature is now generally available. `WithExperimentalFeatures()` is no longer required when calling `WithSpaAuthorizationCode()`. See [2920](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2920), [wiki](https://aka.ms/msal-net/spa-auth-code), and (sample)[https://aka.ms/msal-net/hybrid-spa-sample].
 ** Allow POP token envelope to be created externally [3059](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3059)
-** Remove obsolete MATS telemetry. [3043](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3043)
+** Remove obsolete telemetry (MATS) code** to improve performance and stability. See [3043](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3043).
 ** Windows Form are referenced only in Desktop [3071](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/c240dad04ead8cb7a729ffcb5d23f0b02bf582b5)
-** Log clarification in several places.
+** Log clarification in several places. [1](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/9e827ff0fda472a24aef87d790718ecc95c993a8)
+[2](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/191d0dcacfe602858bbb77a1ae0ee5b2403fb54e)
+
 
 ### Bug Fixes:
-** WAM can hide the windows (account picker and plugin browser) behind the app [2901](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2901)
 ** Allow res:// error pages to be displayed in embedded webview [3083](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3083)
-** MSAL Logs are not clear when regional is enabled and tokens are acquired from the cache [3073](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3073)
+** MSAL Logs are now more clear when regional is enabled and tokens are acquired from the cache [3073](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3073)
 
 4.39.0
 ==========
