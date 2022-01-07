@@ -360,38 +360,45 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return msalTokenResponse;
         }
 
-        public string MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive)
+        public Tuple<string, bool> MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive)
         {
             if (status == WebTokenRequestStatus.UserInteractionRequired)
             {
-                return MsalError.InteractionRequired;
+                return Tuple.Create(MsalError.InteractionRequired, false);
             }
 
             if (status == WebTokenRequestStatus.ProviderError)
             {
                 if (errorCode == 0xcaa20005)
-                    return "WAM_server_temporarily_unavailable";
+                    return Tuple.Create("WAM_server_temporarily_unavailable", true);
 
                 unchecked // as per https://stackoverflow.com/questions/34198173/conversion-of-hresult-between-c-and-c-sharp
                 {
                     var hresultFacility = (((errorCode) >> 16) & 0x1fff);
-                    if (hresultFacility == 0xAA3 // FACILITY_ADAL_HTTP in AAD WAM plugin
-                         || hresultFacility == 0xAA7 // FACILITY_ADAL_URLMON in AAD WAM plugin
-                         || hresultFacility == 0xAA8) // FACILITY_ADAL_INTERNET in AAD WAM plugin
+                    switch (hresultFacility)
                     {
-                        return "WAM_no_network";
-                    }
+                        case 0xAA3: // FACILITY_ADAL_HTTP in AAD WAM plugin
+                        case 0xAA7: // FACILITY_ADAL_URLMON in AAD WAM plugin
+                        case 0xAA8: // FACILITY_ADAL_INTERNET in AAD WAM plugin
+                            return Tuple.Create("WAM_no_network", true);
 
-                    if (hresultFacility == 0xAA1) // FACILITY_ADAL_DEVELOPER in AAD WAM plugin
-                    {
-                        return "WAM_internal_error_ApiContractViolation";
+                        case 0x80080300: // BT_E_SPURIOUS_ACTIVATION in AAD WAM plugin
+                            return Tuple.Create("WAM_process_interrupted", true);
+
+                        case 0xAAD: // FACILITY_ADAL_BACKGROUND_INFRASTRUCTURE in AAD WAM plugin
+                        case 0xcaa20008: // ERROR_ADAL_SERVER_ERROR_RECEIVED in AAD WAM plugin
+                            return Tuple.Create($"WAM_aad_provider_error_{errorCode}", true);
+
+                        case 0xAA1: // FACILITY_ADAL_DEVELOPER in AAD WAM plugin
+                            return Tuple.Create("WAM_internal_error_ApiContractViolation", false);
+
+                        default:
+                            return Tuple.Create($"WAM_aad_provider_error_{errorCode}", false);
                     }
                 }
-
-                return $"WAM_aad_provider_error_{errorCode}";
             }
 
-            return "WAM_unexpected_aad_error";
+            return Tuple.Create("WAM_unexpected_aad_error", false);
         }
     }
 }

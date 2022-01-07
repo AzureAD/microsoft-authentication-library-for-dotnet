@@ -33,15 +33,18 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             var wamPlugin = Substitute.For<IWamPlugin>();
             var logger = Substitute.For<ICoreLogger>();
+            wamPlugin.MapTokenRequestError(Windows.Security.Authentication.Web.Core.WebTokenRequestStatus.ProviderError, 0, true)
+                .Returns(Tuple.Create("some_provider_error", false));
 
-            var msalTokenResponse = WamAdapters.CreateMsalResponseFromWamResponse(
+            var exception = AssertException.Throws<MsalServiceException> (
+                () => WamAdapters.CreateMsalResponseFromWamResponse(
                 wamResponse, 
                 wamPlugin, 
                 TestConstants.ClientId, 
                 logger, 
-                true);
+                true));
 
-            Assert.IsTrue(msalTokenResponse.ErrorDescription.Contains($"ms-appx-web://microsoft.aad.brokerplugin/{TestConstants.ClientId}"));
+            Assert.IsTrue(exception.Message.Contains($"ms-appx-web://microsoft.aad.brokerplugin/{TestConstants.ClientId}"));
         }
 
     }

@@ -32,13 +32,15 @@ namespace Microsoft.Identity.Client
         /// can rely on for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        public MsalServiceException(string errorCode, string errorMessage)
-            : base(errorCode, errorMessage)
+        /// <param name="retry">The optional boolean to indicate whether to perform retry operation for the exception.</param>
+        public MsalServiceException(string errorCode, string errorMessage, bool retry = false)
+            : base(errorCode, errorMessage, retry)
         {
             if (string.IsNullOrWhiteSpace(errorMessage))
             {
                 throw new ArgumentNullException(nameof(errorMessage));
             }
+            Retry = retry ? true : IsAadUnavailable();
         }
 
         /// <summary>
@@ -52,10 +54,12 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="statusCode">Status code of the resposne received from the service.</param>
-        public MsalServiceException(string errorCode, string errorMessage, int statusCode)
-            : this(errorCode, errorMessage)
+        /// <param name="retry">The optional boolean to indicate whether to perform retry operation for the exception.</param>
+        public MsalServiceException(string errorCode, string errorMessage, int statusCode, bool retry = false)
+            : this(errorCode, errorMessage, retry)
         {
             StatusCode = statusCode;
+            Retry = retry ? true : IsAadUnavailable();
         }
 
         /// <summary>
@@ -72,10 +76,12 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified.
         /// </param>
+        /// <param name="retry">The optional boolean to indicate whether to perform retry operation for the exception.</param>
         public MsalServiceException(string errorCode, string errorMessage,
-            Exception innerException)
-            : base(errorCode, errorMessage, innerException)
+            Exception innerException, bool retry = false)
+            : base(errorCode, errorMessage, innerException, retry)
         {
+            Retry = retry ? true : IsAadUnavailable();
         }
 
         /// <summary>
@@ -93,12 +99,14 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified.
         /// </param>
+        /// <param name="retry">The optional boolean to indicate whether to perform retry operation for the exception.</param>
         public MsalServiceException(string errorCode, string errorMessage, int statusCode,
-            Exception innerException)
+            Exception innerException, bool retry = false)
             : base(
-                errorCode, errorMessage, innerException)
+                errorCode, errorMessage, innerException, retry)
         {
             StatusCode = statusCode;
+            Retry = retry ? true : IsAadUnavailable();
         }
 
         /// <summary>
@@ -117,15 +125,18 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified.
         /// </param>
+        /// <param name="retry">The optional boolean to indicate whether to perform retry operation for the exception.</param>
         public MsalServiceException(
             string errorCode,
             string errorMessage,
             int statusCode,
             string claims,
-            Exception innerException)
-            : this(errorCode, errorMessage, statusCode, innerException)
+            Exception innerException, 
+            bool retry = false)
+            : this(errorCode, errorMessage, statusCode, innerException, retry)
         {
             Claims = claims;
+            Retry = retry ? true : IsAadUnavailable();
         }
 
         #endregion

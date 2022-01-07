@@ -32,7 +32,8 @@ namespace Microsoft.Identity.Client
         /// for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        public MsalClientException(string errorCode, string errorMessage) : base(errorCode, errorMessage)
+        /// <param name="retry">The boolean to indicate whether to perform retry operation for the exception.</param>
+        public MsalClientException(string errorCode, string errorMessage, bool retry = false) : base(errorCode, errorMessage, retry)
         {
         }
 
@@ -46,7 +47,8 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="innerException"></param>
-        public MsalClientException(string errorCode, string errorMessage, Exception innerException) : base(errorCode, errorMessage, innerException)
+        /// <param name="retry">The boolean to indicate whether to perform retry operation for the exception.</param>
+        public MsalClientException(string errorCode, string errorMessage, Exception innerException, bool retry = false) : base(errorCode, errorMessage, innerException, retry)
         {
         }
     }
