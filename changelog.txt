@@ -4,7 +4,6 @@
 **Authorization Code for Single Page Applications (SPA) feature is now generally available. `WithExperimentalFeatures()` is no longer required when calling `WithSpaAuthorizationCode()`. See [2920](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2920), [wiki](https://aka.ms/msal-net/spa-auth-code), and (sample)[https://aka.ms/msal-net/hybrid-spa-sample].
 ** Allow POP token envelope to be created externally [3059](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3059)
 ** Remove obsolete telemetry (MATS) code** to improve performance and stability. See [3043](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3043).
-** Windows Form are referenced only in Desktop [3071](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/c240dad04ead8cb7a729ffcb5d23f0b02bf582b5)
 ** Log clarification in several places. [1](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/9e827ff0fda472a24aef87d790718ecc95c993a8)
 [2](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/191d0dcacfe602858bbb77a1ae0ee5b2403fb54e)
 
