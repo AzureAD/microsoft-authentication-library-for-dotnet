@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.IsTrue(ex.Message.Contains("more_detailed_error_message"));
                 Assert.IsTrue(ex.Message.Contains("Internal Error Code: 42"));
                 Assert.IsTrue(ex.Message.Contains("Retry: False"));
-                Assert.IsFalse(ex.isRetryable());
+                Assert.IsFalse(ex.IsRetryable);
             }
         }
 
@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.IsTrue(ex.Message.Contains("more_detailed_error_message"));
                 Assert.IsTrue(ex.Message.Contains("Internal Error Code: 42"));
                 Assert.IsTrue(ex.Message.Contains("Retry: True"));
-                Assert.IsTrue(ex.isRetryable());
+                Assert.IsTrue(ex.IsRetryable);
             }
         }
 
@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Assert 
                 Assert.AreEqual(MsalError.AuthenticationCanceledError, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.AuthenticationCanceled, ex.Message);
-                Assert.IsFalse(ex.isRetryable());
+                Assert.IsFalse(ex.IsRetryable);
             }
         }
 
