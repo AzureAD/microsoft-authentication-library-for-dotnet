@@ -23,9 +23,8 @@ namespace Microsoft.Identity.Client
         private string _errorCode;
 
         /// <summary>
-        /// Returns if the the flow is retryable for the exception.
+        /// Indicates if the previous operation that resulted in this exception should be retried.
         /// </summary>
-        /// <returns>A bool value to indicate if retry can be performed in case of the exception.</returns>
         public bool IsRetryable { internal set; get; }
 
         /// <summary>
