@@ -25,16 +25,23 @@ namespace Microsoft.Identity.Client.Utils.Windows
         /// </remarks>
         public static void InitializeProcessSecurity()
         {
-            int result = CoInitializeSecurity(
-                IntPtr.Zero, -1, IntPtr.Zero,
-                IntPtr.Zero, RpcAuthnLevel.None,
-                RpcImpLevel.Impersonate, IntPtr.Zero,
-                EoAuthnCap.None, IntPtr.Zero);
+            int result = InitializeProcessSecurityInternal();
 
             if (result != 0)
             {
                 throw new MsalClientException(MsalError.InitializeProcessSecurityError, MsalErrorMessage.InitializeProcessSecurityError($"0x{result:x}"));
             }
+        }
+
+        internal static int InitializeProcessSecurityInternal()
+        {
+            int result = CoInitializeSecurity(
+               IntPtr.Zero, -1, IntPtr.Zero,
+               IntPtr.Zero, RpcAuthnLevel.None,
+               RpcImpLevel.Impersonate, IntPtr.Zero,
+               EoAuthnCap.None, IntPtr.Zero);
+
+            return result;
         }
 
         [DllImport("shell32.dll")]
