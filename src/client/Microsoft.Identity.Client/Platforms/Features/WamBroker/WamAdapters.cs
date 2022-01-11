@@ -66,8 +66,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     errorMessage = WamErrorPrefix +
                         $"Wam Plugin: {wamPlugin.GetType()}" +
                         $" Error Code: {internalErrorCode}" +
-                        $" Error Message: {wamResponse.ResponseError?.ErrorMessage}" + 
-                        $" Internal Error Code: {internalErrorCode}" 
+                        $" Error Message: {wamResponse.ResponseError?.ErrorMessage}" +
+                        $" Internal Error Code: {internalErrorCode}"; 
                     throw new MsalUiRequiredException(errorCode, errorMessage);
 
                 case WebTokenRequestStatus.UserCancel: 
