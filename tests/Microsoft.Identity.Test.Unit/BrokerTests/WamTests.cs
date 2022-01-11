@@ -215,7 +215,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual("ui_is_really_needed", ex.ErrorCode);
                 Assert.IsTrue(ex.Message.Contains("more_detailed_error_message"));
                 Assert.IsTrue(ex.Message.Contains("Internal Error Code: 42"));
-                Assert.IsTrue(ex.Message.Contains("Retry: False"));
                 Assert.IsFalse(ex.IsRetryable);
             }
         }
@@ -240,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual("ui_is_really_needed", ex.ErrorCode);
                 Assert.IsTrue(ex.Message.Contains("more_detailed_error_message"));
                 Assert.IsTrue(ex.Message.Contains("Internal Error Code: 42"));
-                Assert.IsTrue(ex.Message.Contains("Retry: True"));
+                Assert.IsTrue(ex.Message.Contains("Is Retryable: True"));
                 Assert.IsTrue(ex.IsRetryable);
             }
         }
