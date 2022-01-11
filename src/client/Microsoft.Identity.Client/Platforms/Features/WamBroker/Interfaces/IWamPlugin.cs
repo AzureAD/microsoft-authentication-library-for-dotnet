@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebTokenResponse webTokenResponse, 
             out Dictionary<string, string> allProperties);
 
-        Tuple<string, bool> MapTokenRequestError(
+        Tuple<string, string, bool> MapTokenRequestError(
             WebTokenRequestStatus status, 
             uint errorCode, 
             bool isInteractive);

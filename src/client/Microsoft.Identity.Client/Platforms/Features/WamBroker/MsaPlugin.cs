@@ -194,17 +194,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         }
 
 
-        public Tuple<string, bool> MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive)
+        public Tuple<string, string, bool> MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive)
         {
             if (status != WebTokenRequestStatus.UserInteractionRequired)
             {
-                return Tuple.Create(MsaErrorCode, false);
+                return Tuple.Create(MsaErrorCode, "", false);
             }
 
             // TODO: can further drill into errors by looking at HResult 
             // https://github.com/AzureAD/microsoft-authentication-library-for-cpp/blob/75de1a8aee5f83d86941de6081fa351f207d9446/source/windows/broker/MSATokenRequest.cpp#L104
 
-            return Tuple.Create(MsalError.InteractionRequired, false);
+            return Tuple.Create(MsalError.InteractionRequired, "", false);
         }
 
         public MsalTokenResponse ParseSuccessfullWamResponse(WebTokenResponse webTokenResponse, 

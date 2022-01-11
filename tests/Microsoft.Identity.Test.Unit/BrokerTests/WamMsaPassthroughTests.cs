@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, true, false, MsaPassthroughHandler.TransferTokenScopes)
                     .Returns(Task.FromResult(msaRequest));
                 _msaPlugin.MapTokenRequestError(WebTokenRequestStatus.ProviderError, 0, true)
-                    .Returns(Tuple.Create("some_provider_error", false));
+                    .Returns(Tuple.Create("some_provider_error", "", false));
 
                 var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
                 

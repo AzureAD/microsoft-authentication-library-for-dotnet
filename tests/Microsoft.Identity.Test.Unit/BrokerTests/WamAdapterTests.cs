@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var wamPlugin = Substitute.For<IWamPlugin>();
             var logger = Substitute.For<ICoreLogger>();
             wamPlugin.MapTokenRequestError(Windows.Security.Authentication.Web.Core.WebTokenRequestStatus.ProviderError, 0, true)
-                .Returns(Tuple.Create("some_provider_error", false));
+                .Returns(Tuple.Create("some_provider_error", "", false));
 
             var exception = AssertException.Throws<MsalServiceException> (
                 () => WamAdapters.CreateMsalResponseFromWamResponse(

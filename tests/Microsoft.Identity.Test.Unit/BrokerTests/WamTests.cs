@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.UserInteractionRequired);
                 webTokenResponseWrapper.ResponseError.Returns(new WebProviderError(42, "more_detailed_error_message"));
                 _aadPlugin.MapTokenRequestError(WebTokenRequestStatus.UserInteractionRequired, 42, false)
-                    .Returns(Tuple.Create("ui_is_really_needed", false));
+                    .Returns(Tuple.Create("ui_is_really_needed", "", false));
 
                 // Act
                 var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.ProviderError);
                 webTokenResponseWrapper.ResponseError.Returns(new WebProviderError(42, "more_detailed_error_message"));
                 _aadPlugin.MapTokenRequestError(WebTokenRequestStatus.ProviderError, 42, false)
-                    .Returns(Tuple.Create("ui_is_really_needed", true));
+                    .Returns(Tuple.Create("ui_is_really_needed", "", true));
 
                 // Act
                 var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(

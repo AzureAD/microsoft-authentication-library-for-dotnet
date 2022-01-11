@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string internalErrorCode = null;
             string errorMessage;
             string errorCode;
-            Tuple<string, bool> error;
+            Tuple<string, string, bool> error;
 
             switch (wamResponse.ResponseStatus)
             {
@@ -68,8 +68,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         $" Error Code: {internalErrorCode}" +
                         $" Error Message: {wamResponse.ResponseError?.ErrorMessage}" + 
                         $" Internal Error Code: {internalErrorCode}" +
-                        $" Retry: {error.Item2}";
-                    throw new MsalUiRequiredException(errorCode, errorMessage, error.Item2);
+                        $" Retry: {error.Item3}";
+                    throw new MsalUiRequiredException(errorCode, errorMessage, error.Item3);
 
                 case WebTokenRequestStatus.UserCancel: 
                     throw new MsalClientException(MsalError.AuthenticationCanceledError, MsalErrorMessage.AuthenticationCanceled);
@@ -81,16 +81,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     errorMessage =
                         $"{WamErrorPrefix} {wamPlugin.GetType()} \n" +
                         $" Error Code: {errorCode} \n" +
-                        $" Error Message: {wamResponse.ResponseError?.ErrorMessage} \n"  +
+                        $" Error Message: {error?.Item2} \n"  +
+                        $" WAM Error Message: {wamResponse.ResponseError?.ErrorMessage} \n" +
                         $" Internal Error Code: {internalErrorCode} \n" +
-                        $" Retry: {error?.Item2} \n" +
+                        $" Retry: {error?.Item3} \n" +
                         $" Possible causes: \n " +
                         $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: {GetExpectedRedirectUri(clientId)} \n" +
                         $"- No Internet connection \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
 
-                    
-                    throw new MsalServiceException(errorCode, errorMessage, error == null ? false : error.Item2);
+                    throw new MsalServiceException(errorCode, errorMessage, error != null && error.Item3);
                     
                 default:
                     internalErrorCode = wamResponse.ResponseError.ErrorCode.ToString(CultureInfo.InvariantCulture);
