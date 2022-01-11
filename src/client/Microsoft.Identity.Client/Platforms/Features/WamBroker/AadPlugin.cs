@@ -25,6 +25,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
         private readonly ICoreLogger _logger;
+        private const int FACILITY_ADAL_HTTP = 0xAA3;
+        private const int FACILITY_ADAL_URLMON = 0xAA7;
+        private const int FACILITY_ADAL_INTERNET = 0xAA8;
+        private const int FACILITY_ADAL_BACKGROUND_INFRASTRUCTURE = 0xAAD;
+        private const int FACILITY_ADAL_DEVELOPER = 0xAA1;
+        private const uint BT_E_SPURIOUS_ACTIVATION = 0x80080300;
+        private const uint ERROR_ADAL_SERVER_ERROR_TEMPORARILY_UNAVAILABLE = 0xcaa20005;
+        private const uint ERROR_ADAL_SERVER_ERROR_RECEIVED = 0xcaa20008;
 
         public AadPlugin(IWamProxy wamProxy, IWebAccountProviderFactory webAccountProviderFactory, ICoreLogger logger)
         {
@@ -371,11 +379,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 switch (errorCode)
                 {
-                    case 0xcaa20005:
-                    case 0xcaa20008: // ERROR_ADAL_SERVER_ERROR_RECEIVED in AAD WAM plugin
+                    case ERROR_ADAL_SERVER_ERROR_TEMPORARILY_UNAVAILABLE:
+                    case ERROR_ADAL_SERVER_ERROR_RECEIVED: // ERROR_ADAL_SERVER_ERROR_RECEIVED in AAD WAM plugin
                         return Tuple.Create("WAM_server_temporarily_unavailable", $"WAM server unavailable. Error: {errorCode}", true);
 
-                    case 0x80080300: // BT_E_SPURIOUS_ACTIVATION in AAD WAM plugin
+                    case BT_E_SPURIOUS_ACTIVATION: // BT_E_SPURIOUS_ACTIVATION in AAD WAM plugin
                         return Tuple.Create("WAM-plugin_process_interrupted", "Either WAM plugin process didn’t start, or WAM plugin process didn’t finished in expected protocol.", true);
                 }
 
@@ -384,15 +392,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     var hresultFacility = (((errorCode) >> 16) & 0x1fff);
                     switch (hresultFacility)
                     {
-                        case 0xAA3: // FACILITY_ADAL_HTTP in AAD WAM plugin
-                        case 0xAA7: // FACILITY_ADAL_URLMON in AAD WAM plugin
-                        case 0xAA8: // FACILITY_ADAL_INTERNET in AAD WAM plugin
+                        case FACILITY_ADAL_HTTP: // FACILITY_ADAL_HTTP in AAD WAM plugin
+                        case FACILITY_ADAL_URLMON: // FACILITY_ADAL_URLMON in AAD WAM plugin
+                        case FACILITY_ADAL_INTERNET: // FACILITY_ADAL_INTERNET in AAD WAM plugin
                             return Tuple.Create("WAM_no_network", $"Windows broker network issue. HR result facility: {hresultFacility}", true);
 
-                        case 0xAAD: // FACILITY_ADAL_BACKGROUND_INFRASTRUCTURE in AAD WAM plugin
+                        case FACILITY_ADAL_BACKGROUND_INFRASTRUCTURE: // FACILITY_ADAL_BACKGROUND_INFRASTRUCTURE in AAD WAM plugin
                             return Tuple.Create($"WAM_background_infrastructure_cancelled", "Background infrastructure cancelled due to not enough resources at the moment.", true);
 
-                        case 0xAA1: // FACILITY_ADAL_DEVELOPER in AAD WAM plugin
+                        case FACILITY_ADAL_DEVELOPER: // FACILITY_ADAL_DEVELOPER in AAD WAM plugin
                             return Tuple.Create("WAM_internal_error_ApiContractViolation", "", false);
 
                         default:

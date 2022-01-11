@@ -67,8 +67,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         $"Wam Plugin: {wamPlugin.GetType()}" +
                         $" Error Code: {internalErrorCode}" +
                         $" Error Message: {wamResponse.ResponseError?.ErrorMessage}" + 
-                        $" Internal Error Code: {internalErrorCode}" +
-                        $" Retry: {error.Item3}";
+                        $" Internal Error Code: {internalErrorCode}" 
                     throw new MsalUiRequiredException(errorCode, errorMessage);
 
                 case WebTokenRequestStatus.UserCancel: 
@@ -84,7 +83,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         $" Error Message: {error?.Item2} \n"  +
                         $" WAM Error Message: {wamResponse.ResponseError?.ErrorMessage} \n" +
                         $" Internal Error Code: {internalErrorCode} \n" +
-                        $" Retry: {error?.Item3} \n" +
+                        $" Is Retryable: {error?.Item3} \n" +
                         $" Possible causes: \n " +
                         $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: {GetExpectedRedirectUri(clientId)} \n" +
                         $"- No Internet connection \n" +
