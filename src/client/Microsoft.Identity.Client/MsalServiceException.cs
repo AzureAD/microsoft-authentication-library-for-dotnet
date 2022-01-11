@@ -32,15 +32,14 @@ namespace Microsoft.Identity.Client
         /// can rely on for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        /// <param name="isRetryable">The optional boolean to indicate whether to perform retry operation for the exception.</param>
-        public MsalServiceException(string errorCode, string errorMessage, bool isRetryable = false)
-            : base(errorCode, errorMessage, isRetryable)
+        public MsalServiceException(string errorCode, string errorMessage)
+            : base(errorCode, errorMessage)
         {
             if (string.IsNullOrWhiteSpace(errorMessage))
             {
                 throw new ArgumentNullException(nameof(errorMessage));
             }
-            IsRetryable = isRetryable ? true : IsAadUnavailable();
+            IsRetryable = IsAadUnavailable();
         }
 
         /// <summary>
@@ -54,12 +53,10 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="statusCode">Status code of the resposne received from the service.</param>
-        /// <param name="isRetryable">The optional boolean to indicate whether to perform retry operation for the exception.</param>
-        public MsalServiceException(string errorCode, string errorMessage, int statusCode, bool isRetryable = false)
-            : this(errorCode, errorMessage, isRetryable)
+        public MsalServiceException(string errorCode, string errorMessage, int statusCode)
+            : this(errorCode, errorMessage)
         {
             StatusCode = statusCode;
-            IsRetryable = isRetryable ? true : IsAadUnavailable();
         }
 
         /// <summary>
@@ -76,12 +73,11 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified.
         /// </param>
-        /// <param name="isRetryable">The optional boolean to indicate whether to perform retry operation for the exception.</param>
         public MsalServiceException(string errorCode, string errorMessage,
-            Exception innerException, bool isRetryable = false)
-            : base(errorCode, errorMessage, innerException, isRetryable)
+            Exception innerException)
+            : base(errorCode, errorMessage, innerException)
         {
-            IsRetryable = isRetryable ? true : IsAadUnavailable();
+            IsRetryable = IsAadUnavailable();
         }
 
         /// <summary>
@@ -99,14 +95,13 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified.
         /// </param>
-        /// <param name="isRetryable">The optional boolean to indicate whether to perform retry operation for the exception.</param>
         public MsalServiceException(string errorCode, string errorMessage, int statusCode,
-            Exception innerException, bool isRetryable = false)
+            Exception innerException)
             : base(
-                errorCode, errorMessage, innerException, isRetryable)
+                errorCode, errorMessage, innerException)
         {
             StatusCode = statusCode;
-            IsRetryable = isRetryable ? true : IsAadUnavailable();
+            IsRetryable = IsAadUnavailable();
         }
 
         /// <summary>
@@ -125,18 +120,15 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified.
         /// </param>
-        /// <param name="isRetryable">The optional boolean to indicate whether to perform retry operation for the exception.</param>
         public MsalServiceException(
             string errorCode,
             string errorMessage,
             int statusCode,
             string claims,
-            Exception innerException, 
-            bool isRetryable = false)
-            : this(errorCode, errorMessage, statusCode, innerException, isRetryable)
+            Exception innerException)
+            : this(errorCode, errorMessage, statusCode, innerException)
         {
             Claims = claims;
-            IsRetryable = isRetryable ? true : IsAadUnavailable();
         }
 
         #endregion

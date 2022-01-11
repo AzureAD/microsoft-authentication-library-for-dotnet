@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 {
                     case 0xcaa20005:
                     case 0xcaa20008: // ERROR_ADAL_SERVER_ERROR_RECEIVED in AAD WAM plugin
-                        return Tuple.Create("WAM_server_temporarily_unavailable", "WAM server unavailable. Please try again.", true);
+                        return Tuple.Create("WAM_server_temporarily_unavailable", $"WAM server unavailable. Error: {errorCode}", true);
 
                     case 0x80080300: // BT_E_SPURIOUS_ACTIVATION in AAD WAM plugin
                         return Tuple.Create("WAM-plugin_process_interrupted", "Either WAM plugin process didn’t start, or WAM plugin process didn’t finished in expected protocol.", true);
@@ -387,7 +387,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         case 0xAA3: // FACILITY_ADAL_HTTP in AAD WAM plugin
                         case 0xAA7: // FACILITY_ADAL_URLMON in AAD WAM plugin
                         case 0xAA8: // FACILITY_ADAL_INTERNET in AAD WAM plugin
-                            return Tuple.Create("WAM_no_network", "WAM network issue.", true);
+                            return Tuple.Create("WAM_no_network", $"Windows broker network issue. HR result facility: {hresultFacility}", true);
 
                         case 0xAAD: // FACILITY_ADAL_BACKGROUND_INFRASTRUCTURE in AAD WAM plugin
                             return Tuple.Create($"WAM_background_infrastructure_cancelled", "Background infrastructure cancelled due to not enough resources at the moment.", true);

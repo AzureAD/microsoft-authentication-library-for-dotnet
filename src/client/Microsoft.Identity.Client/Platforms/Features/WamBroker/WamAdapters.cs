@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         $" Error Message: {wamResponse.ResponseError?.ErrorMessage}" + 
                         $" Internal Error Code: {internalErrorCode}" +
                         $" Retry: {error.Item3}";
-                    throw new MsalUiRequiredException(errorCode, errorMessage, error.Item3);
+                    throw new MsalUiRequiredException(errorCode, errorMessage);
 
                 case WebTokenRequestStatus.UserCancel: 
                     throw new MsalClientException(MsalError.AuthenticationCanceledError, MsalErrorMessage.AuthenticationCanceled);
@@ -90,7 +90,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         $"- No Internet connection \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
 
-                    throw new MsalServiceException(errorCode, errorMessage, error != null && error.Item3);
+                    MsalServiceException serviceException = new MsalServiceException(errorCode, errorMessage);
+                    serviceException.IsRetryable = serviceException.IsRetryable || error.Item3;
+                    throw serviceException;
                     
                 default:
                     internalErrorCode = wamResponse.ResponseError.ErrorCode.ToString(CultureInfo.InvariantCulture);

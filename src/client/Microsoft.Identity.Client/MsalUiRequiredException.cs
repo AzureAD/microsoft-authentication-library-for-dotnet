@@ -25,9 +25,8 @@ namespace Microsoft.Identity.Client
         /// for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        /// <param name="isRetryable">The optional boolean to indicate whether to perform retry operation for the exception.</param>
-        public MsalUiRequiredException(string errorCode, string errorMessage, bool isRetryable = false) :
-            this(errorCode, errorMessage, null, isRetryable)
+        public MsalUiRequiredException(string errorCode, string errorMessage) :
+            this(errorCode, errorMessage, null)
         {
         }
 
@@ -41,9 +40,8 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="innerException">Represents the root cause of the exception.</param>
-        /// <param name="isRetryable">The optional boolean to indicate whether to perform retry operation for the exception.</param>
-        public MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException, bool isRetryable = false) :
-            this(errorCode, errorMessage, innerException, UiRequiredExceptionClassification.None, isRetryable)
+        public MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException) :
+            this(errorCode, errorMessage, innerException, UiRequiredExceptionClassification.None)
         {
         }
 
@@ -59,9 +57,8 @@ namespace Microsoft.Identity.Client
         /// <param name="innerException">Represents the root cause of the exception.</param>
         /// <param name="classification">A higher level description for this exception, that allows handling code to 
         /// understand what type of action it needs to take to resolve the issue. </param>
-        /// <param name="isRetryable">The optional boolean to indicate whether to perform retry operation for the exception.</param>
-        public MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException, UiRequiredExceptionClassification classification, bool isRetryable = false) :
-            base(errorCode, errorMessage, innerException, isRetryable)
+        public MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException, UiRequiredExceptionClassification classification) :
+            base(errorCode, errorMessage, innerException)
         {
             _classification = classification;
         }
