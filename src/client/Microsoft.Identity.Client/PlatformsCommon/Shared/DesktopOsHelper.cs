@@ -83,8 +83,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <summary>
         /// Checks the retrieved Windows version to see if it is a WAM supported Windows Client OS. 
         /// We get the OS Version from the registry and Windows 11 Product name is listed as Windows 10
-        /// So we are just checking for the "Windows 10" version string. We have a support ticket open 
-        /// with the Windows team and if they decide to change it to Windows 11 then we may have to update this 
+        /// So we are just checking for the "Windows 10" version string. This is by design 
+        /// https://microsoft.visualstudio.com/OS/_workitems/edit/36426651
         /// </summary>
         /// <returns>Returns <c>true</c> if the Windows Client Version has WAM support</returns>
         private static bool IsWin10OrNewerInternal()
