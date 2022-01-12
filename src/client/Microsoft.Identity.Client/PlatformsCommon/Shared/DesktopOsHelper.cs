@@ -14,10 +14,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal static class DesktopOsHelper
     {
-        private static Lazy<bool> s_win10OrServerEquivalentLazy = new Lazy<bool>(
-           () => IsWin10OrServerEquivalentInternal());
-        private static Lazy<bool> s_win10Lazy = new Lazy<bool>(
-            () => IsWin10Internal());
+        private static Lazy<bool> s_wamSupportedOSLazy = new Lazy<bool>(
+           () => IsWamSuportedOSInternal());
         private static Lazy<string> s_winVersionLazy = new Lazy<string>(
             () => GetWindowsVersionStringInternal());
 
@@ -28,13 +26,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #else
 
 
-    #if DESKTOP
+#if DESKTOP
             return Environment.OSVersion.Platform == PlatformID.Win32NT;
-    #elif SUPPORTS_WIN32
+#elif SUPPORTS_WIN32
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-    #else
+#else
             return false;
-    #endif
+#endif
 
 #endif
         }
@@ -82,35 +80,53 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #endif
         }
 
-        public static bool IsWin10()
+        /// <summary>
+        /// Checks the retrieved Windows version to see if it is a WAM supported Windows Client OS. 
+        /// We get the OS Version from the registry and Windows 11 Product name is listed as Windows 10
+        /// So we are just checking for the "Windows 10" version string. We have a support ticket open 
+        /// with the Windows team and if they decide to change it to Windows 11 then we may have to update this 
+        /// </summary>
+        /// <returns>Returns <c>true</c> if the Windows Client Version has WAM support</returns>
+        private static bool IsWin10OrNewerInternal()
         {
-            return s_win10Lazy.Value;
-        }
+            string winVersion = GetWindowsVersionString();
 
-        private static bool IsWin10Internal()
-        {
-            if (IsWindows())
+            if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase))
             {
-                string winVersion = GetWindowsVersionString();
-
-                if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
+                return true;
             }
 
             return false;
         }
 
-        private static bool IsWin10OrServerEquivalentInternal()
+        /// <summary>
+        /// Checks the retrieved Windows version to see if it is a WAM supported Windows Server OS. 
+        /// </summary>
+        /// <returns>Returns <c>true</c> if the Windows Server Version has WAM support</returns>
+        private static bool IsWinServer2019OrNewerInternal()
+        {
+            string winVersion = GetWindowsVersionString();
+
+            if (winVersion.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase) ||
+            winVersion.Contains("Windows Server 2022", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>Returns <c>true</c> if the Windows Version has WAM support</returns>
+        private static bool IsWamSuportedOSInternal()
         {
             if (IsWindows())
             {
-                string winVersion = GetWindowsVersionString();
 
-                if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase) ||
-                    winVersion.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase) ||
-                    winVersion.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
+                if (IsWin10OrNewerInternal() ||
+                    IsWinServer2019OrNewerInternal())
                 {
                     return true;
                 }
@@ -146,9 +162,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public static bool IsWin10OrServerEquivalent()
         {
-            return s_win10OrServerEquivalentLazy.Value;
+            return s_wamSupportedOSLazy.Value;
         }
-      
+
         public static bool IsUserInteractive()
         {
 
