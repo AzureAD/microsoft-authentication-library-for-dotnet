@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
@@ -35,6 +36,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected readonly ICoreLogger _logger;
         private readonly CacheOptions _tokenCacheAccessorOptions;
 
+        private long _cacheSize; // In bytes
+        private const long ATSizeInBytes = 2000;
+
         public InMemoryPartitionedAppTokenCacheAccessor(
             ICoreLogger logger,
             CacheOptions tokenCacheAccessorOptions)
@@ -52,17 +56,27 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 AccessTokenCacheDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
                 AppMetadataDictionary = new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
             }
+
+            _cacheSize = 0L;
         }
 
         #region Add
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
+            if (IsOverCapacity())
+            {
+                _logger.Always("[AppCache] Cache is over capacity.");
+                Compact();
+            }
+
             string itemKey = item.GetKey().ToString();
             string partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId);
 
             // if a conflict occurs, pick the latest value
             AccessTokenCacheDictionary
                 .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccessTokenCacheItem>())[itemKey] = item;
+            Interlocked.Add(ref _cacheSize, ATSizeInBytes);
+            _logger.Always($"[AppCache] Saved token. Cache size: {Interlocked.Read(ref _cacheSize)}.");
         }
 
         /// <summary>
@@ -134,9 +148,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
             {
                 _logger.InfoPii(
-                    $"Cannot delete access token because it was not found in the cache. Key {item.GetKey()}.",
-                    "Cannot delete access token because it was not found in the cache.");
+                    $"[AppCache] Cannot delete access token because it was not found in the cache. Key {item.GetKey()}.",
+                    "[AppCache] Cannot delete access token because it was not found in the cache.");
+                return;
             }
+
+            Interlocked.Add(ref _cacheSize, -ATSizeInBytes);
+            _logger.Always($"[AppCache] Removed token. Cache size: {Interlocked.Read(ref _cacheSize)}.");
         }
 
         /// <summary>
@@ -175,7 +193,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
         {
-            _logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
+            _logger.Always($"[AppCache] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
             if (string.IsNullOrEmpty(partitionKey))
             {
                 return AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
@@ -216,13 +234,25 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual void Clear()
         {
             AccessTokenCacheDictionary.Clear();
-            _logger.Always("[Clear] Clearing access token cache data.");
+            Interlocked.Exchange(ref _cacheSize, 0);
+            _logger.Always("[AppCache] Cleared access token cache data.");
             // app metadata isn't removable
         }
 
         public virtual bool HasAccessOrRefreshTokens()
         {
             return AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
+        }
+
+        private bool IsOverCapacity()
+        {
+            return _tokenCacheAccessorOptions.SizeLimit.HasValue && (Interlocked.Read(ref _cacheSize) + ATSizeInBytes) > _tokenCacheAccessorOptions.SizeLimit;
+        }
+
+        private void Compact()
+        {
+            _logger.Always("[AppCache] Compacting cache.");
+            Clear();
         }
     }
 }

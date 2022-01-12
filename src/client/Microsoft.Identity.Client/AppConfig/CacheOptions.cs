@@ -40,6 +40,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="useSharedCache">Set to true to share the cache between all ClientApplication objects. The cache becomes static. <see cref="UseSharedCache"/> for a detailed description. </param>
+        /// <param name="sizeLimit">Token cache size limit in bytes. <see cref="SizeLimit"/> for a detailed description.</param>
+        public CacheOptions(bool useSharedCache, long sizeLimit)
+        {
+            UseSharedCache = useSharedCache;
+            SizeLimit = sizeLimit;
+        }
+
+        /// <summary>
         /// Share the cache between all ClientApplication objects. The cache becomes static. Defaults to false.
         /// </summary>
         /// <remarks>
@@ -50,5 +61,12 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool UseSharedCache { get; set; }
 
+        /// <summary>
+        /// Token cache size limit in bytes.
+        /// </summary>
+        /// <remarks>
+        /// Once the limit is reached, the whole cache is cleared.
+        /// </remarks>
+        public long? SizeLimit { get; set; }
     }
 }
