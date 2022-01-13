@@ -205,15 +205,17 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.UserInteractionRequired);
                 webTokenResponseWrapper.ResponseError.Returns(new WebProviderError(42, "more_detailed_error_message"));
                 _aadPlugin.MapTokenRequestError(WebTokenRequestStatus.UserInteractionRequired, 42, false)
-                    .Returns("ui_is_really_needed");
+                    .Returns(Tuple.Create("ui_is_really_needed", "", false));
 
                 // Act
-                var result = await _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters()).ConfigureAwait(false);
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                    () => _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters())).ConfigureAwait(false);
 
                 // Assert 
-                Assert.AreEqual("ui_is_really_needed", result.Error);
-                Assert.AreEqual("42", result.ErrorCodes[0]);
-                Assert.IsTrue(result.ErrorDescription.Contains("more_detailed_error_message"));
+                Assert.AreEqual("ui_is_really_needed", ex.ErrorCode);
+                Assert.IsTrue(ex.Message.Contains("more_detailed_error_message"));
+                Assert.IsTrue(ex.Message.Contains("Internal Error Code: 42"));
+                Assert.IsFalse(ex.IsRetryable);
             }
         }
 
@@ -227,15 +229,18 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.ProviderError);
                 webTokenResponseWrapper.ResponseError.Returns(new WebProviderError(42, "more_detailed_error_message"));
                 _aadPlugin.MapTokenRequestError(WebTokenRequestStatus.ProviderError, 42, false)
-                    .Returns("ui_is_really_needed");
+                    .Returns(Tuple.Create("ui_is_really_needed", "", true));
 
                 // Act
-                var result = await _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters()).ConfigureAwait(false);
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters())).ConfigureAwait(false);
 
                 // Assert 
-                Assert.AreEqual("ui_is_really_needed", result.Error);
-                Assert.AreEqual("42", result.ErrorCodes[0]);
-                Assert.IsTrue(result.ErrorDescription.Contains("more_detailed_error_message"));
+                Assert.AreEqual("ui_is_really_needed", ex.ErrorCode);
+                Assert.IsTrue(ex.Message.Contains("more_detailed_error_message"));
+                Assert.IsTrue(ex.Message.Contains("Internal Error Code: 42"));
+                Assert.IsTrue(ex.Message.Contains("Is Retryable: True"));
+                Assert.IsTrue(ex.IsRetryable);
             }
         }
 
@@ -249,11 +254,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.UserCancel);
 
                 // Act
-                var result = await _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters()).ConfigureAwait(false);
+                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters())).ConfigureAwait(false);
 
                 // Assert 
-                Assert.AreEqual(MsalError.AuthenticationCanceledError, result.Error);
-                Assert.AreEqual(MsalErrorMessage.AuthenticationCanceled, result.ErrorDescription);
+                Assert.AreEqual(MsalError.AuthenticationCanceledError, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.AuthenticationCanceled, ex.Message);
+                Assert.IsFalse(ex.IsRetryable);
             }
         }
 

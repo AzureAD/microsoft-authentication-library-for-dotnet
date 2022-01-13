@@ -59,17 +59,23 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             if (!transferResponse.ResponseStatus.IsSuccessStatus())
             {
-                var errorResp = WamAdapters.CreateMsalResponseFromWamResponse(
-                    transferResponse,
-                    _msaPlugin,
-                    authenticationRequestParameters.AppConfig.ClientId,
-                    _logger,
-                    isInteractive: true);
+                try
+                {
+                    var errorResp = WamAdapters.CreateMsalResponseFromWamResponse(
+                        transferResponse,
+                        _msaPlugin,
+                        authenticationRequestParameters.AppConfig.ClientId,
+                        _logger,
+                        isInteractive: true);
+                } 
+                catch (MsalServiceException exception)
+                {
+                    _logger.Warning(
+                        "WAM MSA-PT: could not get a transfer token, ussually this is because the " +
+                        "1st party app is configured for MSA-PT but not configured to login MSA users (signinaudience =2). " +
+                        "Error was: " + exception.ErrorCode + " " + exception.Message);
 
-                _logger.Warning(
-                    "WAM MSA-PT: could not get a transfer token, ussually this is because the " +
-                    "1st party app is configured for MSA-PT but not configured to login MSA users (signinaudience =2). " +
-                    "Error was: " + errorResp.Error + " " + errorResp.ErrorDescription);
+                }
 
                 return null;
             }
