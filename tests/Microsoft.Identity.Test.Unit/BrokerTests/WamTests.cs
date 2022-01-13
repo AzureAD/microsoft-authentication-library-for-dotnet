@@ -428,7 +428,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public async Task ATI_WithoutPicker_Async()
+        public async Task ATI_WithoutPicker_AccountMatch_Async()
         {
             string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
             // Arrange
@@ -484,7 +484,55 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public async Task ATI_WithoutPicker_Organizations_Async()
+        public async Task ATI_WithoutPicker_NoAccountMatch_Async()
+        {
+            _accountPickerFactory.ClearReceivedCalls();
+
+            // Arrange 
+            using (var harness = CreateTestHarness())
+            {
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityOrganizationsTenant); 
+                var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+               
+                var webTokenRequest = new WebTokenRequest(wamAccountProvider);
+
+                // will use the AAD provider because the authority is organizations (i.e. AAD only)
+                _webAccountProviderFactory
+                    .GetAccountProviderAsync("organizations")
+                    .ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+                
+                _aadPlugin.CreateWebTokenRequestAsync(
+                    wamAccountProvider,
+                    requestParams,
+                    isForceLoginPrompt: true,
+                    isInteractive: true,
+                    isAccountInWam: false)
+                    .Returns(Task.FromResult(webTokenRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
+                    Returns(Task.FromResult(webTokenResponseWrapper));
+                _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
+
+                // Act
+                var result = await _wamBroker.AcquireTokenInteractiveAsync(
+                    requestParams,
+                    new AcquireTokenInteractiveParameters()).ConfigureAwait(false);
+
+                // Assert                 
+                _accountPickerFactory.DidNotReceiveWithAnyArgs().Create(IntPtr.Zero, null, null, null, false);// Account Picker Is NOT used
+                Assert.AreEqual("select_account", webTokenRequest.Properties["prompt"]);
+                Assert.AreSame(_msalTokenResponse, result);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
+            }
+        }
+
+        [TestMethod]
+        public async Task ATI_WithoutPicker_AccountMatch_Organizations_Async()
         {
             string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
             // Arrange
