@@ -381,7 +381,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 {
                     case ERROR_ADAL_SERVER_ERROR_TEMPORARILY_UNAVAILABLE:
                     case ERROR_ADAL_SERVER_ERROR_RECEIVED: // ERROR_ADAL_SERVER_ERROR_RECEIVED in AAD WAM plugin
-                        return Tuple.Create("WAM_server_temporarily_unavailable", $"WAM server unavailable. Error: {errorCode}", true);
+                        return Tuple.Create("WAM_server_temporarily_unavailable", $"Windows broker server unavailable. Error: {errorCode}", true);
 
                     case BT_E_SPURIOUS_ACTIVATION: // BT_E_SPURIOUS_ACTIVATION in AAD WAM plugin
                         return Tuple.Create("WAM-plugin_process_interrupted", "Either WAM plugin process didn’t start, or WAM plugin process didn’t finished in expected protocol.", true);
