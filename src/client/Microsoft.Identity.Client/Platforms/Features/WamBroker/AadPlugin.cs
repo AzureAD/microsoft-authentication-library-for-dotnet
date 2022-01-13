@@ -384,7 +384,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         return Tuple.Create("WAM_server_temporarily_unavailable", $"Windows broker server unavailable. Error: {errorCode}", true);
 
                     case BT_E_SPURIOUS_ACTIVATION: // BT_E_SPURIOUS_ACTIVATION in AAD WAM plugin
-                        return Tuple.Create("WAM-plugin_process_interrupted", "Either WAM plugin process didn’t start, or WAM plugin process didn’t finished in expected protocol.", true);
+                        return Tuple.Create("WAM_plugin_process_interrupted", "Either WAM plugin process didn’t start, or WAM plugin process didn’t finish in expected protocol.", true);
                 }
 
                 unchecked // as per https://stackoverflow.com/questions/34198173/conversion-of-hresult-between-c-and-c-sharp
