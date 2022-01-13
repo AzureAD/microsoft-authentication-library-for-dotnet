@@ -50,7 +50,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
         private readonly IAccountPickerFactory _accountPickerFactory;
-        private readonly ApplicationConfiguration _appConfig;
         private readonly ICoreLogger _logger;
         private readonly IntPtr _parentHandle;
         private readonly SynchronizationContext _synchronizationContext;
@@ -72,7 +71,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             IAccountPickerFactory accountPickerFactory = null,
             IMsaPassthroughHandler msaPassthroughHandler = null)
         {
-            _appConfig = appConfig;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _synchronizationContext = uiParent?.SynchronizationContext;
 
@@ -121,14 +119,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                      ErrorMessageSuffix);
             }
 #endif
-
+            
             if (authenticationRequestParameters.Account != null ||
                 !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
             {
+                _logger.Verbose("[WamBroker] AcquireTokenIntractive - account information provided. Trying to find a Windows account that matches.");
+
                 bool isMsaPassthrough = _wamOptions.MsaPassthrough;
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
-                    authenticationRequestParameters?.Account?.HomeAccountId?.TenantId, // TODO: we could further optimize here by searching for an account based on UPN
+                    authenticationRequestParameters?.Account?.HomeAccountId?.TenantId, 
                     isMsaPassthrough).ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
@@ -160,8 +160,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     authenticationRequestParameters.LoginHint,
                     authenticationRequestParameters.AppConfig.ClientId).ConfigureAwait(false);
 
-                _logger.Verbose("[WamBroker] Account information provided but not matching account was found ");
-
                 if (wamAccount != null)
                 {
                     var wamResult = await AcquireInteractiveWithWamAccountAsync(
@@ -178,19 +176,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         _logger,
                         isInteractive: true);
                 }
+
+                _logger.Verbose("[WamBroker] AcquireTokenIntractive - account information provided but no matching account was found ");
             }
 
-            // no account information available, need an account picker
-
+            // no account information available, need an account picker 
             if (CanSkipAccountPicker(authenticationRequestParameters.Authority))
             {
                 _logger.Verbose("[WamBroker] Using AAD plugin account picker");
-
                 return await AcquireInteractiveWithAadBrowserAsync(
                     authenticationRequestParameters,
                     acquireTokenInteractiveParameters.Prompt).ConfigureAwait(false);
             }
 
+            _logger.Verbose("[WamBroker] Using Windows account picker (AccountsSettingsPane)");
             return await AcquireInteractiveWithPickerAsync(
                 authenticationRequestParameters,
                 acquireTokenInteractiveParameters.Prompt)
@@ -229,7 +228,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         }
 
         /// <summary>
-        /// If the request authority is AAD (i.e. organizations or , then skip the account picker.
+        /// If the request authority is AAD (i.e. organizations or tenanted) , then skip the account picker.
         /// </summary>
         /// <param name="authority"></param>
         /// <returns></returns>
@@ -786,6 +785,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             if (msaPassthrough)
             {
+                _logger.Info("[WAM Broker] MSA-PassThrough configured - using only AAD plugin");
                 return false;
             }
 
@@ -801,12 +801,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             // org
             if (string.Equals(Constants.OrganizationsTenant, authorityTenant, StringComparison.OrdinalIgnoreCase))
             {
-                if (msaPassthrough)
-                {
-                    _logger.Info($"[WAM Broker] Tenant is organizations, but with MSA-PT (similar to common).");
-                    return await IsGivenOrDefaultAccountMsaAsync(homeTenantId).ConfigureAwait(false);
-                }
-
                 _logger.Info($"[WAM Broker] Tenant is organizations, using WAM-AAD.");
                 return false;
             }
@@ -814,10 +808,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             // consumers
             if (IsConsumerTenantId(authorityTenant))
             {
-                _logger.Info($"[WAM Broker] Authority tenant is consumers. " +
-                    $"ATS will try {(msaPassthrough ? "WAM-AAD" : "WAM-MSA")} ");
-
-                return !msaPassthrough; // for silent flow, the authority is MSA-tenant-id 
+                _logger.Info($"[WAM Broker] Authority tenant is consumers. Using WAM-MSA ");                    
+                return true; // for silent flow, the authority is MSA-tenant-id 
             }
 
             _logger.Info("[WAM Broker] Tenant is not consumers and ATS will try WAM-AAD");
