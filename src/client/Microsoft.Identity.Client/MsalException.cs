@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Indicates if the previous operation that resulted in this exception should be retried.
         /// </summary>
-        public bool IsRetryable { get; internal set; }
+        public bool IsRetryable { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the exception class.
