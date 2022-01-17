@@ -178,6 +178,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var dict = new Dictionary<string, string>
             {
+                [OAuth2Parameter.ClientInfo] = "1",
                 [OAuth2Parameter.GrantType] = _onBehalfOfParameters.UserAssertion.AssertionType,
                 [OAuth2Parameter.Assertion] = _onBehalfOfParameters.UserAssertion.Assertion,
                 [OAuth2Parameter.RequestedTokenUse] = OAuth2RequestedTokenUse.OnBehalfOf
