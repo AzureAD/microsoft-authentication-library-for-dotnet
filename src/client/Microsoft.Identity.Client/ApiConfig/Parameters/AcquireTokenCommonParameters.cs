@@ -3,10 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
@@ -23,5 +26,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
         public IDictionary<string, string> ExtraHttpHeaders { get; set; }
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
+
+        /// <summary>
+        /// If set, the client credentials parameters from the config should be ignored and these parameters should be set.
+        /// The input string is the token endpoint.
+        /// </summary>
+        public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; internal set; }
+
     }
 }

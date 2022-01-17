@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
@@ -24,7 +25,7 @@ namespace Microsoft.Identity.Client.OAuth2
     /// - mex
     /// - /token endpoint via TokenClient
     /// - device code endpoint
-    /// </summary>
+    /// </summary>    
     internal class OAuth2Client
     {
         private readonly Dictionary<string, string> _headers;
@@ -70,12 +71,28 @@ namespace Microsoft.Identity.Client.OAuth2
                        .ConfigureAwait(false);
         }
 
-        internal async Task<MsalTokenResponse> GetTokenAsync(Uri endPoint, RequestContext requestContext, bool addCommonHeaders = true)
+        internal async Task<MsalTokenResponse> GetTokenAsync(
+            Uri endPoint, 
+            RequestContext requestContext, 
+            bool addCommonHeaders, 
+            Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler)
         {
-            return await ExecuteRequestAsync<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext, false, addCommonHeaders).ConfigureAwait(false);
+            return await ExecuteRequestAsync<MsalTokenResponse>(
+                endPoint, 
+                HttpMethod.Post, 
+                requestContext, 
+                false, 
+                addCommonHeaders,
+                onBeforeTokenRequestHandler).ConfigureAwait(false);
         }
 
-        internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool addCommonHeaders = true)
+        internal async Task<T> ExecuteRequestAsync<T>(
+            Uri endPoint, 
+            HttpMethod method, 
+            RequestContext requestContext, 
+            bool expectErrorsOn200OK = false, 
+            bool addCommonHeaders = true,
+            Func<OnBeforeTokenRequestData, Task> onBeforePostRequestData = null)
         {
             //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
             if (addCommonHeaders)
@@ -90,6 +107,12 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 if (method == HttpMethod.Post)
                 {
+                    if (onBeforePostRequestData!=null)
+                    {
+                        var requestData = new OnBeforeTokenRequestData(_bodyParameters, _headers, endpointUri, requestContext.UserCancellationToken);
+                        await onBeforePostRequestData(requestData).ConfigureAwait(false);
+                    }
+
                     response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
                                                 .ConfigureAwait(false);
                 }
@@ -136,6 +159,11 @@ namespace Microsoft.Identity.Client.OAuth2
 
 
             return CreateResponse<T>(response, requestContext);
+        }
+
+        internal void AddBodyParameter(KeyValuePair<string, string> kvp)
+        {
+            _bodyParameters.Add(kvp);
         }
 
         private void AddCommonHeaders(RequestContext requestContext)

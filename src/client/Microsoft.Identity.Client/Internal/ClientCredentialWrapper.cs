@@ -32,19 +32,14 @@ namespace Microsoft.Identity.Client.Internal
     {
         public ClientCredentialWrapper(ApplicationConfiguration config)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
-
-            if (config.ConfidentialClientCredentialCount == 0)
-            {
-                throw new MsalClientException(
-                    MsalError.ClientCredentialAuthenticationTypeMustBeDefined,
-                    MsalErrorMessage.ClientCredentialAuthenticationTypeMustBeDefined);
-            }
+            ConfidentialClientApplication.GuardMobileFrameworks();            
 
             if (config.ConfidentialClientCredentialCount > 1)
             {
                 throw new MsalClientException(MsalError.ClientCredentialAuthenticationTypesAreMutuallyExclusive, MsalErrorMessage.ClientCredentialAuthenticationTypesAreMutuallyExclusive);
             }
+
+            AuthenticationType = ConfidentialClientAuthenticationType.None;
 
             if (!string.IsNullOrWhiteSpace(config.ClientSecret))
             {
@@ -76,6 +71,8 @@ namespace Microsoft.Identity.Client.Internal
 
             switch (AuthenticationType)
             {
+                case ConfidentialClientAuthenticationType.None:
+                    break;
                 case ConfidentialClientAuthenticationType.ClientCertificate:
                     Certificate = config.ClientCredentialCertificate;
                     break;
@@ -107,7 +104,7 @@ namespace Microsoft.Identity.Client.Internal
         public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
         {
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
-            
+
             applicationConfiguration.ClientCredentialCertificate = certificate;
             applicationConfiguration.ConfidentialClientCredentialCount = 1;
             applicationConfiguration.ClaimsToSign = claimsToSign;
@@ -122,10 +119,10 @@ namespace Microsoft.Identity.Client.Internal
             applicationConfiguration.ConfidentialClientCredentialCount = 1;
 
             return new ClientCredentialWrapper(applicationConfiguration);
-        }      
+        }
 
         #endregion TestBuilders       
-   
+
         public static int MinKeySizeInBits { get; } = 2048;
         internal string Thumbprint { get; }
         internal X509Certificate2 Certificate { get; }
@@ -134,8 +131,8 @@ namespace Microsoft.Identity.Client.Internal
         // The signed assertion passed in by the user
         internal string SignedAssertion { get; }
         internal Func<CancellationToken, Task<string>> SignedAssertionDelegate { get; }
-        internal bool AppendDefaultClaims { get;  }
-        internal ConfidentialClientAuthenticationType AuthenticationType { get;  }
+        internal bool AppendDefaultClaims { get; }
+        internal ConfidentialClientAuthenticationType AuthenticationType { get; }
         internal IDictionary<string, string> ClaimsToSign { get; }
 
         public async Task AddConfidentialClientParametersAsync(
@@ -144,13 +141,16 @@ namespace Microsoft.Identity.Client.Internal
             ICryptographyManager cryptographyManager,
             string clientId,
             Authority authority,
-            bool sendX5C, 
+            bool sendX5C,
             CancellationToken cancellationToken)
         {
             using (logger.LogMethodDuration())
             {
                 switch (AuthenticationType)
                 {
+                    case ConfidentialClientAuthenticationType.None:
+                        // allow this to account for extensiblity cases where the params are injected into the request
+                        break;
                     case ConfidentialClientAuthenticationType.ClientCertificate:
                         string tokenEndpoint = authority.GetTokenEndpoint();
 
@@ -200,6 +200,7 @@ namespace Microsoft.Identity.Client.Internal
 
         internal enum ConfidentialClientAuthenticationType
         {
+            None = 0,
             ClientCertificate,
             ClientCertificateWithClaims,
             ClientSecret,

@@ -28,16 +28,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             TestCommon.ResetInternalStaticCaches();
             _serviceBundle = TestCommon.CreateDefaultServiceBundle();
         }
-
-        [TestMethod]
-        public void CCACreatedWithoutAuthenticationType_Throws()
-        {
-            ApplicationConfiguration config = new ApplicationConfiguration();
-
-           Assert.ThrowsException<MsalClientException>(
-               () => new ClientCredentialWrapper(config));
-        }
-
+      
         [TestMethod]
         public void CCACreatedWithAuthenticationType_ClientSecret_DoesNotThrow()
         {

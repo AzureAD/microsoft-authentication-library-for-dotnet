@@ -39,6 +39,25 @@ namespace Microsoft.Identity.Client
             return ExecuteInternalAsync(cancellationToken);
         }
 
+        /// <summary>
+        /// Validates the parameters of the AcquireToken operation.        
+        /// </summary>
+        /// <exception cref="MsalClientException"></exception>
+        protected override void Validate()
+        {            
+            // Confidential client must have a cert / secret / assertion etc. 
+            if (ServiceBundle?.Config.ConfidentialClientCredentialCount == 0 &&
+                CommonParameters.OnBeforeTokenRequestHandler == null) 
+            {
+                throw new MsalClientException(
+                    MsalError.ClientCredentialAuthenticationTypeMustBeDefined,
+                    MsalErrorMessage.ClientCredentialAuthenticationTypeMustBeDefined);
+            }
+
+            base.Validate();
+        }
+
+
         internal IConfidentialClientApplicationExecutor ConfidentialClientApplicationExecutor { get; }
 
         /// <summary>
