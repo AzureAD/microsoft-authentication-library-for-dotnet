@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Extensibility
     /// <summary>
     /// Authentication request details
     /// </summary>
-    public class OnBeforeTokenRequestData
+    public sealed class OnBeforeTokenRequestData
     {
         /// <summary>
         /// Constructor. 
@@ -19,12 +19,12 @@ namespace Microsoft.Identity.Client.Extensibility
         public OnBeforeTokenRequestData(
             IDictionary<string, string> bodyParameters,
             IDictionary<string, string> headers,
-            Uri authEndpoint,
+            Uri requestUri,
             CancellationToken cancellationToken)
         {
             BodyParameters = bodyParameters;
             Headers = headers;
-            RequestUri = authEndpoint;
+            RequestUri = requestUri;
             CancellationToken = cancellationToken;
         }
 

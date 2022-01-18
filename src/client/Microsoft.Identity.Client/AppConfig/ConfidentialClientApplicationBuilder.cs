@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 
 namespace Microsoft.Identity.Client
 {
@@ -117,8 +118,7 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey(nameof(certificate)));
             }
 
-            Config.ClientCredentialCertificate = certificate;
-            Config.ConfidentialClientCredentialCount++;
+            Config.ClientCredential = new CertificateClientCredential(certificate);
             Config.SendX5C = sendX5C;
             return this;
         }
@@ -162,10 +162,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(claimsToSign));
             }
 
-            Config.ClientCredentialCertificate = certificate;
-            Config.ClaimsToSign = claimsToSign;
-            Config.MergeWithDefaultClaims = mergeWithDefaultClaims;
-            Config.ConfidentialClientCredentialCount++;
+            Config.ClientCredential = new CertificateAndClaimsClientCredential(certificate, claimsToSign, mergeWithDefaultClaims);
             Config.SendX5C = sendX5C;
             return this;
         }
@@ -177,14 +174,13 @@ namespace Microsoft.Identity.Client
         /// of the application (the client) requesting the tokens</param>
         /// <returns></returns>
         public ConfidentialClientApplicationBuilder WithClientSecret(string clientSecret)
-        {
+        {            
             if (string.IsNullOrWhiteSpace(clientSecret))
             {
                 throw new ArgumentNullException(nameof(clientSecret));
             }
 
-            Config.ClientSecret = clientSecret;
-            Config.ConfidentialClientCredentialCount++;
+            Config.ClientCredential = new SecretStringClientCredential(clientSecret);
             return this;
         }
 
@@ -203,8 +199,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(signedClientAssertion));
             }
 
-            Config.SignedClientAssertion = signedClientAssertion;
-            Config.ConfidentialClientCredentialCount++;
+            Config.ClientCredential = new SignedAssertionClientCredential(signedClientAssertion);            
             return this;
         }
 
@@ -227,9 +222,7 @@ namespace Microsoft.Identity.Client
                 return Task.FromResult(clientAssertionDelegate());
             };
 
-
-            Config.SignedClientAssertionDelegate = clientAssertionAsyncDelegate;
-            Config.ConfidentialClientCredentialCount++;
+            Config.ClientCredential = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
             return this;
         }
 
@@ -242,14 +235,12 @@ namespace Microsoft.Identity.Client
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate)
         {
-
             if (clientAssertionAsyncDelegate == null)
             {
                 throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
             }
 
-            Config.SignedClientAssertionDelegate = clientAssertionAsyncDelegate;
-            Config.ConfidentialClientCredentialCount++;
+            Config.ClientCredential = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
             return this;
         }
 
@@ -313,8 +304,6 @@ namespace Microsoft.Identity.Client
         internal override void Validate()
         {
             base.Validate();
-
-            Config.ClientCredential = new ClientCredentialWrapper(Config);
 
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {

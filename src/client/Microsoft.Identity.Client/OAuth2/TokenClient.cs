@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     _requestParams.RequestContext.Logger,
                     _serviceBundle.PlatformProxy.CryptographyManager,
                     _requestParams.AppConfig.ClientId,
-                    _requestParams.Authority,
+                    _requestParams.Authority.GetTokenEndpoint(),
                     _requestParams.SendX5C,
                     cancellationToken).ConfigureAwait(false);
             }

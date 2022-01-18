@@ -26,11 +26,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
         public IDictionary<string, string> ExtraHttpHeaders { get; set; }
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
-
-        /// <summary>
-        /// If set, the client credentials parameters from the config should be ignored and these parameters should be set.
-        /// The input string is the token endpoint.
-        /// </summary>
         public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; internal set; }
 
     }

@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Json;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Client.Internal
         public IDictionary<string, string> ClaimsToSign { get; private set; }
         public long ValidTo { get { return Payload.ValidTo; } }
         private readonly ICryptographyManager _cryptographyManager;
-        private bool _appendDefaultClaims;
+        private readonly bool _appendDefaultClaims;
 
         public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
         {
@@ -45,10 +46,10 @@ namespace Microsoft.Identity.Client.Internal
             _appendDefaultClaims = appendDefaultClaims;
         }
 
-        public string Sign(ClientCredentialWrapper credential, bool sendX5C)
+        public string Sign(X509Certificate2 certificate, string base64EncodedThumbprint, bool sendX5C)
         {
             // Base64Url encoded header and claims
-            string token = Encode(credential, sendX5C);
+            string token = Encode(certificate, base64EncodedThumbprint, sendX5C);
 
             // Length check before sign
             if (MaxTokenLength < token.Length)
@@ -56,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal
                 throw new MsalException(MsalError.EncodedTokenTooLong);
             }
 
-            byte[] signature = _cryptographyManager.SignWithCertificate(token, credential.Certificate);                
+            byte[] signature = _cryptographyManager.SignWithCertificate(token, certificate);
             return string.Concat(token, ".", UrlEncodeSegment(signature));
         }
 
@@ -70,9 +71,9 @@ namespace Microsoft.Identity.Client.Internal
             return Base64UrlHelpers.Encode(segment);
         }
 
-        private static string EncodeHeaderToJson(ClientCredentialWrapper credential, bool sendCertificate)
+        private static string EncodeHeaderToJson(X509Certificate2 certificate, string base64EncodedThumbprint, bool sendX5C)
         {
-            JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential, sendCertificate);
+            JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(certificate, base64EncodedThumbprint, sendX5C);
             return JsonHelper.SerializeToJson(header);
         }
 
@@ -83,10 +84,10 @@ namespace Microsoft.Identity.Client.Internal
             return (long)diff.TotalSeconds;
         }
 
-        private string Encode(ClientCredentialWrapper credential, bool sendCertificate)
+        private string Encode(X509Certificate2 certificate, string base64EncodedThumbprint, bool sendCertificate)
         {
             // Header segment
-            string jsonHeader = EncodeHeaderToJson(credential, sendCertificate);
+            string jsonHeader = EncodeHeaderToJson(certificate, base64EncodedThumbprint, sendCertificate);
 
             string encodedHeader = EncodeSegment(jsonHeader);
             string jsonPayload;
@@ -120,12 +121,12 @@ namespace Microsoft.Identity.Client.Internal
         [Preserve(AllMembers = true)]
         internal class JWTHeader
         {
-            public JWTHeader(ClientCredentialWrapper credential)
+            public JWTHeader(X509Certificate2 certificate)
             {
-                Credential = credential;
+                Certificate = certificate;
             }
 
-            protected ClientCredentialWrapper Credential { get; }
+            protected X509Certificate2 Certificate { get; }
 
             [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
             public static string Type
@@ -143,7 +144,7 @@ namespace Microsoft.Identity.Client.Internal
             {
                 get
                 {
-                    return Credential == null
+                    return Certificate == null
                         ? JsonWebTokenConstants.Algorithms.None
                         : JsonWebTokenConstants.Algorithms.RsaSha256;
                 }
@@ -186,27 +187,23 @@ namespace Microsoft.Identity.Client.Internal
         [Preserve(AllMembers = true)]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
-            public JWTHeaderWithCertificate(ClientCredentialWrapper credential, bool sendCertificate)
-                : base(credential)
+            public JWTHeaderWithCertificate(X509Certificate2 certificate, string base64EncodedThumbprint, bool sendCertificate)
+                : base(certificate)
             {
-                X509CertificateThumbprint = Credential.Thumbprint;
-                if (Credential?.Certificate?.Thumbprint != null)
-                {
-                    X509CertificateKeyId = Credential.Certificate.Thumbprint;
-                }
+                // this is just Base64UrlHelpers.Encode(certificate.GetCertHash()) but computed higher up so that it can be cached
+                X509CertificateThumbprint = base64EncodedThumbprint; 
+                X509CertificateKeyId = certificate.Thumbprint;
 
                 X509CertificatePublicCertValue = null;
 
-                if (!sendCertificate)
+                if (sendCertificate)
                 {
-                    return;
-                }
-
 #if DESKTOP
-                X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());
+                    X509CertificatePublicCertValue = Convert.ToBase64String(certificate.GetRawCertData());
 #else
-                X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
+                    X509CertificatePublicCertValue = Convert.ToBase64String(certificate.RawData);
 #endif
+                }
             }
 
             /// <summary>
