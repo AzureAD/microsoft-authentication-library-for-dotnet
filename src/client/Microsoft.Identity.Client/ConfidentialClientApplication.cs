@@ -44,6 +44,11 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
+            if (!(string.IsNullOrEmpty(configuration.AzureRegion) || configuration.CustomInstanceDiscoveryMetadata == null))
+            {
+                throw new MsalClientException(MsalError.RegionDiscoveryWithCustomInstanceMetadata, MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata);
+            }
+
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
             Certificate = configuration.ClientCredentialCertificate;
             
