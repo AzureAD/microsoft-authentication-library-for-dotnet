@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
@@ -88,10 +89,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
-            Assert.IsNotNull(app.ClientCredential);
-            Assert.IsNotNull(app.ClientCredential.Secret);
-            Assert.AreEqual(TestConstants.ClientSecret, app.ClientCredential.Secret);
-            Assert.IsNull(app.ClientCredential.Certificate);
+            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration).ClientCredential);
+            Assert.IsNotNull(app.AppConfig.ClientSecret);
+            Assert.AreEqual(TestConstants.ClientSecret, app.AppConfig.ClientSecret);
+            Assert.IsNull(app.AppConfig.ClientCredentialCertificate);
 
             app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
@@ -104,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                       .WithAdfsAuthority(TestConstants.OnPremiseAuthority, true)
                                                       .WithRedirectUri(TestConstants.RedirectUri)
-                                                      .WithClientSecret(TestConstants.s_onPremiseCredentialWithSecret.Secret)
+                                                      .WithClientSecret(TestConstants.ClientSecret)
                                                       .BuildConcrete();
 
 
@@ -407,10 +408,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             SignedAssertionAsyncDelegate,
         }
 
-        private ConfidentialClientApplication CreateConfidentialClient(
+        private (ConfidentialClientApplication app, MockHttpMessageHandler handler) CreateConfidentialClient(
             MockHttpManager httpManager,
             X509Certificate2 cert,
-            int tokenResponses,
             CredentialType credentialType = CredentialType.Certificate)
         {
             var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -443,24 +443,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNull(app.Certificate);
                     break;
                 case CredentialType.Certificate:
-                default:
                     builder = builder.WithCertificate(cert);
                     app = builder.BuildConcrete();
                     Assert.AreEqual(cert, app.Certificate);
                     break;
+                default:
+                    throw new NotImplementedException();
             }
 
 
-            for (int i = 0; i < tokenResponses; i++)
-            {
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-            }
+            MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-            return app;
+            return (app, handler);
         }
 
 
-        private static Task ModifyRequestAsync (OnBeforeTokenRequestData requestData)
+        private static Task ModifyRequestAsync(OnBeforeTokenRequestData requestData)
         {
             Assert.AreEqual("https://login.microsoftonline.com/tid/oauth2/v2.0/token", requestData.RequestUri.AbsoluteUri);
             requestData.BodyParameters.Add("param1", "val1");
@@ -489,9 +487,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
 
                 MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                
+
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithKeyId("key1")                    
+                    .WithProofOfPosessionKeyId("key1")
                     .OnBeforeTokenRequest(ModifyRequestAsync)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -507,7 +505,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("key1", (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithKeyId("key1")
+                    .WithProofOfPosessionKeyId("key1")
                     .OnBeforeTokenRequest(ModifyRequestAsync)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -540,7 +538,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, cert, 1);
+                var (app, _) = CreateConfidentialClient(httpManager, cert);
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
@@ -596,14 +594,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, cert, 0, CredentialType.CertificateAndClaims);
-                var tokenHttpHandler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup = CreateConfidentialClient(httpManager, cert, CredentialType.CertificateAndClaims);
+                var app = setup.App;
+                var tokenHttpHandler = setup.Handler;
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                Assert.IsNotNull(result);
+                Assert.IsNotNull(setup);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
                 appCacheAccess.AssertAccessCounts(1, 1);
@@ -640,7 +639,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, cert, 1, CredentialType.SignedAssertion);
+                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup 
+                    = CreateConfidentialClient(httpManager, cert,  CredentialType.SignedAssertion);
+                var app = setup.App;
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -657,7 +658,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // assert client credential
 
-                Assert.IsNotNull(app.ClientCredential.SignedAssertion);
+                Assert.IsTrue((app.AppConfig as ApplicationConfiguration).ClientCredential is SignedAssertionClientCredential);
             }
         }
 
@@ -668,8 +669,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, null, 1, CredentialType.SignedAssertionDelegate);
+                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup =
+                    CreateConfidentialClient(httpManager, null, CredentialType.SignedAssertionDelegate);
+
+                var app = setup.App;
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -685,9 +688,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no RTs are returned
 
                 // assert client credential
-                Assert.IsNotNull(app.ClientCredential.SignedAssertionDelegate);
-                var cred = await app.ClientCredential.SignedAssertionDelegate(default).ConfigureAwait(false);
-                Assert.AreEqual(TestConstants.DefaultClientAssertion, cred);
+                Assert.AreEqual(
+                                    TestConstants.DefaultClientAssertion,
+                                    setup.Handler.ActualRequestPostData["client_assertion"]);
+
+                Assert.AreEqual(
+                    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                    setup.Handler.ActualRequestPostData["client_assertion_type"]);
             }
         }
 
@@ -698,18 +705,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, null, 1, CredentialType.SignedAssertionDelegate);
+                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup = 
+                    CreateConfidentialClient(httpManager, null, CredentialType.SignedAssertionDelegate);
 
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                var result = await setup.App.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
 
-                Assert.IsNotNull(app.ClientCredential.SignedAssertionDelegate);
-                var cred = await app.ClientCredential.SignedAssertionDelegate(default).ConfigureAwait(false);
-                Assert.AreEqual(TestConstants.DefaultClientAssertion, cred);
+
+                Assert.AreEqual(
+                    TestConstants.DefaultClientAssertion, 
+                    setup.Handler.ActualRequestPostData["client_assertion"]);
+
+                Assert.AreEqual(
+                    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                    setup.Handler.ActualRequestPostData["client_assertion_type"]);
             }
         }
 
@@ -721,7 +733,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
                 var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)

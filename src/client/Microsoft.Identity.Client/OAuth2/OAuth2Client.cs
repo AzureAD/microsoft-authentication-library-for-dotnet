@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.OAuth2
             Uri endPoint, 
             RequestContext requestContext, 
             bool addCommonHeaders, 
-            Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler)
+            Func<OnBeforeTokenRequestData, Task> onBeforePostRequestHandler)
         {
             return await ExecuteRequestAsync<MsalTokenResponse>(
                 endPoint, 
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 requestContext, 
                 false, 
                 addCommonHeaders,
-                onBeforeTokenRequestHandler).ConfigureAwait(false);
+                onBeforePostRequestHandler).ConfigureAwait(false);
         }
 
         internal async Task<T> ExecuteRequestAsync<T>(
@@ -113,8 +113,13 @@ namespace Microsoft.Identity.Client.OAuth2
                         await onBeforePostRequestData(requestData).ConfigureAwait(false);
                     }
 
-                    response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
-                                                .ConfigureAwait(false);
+                    response = await _httpManager.SendPostAsync(
+                        endpointUri, 
+                        _headers, 
+                        _bodyParameters, 
+                        requestContext.Logger, 
+                        requestContext.UserCancellationToken)
+                             .ConfigureAwait(false);
                 }
                 else
                 {
@@ -122,7 +127,8 @@ namespace Microsoft.Identity.Client.OAuth2
                         endpointUri,
                         _headers,
                         requestContext.Logger,
-                        cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
+                        cancellationToken: requestContext.UserCancellationToken)
+                            .ConfigureAwait(false);
                 }
             }
 

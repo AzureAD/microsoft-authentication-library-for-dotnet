@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
                 .Build();
 
             var result = await cca.AcquireTokenForClient(settings.AppScopes)
-                .WithKeyId(popKey.KeyId)
+                .WithProofOfPosessionKeyId(popKey.KeyId)
                 .OnBeforeTokenRequest((data) =>
                     {
                         ModifyRequestWithLegacyPop(data, settings, clientCredsCert, popKey);
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             Assert.AreEqual(at.KeyId, popKey.KeyId);
 
             result = await cca.AcquireTokenForClient(settings.AppScopes)
-                .WithKeyId(popKey.KeyId)
+                .WithProofOfPosessionKeyId(popKey.KeyId)
                 .OnBeforeTokenRequest((data) =>
                 {
                     ModifyRequestWithLegacyPop(data, settings, clientCredsCert, popKey);
@@ -67,10 +67,10 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             RsaSecurityKey popKey2 = CreateRsaSecurityKey();
 
             result = await cca.AcquireTokenForClient(settings.AppScopes)
-                .WithKeyId(popKey2.KeyId)
+                .WithProofOfPosessionKeyId(popKey2.KeyId)
                 .OnBeforeTokenRequest((data) =>
                 {
-                    ModifyRequestWithLegacyPop(data, settings, clientCredsCert, popKey);
+                    ModifyRequestWithLegacyPop(data, settings, clientCredsCert, popKey2);
                     return Task.CompletedTask;
                 }).ExecuteAsync().ConfigureAwait(false);
 
