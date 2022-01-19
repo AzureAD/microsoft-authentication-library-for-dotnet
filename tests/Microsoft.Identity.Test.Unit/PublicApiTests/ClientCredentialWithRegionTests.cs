@@ -593,14 +593,30 @@ namespace Microsoft.Identity.Test.Unit
                 var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
-                    true));
+                    hasCustomInstanceMetadata: true));
 
                 Assert.AreEqual(MsalError.RegionDiscoveryWithCustomInstanceMetadata, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata, ex.Message);
             }
         }
 
-        private static IConfidentialClientApplication CreateCca(MockHttpManager httpManager, string region, bool hasCustomInstanceMetadata = false)
+        [TestMethod]
+        [Description("Test when region is configured with custom metadata uri")]
+        public void RegionConfiguredWithCustomInstanceDiscoveryUriThrowsException()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                    httpManager,
+                    ConfidentialClientApplication.AttemptRegionDiscovery,
+                    hasCustomInstanceMetadataUri: true));
+
+                Assert.AreEqual(MsalError.RegionDiscoveryWithCustomInstanceMetadata, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata, ex.Message);
+            }
+        }
+
+        private static IConfidentialClientApplication CreateCca(MockHttpManager httpManager, string region, bool hasCustomInstanceMetadata = false, bool hasCustomInstanceMetadataUri = false)
         {
             var builder = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
@@ -617,6 +633,12 @@ namespace Microsoft.Identity.Test.Unit
                 string instanceMetadataJson = File.ReadAllText(
                 ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
                 builder = builder.WithInstanceDiscoveryMetadata(instanceMetadataJson);
+            }
+
+            if (hasCustomInstanceMetadataUri)
+            {
+                Uri customMetadataUri = new Uri("http://login.microsoftonline.com/");
+                builder = builder.WithInstanceDiscoveryMetadata(customMetadataUri);
             }
 
             return builder.Build();

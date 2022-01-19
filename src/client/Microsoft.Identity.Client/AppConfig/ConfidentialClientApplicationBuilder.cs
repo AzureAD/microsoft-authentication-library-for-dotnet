@@ -325,6 +325,11 @@ namespace Microsoft.Identity.Client
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
+
+            if (!string.IsNullOrEmpty(Config.AzureRegion) && (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
+            {
+                throw new MsalClientException(MsalError.RegionDiscoveryWithCustomInstanceMetadata, MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata);
+            }
         }
 
         /// <summary>
