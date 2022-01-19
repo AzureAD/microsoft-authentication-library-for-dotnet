@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Utils;
-using System.Security;
 
 #if SUPPORTS_WIN32 && !WINDOWS_APP
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
@@ -15,139 +14,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal static class DesktopOsHelper
     {
-        #region ProductType    
-        /// <summary>
-        /// The system is a domain controller and the operating system is Windows Server.
-        /// </summary>
-        /// <remarks>VER_NT_DOMAIN_CONTROLLER</remarks>
-        private const byte VerNtDomainController = 0x0000002;
-
-        /// <summary>
-        /// The operating system is Windows Server. Note that a server that is also a domain controller
-        /// is reported as VER_NT_DOMAIN_CONTROLLER, not VER_NT_SERVER.
-        /// </summary>
-        /// <remarks>VER_NT_SERVER</remarks>
-        private const byte VerNtServer = 0x0000003;
-
-        /// <summary>
-        /// The operating system is Windows 10, Windows 8, Windows 7,...
-        /// </summary>
-        /// <remarks>VER_NT_WORKSTATION</remarks>
-        private const byte VerNtWorkstation = 0x0000001;
-        #endregion ProductType
-
-        /// <summary>
-        /// RtlGetVersion returns STATUS_SUCCESS.
-        /// </summary>
-        /// <remarks>NT_STATUS</remarks>
-        private const byte NtStatusSuccess = 0x00000000;
-
-        /// <summary>
-        /// Microsoft 365 apps (for example, Office client apps) use Azure Active Directory Authentication Library (ADAL) 
-        /// framework-based Modern Authentication by default. Starting with build 16.0.7967, Microsoft 365 apps use 
-        /// Web Account Manager (WAM) for sign-in workflows on Windows builds that are later than 15000 
-        /// (Windows 10, version 1703, build 15063.138).
-        /// https://docs.microsoft.com/en-us/office365/troubleshoot/administration/disabling-adal-wam-not-recommended
-        /// </summary>
-        private static readonly int s_windows10MinimumSupportedBuildNumber = 15063;
-
-        /// <summary>
-        /// Windows Server 2019 (version 1809)
-        /// Editions : Datacenter, Essentials, Standard
-        /// https://docs.microsoft.com/en-us/windows-server/get-started/windows-server-release-info
-        /// </summary>
-        private static readonly int s_windows2019MinimumSupportedBuildNumber = 17763;
-
-        /// <summary>
-        /// RtlGetVersion is the kernel-mode equivalent of the user-mode GetVersionEx function in the Windows SDK
-        /// The RtlGetVersion routine returns version information about the currently running operating system.
-        /// https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlgetversion
-        /// When using RtlGetVersion to determine whether a particular version of the operating system is running, 
-        /// a caller should check for version numbers that are greater than or equal to the required version number. 
-        /// This ensures that a version test succeeds for later versions of Windows.
-        /// </summary>
-        /// <param name="versionInformation">Pointer to either a RTL_OSVERSIONINFOW structure or a RTL_OSVERSIONINFOEXW 
-        /// structure that contains the version information about the currently running operating system. A caller specifies 
-        /// which input structure is used by setting the dwOSVersionInfoSize member of the structure to the size in bytes of 
-        /// the structure that is used.</param>
-        /// <returns>RtlGetVersion returns Status_Success.</returns>
-        [SecurityCritical]
-        [DllImport("ntdll.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern int RtlGetVersion(ref OSVERSIONINFOEXW versionInformation); // return type should be the NtStatus enum
-
-        /// <summary>
-        /// Contains operating system version information. The information includes major and minor version numbers, 
-        /// a build number, a platform identifier, and information about product suites and the latest Service Pack 
-        /// installed on the system. This structure is used with the GetVersionEx and VerifyVersionInfo functions.
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        internal struct OSVERSIONINFOEXW
-        {
-            /// <summary>
-            /// The size, in bytes, of an RTL_OSVERSIONINFOEXW structure. 
-            /// </summary>
-            public int OSVersionInfoSize;
-
-            /// <summary>
-            /// The major version number of the operating system. 
-            /// For example, for Windows 2000, the major version number is five.
-            /// </summary>
-            public int MajorVersion;
-
-            /// <summary>
-            /// The minor version number of the operating system. 
-            /// For example, for Windows 2000, the minor version number is zero.
-            /// </summary>
-            public int MinorVersion;
-
-            /// <summary>
-            /// The build number of the operating system.
-            /// </summary>
-            public int BuildNumber;
-
-            /// <summary>
-            /// The operating system platform. This member can be VER_PLATFORM_WIN32_NT (2).
-            /// </summary>
-            public int PlatformId;
-
-            /// <summary>
-            /// A null-terminated string, such as "Service Pack 3", that indicates the latest Service Pack 
-            /// installed on the system. If no Service Pack has been installed, the string is empty.
-            /// </summary>
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-            public string SDVersion;
-
-            /// <summary>
-            /// The major version number of the latest Service Pack installed on the system. 
-            /// For example, for Service Pack 3, the major version number is 3. 
-            /// If no Service Pack has been installed, the value is zero.
-            /// </summary>
-            public ushort ServicePackMajor;
-
-            /// <summary>
-            /// The minor version number of the latest Service Pack installed on the system. 
-            /// For example, for Service Pack 3, the minor version number is 0.
-            /// </summary>
-            public ushort ServicePackMinor;
-
-            /// <summary>
-            /// A bit mask that identifies the product suites available on the system. 
-            /// This member can be a combination of the following values.
-            /// </summary>
-            public short SuiteMask;
-
-            /// <summary>
-            /// The product type. This member contains additional information about the system. 
-            /// This member can be one of the following values: VER_NT_WORKSTATION, VER_NT_DOMAIN_CONTROLLER, VER_NT_SERVER
-            /// </summary>
-            public byte ProductType;
-
-            /// <summary>
-            /// Reserved for future use.
-            /// </summary>
-            public byte Reserved;
-        }
-
         private static Lazy<bool> s_wamSupportedOSLazy = new Lazy<bool>(
            () => IsWamSuportedOSInternal());
         private static Lazy<string> s_winVersionLazy = new Lazy<string>(
@@ -215,54 +81,36 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <summary>
-        /// Returns true if the OS supports WAM (Web Account Manager)
-        /// WAM Supported OS's are Windows 10 and above for Client, Windows 2019 and above for Server
+        /// Checks the retrieved Windows version to see if it is a WAM supported Windows Client OS. 
+        /// We get the OS Version from the registry and Windows 11 Product name is listed as Windows 10
+        /// So we are just checking for the "Windows 10" version string. This is by design 
+        /// https://microsoft.visualstudio.com/OS/_workitems/edit/36426651
         /// </summary>
-        /// <returns>Returns <c>true</c> if the OS Version has WAM support</returns>
-        private static bool IsWamSupportedOs()
+        /// <returns>Returns <c>true</c> if the Windows Client Version has WAM support</returns>
+        private static bool IsWin10OrNewerInternal()
         {
-            var OsVersionInfo = new OSVERSIONINFOEXW { OSVersionInfoSize = Marshal.SizeOf(typeof(OSVERSIONINFOEXW)) };
+            string winVersion = GetWindowsVersionString();
 
-            if (RtlGetVersion(ref OsVersionInfo) == NtStatusSuccess)
+            if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase))
             {
-                switch (OsVersionInfo.ProductType)
-                {
-                    //When OS Installation Type is Client 
-                    case VerNtWorkstation:
-                        switch (OsVersionInfo.MajorVersion)
-                        {
-                            case 10:
-                                if (OsVersionInfo.BuildNumber >= s_windows10MinimumSupportedBuildNumber)
-                                    return true;
-                                else
-                                    return false;
+                return true;
+            }
 
-                            default:
-                                return false;
-                        }
+            return false;
+        }
 
-                    //When OS Installation Type is Server or Multi Session Client OS's
-                    //https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-firewall/create-wmi-filters-for-the-gpo
-                    //For server operating systems that are not domain controllers and for Windows 10 and Windows 11 multi-session, use ProductType="3".
-                    //For domain controllers only, use ProductType="2". 
-                    case VerNtServer:
-                    case VerNtDomainController:
-                        switch (OsVersionInfo.MajorVersion)
-                        {
-                            case 10:
-                                if (OsVersionInfo.BuildNumber >= s_windows2019MinimumSupportedBuildNumber)
-                                    return true;
-                                else
-                                    return false;
+        /// <summary>
+        /// Checks the retrieved Windows version to see if it is a WAM supported Windows Server OS. 
+        /// </summary>
+        /// <returns>Returns <c>true</c> if the Windows Server Version has WAM support</returns>
+        private static bool IsWinServer2019OrNewerInternal()
+        {
+            string winVersion = GetWindowsVersionString();
 
-                            default:
-                                return false;
-                        }
-
-                    default:
-                        return false;
-
-                }
+            if (winVersion.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase) ||
+            winVersion.Contains("Windows Server 2022", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
             }
 
             return false;
@@ -277,7 +125,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (IsWindows())
             {
 
-                if (IsWamSupportedOs())
+                if (IsWin10OrNewerInternal() ||
+                    IsWinServer2019OrNewerInternal())
                 {
                     return true;
                 }
