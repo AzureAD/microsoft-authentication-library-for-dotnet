@@ -1561,6 +1561,52 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
             }
         }
+
+        [TestMethod]
+        public async Task ValidateGetAccountAsyncWithNullAccountIdAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                var acc = await app.GetAccountAsync(null).ConfigureAwait(false);
+
+                Assert.IsNull(acc);
+            }
+        }
+
+        [TestMethod]
+        public async Task ValidateGetAccountAsyncWithEmptyAccountIdAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                var acc = await app.GetAccountAsync("").ConfigureAwait(false);
+
+                Assert.IsNull(acc);
+            }
+        }
     }
 }
 

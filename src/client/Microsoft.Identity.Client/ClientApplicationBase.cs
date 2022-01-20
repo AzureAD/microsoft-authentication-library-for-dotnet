@@ -169,7 +169,12 @@ namespace Microsoft.Identity.Client
         /// </param>
         public async Task<IAccount> GetAccountAsync(string accountId)
         {
-            return await GetAccountAsync(accountId, default(CancellationToken)).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(accountId))
+            {
+                return await GetAccountAsync(accountId, default(CancellationToken)).ConfigureAwait(false);
+            }
+
+            return null;
         }
 
         /// <summary>
