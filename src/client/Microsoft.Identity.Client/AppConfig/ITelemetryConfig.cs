@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
@@ -10,6 +10,8 @@ namespace Microsoft.Identity.Client
     /// Describes the types of audiences for telemetry. <see cref="ITelemetryConfig.AudienceType"/>
     /// </summary>
     /// <remarks>This API is experimental and it may change in future versions of the library without an major version increment</remarks>
+    [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public enum TelemetryAudienceType
     {
         /// <summary>
@@ -26,6 +28,8 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// </summary>
     /// <remarks>This API is experimental and it may change in future versions of the library without an major version increment</remarks>
+    [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public interface ITelemetryConfig
     {
         /// <summary>

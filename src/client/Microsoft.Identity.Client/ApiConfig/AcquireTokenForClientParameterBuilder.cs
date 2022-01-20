@@ -24,8 +24,6 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenForClientParameters Parameters { get; } = new AcquireTokenForClientParameters();
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenForClient;
-
         /// <inheritdoc />
         internal AcquireTokenForClientParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor)
@@ -49,15 +47,15 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithForceRefresh(bool forceRefresh)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithForceRefresh, forceRefresh);
             Parameters.ForceRefresh = forceRefresh;
             return this;
         }
 
         /// <summary>
-        /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
+        /// Applicable to first-party applications only, this method also allows to specify 
+        /// if the <see href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.7">x5c claim</see> should be sent to Azure AD.
         /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
-        /// this method will send the public certificate to Azure AD along with the token request,
+        /// this method will send the certificate chain to Azure AD along with the token request,
         /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
         /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
@@ -67,8 +65,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithSendX5C(bool withSendX5C)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C, withSendX5C);
-            Parameters.SendX5C = withSendX5C; 
+            Parameters.SendX5C = withSendX5C;
             return this;
         }
 
@@ -89,7 +86,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use WithAzureRegion on the ConfidentialClientApplicationBuilder object", true)]
         public AcquireTokenForClientParameterBuilder WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true)
         {
-            throw new NotImplementedException();            
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />

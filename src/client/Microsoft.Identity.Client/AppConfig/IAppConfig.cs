@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
@@ -83,6 +84,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// </summary>
+        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         ITelemetryConfig TelemetryConfig { get; }
 
         /// <summary>

@@ -3,7 +3,6 @@
 
 using System.Collections.Concurrent;
 using System.Text;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Http
@@ -71,7 +70,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
                 failedRequests.Append(ev.ApiIdString);
                 failedRequests.Append(",");
-                failedRequests.Append(ev.CorrelationId);
+                failedRequests.Append(ev.CorrelationId.ToString());
 
                 firstFailure = false;
             }
@@ -103,31 +102,27 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 return string.Empty;
             }
 
-            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
-            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.CacheInfoKey, out string cacheInfo);
-            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionUsed, out string regionUsed);
-            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionSource, out string regionSource);
-            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionOutcome, out string regionOutcome);
-            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsTokenCacheSerializedKey, out string isTokenCacheSerialized);
-            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.IsLegacyCacheEnabledKey, out string isLegacyCacheEnabled);
+            var sb = new StringBuilder();
+            // Version
+            sb.Append(TelemetryConstants.HttpTelemetrySchemaVersion);
+            // Main values
+            sb.Append(TelemetryConstants.HttpTelemetryPipe);
+            sb.Append(eventInProgress.ApiIdString);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.CacheInfoString);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.RegionUsed);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.RegionAutodetectionSourceString);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.RegionOutcomeString);
+            // Platform config
+            sb.Append(TelemetryConstants.HttpTelemetryPipe);
+            sb.Append(eventInProgress.IsTokenCacheSerializedString);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.IsLegacyCacheEnabledString);
 
-            var platformConfig = new StringBuilder();
-            platformConfig.Append(ConvertFromStringToBitwise(isTokenCacheSerialized) + ",");
-            platformConfig.Append(ConvertFromStringToBitwise(isLegacyCacheEnabled));
-
-            return $"{TelemetryConstants.HttpTelemetrySchemaVersion}" +
-                $"|{apiId},{cacheInfo},{regionUsed},{regionSource},{regionOutcome}" +
-                $"|{platformConfig}";
-        }
-
-        private string ConvertFromStringToBitwise(string value)
-        {
-            if (string.IsNullOrEmpty(value) || value == TelemetryConstants.False)
-            {
-                return TelemetryConstants.Zero;
-            }
-
-            return TelemetryConstants.One;
+            return sb.ToString();
         }
     }
 }

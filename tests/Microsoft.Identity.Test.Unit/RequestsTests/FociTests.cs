@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -121,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsTrue(!String.IsNullOrEmpty(ex.CorrelationId));
 
                 // B performs interactive auth and everything goes back to normal - both A and B can silently sing in
-                await InteractiveAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);                                
+                await InteractiveAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 await SilentAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
                 await SilentAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
@@ -220,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var tokens = _appA.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
 
-                Assert.IsTrue( 
+                Assert.IsTrue(
                     !string.IsNullOrEmpty(tokens.Single().FamilyId),
                     "The FRT should not be deleted when FOCI is disabled");
 
@@ -363,14 +362,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .Create(TestConstants.ClientId)
                 .WithHttpManager(_harness.HttpManager)
                 .WithAuthority(TestConstants.AuthorityUtidTenant)
-                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             _appB = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId2)
                 .WithHttpManager(_harness.HttpManager)
                 .WithAuthority(TestConstants.AuthorityUtidTenant)
-                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             ConfigureCacheSerialization(_appA);

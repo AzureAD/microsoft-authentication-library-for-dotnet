@@ -112,17 +112,17 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public ITokenCacheAccessor UserTokenCacheAccessorForTest { get; set; }
         public ITokenCacheAccessor AppTokenCacheAccessorForTest { get; set; }
-                
+
         public virtual ITokenCacheAccessor CreateTokenCacheAccessor(CacheOptions tokenCacheAccessorOptions, bool isApplicationTokenCache = false)
         {
             if (isApplicationTokenCache)
-            {                
-                return AppTokenCacheAccessorForTest ?? 
+            {
+                return AppTokenCacheAccessorForTest ??
                     new InMemoryPartitionedAppTokenCacheAccessor(Logger, tokenCacheAccessorOptions);
             }
             else
-            {                
-                return UserTokenCacheAccessorForTest ?? 
+            {
+                return UserTokenCacheAccessorForTest ??
                     new InMemoryPartitionedUserTokenCacheAccessor(Logger, tokenCacheAccessorOptions);
             }
         }
@@ -161,11 +161,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return null;
         }
 
-        // MATS properties
-        public abstract string GetDevicePlatformTelemetryId();
-        public abstract string GetDeviceNetworkState();
-        public abstract int GetMatsOsPlatformCode();
-        public abstract string GetMatsOsPlatform();
         public virtual IFeatureFlags GetFeatureFlags()
         {
             return OverloadFeatureFlags ?? CreateFeatureFlags();

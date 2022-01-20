@@ -65,8 +65,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.EnvVariable).ToString(),
-                ((int)RegionOutcome.AutodetectSuccess).ToString());
+                RegionAutodetectionSource.EnvVariable.ToString("D"),
+                RegionOutcome.AutodetectSuccess.ToString("D"));
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
 
             Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
@@ -75,8 +75,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.Cache).ToString(),
-                ((int)RegionOutcome.AutodetectSuccess).ToString());
+                RegionAutodetectionSource.Cache.ToString("D"),
+                RegionOutcome.AutodetectSuccess.ToString("D"));
             AssertPreviousTelemetry(
                 result.HttpRequest,
                 expectedSilentCount: 0);
@@ -89,8 +89,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
 
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.Cache).ToString(),
-                ((int)RegionOutcome.AutodetectSuccess).ToString());
+                RegionAutodetectionSource.Cache.ToString("D"),
+                RegionOutcome.AutodetectSuccess.ToString("D"));
         }
 
         /// <summary>
@@ -108,8 +108,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 .ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.EnvVariable).ToString(),
-                ((int)RegionOutcome.AutodetectSuccess).ToString(),
+                RegionAutodetectionSource.EnvVariable.ToString("D"),
+                RegionOutcome.AutodetectSuccess.ToString("D"),
                 isCacheSerialized: true);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
         }
@@ -123,8 +123,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             AssertCurrentTelemetry(
                 result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.FailedAutoDiscovery).ToString(),
-                ((int)RegionOutcome.FallbackToGlobal).ToString(),
+                RegionAutodetectionSource.FailedAutoDiscovery.ToString("D"),
+                RegionOutcome.FallbackToGlobal.ToString("D"),
                 isCacheSerialized: false,
                 region: "");
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
@@ -139,8 +139,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             AssertCurrentTelemetry(
                 result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.FailedAutoDiscovery).ToString(),
-                ((int)RegionOutcome.UserProvidedAutodetectionFailed).ToString(),
+                RegionAutodetectionSource.FailedAutoDiscovery.ToString("D"),
+                RegionOutcome.UserProvidedAutodetectionFailed.ToString("D"),
                 isCacheSerialized: false,
                 region: TestConstants.Region);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
@@ -160,8 +160,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.EnvVariable).ToString(),
-                ((int)RegionOutcome.UserProvidedValid).ToString(),
+                RegionAutodetectionSource.EnvVariable.ToString("D"),
+                RegionOutcome.UserProvidedValid.ToString("D"),
                 isCacheSerialized: false,
                 region: TestConstants.Region);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
@@ -181,8 +181,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedInvalidRegion).ConfigureAwait(false);
             AssertCurrentTelemetry(result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                ((int)RegionAutodetectionSource.EnvVariable).ToString(),
-                ((int)RegionOutcome.UserProvidedInvalid).ToString(),
+                RegionAutodetectionSource.EnvVariable.ToString("D"),
+                RegionOutcome.UserProvidedInvalid.ToString("D"),
                 isCacheSerialized: false,
                 region: TestConstants.InvalidRegion);
             AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);

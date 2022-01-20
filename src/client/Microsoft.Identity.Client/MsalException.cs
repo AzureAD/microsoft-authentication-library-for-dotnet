@@ -23,6 +23,11 @@ namespace Microsoft.Identity.Client
         private string _errorCode;
 
         /// <summary>
+        /// Indicates if the previous operation that resulted in this exception should be retried.
+        /// </summary>
+        public bool IsRetryable { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the exception class.
         /// </summary>
         public MsalException()

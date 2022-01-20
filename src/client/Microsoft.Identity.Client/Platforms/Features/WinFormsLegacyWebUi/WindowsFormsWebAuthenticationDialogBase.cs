@@ -209,11 +209,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 readyToClose = true;
             }
 
-            if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
-                !url.AbsoluteUri.Equals("about:blank", StringComparison.OrdinalIgnoreCase) && !url.Scheme.Equals("javascript", StringComparison.OrdinalIgnoreCase))
+            if (!readyToClose && !EmbeddedUiCommon.IsAllowedIeOrEdgeAuthorizationRedirect(url)) // IE error pages                
             {
                 RequestContext.Logger.Error(string.Format(CultureInfo.InvariantCulture,
-                    "[Legacy WebView] Redirection to non-HTTPS scheme ({0}) found! WebView will fail...", url.Scheme));
+                    "[Legacy WebView] Redirection to non-HTTPS uri: {0} - WebView1 will fail...", url));
                 Result = AuthorizationResult.FromStatus(
                     AuthorizationStatus.ErrorHttp,
                     MsalError.NonHttpsRedirectNotSupported,

@@ -30,7 +30,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -74,20 +73,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public void InteractiveStrategy_ProtectionPolicyNotEnabled_Throws_IntuneAppProtectionPolicyRequiredException()
-        {
-            ProtectionPolicyNotEnabled_Throws_IntuneAppProtectionPolicyRequiredException_Common((msalToken) =>
-            {
-                _brokerInteractiveRequest.ValidateResponseFromBroker(msalToken);
-            });
-        }
-
-        [TestMethod]
         public void BrokerErrorResponseTest()
         {
             using (CreateBrokerHelper())
             {
-                var response = new MobileBrokerTokenResponse
+                var response = new MsalTokenResponse
                 {
                     Error = "MSALErrorDomain",
                     ErrorDescription = "error_description: Server returned less scopes than requested"
@@ -112,7 +102,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (CreateBrokerHelper())
             {
 
-                var response = new MobileBrokerTokenResponse
+                var response = new MsalTokenResponse
                 {
                     Error = MsalError.InteractionRequired,
                     ErrorDescription = MsalError.InteractionRequired,
@@ -140,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (CreateBrokerHelper())
             {
 
-                var response = new MobileBrokerTokenResponse
+                var response = new MsalTokenResponse
                 {
                     Error = MsalError.InvalidGrantError,
                     ErrorDescription = MsalError.InvalidGrantError,
@@ -692,51 +682,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-        [TestMethod]
-        public void SilentStrategy_ProtectionPolicyNotEnabled_Throws_IntuneAppProtectionPolicyRequiredException()
+        private static MsalTokenResponse CreateErrorResponse(string errorCode)
         {
-            ProtectionPolicyNotEnabled_Throws_IntuneAppProtectionPolicyRequiredException_Common((msalToken) =>
-            {
-                _brokerSilentAuthStrategy.ValidateResponseFromBroker(msalToken);
-            });
-        }
-
-        private void ProtectionPolicyNotEnabled_Throws_IntuneAppProtectionPolicyRequiredException_Common(Action<MsalTokenResponse> action)
-        {
-            using (var harness = CreateBrokerHelper())
-            {
-                try
-                {
-                    // Arrange
-                    MobileBrokerTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
-                    msalTokenResponse.SubError = BrokerResponseConst.AndroidProtectionPolicyRequired;
-                    msalTokenResponse.TenantId = TestConstants.TenantId;
-                    msalTokenResponse.Upn = TestConstants.Username;
-                    msalTokenResponse.AccountUserId = TestConstants.LocalAccountId;
-                    msalTokenResponse.AuthorityUrl = TestConstants.AuthorityUtid2Tenant;
-
-                    // Act
-                    action(msalTokenResponse);
-                }
-                catch (IntuneAppProtectionPolicyRequiredException ex)
-                {
-                    // Assert
-                    Assert.AreEqual(BrokerResponseConst.AndroidUnauthorizedClient, ex.ErrorCode);
-                    Assert.AreEqual(BrokerResponseConst.AndroidProtectionPolicyRequired, ex.SubError);
-                    Assert.AreEqual(TestConstants.TenantId, ex.TenantId);
-                    Assert.AreEqual(TestConstants.Username, ex.Upn);
-                    Assert.AreEqual(TestConstants.LocalAccountId, ex.AccountUserId);
-                    Assert.AreEqual(TestConstants.AuthorityUtid2Tenant, ex.AuthorityUrl);
-                    return;
-                }
-
-                Assert.Fail("Wrong Exception thrown. ");
-            }
-        }
-
-        private static MobileBrokerTokenResponse CreateErrorResponse(string errorCode)
-        {
-            return new MobileBrokerTokenResponse
+            return new MsalTokenResponse
             {
                 Scope = TestConstants.s_scope.AsSingleString(),
                 TokenType = TestConstants.Bearer,

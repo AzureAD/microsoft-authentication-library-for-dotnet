@@ -12,23 +12,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Advanced;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -88,9 +80,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task NoStateReturnedTestAsync()
         {
-            var receiver = new MyReceiver();
-
-            using (var harness = CreateTestHarness(telemetryCallback: receiver.HandleTelemetryEvents))
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -98,7 +88,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(harness.HttpManager)
-                    .WithTelemetry(receiver.HandleTelemetryEvents)
                     .BuildConcrete();
 
                 MockWebUI ui = new MockWebUI()
@@ -123,22 +112,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNotNull(exc);
                     Assert.AreEqual(MsalError.StateMismatchError, exc.ErrorCode);
                 }
-
-                Assert.IsNotNull(
-                    receiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1005" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
-                            anEvent[ApiEvent.ApiErrorCodeKey] == "state_mismatch"));
             }
         }
 
         [TestMethod]
         public async Task DifferentStateReturnedTestAsync()
         {
-            var receiver = new MyReceiver();
-
-            using (var harness = CreateTestHarness(telemetryCallback: receiver.HandleTelemetryEvents))
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -146,7 +126,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(harness.HttpManager)
-                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
                 MockWebUI ui = new MockWebUI()
@@ -184,7 +163,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 app.ServiceBundle.ConfigureMockWebUI();
@@ -225,7 +203,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 app.ServiceBundle.ConfigureMockWebUI();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
@@ -282,7 +259,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 app.ServiceBundle.ConfigureMockWebUI();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
@@ -312,6 +288,57 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task AcquireTokenDifferentResourcesAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .BuildConcrete();
+                app.ServiceBundle.ConfigureMockWebUI();
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                            "resource/scope1",
+                            MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                            MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
+                    });
+
+                AuthenticationResult result;
+                result = await app
+                    .AcquireTokenInteractive(new[] { "resource/scope1" })
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                harness.HttpManager.AddMockHandler(
+                   new MockHttpMessageHandler
+                   {
+                       ExpectedMethod = HttpMethod.Post,
+                       ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                           "resource/scope1 resource/scope2",
+                           MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                           MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
+                   });
+
+                var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+                result = await app
+                    .AcquireTokenSilent(new[] { "resource/scope2" }, accounts.Single())
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource, "Second token can be obtained silently via refresh_token flow");
+
+                result = await app
+                    .AcquireTokenSilent(new[] { "resource/scope1" }, accounts.Single())
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource, "First token should still be in the cache");
+
+            }
+        }
+
+        [TestMethod]
         public void AcquireTokenWithDefaultRedirectURITest()
         {
             using (var harness = CreateTestHarness())
@@ -326,7 +353,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .WithDefaultRedirectUri()
                                                                             .BuildConcrete();
 
@@ -350,7 +376,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .WithCachePartitioningAsserts(harness.ServiceBundle.PlatformProxy)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 app.ServiceBundle.ConfigureMockWebUI();
@@ -404,7 +429,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void AcquireTokenDifferentUserReturnedFromServiceTest()
         {
-            var receiver = new MyReceiver();
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -412,7 +436,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
                 app.ServiceBundle.ConfigureMockWebUI();
@@ -472,13 +495,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.AreEqual(MsalError.UserMismatch, exc.ErrorCode);
                 }
 
-                Assert.IsNotNull(
-                    receiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1005" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
-                            anEvent[ApiEvent.ApiErrorCodeKey] == "user_mismatch"));
-
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(1, users.Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
@@ -495,7 +511,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 app.ServiceBundle.ConfigureMockWebUI();
@@ -557,7 +572,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(httpManager)
-                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
                 app.ServiceBundle.ConfigureMockWebUI();
@@ -582,7 +596,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 // repeat interactive call and pass in the same user
@@ -619,7 +632,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             var accounts = app.GetAccountsAsync().Result;
@@ -655,7 +667,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(userToFind.Environment, acc.Environment);
         }
 
-      
+
         [TestMethod]
         public async Task GetAccountByUserFlowTestsAsync()
         {
@@ -712,7 +724,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [Description("Test for AcquireToken with user canceling authentication")]
         public async Task AcquireTokenWithAuthenticationCanceledTestAsync()
         {
-            var receiver = new MyReceiver();
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -720,7 +731,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .WithDebugLoggingCallback(logLevel: LogLevel.Verbose)
                                                                             .BuildConcrete();
 
@@ -744,11 +754,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual("authentication_canceled", exc.ErrorCode);
-                    Assert.IsNotNull(
-                        receiver.EventsReceived.Find(
-                            anEvent => // Expect finding such an event
-                                anEvent[EventBase.EventNameKey].EndsWith("ui_event") &&
-                                anEvent[UiEvent.UserCancelledKey] == "true"));
                     return;
                 }
             }
@@ -761,7 +766,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             "user cancels authentication with embedded webview")]
         public async Task AcquireTokenWithAccessDeniedErrorTestAsync()
         {
-            var receiver = new MyReceiver();
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -770,7 +774,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(httpManager)
-                    .WithTelemetry(receiver.HandleTelemetryEvents)
                     .BuildConcrete();
 
                 // Interactive call and authentication fails with access denied
@@ -793,11 +796,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual("access_denied", exc.ErrorCode);
-                    Assert.IsNotNull(
-                        receiver.EventsReceived.Find(
-                            anEvent => // Expect finding such an event
-                                anEvent[EventBase.EventNameKey].EndsWith("ui_event") &&
-                                anEvent[UiEvent.AccessDeniedKey] == "true"));
                     return;
                 }
             }
@@ -811,7 +809,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             PublicClientApplication app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             var authority = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.Authority.AuthorityInfo, null);
@@ -824,7 +821,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             PublicClientApplication app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             var authority = Authority.CreateAuthorityWithTenant(
@@ -874,7 +870,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                 var account = accounts.Single(a => a.HomeAccountId.TenantId == tenant1);
                 var tenantProfiles = account.GetTenantProfiles();
-                
+
                 AuthenticationResult response = await
                     pca.AcquireTokenSilent(new[] { "User.Read" }, account)
                     .WithAuthority(tenantedAuthority1)
@@ -886,7 +882,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 AssertTenantProfiles(tenantProfiles, tenant1, tenant2);
                 AssertTenantProfiles(response.Account.GetTenantProfiles(), tenant1, tenant2);
                 Assert.AreEqual(tenant1, response.ClaimsPrincipal.FindFirst("tid").Value);
-                
+
 
                 // Act
                 accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -1043,7 +1039,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithAdfsAuthority(TestConstants.OnPremiseAuthority, true)
                     .WithHttpManager(httpManager)
-                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
                 app.ServiceBundle.ConfigureMockWebUI();
@@ -1084,7 +1079,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithAdfsAuthority(TestConstants.OnPremiseAuthority, true)
                     .WithHttpManager(httpManager)
-                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
                 app.ServiceBundle.ConfigureMockWebUI();
@@ -1116,7 +1110,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             IPublicClientApplication app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithTelemetry(new TraceTelemetryConfig())
                 .Build();
 
             // This test is to ensure that the methods we want/need on the IPublicClientApplication exist and compile.  This isn't testing functionality, that's done elsewhere.
@@ -1168,7 +1161,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(harness.HttpManager)
-                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
                 app.ServiceBundle.ConfigureMockWebUI();
@@ -1181,8 +1173,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
-                Assert.IsNotNull((result.CorrelationId));
-                Assert.AreEqual(correlationId.AsMatsCorrelationId(), result.CorrelationId.AsMatsCorrelationId());
+                Assert.IsNotNull(result.CorrelationId);
+                Assert.AreEqual(correlationId.ToString(), result.CorrelationId.ToString());
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
             }

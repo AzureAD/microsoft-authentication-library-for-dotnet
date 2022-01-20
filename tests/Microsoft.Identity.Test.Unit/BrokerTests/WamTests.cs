@@ -205,15 +205,17 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.UserInteractionRequired);
                 webTokenResponseWrapper.ResponseError.Returns(new WebProviderError(42, "more_detailed_error_message"));
                 _aadPlugin.MapTokenRequestError(WebTokenRequestStatus.UserInteractionRequired, 42, false)
-                    .Returns("ui_is_really_needed");
+                    .Returns(Tuple.Create("ui_is_really_needed", "", false));
 
                 // Act
-                var result = await _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters()).ConfigureAwait(false);
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                    () => _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters())).ConfigureAwait(false);
 
                 // Assert 
-                Assert.AreEqual("ui_is_really_needed", result.Error);
-                Assert.AreEqual("42", result.ErrorCodes[0]);
-                Assert.IsTrue(result.ErrorDescription.Contains("more_detailed_error_message"));
+                Assert.AreEqual("ui_is_really_needed", ex.ErrorCode);
+                Assert.IsTrue(ex.Message.Contains("more_detailed_error_message"));
+                Assert.IsTrue(ex.Message.Contains("Internal Error Code: 42"));
+                Assert.IsFalse(ex.IsRetryable);
             }
         }
 
@@ -227,15 +229,18 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.ProviderError);
                 webTokenResponseWrapper.ResponseError.Returns(new WebProviderError(42, "more_detailed_error_message"));
                 _aadPlugin.MapTokenRequestError(WebTokenRequestStatus.ProviderError, 42, false)
-                    .Returns("ui_is_really_needed");
+                    .Returns(Tuple.Create("ui_is_really_needed", "", true));
 
                 // Act
-                var result = await _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters()).ConfigureAwait(false);
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters())).ConfigureAwait(false);
 
                 // Assert 
-                Assert.AreEqual("ui_is_really_needed", result.Error);
-                Assert.AreEqual("42", result.ErrorCodes[0]);
-                Assert.IsTrue(result.ErrorDescription.Contains("more_detailed_error_message"));
+                Assert.AreEqual("ui_is_really_needed", ex.ErrorCode);
+                Assert.IsTrue(ex.Message.Contains("more_detailed_error_message"));
+                Assert.IsTrue(ex.Message.Contains("Internal Error Code: 42"));
+                Assert.IsTrue(ex.Message.Contains("Is Retryable: True"));
+                Assert.IsTrue(ex.IsRetryable);
             }
         }
 
@@ -249,11 +254,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.UserCancel);
 
                 // Act
-                var result = await _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters()).ConfigureAwait(false);
+                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters())).ConfigureAwait(false);
 
                 // Assert 
-                Assert.AreEqual(MsalError.AuthenticationCanceledError, result.Error);
-                Assert.AreEqual(MsalErrorMessage.AuthenticationCanceled, result.ErrorDescription);
+                Assert.AreEqual(MsalError.AuthenticationCanceledError, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.AuthenticationCanceled, ex.Message);
+                Assert.IsFalse(ex.IsRetryable);
             }
         }
 
@@ -428,7 +435,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public async Task ATI_WithoutPicker_Async()
+        public async Task ATI_WithoutPicker_AccountMatch_Async()
         {
             string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
             // Arrange
@@ -484,7 +491,55 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public async Task ATI_WithoutPicker_Organizations_Async()
+        public async Task ATI_WithoutPicker_NoAccountMatch_Async()
+        {
+            _accountPickerFactory.ClearReceivedCalls();
+
+            // Arrange 
+            using (var harness = CreateTestHarness())
+            {
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityOrganizationsTenant); 
+                var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+               
+                var webTokenRequest = new WebTokenRequest(wamAccountProvider);
+
+                // will use the AAD provider because the authority is organizations (i.e. AAD only)
+                _webAccountProviderFactory
+                    .GetAccountProviderAsync("organizations")
+                    .ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+                
+                _aadPlugin.CreateWebTokenRequestAsync(
+                    wamAccountProvider,
+                    requestParams,
+                    isForceLoginPrompt: true,
+                    isInteractive: true,
+                    isAccountInWam: false)
+                    .Returns(Task.FromResult(webTokenRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
+                    Returns(Task.FromResult(webTokenResponseWrapper));
+                _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
+
+                // Act
+                var result = await _wamBroker.AcquireTokenInteractiveAsync(
+                    requestParams,
+                    new AcquireTokenInteractiveParameters()).ConfigureAwait(false);
+
+                // Assert                 
+                _accountPickerFactory.DidNotReceiveWithAnyArgs().Create(IntPtr.Zero, null, null, null, false);// Account Picker Is NOT used
+                Assert.AreEqual("select_account", webTokenRequest.Properties["prompt"]);
+                Assert.AreSame(_msalTokenResponse, result);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
+            }
+        }
+
+        [TestMethod]
+        public async Task ATI_WithoutPicker_AccountMatch_Organizations_Async()
         {
             string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
             // Arrange

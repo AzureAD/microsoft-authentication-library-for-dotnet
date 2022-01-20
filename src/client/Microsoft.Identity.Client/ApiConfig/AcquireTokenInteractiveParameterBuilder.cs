@@ -9,7 +9,6 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.Utils;
 
 #if iOS
 using UIKit;
@@ -37,8 +36,6 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenInteractiveParameters Parameters { get; } = new AcquireTokenInteractiveParameters();
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenInteractive;
-
         internal AcquireTokenInteractiveParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
             : base(publicClientApplicationExecutor)
         {
@@ -61,7 +58,6 @@ namespace Microsoft.Identity.Client
 
         internal AcquireTokenInteractiveParameterBuilder WithCurrentSynchronizationContext()
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithCurrentSynchronizationContext);
             Parameters.UiParent.SynchronizationContext = SynchronizationContext.Current;
             return this;
         }
@@ -89,7 +85,6 @@ namespace Microsoft.Identity.Client
         {
             // platform WebUI factories will validate this setting
 
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithEmbeddedWebView, useEmbeddedWebView);
             Parameters.UseEmbeddedWebView = useEmbeddedWebView ?
                 WebViewPreference.Embedded :
                 WebViewPreference.System;
@@ -110,26 +105,24 @@ namespace Microsoft.Identity.Client
         {
             SystemWebViewOptions.ValidatePlatformAvailability();
 
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSystemBrowserOptions);
             Parameters.UiParent.SystemWebViewOptions = options;
             return this;
         }
 
-    
+
         /// <summary>
-        /// Specifies options for using the embedded wevbiew for interactive authentication.
+        /// Specifies options for using the embedded web view for interactive authentication.
         /// </summary>
         /// <param name="options">Data object with options</param>
         /// <returns>The builder to chain the .With methods</returns>
-        #if !SUPPORTS_WIN32 // currently only WebView2 allows customization
+#if !SUPPORTS_WIN32 // currently only WebView2 allows customization
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        #endif
+#endif
         public AcquireTokenInteractiveParameterBuilder WithEmbeddedWebViewOptions(
             EmbeddedWebViewOptions options)
         {
             EmbeddedWebViewOptions.ValidatePlatformAvailability();
 
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSystemBrowserOptions);
             Parameters.UiParent.EmbeddedWebviewOptions = options;
             return this;
         }
@@ -143,7 +136,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithLoginHint(string loginHint)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithLoginHint);
             Parameters.LoginHint = loginHint;
             return this;
         }
@@ -156,7 +148,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithAccount(IAccount account)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAccount);
             Parameters.Account = account;
             return this;
         }
@@ -168,7 +159,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithExtraScopesToConsent(IEnumerable<string> extraScopesToConsent)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithExtraScopesToConsent);
             Parameters.ExtraScopesToConsent = extraScopesToConsent;
             return this;
         }
@@ -181,12 +171,11 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithPrompt(Prompt prompt)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPrompt);
             Parameters.Prompt = prompt;
             return this;
         }
 
-#region WithParentActivityOrWindow
+        #region WithParentActivityOrWindow
 
         /*
          * .WithParentActivityOrWindow is platform specific but we need a solution for
@@ -195,7 +184,7 @@ namespace Microsoft.Identity.Client
          * since Activity, ViewController etc. do not exist in NetStandard.
          */
 
-        
+
         /// <summary>
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
@@ -215,7 +204,6 @@ namespace Microsoft.Identity.Client
 
         private AcquireTokenInteractiveParameterBuilder WithParentObject(object parent)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithParent);
 #if ANDROID
             if (parent is Activity activity)
             {
@@ -290,7 +278,7 @@ namespace Microsoft.Identity.Client
 #if DESKTOP || NET5_WIN
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
-        /// Used to center the browser (embedded webview and Windows broker) that pop-up onto this window.        
+        /// Used to center the browser (embedded web view and Windows broker) that pop-up onto this window.        
         /// </summary>
         /// <param name="window">The current window as a IWin32Window</param>
         /// <returns>The builder to chain the .With methods</returns>
@@ -326,7 +314,7 @@ namespace Microsoft.Identity.Client
 
 #if MAC
         /// <summary>
-        /// Sets a reference to the current NSWindow. The browser pop-up will be centered on it. If ommited,
+        /// Sets a reference to the current NSWindow. The browser pop-up will be centered on it. If omitted,
         /// it will be centered on the screen.
         /// </summary>
         /// <param name="nsWindow">The current NSWindow</param>

@@ -9,11 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
@@ -69,22 +66,17 @@ namespace Microsoft.Identity.Client.Internal
             string state = authorizationTuple.Item2;
             string codeVerifier = authorizationTuple.Item3;
 
-            var uiEvent = new UiEvent(_requestParams.RequestContext.CorrelationId.AsMatsCorrelationId());
-            using (_requestParams.RequestContext.CreateTelemetryHelper(uiEvent))
-            {
-                var authorizationResult = await webUi.AcquireAuthorizationAsync(
-                                           authorizationUri,
-                                           _requestParams.RedirectUri,
-                                           _requestParams.RequestContext,
-                                           cancellationToken).ConfigureAwait(false);
 
-                uiEvent.UserCancelled = authorizationResult.Status == AuthorizationStatus.UserCancel;
-                uiEvent.AccessDenied = authorizationResult.Status == AuthorizationStatus.ProtocolError;
+            var authorizationResult = await webUi.AcquireAuthorizationAsync(
+                                       authorizationUri,
+                                       _requestParams.RedirectUri,
+                                       _requestParams.RequestContext,
+                                       cancellationToken).ConfigureAwait(false);
 
-                VerifyAuthorizationResult(authorizationResult, state);
+            VerifyAuthorizationResult(authorizationResult, state);
 
-                return new Tuple<AuthorizationResult, string>(authorizationResult, codeVerifier);
-            }
+            return new Tuple<AuthorizationResult, string>(authorizationResult, codeVerifier);
+
         }
 
         private Tuple<Uri, string> CreateAuthorizationUriWithCodeChallenge(

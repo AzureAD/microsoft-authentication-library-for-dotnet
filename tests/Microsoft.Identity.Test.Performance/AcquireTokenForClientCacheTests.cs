@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Performance
     /// 10,000 - 100 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
-    public class AcquireTokenForClientLargeCacheTests
+    public class AcquireTokenForClientCacheTests
     {
         readonly string _tenantPrefix = TestConstants.Utid;
         readonly string _scopePrefix = "scope";
@@ -41,10 +41,9 @@ namespace Microsoft.Identity.Test.Performance
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10000),
-            (1, 100000),
             (100, 10000),
             (1000, 1000),
-            (10000, 100) };
+        };
 
         [GlobalSetup]
         public void GlobalSetup()
@@ -53,6 +52,7 @@ namespace Microsoft.Identity.Test.Performance
                 .Create(TestConstants.ClientId)
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
+                .WithLegacyCacheCompatibility(false)
                 .BuildConcrete();
 
             PopulateAppCache(_cca, CacheSize.Tenants, CacheSize.TokensPerTenant);
@@ -66,7 +66,8 @@ namespace Microsoft.Identity.Test.Performance
             _scope = $"{_scopePrefix}{random.Next(0, CacheSize.TokensPerTenant)}";
         }
 
-        [Benchmark]
+        [Benchmark(Description = "AcquireTokenForClient")]
+        [BenchmarkCategory("With cache")]
         public async Task<AuthenticationResult> AcquireTokenForClient_TestAsync()
         {
             return await _cca.AcquireTokenForClient(new[] { _scope })

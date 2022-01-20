@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -32,7 +31,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 app.ServiceBundle.ConfigureMockWebUI();
@@ -58,7 +56,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.B2CAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
@@ -86,7 +83,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
@@ -115,7 +111,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(new Uri(TestConstants.B2CCustomDomain), true)
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .WithCachePartitioningAsserts(harness.ServiceBundle.PlatformProxy)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
@@ -145,7 +140,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 try
                 {
@@ -230,7 +224,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("B2C")]
         public async Task B2C_NoScopes_NoAccessToken_Async()
         {
-            
+
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)

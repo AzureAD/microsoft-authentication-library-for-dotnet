@@ -11,18 +11,14 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
-using Microsoft.Identity.Test.Unit.PublicApiTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -116,9 +112,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task NoCacheLookupAsync()
         {
-            MyReceiver myReceiver = new MyReceiver();
-
-            using (MockHttpAndServiceBundle harness = CreateTestHarness(telemetryCallback: myReceiver.HandleTelemetryEvents))
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 TokenCache cache = new TokenCache(harness.ServiceBundle, false);
                 string clientInfo = MockHelpers.CreateClientInfo();
@@ -132,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)),
-                    clientInfo, 
+                    clientInfo,
                     homeAccountId);
 
                 string atKey = atItem.GetKey().ToString();
@@ -175,22 +169,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
                 Assert.AreEqual(2, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(result.AccessToken, "some-access-token");
-
-                Assert.IsNotNull(
-                    myReceiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("ui_event") &&
-                            anEvent[UiEvent.UserCancelledKey] == "false"));
-                Assert.IsNotNull(
-                    myReceiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.PromptKey] == "select_account"));
-                Assert.IsNotNull(
-                    myReceiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("ui_event") &&
-                            anEvent[UiEvent.AccessDeniedKey] == "false"));
             }
         }
 

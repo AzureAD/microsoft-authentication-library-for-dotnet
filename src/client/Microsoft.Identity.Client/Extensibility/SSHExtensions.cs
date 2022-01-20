@@ -26,7 +26,6 @@ namespace Microsoft.Identity.Client.SSHCertificates
             string publicKeyJwk,
             string keyId)
         {
-            builder.CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSSHAuthenticationScheme);
             builder.CommonParameters.AuthenticationScheme = new SSHCertAuthenticationScheme(keyId, publicKeyJwk);
             return builder;
         }
@@ -49,7 +48,6 @@ namespace Microsoft.Identity.Client.SSHCertificates
             string publicKeyJwk,
             string keyId)
         {
-            builder.CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSSHAuthenticationScheme);
             builder.CommonParameters.AuthenticationScheme = new SSHCertAuthenticationScheme(keyId, publicKeyJwk);
             return builder;
         }

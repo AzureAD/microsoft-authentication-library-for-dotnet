@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Advanced;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Advanced;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -26,8 +26,6 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenByAuthorizationCodeParameters Parameters { get; } = new AcquireTokenByAuthorizationCodeParameters();
 
-        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenByAuthorizationCode;
-
         internal AcquireTokenByAuthorizationCodeParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor)
         {
@@ -36,7 +34,7 @@ namespace Microsoft.Identity.Client
 
         internal static AcquireTokenByAuthorizationCodeParameterBuilder Create(
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
-            IEnumerable<string> scopes, 
+            IEnumerable<string> scopes,
             string authorizationCode)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
@@ -80,9 +78,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
+        /// Applicable to first-party applications only, this method also allows to specify 
+        /// if the <see href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.7">x5c claim</see> should be sent to Azure AD.
         /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
-        /// this method will send the public certificate to Azure AD along with the token request,
+        /// this method will send the certificate chain to Azure AD along with the token request,
         /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
         /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
@@ -92,7 +91,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenByAuthorizationCodeParameterBuilder WithSendX5C(bool withSendX5C)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
             Parameters.SendX5C = withSendX5C;
             return this;
         }
@@ -124,9 +122,9 @@ namespace Microsoft.Identity.Client
                 return this;
             }
 
-            var ccsRoutingHeader = new Dictionary<string, string>() 
+            var ccsRoutingHeader = new Dictionary<string, string>()
             {
-                { Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsClientInfoHint(userObjectIdentifier, tenantIdentifier) } 
+                { Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsClientInfoHint(userObjectIdentifier, tenantIdentifier) }
             };
 
             this.WithExtraHttpHeaders(ccsRoutingHeader);
@@ -158,15 +156,12 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Requests an auth code for the frontend (SPA using MSAL.js for instance). 
         /// See https://aka.ms/msal-net/spa-auth-code for details.
-        /// This is an experimental API. The method signature may change in the future without involving a major version upgrade.
         /// </summary>
         /// <param name="requestSpaAuthorizationCode "><c>true</c> if a SPA Authorization Code should be returned,
         /// <c>false</c></param> otherwise.
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenByAuthorizationCodeParameterBuilder WithSpaAuthorizationCode(bool requestSpaAuthorizationCode = true)
         {
-            ValidateUseOfExperimentalFeature();
-
             Parameters.SpaCode = requestSpaAuthorizationCode;
 
             return this;

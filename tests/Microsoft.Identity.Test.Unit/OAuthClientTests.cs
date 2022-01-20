@@ -17,7 +17,6 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Windows.Security.Credentials;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -138,10 +137,9 @@ namespace Microsoft.Identity.Test.Unit
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                
+
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
@@ -169,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 var builder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                        .WithAuthority("https://login.microsoftonline.com/common")                          
+                        .WithAuthority("https://login.microsoftonline.com/common")
                         .WithHttpManager(harness.HttpManager);
                 builder.Config.DeviceAuthManagerForTest = Substitute.For<IDeviceAuthManager>();
                 Uri actualUri = null;
@@ -177,12 +175,13 @@ namespace Microsoft.Identity.Test.Unit
                     Arg.Any<HttpResponseHeaders>(),
                     Arg.Any<Uri>(),
                     out Arg.Any<string>())
-                    .Returns(x => {
+                    .Returns(x =>
+                    {
                         x[2] = TestConstants.PKeyAuthResponse;
                         actualUri = (Uri)x[1];
                         return true;
-                        }); 
-                
+                    });
+
 
                 var pca = builder.BuildConcrete();
 
@@ -207,7 +206,7 @@ namespace Microsoft.Identity.Test.Unit
                 //await builder.Config.DeviceAuthManagerForTest.Received()
                 //    .TryCreateDeviceAuthChallengeResponseAsync(Arg.Any<HttpResponseHeaders>(), "foo", Arg.Any<string>());
                 Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", actualUri.AbsoluteUri);
-                    
+
             }
         }
 
@@ -229,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit
 #endif
 
         private async Task ValidateOathClientAsync(
-            HttpResponseMessage httpResponseMessage, 
+            HttpResponseMessage httpResponseMessage,
             Action<Exception> validationHandler)
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
@@ -252,7 +251,7 @@ namespace Microsoft.Identity.Test.Unit
                     () => client.ExecuteRequestAsync<OAuth2ResponseBase>(
                         requestUri,
                         HttpMethod.Post,
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid())), 
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid())),
                     allowDerived: true)
                     .ConfigureAwait(false);
 
