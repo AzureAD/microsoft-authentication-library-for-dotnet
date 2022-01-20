@@ -1565,7 +1565,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         [DataRow("")]
         [DataRow(null)]
-        public async Task ValidateGetAccountAsyncWithNullAccountIdAsync(string accountId)
+        public async Task ValidateGetAccountAsyncWithNullEmptyAccountIdAsync(string accountId)
         {
             using (var httpManager = new MockHttpManager())
             {
