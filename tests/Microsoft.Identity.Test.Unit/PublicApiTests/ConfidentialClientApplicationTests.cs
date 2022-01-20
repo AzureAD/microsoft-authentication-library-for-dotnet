@@ -1561,6 +1561,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
             }
         }
+
+        [TestMethod]
+        [DataRow("")]
+        [DataRow(null)]
+        public async Task ValidateGetAccountAsyncWithNullEmptyAccountIdAsync(string accountId)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                var acc = await app.GetAccountAsync(accountId).ConfigureAwait(false);
+
+                Assert.IsNull(acc);
+            }
+        }
     }
 }
 
