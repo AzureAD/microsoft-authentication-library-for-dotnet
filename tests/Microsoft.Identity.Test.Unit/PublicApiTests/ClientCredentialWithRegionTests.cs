@@ -3,6 +3,7 @@
 
 #if !ANDROID && !iOS && !WINDOWS_APP 
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -17,6 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
+    [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
     public class ConfidentialClientWithRegionTests : TestBase
     {
 
@@ -582,7 +584,39 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        private static IConfidentialClientApplication CreateCca(MockHttpManager httpManager, string region)
+        [TestMethod]
+        [Description("Test when region is configured with custom metadata")]
+        public void RegionConfiguredWithCustomInstanceDiscoveryThrowsException()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                    httpManager,
+                    ConfidentialClientApplication.AttemptRegionDiscovery,
+                    hasCustomInstanceMetadata: true));
+
+                Assert.AreEqual(MsalError.RegionDiscoveryWithCustomInstanceMetadata, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata, ex.Message);
+            }
+        }
+
+        [TestMethod]
+        [Description("Test when region is configured with custom metadata uri")]
+        public void RegionConfiguredWithCustomInstanceDiscoveryUriThrowsException()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                    httpManager,
+                    ConfidentialClientApplication.AttemptRegionDiscovery,
+                    hasCustomInstanceMetadataUri: true));
+
+                Assert.AreEqual(MsalError.RegionDiscoveryWithCustomInstanceMetadata, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata, ex.Message);
+            }
+        }
+
+        private static IConfidentialClientApplication CreateCca(MockHttpManager httpManager, string region, bool hasCustomInstanceMetadata = false, bool hasCustomInstanceMetadataUri = false)
         {
             var builder = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
@@ -592,6 +626,19 @@ namespace Microsoft.Identity.Test.Unit
             if (region != null)
             {
                 builder = builder.WithAzureRegion(region);
+            }
+
+            if (hasCustomInstanceMetadata)
+            {
+                string instanceMetadataJson = File.ReadAllText(
+                ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
+                builder = builder.WithInstanceDiscoveryMetadata(instanceMetadataJson);
+            }
+
+            if (hasCustomInstanceMetadataUri)
+            {
+                Uri customMetadataUri = new Uri("http://login.microsoftonline.com/");
+                builder = builder.WithInstanceDiscoveryMetadata(customMetadataUri);
             }
 
             return builder.Build();

@@ -1006,6 +1006,12 @@ namespace Microsoft.Identity.Client
         public const string RegionalAuthorityValidation = "regional_authority_validation";
 
         /// <summary>
+        /// <para>What happens?</para>You have configured both Region Discovery and Custom Instance Metadata. Custom metadata supersedes region discovery.
+        /// <para>Mitigation</para>Configure either Region Discovery or Custom Instance Discovery Metadata.
+        /// </summary>
+        public const string RegionDiscoveryWithCustomInstanceMetadata = "region_discovery_with_custom_instance_metadata";
+
+        /// <summary>
         /// An HttpListenerException occurred while listening for the system browser to complete the login.
         /// </summary>
         public const string HttpListenerError = "http_listener_error";
