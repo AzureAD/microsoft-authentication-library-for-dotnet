@@ -11,6 +11,11 @@ steps:
   displayName: 'Clear local NuGet cache'
   inputs:
     script: 'nuget locals all -clear'
+    
+- task: CmdLine@2
+  displayName: 'Check Dir'
+  inputs:
+    script: 'dir'
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
