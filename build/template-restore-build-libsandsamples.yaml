@@ -12,6 +12,11 @@ steps:
   inputs:
     script: 'nuget locals all -clear'
     
+- task: CmdLine@2
+  displayName: 'Check dir'
+  inputs:
+    script: 'dir "C:\Program Files (x86)\Android\android-sdk\cmdline-tools"'
+
 - powershell: 'powershell.exe -File "microsoft-authentication-library-for-dotnet\build\install-java.ps1" -ExecutionPolicy Bypass'
   errorActionPreference: silentlyContinue
   displayName: 'Install Java'
