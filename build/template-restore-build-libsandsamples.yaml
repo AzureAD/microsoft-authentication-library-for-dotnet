@@ -6,13 +6,14 @@ parameters:
   BuildConfiguration: 'debug'
   MsalClientSemVer: '4.0.0-devopsbuild'
 
+steps:
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
     script: 'nuget locals all -clear'
     
 - task: CmdLine@2
-  displayName: 'Install Android 10'
+  displayName: 'Check Dir'
   inputs:
     script: '"C:\Program Files (x86)\Android\android-sdk\tools\bin\"sdkmanager platforms;android-29'
 
