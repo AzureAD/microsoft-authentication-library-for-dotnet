@@ -6,17 +6,15 @@ parameters:
   BuildConfiguration: 'debug'
   MsalClientSemVer: '4.0.0-devopsbuild'
 
-steps:
-
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
     script: 'nuget locals all -clear'
     
 - task: CmdLine@2
-  displayName: 'Check Dir'
+  displayName: 'Install Android 10'
   inputs:
-    script: 'dir microsoft-authentication-library-for-dotnet'
+    script: '"C:\Program Files (x86)\Android\android-sdk\tools\bin\"sdkmanager platforms;android-29'
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
