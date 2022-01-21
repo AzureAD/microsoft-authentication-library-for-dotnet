@@ -7,6 +7,7 @@ parameters:
   MsalClientSemVer: '4.0.0-devopsbuild'
 
 steps:
+
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
@@ -15,7 +16,7 @@ steps:
 - task: CmdLine@2
   displayName: 'Check Dir'
   inputs:
-    script: 'dir'
+    script: 'dir microsoft-authentication-library-for-dotnet'
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
