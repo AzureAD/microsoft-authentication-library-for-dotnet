@@ -19,7 +19,7 @@ steps:
 - task: CmdLine@2
   displayName: 'Install android'
   inputs:
-    script: '"C:\Program Files (x86)\Android\android-sdk\tools\bin\"sdkmanager platforms;android-29'
+    script: '"C:\Program Files (x86)\Android\android-sdk\tools\bin\"sdkmanager platform-tools platforms;android-29'
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
