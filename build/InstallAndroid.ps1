@@ -25,4 +25,4 @@ finally
 }
 
 echo "installing android"
-$destination\cmdline-tools\bin\.\sdkmanager "platforms;android-29" --sdk_root=$androidSdk
+C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager "platforms;android-29" --sdk_root=$androidSdk
