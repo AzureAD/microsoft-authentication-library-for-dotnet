@@ -4,14 +4,15 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Shared
+namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 {
     /// <summary>
     /// Windows OS Version checks
     /// </summary>
-    internal static class Win32API
+    internal static class Win32VersionApi
     {
-#region ProductType    
+
+        #region ProductType    
         /// <summary>
         /// The operating system is Windows 10, Windows 8, Windows 7,...
         /// </summary>
@@ -30,7 +31,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         /// <remarks>VER_NT_SERVER</remarks>
         private const byte VER_NT_SERVER = 0x0000003;
-#endregion ProductType
+        #endregion ProductType
 
         /// <summary>
         /// RtlGetVersion returns STATUS_SUCCESS.
@@ -71,7 +72,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// the structure that is used.</param>
         /// <returns>RtlGetVersion returns Status_Success.</returns>
         [DllImport("ntdll.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern int RtlGetVersion(ref OSVERSIONINFOEXW versionInformation); 
+        private static extern int RtlGetVersion(ref OSVERSIONINFOEXW versionInformation);
 
         /// <summary>
         /// Contains operating system version information. The information includes major and minor version numbers, 
@@ -170,6 +171,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                             {
                                 //https://docs.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version
                                 //For Client (Windows 10 and 11) and for Server (Windows 2016 and above) Major version is 10.*
+                                //Windows 10 Build Number 15063 is the minimum version where WAM is supported
                                 case 10:
                                     if (OsVersionInfo.dwBuildNumber >= WamSupportedWindows10BuildNumber)
                                         return true;
@@ -188,6 +190,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                             {
                                 //https://docs.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version
                                 //For Client (Windows 10 and 11) and for Server (Windows 2016 and above) Major version is 10.*
+                                //Windows Server 2019 minimum build number is 17763
                                 case 10:
                                     if (OsVersionInfo.dwBuildNumber >= Windows2019BuildNumber)
                                         return true;

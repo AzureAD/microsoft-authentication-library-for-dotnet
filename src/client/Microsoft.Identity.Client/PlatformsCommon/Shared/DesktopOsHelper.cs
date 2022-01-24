@@ -11,7 +11,7 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 #endif
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
-{
+{    
     internal static class DesktopOsHelper
     {
         private static Lazy<bool> s_wamSupportedOSLazy = new Lazy<bool>(
@@ -78,25 +78,23 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #else
             return false;
 #endif
-        }   
+        }
 
         /// <summary>
-        /// 
+        /// Checks if the OS supports WAM (Web Account Manager)
+        /// WAM Supported OS's are Windows 10 and above for Client, Windows 2019 and above for Server
         /// </summary>
         /// <returns>Returns <c>true</c> if the Windows Version has WAM support</returns>
         private static bool IsWamSuportedOSInternal()
         {
-            if (IsWindows())
+            if (IsWindows() && Win32VersionApi.IsWamSupportedOs())
             {
-
-                if (Win32API.IsWamSupportedOs())
-                {
-                    return true;
-                }
+                return true;
             }
 
             return false;
         }
+
         private static string GetWindowsVersionStringInternal()
         {
             //Environment.OSVersion as it will return incorrect information on some operating systems
