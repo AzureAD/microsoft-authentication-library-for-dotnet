@@ -25,8 +25,7 @@ steps:
 - task: CmdLine@2
   displayName: 'Check dir'
   inputs:
-    script: 'cd \
-    dir android-sdk /AD /s'
+    script: 'dir "C:\Program Files (x86)\Android\android-sdk\platforms"'
 
 - powershell: 'powershell.exe -File "microsoft-authentication-library-for-dotnet\build\install-java.ps1" -ExecutionPolicy Bypass'
   errorActionPreference: silentlyContinue
