@@ -14,6 +14,8 @@ if (Test-Path "$PSScriptRoot\win-installer-helper.psm1")
     Import-Module "$PSScriptRoot\..\..\Helpers\win-installer-helper.psm1" -DisableNameChecking
 }
 
+mkdir -Path C:\Downloads\ -Force
+
 Get-File -Url $url -FileName $fileName
 #Expand-ArchiveWith7Zip -Source $source -Destination $destination
 
