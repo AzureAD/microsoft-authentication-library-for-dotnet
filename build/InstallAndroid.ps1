@@ -14,15 +14,12 @@ if (Test-Path "$PSScriptRoot\win-installer-helper.psm1")
     Import-Module "$PSScriptRoot\..\..\Helpers\win-installer-helper.psm1" -DisableNameChecking
 }
 
-try 
-{
-    Get-File -Url $url -FileName $fileName
-    Expand-ArchiveWith7Zip -Source $source -Destination $destination
-} 
-finally 
-{
-    Stop-Setup
-}
+Get-File -Url $url -FileName $fileName
+#Expand-ArchiveWith7Zip -Source $source -Destination $destination
+
+
+echo "Expanding"
+Expand-Archive -LiteralPath "$source" -DestinationPath "C:\Downloads\AndroidSdkTools" -Force
 
 echo "installing android"
 C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager "platforms;android-29" --sdk_root=$androidSdk
