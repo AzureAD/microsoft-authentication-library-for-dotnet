@@ -4,7 +4,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     /// <summary>
     /// Windows OS Version checks
