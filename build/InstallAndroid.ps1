@@ -1,7 +1,7 @@
 $url = "https://dl.google.com/android/repository/commandlinetools-win-7583922_latest.zip"
 $fileName = "AndroidTools.zip"
 $source = "C:\Downloads\$fileName"
-$destination = '$(Build.SourcesDirectory)\AndroidSdkTools'
+$destination = "C:\Downloads\AndroidSdkTools"
 $androidSdk = "C:\Program Files (x86)\Android\android-sdk\"
 
 $ErrorActionPreference = "Stop"
@@ -25,4 +25,4 @@ finally
 }
 
 echo "installing android"
-$(Build.SourcesDirectory)\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager "platforms;android-29" --sdk_root=$androidSdk
+$destination\cmdline-tools\bin\.\sdkmanager "platforms;android-29" --sdk_root=$androidSdk
