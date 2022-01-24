@@ -34,6 +34,7 @@ steps:
 - powershell: 'powershell.exe -File "microsoft-authentication-library-for-dotnet\build\install-java.ps1" -ExecutionPolicy Bypass'
   errorActionPreference: silentlyContinue
   displayName: 'Install Java'
+  enabled: false
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
