@@ -13,7 +13,7 @@ steps:
     script: 'nuget locals all -clear'
     
 - task: CmdLine@2
-  displayName: 'Check dir'
+  displayName: 'Check dir1'
   inputs:
     script: 'dir "microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses"'
 
