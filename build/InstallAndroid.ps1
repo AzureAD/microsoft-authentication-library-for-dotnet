@@ -16,10 +16,8 @@ if (Test-Path "$PSScriptRoot\win-installer-helper.psm1")
 
 mkdir -Path C:\Downloads\ -Force
 mkdir -Path "C:\Program Files (x86)\Android\android-sdk\licenses" -Force
-mkdir -Path "C:\Downloads\AndroidSdkTools\cmdline-tools\licenses" -Force
 
 Get-File -Url $url -FileName $fileName
-#Expand-ArchiveWith7Zip -Source $source -Destination $destination
 
 echo "Expanding"
 Expand-Archive -LiteralPath "$source" -DestinationPath "C:\Downloads\AndroidSdkTools" -Force
@@ -28,7 +26,6 @@ dir "C:\Program Files (x86)\Android\android-sdk\licenses"
 
 echo "Installing licenses"
 Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses\* -Destination "C:\Program Files (x86)\Android\android-sdk\licenses" -Force
-#Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses\* -Destination "C:\Downloads\AndroidSdkTools\cmdline-tools\licenses" -Force
 
 dir "C:\Program Files (x86)\Android\android-sdk\licenses"
 

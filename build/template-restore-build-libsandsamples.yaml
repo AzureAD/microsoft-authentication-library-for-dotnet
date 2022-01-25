@@ -11,39 +11,9 @@ steps:
   displayName: 'Clear local NuGet cache'
   inputs:
     script: 'nuget locals all -clear'
-    
-- task: CmdLine@2
-  displayName: 'Check dir1'
-  inputs:
-    script: 'dir "microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses"'
-
-- task: CmdLine@2
-  displayName: 'Check dir'
-  inputs:
-    script: 'dir "C:\Program Files (x86)\Android\android-sdk"'
-
-- task: CmdLine@2
-  displayName: 'Check dir'
-  inputs:
-    script: 'dir "C:\Program Files (x86)\Android\android-sdk\platforms"'
 
 - powershell: 'powershell.exe -File "microsoft-authentication-library-for-dotnet\build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
   displayName: 'Install Android'
-
-- task: CmdLine@2
-  displayName: 'Check dir'
-  inputs:
-    script: 'dir "C:\Program Files (x86)\Android\android-sdk"'
-
-- task: CmdLine@2
-  displayName: 'Check dir'
-  inputs:
-    script: 'dir "C:\Program Files (x86)\Android\android-sdk\licenses"'
-
-- powershell: 'powershell.exe -File "microsoft-authentication-library-for-dotnet\build\install-java.ps1" -ExecutionPolicy Bypass'
-  errorActionPreference: silentlyContinue
-  displayName: 'Install Java'
-  enabled: false
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
@@ -61,12 +31,3 @@ steps:
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
-- task: CopyFiles@2
-  displayName: 'Stage Device Authentication Tests'
-  inputs:
-    SourceFolder: tests/Microsoft.Identity.Test.Integration.Win8
-    Contents: '**/*'
-    TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: DeviceAuth'
