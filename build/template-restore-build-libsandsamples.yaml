@@ -31,13 +31,13 @@ steps:
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
+# Run Post-build code analysis (e.g. Roslyn)
+- template: template-postbuild-code-analysis.yaml
+
 - task: DeleteFiles@1
   inputs:
     SourceFolder: 'microsoft-authentication-library-for-dotnet\tests'
     Contents: '**/*'
-
-# Run Post-build code analysis (e.g. Roslyn)
-- template: template-postbuild-code-analysis.yaml
 
 - template: template-pack-and-sign-all-nugets.yaml
 
