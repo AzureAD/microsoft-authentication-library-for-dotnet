@@ -21,26 +21,17 @@ mkdir -Path "C:\Downloads\AndroidSdkTools\cmdline-tools\licenses" -Force
 Get-File -Url $url -FileName $fileName
 #Expand-ArchiveWith7Zip -Source $source -Destination $destination
 
-Start-Setup
-$PathNodes=@()
-try 
-{
-    echo "Expanding"
-    Expand-Archive -LiteralPath "$source" -DestinationPath "C:\Downloads\AndroidSdkTools" -Force
+echo "Expanding"
+Expand-Archive -LiteralPath "$source" -DestinationPath "C:\Downloads\AndroidSdkTools" -Force
 
-    dir "C:\Program Files (x86)\Android\android-sdk\licenses"
+dir "C:\Program Files (x86)\Android\android-sdk\licenses"
 
-    echo "Installing licenses"
-    Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses -Destination "C:\Program Files (x86)\Android\android-sdk\licenses" -Filter * -Force
-    Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses -Destination "C:\Downloads\AndroidSdkTools\cmdline-tools\licenses" -Filter * -Force
+echo "Installing licenses"
+Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses -Destination "C:\Program Files (x86)\Android\android-sdk\licenses" -Filter * -Force
+Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses -Destination "C:\Downloads\AndroidSdkTools\cmdline-tools\licenses" -Filter * -Force
 
-    dir "C:\Program Files (x86)\Android\android-sdk\licenses"
+dir "C:\Program Files (x86)\Android\android-sdk\licenses"
 
-    echo "installing android"
-    C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager --licenses --sdk_root="C:\Program Files (x86)\Android\android-sdk"
-    echo y y y y y y y |C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager "platforms;android-29" --sdk_root="C:\Program Files (x86)\Android\android-sdk"
-} 
-finally 
-{
-    Stop-Setup
-}
+echo "installing android"
+C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager --licenses --sdk_root="C:\Program Files (x86)\Android\android-sdk"
+echo y y y y y y y |C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager "platforms;android-29" --sdk_root="C:\Program Files (x86)\Android\android-sdk"

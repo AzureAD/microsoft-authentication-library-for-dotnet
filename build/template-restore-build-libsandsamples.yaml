@@ -15,7 +15,7 @@ steps:
 - task: CmdLine@2
   displayName: 'Check dir'
   inputs:
-    script: 'dir "C:\Program Files (x86)\Android"'
+    script: 'dir "microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses"'
 
 - task: CmdLine@2
   displayName: 'Check dir'
@@ -29,6 +29,16 @@ steps:
 
 - powershell: 'powershell.exe -File "microsoft-authentication-library-for-dotnet\build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
   displayName: 'Install Android'
+
+- task: CmdLine@2
+  displayName: 'Check dir'
+  inputs:
+    script: 'dir "C:\Program Files (x86)\Android\android-sdk"'
+
+- task: CmdLine@2
+  displayName: 'Check dir'
+  inputs:
+    script: 'dir "C:\Program Files (x86)\Android\android-sdk\licenses"'
 
 - powershell: 'powershell.exe -File "microsoft-authentication-library-for-dotnet\build\install-java.ps1" -ExecutionPolicy Bypass'
   errorActionPreference: silentlyContinue
