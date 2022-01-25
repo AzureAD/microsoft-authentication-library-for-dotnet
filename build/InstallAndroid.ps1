@@ -26,8 +26,13 @@ try
     echo "Expanding"
     Expand-Archive -LiteralPath "$source" -DestinationPath "C:\Downloads\AndroidSdkTools" -Force
 
+    dir "C:\Program Files (x86)\Android\android-sdk\licenses"
+
     echo "Installing licenses"
     Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses -Destination "C:\Program Files (x86)\Android\android-sdk\licenses" -Filter * -Force
+    Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses -Destination "C:\Downloads\AndroidSdkTools\cmdline-tools\licenses" -Filter * -Force
+
+    dir "C:\Program Files (x86)\Android\android-sdk\licenses"
 
     echo "installing android"
     C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager --licenses --sdk_root="C:\Program Files (x86)\Android\android-sdk"
