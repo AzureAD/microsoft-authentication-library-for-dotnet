@@ -15,6 +15,8 @@ if (Test-Path "$PSScriptRoot\win-installer-helper.psm1")
 }
 
 mkdir -Path C:\Downloads\ -Force
+mkdir -Path "C:\Program Files (x86)\Android\android-sdk\licenses" -Force
+mkdir -Path "C:\Downloads\AndroidSdkTools\cmdline-tools\licenses" -Force
 
 Get-File -Url $url -FileName $fileName
 #Expand-ArchiveWith7Zip -Source $source -Destination $destination
