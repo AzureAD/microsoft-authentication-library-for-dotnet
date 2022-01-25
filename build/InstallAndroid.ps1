@@ -4,7 +4,7 @@ $source = "C:\Downloads\$fileName"
 $destination = "C:\Downloads\AndroidSdkTools"
 $androidSdk = "C:\Program Files (x86)\Android\android-sdk\"
 
-$ErrorActionPreference = "Stop"
+#$ErrorActionPreference = "Stop"
 
 if (Test-Path "$PSScriptRoot\win-installer-helper.psm1") 
 {
