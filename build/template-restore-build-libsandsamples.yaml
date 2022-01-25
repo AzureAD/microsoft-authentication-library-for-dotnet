@@ -3,7 +3,7 @@
 
 parameters:
   BuildPlatform: 'any cpu'
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'release'
   MsalClientSemVer: '4.0.0-devopsbuild'
 
 steps:
@@ -31,3 +31,13 @@ steps:
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
+# Run Post-build code analysis (e.g. Roslyn)
+- template: template-postbuild-code-analysis.yaml
+
+- template: template-pack-and-sign-all-nugets.yaml
+
+# Publish nuget packages and symbols to VSTS package manager.
+- template: template-publish-packages-and-symbols.yaml
+
+# Publish analysis and cleanup
+- template: template-publish-analysis-and-cleanup.yaml
