@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -33,14 +34,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class ClientCredentialsTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
-        private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };        
+        private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
         private const string PublicCloudConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
 
-        private enum CredentialType { 
-            Cert, 
-            Secret, 
-            ClientAssertion_Wilson, 
+        private enum CredentialType
+        {
+            Cert,
+            Secret,
+            ClientAssertion_Wilson,
             ClientAssertion_Manual,
             ClientClaims_MergeClaims,
             ClientClaims_ExtraClaims
@@ -49,9 +51,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();          
+            TestCommon.ResetInternalStaticCaches();
         }
-    
+
         [TestMethod]
         [DataRow(Cloud.Public, RunOn.NetFx | RunOn.NetCore)]
         [DataRow(Cloud.Adfs, RunOn.NetCore)]
@@ -67,7 +69,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [TestMethod]
         [DataRow(Cloud.Public, RunOn.NetFx | RunOn.NetCore)]
-        [DataRow(Cloud.Adfs, RunOn.NetFx)]        
+        [DataRow(Cloud.Adfs, RunOn.NetFx)]
         [DataRow(Cloud.Arlington, RunOn.NetCore)]
         //[DataRow(Cloud.PPE)] - secret not setup
         public async Task WithSecret_TestAsync(Cloud cloud, RunOn runOn)
@@ -99,7 +101,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, RunOn.NetCore)]        
+        [DataRow(Cloud.Public, RunOn.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientClaims_ExtraClaims_TestAsync(Cloud cloud, RunOn runOn)
         {
@@ -123,7 +125,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task WithClientClaims_SendX5C_ExtraClaims_TestAsync(Cloud cloud, RunOn runOn)
         {
             runOn.AssertFramework();
-            await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims, sendX5C:true).ConfigureAwait(false);
+            await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims, sendX5C: true).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -174,8 +176,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
-                Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs == 0);
-            
+            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs == 0);
+
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
@@ -184,7 +186,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreNotEqual(correlationId, appCacheRecorder.LastBeforeAccessNotificationArgs.CorrelationId);
             Assert.AreEqual(
                GetExpectedCacheKey(settings.ClientId, settings.TenantId),
-               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);        
+               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
         }
 
         private static IConfidentialClientApplication CreateApp(CredentialType credentialType, IConfidentialAppSettings settings, bool sendX5C)
@@ -246,7 +248,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private string GetExpectedCacheKey(string clientId, string tenantId)
         {
             return $"{clientId}_{tenantId ?? ""}_AppTokenCache";
-        }       
+        }
 
         internal static long ConvertToTimeT(DateTime time)
         {
@@ -254,22 +256,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TimeSpan diff = time - startTime;
             return (long)diff.TotalSeconds;
         }
-
         private static IDictionary<string, string> GetClaims(bool useDefaultClaims = true)
         {
+            const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
+
             if (useDefaultClaims)
             {
-                DateTime validFrom = DateTime.UtcNow;
-                var nbf = ConvertToTimeT(validFrom);
-                var exp = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(TestConstants.JwtToAadLifetimeInSeconds));
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+                DateTimeOffset validFrom = now; // AAD will take clock skew into consideration
+                DateTimeOffset validUntil = now.AddSeconds(JwtToAadLifetimeInSeconds);
 
                 return new Dictionary<string, string>()
                 {
                 { "aud", TestConstants.ClientCredentialAudience },
-                { "exp", exp.ToString(CultureInfo.InvariantCulture) },
+                { "exp", validUntil.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture) },
                 { "iss", PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
                 { "jti", Guid.NewGuid().ToString() },
-                { "nbf", nbf.ToString(CultureInfo.InvariantCulture) },
+                { "nbf", validFrom.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture) },
                 { "sub", PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
                 { "ip", "192.168.2.1" }
                 };
@@ -309,25 +312,34 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             return signedClientAssertion;
         }
 
-        private static string GetSignedClientAssertionManual(
-            string issuer, // client ID
-            string audience, // ${authority}/oauth2/v2.0/token for AAD or ${authority}/oauth2/token for ADFS
+        /// <summary>
+        /// Creates a signed assertion in JWT format which can be used in the client_credentials flow. 
+        /// </summary>
+        /// <param name="issuer">the client ID</param>
+        /// <param name="audience">the token endpoint, i.e. ${authority}/oauth2/v2.0/token for AAD or ${authority}/oauth2/token for ADFS</param>
+        /// <param name="certificate"></param>
+        /// <returns></returns>
+        internal static string GetSignedClientAssertionManual(
+            string issuer, 
+            string audience, 
             X509Certificate2 certificate)
         {
             const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
-            DateTime validFrom = DateTime.UtcNow;
-            var nbf = ConvertToTimeT(validFrom);
-            var exp = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds));
 
-            var payload = new Dictionary<string, string>()
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            DateTimeOffset validFrom = now; // AAD will take clock skew into consideration
+            DateTimeOffset validUntil = now.AddSeconds(JwtToAadLifetimeInSeconds);
+
+            // as per https://datatracker.ietf.org/doc/html/rfc7523#section-3
+            // more claims can be added here
+            var claims = new Dictionary<string, object>()
             {
                 { "aud", audience },
+                { "exp", validUntil.ToUnixTimeSeconds() },
                 { "iss", issuer },
                 { "jti", Guid.NewGuid().ToString() },
-                { "sub", issuer },
-                { "exp", exp.ToString(CultureInfo.InvariantCulture) },
-                { "nbf", nbf.ToString(CultureInfo.InvariantCulture) },
-                { "iat", nbf.ToString(CultureInfo.InvariantCulture) }
+                { "nbf", validFrom.ToUnixTimeSeconds() },
+                { "sub", issuer }
             };
 
             RSACng rsa = certificate.GetRSAPrivateKey() as RSACng;
@@ -339,23 +351,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
               { "alg", "RS256"},
               { "kid",  certificate.Thumbprint},
               { "typ", "JWT"},
-              { "x5t", Encode(certificate.GetCertHash())},
+              { "x5t", Base64UrlEncode(certificate.GetCertHash())},
             };
 
-            string token = Encode(
-                Encoding.UTF8.GetBytes(JObject.FromObject(header).ToString())) +
-                "." +
-                Encode(Encoding.UTF8.GetBytes(JObject.FromObject(payload).ToString()));
+            var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
+            var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
+            string token = Base64UrlEncode(headerBytes) + "." + Base64UrlEncode(claimsBytes);
 
-            string signature = Encode(
+            string signature = Base64UrlEncode(
                 rsa.SignData(
                     Encoding.UTF8.GetBytes(token),
                     HashAlgorithmName.SHA256,
-                    System.Security.Cryptography.RSASignaturePadding.Pkcs1));
+                    RSASignaturePadding.Pkcs1));
             return string.Concat(token, ".", signature);
         }
 
-        private static string Encode(byte[] arg)
+        private static string Base64UrlEncode(byte[] arg)
         {
             char Base64PadCharacter = '=';
             char Base64Character62 = '+';
