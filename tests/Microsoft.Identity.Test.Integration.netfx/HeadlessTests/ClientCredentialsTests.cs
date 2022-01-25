@@ -349,7 +349,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var header = new Dictionary<string, string>()
             {
               { "alg", "RS256"},
-              { "kid",  certificate.Thumbprint},
               { "typ", "JWT"},
               { "x5t", Base64UrlEncode(certificate.GetCertHash())},
             };
