@@ -27,8 +27,8 @@ Expand-Archive -LiteralPath "$source" -DestinationPath "C:\Downloads\AndroidSdkT
 dir "C:\Program Files (x86)\Android\android-sdk\licenses"
 
 echo "Installing licenses"
-Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses -Destination "C:\Program Files (x86)\Android\android-sdk\licenses" -Filter * -Force
-Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses -Destination "C:\Downloads\AndroidSdkTools\cmdline-tools\licenses" -Filter * -Force
+Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses\* -Destination "C:\Program Files (x86)\Android\android-sdk\licenses" -Force
+#Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses\* -Destination "C:\Downloads\AndroidSdkTools\cmdline-tools\licenses" -Force
 
 dir "C:\Program Files (x86)\Android\android-sdk\licenses"
 
