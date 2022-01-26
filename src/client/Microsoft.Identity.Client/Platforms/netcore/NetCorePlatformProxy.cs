@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 try
                 {
                     ProcessStartInfo psi = null;
-                    foreach (string openTool in new[] { "xdg-open", "gnome-open", "kfmclient" })
+                    foreach (string openTool in new[] { "microsoft-edge", "xdg-open", "gnome-open", "kfmclient" })
                     {
                         if (TryGetExecutablePath(openTool, out string openToolPath))
                         {
