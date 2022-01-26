@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             OverloadFeatureFlags = featureFlags;
         }
 
-        public virtual Task StartDefaultOsBrowserAsync(string url)
+        public virtual Task StartDefaultOsBrowserAsync(string url, bool isBrokerEnabled = false)
         {
             throw new NotImplementedException();
         }

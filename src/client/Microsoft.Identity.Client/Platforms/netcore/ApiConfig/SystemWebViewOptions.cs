@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client
             else
             {
                 var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
-                await proxy.StartDefaultOsBrowserAsync(url).ConfigureAwait(false);
+                await proxy.StartDefaultOsBrowserAsync(url, true).ConfigureAwait(false);
             }
 
         }

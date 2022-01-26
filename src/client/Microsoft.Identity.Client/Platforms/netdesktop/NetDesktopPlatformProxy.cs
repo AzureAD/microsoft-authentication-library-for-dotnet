@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         protected override IFeatureFlags CreateFeatureFlags() => new NetDesktopFeatureFlags();
 
-        public override Task StartDefaultOsBrowserAsync(string url)
+        public override Task StartDefaultOsBrowserAsync(string url, bool isBrokerEnabled = false)
         {
             try
             {

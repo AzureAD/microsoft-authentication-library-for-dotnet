@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -144,7 +145,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         protected override IFeatureFlags CreateFeatureFlags() => new NetCoreFeatureFlags();
 
-        public override Task StartDefaultOsBrowserAsync(string url)
+        public override Task StartDefaultOsBrowserAsync(string url, bool isBrokerEnabled = false)
         {
             if (DesktopOsHelper.IsWindows())
             {
@@ -172,25 +173,33 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     throw new MsalClientException(MsalError.LinuxXdgOpen, MsalErrorMessage.LinuxOpenAsSudoNotSupported);
                 }
 
+                List<string> openTools = new List<string>();
+                if (isBrokerEnabled)
+                {
+                    openTools.Add("microsoft-edge");
+                }
+
+                openTools.Add("xdg-open");
+                openTools.Add("gnome-open");
+                openTools.Add("kfmclient");
+
                 try
                 {
                     ProcessStartInfo psi = null;
-                    foreach (string openTool in new[] { "microsoft-edge", "xdg-open", "gnome-open", "kfmclient" })
+
+                    if (psi == null)
                     {
-                        if (TryGetExecutablePath(openTool, out string openToolPath))
+                        foreach (string openTool in GetOpenToolsLinux(isBrokerEnabled))
                         {
-                            psi = new ProcessStartInfo(openToolPath, url)
+                            if (TryGetExecutablePath(openTool, out string openToolPath))
                             {
-                                RedirectStandardOutput = true,
-                                RedirectStandardError = true
-                            };
+                                psi = OpenLinuxBrowser(openToolPath, url);
 
-                            Process.Start(psi);
-
-                            break;
+                                break;
+                            }
                         }
                     }
-
+                    
                     if (psi == null)
                     {
                         throw new Exception("Failed to locate a utility to launch the default web browser.");
@@ -214,6 +223,34 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             }
             return Task.FromResult(0);
 
+        }
+
+        private ProcessStartInfo OpenLinuxBrowser(string openToolPath, string url)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo(openToolPath, url)
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
+            Process.Start(psi);
+
+            return psi;
+        }
+
+        private List<string> GetOpenToolsLinux(bool isBrokerEnabled)
+        {
+            List<string> openTools = new List<string>();
+            if (isBrokerEnabled)
+            {
+                openTools.Add("microsoft-edge");
+            }
+
+            openTools.Add("xdg-open");
+            openTools.Add("gnome-open");
+            openTools.Add("kfmclient");
+
+            return openTools;
         }
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
