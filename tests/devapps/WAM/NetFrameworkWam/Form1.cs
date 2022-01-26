@@ -85,7 +85,8 @@ namespace NetDesktopWinForms
                 .WithWindowsBrokerOptions(new WindowsBrokerOptions()
                 {
                     ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
-                    MsaPassthrough = cbxMsaPt.Checked
+                    MsaPassthrough = cbxMsaPt.Checked, 
+                    HeaderText = "MSAL Dev App .NET FX"
                 })
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();

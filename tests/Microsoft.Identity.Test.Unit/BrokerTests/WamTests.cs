@@ -531,7 +531,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     new AcquireTokenInteractiveParameters()).ConfigureAwait(false);
 
                 // Assert                 
-                _accountPickerFactory.DidNotReceiveWithAnyArgs().Create(IntPtr.Zero, null, null, null, false);// Account Picker Is NOT used
+                _accountPickerFactory.DidNotReceiveWithAnyArgs().Create(IntPtr.Zero, null, null, null, false, null);// Account Picker Is NOT used
                 Assert.AreEqual("select_account", webTokenRequest.Properties["prompt"]);
                 Assert.AreSame(_msalTokenResponse, result);
                 AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
@@ -709,7 +709,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var accountPicker = Substitute.For<IAccountPicker>();
 
-                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
+                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false, null).ReturnsForAnyArgs(accountPicker);
 
                 var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
                 accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(wamAccountProvider));
@@ -1152,7 +1152,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    _msaPassthroughHandler);
 
                 var accountPicker = Substitute.For<IAccountPicker>();
-                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
+                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false, null).ReturnsForAnyArgs(accountPicker);
                 var msaProvider = new WebAccountProvider("msa", "user@contoso.com", null);
                 accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(msaProvider));
                 // AAD plugin + consumer provider = Guest MSA-PT scenario
@@ -1290,7 +1290,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    _accountPickerFactory,
                    _msaPassthroughHandler);
                 var accountPicker = Substitute.For<IAccountPicker>();
-                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
+                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false, null).ReturnsForAnyArgs(accountPicker);
                 var msaProvider = new WebAccountProvider("msa", "user@contoso.com", null);
                 accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(msaProvider));
                 // AAD plugin + consumer provider = Guest MSA-PT scenario

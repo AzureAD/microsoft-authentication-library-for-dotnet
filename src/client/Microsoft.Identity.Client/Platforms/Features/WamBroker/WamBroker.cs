@@ -348,7 +348,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 _logger,
                 _synchronizationContext,
                 authenticationRequestParameters.Authority,
-                isMsaPassthrough);
+                isMsaPassthrough,
+                _wamOptions.HeaderText);
 
             IWamPlugin wamPlugin;
             WebTokenRequest webTokenRequest;
