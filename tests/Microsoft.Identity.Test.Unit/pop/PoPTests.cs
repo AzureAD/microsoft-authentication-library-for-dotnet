@@ -195,8 +195,9 @@ namespace Microsoft.Identity.Test.Unit.Pop
                         TestConstants.Utid), 
                     actualCacheKey);
 
-                // Arrange - force a new key 
-                testTimeService.MoveToFuture(PoPProviderFactory.KeyRotationInterval.Add(TimeSpan.FromMinutes(1)));
+                // Arrange - force a new key by moving to the future
+                (PoPProviderFactory.TimeService as TestTimeService).MoveToFuture(
+                    PoPProviderFactory.KeyRotationInterval.Add(TimeSpan.FromMinutes(10)));
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
 
