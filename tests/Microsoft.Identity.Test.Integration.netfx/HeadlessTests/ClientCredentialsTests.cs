@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -25,7 +26,6 @@ using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -250,12 +250,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             return $"{clientId}_{tenantId ?? ""}_AppTokenCache";
         }
 
-        internal static long ConvertToTimeT(DateTime time)
-        {
-            var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            TimeSpan diff = time - startTime;
-            return (long)diff.TotalSeconds;
-        }
         private static IDictionary<string, string> GetClaims(bool useDefaultClaims = true)
         {
             const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
@@ -350,37 +344,19 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
               { "alg", "RS256"},
               { "typ", "JWT"},
-              { "x5t", Base64UrlEncode(certificate.GetCertHash())},
+              { "x5t", Base64UrlHelpers.Encode(certificate.GetCertHash())},
             };
 
             var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
             var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
-            string token = Base64UrlEncode(headerBytes) + "." + Base64UrlEncode(claimsBytes);
+            string token = Base64UrlHelpers.Encode(headerBytes) + "." + Base64UrlHelpers.Encode(claimsBytes);
 
-            string signature = Base64UrlEncode(
+            string signature = Base64UrlHelpers.Encode(
                 rsa.SignData(
                     Encoding.UTF8.GetBytes(token),
                     HashAlgorithmName.SHA256,
                     RSASignaturePadding.Pkcs1));
             return string.Concat(token, ".", signature);
         }
-
-        private static string Base64UrlEncode(byte[] arg)
-        {
-            char Base64PadCharacter = '=';
-            char Base64Character62 = '+';
-            char Base64Character63 = '/';
-            char Base64UrlCharacter62 = '-';
-            char Base64UrlCharacter63 = '_';
-
-
-            string s = Convert.ToBase64String(arg);
-            s = s.Split(Base64PadCharacter)[0]; // RemoveAccount any trailing padding
-            s = s.Replace(Base64Character62, Base64UrlCharacter62); // 62nd char of encoding
-            s = s.Replace(Base64Character63, Base64UrlCharacter63); // 63rd char of encoding
-
-            return s;
-        }
-
     }
 }
