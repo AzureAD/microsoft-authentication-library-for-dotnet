@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         protected override IFeatureFlags CreateFeatureFlags() => new NetCoreFeatureFlags();
 
-        public override Task StartDefaultOsBrowserAsync(string url, bool isBrokerEnabled = false)
+        public override Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured)
         {
             if (DesktopOsHelper.IsWindows())
             {
@@ -173,30 +173,17 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     throw new MsalClientException(MsalError.LinuxXdgOpen, MsalErrorMessage.LinuxOpenAsSudoNotSupported);
                 }
 
-                List<string> openTools = new List<string>();
-                if (isBrokerEnabled)
-                {
-                    openTools.Add("microsoft-edge");
-                }
-
-                openTools.Add("xdg-open");
-                openTools.Add("gnome-open");
-                openTools.Add("kfmclient");
-
                 try
                 {
                     ProcessStartInfo psi = null;
 
-                    if (psi == null)
+                    foreach (string openTool in GetOpenToolsLinux(isBrokerConfigured))
                     {
-                        foreach (string openTool in GetOpenToolsLinux(isBrokerEnabled))
+                        if (TryGetExecutablePath(openTool, out string openToolPath))
                         {
-                            if (TryGetExecutablePath(openTool, out string openToolPath))
-                            {
-                                psi = OpenLinuxBrowser(openToolPath, url);
+                            psi = OpenLinuxBrowser(openToolPath, url);
 
-                                break;
-                            }
+                            break;
                         }
                     }
                     
@@ -238,19 +225,14 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return psi;
         }
 
-        private List<string> GetOpenToolsLinux(bool isBrokerEnabled)
+        private string[] GetOpenToolsLinux(bool isBrokerConfigured)
         {
-            List<string> openTools = new List<string>();
-            if (isBrokerEnabled)
+            if (isBrokerConfigured)
             {
-                openTools.Add("microsoft-edge");
+                return new[] { "microsoft-edge", "xdg-open", "gnome-open", "kfmclient" };
             }
 
-            openTools.Add("xdg-open");
-            openTools.Add("gnome-open");
-            openTools.Add("kfmclient");
-
-            return openTools;
+            return new[] { "xdg-open", "gnome-open", "kfmclient" };
         }
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()

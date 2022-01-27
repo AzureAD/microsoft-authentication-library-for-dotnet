@@ -64,8 +64,8 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 var authCodeUri = await InterceptAuthorizationUriAsync(
                     authorizationUri,
                     redirectUri,
-                    cancellationToken,
-                    requestContext.ServiceBundle.Config.IsBrokerEnabled)
+                    requestContext.ServiceBundle.Config.IsBrokerEnabled,
+                    cancellationToken)
                     .ConfigureAwait(true);
 
                 if (!authCodeUri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) ||
@@ -136,10 +136,10 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         private async Task<Uri> InterceptAuthorizationUriAsync(
             Uri authorizationUri,
             Uri redirectUri,
-            CancellationToken cancellationToken,
-            bool isBrokerEnabled)
+            bool isBrokerConfigured,
+            CancellationToken cancellationToken)
         {
-            Func<Uri, Task> defaultBrowserAction = (Uri u) => _platformProxy.StartDefaultOsBrowserAsync(u.AbsoluteUri, isBrokerEnabled);
+            Func<Uri, Task> defaultBrowserAction = (Uri u) => _platformProxy.StartDefaultOsBrowserAsync(u.AbsoluteUri, isBrokerConfigured);
             Func<Uri, Task> openBrowserAction = _webViewOptions?.OpenBrowserAsync ?? defaultBrowserAction;
 
             cancellationToken.ThrowIfCancellationRequested();
