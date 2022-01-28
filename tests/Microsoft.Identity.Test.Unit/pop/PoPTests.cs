@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -176,6 +177,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
 
                 // Act
+                Trace.WriteLine("1. AcquireTokenForClient ");
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .WithProofOfPossession(popConfig)
@@ -202,6 +204,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
 
                 // Act
+                Trace.WriteLine("1. AcquireTokenForClient again, after time passes - expect POP key rotation");
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                    .WithAuthority(TestConstants.AuthorityUtidTenant)
                    .WithProofOfPossession(popConfig)

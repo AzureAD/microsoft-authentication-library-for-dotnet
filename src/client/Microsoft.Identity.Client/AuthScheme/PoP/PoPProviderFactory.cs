@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
@@ -25,13 +26,20 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         {
             lock (s_lock)
             {
-                if (s_currentProvider != null && s_providerExpiration > TimeService.GetUtcNow())
+                var time = TimeService.GetUtcNow();
+                if (s_currentProvider != null && s_providerExpiration > time)
                 {
+                    Trace.WriteLine($"InMemoryCryptoProvider - using existing provider. Expiration: {s_providerExpiration} time: {time}");
                     return s_currentProvider;
                 }
 
+                Trace.WriteLine($"InMemoryCryptoProvider - using new provider. Before. Expiration: {s_providerExpiration} time: {time}");
+
                 s_currentProvider = new InMemoryCryptoProvider();
                 s_providerExpiration = TimeService.GetUtcNow() + KeyRotationInterval;
+
+                Trace.WriteLine($"InMemoryCryptoProvider - using new provider. After. Expiration: {s_providerExpiration} time: {time}");
+
                 return s_currentProvider;
             }
         }
