@@ -20,6 +20,21 @@ steps:
   inputs:
        BuildDropPath: '${{ parameters.ArtifactPublishPath }}'
 
+- task: CmdLine@2
+  displayName: 'Check dir1'
+  inputs:
+    script: 'dir "$(Build.ArtifactStagingDirectory)\packages"'
+
+- powershell: 'dir $(Build.ArtifactStagingDirectory)\packages'
+  errorActionPreference: silentlyContinue
+  displayName: 'Import Variables'
+  continueOnError: true
+
+- powershell: 'dir $(Build.ArtifactStagingDirectory)'
+  errorActionPreference: silentlyContinue
+  displayName: 'Import Variables'
+  continueOnError: true
+
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: packages'
   inputs:
