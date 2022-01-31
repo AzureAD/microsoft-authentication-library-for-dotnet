@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 CancellationToken.None).ConfigureAwait(false);
 
             // Assert that we didn't open the browser using platform proxy
-            await _platformProxy.DidNotReceiveWithAnyArgs().StartDefaultOsBrowserAsync(default)
+            await _platformProxy.DidNotReceiveWithAnyArgs().StartDefaultOsBrowserAsync(default, requestContext.ServiceBundle.Config.IsBrokerEnabled)
                 .ConfigureAwait(false);
 
             await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 CancellationToken.None).ConfigureAwait(false);
 
             // Assert that we opened the browser
-            await _platformProxy.Received(1).StartDefaultOsBrowserAsync(requestUri)
+            await _platformProxy.Received(1).StartDefaultOsBrowserAsync(requestUri, requestContext.ServiceBundle.Config.IsBrokerEnabled)
                 .ConfigureAwait(false);
 
             return authorizationResult;

@@ -145,7 +145,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOs\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
 
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -166,7 +166,7 @@
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOs\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet5Win)' ">
@@ -175,7 +175,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOs\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
 
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
@@ -192,7 +192,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOs\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
 
     <Reference Include="System" />
     <Reference Include="System.Core" />

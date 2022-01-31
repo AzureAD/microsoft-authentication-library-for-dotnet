@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Use a real platform proxy but block StartDefaultOsBrowserAsync as we do not want an actual
             // browser to pop-up during tests
             var platformProxy = Substitute.ForPartsOf<NetCorePlatformProxy>(new NullLogger());
-            platformProxy.WhenForAnyArgs(x => x.StartDefaultOsBrowserAsync(default)).DoNotCallBase();
+            platformProxy.WhenForAnyArgs(x => x.StartDefaultOsBrowserAsync(default, false)).DoNotCallBase();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                     .Create("1d18b3b0-251b-4714-a02a-9956cec86c2d") // Any app that accepts http://localhost redirect
