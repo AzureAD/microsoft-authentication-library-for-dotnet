@@ -75,8 +75,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
                 }).ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-            at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
-            Assert.AreEqual(at.KeyId, popKey2.KeyId);
+            var ats = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens();
+            Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == popKey2.KeyId));
+            Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == popKey.KeyId));
         }
 
         private static void ModifyRequestWithLegacyPop(OnBeforeTokenRequestData data, IConfidentialAppSettings settings, X509Certificate2 clientCredsCert, RsaSecurityKey popKey)
