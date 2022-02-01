@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     /// <summary>
     /// This factory ensures key rotation every 8h
     /// </summary>
-    internal class PoPProviderFactory
+    internal static class PoPProviderFactory
     {
         private static InMemoryCryptoProvider s_currentProvider;
         private static DateTime s_providerExpiration;
@@ -29,22 +29,12 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                 var time = TimeService.GetUtcNow();
                 if (s_currentProvider != null && s_providerExpiration > time)
                 {
-#if NET461
-                    Trace.WriteLine($"InMemoryCryptoProvider - using existing provider. Expiration: {s_providerExpiration} time: {time}");
-#endif
                     return s_currentProvider;
                 }
-#if NET461
-
-                Trace.WriteLine($"InMemoryCryptoProvider - using new provider. Before. Expiration: {s_providerExpiration} time: {time}");
-#endif
 
                 s_currentProvider = new InMemoryCryptoProvider();
                 s_providerExpiration = TimeService.GetUtcNow() + KeyRotationInterval;
-#if NET461
 
-                Trace.WriteLine($"InMemoryCryptoProvider - using new provider. After. Expiration: {s_providerExpiration} time: {time}");
-#endif
                 return s_currentProvider;
             }
         }

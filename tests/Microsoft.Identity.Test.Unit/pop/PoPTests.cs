@@ -31,6 +31,13 @@ namespace Microsoft.Identity.Test.Unit.Pop
         private const string ProtectedUrlWithPort = "https://www.contoso.com:5555/path1/path2?queryParam1=a&queryParam2=b";
         private const string CustomNonce = "my_nonce";
 
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            PoPProviderFactory.Reset();
+            base.TestCleanup();
+        }
+
         [TestMethod]
         public async Task POP_ShrValidation_Async()
         {
@@ -162,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             {
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithClientSecret(TestConstants.ClientSecret)                                                              
+                                                              .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
                                                               .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
@@ -194,7 +201,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                         "{0}{1}_{2}_AppTokenCache",
                         expectedKid,
                         TestConstants.ClientId,
-                        TestConstants.Utid), 
+                        TestConstants.Utid),
                     actualCacheKey);
 
                 // Arrange - force a new key by moving to the future
@@ -228,6 +235,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
         }
 
+
         /// <summary>
         /// A key ID that uniquely describes a public / private key pair. While KeyID is not normally
         /// strict, AAD support for PoP requires that we use the base64 encoded JWK thumbprint, as described by 
@@ -235,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
         /// </summary>
         private string GetKidFromJwk(string jwk)
         {
-           
+
             using (SHA256 hash = SHA256.Create())
             {
                 byte[] hashBytes = hash.ComputeHash(Encoding.UTF8.GetBytes(jwk));
