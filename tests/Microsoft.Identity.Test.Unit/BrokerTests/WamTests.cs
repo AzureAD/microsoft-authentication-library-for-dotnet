@@ -82,12 +82,27 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.Inconclusive("Needs to run on win10 or equivalent");
             }
             var pcaBuilder = PublicClientApplicationBuilder
-               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3");
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
+               .WithAuthority(TestConstants.AuthorityTenant);
 #if !NET5_WIN
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
+
+        }
+
+        [TestMethod]
+        public void NoWamOnADFS()
+        {
+            var pcaBuilder = PublicClientApplicationBuilder
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
+               .WithAdfsAuthority(TestConstants.ADFSAuthority);
+#if !NET5_WIN
+            pcaBuilder = pcaBuilder.WithWindowsBroker();
+#endif
+
+            Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
 
         }
 
