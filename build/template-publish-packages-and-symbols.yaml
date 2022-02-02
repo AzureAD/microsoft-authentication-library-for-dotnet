@@ -40,6 +40,7 @@ steps:
   inputs:
     PathtoPublish: '${{ parameters.ArtifactPublishPath }}'
     ArtifactName: '${{ parameters.DropArtifactName }}'
+  enabled: false
 
 - task: NuGetCommand@2
   displayName: 'Publish packages to VSTS feed'
@@ -49,6 +50,7 @@ steps:
     publishVstsFeed: '46419298-b96c-437f-bd4c-12c8df7f868d'
     allowPackageConflicts: true
   continueOnError: true
+  enabled: false
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols'
