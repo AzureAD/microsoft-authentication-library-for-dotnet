@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
         }
 
-        public bool IsBrokerInstalledAndInvokable()
+        public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType = AuthorityType.Aad)
         {
             return _brokerHelper.IsBrokerInstalledAndInvokable();
         }
