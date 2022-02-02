@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -179,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
-                string partitionKey = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid);
+                string partitionKey = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid, null);
                 Assert.AreEqual(
                     partitionKey,
                     ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Single());
@@ -192,7 +193,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
                 Assert.AreEqual(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
-                string partitionKey2 = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid2);
+                string partitionKey2 = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid2, null);
 
                 Assert.IsTrue(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(partitionKey)));
                 Assert.IsTrue(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(partitionKey2)));
@@ -221,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // One tenant partition with one token
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
                 Assert.AreEqual(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
-                string partitionKey = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid);
+                string partitionKey = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid, null);
 
                 Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey]);
                 Assert.AreEqual(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey].Count);
@@ -246,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Two tenant partitions with three tokens total
                 Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                string partitionKey2 = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid2);
+                string partitionKey2 = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid2, null);
 
                 Assert.AreEqual(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
                 Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey2]);
@@ -477,14 +478,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithAuthority("https://login.microsoftonline.com/tid/")
                               .WithExperimentalFeatures(true)
                               .WithHttpManager(httpManager)
                               .Build();
-
 
                 MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
@@ -526,7 +524,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("Bearer", result.TokenType);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsNull((app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
+                IReadOnlyList<Client.Cache.Items.MsalAccessTokenCacheItem> ats = (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens();
+                Assert.AreEqual(2, ats.Count);
+                Assert.IsTrue(ats.Single(at => at.KeyId == "key1") != null);
+                Assert.IsTrue(ats.Single(at => at.KeyId == null) != null);
             }
         }
 
