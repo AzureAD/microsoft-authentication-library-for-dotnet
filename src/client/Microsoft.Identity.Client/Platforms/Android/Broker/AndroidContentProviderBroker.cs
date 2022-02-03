@@ -39,9 +39,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
         }
 
-        public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType = AuthorityType.Aad)
+        public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
-            return _brokerHelper.IsBrokerInstalledAndInvokable();
+            return _brokerHelper.IsBrokerInstalledAndInvokable(authorityType);
         }
 
         public async Task InitiateBrokerHandShakeAsync()
@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             using (_logger.LogMethodDuration())
             {
-                if (!IsBrokerInstalledAndInvokable())
+                if (!IsBrokerInstalledAndInvokable(authorityInfo.AuthorityType))
                 {
                     _logger.Warning("[Android broker] Broker is either not installed or is not reachable so no accounts will be returned. ");
                     return null;
@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             using (_logger.LogMethodDuration())
             {
-                if (!IsBrokerInstalledAndInvokable())
+                if (!IsBrokerInstalledAndInvokable(appConfig.Authority.AuthorityInfo.AuthorityType))
                 {
                     _logger.Warning("[Android broker] Broker is either not installed or not reachable so no accounts will be removed. ");
                     return;

@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AndroidAccountManager = AccountManager.Get(_androidContext);
         }
 
-        public bool IsBrokerInstalledAndInvokable()
+        public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
             using (_logger.LogMethodDuration())
             {

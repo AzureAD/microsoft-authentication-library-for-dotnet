@@ -703,6 +703,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 #if NET_CORE
             if (!DesktopOsHelper.IsWindows())
             {
+                _logger.Info("[WAM Broker] Not a Windows Operating System. WAM Broker will not be used. ");
                 return false;
             }
 #endif            
@@ -712,6 +713,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 _logger.Info("[WAM Broker] Falling Back to Browser for ADFS Authority. ");
                 return false;
             }
+
+            _logger.Info("[WAM Broker] Authority is AAD. Using WAM Broker. ");
 
             // WAM is present on Win 10 only
             return ApiInformation.IsMethodPresent(
