@@ -675,6 +675,15 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // broker is not available on ADFS
             Assert.AreEqual(false, builder1.IsBrokerAvailable());
+
+            var builder3 = PublicClientApplicationBuilder
+                   .Create(TestConstants.ClientId)
+                   .WithDesktopFeatures()
+                   .WithAdfsAuthority(TestConstants.ADFSAuthority);
+
+
+            // broker is not available on ADFS
+            Assert.AreEqual(false, builder1.IsBrokerAvailable());
         }
 #endif
     }

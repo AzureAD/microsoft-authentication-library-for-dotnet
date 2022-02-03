@@ -698,7 +698,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             throw new NotImplementedException();
         }
 
-        public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
+        public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType = AuthorityType.Aad)
         {
 #if NET_CORE
             if (!DesktopOsHelper.IsWindows())

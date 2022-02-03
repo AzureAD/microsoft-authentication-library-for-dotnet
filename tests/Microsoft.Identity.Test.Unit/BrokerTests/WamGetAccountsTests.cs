@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
 
                 var msalTokenResponse = CreateMsalTokenResponseFromWam("wam1");
                 mockBroker.AcquireTokenInteractiveAsync(null, null).ReturnsForAnyArgs(Task.FromResult(msalTokenResponse));
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
 
                 var msalTokenResponse1 = CreateMsalTokenResponseFromWam("wam1");
                 var msalTokenResponse2 = CreateMsalTokenResponseFromWam("wam2");
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 IReadOnlyList<IAccount> brokerAccounts = new List<IAccount>() { brokerAccount1, brokerAccount2 };
 
                 var mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
 
                 var msalTokenResponse = CreateMsalTokenResponseFromWam("wam_acc_id");
                 mockBroker.AcquireTokenInteractiveAsync(null, null).ReturnsForAnyArgs(Task.FromResult(msalTokenResponse));

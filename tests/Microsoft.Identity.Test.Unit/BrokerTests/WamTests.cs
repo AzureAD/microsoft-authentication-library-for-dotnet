@@ -84,6 +84,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var pcaBuilder = PublicClientApplicationBuilder
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAuthority(TestConstants.AuthorityTenant);
+
 #if !NET5_WIN
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
