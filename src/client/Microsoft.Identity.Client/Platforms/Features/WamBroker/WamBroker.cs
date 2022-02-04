@@ -698,14 +698,24 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             throw new NotImplementedException();
         }
 
-        public bool IsBrokerInstalledAndInvokable()
+        public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
 #if NET_CORE
             if (!DesktopOsHelper.IsWindows())
             {
+                _logger.Info("[WAM Broker] Not a Windows operating system. WAM broker is not available. ");
                 return false;
             }
 #endif            
+            // WAM does not work on pure ADFS environments
+            if (authorityType == AuthorityType.Adfs)
+            {
+                _logger.Info("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority. ");
+                return false;
+            }
+
+            _logger.Info("[WAM Broker] Authority is AAD. Using WAM Broker. ");
+
             // WAM is present on Win 10 only
             return ApiInformation.IsMethodPresent(
                    "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
