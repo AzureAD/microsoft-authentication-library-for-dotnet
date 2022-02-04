@@ -33,9 +33,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             AndroidBrokerHelper brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
 
-            AuthorityType authorityType = AuthorityType.Aad; //passing AAD as default authority
-
-            if (brokerHelper.IsBrokerInstalledAndInvokable(authorityType))
+            if (brokerHelper.IsBrokerInstalledAndInvokable(AuthorityType.Aad)) //authorityType is actually not used by the brokerHelper.IsBrokerInstalledAndInvokable
             {
                 try
                 {

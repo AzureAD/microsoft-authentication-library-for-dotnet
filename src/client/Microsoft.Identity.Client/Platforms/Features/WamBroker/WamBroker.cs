@@ -698,19 +698,19 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             throw new NotImplementedException();
         }
 
-        public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType = AuthorityType.Aad)
+        public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
 #if NET_CORE
             if (!DesktopOsHelper.IsWindows())
             {
-                _logger.Info("[WAM Broker] Not a Windows Operating System. WAM Broker will not be used. ");
+                _logger.Info("[WAM Broker] Not a Windows operating system. WAM broker is not available. ");
                 return false;
             }
 #endif            
             // WAM does not work on pure ADFS environments
             if (authorityType == AuthorityType.Adfs)
             {
-                _logger.Info("[WAM Broker] Falling Back to Browser for ADFS Authority. ");
+                _logger.Info("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority. ");
                 return false;
             }
 
