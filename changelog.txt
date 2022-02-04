@@ -1,12 +1,12 @@
 4.41.0
 ==========
 ### New Features:
-**Use AAD plugin's account selector if authority is AAD only. This overcomes the issue of console apps not being able to display the account picker and other issues with Account Picker instability. See [2289](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2289)
+**MSAL now uses the AAD plugin's account selector if authority is AAD only.** This overcomes the issue of console apps not being able to display the account picker and other issues with Account Picker instability. See [2289](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2289)
 **Added extensibility mechanism to support a legacy POP implementation for SAL + MSAL Integration. See [3114](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3114)
 **Add pop kid to client_credentials cache key. See [3115](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3115)
 **Improved the error message when when both region and custom metadata are configured. See [3014](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3014)
-**Exposed the ability to add a custom string to auth dialogs such as WAM. You can now send a custom string to authentication dialogs. See [3125](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3125)
-**Support for Edge System browser on Linux Broker. The .WithBroker() call can now use edge to integrate with linux broker. See [3051](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3051)
+**Exposed the ability to add a custom string to auth dialogs such as WAM.** You can now send a custom string to authentication dialogs. See [3125](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3125)
+**MSAL now supports Linux broker via Edge.** The .WithBroker() call can now use the Edge system browser to integrate with Linux broker. See [3051](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3051)
 
 ### Bug Fixes:
 **Adding support for WAM on Windows Server 2022 and Windows 11. On Windows 2016, we will now fall back to the browser as WAM is not supported. See [3040](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3040) and [2946](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2946)
