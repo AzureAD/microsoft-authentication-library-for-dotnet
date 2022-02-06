@@ -10,7 +10,7 @@
 
 ### Bug Fixes:
 **Adding support for WAM on Windows Server 2022 and Windows 11.** On Windows 2016, we will now fall back to the browser as WAM is not supported. See [3040](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3040) and [2946](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2946)
-**Fix for GetAccountAsync API by checking for null on accountId.** See [3118](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3118)
+**Fix for `GetAccountAsync` API by checking for null on `accountId` parameter.** See [3118](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3118)
 **WAM is not supported in pure ADFS environments.** We will now fall back to browser if the Authority is set as ADFS. See [2836](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2836)
 
 4.40.0
