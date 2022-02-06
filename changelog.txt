@@ -9,7 +9,8 @@
 **MSAL now supports using Linux broker via Microsoft Edge.** Use `WithBroker()` to authenticate with Microsoft Edge system browser, if installed, which integrates with Linux broker to offer a better authentication experience. See [3051](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3051)
 
 ### Bug Fixes:
-**Adding support for WAM on Windows Server 2022 and Windows 11.** On Windows 2016, we will now fall back to the browser as WAM is not supported. See [3040](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3040) and [2946](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2946)
+**Added support for WAM on Windows Server 2022 and Windows 11,** and improved operation system detection for future versions. See [3040](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3040)
+**WAM is not supported on Windows Server 2016.** MSAL will now fall back to browser if this OS is detected. See [2946](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2946)
 **Fix for `GetAccountAsync` API by checking for null on `accountId` parameter.** See [3118](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3118)
 **WAM is not supported in pure ADFS environments.** We will now fall back to browser if the Authority is set as ADFS. See [2836](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2836)
 
