@@ -5,8 +5,8 @@
 **Added extensibility mechanism to support a legacy POP implementation** for SAL + MSAL Integration. See [3114](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3114)
 **Added pop kid to client_credentials cache key.** See [3115](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3115)
 **Improved the error message when both region and custom metadata are configured.** See [3014](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3014)
-**Exposed the ability to add a custom string to auth dialogs such as WAM.** You can now send a custom string to authentication dialogs. See [3125](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3125)
-**MSAL now supports Linux broker via Edge.** The .WithBroker() call can now use the Edge system browser to integrate with Linux broker. See [3051](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3051)
+**Exposed the ability to add a custom header text to auth dialogs such as WAM.** See [3125](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3125)
+**MSAL now supports using Linux broker via Microsoft Edge.** Use `WithBroker()` to authenticate with Microsoft Edge system browser, if installed, which integrates with Linux broker to offer a better authentication experience. See [3051](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3051)
 
 ### Bug Fixes:
 **Adding support for WAM on Windows Server 2022 and Windows 11.** On Windows 2016, we will now fall back to the browser as WAM is not supported. See [3040](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3040) and [2946](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2946)
