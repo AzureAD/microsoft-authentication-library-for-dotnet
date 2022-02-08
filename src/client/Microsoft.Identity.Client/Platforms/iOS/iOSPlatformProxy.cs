@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     /// </summary>
     internal class iOSPlatformProxy : AbstractPlatformProxy
     {
+        private const string EnrollmentIdKey = "intune_app_protection_enrollment_id_V1";
         internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
 
         public iOSPlatformProxy(ICoreLogger logger)
@@ -96,6 +97,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             bool isApplicationTokenCache = false)
         {
             return new iOSTokenCacheAccessor();
+        }
+
+        public override string GetEnrollmentIds()
+        {
+            return NSUserDefaults.StandardUserDefaults.StringForKey(EnrollmentIdKey);
         }
 
         /// <inheritdoc />

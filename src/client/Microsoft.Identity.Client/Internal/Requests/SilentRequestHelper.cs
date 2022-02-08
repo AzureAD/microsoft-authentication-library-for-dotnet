@@ -16,10 +16,21 @@ namespace Microsoft.Identity.Client.Internal
     {
         internal static async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, RequestBase request, AuthenticationRequestParameters authenticationRequestParameters, CancellationToken cancellationToken)
         {
+            const string MAMEnrollmentIdKey = "microsoft_enrollment_id";
             authenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
             await authenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
 
-            var msalTokenResponse = await request.SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
+            var dict = GetBodyParameters(msalRefreshTokenItem.Secret);
+
+            var enrollmentIDs = request.ServiceBundle.PlatformProxy.GetEnrollmentIds();
+            
+            if (!string.IsNullOrEmpty(enrollmentIDs))
+            {
+                var realEnrollmentId = ExtractEnrollmentId(enrollmentIDs);
+                dict[MAMEnrollmentIdKey] = realEnrollmentId;
+            }
+
+            var msalTokenResponse = await request.SendTokenRequestAsync(dict, cancellationToken)
                                     .ConfigureAwait(false);
 
             if (msalTokenResponse.RefreshToken == null)
@@ -105,6 +116,40 @@ namespace Microsoft.Identity.Client.Internal
 
             
             return null;           
+        }
+
+        private static string ExtractEnrollmentId(string enrollmentIDs)
+        {
+            // This method extracts EnrollmentId from EnrollmentIDs that correspoond ot the value in the keychain
+            // expected input format is as follows
+            //{
+            //    "enrollment_ids" : [
+            //      {
+            //          "home_account_id" : "29ba73b9-5cbb-478b-a67d-1e8cf7dd425b.7257a09f-53cc-4a91-aca8-0cb6713642a5",
+            //          "tid" : "7257a09f-53cc-4a91-aca8-0cb6713642a5",
+            //          "user_id" : "IDLAB20TrueMAMCA@msidlab20.onmicrosoft.com",
+            //          "oid" : "29ba73b9-5cbb-478b-a67d-1e8cf7dd425b",
+            //          "enrollment_id" : "02460f14-a7e5-4458-9ab1-789d97114aae"
+            //      }
+            //    ]
+            //}
+
+            const string EnrollmentIdKey = "\"enrollment_id\"";
+
+            // JSON conversion would be costly in performance and the format will stay unchanged.
+            // So indexing has been used.
+            // find the position of the key
+            int indEnrollmentid = enrollmentIDs.IndexOf(EnrollmentIdKey);
+            if (indEnrollmentid == -1)
+            {
+                return string.Empty;
+            }
+            // find the start of the value
+            int beginrealEnrollmentid = enrollmentIDs.IndexOf('"', indEnrollmentid + EnrollmentIdKey.Length);
+            // find end of the value
+            int endrealEnrollmentid = enrollmentIDs.IndexOf('"', beginrealEnrollmentid + 1);
+            // extract and return the value
+            return enrollmentIDs.Substring(beginrealEnrollmentid + 1, endrealEnrollmentid - beginrealEnrollmentid - 1);
         }
     }
 }

@@ -3,6 +3,7 @@
 
 using Microsoft.Identity.Client.Core;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
@@ -142,6 +143,19 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 brokerRequest.Add(BrokerParameter.ExtraQp, extraQP);
             }
 
+            if (authenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities?.Any() == true)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var capability in authenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities)
+                {
+                    sb.Append(capability);
+                    sb.Append(',');
+                }
+                sb.Remove(sb.Length - 1, 1);
+
+                brokerRequest.Add(BrokerParameter.ClientCapabilities, sb.ToString());
+            }
+
             brokerRequest.Add(BrokerParameter.Username, authenticationRequestParameters.Account?.Username ?? string.Empty);
             brokerRequest.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
 
@@ -243,9 +257,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 return ResultFromBrokerResponse(responseDictionary);
             }
         }
-        private MobileBrokerTokenResponse ResultFromBrokerResponse(Dictionary<string, string> responseDictionary)
+        private MsalTokenResponse ResultFromBrokerResponse(Dictionary<string, string> responseDictionary)
         {
-            MobileBrokerTokenResponse brokerTokenResponse;
+            MsalTokenResponse brokerTokenResponse;
 
             string expectedHash = responseDictionary[iOSBrokerConstants.ExpectedHash];
             string encryptedResponse = responseDictionary[iOSBrokerConstants.EncryptedResponsed];
@@ -260,7 +274,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
                 if (!ValidateBrokerResponseNonceWithRequestNonce(responseDictionary))
                 {
-                    return new MobileBrokerTokenResponse
+                    return new MsalTokenResponse
                     {
                         Error = MsalError.BrokerNonceMismatch,
                         ErrorDescription = MsalErrorMessage.BrokerNonceMismatch
@@ -287,14 +301,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     else if (errCode == BrokerResponseConst.iOSBrokerProtectionPoliciesRequired)
                     {
                         responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.ProtectionPolicyRequired;
-                        _accessToken = responseDictionary[BrokerResponseConst.AccessToken];
-                        _refreshToken = responseDictionary[BrokerResponseConst.RefreshToken];
                     }
                 }
             }
             else
             {
-                brokerTokenResponse = new MobileBrokerTokenResponse
+                brokerTokenResponse = new MsalTokenResponse
                 {
                     Error = MsalError.BrokerResponseHashMismatch,
                     ErrorDescription = MsalErrorMessage.BrokerResponseHashMismatch

@@ -67,6 +67,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// <returns>Runtime version</returns>
         string GetRuntimeVersion();
 
+        /// <summary>
+        /// Returns EnrollmentId for a MAM compliant iOS device
+        /// </summary>
+        /// <returns></returns>
+        string GetEnrollmentIds();
+
         ILegacyCachePersistence CreateLegacyCachePersistence();
 
         bool LegacyCacheRequiresSerialization { get; }

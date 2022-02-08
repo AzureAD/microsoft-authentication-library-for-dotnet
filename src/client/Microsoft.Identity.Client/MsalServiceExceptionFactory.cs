@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
@@ -71,18 +72,19 @@ namespace Microsoft.Identity.Client
           string errorMessage,
           string subErrorCode,
           string correlationId,
-          MobileBrokerTokenResponse msalResponse)
+          MsalTokenResponse msalTokenResponse)
         {
+            HttpResponse brokerHttpResponse = msalTokenResponse.HttpResponse;
             MsalServiceException ex = null;
 
             if (IsPolicyProtectionRequired(errorCode, subErrorCode))
             {
                 ex = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode)
                 {
-                    Upn = msalResponse.Upn,
-                    AccountUserId = msalResponse.AccountUserId,
-                    TenantId = msalResponse.TenantId,
-                    AuthorityUrl = msalResponse.AuthorityUrl,
+                    Upn = msalTokenResponse.Upn,
+                    AccountUserId = msalTokenResponse.AccountUserId,
+                    TenantId = msalTokenResponse.TenantId,
+                    AuthorityUrl = msalTokenResponse.AuthorityUrl,
                 };
             }
 
@@ -103,7 +105,7 @@ namespace Microsoft.Identity.Client
                 ex = new MsalServiceException(errorCode, errorMessage);
             }
 
-            SetHttpExceptionData(ex, msalResponse.HttpResponse);
+            SetHttpExceptionData(ex, brokerHttpResponse);
 
             ex.CorrelationId = correlationId;
             ex.SubError = subErrorCode;
@@ -151,7 +153,7 @@ namespace Microsoft.Identity.Client
 
         private static bool IsPolicyProtectionRequired(string errorCode, string subErrorCode)
         {
-            return string.Equals(errorCode, MsalError.UnauthorizedClient, StringComparison.OrdinalIgnoreCase)
+            return string.Equals(errorCode, BrokerResponseConst.iOSBrokerProtectionPoliciesRequired, StringComparison.OrdinalIgnoreCase)
                              && string.Equals(subErrorCode, MsalError.ProtectionPolicyRequired, StringComparison.OrdinalIgnoreCase);
         }
 

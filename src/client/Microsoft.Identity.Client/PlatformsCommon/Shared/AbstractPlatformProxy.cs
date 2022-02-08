@@ -108,6 +108,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <inheritdoc />
+        public virtual string GetEnrollmentIds()
+        {
+            return string.Empty;
+        }
+
+        /// <inheritdoc />
         public abstract ILegacyCachePersistence CreateLegacyCachePersistence();
 
         public ITokenCacheAccessor UserTokenCacheAccessorForTest { get; set; }
