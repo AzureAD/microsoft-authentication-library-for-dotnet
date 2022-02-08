@@ -6,7 +6,7 @@ parameters:
   ArtifactPublishPath: '$(Build.ArtifactStagingDirectory)\packages'
   SymbolPublishWildcard: '**/bin/**/microsoft.identity.client.*'
   DropArtifactName: 'packages'
-  PipelineType: DefaultADO #Used to determine if pipeline artifacts should be published with standard tasks
+  PipelineType: 'DefaultADO' #Used to determine if pipeline artifacts should be published with standard tasks
 
 steps:
 - task: NuGetCommand@2
@@ -26,7 +26,7 @@ steps:
   inputs:
     PathtoPublish: '${{ parameters.ArtifactPublishPath }}'
     ArtifactName: '${{ parameters.DropArtifactName }}'
-  condition: eq(variables['variables.PipelineType'], 'OneBranch')
+  condition: eq(variables['variables.PipelineType'], 'DefaultADO')
 
 - task: NuGetCommand@2
   displayName: 'Publish packages to VSTS feed'
@@ -36,7 +36,7 @@ steps:
     publishVstsFeed: '46419298-b96c-437f-bd4c-12c8df7f868d'
     allowPackageConflicts: true
   continueOnError: true
-  condition: eq(variables['variables.PipelineType'], 'OneBranch')
+  condition: eq(variables['variables.PipelineType'], 'DefaultADO')
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols'
