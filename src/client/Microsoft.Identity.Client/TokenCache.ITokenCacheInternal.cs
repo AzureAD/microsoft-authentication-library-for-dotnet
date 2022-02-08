@@ -960,8 +960,13 @@ namespace Microsoft.Identity.Client
                 allEnvironmentsInCache,
                 requestParameters.RequestContext).ConfigureAwait(false);
 
-            rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment)).ToList();
-            accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment)).ToList();
+            // If the client application is instance aware then we skip the filter with environment
+            // since the authority in request is different from the authority used to get the token
+            if (!requestParameters.AppConfig.MultiCloudSupport)
+            {
+                rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment)).ToList();
+                accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment)).ToList();
+            }
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
