@@ -105,6 +105,19 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Configures the public client application to use multi cloud support.
+        /// It enables applications to pass in a default public cloud authority to the library and can still get tokens for resources from national clouds.
+        /// </summary>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        public PublicClientApplicationBuilder WithMultiCloudSupport()
+        {
+            Config.MultiCloudSupport = true;
+            Config.ExtraQueryParameters.Add("instance_aware", "true");
+            return this;
+        }
+
+        /// <summary>
         /// You can specify a Keychain Access Group to use for persisting the token cache across multiple applications.
         /// This enables you to share the token cache between several applications having the same Keychain access group.
         /// Sharing the token cache allows single sign-on between all of the applications that use the same Keychain access Group.
