@@ -3,7 +3,7 @@
 
 parameters:
   NugetPackagesWildcard: '$(Build.ArtifactStagingDirectory)\packages\*.nupkg'
-  ArtifactPublishPath: '$(ob_outputDirectory)\packages'
+  ArtifactPublishPath: '$(Build.ArtifactStagingDirectory)\packages'
   SymbolPublishWildcard: '**/bin/**/microsoft.identity.client.*'
   DropArtifactName: 'packages'
 

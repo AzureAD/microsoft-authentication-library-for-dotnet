@@ -1,16 +1,20 @@
-# template-restore-build-libsandsamples.yaml
+# template-OneBranch-PR-libsandsamples.yaml
 # Performs Nuget Restore and Build of LibsAndSamples.sln based on BuildPlatform and BuildConfiguration
 
 parameters:
   BuildPlatform: 'any cpu'
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'release'
   MsalClientSemVer: '4.0.0-devopsbuild'
+  MsalSourceDir: 'microsoft-authentication-library-for-dotnet\'
 
 steps:
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
     script: 'nuget locals all -clear'
+
+- powershell: 'powershell.exe -File "$(MsalSourceDir)build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
+  displayName: 'Install Android'
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
@@ -28,12 +32,13 @@ steps:
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
-- task: CopyFiles@2
-  displayName: 'Stage Device Authentication Tests'
-  inputs:
-    SourceFolder: tests/Microsoft.Identity.Test.Integration.Win8
-    Contents: '**/*'
-    TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
+# Run Post-build code analysis (e.g. Roslyn)
+- template: template-postbuild-code-analysis.yaml
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: DeviceAuth'
+- template: template-pack-and-sign-all-nugets.yaml
+
+# Publish nuget packages and symbols to VSTS package manager.
+- template: template-publish-packages-and-symbols.yaml
+
+# Publish analysis and cleanup
+- template: template-publish-analysis-and-cleanup.yaml

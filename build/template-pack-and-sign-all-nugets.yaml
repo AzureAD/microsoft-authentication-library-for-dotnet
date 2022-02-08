@@ -3,6 +3,7 @@
 
 parameters:
   BuildConfiguration: 'release'
+  MsalSourceDir: 'microsoft-authentication-library-for-dotnet\'
 
 steps:
 
@@ -22,11 +23,11 @@ steps:
 
 # Copy all packages out to staging
 - task: CopyFiles@2
-  displayName: 'Copy Files to: $(ob_outputDirectory)\packages'
+  displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)\packages'
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)\microsoft-authentication-library-for-dotnet'
     Contents: '**\*nupkg'
-    TargetFolder: '$(ob_outputDirectory)\packages'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\packages'
     flattenFolders: true
 
 # Sign all final nuget packages in the staging directory
@@ -34,7 +35,7 @@ steps:
   displayName: 'Sign Packages'
   inputs:
     ConnectedServiceName: 'IDDP Code Signing'
-    FolderPath: '$(ob_outputDirectory)\packages'
+    FolderPath: '$(Build.ArtifactStagingDirectory)\packages'
     Pattern: '*nupkg'
     signConfigType: inlineSignParams
     inlineOperation: |
