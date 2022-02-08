@@ -14,7 +14,6 @@ if (Test-Path "$PSScriptRoot\win-installer-helper.psm1")
     Import-Module "$PSScriptRoot\..\..\Helpers\win-installer-helper.psm1" -DisableNameChecking
 }
 
-mkdir -Path C:\Downloads\ -Force
 mkdir -Path "C:\Program Files (x86)\Android\android-sdk\licenses" -Force
 
 Get-File -Url $url -FileName $fileName
