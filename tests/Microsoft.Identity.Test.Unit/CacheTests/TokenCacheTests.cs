@@ -456,10 +456,58 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var userAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(userTokenCache.Accessor, logger);
 
                 // Assert
-                Assert.IsTrue(appAccessorExpiration <= DateTimeOffset.UtcNow);
-                Assert.IsTrue(userAccessorExpiration <= DateTimeOffset.UtcNow);
+                Assert.IsNull(appAccessorExpiration );
+                Assert.IsNull(userAccessorExpiration);
                 Assert.IsFalse(appTokenCache.Accessor.HasAccessOrRefreshTokens());
                 Assert.IsFalse(userTokenCache.Accessor.HasAccessOrRefreshTokens());
+            }
+        }
+
+        [TestMethod]
+        // regression for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3130
+        public void TokensCloseToExpiry_NoTokens()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                ITokenCacheInternal appTokenCache = new TokenCache(harness.ServiceBundle, true);
+                ITokenCacheInternal userTokenCache = new TokenCache(harness.ServiceBundle, false);
+                var logger = Substitute.For<ICoreLogger>();
+
+                var t1 = TokenCacheHelper.CreateAccessTokenItem(isExpired: true);
+                var t2 = TokenCacheHelper.CreateAccessTokenItem(isExpired: true);
+                var t3 = TokenCacheHelper.CreateAccessTokenItem(exiresIn: TimeSpan.FromMinutes(4));
+
+                appTokenCache.Accessor.SaveAccessToken(t1);
+                appTokenCache.Accessor.SaveAccessToken(t2);
+                appTokenCache.Accessor.SaveAccessToken(t3);
+                userTokenCache.Accessor.SaveAccessToken(t1);
+                userTokenCache.Accessor.SaveAccessToken(t2);
+                userTokenCache.Accessor.SaveAccessToken(t3);
+
+                // Act
+                var appAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(appTokenCache.Accessor, logger);
+                var userAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(userTokenCache.Accessor, logger);
+
+                // Assert
+                Assert.IsNull(appAccessorExpiration);
+                Assert.IsNull(userAccessorExpiration);
+                Assert.IsFalse(appTokenCache.Accessor.HasAccessOrRefreshTokens());
+                Assert.IsFalse(userTokenCache.Accessor.HasAccessOrRefreshTokens());
+
+                // Arrange
+                var t4 = TokenCacheHelper.CreateAccessTokenItem(exiresIn: TimeSpan.FromMinutes(10));
+                appTokenCache.Accessor.SaveAccessToken(t4);
+                userTokenCache.Accessor.SaveAccessToken(t4);
+
+                // Act
+                appAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(appTokenCache.Accessor, logger);
+                userAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(userTokenCache.Accessor, logger);
+
+                // Assert
+                CoreAssert.IsWithinRange(t4.ExpiresOn, appAccessorExpiration.Value, TimeSpan.FromSeconds(3));
+                CoreAssert.IsWithinRange(t4.ExpiresOn, userAccessorExpiration.Value, TimeSpan.FromSeconds(3));
+                
             }
         }
 

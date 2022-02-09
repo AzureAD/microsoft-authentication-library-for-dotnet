@@ -343,6 +343,9 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        /// <summary>
+        /// Important note: we should not be suggesting expiration dates that are in the past, as it breaks some cache implementations.
+        /// </summary>
         internal /* for testing */ static DateTimeOffset? CalculateSuggestedCacheExpiry(
             ITokenCacheAccessor accessor, 
             ICoreLogger logger)
@@ -354,11 +357,17 @@ namespace Microsoft.Identity.Client
                 IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = accessor.GetAllAccessTokens(optionalPartitionKey: null);
                 if (tokenCacheItems.Count == 0)
                 {
-                    logger.Warning("[CalculateSuggestedCacheExpiry] No access tokens or refresh tokens found in the accessor. Suggesting immediate expiration.");
-                    return DateTimeOffset.UtcNow;
+                    logger.Warning("[CalculateSuggestedCacheExpiry] No access tokens or refresh tokens found in the accessor. Not returning any expiration.");
+                    return null;
                 }
 
                 DateTimeOffset cacheExpiry = tokenCacheItems.Max(item => item.ExpiresOn);
+                
+                // do not suggest an expiration date from the past or within 5 min, as tokens will not be usable anyway
+                // and HasTokens will be set to false, letting implementers know to delete the cache node
+                if (cacheExpiry < DateTimeOffset.UtcNow + Constants.AccessTokenExpirationBuffer)
+                    return null;
+
                 return cacheExpiry;
             }
 
