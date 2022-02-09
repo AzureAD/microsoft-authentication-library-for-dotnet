@@ -14,6 +14,7 @@ if (Test-Path "$PSScriptRoot\win-installer-helper.psm1")
     Import-Module "$PSScriptRoot\..\..\Helpers\win-installer-helper.psm1" -DisableNameChecking
 }
 
+mkdir -Path C:\Downloads\ -Force
 mkdir -Path "C:\Program Files (x86)\Android\android-sdk\licenses" -Force
 
 Get-File -Url $url -FileName $fileName
@@ -23,7 +24,7 @@ Expand-Archive -LiteralPath "$source" -DestinationPath "C:\Downloads\AndroidSdkT
 
 dir "C:\Program Files (x86)\Android\android-sdk\licenses"
 
-echo "Installing licenses"
+echo "Installing licenses" #This is a workaround as it is not possible to accept licences during the build run. If there is an issue, simply accept the licenses locally and reupload them.
 Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLicenses\* -Destination "C:\Program Files (x86)\Android\android-sdk\licenses" -Force
 
 dir "C:\Program Files (x86)\Android\android-sdk\licenses"
