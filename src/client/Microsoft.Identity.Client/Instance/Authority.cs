@@ -62,7 +62,9 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
-            await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
+
+            if (!requestContext.ServiceBundle.Config.MultiCloudSupport)
+                await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
 
             switch (configAuthorityInfo.AuthorityType)
             {
