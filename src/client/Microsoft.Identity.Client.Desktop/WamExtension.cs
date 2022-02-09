@@ -27,7 +27,11 @@ namespace Microsoft.Identity.Client.Desktop
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
                 builder.Config.BrokerCreatorFunc =
-                     (uiParent, appConfig, logger) => new Platforms.Features.WamBroker.WamBroker(uiParent, appConfig, logger);                    
+                     (uiParent, appConfig, logger) =>
+                     {
+                         logger.Info("WAM support added.");
+                         return new Platforms.Features.WamBroker.WamBroker(uiParent, appConfig, logger);
+                     };
             }
             else
             {
