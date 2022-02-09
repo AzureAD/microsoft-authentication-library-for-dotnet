@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
@@ -436,6 +437,29 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     account: new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null));
 
                 Assert.IsNull(cache.FindAccessTokenAsync(param).Result);
+            }
+        }
+
+        [TestMethod]
+        // regression for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3130
+        public void ExpiryNoTokens()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                ITokenCacheInternal appTokenCache = new TokenCache(harness.ServiceBundle, true);
+                ITokenCacheInternal userTokenCache = new TokenCache(harness.ServiceBundle, false);
+                var logger = Substitute.For<ICoreLogger>();
+
+                // Act
+                var appAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(appTokenCache.Accessor, logger);
+                var userAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(userTokenCache.Accessor, logger);
+
+                // Assert
+                Assert.IsTrue(appAccessorExpiration <= DateTimeOffset.UtcNow);
+                Assert.IsTrue(userAccessorExpiration <= DateTimeOffset.UtcNow);
+                Assert.IsFalse(appTokenCache.Accessor.HasAccessOrRefreshTokens());
+                Assert.IsFalse(userTokenCache.Accessor.HasAccessOrRefreshTokens());
             }
         }
 
