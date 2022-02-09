@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Desktop
                 builder.Config.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>
                      {
-                         logger.Info("WAM support added.");
+                         logger.Info("WAM supported OS.");
                          return new Platforms.Features.WamBroker.WamBroker(uiParent, appConfig, logger);
                      };
             }
