@@ -34,6 +34,11 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string SpaCode = "spa_code";
         public const string ErrorSubcode = "error_subcode";
         public const string ErrorSubcodeCancel = "cancel";
+
+        // Android Broker
+        public const string TenantIdAndroidBrokerOnly = "tenant_id";
+        public const string UpnAndroidBrokerOnly = "username";
+        public const string LocalAccountIdAndroidBrokerOnly = "local_account_id";
     }
 
     [JsonObject]
@@ -79,13 +84,13 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonProperty(PropertyName = TokenResponseClaim.Authority)]
         public string AuthorityUrl { get; set; }
 
-        [JsonProperty(PropertyName = MobileBrokerTokenResponseClaim.TenantIdAndroidBrokerOnly)]
+        [JsonProperty(PropertyName = TokenResponseClaim.TenantIdAndroidBrokerOnly)]
         public string TenantId { get; set; }
 
-        [JsonProperty(PropertyName = MobileBrokerTokenResponseClaim.UpnAndroidBrokerOnly)]
+        [JsonProperty(PropertyName = TokenResponseClaim.UpnAndroidBrokerOnly)]
         public string Upn { get; set; }
 
-        [JsonProperty(PropertyName = MobileBrokerTokenResponseClaim.LocalAccountIdAndroidBrokerOnly)]
+        [JsonProperty(PropertyName = TokenResponseClaim.LocalAccountIdAndroidBrokerOnly)]
         public string AccountUserId { get; set; }
 
         public string WamAccountId { get; set; }
