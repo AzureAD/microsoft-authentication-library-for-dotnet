@@ -382,6 +382,11 @@ namespace Microsoft.Identity.Client
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
+
+            if (Config.IsBrokerEnabled && Config.MultiCloudSupport)
+            {
+                throw new NotSupportedException("Multi cloud support is not supported for broker yet.");
+            }
         }
     }
 }
