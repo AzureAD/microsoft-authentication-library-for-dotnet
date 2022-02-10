@@ -476,7 +476,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var t1 = TokenCacheHelper.CreateAccessTokenItem(isExpired: true);
                 var t2 = TokenCacheHelper.CreateAccessTokenItem(isExpired: true);
-                var t3 = TokenCacheHelper.CreateAccessTokenItem(exiresIn: TimeSpan.FromMinutes(4));
+                // token that expires in less than 5 min and is seen as expired by msal
+                var t3 = TokenCacheHelper.CreateAccessTokenItem(exiresIn: Constants.AccessTokenExpirationBuffer - TimeSpan.FromSeconds(1));
 
                 appTokenCache.Accessor.SaveAccessToken(t1);
                 appTokenCache.Accessor.SaveAccessToken(t2);
@@ -495,8 +496,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsFalse(appTokenCache.Accessor.HasAccessOrRefreshTokens());
                 Assert.IsFalse(userTokenCache.Accessor.HasAccessOrRefreshTokens());
 
-                // Arrange
-                var t4 = TokenCacheHelper.CreateAccessTokenItem(exiresIn: TimeSpan.FromMinutes(10));
+                // Arrange - token that is not seen as expired
+                var t4 = TokenCacheHelper.CreateAccessTokenItem(exiresIn: Constants.AccessTokenExpirationBuffer + TimeSpan.FromMinutes(1));
                 appTokenCache.Accessor.SaveAccessToken(t4);
                 userTokenCache.Accessor.SaveAccessToken(t4);
 
@@ -507,7 +508,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Assert
                 CoreAssert.IsWithinRange(t4.ExpiresOn, appAccessorExpiration.Value, TimeSpan.FromSeconds(3));
                 CoreAssert.IsWithinRange(t4.ExpiresOn, userAccessorExpiration.Value, TimeSpan.FromSeconds(3));
-                
+                Assert.IsTrue(appTokenCache.Accessor.HasAccessOrRefreshTokens());
+                Assert.IsTrue(userTokenCache.Accessor.HasAccessOrRefreshTokens());
+
             }
         }
 
