@@ -790,8 +790,11 @@ namespace Microsoft.Identity.Client
                 var aliases = metadata.Aliases;
 
                 allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
-                allRts = allRts.Where(
-                    item => aliases.ContainsOrdinalIgnoreCase(item.Environment)).ToList();
+                if (!requestParams.AppConfig.MultiCloudSupport)
+                {
+                    allRts = allRts.Where(
+                        item => aliases.ContainsOrdinalIgnoreCase(item.Environment)).ToList();
+                }
 
                 IReadOnlyList<MsalRefreshTokenCacheItem> finalList = allRts.ToList();
                 requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (finalList.Count != 0));
