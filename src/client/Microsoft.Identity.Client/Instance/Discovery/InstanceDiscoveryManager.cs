@@ -98,6 +98,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                         _knownMetadataProvider.GetMetadata(environment, existingEnvironmentsInCache, requestContext.Logger) ??
                         await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
 
+                case AuthorityType.Dsts:
                 case AuthorityType.Adfs:
                 case AuthorityType.B2C:
 

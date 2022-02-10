@@ -17,6 +17,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// </summary>
-        B2C
+        B2C, 
+
+        Dsts,
     }
 }

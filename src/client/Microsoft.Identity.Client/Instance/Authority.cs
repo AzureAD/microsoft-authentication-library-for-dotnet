@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Client.Instance
             {
                 // ADFS is tenant-less, no need to consider tenant
                 case AuthorityType.Adfs:
+                case AuthorityType.Dsts:
                     return requestAuthorityInfo == null ?
                         new AdfsAuthority(configAuthorityInfo) :
                         new AdfsAuthority(requestAuthorityInfo);

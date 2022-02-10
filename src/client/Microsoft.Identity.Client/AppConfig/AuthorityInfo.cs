@@ -303,10 +303,17 @@ namespace Microsoft.Identity.Client
         private static AuthorityType GetAuthorityType(string authority) 
         {
             string firstPathSegment = GetFirstPathSegment(authority);
+            
+
 
             if (string.Equals(firstPathSegment, "adfs", StringComparison.OrdinalIgnoreCase))
             {
                 return AuthorityType.Adfs;
+            }
+
+            if (string.Equals(firstPathSegment, "dstsv2", StringComparison.OrdinalIgnoreCase))
+            {
+                return AuthorityType.Dsts;
             }
 
             if (string.Equals(firstPathSegment, B2CAuthority.Prefix, StringComparison.OrdinalIgnoreCase))

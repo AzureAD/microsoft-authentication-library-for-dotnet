@@ -165,6 +165,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenByRefreshToken &&
                 AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs &&
+                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Dsts &&
                 !(msalTokenResponse.ClientInfo is null))
             {
                 //client_info is not returned from client credential flows because there is no user present.
