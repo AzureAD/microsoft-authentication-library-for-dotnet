@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.AuthScheme.Bearer;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
@@ -34,7 +35,8 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
-            response.Log(requestParams.RequestContext.Logger, LogLevel.Verbose);
+            var logger = requestParams.RequestContext.Logger;
+            response.Log(logger, LogLevel.Verbose);
 
             MsalAccessTokenCacheItem msalAccessTokenCacheItem = null;
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
@@ -44,7 +46,7 @@ namespace Microsoft.Identity.Client
             IdToken idToken = IdToken.Parse(response.IdToken);
             if (idToken == null)
             {
-                requestParams.RequestContext.Logger.Info("ID Token not present in response. ");
+                logger.Info("ID Token not present in response. ");
             }
 
             var tenantId = GetTenantId(idToken, requestParams);
@@ -138,9 +140,9 @@ namespace Microsoft.Identity.Client
 
             #endregion
 
-            requestParams.RequestContext.Logger.Verbose($"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
+            logger.Verbose($"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
             await _semaphoreSlim.WaitAsync(requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
-            requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore. ");
+            logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore. ");
             ITokenCacheInternal tokenCacheInternal = this;
 
             try
@@ -174,7 +176,7 @@ namespace Microsoft.Identity.Client
 
                     if (msalAccessTokenCacheItem != null)
                     {
-                        requestParams.RequestContext.Logger.Info("Saving AT in cache and removing overlapping ATs...");
+                        logger.Info("Saving AT in cache and removing overlapping ATs...");
 
                         DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
@@ -189,7 +191,7 @@ namespace Microsoft.Identity.Client
 
                     if (idToken != null)
                     {
-                        requestParams.RequestContext.Logger.Info("Saving Id Token and Account in cache ...");
+                        logger.Info("Saving Id Token and Account in cache ...");
                         Accessor.SaveIdToken(msalIdTokenCacheItem);
                         MergeWamAccountIds(msalAccountCacheItem);
                         Accessor.SaveAccount(msalAccountCacheItem);
@@ -198,7 +200,7 @@ namespace Microsoft.Identity.Client
                     // if server returns the refresh token back, save it in the cache.
                     if (msalRefreshTokenCacheItem != null)
                     {
-                        requestParams.RequestContext.Logger.Info("Saving RT in cache...");
+                        logger.Info("Saving RT in cache...");
                         Accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
                     }
 
@@ -219,12 +221,7 @@ namespace Microsoft.Identity.Client
                 {
                     if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
-                        DateTimeOffset? cacheExpiry = null;
-
-                        if (!Accessor.GetAllRefreshTokens().Any())
-                        {
-                            cacheExpiry = CalculateSuggestedCacheExpiry();
-                        }
+                        DateTimeOffset? cacheExpiry = CalculateSuggestedCacheExpiry(Accessor, logger);
 
                         var args = new TokenCacheNotificationArgs(
                             tokenCache: this,
@@ -255,7 +252,7 @@ namespace Microsoft.Identity.Client
             finally
             {
                 _semaphoreSlim.Release();
-                requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
+                logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
             }
         }
 
@@ -346,11 +343,35 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private DateTimeOffset CalculateSuggestedCacheExpiry()
+        /// <summary>
+        /// Important note: we should not be suggesting expiration dates that are in the past, as it breaks some cache implementations.
+        /// </summary>
+        internal /* for testing */ static DateTimeOffset? CalculateSuggestedCacheExpiry(
+            ITokenCacheAccessor accessor, 
+            ICoreLogger logger)
         {
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
-            DateTimeOffset cacheExpiry = tokenCacheItems.Max(item => item.ExpiresOn);
-            return cacheExpiry;
+            // If we have refresh tokens in the cache, we cannot suggest expiration
+            // because refresh token expiration is not disclosed to SDKs and RTs are long lived anyway (3 months by default)
+            if (accessor.GetAllRefreshTokens().Count == 0)
+            {
+                IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = accessor.GetAllAccessTokens(optionalPartitionKey: null);
+                if (tokenCacheItems.Count == 0)
+                {
+                    logger.Warning("[CalculateSuggestedCacheExpiry] No access tokens or refresh tokens found in the accessor. Not returning any expiration.");
+                    return null;
+                }
+
+                DateTimeOffset cacheExpiry = tokenCacheItems.Max(item => item.ExpiresOn);
+                
+                // do not suggest an expiration date from the past or within 5 min, as tokens will not be usable anyway
+                // and HasTokens will be set to false, letting implementers know to delete the cache node
+                if (cacheExpiry < DateTimeOffset.UtcNow + Constants.AccessTokenExpirationBuffer)
+                    return null;
+
+                return cacheExpiry;
+            }
+
+            return null;
         }
 
         private string GetTenantId(IdToken idToken, AuthenticationRequestParameters requestParams)
