@@ -385,7 +385,7 @@ namespace Microsoft.Identity.Client
 
             if (Config.IsBrokerEnabled && Config.MultiCloudSupport)
             {
-                throw new NotSupportedException("Multi cloud support is not supported for broker yet.");
+                throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
             }
         }
     }
