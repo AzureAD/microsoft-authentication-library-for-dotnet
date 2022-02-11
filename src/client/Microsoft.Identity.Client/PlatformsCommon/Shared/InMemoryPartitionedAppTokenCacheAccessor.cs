@@ -36,8 +36,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected readonly ICoreLogger _logger;
         private readonly CacheOptions _tokenCacheAccessorOptions;
 
-        private long _cacheSize; // In bytes
-        private const long ATSizeInBytes = 2000;
+        // Approximate size of cache item objects
+        private const long AccessTokenSizeInBytes = 4500;
+
+        private long _appCacheSize;
 
         public InMemoryPartitionedAppTokenCacheAccessor(
             ICoreLogger logger,
@@ -56,14 +58,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 AccessTokenCacheDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
                 AppMetadataDictionary = new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
             }
-
-            _cacheSize = 0L;
         }
 
         #region Add
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            if (IsOverCapacity())
+            if (IsCacheOverCapacity(AccessTokenSizeInBytes))
             {
                 _logger.Always("[AppCache] Cache is over capacity.");
                 Compact();
@@ -72,11 +72,17 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string itemKey = item.GetKey().ToString();
             string partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId, item.KeyId);
 
+            // Update cache size only if cache item is added, not updated
+            if (!AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition) || !partition.TryGetValue(itemKey, out _))
+            {
+                Interlocked.Add(ref _appCacheSize, AccessTokenSizeInBytes);
+                Interlocked.Add(ref TokenCache.CacheSize, AccessTokenSizeInBytes);
+            }
+
             // if a conflict occurs, pick the latest value
             AccessTokenCacheDictionary
                 .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccessTokenCacheItem>())[itemKey] = item;
-            Interlocked.Add(ref _cacheSize, ATSizeInBytes);
-            _logger.Always($"[AppCache] Saved token. Cache size: {Interlocked.Read(ref _cacheSize)}.");
+            _logger.Verbose($"[AppCache] Saved access token. App cache size: {Interlocked.Read(ref _appCacheSize)}.");
         }
 
         /// <summary>
@@ -153,8 +159,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 return;
             }
 
-            Interlocked.Add(ref _cacheSize, -ATSizeInBytes);
-            _logger.Always($"[AppCache] Removed token. Cache size: {Interlocked.Read(ref _cacheSize)}.");
+            Interlocked.Add(ref _appCacheSize, -AccessTokenSizeInBytes);
+            Interlocked.Add(ref TokenCache.CacheSize, -AccessTokenSizeInBytes);
+            _logger.Verbose($"[AppCache] Removed access token. App cache size: {Interlocked.Read(ref _appCacheSize)}.");
         }
 
         /// <summary>
@@ -234,7 +241,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual void Clear()
         {
             AccessTokenCacheDictionary.Clear();
-            Interlocked.Exchange(ref _cacheSize, 0);
+            Interlocked.Add(ref TokenCache.CacheSize, -_appCacheSize);
+            Interlocked.Exchange(ref _appCacheSize, 0);
             _logger.Always("[AppCache] Cleared access token cache data.");
             // app metadata isn't removable
         }
@@ -244,9 +252,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
         }
 
-        private bool IsOverCapacity()
+        private bool IsCacheOverCapacity(long sizeToAdd)
         {
-            return _tokenCacheAccessorOptions.SizeLimit.HasValue && (Interlocked.Read(ref _cacheSize) + ATSizeInBytes) > _tokenCacheAccessorOptions.SizeLimit;
+            return _tokenCacheAccessorOptions.SizeLimit.HasValue && (Interlocked.Read(ref TokenCache.CacheSize) + sizeToAdd) > _tokenCacheAccessorOptions.SizeLimit;
         }
 
         private void Compact()

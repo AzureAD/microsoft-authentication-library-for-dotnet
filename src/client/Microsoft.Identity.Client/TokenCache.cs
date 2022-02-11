@@ -47,6 +47,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal bool UsesDefaultSerialization { get; set; } = false;
 
+        /// <summary>
+        /// Static, used by both app and user caches to track approximate token cache size.
+        /// </summary>
+        internal static long CacheSize = 0L;
+
         internal string ClientId => ServiceBundle.Config.ClientId;
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => Accessor;
@@ -117,7 +122,7 @@ namespace Microsoft.Identity.Client
             (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
 #endif
         }
-       
+
         private void UpdateAppMetadata(string clientId, string environment, string familyId)
         {
             if (_featureFlags.IsFociEnabled)

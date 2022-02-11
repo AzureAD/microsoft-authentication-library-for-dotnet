@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -46,8 +48,10 @@ namespace Microsoft.Identity.Client
         /// <param name="sizeLimit">Token cache size limit in bytes. <see cref="SizeLimit"/> for a detailed description.</param>
         public CacheOptions(bool useSharedCache, long sizeLimit)
         {
+            ValidateSizeLimit(sizeLimit);
+
             UseSharedCache = useSharedCache;
-            SizeLimit = sizeLimit;
+            _sizeLimit = sizeLimit;
         }
 
         /// <summary>
@@ -61,12 +65,35 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool UseSharedCache { get; set; }
 
+        private long? _sizeLimit;
+
         /// <summary>
-        /// Token cache size limit in bytes.
+        /// Total token cache size limit in bytes for both app and user token caches.
         /// </summary>
         /// <remarks>
-        /// Once the limit is reached, the whole cache is cleared.
+        /// Once the limit is reached, either the app or user cache will be fully cleared, depending on which was most recently used.
+        /// MSAL doesn't calculate the exact memory usage and uses approximations of the token sizes. 
+        /// For instance, app token cache entry is approximately at least 4500 bytes; user access token entry - 6500 bytes,
+        /// user refresh token entry - 3700 bytes.
+        /// IMPORTANT: Monitor app health metrics (including memory usage) and cache performance (<see href="https://aka.ms/msal-net-token-cache-serialization"/>)
+        /// and adjust size limit accordingly.
         /// </remarks>
-        public long? SizeLimit { get; set; }
+        public long? SizeLimit
+        {
+            get => _sizeLimit;
+            set
+            {
+                ValidateSizeLimit(value);
+                _sizeLimit = value;
+            }
+        }
+
+        private void ValidateSizeLimit(long? sizeLimit)
+        {
+            if (!sizeLimit.HasValue || sizeLimit < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sizeLimit), $"{nameof(sizeLimit)} must be a positive number.");
+            }
+        }
     }
 }

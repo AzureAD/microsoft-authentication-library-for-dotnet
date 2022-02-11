@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
@@ -44,6 +45,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected readonly ICoreLogger _logger;
         private readonly CacheOptions _tokenCacheAccessorOptions;
 
+        // Approximate size of cache item objects
+        private const long AccessTokenSizeInBytes = 6500;
+        private const long RefreshTokenSizeInBytes = 3700;
+        private const long IDTokenSizeInBytes = 3300;
+        private const long AccountSizeInBytes = 1300;
+
+        private long _userCacheSize;
+
         public InMemoryPartitionedUserTokenCacheAccessor(ICoreLogger logger, CacheOptions tokenCacheAccessorOptions)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -70,11 +79,26 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Add
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
+            if (IsCacheOverCapacity(AccessTokenSizeInBytes))
+            {
+                _logger.Always("[UserCache] Cache is over capacity.");
+                Compact();
+            }
+
             string itemKey = item.GetKey().ToString();
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
+            // Update cache size only if cache item is added, not updated
+            if (!AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition) || !partition.TryGetValue(itemKey, out _))
+            {
+                Interlocked.Add(ref _userCacheSize, AccessTokenSizeInBytes);
+                Interlocked.Add(ref TokenCache.CacheSize, AccessTokenSizeInBytes);
+            }
+
+            // if a conflict occurs, pick the latest value
             AccessTokenCacheDictionary
-                .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccessTokenCacheItem>())[itemKey] = item; // if a conflict occurs, pick the latest value
+                .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccessTokenCacheItem>())[itemKey] = item;
+            _logger.Verbose($"[UserCache] Saved access token. User cache size: {Interlocked.Read(ref _userCacheSize)}.");
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
@@ -82,8 +106,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string itemKey = item.GetKey().ToString();
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
+            // Update cache size only if cache item is added, not updated
+            if (!RefreshTokenCacheDictionary.TryGetValue(partitionKey, out var partition) || !partition.TryGetValue(itemKey, out _))
+            {
+                Interlocked.Add(ref _userCacheSize, RefreshTokenSizeInBytes);
+                Interlocked.Add(ref TokenCache.CacheSize, RefreshTokenSizeInBytes);
+            }
+
             RefreshTokenCacheDictionary
                 .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalRefreshTokenCacheItem>())[itemKey] = item;
+            _logger.Verbose($"[UserCache] Saved refresh token. User cache size: {Interlocked.Read(ref _userCacheSize)}.");
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
@@ -91,8 +123,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string itemKey = item.GetKey().ToString();
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
+            // Update cache size only if cache item is added, not updated
+            if (!IdTokenCacheDictionary.TryGetValue(partitionKey, out var partition) || !partition.TryGetValue(itemKey, out _))
+            {
+                Interlocked.Add(ref _userCacheSize, IDTokenSizeInBytes);
+                Interlocked.Add(ref TokenCache.CacheSize, IDTokenSizeInBytes);
+            }
+
             IdTokenCacheDictionary
                 .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalIdTokenCacheItem>())[itemKey] = item;
+            _logger.Verbose($"[UserCache] Saved ID token. User cache size: {Interlocked.Read(ref _userCacheSize)}.");
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
@@ -100,8 +140,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string itemKey = item.GetKey().ToString();
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
+            // Update cache size only if cache item is added, not updated
+            if (!AccountCacheDictionary.TryGetValue(partitionKey, out var partition) || !partition.TryGetValue(itemKey, out _))
+            {
+                Interlocked.Add(ref _userCacheSize, AccountSizeInBytes);
+                Interlocked.Add(ref TokenCache.CacheSize, AccountSizeInBytes);
+            }
+
             AccountCacheDictionary
                 .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccountCacheItem>())[itemKey] = item;
+            _logger.Verbose($"[UserCache] Saved account. User cache size: {Interlocked.Read(ref _userCacheSize)}.");
         }
 
         public void SaveAppMetadata(MsalAppMetadataCacheItem item)
@@ -155,9 +203,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
             {
                 _logger.InfoPii(
-                    $"Cannot delete access token because it was not found in the cache. Key {item.GetKey()}.",
-                    "Cannot delete access token because it was not found in the cache.");
+                    $"[UserCache] Cannot delete access token because it was not found in the cache. Key {item.GetKey()}.",
+                    "[UserCache] Cannot delete access token because it was not found in the cache.");
+                return;
             }
+
+            Interlocked.Add(ref _userCacheSize, -AccessTokenSizeInBytes);
+            Interlocked.Add(ref TokenCache.CacheSize, -AccessTokenSizeInBytes);
+            _logger.Verbose($"[UserCache] Removed access token. User cache size: {Interlocked.Read(ref _userCacheSize)}.");
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
@@ -168,9 +221,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
             {
                 _logger.InfoPii(
-                    $"Cannot delete refresh token because it was not found in the cache. Key {item.GetKey()}.",
-                    "Cannot delete refresh token because it was not found in the cache.");
+                    $"[UserCache] Cannot delete refresh token because it was not found in the cache. Key {item.GetKey()}.",
+                    "[UserCache] Cannot delete refresh token because it was not found in the cache.");
+                return;
             }
+
+            Interlocked.Add(ref _userCacheSize, -RefreshTokenSizeInBytes);
+            Interlocked.Add(ref TokenCache.CacheSize, -RefreshTokenSizeInBytes);
+            _logger.Verbose($"[UserCache] Removed refresh token. User cache size: {Interlocked.Read(ref _userCacheSize)}.");
         }
 
         public void DeleteIdToken(MsalIdTokenCacheItem item)
@@ -181,9 +239,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
             {
                 _logger.InfoPii(
-                    $"Cannot delete ID token because it was not found in the cache. Key {item.GetKey()}.",
-                    "Cannot delete ID token because it was not found in the cache.");
+                    $"[UserCache] Cannot delete ID token because it was not found in the cache. Key {item.GetKey()}.",
+                    "[UserCache] Cannot delete ID token because it was not found in the cache.");
+                return;
             }
+
+            Interlocked.Add(ref _userCacheSize, -IDTokenSizeInBytes);
+            Interlocked.Add(ref TokenCache.CacheSize, -IDTokenSizeInBytes);
+            _logger.Verbose($"[UserCache] Removed ID token. User cache size: {Interlocked.Read(ref _userCacheSize)}.");
         }
 
         public void DeleteAccount(MsalAccountCacheItem item)
@@ -194,9 +257,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
             {
                 _logger.InfoPii(
-                    $"Cannot delete account because it was not found in the cache. Key {item.GetKey()}.",
-                    "Cannot delete account because it was not found in the cache");
+                    $"[UserCache] Cannot delete account because it was not found in the cache. Key {item.GetKey()}.",
+                    "[UserCache] Cannot delete account because it was not found in the cache");
+                return;
             }
+
+            Interlocked.Add(ref _userCacheSize, -AccountSizeInBytes);
+            Interlocked.Add(ref TokenCache.CacheSize, -AccountSizeInBytes);
+            _logger.Verbose($"[UserCache] Removed account. User cache size: {Interlocked.Read(ref _userCacheSize)}.");
         }
         #endregion
 
@@ -277,11 +345,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual void Clear()
         {
-            _logger.Always("[Clear] Clearing access token cache data.");
             AccessTokenCacheDictionary.Clear();
             RefreshTokenCacheDictionary.Clear();
             IdTokenCacheDictionary.Clear();
             AccountCacheDictionary.Clear();
+            Interlocked.Add(ref TokenCache.CacheSize, -_userCacheSize);
+            Interlocked.Exchange(ref _userCacheSize, 0);
+            _logger.Always("[UserCache] Cleared access token cache data.");
             // app metadata isn't removable
         }
 
@@ -291,6 +361,17 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return RefreshTokenCacheDictionary.Any(partition => partition.Value.Count > 0) ||
                     AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
+        }
+
+        private bool IsCacheOverCapacity(long sizeToAdd)
+        {
+            return _tokenCacheAccessorOptions.SizeLimit.HasValue && (Interlocked.Read(ref TokenCache.CacheSize) + sizeToAdd) > _tokenCacheAccessorOptions.SizeLimit;
+        }
+
+        private void Compact()
+        {
+            _logger.Always("[UserCache] Compacting cache.");
+            Clear();
         }
     }
 }
