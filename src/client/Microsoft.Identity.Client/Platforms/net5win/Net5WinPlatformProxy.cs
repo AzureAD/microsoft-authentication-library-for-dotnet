@@ -29,13 +29,15 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         {
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
+                Logger.Info("WAM supported OS. ");
+
                 return appConfig.BrokerCreatorFunc != null ?
                     appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
                     new Features.WamBroker.WamBroker(uiParent, appConfig, Logger);
             }
             else
             {
-                Logger.Info("Not a Win10 or Server 2019 or Server 2016 machine. WAM is not available");
+                Logger.Info("WAM is not available. WAM is supported only on Windows 10+ or Windows Server 2019+");
                 return new NullBroker(Logger);
             }
         }
