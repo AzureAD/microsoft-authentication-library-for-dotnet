@@ -27,8 +27,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string tenant = TestConstants.Utid,
             string homeAccountId = TestConstants.HomeAccountId,
             bool isExpired = false,
-            string oboCacheKey = null)
+            string oboCacheKey = null, 
+            TimeSpan? exiresIn = null)
         {
+            var expiresIn = (exiresIn.HasValue ? exiresIn.Value : TimeSpan.FromSeconds(ValidExpiresIn));
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                TestConstants.ProductionPrefCacheEnvironment,
                TestConstants.ClientId,
@@ -36,7 +38,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                tenantId: tenant,
                secret: "",
                cachedAt: DateTimeOffset.UtcNow,
-               expiresOn: isExpired ? new DateTimeOffset(DateTime.UtcNow) : new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+               expiresOn: isExpired ? new DateTimeOffset(DateTime.UtcNow) : new DateTimeOffset(DateTime.UtcNow + expiresIn),
                extendedExpiresOn: isExpired ? new DateTimeOffset(DateTime.UtcNow) : new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
                MockHelpers.CreateClientInfo(),
                homeAccountId, 

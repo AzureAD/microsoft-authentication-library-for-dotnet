@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -144,7 +145,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         protected override IFeatureFlags CreateFeatureFlags() => new NetCoreFeatureFlags();
 
-        public override Task StartDefaultOsBrowserAsync(string url)
+        public override Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured)
         {
             if (DesktopOsHelper.IsWindows())
             {
@@ -175,22 +176,17 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 try
                 {
                     ProcessStartInfo psi = null;
-                    foreach (string openTool in new[] { "xdg-open", "gnome-open", "kfmclient" })
+
+                    foreach (string openTool in GetOpenToolsLinux(isBrokerConfigured))
                     {
                         if (TryGetExecutablePath(openTool, out string openToolPath))
                         {
-                            psi = new ProcessStartInfo(openToolPath, url)
-                            {
-                                RedirectStandardOutput = true,
-                                RedirectStandardError = true
-                            };
-
-                            Process.Start(psi);
+                            psi = OpenLinuxBrowser(openToolPath, url);
 
                             break;
                         }
                     }
-
+                    
                     if (psi == null)
                     {
                         throw new Exception("Failed to locate a utility to launch the default web browser.");
@@ -214,6 +210,29 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             }
             return Task.FromResult(0);
 
+        }
+
+        private ProcessStartInfo OpenLinuxBrowser(string openToolPath, string url)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo(openToolPath, url)
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
+            Process.Start(psi);
+
+            return psi;
+        }
+
+        private string[] GetOpenToolsLinux(bool isBrokerConfigured)
+        {
+            if (isBrokerConfigured)
+            {
+                return new[] { "microsoft-edge", "xdg-open", "gnome-open", "kfmclient" };
+            }
+
+            return new[] { "xdg-open", "gnome-open", "kfmclient" };
         }
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()

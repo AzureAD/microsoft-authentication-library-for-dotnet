@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
 #if HAVE_METHOD_IMPL_ATTRIBUTE
 using System.Runtime.CompilerServices;
 #endif
@@ -20,6 +22,15 @@ namespace Microsoft.Identity.Client.Utils
             return Array.Empty<T>();
 #else
             return new List<T>();
+#endif
+        }
+
+        public static IDictionary<TKey, TValue> GetEmptyDictionary<TKey, TValue>()
+        {
+#if NET_CORE
+            return System.Collections.Immutable.ImmutableDictionary<TKey, TValue>.Empty;
+#else
+            return new Dictionary<TKey, TValue>();
 #endif
         }
     }

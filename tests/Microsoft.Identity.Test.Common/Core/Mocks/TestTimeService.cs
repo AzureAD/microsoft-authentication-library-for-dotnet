@@ -8,16 +8,31 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     public class TestTimeService : ITimeService
     {
-        public TestTimeService(DateTime utcNow)
+        private DateTime _utcNow;
+
+        public TestTimeService()
         {
-            UtcNow = utcNow;
+            _utcNow = DateTime.UtcNow;
         }
 
-        public DateTime UtcNow { get; set; }
+        public TestTimeService(DateTime utcNow)
+        {
+            _utcNow = utcNow;
+        }
 
         public DateTime GetUtcNow()
         {
-            return UtcNow;
+            return _utcNow;
+        }
+
+        public void MoveToFuture(TimeSpan span)
+        {
+            _utcNow += span;
+        }
+
+        public void MoveToPast(TimeSpan span)
+        {
+            _utcNow -= span;
         }
     }
 }

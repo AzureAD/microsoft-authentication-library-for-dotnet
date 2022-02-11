@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 
                 Task<MsalTokenResponse> task = client.GetTokenAsync(
                     new Uri(TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token"),
-                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()));
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()), addCommonHeaders: true, onBeforePostRequestHandler: null);
                 MsalTokenResponse response = task.Result;
                 Assert.IsNotNull(response);
             }

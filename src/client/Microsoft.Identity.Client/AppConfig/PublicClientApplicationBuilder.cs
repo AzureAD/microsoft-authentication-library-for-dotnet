@@ -329,7 +329,7 @@ namespace Microsoft.Identity.Client
         public bool IsBrokerAvailable()
         {            
             return PlatformProxyFactory.CreatePlatformProxy(null)
-                .CreateBroker(base.Config, null).IsBrokerInstalledAndInvokable();
+                .CreateBroker(base.Config, null).IsBrokerInstalledAndInvokable(base.Config.Authority.AuthorityInfo.AuthorityType);
         }
 
         /// <summary>

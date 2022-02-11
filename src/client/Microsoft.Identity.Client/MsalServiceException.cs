@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(errorMessage));
             }
+            IsRetryable = IsAadUnavailable();
         }
 
         /// <summary>
@@ -76,6 +77,7 @@ namespace Microsoft.Identity.Client
             Exception innerException)
             : base(errorCode, errorMessage, innerException)
         {
+            IsRetryable = IsAadUnavailable();
         }
 
         /// <summary>
@@ -99,6 +101,7 @@ namespace Microsoft.Identity.Client
                 errorCode, errorMessage, innerException)
         {
             StatusCode = statusCode;
+            IsRetryable = IsAadUnavailable();
         }
 
         /// <summary>

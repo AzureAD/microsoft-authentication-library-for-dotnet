@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 
         protected override IFeatureFlags CreateFeatureFlags() => new NetStandardFeatureFlags();
 
-        public override Task StartDefaultOsBrowserAsync(string url)
+        public override Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured)
         {            
             return Task.FromResult(0);
         }

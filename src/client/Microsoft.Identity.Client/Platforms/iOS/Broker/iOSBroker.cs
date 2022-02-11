@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             _uIParent = uIParent;
         }
 
-        public bool IsBrokerInstalledAndInvokable()
+        public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
             using (_logger.LogMethodDuration())
             {

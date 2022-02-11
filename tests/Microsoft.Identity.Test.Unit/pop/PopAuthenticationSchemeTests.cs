@@ -19,7 +19,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
-namespace Microsoft.Identity.Test.Unit.PoP
+namespace Microsoft.Identity.Test.Unit.Pop
 {
     [TestClass]
     public class PopAuthenticationSchemeTests : TestBase
@@ -129,8 +129,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                     responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token: $"header.{Guid.NewGuid()}.signature", tokenType: "pop"));
 
                 Guid correlationId = Guid.NewGuid();
-                TestClock testClock = new TestClock();
-                testClock.TestTime = DateTime.UtcNow;
+                TestTimeService testClock = new TestTimeService();                
                 PoPProviderFactory.TimeService = testClock;
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -140,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 var initialToken = result.AccessToken;
 
                 //Advance time 7 hours. Should still be the same key and token
-                testClock.TestTime +=TimeSpan.FromHours(7);
+                testClock.MoveToFuture(TimeSpan.FromHours(7));
                 PoPProviderFactory.TimeService = testClock;
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -153,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
 
                 //Advance time 2 hours. Should be a different key
-                testClock.TestTime +=TimeSpan.FromHours(2);
+                testClock.MoveToFuture(TimeSpan.FromHours(2));
                 PoPProviderFactory.TimeService = testClock;
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -192,16 +191,6 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 Assert.AreEqual(optionalExpectedValue, value);
             }
             return value;
-        }
-    }
-
-    class TestClock : ITimeService
-    {
-        public DateTime TestTime { get; set; }
-
-        public DateTime GetUtcNow()
-        {
-            return TestTime;
         }
     }
 }

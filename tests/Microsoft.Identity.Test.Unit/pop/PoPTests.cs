@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,15 +21,22 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.pop
+namespace Microsoft.Identity.Test.Unit.Pop
 {
 
     [TestClass]
-    public class PoPTests : TestBase
+    public class PopTests : TestBase
     {
         private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
         private const string ProtectedUrlWithPort = "https://www.contoso.com:5555/path1/path2?queryParam1=a&queryParam2=b";
         private const string CustomNonce = "my_nonce";
+
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            PoPProviderFactory.Reset();
+            base.TestCleanup();
+        }
 
         [TestMethod]
         public async Task POP_ShrValidation_Async()
@@ -59,7 +69,6 @@ namespace Microsoft.Identity.Test.Unit.pop
 
                 Assert.IsTrue(!string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
                 AssertSingedHttpRequestClaims(provider, claims);
-
             }
         }
 
@@ -152,6 +161,96 @@ namespace Microsoft.Identity.Test.Unit.pop
             Assert.AreEqual("www.contoso.com:5555", popConfig.HttpHost);
             Assert.AreEqual("/path1/path2", popConfig.HttpPath);
         }
+
+        [TestMethod]
+        public async Task CacheKey_Includes_POPKid_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .WithExperimentalFeatures(true)
+                                                              .BuildConcrete();
+                var testTimeService = new TestTimeService();
+                PoPProviderFactory.TimeService = testTimeService;
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+                var popConfig = new PoPAuthenticationConfiguration(request);
+                var cacheAccess = app.AppTokenCache.RecordAccess();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                // Act
+                Trace.WriteLine("1. AcquireTokenForClient ");
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithProofOfPossession(popConfig)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                string expectedKid = GetKidFromJwk(PoPProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
+                string actualCacheKey = cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey;
+                Assert.AreEqual(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0}{1}_{2}_AppTokenCache",
+                        expectedKid,
+                        TestConstants.ClientId,
+                        TestConstants.Utid),
+                    actualCacheKey);
+
+                // Arrange - force a new key by moving to the future
+                (PoPProviderFactory.TimeService as TestTimeService).MoveToFuture(
+                    PoPProviderFactory.KeyRotationInterval.Add(TimeSpan.FromMinutes(10)));
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                // Act
+                Trace.WriteLine("1. AcquireTokenForClient again, after time passes - expect POP key rotation");
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                   .WithAuthority(TestConstants.AuthorityUtidTenant)
+                   .WithProofOfPossession(popConfig)
+                   .ExecuteAsync()
+                   .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                string expectedKid2 = GetKidFromJwk(PoPProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
+                string actualCacheKey2 = cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey;
+                Assert.AreEqual(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0}{1}_{2}_AppTokenCache",
+                        expectedKid2,
+                        TestConstants.ClientId,
+                        TestConstants.Utid),
+                    actualCacheKey2);
+
+                Assert.AreNotEqual(actualCacheKey, actualCacheKey2);
+            }
+        }
+
+
+        /// <summary>
+        /// A key ID that uniquely describes a public / private key pair. While KeyID is not normally
+        /// strict, AAD support for PoP requires that we use the base64 encoded JWK thumbprint, as described by 
+        /// https://tools.ietf.org/html/rfc7638
+        /// </summary>
+        private string GetKidFromJwk(string jwk)
+        {
+
+            using (SHA256 hash = SHA256.Create())
+            {
+                byte[] hashBytes = hash.ComputeHash(Encoding.UTF8.GetBytes(jwk));
+                return Base64UrlHelpers.Encode(hashBytes);
+            }
+        }
+
         private static void AssertSingedHttpRequestClaims(IPoPCryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
         {
             Assert.AreEqual("GET", claims.FindAll("m").Single().Value);
@@ -172,6 +271,6 @@ namespace Microsoft.Identity.Test.Unit.pop
             var jwkInToken = JObject.Parse(jwkClaim);
 
             Assert.IsTrue(JObject.DeepEquals(jwkInConfig, jwkInToken));
-        }       
+        }
     }
 }

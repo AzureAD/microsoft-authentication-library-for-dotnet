@@ -620,7 +620,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private string GetPartitionKey(bool isAppCache, MsalAccessTokenCacheItem atItem)
         {
             return isAppCache ?
-                CacheKeyFactory.GetClientCredentialKey(atItem.ClientId, atItem.TenantId) :
+                CacheKeyFactory.GetClientCredentialKey(atItem.ClientId, atItem.TenantId, atItem.KeyId) :
                 CacheKeyFactory.GetKeyFromCachedItem(atItem);
         }
     }

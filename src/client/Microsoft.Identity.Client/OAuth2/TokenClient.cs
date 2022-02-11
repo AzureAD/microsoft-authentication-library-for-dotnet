@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.OAuth2
             using (_requestParams.RequestContext.Logger.LogMethodDuration())
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Authority.GetTokenEndpoint();
                 Debug.Assert(_requestParams.RequestContext.ApiEvent != null, "The Token Client must only be called by requests.");
                 _requestParams.RequestContext.ApiEvent.TokenEndpoint = tokenEndpoint;
@@ -121,23 +121,21 @@ namespace Microsoft.Identity.Client.OAuth2
         }
 
         private async Task AddBodyParamsAndHeadersAsync(
-            IDictionary<string, string> additionalBodyParameters, 
-            string scopes, 
+            IDictionary<string, string> additionalBodyParameters,
+            string scopes,
             CancellationToken cancellationToken)
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
-            _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
-
 
             if (_serviceBundle.Config.ClientCredential != null)
             {
                 await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
                     _oAuth2Client,
                     _requestParams.RequestContext.Logger,
-                    _serviceBundle.PlatformProxy.CryptographyManager,                    
+                    _serviceBundle.PlatformProxy.CryptographyManager,
                     _requestParams.AppConfig.ClientId,
-                    _requestParams.Authority,
-                    _requestParams.SendX5C, 
+                    _requestParams.Authority.GetTokenEndpoint(),
+                    _requestParams.SendX5C,
                     cancellationToken).ConfigureAwait(false);
             }
 
@@ -189,7 +187,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     if (!string.IsNullOrEmpty(pair.Key) &&
                         !string.IsNullOrEmpty(pair.Value))
-                    _oAuth2Client.AddHeader(pair.Key, pair.Value);
+                        _oAuth2Client.AddHeader(pair.Key, pair.Value);
                 }
             }
         }
@@ -211,7 +209,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 MsalTokenResponse msalTokenResponse =
                     await _oAuth2Client
                         .GetTokenAsync(tokenEndpointWithQueryParams,
-                            _requestParams.RequestContext)
+                            _requestParams.RequestContext, true, _requestParams.OnBeforeTokenRequestHandler)
                         .ConfigureAwait(false);
 
                 // Clear failed telemetry data as we've just sent it
@@ -233,7 +231,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     string responseHeader = string.Empty;
                     var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponseAsync(
-                        ex.Headers, 
+                        ex.Headers,
                         new Uri(tokenEndpoint), // do not add query params to PKeyAuth https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2359
                         out responseHeader);
                     if (isChallenge)
@@ -242,9 +240,9 @@ namespace Microsoft.Identity.Client.OAuth2
                         _oAuth2Client.AddHeader("Authorization", responseHeader);
 
                         return await _oAuth2Client.GetTokenAsync(
-                            tokenEndpointWithQueryParams, 
-                            _requestParams.RequestContext, 
-                            false).ConfigureAwait(false);
+                            tokenEndpointWithQueryParams,
+                            _requestParams.RequestContext,
+                            false, _requestParams.OnBeforeTokenRequestHandler).ConfigureAwait(false);
                     }
                 }
 
