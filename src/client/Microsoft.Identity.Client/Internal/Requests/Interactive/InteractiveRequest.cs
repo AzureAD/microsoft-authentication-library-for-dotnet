@@ -112,6 +112,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
+            if (_requestParams.AppConfig.MultiCloudSupport)
+            {
+                _requestParams.AppConfig.ExtraQueryParameters.Add("instance_aware", "true");
+            }
+
             IAuthCodeRequestComponent authorizationFetcher =
                 _authCodeRequestComponentOverride ??
                 new AuthCodeRequestComponent(

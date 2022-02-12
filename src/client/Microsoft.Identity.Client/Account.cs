@@ -49,8 +49,6 @@ namespace Microsoft.Identity.Client
 
         internal IDictionary<string, string> WamAccountIds { get; }
 
-        public string GetAuthority() => $"https://{Environment}/{HomeAccountId.TenantId}";
-
         public override string ToString()
         {
             return string.Format(

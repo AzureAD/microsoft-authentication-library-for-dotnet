@@ -63,8 +63,7 @@ namespace Microsoft.Identity.Client.Instance
 
             ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
 
-            if (!requestContext.ServiceBundle.Config.MultiCloudSupport)
-                await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
+            await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
 
             switch (configAuthorityInfo.AuthorityType)
             {
@@ -196,7 +195,8 @@ namespace Microsoft.Identity.Client.Instance
         {
             var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
 
-            if (requestAuthorityInfo != null &&
+            if (!requestContext.ServiceBundle.Config.MultiCloudSupport && 
+                requestAuthorityInfo != null &&
                 !string.Equals(requestAuthorityInfo.Host, configAuthorityInfo.Host, StringComparison.OrdinalIgnoreCase))
             {
                 if (requestAuthorityInfo.AuthorityType == AuthorityType.B2C)

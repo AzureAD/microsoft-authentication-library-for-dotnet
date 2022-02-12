@@ -59,18 +59,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var result = await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        public async Task Interactive_Arlington_MultiCloudSupport_AADAsync()
-        {
-            // Arrange
-            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            var result = await RunTestForUserAsync(labResponse, multiCloudSupport: true).ConfigureAwait(false);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(labResponse.Lab.Authority + labResponse.Lab.TenantId, result.Account.GetAuthority());
-        }
-
-
-
 #if DESKTOP // no point in running these tests on NetCore - the code path is similar
         [TestMethod]
         [TestCategory(TestCategories.Arlington)]
@@ -226,39 +214,49 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(authResult.AccessToken);
         }
 
+        [TestMethod]
+        public async Task Interactive_Arlington_MultiCloudSupport_AADAsync()
+        {
+            // Arrange
+            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            var tuple = getPCA(labResponse, false, true);
+            IPublicClientApplication pca = tuple.Item1;
+
+            Trace.WriteLine("Part 1 - Acquire a token interactively");
+            AuthenticationResult result = await pca
+                .AcquireTokenInteractive(s_scopes)
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false))
+                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Account);
+            Assert.AreEqual(labResponse.Lab.Authority + labResponse.Lab.TenantId, result.Account.GetAuthority());
+
+            Trace.WriteLine("Part 2 - Get Accounts");
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(accounts);
+            Assert.IsTrue(accounts.Count() > 0);
+            Assert.AreEqual(labResponse.User.Upn, accounts.FirstOrDefault().Username);
+
+            Trace.WriteLine("Part 3 - Acquire a token silently");
+            result = await pca
+                .AcquireTokenSilent(s_scopes, result.Account)
+                .WithAuthority(result.Account.GetAuthority())
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Account);
+            Assert.AreEqual(labResponse.Lab.Authority + labResponse.Lab.TenantId, result.Account.GetAuthority());
+        }
+
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false, bool multiCloudSupport = false)
         {
-            HttpSnifferClientFactory factory = null;
-            IPublicClientApplication pca;
-            if (directToAdfs)
-            {
-                pca = PublicClientApplicationBuilder
-                    .Create(Adfs2019LabConstants.PublicClientId)
-                    .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
-                    .WithAdfsAuthority(Adfs2019LabConstants.Authority)
-                    .WithTestLogging()
-                    .Build();
-            }
-            else if (multiCloudSupport)
-            {
-                pca = PublicClientApplicationBuilder
-                    .Create(labResponse.App.AppId)
-                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-                    .WithMultiCloudSupport()
-                    .WithAuthority("https://login.microsoftonline.com/common")
-                    .WithTestLogging(out factory)
-                    .Build();
-            }
-            else
-            {
-                pca = PublicClientApplicationBuilder
-                    .Create(labResponse.App.AppId)
-                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-                    .WithAuthority(labResponse.Lab.Authority + "common")
-                    .WithTestLogging(out factory)
-                    .Build();
-            }
-
+            var tuple = getPCA(labResponse, directToAdfs, multiCloudSupport);
+            IPublicClientApplication pca = tuple.Item1;
+            HttpSnifferClientFactory factory = tuple.Item2;
             var userCacheAccess = pca.UserTokenCache.RecordAccess();
 
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
@@ -276,7 +274,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(1, 1); // the assert calls GetAccounts
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
-            AssertMultiCloudSupportAuthorityUpdate(labResponse, result, multiCloudSupport);
 
             Trace.WriteLine("Part 2 - Clear the cache");
             await pca.RemoveAsync(account).ConfigureAwait(false);
@@ -284,7 +281,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsFalse((await pca.GetAccountsAsync().ConfigureAwait(false)).Any());
             userCacheAccess.AssertAccessCounts(2, 2);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
-            AssertMultiCloudSupportAuthorityUpdate(labResponse, result, multiCloudSupport);
 
             if (factory?.RequestsAndResponses != null)
             {
@@ -306,7 +302,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(3, 3);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
-            AssertMultiCloudSupportAuthorityUpdate(labResponse, result, multiCloudSupport);
 
             if (factory?.RequestsAndResponses != null)
             {
@@ -314,58 +309,62 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }
 
             Trace.WriteLine("Part 4 - Acquire a token silently");
-            if (multiCloudSupport)
-            {
-                result = await pca
-                .AcquireTokenSilent(s_scopes, result.Account)
-                .WithAuthority(result.Account.GetAuthority())
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
-            }
-            else
-            {
-                result = await pca
+            result = await pca
                 .AcquireTokenSilent(s_scopes, account)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
-            }
             
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
-            AssertMultiCloudSupportAuthorityUpdate(labResponse, result, multiCloudSupport);
 
             Trace.WriteLine("Part 5 - Acquire a token silently with force refresh");
-            if (multiCloudSupport)
-            {
-                result = await pca
-                .AcquireTokenSilent(s_scopes, result.Account)
-                .WithAuthority(result.Account.GetAuthority())
-                .WithForceRefresh(true)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
-            }
-            else
-            {
-                result = await pca
+            result = await pca
                 .AcquireTokenSilent(s_scopes, account)
                 .WithForceRefresh(true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
-            }
 
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
             AssertCcsRoutingInformationIsSent(factory, labResponse);
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
-            AssertMultiCloudSupportAuthorityUpdate(labResponse, result, multiCloudSupport);
 
             return result;
         }
 
-        private void AssertMultiCloudSupportAuthorityUpdate(LabResponse labResponse, AuthenticationResult result, bool multiCloudSupport)
+        private Tuple<IPublicClientApplication, HttpSnifferClientFactory> getPCA(LabResponse labResponse, bool directToAdfs, bool multiCloudSupport)
         {
-            if (!multiCloudSupport)
-                return;
-            Assert.AreEqual(labResponse.Lab.Authority + labResponse.Lab.TenantId, result.Account.GetAuthority());
+            HttpSnifferClientFactory factory = null;
+            PublicClientApplicationBuilder pcaBuilder;
+
+            if (directToAdfs)
+            {
+                pcaBuilder = PublicClientApplicationBuilder
+                    .Create(Adfs2019LabConstants.PublicClientId)
+                    .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
+                    .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                    .WithTestLogging();
+            }
+            else 
+            {
+                pcaBuilder = PublicClientApplicationBuilder
+                    .Create(labResponse.App.AppId)
+                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    
+                    .WithTestLogging(out factory);
+            }
+
+            if (multiCloudSupport)
+            {
+                pcaBuilder
+                    .WithAuthority("https://login.microsoftonline.com/common")
+                    .WithMultiCloudSupport(multiCloudSupport);
+            }
+            else
+            {
+                pcaBuilder.WithAuthority(labResponse.Lab.Authority + "common");
+            }
+
+            return Tuple.Create(pcaBuilder.Build(), factory);
         }
 
         private void AssertCcsRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)

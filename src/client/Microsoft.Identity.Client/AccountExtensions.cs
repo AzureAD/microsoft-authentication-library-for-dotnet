@@ -23,5 +23,14 @@ namespace Microsoft.Identity.Client
         {
             return (account as Account)?.TenantProfiles;
         }
+
+        /// <summary>
+        /// Returns the authority from which the account is acquired.
+        /// </summary>
+        /// <returns>Authority for the account.</returns>
+        public static string GetAuthority(this IAccount account)
+        {
+            return $"https://{account.Environment}/{account.HomeAccountId.TenantId}";
+        }
     }
 }

@@ -108,12 +108,12 @@ namespace Microsoft.Identity.Client
         /// Configures the public client application to use multi cloud support.
         /// It enables applications to pass in a default public cloud authority to the library and can still get tokens for resources from national clouds.
         /// </summary>
+        /// <param name="enabled"></param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
-        public PublicClientApplicationBuilder WithMultiCloudSupport()
+        public PublicClientApplicationBuilder WithMultiCloudSupport(bool enabled)
         {
-            Config.MultiCloudSupport = true;
-            Config.ExtraQueryParameters.Add("instance_aware", "true");
+            Config.MultiCloudSupport = enabled;
             return this;
         }
 

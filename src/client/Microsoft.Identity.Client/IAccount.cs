@@ -33,11 +33,6 @@ namespace Microsoft.Identity.Client
         /// AccountId of the home account for the user. This uniquely identifies the user across AAD tenants.
         /// </summary>
         /// <remarks>Can be null, for example if this account was migrated to MSAL.NET from ADAL.NET v3's token cache</remarks>
-        AccountId HomeAccountId { get; }
-
-        /// <summary>
-        /// Returns the authority from which the token is acquired.
-        /// </summary>
-        string GetAuthority();    
+        AccountId HomeAccountId { get; } 
     }
 }
