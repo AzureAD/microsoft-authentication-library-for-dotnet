@@ -26,22 +26,6 @@ namespace IntuneMAMSampleiOS
                     var abcd = plist.StringForKey("intune_app_protection_enrollment_id_V1");
                     System.Diagnostics.Debug.WriteLine(abcd);
                     _manualReset.Set();
-                    //try
-                    //{
-                    //    string[] Scopes = { "api://09aec9b9-0b0f-488a-81d6-72fd13a3a1c1/Hello.World" };
-                    //    var accts = await MainViewController.PCA.GetAccountsAsync().ConfigureAwait(false);
-                    //    var acct = accts.FirstOrDefault();
-                    //    if (acct != null)
-                    //    {
-                    //        var silentParamBuilder = MainViewController.PCA.AcquireTokenSilent(Scopes, acct);
-                    //        var authResult = await silentParamBuilder.ExecuteAsync().ConfigureAwait(false);
-                    //        System.Diagnostics.Debug.WriteLine(authResult.AccessToken);
-                    //    }
-                    //}
-                    //catch (Exception ex)
-                    //{
-                    //    System.Diagnostics.Debug.WriteLine(ex.Message);
-                    //}
                 }
                 catch (Exception ex)
                 {

@@ -82,9 +82,6 @@ namespace Microsoft.Identity.Client
                 ex = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode)
                 {
                     Upn = msalTokenResponse.Upn,
-                    AccountUserId = msalTokenResponse.AccountUserId,
-                    TenantId = msalTokenResponse.TenantId,
-                    AuthorityUrl = msalTokenResponse.AuthorityUrl,
                 };
             }
 
