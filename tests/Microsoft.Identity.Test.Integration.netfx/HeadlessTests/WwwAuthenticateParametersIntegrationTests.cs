@@ -17,10 +17,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://buildautomation.vault.azure.net/secrets/CertName/CertVersion").ConfigureAwait(false);
 
-            Assert.AreEqual("https://vault.azure.net", authParams.Resource);
             Assert.AreEqual("login.windows.net", new Uri(authParams.Authority).Host);
             Assert.AreEqual("72f988bf-86f1-41af-91ab-2d7cd011db47", authParams.GetTenantId()); // because the Key Vault resource belong to Microsoft Corp tenant
-            Assert.AreEqual("https://vault.azure.net/.default", authParams.Scopes.FirstOrDefault());
+            Assert.IsNull(authParams.Scopes);
             Assert.AreEqual(2, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
@@ -31,10 +30,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://graph.microsoft.com/v1.0/me").ConfigureAwait(false);
 
-            Assert.AreEqual("00000003-0000-0000-c000-000000000000", authParams.Resource);
             Assert.AreEqual("https://login.microsoftonline.com/common", authParams.Authority);
             Assert.AreEqual("common", authParams.GetTenantId());
-            Assert.AreEqual("00000003-0000-0000-c000-000000000000/.default", authParams.Scopes.FirstOrDefault());
+            Assert.IsNull(authParams.Scopes);
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
@@ -58,7 +56,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(url).ConfigureAwait(false);
 
-            Assert.IsNull(authParams.Resource);
             Assert.AreEqual($"https://{authority}/{tenantId}", authParams.Authority); // authority URI consists of AAD endpoint and tenant ID
             Assert.AreEqual(tenantId, authParams.GetTenantId()); // tenant ID is extracted out of authority URI
             Assert.IsNull(authParams.Scopes);
