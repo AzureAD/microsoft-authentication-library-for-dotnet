@@ -33,24 +33,7 @@ namespace Microsoft.Identity.Client
         /// If it's not provided by the web API, it's computed from the Resource.
         /// </summary>
         [Obsolete("The client apps should know which scopes to request for.", true)]
-        public IEnumerable<string> Scopes
-        {
-            get
-            {
-                if (_scopes != null)
-                {
-                    return _scopes;
-                }
-
-                return null;
-            }
-            set
-            {
-                _scopes = value;
-            }
-        }
-
-        private IEnumerable<string> _scopes;
+        public IEnumerable<string> Scopes { get; set; }
 
         /// <summary>
         /// Authority from which to request an access token.
