@@ -50,9 +50,7 @@ namespace Microsoft.Identity.Test.Unit
             var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
 
             // Assert
-            Assert.AreEqual(GraphGuid, authParams.Resource);
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
-            Assert.AreEqual($"{GraphGuid}/.default", authParams.Scopes.FirstOrDefault());
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
@@ -136,9 +134,7 @@ namespace Microsoft.Identity.Test.Unit
             var authParams = WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateResponse);
 
             // Assert
-            Assert.AreEqual(GraphGuid, authParams.Resource);
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
-            Assert.AreEqual($"{GraphGuid}/.default", authParams.Scopes.First());
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
