@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client.Instance
         {
             var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
 
-            if (!requestContext.ServiceBundle.Config.MultiCloudSupport && 
+            if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && 
                 requestAuthorityInfo != null &&
                 !string.Equals(requestAuthorityInfo.Host, configAuthorityInfo.Host, StringComparison.OrdinalIgnoreCase))
             {

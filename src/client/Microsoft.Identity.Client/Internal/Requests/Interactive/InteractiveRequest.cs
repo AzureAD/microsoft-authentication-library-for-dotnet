@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            if (_requestParams.AppConfig.MultiCloudSupport)
+            if (_requestParams.AppConfig.MultiCloudSupportEnabled)
             {
                 _requestParams.AppConfig.ExtraQueryParameters.Add("instance_aware", "true");
             }
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await RunBrokerWithInstallUriAsync(brokerInstallUri, cancellationToken).ConfigureAwait(false);
             }
 
-            if (!_requestParams.AppConfig.IsBrokerEnabled && !string.IsNullOrEmpty(authResult.CloudInstanceHost))
+            if (_requestParams.AppConfig.MultiCloudSupportEnabled && !string.IsNullOrEmpty(authResult.CloudInstanceHost))
             {
                 _logger.Info("Updating the authority to the cloud specific authority.");
                 _requestParams.AuthorityManager = new AuthorityManager(

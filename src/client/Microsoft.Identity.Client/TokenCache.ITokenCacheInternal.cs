@@ -790,7 +790,7 @@ namespace Microsoft.Identity.Client
                 var aliases = metadata.Aliases;
 
                 allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
-                if (!requestParams.AppConfig.MultiCloudSupport)
+                if (!requestParams.AppConfig.MultiCloudSupportEnabled)
                 {
                     allRts = allRts.Where(
                         item => aliases.ContainsOrdinalIgnoreCase(item.Environment)).ToList();
@@ -965,7 +965,7 @@ namespace Microsoft.Identity.Client
 
             // If the client application is instance aware then we skip the filter with environment
             // since the authority in request is different from the authority used to get the token
-            if (!requestParameters.AppConfig.MultiCloudSupport)
+            if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
             {
                 rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment)).ToList();
                 accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment)).ToList();

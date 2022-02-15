@@ -25,9 +25,9 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Returns the authority from which the account is acquired.
+        /// Gets the authority associated with the home tenant for this user.
         /// </summary>
-        /// <returns>Authority for the account.</returns>
+        /// <returns>Authority.</returns>
         public static string GetAuthority(this IAccount account)
         {
             return $"https://{account.Environment}/{account.HomeAccountId.TenantId}";

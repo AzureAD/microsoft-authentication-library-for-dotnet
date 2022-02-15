@@ -487,7 +487,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var ex = Assert.ThrowsException<NotSupportedException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
                 .WithBroker(true)
-                .WithMultiCloudSupport()
+                .WithMultiCloudSupport(true)
                 .Build());
             Assert.AreEqual(MsalErrorMessage.MultiCloudSupportUnavailable, ex.Message);
         }

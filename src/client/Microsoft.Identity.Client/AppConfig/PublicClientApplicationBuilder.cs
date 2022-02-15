@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithMultiCloudSupport(bool enabled)
         {
-            Config.MultiCloudSupport = enabled;
+            Config.MultiCloudSupportEnabled = enabled;
             return this;
         }
 
@@ -383,7 +383,7 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
 
-            if (Config.IsBrokerEnabled && Config.MultiCloudSupport)
+            if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
             {
                 throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
             }
