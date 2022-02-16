@@ -79,6 +79,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Add
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
+            // When saving tokens in SaveTokenResponseAsync, AT is saved first, then other tokens.
+            // For the user cache, checking size limit and compacting only when saving AT,
+            // because otherwise, if compact is run in other save methods,
+            // it could leave unassociated tokens in the cache.
+            // (For ex, compact in SaveAccount, would leave only account in the cache, without other tokens.)
             if (IsCacheOverCapacity(AccessTokenSizeInBytes))
             {
                 _logger.Always("[UserCache] Cache is over capacity.");

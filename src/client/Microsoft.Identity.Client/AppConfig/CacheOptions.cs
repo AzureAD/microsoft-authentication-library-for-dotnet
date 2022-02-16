@@ -48,10 +48,8 @@ namespace Microsoft.Identity.Client
         /// <param name="sizeLimit">Token cache size limit in bytes. <see cref="SizeLimit"/> for a detailed description.</param>
         public CacheOptions(bool useSharedCache, long sizeLimit)
         {
-            ValidateSizeLimit(sizeLimit);
-
             UseSharedCache = useSharedCache;
-            _sizeLimit = sizeLimit;
+            SizeLimit = sizeLimit;
         }
 
         /// <summary>
@@ -75,6 +73,8 @@ namespace Microsoft.Identity.Client
         /// MSAL doesn't calculate the exact memory usage and uses approximations of the token sizes. 
         /// For instance, app token cache entry is approximately at least 4500 bytes; user access token entry - 6500 bytes,
         /// user refresh token entry - 3700 bytes.
+        /// Using a MemoryCache via Microsoft.Identity.Web.TokenCache is more accurate but slower.
+        /// This size limit applies only to internal memory cache and is not a concern when distributed caching is used.
         /// IMPORTANT: Monitor app health metrics (including memory usage) and cache performance (<see href="https://aka.ms/msal-net-token-cache-serialization"/>)
         /// and adjust size limit accordingly.
         /// </remarks>
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client
 
         private void ValidateSizeLimit(long? sizeLimit)
         {
-            if (!sizeLimit.HasValue || sizeLimit < 0)
+            if (sizeLimit < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(sizeLimit), $"{nameof(sizeLimit)} must be a positive number.");
             }
