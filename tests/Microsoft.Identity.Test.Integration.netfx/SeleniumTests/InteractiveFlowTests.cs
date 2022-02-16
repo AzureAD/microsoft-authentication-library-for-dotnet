@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Account);
-            Assert.AreEqual(labResponse.Lab.Authority + labResponse.Lab.TenantId, result.Account.GetAuthority());
+            Assert.IsTrue(labResponse.Lab.Authority.Contains(result.Account.Environment));
 
             Trace.WriteLine("Part 2 - Get Accounts");
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -158,13 +158,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 3 - Acquire a token silently");
             result = await pca
                 .AcquireTokenSilent(s_scopes, result.Account)
-                .WithAuthority(result.Account.GetAuthority())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Account);
-            Assert.AreEqual(labResponse.Lab.Authority + labResponse.Lab.TenantId, result.Account.GetAuthority());
+            Assert.IsTrue(labResponse.Lab.Authority.Contains(result.Account.Environment));
         }
 
 #endif

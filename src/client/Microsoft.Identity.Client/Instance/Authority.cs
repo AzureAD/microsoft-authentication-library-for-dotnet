@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Instance
         public static async Task<Authority> CreateAuthorityForRequestAsync(
             RequestContext requestContext,
             AuthorityInfo requestAuthorityInfo,
-            string requestHomeAccountTenantId = null)
+            IAccount account = null)
         {
             var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
 
@@ -83,9 +83,15 @@ namespace Microsoft.Identity.Client.Instance
 
                 case AuthorityType.Aad:
 
+                    bool updateAuthority = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null;
+
                     if (requestAuthorityInfo == null)
                     {
-                        return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
+                        return CreateAuthorityWithTenant(
+                            updateAuthority ? 
+                                new AuthorityInfo(AuthorityType.Aad, $"https://{account.Environment}/{account.HomeAccountId.TenantId}", configAuthorityInfo.ValidateAuthority) : 
+                                configAuthorityInfo, 
+                            account?.HomeAccountId?.TenantId);
                     }
 
                     // In case the authority is defined only at the request level
@@ -95,13 +101,19 @@ namespace Microsoft.Identity.Client.Instance
                         return CreateAuthority(requestAuthorityInfo);
                     }
 
-                    var requestAuthority = new AadAuthority(requestAuthorityInfo);
+                    var requestAuthority = updateAuthority ? 
+                        new AadAuthority(new AuthorityInfo(AuthorityType.Aad, $"https://{account.Environment}/{account.HomeAccountId.TenantId}", requestAuthorityInfo.ValidateAuthority)) :
+                        new AadAuthority(requestAuthorityInfo);
                     if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant())
                     {
                         return requestAuthority;
                     }
 
-                    return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
+                    return CreateAuthorityWithTenant(
+                            updateAuthority ?
+                                new AuthorityInfo(AuthorityType.Aad, $"https://{account.Environment}/{account.HomeAccountId.TenantId}", configAuthorityInfo.ValidateAuthority) :
+                                configAuthorityInfo,
+                            account?.HomeAccountId?.TenantId);
 
                 default:
                     throw new MsalClientException(

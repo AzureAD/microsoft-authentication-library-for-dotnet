@@ -105,15 +105,15 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Configures the public client application to use multi cloud support.
-        /// It enables applications to pass in a default public cloud authority to the library and can still get tokens for resources from national clouds.
+        /// Enables multi cloud support for this instance of public client application.
+        /// It enables applications to use in a global public cloud authority to the library and can still get tokens for resources from national clouds.
         /// </summary>
         /// <param name="enabled"></param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
-        public PublicClientApplicationBuilder WithMultiCloudSupport(bool enabled)
+        public PublicClientApplicationBuilder WithMultiCloudSupport(bool enableMultiCloudSupport)
         {
-            Config.MultiCloudSupportEnabled = enabled;
+            Config.MultiCloudSupportEnabled = enableMultiCloudSupport;
             return this;
         }
 
@@ -385,6 +385,7 @@ namespace Microsoft.Identity.Client
 
             if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
             {
+                // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139
                 throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
             }
         }
