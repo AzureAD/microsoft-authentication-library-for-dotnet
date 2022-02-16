@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    });
 
                 // Act
-                var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenAsync(requestParams, msaProvider)
+                var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenInteractiveAsync(requestParams, msaProvider)
                     .ConfigureAwait(false);
 
                 // Assert
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _wamProxy.RequestTokenForWindowAsync(IntPtr.Zero, msaRequest).Returns(webTokenResponseWrapper);
 
                 // Act
-                var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenAsync(requestParams, msaProvider)
+                var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenInteractiveAsync(requestParams, msaProvider)
                     .ConfigureAwait(false);
 
                 // Assert

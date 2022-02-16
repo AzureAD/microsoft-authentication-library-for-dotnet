@@ -37,7 +37,7 @@ using System.Runtime.Versioning;
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     /// <summary>
-    /// Important: all the WAM code has Win10 specific types and MUST be guarded against 
+    /// Important: all the WAM code has Win10 specific types and MUST be guarded against
     /// usage on older Windows, Mac and Linux, otherwise TypeLoadExceptions occur
     /// </summary>
 #if NET5_WIN
@@ -55,6 +55,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly SynchronizationContext _synchronizationContext;
         private readonly IMsaPassthroughHandler _msaPassthroughHandler;
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
+        private const string InfrastructureTenantAuthority = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
         private readonly WindowsBrokerOptions _wamOptions;
 
         /// <summary>
@@ -90,21 +91,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         }
 
         /// <summary>
-        /// In WAM, AcquireTokenInteractive is always associated to an account. WAM also allows for an "account picker" to be displayed, 
+        /// In WAM, AcquireTokenInteractive is always associated to an account. WAM also allows for an "account picker" to be displayed,
         /// which is similar to the EVO browser experience, allowing the user to add an account or use an existing one.
-        /// 
-        /// MSAL does not have a concept of account picker so MSAL.AccquireTokenInteractive will: 
-        /// 
+        ///
+        /// MSAL does not have a concept of account picker so MSAL.AccquireTokenInteractive will:
+        ///
         /// 1. Call WAM.AccountPicker if an IAccount (or possibly login_hint) is not configured
         /// 2. Figure out the WAM.AccountID associated to the MSAL.Account
         /// 3. Call WAM.AcquireTokenInteractive with the WAM.AccountID
-        /// 
-        /// To make matters more complicated, WAM has 2 plugins - AAD and MSA. With AAD plugin, 
-        /// it is possible to list all WAM accounts and find the one associated to the MSAL account. 
-        /// However, MSA plugin does NOT allow listing of accounts, and the only way to figure out the 
-        /// WAM account ID is to use the account picker. This makes AcquireTokenSilent impossible for MSA, 
-        /// because we would not be able to map an Msal.Account to a WAM.Account. To overcome this, 
-        /// we save the WAM.AccountID in MSAL's cache. 
+        ///
+        /// To make matters more complicated, WAM has 2 plugins - AAD and MSA. With AAD plugin,
+        /// it is possible to list all WAM accounts and find the one associated to the MSAL account.
+        /// However, MSA plugin does NOT allow listing of accounts, and the only way to figure out the
+        /// WAM account ID is to use the account picker. This makes AcquireTokenSilent impossible for MSA,
+        /// because we would not be able to map an Msal.Account to a WAM.Account. To overcome this,
+        /// we save the WAM.AccountID in MSAL's cache.
         /// </summary>
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -119,7 +120,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                      ErrorMessageSuffix);
             }
 #endif
-            
+
             if (authenticationRequestParameters.Account != null ||
                 !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
             {
@@ -128,7 +129,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 bool isMsaPassthrough = _wamOptions.MsaPassthrough;
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
-                    authenticationRequestParameters?.Account?.HomeAccountId?.TenantId, 
+                    authenticationRequestParameters?.Account?.HomeAccountId?.TenantId,
                     isMsaPassthrough).ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
@@ -180,7 +181,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 _logger.Verbose("[WamBroker] AcquireTokenIntractive - account information provided but no matching account was found ");
             }
 
-            // no account information available, need an account picker 
+            // no account information available, need an account picker
             if (CanSkipAccountPicker(authenticationRequestParameters.Authority))
             {
                 _logger.Verbose("[WamBroker] Using AAD plugin account picker");
@@ -378,7 +379,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 bool isForceLoginPrompt = false;
                 if (isConsumerTenant && isMsaPassthrough)
                 {
-                    transferToken = await _msaPassthroughHandler.TryFetchTransferTokenAsync(
+                    transferToken = await _msaPassthroughHandler.TryFetchTransferTokenInteractiveAsync(
                      authenticationRequestParameters,
                      accountProvider).ConfigureAwait(false);
 
@@ -459,7 +460,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return ptr;
             }
 
-            // other MSALs prefer to default to GetForegroundWindow() but this causes issues 
+            // other MSALs prefer to default to GetForegroundWindow() but this causes issues
             // for example if the user quickly switches windows.
             // GetDesktopWindow will make the default more consistent with the embedded browser
             _logger.Info("[WAM Broker] Using desktop as a parent window.");
@@ -474,7 +475,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogMethodDuration())
             {
-                // Important: MSAL will have already resolved the authority by now, 
+                // Important: MSAL will have already resolved the authority by now,
                 // so we are not expecting "common" or "organizations" but a tenanted authority
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
@@ -504,6 +505,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     null, // ATS requires an account object, login_hint is not supported on its own
                     authenticationRequestParameters.AppConfig.ClientId).ConfigureAwait(false);
 
+                if (webAccount == null && _wamOptions.MsaPassthrough)
+                {
+                    return await AcquireMsaTokenSilentForPassthroughAsync(
+                        authenticationRequestParameters,
+                        provider).ConfigureAwait(false);
+                }
+
                 if (webAccount == null)
                 {
                     throw new MsalUiRequiredException(
@@ -519,8 +527,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     isInteractive: false)
                     .ConfigureAwait(false);
 
-                // For MSA-PT scenario, MSAL's authority is wrong. MSAL will use Account.HomeTenantId 
-                // which will essentialyl be /consumers. This is wrong, we are not trying to obtain 
+                // For MSA-PT scenario, MSAL's authority is wrong. MSAL will use Account.HomeTenantId
+                // which will essentialyl be /consumers. This is wrong, we are not trying to obtain
                 // an MSA token, we are trying to obtain an ADD *guest* token.
                 string differentAuthority = null;
                 if (_wamOptions.MsaPassthrough &&
@@ -545,6 +553,71 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
         }
 
+        private async Task<MsalTokenResponse> AcquireMsaTokenSilentForPassthroughAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            WebAccountProvider aadAccountProvider)
+        {
+            // Try to find an MSA account which matches the MSAL account
+            var msaProvider = await GetProviderAsync("consumers", true).ConfigureAwait(false);
+            var msaWebAccount = await FindWamAccountForMsalAccountAsync(
+                msaProvider,
+                _msaPlugin,
+                authenticationRequestParameters.Account,
+                null, // ATS requires an account object, login_hint is not supported on its own
+                authenticationRequestParameters.AppConfig.ClientId).ConfigureAwait(false);
+
+            if (msaWebAccount == null)
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.InteractionRequired,
+                    "Could not find a WAM MSA account for the silent request.");
+            }
+
+            // We can't use the account as is to get a token, because this account is from MSA but the provider is AAD
+            // so we have to perform the transfer token flow
+            string transferToken = await _msaPassthroughHandler.TryFetchTransferTokenSilentlyAsync(
+                authenticationRequestParameters,
+                msaWebAccount).ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(transferToken))
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.InteractionRequired,
+                    "Found an MSA account, but could not retrieve a transfer token for it.");
+            }
+
+            // Now make a request to AAD plugin, including the login hint and transfer token
+            var webTokenRequest = await _aadPlugin.CreateWebTokenRequestAsync(
+               aadAccountProvider,
+               authenticationRequestParameters,
+               isForceLoginPrompt: false,
+               isInteractive: false,
+               isAccountInWam: true)
+              .ConfigureAwait(true);
+
+            _msaPassthroughHandler.AddTransferTokenToRequest(webTokenRequest, transferToken);
+
+            // We can't make this request on the /consumers authority, this is a known MSA-PT issue with the browser as well
+            // but we can make the request over /organizations or over /MicrosoftInfrastructureTenant
+            string overrideAuthority = null;
+            if (authenticationRequestParameters.Authority is AadAuthority aadAuthority && aadAuthority.IsConsumers())
+            {
+                overrideAuthority =
+                    authenticationRequestParameters.Authority.GetTenantedAuthority("organizations", true);
+            }
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, overrideAuthority);
+
+            var wamResult =
+                await _wamProxy.RequestTokenForWindowAsync(_parentHandle, webTokenRequest).ConfigureAwait(false);
+
+            return WamAdapters.CreateMsalResponseFromWamResponse(
+                wamResult,
+                _aadPlugin,
+                authenticationRequestParameters.AppConfig.ClientId,
+                _logger,
+                isInteractive: false);
+        }
+
         private async Task<WebAccountProvider> GetProviderAsync(
             string authority,
             bool isMsa)
@@ -556,14 +629,27 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return provider;
         }
 
-
-
         public async Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
             using (_logger.LogMethodDuration())
             {
+                var defaultAccountProvider = await _webAccountProviderFactory.GetDefaultProviderAsync().ConfigureAwait(false);
+                if (defaultAccountProvider == null)
+                {
+                    throw new MsalUiRequiredException(
+                        MsalError.InteractionRequired,
+                        "A default account was not found");
+
+                }
+                // special case: passthrough + default MSA account. Need to use the transfer token protocol.
+                if (_wamOptions.MsaPassthrough && 
+                    _webAccountProviderFactory.IsConsumerProvider(defaultAccountProvider))
+                {
+                    return await AcquireTokenSilentDefaultUserPassthroughAsync(authenticationRequestParameters, defaultAccountProvider).ConfigureAwait(false);
+                }
+
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     null,
@@ -594,6 +680,42 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     _logger,
                     isInteractive: false);
             }
+        }
+
+        private async Task<MsalTokenResponse> AcquireTokenSilentDefaultUserPassthroughAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider defaultAccountProvider)
+        {
+            var transferToken = await _msaPassthroughHandler.TryFetchTransferSilentDefaultAccountAsync(authenticationRequestParameters, defaultAccountProvider).ConfigureAwait(false);
+
+            var aadAccountProvider = await _webAccountProviderFactory.GetAccountProviderAsync("organizations").ConfigureAwait(false);
+            var webTokenRequest = await _aadPlugin.CreateWebTokenRequestAsync(
+              aadAccountProvider,
+              authenticationRequestParameters,
+              isForceLoginPrompt: false,
+              isInteractive: false,
+              isAccountInWam: true)
+             .ConfigureAwait(false);
+
+            _msaPassthroughHandler.AddTransferTokenToRequest(webTokenRequest, transferToken);
+
+            // We can't make this request on the /consumers authority, this is a known MSA-PT issue with the browser as well
+            // but we can make the request over /organizations or over /MicrosoftInfrastructureTenant
+            string overrideAuthority = null;
+            if (authenticationRequestParameters.Authority is AadAuthority aadAuthority && aadAuthority.IsConsumers())
+            {
+                overrideAuthority =
+                    authenticationRequestParameters.Authority.GetTenantedAuthority("organizations", true);
+            }
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, overrideAuthority);
+
+            var wamResult =
+                await _wamProxy.RequestTokenForWindowAsync(_parentHandle, webTokenRequest).ConfigureAwait(false);
+
+            return WamAdapters.CreateMsalResponseFromWamResponse(
+                wamResult,
+                _aadPlugin,
+                authenticationRequestParameters.AppConfig.ClientId,
+                _logger,
+                isInteractive: false);
         }
 
         private async Task<WebAccount> FindWamAccountForMsalAccountAsync(
@@ -706,7 +828,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 _logger.Info("[WAM Broker] Not a Windows operating system. WAM broker is not available. ");
                 return false;
             }
-#endif            
+#endif
             // WAM does not work on pure ADFS environments
             if (authorityType == AuthorityType.Adfs)
             {
@@ -802,7 +924,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             string authorityTenant = authority.TenantId;
 
-            // common 
+            // common
             if (string.Equals(Constants.CommonTenant, authorityTenant, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.Info($"[WAM Broker] Tenant is common.");
@@ -819,8 +941,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             // consumers
             if (IsConsumerTenantId(authorityTenant))
             {
-                _logger.Info($"[WAM Broker] Authority tenant is consumers. Using WAM-MSA ");                    
-                return true; // for silent flow, the authority is MSA-tenant-id 
+                _logger.Info($"[WAM Broker] Authority tenant is consumers. Using WAM-MSA ");
+                return true; // for silent flow, the authority is MSA-tenant-id
             }
 
             _logger.Info("[WAM Broker] Tenant is not consumers and ATS will try WAM-AAD");

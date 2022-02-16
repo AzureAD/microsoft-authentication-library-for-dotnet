@@ -8,6 +8,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     internal interface IWebAccountProviderFactory
     {
         Task<WebAccountProvider> GetAccountProviderAsync(string authorityOrTenant);
+        Task<WebAccountProvider> GetDefaultProviderAsync();
         bool IsConsumerProvider(WebAccountProvider webAccountProvider);
         Task<bool> IsDefaultAccountMsaAsync();
     }

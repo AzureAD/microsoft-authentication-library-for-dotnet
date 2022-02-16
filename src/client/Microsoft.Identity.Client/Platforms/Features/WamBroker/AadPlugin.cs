@@ -96,13 +96,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 var msalAccounts = (await Task.WhenAll(msalAccountTasks).ConfigureAwait(false)).Where(a => a != null).ToList();
 
-                _logger.Info($"[WAM AAD Provider] GetAccountsAsync converted {msalAccounts.Count()} accounts from {wamAccounts.Count} WAM accounts");
+                _logger.Info($"[WAM AAD Provider] GetAccountsAsync converted {msalAccounts.Count} accounts from {wamAccounts.Count} WAM accounts");
                 return msalAccounts;
             }
 
+            _logger.Info("[WAM AAD provider] No accounts found.");
             return Array.Empty<IAccount>();
         }
-
 
         private async Task<Account> ConvertToMsalAccountOrNullAsync(
             string clientId,
