@@ -68,16 +68,17 @@ namespace Microsoft.Identity.Client
         }
 
         internal static MsalServiceException FromBrokerResponse(
-          string errorCode,
-          string errorMessage,
-          string subErrorCode,
-          string correlationId,
-          MsalTokenResponse msalTokenResponse)
+          MsalTokenResponse msalTokenResponse,
+          string errorMessage)
         {
+            string errorCode = msalTokenResponse.Error;
+            string correlationId = msalTokenResponse.CorrelationId;
+            string subErrorCode = string.IsNullOrEmpty(msalTokenResponse.SubError)?
+                                                                     MsalError.UnknownBrokerError : msalTokenResponse.SubError;
             HttpResponse brokerHttpResponse = msalTokenResponse.HttpResponse;
             MsalServiceException ex = null;
 
-            if (IsPolicyProtectionRequired(errorCode, subErrorCode))
+            if (IsAppProtectionPolicyRequired(errorCode, subErrorCode))
             {
                 ex = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode)
                 {
@@ -148,9 +149,9 @@ namespace Microsoft.Identity.Client
                              && IsInvalidGrantSubError(subErrorCode);
         }
 
-        private static bool IsPolicyProtectionRequired(string errorCode, string subErrorCode)
+        private static bool IsAppProtectionPolicyRequired(string errorCode, string subErrorCode)
         {
-            return string.Equals(errorCode, BrokerResponseConst.iOSBrokerProtectionPoliciesRequired, StringComparison.OrdinalIgnoreCase)
+            return string.Equals(errorCode, BrokerResponseConst.iOSBrokerProtectionPoliciesRequiredErrorCode, StringComparison.OrdinalIgnoreCase)
                              && string.Equals(subErrorCode, MsalError.ProtectionPolicyRequired, StringComparison.OrdinalIgnoreCase);
         }
 

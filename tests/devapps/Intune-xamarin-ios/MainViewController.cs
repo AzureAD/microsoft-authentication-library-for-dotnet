@@ -60,17 +60,11 @@ namespace IntuneMAMSampleiOS
 
             if (useLab4)
             {
-                // for IDLABTRUEMAMCA@msidlab4.onmicrosoft.com
-                // com.xamarin.microsoftintunemamsample
-                // Redirect URI = msauth.com.xamarin.microsoftintunemamsample://auth
-                // MSAL config
-                // let kClientID = "cc2ef30a-30ff-404e-b0c8-8022dc941b51"
-                // let kRedirectUri = "msauth.com.xamarin.microsoftintunemamsample://auth"
-                // let kAuthority = "https://login.microsoftonline.com/common"
-                // let kGraphEndpoint = "https://graph.microsoft.com/"
-
-                // string clientId = "cc2ef30a-30ff-404e-b0c8-8022dc941b51"; // my app in the lab
-                // string[] Scopes = { "User.Read" };
+                // for xammamtrust@msidlab4.onmicrosoft.com
+                clientId = "39c14f70-8284-4671-b54b-bc51aa1a1b18"; // my app in the lab
+                redirectURI = $"msauth.com.xamarin.microsoftintunemamsample://auth";
+                tenantID = "30a4dfae-ad95-4192-b5c0-1b8498b83ad3";
+                Scopes[0] = "api://34806c4d-ae1c-4836-9aa1-6d7a8ffa6831/Hello.World"; // needs admin consent
             }
 
             // IDLAB20TrueMAMCA@msidlab20.onmicrosoft.com

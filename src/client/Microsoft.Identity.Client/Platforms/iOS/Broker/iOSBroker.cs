@@ -41,9 +41,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private string _brokerRequestNonce;
         private bool _brokerV3Installed = false;
 
-        private string _accessToken;
-        private string _refreshToken;
-
         public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
         {
             _logger = logger;
@@ -145,15 +142,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (authenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities?.Any() == true)
             {
-                StringBuilder sb = new StringBuilder();
-                foreach (var capability in authenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities)
-                {
-                    sb.Append(capability);
-                    sb.Append(',');
-                }
-                sb.Remove(sb.Length - 1, 1);
-
-                brokerRequest.Add(BrokerParameter.ClientCapabilities, sb.ToString());
+                var capabilities = String.Join(',', authenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities);
+                brokerRequest.Add(BrokerParameter.ClientCapabilities, capabilities);
             }
 
             brokerRequest.Add(BrokerParameter.Username, authenticationRequestParameters.Account?.Username ?? string.Empty);
@@ -289,8 +279,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 }
 
                 brokerTokenResponse = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
-                _accessToken = string.Empty;
-                _refreshToken = string.Empty;
 
                 if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errCode))
                 {
@@ -298,7 +286,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     {
                         responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.AuthenticationCanceledError;
                     }
-                    else if (errCode == BrokerResponseConst.iOSBrokerProtectionPoliciesRequired)
+                    else if (errCode == BrokerResponseConst.iOSBrokerProtectionPoliciesRequiredErrorCode)
                     {
                         responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.ProtectionPolicyRequired;
                     }

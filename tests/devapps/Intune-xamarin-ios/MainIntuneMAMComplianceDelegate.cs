@@ -16,15 +16,10 @@ namespace IntuneMAMSampleiOS
 
         public async override void IdentityHasComplianceStatus(string identity, IntuneMAMComplianceStatus status, string errorMessage, string errorTitle)
         {
-            // base.IdentityHasComplianceStatus(identity, status, errorMessage, errorTitle);
-            System.Diagnostics.Debug.WriteLine($"Status = {status} Id = {identity}");
             if (status == IntuneMAMComplianceStatus.Compliant)
             {
                 try
                 {
-                    var plist = NSUserDefaults.StandardUserDefaults;
-                    var abcd = plist.StringForKey("intune_app_protection_enrollment_id_V1");
-                    System.Diagnostics.Debug.WriteLine(abcd);
                     _manualReset.Set();
                 }
                 catch (Exception ex)

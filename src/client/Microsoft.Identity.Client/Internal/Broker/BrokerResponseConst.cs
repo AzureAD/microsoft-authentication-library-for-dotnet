@@ -42,14 +42,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public const string iOSBrokerUserCancellationErrorCode = "-50005";
 
-        /**
-         The requested resource is protected by an Intune Conditional Access policy.
-         The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
-         please see https://aka.ms/intuneMAMSDK for more information. Handling of this error is optional (handle it only
-         if you are going to access resources protected by an Intune Conditional Access policy).
-         */
-        public const string iOSBrokerProtectionPoliciesRequired = "-50004";
-
+        // The requested resource is protected by an Intune Conditional Access policy.
+        // The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
+        // please see https://aka.ms/intuneMAMSDK for more information. Handling of this error is optional (handle it only
+        // if you are going to access resources protected by an Intune Conditional Access policy).
+        public const string iOSBrokerProtectionPoliciesRequiredErrorCode = "-50004";
 
         public const string TokenType = "token_type";
 

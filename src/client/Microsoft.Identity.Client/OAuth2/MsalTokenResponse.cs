@@ -35,10 +35,9 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string ErrorSubcode = "error_subcode";
         public const string ErrorSubcodeCancel = "cancel";
 
-        // Android Broker
-        public const string TenantIdAndroidBrokerOnly = "tenant_id";
-        public const string UpnAndroidBrokerOnly = "username";
-        public const string LocalAccountIdAndroidBrokerOnly = "local_account_id";
+        public const string TenantId = "tenant_id";
+        public const string Upn = "username";
+        public const string LocalAccountId = "local_account_id";
     }
 
     [JsonObject]
@@ -84,13 +83,10 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonProperty(PropertyName = TokenResponseClaim.Authority)]
         public string AuthorityUrl { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.TenantIdAndroidBrokerOnly)]
         public string TenantId { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.UpnAndroidBrokerOnly)]
         public string Upn { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.LocalAccountIdAndroidBrokerOnly)]
         public string AccountUserId { get; set; }
 
         public string WamAccountId { get; set; }
@@ -101,53 +97,50 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
         {
-            try
+            if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
-                if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
+                string original = responseDictionary["error_metadata"];
+                string dataUnescaped = Uri.UnescapeDataString(original);
+                Dictionary<string, string> dictionary = Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(dataUnescaped);
+                var homeAcctId = dictionary["home_account_id"];
+                return new MsalTokenResponse
                 {
-                    string original = responseDictionary["error_metadata"];
-                    string dataUnescaped = Uri.UnescapeDataString(original);
-                    Dictionary<string, string> dictionary = Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(dataUnescaped);
-                    var homeAcctId = dictionary["home_account_id"];
-                    return new MsalTokenResponse
-                    {
-                        Error = errorCode,
-                        ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription]),
-                        SubError = responseDictionary[OAuth2ResponseBaseClaim.SubError],
-                        AccountUserId = AccountId.ParseFromString(homeAcctId).ObjectId,
-                        TenantId = AccountId.ParseFromString(homeAcctId).TenantId,
-                        Upn = dictionary["username"],
-                    };
-                }
-
-                var response = new MsalTokenResponse
-                {
-                    AccessToken = responseDictionary[BrokerResponseConst.AccessToken],
-                    RefreshToken = responseDictionary.ContainsKey(BrokerResponseConst.RefreshToken)
-                        ? responseDictionary[BrokerResponseConst.RefreshToken]
-                        : null,
-                    IdToken = responseDictionary[BrokerResponseConst.IdToken],
-                    TokenType = BrokerResponseConst.Bearer,
-                    CorrelationId = responseDictionary[BrokerResponseConst.CorrelationId],
-                    Scope = responseDictionary[BrokerResponseConst.Scope],
-              };
-
-                if (responseDictionary.ContainsKey(TokenResponseClaim.RefreshIn))
-                {
-                    response.RefreshIn = long.Parse(
-                        responseDictionary[TokenResponseClaim.RefreshIn],
-                        CultureInfo.InvariantCulture);
-                }
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex.Message + "\r\n" + ex.StackTrace);
-
-                return null;
+                    Error = errorCode,
+                    ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription]),
+                    SubError = responseDictionary[OAuth2ResponseBaseClaim.SubError],
+                    AccountUserId = AccountId.ParseFromString(homeAcctId).ObjectId,
+                    TenantId = AccountId.ParseFromString(homeAcctId).TenantId,
+                    Upn = dictionary[TokenResponseClaim.Upn],
+                };
             }
 
+            var response = new MsalTokenResponse
+            {
+                AccessToken = responseDictionary[BrokerResponseConst.AccessToken],
+                RefreshToken = responseDictionary.ContainsKey(BrokerResponseConst.RefreshToken)
+                    ? responseDictionary[BrokerResponseConst.RefreshToken]
+                    : null,
+                IdToken = responseDictionary[BrokerResponseConst.IdToken],
+                TokenType = BrokerResponseConst.Bearer,
+                CorrelationId = responseDictionary[BrokerResponseConst.CorrelationId],
+                Scope = responseDictionary[BrokerResponseConst.Scope],
+                ExpiresIn = responseDictionary.TryGetValue(BrokerResponseConst.ExpiresOn, out string expiresOn) ?
+                                DateTimeHelpers.GetDurationFromNowInSeconds(expiresOn) :
+                                0,
+                ClientInfo = responseDictionary.ContainsKey(BrokerResponseConst.ClientInfo)
+                                ? responseDictionary[BrokerResponseConst.ClientInfo]
+                                : null,
+                TokenSource = TokenSource.Broker
+            };
+
+            if (responseDictionary.ContainsKey(TokenResponseClaim.RefreshIn))
+            {
+                response.RefreshIn = long.Parse(
+                    responseDictionary[TokenResponseClaim.RefreshIn],
+                    CultureInfo.InvariantCulture);
+            }
+
+            return response;
         }
 
         /// <remarks>

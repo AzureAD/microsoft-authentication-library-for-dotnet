@@ -536,10 +536,10 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Non HTTPS redirects are not supported
-        /// <para>What happens?</para>This error happens when you have registered a non-HTTPS redirect URI for the
-        /// public client application other than <c>urn:ietf:wg:oauth:2.0:oob</c>
-        /// <para>Mitigation [App registration and development]</para>Register in the application a Reply URL starting with "https://"
-        /// </summary>
+        /// <para>What happens?</para>This error happens when the authorization flow, which collects user credentials, gets redirected 
+        /// to an page that is not supported, for example if the redirect occurs over http. 
+        /// This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects.
+        /// <para>Mitigation</para>This usually happens when using a federated directory which is not setup correctly. 
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
 
         /// <summary>
@@ -1039,7 +1039,7 @@ namespace Microsoft.Identity.Client
         public const string TenantOverrideNonAad = "tenant_override_non_aad";
 
         /// <summary>
-        /// <para>What happens?</para>You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request."/>
+        /// <para>What happens?</para>You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request.
         /// <para>Mitigation</para> Use WithTenantId at the request level instead.
         /// </summary>
         public const string RegionalAndAuthorityOverride = "authority_override_regional";

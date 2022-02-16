@@ -99,11 +99,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new iOSTokenCacheAccessor();
         }
 
-        public override string GetEnrollmentIds()
-        {
-            return NSUserDefaults.StandardUserDefaults.StringForKey(EnrollmentIdKey);
-        }
-
         /// <inheritdoc />
         protected override IWebUIFactory CreateWebUiFactory()
         {
