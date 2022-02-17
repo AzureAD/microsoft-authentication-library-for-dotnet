@@ -15,6 +15,7 @@ using Microsoft.Identity.Client;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace IntuneMAMSampleiOS
 {
@@ -40,24 +41,31 @@ namespace IntuneMAMSampleiOS
 
             this.btnMSAL = new UIButton(UIButtonType.System);
             this.btnMSAL.Frame = new CGRect(0, 400, 300, 30);
-            this.btnMSAL.SetTitle("MSAL", UIControlState.Normal);
+            this.btnMSAL.SetTitle("Acquire token", UIControlState.Normal);
             
             this.btnMSAL.TouchUpInside += BtnMSAL_TouchUpInside;
 
             View.AddSubview(btnMSAL);
         }
 
+        /// <summary>
+        /// This method shows calling pattern to access resource protected by Conditional Access with App Protection Policy
+        /// </summary>
+        /// <param name="sender">Sender button</param>
+        /// <param name="e">arguments</param>
         private async void BtnMSAL_TouchUpInside(object sender, EventArgs e)
         {
             bool useLab4 = false;
             bool useLab20 = !useLab4;
 
-            string clientId = "6d50af5d-2529-4ff4-912f-c1d6ad06953e"; // my app in the lab
-            string redirectURI = $"msauth.com.xamarin.microsoftintunemamsample://auth";
-            string tenantID = "7257a09f-53cc-4a91-aca8-0cb6713642a5";
-            string[] Scopes = { "https://xamarintruemamenterpriseapp-msidlab20.msappproxy.net//Hello.World" };
-            string[] clientCapabilities = { "ProtApp" };
+            // Configure the following parameters
+            string clientId = "6d50af5d-2529-4ff4-912f-c1d6ad06953e"; // your app id
+            string redirectURI = $"msauth.com.xamarin.microsoftintunemamsample://auth"; // redirect URI for the app as registred in the AD
+            string tenantID = "7257a09f-53cc-4a91-aca8-0cb6713642a5"; // your tenantID
+            string[] Scopes = { "https://xamarintruemamenterpriseapp-msidlab20.msappproxy.net//Hello.World" }; // desired scope(s)
+            string[] clientCapabilities = { "ProtApp" }; // Important: This must be passed to the PCABuilder
 
+            // This is for now. It will go away when lab is set.
             if (useLab4)
             {
                 // for xammamtrust@msidlab4.onmicrosoft.com
@@ -78,6 +86,8 @@ namespace IntuneMAMSampleiOS
 
             try
             {
+                // Create PCA once. Make sure that all the config parameters below are passed
+                // ClientCapabilities - must have ProtApp
                 if (PCA == null)
                 {
                     var pcaBuilder = PublicClientApplicationBuilder.Create(clientId)
@@ -89,40 +99,64 @@ namespace IntuneMAMSampleiOS
                                                                         .WithHttpClientFactory(new HttpSnifferClientFactory())
                                                                         .WithBroker(true);
                     PCA = pcaBuilder.Build();
+                }
+
+                // attempt silent login.
+                // If this is very first time and the device is not enrolled, it will throw MsalUiRequiredException
+                // If the device is enrolled, this will succeed.
+                var authResult = await DoSilentAsync(Scopes).ConfigureAwait(false);
+                ShowAlert("Success Silent 1", authResult.AccessToken);
+            }
+            catch (MsalUiRequiredException _)
+            {
+                // This executes UI interaction
+                try
+                {
                     var interParamBuilder = PCA.AcquireTokenInteractive(Scopes)
                                                 .WithParentActivityOrWindow(this)
                                                 .WithUseEmbeddedWebView(true);
 
                     var authResult = await interParamBuilder.ExecuteAsync().ConfigureAwait(false);
-                    ShowAlert("Success Interactive 1", authResult.AccessToken);
+                    ShowAlert("Success Interactive", authResult.AccessToken);
                 }
-            }
-            catch (IntuneAppProtectionPolicyRequiredException ex)
-            {
-                _manualReset.Reset();
-
-                IntuneMAMComplianceManager.Instance.RemediateComplianceForIdentity(ex.Upn, false);
-                _manualReset.WaitOne();
-                System.Diagnostics.Debug.WriteLine("Complied");
-                var accts = await PCA.GetAccountsAsync().ConfigureAwait(false);
-                var acct = accts.FirstOrDefault();
-                if (acct != null)
+                catch (IntuneAppProtectionPolicyRequiredException ex)
                 {
-                    try
-                    {
-                        var silentParamBuilder = PCA.AcquireTokenSilent(Scopes, acct);
-                        var authResult = await silentParamBuilder.ExecuteAsync().ConfigureAwait(false);
-                        ShowAlert("Success Silent 1", authResult.AccessToken);
-                    }
-                    catch (Exception ex2)
-                    {
-                        System.Diagnostics.Debug.WriteLine(ex2.Message);
-                    }
+                    // if the scope requires App Protection Policy,  IntuneAppProtectionPolicyRequiredException is thrown.
+                    // To ensure that the policy is applied before the next call, reset the semaphore
+                    _manualReset.Reset();
+                    // Using IntuneMAMComplianceManager, ensure that the device is compliant.
+                    // This will raise UI for compliance. After user satisfies the compliance requirements, MainIntuneMAMComplianceDelegate method will be called.
+                    // the delegate will set the semaphore
+                    IntuneMAMComplianceManager.Instance.RemediateComplianceForIdentity(ex.Upn, false);
+                    // wait for the delegate to set it. 
+                    _manualReset.WaitOne();
+                    // now the device is compliant
+                    System.Diagnostics.Debug.WriteLine("Complied");
+                    // Attempt silent acquisition again.
+                    // this should succeed
+                    var authResult = await DoSilentAsync(Scopes).ConfigureAwait(false);
+                    ShowAlert("Success Silent 2", authResult.AccessToken);
                 }
             }
             catch (Exception ex)
             {
                 ShowAlert($"Error {((MsalException)ex).ErrorCode}", ex.Message + "\r\n" + ex.StackTrace);
+            }
+        }
+
+        private async Task<AuthenticationResult> DoSilentAsync(string[] Scopes)
+        {
+            var accts = await PCA.GetAccountsAsync().ConfigureAwait(false);
+            var acct = accts.FirstOrDefault();
+            if (acct != null)
+            {
+                var silentParamBuilder = PCA.AcquireTokenSilent(Scopes, acct);
+                var authResult = await silentParamBuilder.ExecuteAsync().ConfigureAwait(false);
+                return authResult;
+            }
+            else
+            {
+                throw new MsalUiRequiredException("ErrCode", "ErrMessage");
             }
         }
 
