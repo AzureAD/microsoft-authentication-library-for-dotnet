@@ -114,15 +114,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.Utid));
             requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
 
-            // Act
             await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
             await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
-            IEnumerable<IAccount> accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
-            await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
 
-            // Assert
+            IEnumerable<IAccount> accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
             Assert.IsNotNull(accounts);
             Assert.IsNotNull(accounts.Single());
+
+            MsalRefreshTokenCacheItem refreshToken = await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
+            Assert.IsNotNull(refreshToken);
+
+            await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
             accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
             Assert.IsNotNull(accounts);
             Assert.IsTrue(accounts.IsNullOrEmpty());

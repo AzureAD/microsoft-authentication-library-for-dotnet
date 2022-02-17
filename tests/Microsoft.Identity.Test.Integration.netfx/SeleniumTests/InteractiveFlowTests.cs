@@ -154,6 +154,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(accounts);
             Assert.IsNotNull(accounts.Single());
             Assert.AreEqual(labResponse.User.Upn, accounts.FirstOrDefault().Username);
+            Assert.AreEqual("login.microsoftonline.com", accounts.Single().Environment);
 
             Trace.WriteLine("Part 3 - Acquire a token silently");
             result = await pca
