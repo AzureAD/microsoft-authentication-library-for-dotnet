@@ -41,7 +41,7 @@
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>ADALClientId</key>
-		<string>6d50af5d-2529-4ff4-912f-c1d6ad06953e</string>
+		<string>bd9933c9-a825-4f9a-82a0-bbf23c9049fd</string>
 		<key>ADALRedirectUri</key>
 		<string>msauth.com.xamarin.microsoftintunemamsample://auth</string>
 	</dict>

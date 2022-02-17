@@ -55,34 +55,12 @@ namespace IntuneMAMSampleiOS
         /// <param name="e">arguments</param>
         private async void BtnMSAL_TouchUpInside(object sender, EventArgs e)
         {
-            bool useLab4 = false;
-            bool useLab20 = !useLab4;
-
-            // Configure the following parameters
-            string clientId = "6d50af5d-2529-4ff4-912f-c1d6ad06953e"; // your app id
-            string redirectURI = $"msauth.com.xamarin.microsoftintunemamsample://auth"; // redirect URI for the app as registred in the AD
-            string tenantID = "7257a09f-53cc-4a91-aca8-0cb6713642a5"; // your tenantID
-            string[] Scopes = { "https://xamarintruemamenterpriseapp-msidlab20.msappproxy.net//Hello.World" }; // desired scope(s)
+            // Configure the following parameters            
+            string clientId = "bd9933c9-a825-4f9a-82a0-bbf23c9049fd"; // my app in the lab
+            string redirectURI = $"msauth.com.xamarin.microsoftintunemamsample://auth";
+            string tenantID = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
+            string[] Scopes = { "api://a8bf4bd3-c92d-44d0-8307-9753d975c21e/Hello.World" }; // needs admin consent
             string[] clientCapabilities = { "ProtApp" }; // Important: This must be passed to the PCABuilder
-
-            // This is for now. It will go away when lab is set.
-            if (useLab4)
-            {
-                // for xammamtrust@msidlab4.onmicrosoft.com
-                clientId = "39c14f70-8284-4671-b54b-bc51aa1a1b18"; // my app in the lab
-                redirectURI = $"msauth.com.xamarin.microsoftintunemamsample://auth";
-                tenantID = "30a4dfae-ad95-4192-b5c0-1b8498b83ad3";
-                Scopes[0] = "api://34806c4d-ae1c-4836-9aa1-6d7a8ffa6831/Hello.World"; // needs admin consent
-            }
-
-            // IDLAB20TrueMAMCA@msidlab20.onmicrosoft.com
-            if (useLab20)
-            {
-                clientId = "6d50af5d-2529-4ff4-912f-c1d6ad06953e"; // my app in the lab
-                redirectURI = $"msauth.com.xamarin.microsoftintunemamsample://auth";
-                tenantID = "7257a09f-53cc-4a91-aca8-0cb6713642a5";
-                Scopes[0] = "api://09aec9b9-0b0f-488a-81d6-72fd13a3a1c1/Hello.World"; // needs admin consent
-            }
 
             try
             {
