@@ -2,7 +2,7 @@ $url = "https://dl.google.com/android/repository/commandlinetools-win-7583922_la
 $fileName = "AndroidTools.zip"
 $source = "C:\Downloads\$fileName"
 $destination = "C:\Downloads\AndroidSdkTools"
-$androidSdk = "C:\%PROGRAMFILES(x86)%\Android\android-sdk"
+$androidSdk = "C:\Program Files (x86)\Android\android-sdk"
 $androidSdkVersion = "platforms;android-29"
 
 #$ErrorActionPreference = "Stop"
@@ -21,7 +21,7 @@ mkdir -Path "$androidSdk\licenses" -Force
 Get-File -Url $url -FileName $fileName
 
 echo "Expanding"
-Expand-Archive -LiteralPath "$source" -DestinationPath "C:\Downloads\AndroidSdkTools" -Force
+Expand-Archive -LiteralPath "$source" -DestinationPath $destination -Force
 
 dir "$androidSdk\licenses"
 
@@ -31,5 +31,5 @@ Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLice
 dir "$androidSdk\licenses"
 
 echo "installing android"
-C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager --licenses --sdk_root=$androidSdk
-echo y y y y y y y |C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager $androidSdkVersion --sdk_root=$androidSdk
+C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager --licenses --sdk_root="$androidSdk"
+echo y y y y y y y |C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager "$androidSdkVersion" --sdk_root="$androidSdk"
