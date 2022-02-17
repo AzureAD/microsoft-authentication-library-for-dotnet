@@ -342,6 +342,124 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
+        [TestMethod]
+        public async Task WithMultiCloudSupportEnabledAsync()
+        {
+            var expectedQueryParams = TestConstants.ExtraQueryParameters;
+            expectedQueryParams.Add("instance_aware", "true");
+
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            {
+                var cache = new TokenCache(harness.ServiceBundle, false);
+
+                var ui = new MockWebUI()
+                {
+                    MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code&cloud_instance_name=microsoftonline.us&cloud_instance_host_name=login.microsoftonline.us"),
+                    QueryParamsToValidate = expectedQueryParams
+                };
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle, ui);
+
+                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+
+                var tokenResponseHandler = new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedQueryParams = expectedQueryParams,
+                    ExpectedPostData = new Dictionary<string, string>()
+                        { {OAuth2Parameter.Claims,  TestConstants.Claims } },
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                };
+                harness.HttpManager.AddMockHandler(tokenResponseHandler);
+
+                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope,
+                    cache,
+                    extraQueryParameters: TestConstants.ExtraQueryParameters,
+                    claims: TestConstants.Claims);
+
+                parameters.RedirectUri = new Uri("some://uri");
+                parameters.LoginHint = TestConstants.DisplayableId;
+                parameters.AppConfig.MultiCloudSupportEnabled = true;
+
+                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+                {
+                    Prompt = Prompt.SelectAccount,
+                    ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
+                };
+
+                var request = new InteractiveRequest(
+                    parameters,
+                    interactiveParameters);
+
+                AuthenticationResult result = await request.RunAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual("https://login.microsoftonline.us/home/oauth2/v2.0/token", result.AuthenticationResultMetadata.TokenEndpoint);
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(result.AccessToken, "some-access-token");
+            }
+        }
+
+        [TestMethod]
+        public async Task WithMultiCloudSupportNotEnabledAsync()
+        {
+            var expectedQueryParams = TestConstants.ExtraQueryParameters;
+
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            {
+                var cache = new TokenCache(harness.ServiceBundle, false);
+
+                var ui = new MockWebUI()
+                {
+                    MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code"),
+                    QueryParamsToValidate = expectedQueryParams
+                };
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle, ui);
+
+                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+
+                var tokenResponseHandler = new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedQueryParams = expectedQueryParams,
+                    ExpectedPostData = new Dictionary<string, string>()
+                        { {OAuth2Parameter.Claims,  TestConstants.Claims } },
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                };
+                harness.HttpManager.AddMockHandler(tokenResponseHandler);
+
+                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope,
+                    cache,
+                    extraQueryParameters: TestConstants.ExtraQueryParameters,
+                    claims: TestConstants.Claims);
+
+                parameters.RedirectUri = new Uri("some://uri");
+                parameters.LoginHint = TestConstants.DisplayableId;
+
+                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+                {
+                    Prompt = Prompt.SelectAccount,
+                    ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
+                };
+
+                var request = new InteractiveRequest(
+                    parameters,
+                    interactiveParameters);
+
+                AuthenticationResult result = await request.RunAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual("https://login.microsoftonline.com/home/oauth2/v2.0/token", result.AuthenticationResultMetadata.TokenEndpoint);
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(result.AccessToken, "some-access-token");
+            }
+        }
+
         private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
