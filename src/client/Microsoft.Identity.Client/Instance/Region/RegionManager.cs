@@ -19,14 +19,16 @@ namespace Microsoft.Identity.Client.Region
     {
         private class RegionInfo
         {
-            public RegionInfo(string region, RegionAutodetectionSource regionSource)
+            public RegionInfo(string region, RegionAutodetectionSource regionSource, string regionDiscoveryFailureReason)
             {
                 Region = region;
                 RegionSource = regionSource;
+                RegionDiscoveryFailureReason = regionDiscoveryFailureReason;
             }
 
             public string Region { get; }
             public RegionAutodetectionSource RegionSource { get; }
+            public string RegionDiscoveryFailureReason { get; }
         }
 
         // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
@@ -38,6 +40,7 @@ namespace Microsoft.Identity.Client.Region
 
         private static string s_autoDiscoveredRegion;
         private static bool s_failedAutoDiscovery = false;
+        private static string s_regionDiscoveryFailureReason;
 
         public RegionManager(
             IHttpManager httpManager,
@@ -51,6 +54,7 @@ namespace Microsoft.Identity.Client.Region
             {
                 s_failedAutoDiscovery = false;
                 s_autoDiscoveredRegion = null;
+                s_regionDiscoveryFailureReason = null;
             }
         }
 
@@ -82,7 +86,9 @@ namespace Microsoft.Identity.Client.Region
                 }
                 else
                 {
-                    logger.Warning($"[Region discovery] Auto-discovery failed.");
+                    s_regionDiscoveryFailureReason = $"Region Auto-discovery failed.";
+                    logger.Warning($"[Region discovery] {s_regionDiscoveryFailureReason}");
+                    requestContext.ApiEvent.RegionDiscoveryFailureReason = s_regionDiscoveryFailureReason;
                     return null;
                 }
             }
@@ -117,6 +123,7 @@ namespace Microsoft.Identity.Client.Region
             else
             {
                 apiEvent.RegionUsed = azureRegionConfig;
+                apiEvent.RegionDiscoveryFailureReason = discoveredRegion.RegionDiscoveryFailureReason;
 
                 if (discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery)
                 {
@@ -144,21 +151,23 @@ namespace Microsoft.Identity.Client.Region
         {
             if (s_failedAutoDiscovery == true)
             {
-                logger.Info($"[Region discovery] Auto-discovery failed in the past. Not trying again.");
-                return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery);
+                s_regionDiscoveryFailureReason = "Auto-discovery failed in the past. Not trying again.";
+                logger.Info($"[Region discovery] {s_regionDiscoveryFailureReason}.");
+                return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, s_regionDiscoveryFailureReason);
             }
 
             if (s_failedAutoDiscovery == false &&
                 !string.IsNullOrEmpty(s_autoDiscoveredRegion))
             {
                 logger.Info($"[Region discovery] Auto-discovery already ran and found {s_autoDiscoveredRegion}.");
-                return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache);
+                return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache, null);
             }
 
             var result = await DiscoverAsync(logger, requestCancellationToken).ConfigureAwait(false);
 
             s_failedAutoDiscovery = result.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery;
             s_autoDiscoveredRegion = result.Region;
+            s_regionDiscoveryFailureReason = result.RegionDiscoveryFailureReason;
 
             return result;
         }
@@ -170,7 +179,7 @@ namespace Microsoft.Identity.Client.Region
             if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
             {
                 logger.Info($"[Region discovery] Region found in environment variable: {region}.");
-                return new RegionInfo(region, RegionAutodetectionSource.EnvVariable);
+                return new RegionInfo(region, RegionAutodetectionSource.EnvVariable, null);
             }
 
             try
@@ -201,7 +210,7 @@ namespace Microsoft.Identity.Client.Region
                     if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
                     {
                         logger.Info($"[Region discovery] Call to local IMDS succeeded. Region: {region}.");
-                        return new RegionInfo(region, RegionAutodetectionSource.Imds);
+                        return new RegionInfo(region, RegionAutodetectionSource.Imds, null);
                     }
                 }
                 else
@@ -214,15 +223,17 @@ namespace Microsoft.Identity.Client.Region
             {
                 if (e is MsalServiceException msalEx && MsalError.RequestTimeout.Equals(msalEx?.ErrorCode))
                 {
-                    logger.Warning($"[Region discovery] Call to local IMDS timed out after {_imdsCallTimeoutMs}.");
+                    s_regionDiscoveryFailureReason = $"Call to local IMDS timed out after {_imdsCallTimeoutMs}.";
+                    logger.Warning($"[Region discovery] {s_regionDiscoveryFailureReason}.");
                 }
                 else
                 {
-                    logger.Warning($"[Region discovery] IMDS call failed with exception {e}");
+                    s_regionDiscoveryFailureReason = $"IMDS call failed with exception {e}.";
+                    logger.Warning($"[Region discovery] {s_regionDiscoveryFailureReason}");
                 }
             }
 
-            return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery);
+            return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, s_regionDiscoveryFailureReason);
         }
 
         private static bool ValidateRegion(string region, string source, ICoreLogger logger)

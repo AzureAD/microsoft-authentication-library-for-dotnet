@@ -73,6 +73,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         {
             get => _regionOutcome.HasValue ? _regionOutcome.Value.ToString("D") : null;
         }
+
+        public string RegionDiscoveryFailureReason { get; set; }
         #endregion
 
         public bool IsTokenCacheSerialized { get; set; }
