@@ -55,8 +55,9 @@ namespace IntuneMAMSampleiOS
         /// <param name="e">arguments</param>
         private async void BtnMSAL_TouchUpInside(object sender, EventArgs e)
         {
-            // Configure the following parameters            
-            string clientId = "bd9933c9-a825-4f9a-82a0-bbf23c9049fd"; // my app in the lab
+            // The following parameters are for sample app in lab4. Please configure them as per your app registration.
+            // And also update corresponding entries in info.plist -> IntuneMAMSettings -> ADALClientID and ADALRedirectUri
+            string clientId = "bd9933c9-a825-4f9a-82a0-bbf23c9049fd";
             string redirectURI = $"msauth.com.xamarin.microsoftintunemamsample://auth";
             string tenantID = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
             string[] Scopes = { "api://a8bf4bd3-c92d-44d0-8307-9753d975c21e/Hello.World" }; // needs admin consent
