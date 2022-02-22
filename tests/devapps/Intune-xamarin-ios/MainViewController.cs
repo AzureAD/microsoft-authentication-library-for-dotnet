@@ -35,7 +35,6 @@ namespace IntuneMAMSampleiOS
         public override void ViewDidLoad()
         {
             _manualReset = new ManualResetEvent(false);
-            _manualReset.Reset();
             _mamComplianceDelegate = new MainIntuneMAMComplianceDelegate(_manualReset);
             IntuneMAMComplianceManager.Instance.Delegate = _mamComplianceDelegate;
 
@@ -69,11 +68,12 @@ namespace IntuneMAMSampleiOS
                 // ClientCapabilities - must have ProtApp
                 if (PCA == null)
                 {
+                    string authority = $"https://login.microsoftonline.com/{tenantID}/";
                     var pcaBuilder = PublicClientApplicationBuilder.Create(clientId)
                                                                         .WithRedirectUri(redirectURI)
                                                                         .WithIosKeychainSecurityGroup("com.microsoft.adalcache")
                                                                         .WithLogging(MSALLogCallback, LogLevel.Verbose)
-                                                                        .WithTenantId(tenantID)
+                                                                        .WithAuthority(authority)
                                                                         .WithClientCapabilities(clientCapabilities)
                                                                         .WithHttpClientFactory(new HttpSnifferClientFactory())
                                                                         .WithBroker(true);
@@ -119,7 +119,7 @@ namespace IntuneMAMSampleiOS
             }
             catch (Exception ex)
             {
-                ShowAlert($"Error {((MsalException)ex).ErrorCode}", ex.Message + "\r\n" + ex.StackTrace);
+                ShowAlert($"{ex}", "Error");
             }
         }
 
@@ -168,92 +168,5 @@ namespace IntuneMAMSampleiOS
                 this.PresentViewController(alertController, false, null);
             });
         }
-
-        /*
-                partial void buttonUrl_TouchUpInside (UIButton sender)
-                {
-                    string url = textUrl.Text;
-
-                    if (string.IsNullOrWhiteSpace(url))
-                    {
-                        url = "http://www.microsoft.com/en-us/server-cloud/products/microsoft-intune/";
-                    }
-
-                    UIApplication.SharedApplication.OpenUrl (NSUrl.FromString (url));
-                }
-
-                partial void buttonShare_TouchUpInside (UIButton sender)
-                {
-                    NSString text = new NSString ("Test Content Sharing from Intune Sample App");
-                    UIActivityViewController avc = new UIActivityViewController (new NSObject[] { text }, null);
-
-                    if (avc.PopoverPresentationController != null)
-                    {
-                        UIViewController topController = UIApplication.SharedApplication.KeyWindow.RootViewController;
-                        CGRect frame = UIScreen.MainScreen.Bounds;
-                        frame.Height /= 2;
-                        avc.PopoverPresentationController.SourceView = topController.View;
-                        avc.PopoverPresentationController.SourceRect = frame;
-                        avc.PopoverPresentationController.PermittedArrowDirections = UIPopoverArrowDirection.Unknown;
-                    }
-
-                    this.PresentViewController(avc, true, null);
-                }
-
-                partial void ButtonSave_TouchUpInside(UIButton sender)
-                {
-                    // Apps are responsible for enforcing Save-As policy
-                    if (!IntuneMAMPolicyManager.Instance.Policy.IsSaveToAllowedForLocation(IntuneMAMSaveLocation.LocalDrive, IntuneMAMEnrollmentManager.Instance.EnrolledAccount))
-                    {
-                        this.ShowAlert("Blocked", "Blocked from writing to local location");
-                        return;
-                    }
-
-                    string fileName = "intune-test.txt";
-                    string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), fileName);
-
-                    try
-                    {
-                        File.WriteAllText(path, "Test Save to Personal");
-                        this.ShowAlert("Success", "Wrote to " + fileName);
-                    }
-                    catch (Exception)
-                    {
-                        this.ShowAlert("Failed", "Failed to write to " + fileName);
-                    }
-                }
-
-                partial void ButtonLogIn_TouchUpInside(UIButton sender)
-                {
-                    IntuneMAMEnrollmentManager.Instance.LoginAndEnrollAccount(this.textEmail.Text);
-                }
-
-                partial void ButtonLogOut_TouchUpInside(UIButton sender)
-                {
-                    IntuneMAMEnrollmentManager.Instance.DeRegisterAndUnenrollAccount(IntuneMAMEnrollmentManager.Instance.EnrolledAccount, true);
-                }
-
-                bool DismissKeyboard (UITextField textField)
-                {
-                    textField.ResignFirstResponder ();
-                    return true;
-                }
-
-                public void HideLogInButton()
-                {
-                    this.buttonLogIn.Hidden = true;
-                    this.textEmail.Hidden = true;
-                    this.labelEmail.Hidden = true;
-                    this.buttonLogOut.Hidden = false;
-                }
-
-                public void HideLogOutButton()
-                {
-                    this.buttonLogOut.Hidden = true;
-                    this.textEmail.Hidden = false;
-                    this.labelEmail.Hidden = false;
-                    this.buttonLogIn.Hidden = false;
-                }
-        */
     }
 }

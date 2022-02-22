@@ -23,14 +23,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 try
                 {
-                    var enrollmentIDs = JsonConvert.DeserializeObject <EnrollmentIDs>(keychainData);
+                    var enrollmentIDs = JsonConvert.DeserializeObject<EnrollmentIDs>(keychainData);
 
                     return enrollmentIDs.EnrollmentIds[0].EnrollmentId;
 
                 }
-                catch (Exception ex)
+                catch (JsonException jEx)
                 {
-                    logger.Error($"Failed to retreive enrollmentID {ex.Message}");
+                    logger.ErrorPii($"Failed to parse enrollmentID for KeychainData: {keychainData}", string.Empty);
+                    logger.ErrorPii(jEx);
+
+                    return string.Empty;
                 }
             }
 #endif
