@@ -114,7 +114,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.Utid));
             requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
 
-            await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
             await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
 
             IEnumerable<IAccount> accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);

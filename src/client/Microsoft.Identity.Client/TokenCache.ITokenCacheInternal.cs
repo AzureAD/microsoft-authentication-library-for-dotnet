@@ -781,17 +781,18 @@ namespace Microsoft.Identity.Client
 
             if (allRts.Count != 0)
             {
-                var metadata =
+                allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
+
+                if (!requestParams.AppConfig.MultiCloudSupportEnabled)
+                {
+                    var metadata =
                     await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                         requestParams.AuthorityInfo,
                         allRts.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
                         requestParams.RequestContext)
                     .ConfigureAwait(false);
-                var aliases = metadata.Aliases;
+                    var aliases = metadata.Aliases;
 
-                allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
-                if (!requestParams.AppConfig.MultiCloudSupportEnabled)
-                {
                     allRts = allRts.Where(
                         item => aliases.ContainsOrdinalIgnoreCase(item.Environment)).ToList();
                 }
@@ -986,7 +987,9 @@ namespace Microsoft.Identity.Client
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
                             account.PreferredUsername,
-                            environment, // Preserve the environment passed in by the user
+                            requestParameters.AppConfig.MultiCloudSupportEnabled ? 
+                                account.Environment : // If multi cloud support is enabled keep the cached environment
+                                environment, // Preserve the environment passed in by the user
                             account.WamAccountIds,
                             tenantProfiles?.Values);
 
