@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client
         /// Enables multi cloud support for this instance of public client application.
         /// It enables applications to use in a global public cloud authority to the library and can still get tokens for resources from national clouds.
         /// </summary>
-        /// <param name="enabled"></param>
+        /// <param name="enableMultiCloudSupport">Enable or disable multi cloud support.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithMultiCloudSupport(bool enableMultiCloudSupport)
@@ -372,6 +372,12 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
+            if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
+            {
+                // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139
+                throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
+            }
+
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)
@@ -381,12 +387,6 @@ namespace Microsoft.Identity.Client
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
-            }
-
-            if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
-            {
-                // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139
-                throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
             }
         }
     }
