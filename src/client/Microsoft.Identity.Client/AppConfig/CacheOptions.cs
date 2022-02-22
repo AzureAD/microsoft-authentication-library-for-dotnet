@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -40,6 +42,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="useSharedCache">Set to true to share the cache between all ClientApplication objects. The cache becomes static. <see cref="UseSharedCache"/> for a detailed description. </param>
+        /// <param name="maximumItems">Token cache items limit. <see cref="MaximumItems"/> for a detailed description.</param>
+        public CacheOptions(bool useSharedCache, int maximumItems)
+        {
+            UseSharedCache = useSharedCache;
+            MaximumItems = maximumItems;
+        }
+
+        /// <summary>
         /// Share the cache between all ClientApplication objects. The cache becomes static. Defaults to false.
         /// </summary>
         /// <remarks>
@@ -50,5 +63,34 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool UseSharedCache { get; set; }
 
+        private int? _maximumItems;
+
+        /// <summary>
+        /// Total token cache items limit for both app and user token caches.
+        /// </summary>
+        /// <remarks>
+        /// Once the limit is reached, either the app or user cache will be compacted, depending on which was most recently used.
+        /// Using a MemoryCache via Microsoft.Identity.Web.TokenCache is more accurate but slower.
+        /// This size limit applies only to internal memory cache and is not a concern when distributed caching is used.
+        /// IMPORTANT: Monitor app health metrics (including memory usage) and cache performance (<see href="https://aka.ms/msal-net-token-cache-serialization"/>)
+        /// and adjust size limit accordingly.
+        /// </remarks>
+        public int? MaximumItems
+        {
+            get => _maximumItems;
+            set
+            {
+                ValidateSizeLimit(value);
+                _maximumItems = value;
+            }
+        }
+
+        private void ValidateSizeLimit(int? maximumItems)
+        {
+            if (maximumItems < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maximumItems), $"{nameof(maximumItems)} must be a positive number.");
+            }
+        }
     }
 }

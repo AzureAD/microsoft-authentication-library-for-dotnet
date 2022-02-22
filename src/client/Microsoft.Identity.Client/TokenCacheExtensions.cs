@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client
             }
 
             var proxy = cache.ServiceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
-            cache.Accessor = proxy.CreateTokenCacheAccessor(options, tokenCacheInternal.IsApplicationCache);
+            cache.GetAccessor = proxy.CreateTokenCacheAccessor(options, tokenCacheInternal.IsApplicationCache);
         }
 
         private static void ValidatePlatform()
