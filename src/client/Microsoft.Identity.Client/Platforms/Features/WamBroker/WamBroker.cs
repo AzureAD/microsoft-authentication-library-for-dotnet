@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly SynchronizationContext _synchronizationContext;
         private readonly IMsaPassthroughHandler _msaPassthroughHandler;
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
-        private const string InfrastructureTenantAuthority = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
+        private const string InfrastructureTenant = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
         private readonly WindowsBrokerOptions _wamOptions;
 
         /// <summary>
@@ -696,15 +696,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
              .ConfigureAwait(false);
 
             _msaPassthroughHandler.AddTransferTokenToRequest(webTokenRequest, transferToken);
+            
+            string overrideAuthority =  authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true);
 
-            // We can't make this request on the /consumers authority, this is a known MSA-PT issue with the browser as well
-            // but we can make the request over /organizations or over /MicrosoftInfrastructureTenant
-            string overrideAuthority = null;
-            if (authenticationRequestParameters.Authority is AadAuthority aadAuthority && aadAuthority.IsConsumers())
-            {
-                overrideAuthority =
-                    authenticationRequestParameters.Authority.GetTenantedAuthority("organizations", true);
-            }
             WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, overrideAuthority);
 
             var wamResult =
