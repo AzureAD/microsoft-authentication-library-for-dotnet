@@ -479,7 +479,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 _webAccountProviderFactory.GetDefaultProviderAsync().ReturnsForAnyArgs(Task.FromResult(msaAccountProvider));
                 _webAccountProviderFactory.IsConsumerProvider(msaAccountProvider).Returns(true);
-                _msaPassthroughHandler.TryFetchTransferSilentDefaultAccountAsync(requestParams, msaAccountProvider).Returns("transfer_token");
+                _msaPassthroughHandler.TryFetchTransferTokenSilentDefaultAccountAsync(requestParams, msaAccountProvider).Returns("transfer_token");
 
                 _webAccountProviderFactory.GetAccountProviderAsync("organizations").Returns(aadAccountProvider);
 

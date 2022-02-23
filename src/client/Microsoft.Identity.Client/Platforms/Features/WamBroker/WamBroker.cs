@@ -575,7 +575,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             // We can't use the account as is to get a token, because this account is from MSA but the provider is AAD
             // so we have to perform the transfer token flow
-            string transferToken = await _msaPassthroughHandler.TryFetchTransferTokenSilentlyAsync(
+            string transferToken = await _msaPassthroughHandler.TryFetchTransferTokenSilentAsync(
                 authenticationRequestParameters,
                 msaWebAccount).ConfigureAwait(false);
 
@@ -684,7 +684,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         private async Task<MsalTokenResponse> AcquireTokenSilentDefaultUserPassthroughAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider defaultAccountProvider)
         {
-            var transferToken = await _msaPassthroughHandler.TryFetchTransferSilentDefaultAccountAsync(authenticationRequestParameters, defaultAccountProvider).ConfigureAwait(false);
+            var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenSilentDefaultAccountAsync(authenticationRequestParameters, defaultAccountProvider).ConfigureAwait(false);
 
             var aadAccountProvider = await _webAccountProviderFactory.GetAccountProviderAsync("organizations").ConfigureAwait(false);
             var webTokenRequest = await _aadPlugin.CreateWebTokenRequestAsync(
