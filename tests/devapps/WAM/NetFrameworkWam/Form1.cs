@@ -162,7 +162,7 @@ namespace NetDesktopWinForms
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 var builder = pca.AcquireTokenSilent(GetScopes(), acc);
-                if (IsMsaPassthroughConfigured())
+                if (IsMsaPassthroughConfigured() && !useBrokerChk.Checked)
                 {
                     // this is the same in all clouds
                     const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
