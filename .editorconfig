@@ -176,14 +176,19 @@ end_of_line = crlf
 # Code files
 [*.{cs,vb}]
 
-dotnet_diagnostic.UseAsyncSuffix.severity = error
+# dotnet_diagnostic.UseAsyncSuffix.severity = error
 
-dotnet_diagnostic.UseConfigureAwait.severity = error
+# dotnet_diagnostic.UseConfigureAwait.severity = error
 
-dotnet_diagnostic.AvoidAsyncSuffix.severity = none
+# dotnet_diagnostic.AvoidAsyncSuffix.severity = none
 
-dotnet_diagnostic.AvoidAsyncVoid.severity = none
+# dotnet_diagnostic.AvoidAsyncVoid.severity = none
 
+dotnet_diagnostic.VSTHRD200.severity = error
+
+dotnet_diagnostic.VSTHRD111.severity = error
+
+dotnet_diagnostic.VSTHRD100.severity = none
 
 # Compiler warnings that trigger SDL
 dotnet_diagnostic.CS0618.severity = error
