@@ -93,6 +93,7 @@ namespace Microsoft.Identity.Client
         public bool SendX5C { get; internal set; } = false;
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
+        public bool MultiCloudSupportEnabled { get; set; } = false;
 
         #region ClientCredentials
 

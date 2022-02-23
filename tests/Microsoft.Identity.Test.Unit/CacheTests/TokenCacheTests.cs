@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Castle.Core.Internal;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
@@ -91,6 +92,42 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 legacyCachePersistence.DidNotReceiveWithAnyArgs().LoadCache();
                 legacyCachePersistence.DidNotReceiveWithAnyArgs().WriteCache(Arg.Any<byte[]>());
             }
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task WithMultiCloudSupportTest_Async(
+            bool multiCloudSupportEnabled)
+        {
+            // Arrange
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isMultiCloudSupportEnabled: multiCloudSupportEnabled);
+            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            var response = TestConstants.CreateMsalTokenResponse();
+
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+
+            var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
+            requestParams.AuthorityManager = new AuthorityManager(
+                requestContext,
+                Authority.CreateAuthorityWithTenant(
+                    requestParams.AuthorityInfo,
+                    TestConstants.Utid));
+            requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
+
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
+
+            IEnumerable<IAccount> accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
+            Assert.IsNotNull(accounts);
+            Assert.IsNotNull(accounts.Single());
+
+            MsalRefreshTokenCacheItem refreshToken = await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
+            Assert.IsNotNull(refreshToken);
+
+            await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
+            accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
+            Assert.IsNotNull(accounts);
+            Assert.IsTrue(accounts.IsNullOrEmpty());
         }
 
         [TestMethod]
