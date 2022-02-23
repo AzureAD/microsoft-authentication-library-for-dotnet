@@ -11,38 +11,38 @@ namespace Microsoft.Identity.Client
     /// <see cref="AuthenticationResultMetadata"/> for additional metadata 
     /// information of the authentication result.
     /// </summary>
-    public class RegionDiscoveryOutcome
+    public class RegionDetails
     {
         /// <summary>
-        /// Constructor for RegionDiscoveryOutcome
+        /// Constructor for RegionDetails
         /// </summary>
         /// <param name="regionOutcome"></param>
         /// <param name="regionUsed"></param>
-        /// <param name="exception"></param>
-        internal RegionDiscoveryOutcome(
+        /// <param name="autoDetectionError "></param>
+        public RegionDetails(
             RegionOutcome regionOutcome,
             string regionUsed,
-            string exception)
+            string autoDetectionError)
         {
             RegionOutcome = regionOutcome;
             RegionUsed = regionUsed;
-            Exception = exception;
+            AutoDetectionError = autoDetectionError;
         }
 
         /// <summary>
         /// Region Outcome based on MSAL region detection
         /// </summary>
-        internal RegionOutcome RegionOutcome { get; }
+        public RegionOutcome RegionOutcome { get; }
 
         /// <summary>
-        /// Region returned to the user
+        /// Region used to construct /token endpoint to contact ESTS.
         /// </summary>
-        internal string RegionUsed { get; }
+        public string RegionUsed { get; }
 
         /// <summary>
         /// Error details when region auto detect fails
         /// </summary>
-        internal string Exception { get; }
+        public string AutoDetectionError  { get; }
 
     }
 }

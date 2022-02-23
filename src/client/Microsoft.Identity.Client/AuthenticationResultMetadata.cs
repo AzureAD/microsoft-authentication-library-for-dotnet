@@ -69,6 +69,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Contains the Outcome of the region discovery if Region was used.
         /// </summary>
-        public RegionDiscoveryOutcome RegionDiscoveryOutcome { get; set; }
+        public RegionDetails RegionDetails { get; set; }
     }
 }

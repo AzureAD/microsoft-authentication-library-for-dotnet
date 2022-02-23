@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.UserProvidedAutodetectionFailed, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
+            Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionAutoDetectNotFoundFailureMessage));
         }
 
         [TestMethod]
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.AreEqual(TestConstants.RegionAutoDetectFailureMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
+            Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionAutoDetectOkFailureMessage));
         }
 
         [TestMethod]
@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.AreEqual(TestConstants.RegionAutoDetectFailureMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
+            Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionAutoDetectNotFoundFailureMessage));
         }
 
         [TestMethod]
@@ -317,7 +317,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.AreEqual(TestConstants.RegionAutoDetectFailureMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
+            Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionDiscoveryNotSupportedErrorMessage));
         }
 
         [TestMethod]
@@ -338,7 +338,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.AreEqual(TestConstants.RegionAutoDetectFailureMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
+            Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionDiscoveryNotSupportedErrorMessage));
         }
 
         private void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true)

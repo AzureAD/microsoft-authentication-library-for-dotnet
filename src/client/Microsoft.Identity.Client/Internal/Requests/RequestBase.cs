@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
             authenticationResult.AuthenticationResultMetadata.TokenEndpoint = apiEvent.TokenEndpoint;
             authenticationResult.AuthenticationResultMetadata.CacheRefreshReason = apiEvent.CacheInfo;
-            authenticationResult.AuthenticationResultMetadata.RegionDiscoveryOutcome = CreateRegionDiscoveryOutcome(apiEvent);
+            authenticationResult.AuthenticationResultMetadata.RegionDetails = CreateRegionDetails(apiEvent);
 
             Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
         }
@@ -410,13 +410,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         /// <summary>
-        /// Creates the region discovery Outcome
+        /// Creates the region Details
         /// </summary>
         /// <param name="apiEvent"></param>
         /// <returns></returns>
-        private static RegionDiscoveryOutcome CreateRegionDiscoveryOutcome(ApiEvent apiEvent)
+        private static RegionDetails CreateRegionDetails(ApiEvent apiEvent)
         {
-            return new RegionDiscoveryOutcome(
+            return new RegionDetails(
                 apiEvent.RegionOutcome,
                 apiEvent.RegionUsed,
                 apiEvent.RegionDiscoveryFailureReason);
