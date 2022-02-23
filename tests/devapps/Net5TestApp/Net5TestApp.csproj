@@ -6,13 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.1.46">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 
