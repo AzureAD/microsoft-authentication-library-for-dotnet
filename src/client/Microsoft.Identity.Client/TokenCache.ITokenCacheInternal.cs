@@ -1103,16 +1103,20 @@ namespace Microsoft.Identity.Client
 
             var idTokenCacheItems = GetAllIdTokensWithNoLocks(true, homeAccountId);
 
-            ISet<string> allEnvironmentsInCache = new HashSet<string>(
+            if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
+            {
+                ISet<string> allEnvironmentsInCache = new HashSet<string>(
                 idTokenCacheItems.Select(aci => aci.Environment),
                 StringComparer.OrdinalIgnoreCase);
 
-            InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                requestParameters.AuthorityInfo,
-                allEnvironmentsInCache,
-                requestParameters.RequestContext).ConfigureAwait(false);
+                InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                    requestParameters.AuthorityInfo,
+                    allEnvironmentsInCache,
+                    requestParameters.RequestContext).ConfigureAwait(false);
 
-            idTokenCacheItems = idTokenCacheItems.Where(idToken => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(idToken.Environment)).ToList();
+                idTokenCacheItems = idTokenCacheItems.Where(idToken => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(idToken.Environment)).ToList();
+            }
+
             // some accessors might not support partitioning, so make sure to filter by home account id
             idTokenCacheItems = idTokenCacheItems.Where(idToken => homeAccountId.Equals(idToken.HomeAccountId)).ToList();
 

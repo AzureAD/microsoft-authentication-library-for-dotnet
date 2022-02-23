@@ -146,6 +146,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Account);
+            Assert.IsNotNull(result.Account.GetTenantProfiles());
+            Assert.IsTrue(result.Account.GetTenantProfiles().Any());
             Assert.AreEqual(labResponse.User.Upn, result.Account.Username);
             Assert.IsTrue(labResponse.Lab.Authority.Contains(result.Account.Environment));
 
@@ -154,8 +156,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(accounts);
             Assert.IsNotNull(accounts.Single());
-            Assert.AreEqual(labResponse.User.Upn, accounts.FirstOrDefault().Username);
-            Assert.AreEqual("login.microsoftonline.us", accounts.Single().Environment);
+
+            var account = accounts.Single();
+
+            Assert.IsNotNull(account.GetTenantProfiles());
+            Assert.IsTrue(account.GetTenantProfiles().Any());
+            Assert.AreEqual(labResponse.User.Upn, account.Username);
+            Assert.AreEqual("login.microsoftonline.us", account.Environment);
 
             Trace.WriteLine("Part 3 - Acquire a token silently");
             result = await pca
@@ -165,6 +172,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Account);
+            Assert.IsNotNull(result.Account.GetTenantProfiles());
+            Assert.IsTrue(result.Account.GetTenantProfiles().Any());
             Assert.IsTrue(labResponse.Lab.Authority.Contains(result.Account.Environment));
         }
 
