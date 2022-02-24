@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private readonly IServiceBundle _serviceBundle;
         private readonly ICoreLogger _logger;
-        private readonly const string InstanceAwareParam = "instance_aware";
+        private const string InstanceAwareParam = "instance_aware";
 
         #region For Test
         private readonly IAuthCodeRequestComponent _authCodeRequestComponentOverride;
@@ -115,6 +115,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (_requestParams.AppConfig.MultiCloudSupportEnabled)
             {
+                _logger.Info("Instance Aware was configured.");
                 _requestParams.AppConfig.ExtraQueryParameters[InstanceAwareParam] = "true";
             }
 
