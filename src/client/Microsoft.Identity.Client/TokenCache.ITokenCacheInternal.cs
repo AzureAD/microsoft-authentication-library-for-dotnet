@@ -802,17 +802,21 @@ namespace Microsoft.Identity.Client
 
             if (allRts.Count != 0)
             {
-                var metadata =
+                allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
+
+                if (!requestParams.AppConfig.MultiCloudSupportEnabled)
+                {
+                    var metadata =
                     await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                         requestParams.AuthorityInfo,
                         allRts.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
                         requestParams.RequestContext)
                     .ConfigureAwait(false);
-                var aliases = metadata.Aliases;
+                    var aliases = metadata.Aliases;
 
-                allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
-                allRts = allRts.Where(
-                    item => aliases.ContainsOrdinalIgnoreCase(item.Environment)).ToList();
+                    allRts = allRts.Where(
+                        item => aliases.ContainsOrdinalIgnoreCase(item.Environment)).ToList();
+                }
 
                 IReadOnlyList<MsalRefreshTokenCacheItem> finalList = allRts.ToList();
                 requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (finalList.Count != 0));
@@ -981,8 +985,13 @@ namespace Microsoft.Identity.Client
                 allEnvironmentsInCache,
                 requestParameters.RequestContext).ConfigureAwait(false);
 
-            rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment)).ToList();
-            accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment)).ToList();
+            // If the client application is instance aware then we skip the filter with environment
+            // since the authority in request is different from the authority used to get the token
+            if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
+            {
+                rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment)).ToList();
+                accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment)).ToList();
+            }
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
@@ -999,7 +1008,9 @@ namespace Microsoft.Identity.Client
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
                             account.PreferredUsername,
-                            environment, // Preserve the environment passed in by the user
+                            requestParameters.AppConfig.MultiCloudSupportEnabled ? 
+                                account.Environment : // If multi cloud support is enabled keep the cached environment
+                                environment, // Preserve the environment passed in by the user
                             account.WamAccountIds,
                             tenantProfiles?.Values);
 
@@ -1113,16 +1124,20 @@ namespace Microsoft.Identity.Client
 
             var idTokenCacheItems = GetAllIdTokensWithNoLocks(true, homeAccountId);
 
-            ISet<string> allEnvironmentsInCache = new HashSet<string>(
+            if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
+            {
+                ISet<string> allEnvironmentsInCache = new HashSet<string>(
                 idTokenCacheItems.Select(aci => aci.Environment),
                 StringComparer.OrdinalIgnoreCase);
 
-            InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                requestParameters.AuthorityInfo,
-                allEnvironmentsInCache,
-                requestParameters.RequestContext).ConfigureAwait(false);
+                InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                    requestParameters.AuthorityInfo,
+                    allEnvironmentsInCache,
+                    requestParameters.RequestContext).ConfigureAwait(false);
 
-            idTokenCacheItems = idTokenCacheItems.Where(idToken => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(idToken.Environment)).ToList();
+                idTokenCacheItems = idTokenCacheItems.Where(idToken => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(idToken.Environment)).ToList();
+            }
+
             // some accessors might not support partitioning, so make sure to filter by home account id
             idTokenCacheItems = idTokenCacheItems.Where(idToken => homeAccountId.Equals(idToken.HomeAccountId)).ToList();
 

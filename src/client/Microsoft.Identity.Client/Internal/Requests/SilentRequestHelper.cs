@@ -9,17 +9,30 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+#if iOS
+using Microsoft.Identity.Client.Platforms.iOS;
+#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
     internal static class SilentRequestHelper
     {
+        const string MamEnrollmentIdKey = "microsoft_enrollment_id";
+
         internal static async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, RequestBase request, AuthenticationRequestParameters authenticationRequestParameters, CancellationToken cancellationToken)
         {
             authenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
             await authenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
 
-            var msalTokenResponse = await request.SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
+            var dict = GetBodyParameters(msalRefreshTokenItem.Secret);
+#if iOS
+                var realEnrollmentId = IntuneEnrollmentIdHelper.GetEnrollmentId(authenticationRequestParameters.RequestContext.Logger);
+                if(!string.IsNullOrEmpty(realEnrollmentId))
+                {
+                    dict[MamEnrollmentIdKey] = realEnrollmentId;
+                }
+#endif
+            var msalTokenResponse = await request.SendTokenRequestAsync(dict, cancellationToken)
                                     .ConfigureAwait(false);
 
             if (msalTokenResponse.RefreshToken == null)
@@ -103,7 +116,6 @@ namespace Microsoft.Identity.Client.Internal
                 var refreshOnWithJitter = msalAccessTokenCacheItem.RefreshOn.Value + TimeSpan.FromSeconds(jitter);
                 return refreshOnWithJitter;
             }
-
             
             return null;           
         }

@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Instance
         public static async Task<Authority> CreateAuthorityForRequestAsync(
             RequestContext requestContext,
             AuthorityInfo requestAuthorityInfo,
-            string requestHomeAccountTenantId = null)
+            IAccount account = null)
         {
             var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
 
@@ -62,6 +62,7 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
+
             await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
 
             switch (configAuthorityInfo.AuthorityType)
@@ -82,9 +83,13 @@ namespace Microsoft.Identity.Client.Instance
 
                 case AuthorityType.Aad:
 
+                    bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null;
+
                     if (requestAuthorityInfo == null)
                     {
-                        return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
+                        return updateEnvironment ?
+                            CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
+                            CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
                     }
 
                     // In case the authority is defined only at the request level
@@ -94,13 +99,17 @@ namespace Microsoft.Identity.Client.Instance
                         return CreateAuthority(requestAuthorityInfo);
                     }
 
-                    var requestAuthority = new AadAuthority(requestAuthorityInfo);
+                    var requestAuthority = updateEnvironment ? 
+                        new AadAuthority(CreateAuthorityWithEnvironment(requestAuthorityInfo, account?.Environment).AuthorityInfo) :
+                        new AadAuthority(requestAuthorityInfo);
                     if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant())
                     {
                         return requestAuthority;
                     }
 
-                    return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
+                    return updateEnvironment ?
+                            CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
+                            CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
 
                 default:
                     throw new MsalClientException(
@@ -194,7 +203,8 @@ namespace Microsoft.Identity.Client.Instance
         {
             var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
 
-            if (requestAuthorityInfo != null &&
+            if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && 
+                requestAuthorityInfo != null &&
                 !string.Equals(requestAuthorityInfo.Host, configAuthorityInfo.Host, StringComparison.OrdinalIgnoreCase))
             {
                 if (requestAuthorityInfo.AuthorityType == AuthorityType.B2C)

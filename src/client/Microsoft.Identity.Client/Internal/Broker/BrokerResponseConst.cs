@@ -34,17 +34,27 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Account = "mAccount";
         public const string HomeAccountId = "home_account_id";
         public const string LocalAccountId = "local_account_id";
+        public const string TenantId = "tenant_id";
         public const string UserName = "username";
         public const string iOSBrokerNonce = "broker_nonce"; // included in request and response with iOS Broker v3
+        public const string iOSBrokerTenantId = "utid";
         public const string Environment = "environment";
 
         public const string iOSBrokerUserCancellationErrorCode = "-50005";
+
+        // The requested resource is protected by an Intune Conditional Access policy.
+        // The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
+        // please see https://aka.ms/intuneMAMSDK for more information. Handling of this error is optional (handle it only
+        // if you are going to access resources protected by an Intune Conditional Access policy).
+        public const string iOSBrokerProtectionPoliciesRequiredErrorCode = "-50004";
 
         public const string TokenType = "token_type";
 
         //Error codes returned from Android broker
         public const string AndroidNoTokenFound = "no_tokens_found";
         public const string AndroidNoAccountFound = "no_account_found";
+        public const string AndroidUnauthorizedClient = "unauthorized_client";
         public const string AndroidInvalidRefreshToken = "Broker refresh token is invalid";
+        public const string AndroidProtectionPolicyRequired = "protection_policy_required";
     }
 }

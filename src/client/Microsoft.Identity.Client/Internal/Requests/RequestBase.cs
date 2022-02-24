@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
         internal ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
-        protected IServiceBundle ServiceBundle { get; }
+        internal IServiceBundle ServiceBundle { get; }
 
         protected RequestBase(
             IServiceBundle serviceBundle,
@@ -129,6 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
             authenticationResult.AuthenticationResultMetadata.TokenEndpoint = apiEvent.TokenEndpoint;
             authenticationResult.AuthenticationResultMetadata.CacheRefreshReason = apiEvent.CacheInfo;
+            authenticationResult.AuthenticationResultMetadata.RegionDetails = CreateRegionDetails(apiEvent);
 
             Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
         }
@@ -365,17 +366,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 
                 AuthenticationRequestParameters.RequestContext.Logger.Info("\n\t=== Token Acquisition finished successfully:");
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes}" +
-                            $"source {result.AuthenticationResultMetadata.TokenSource}",
-                        $" AT expiration time: {result.ExpiresOn}, scopes {scopes}" +
-                            $"source {result.AuthenticationResultMetadata.TokenSource}");
+                        $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
+                            $"source: {result.AuthenticationResultMetadata.TokenSource}",
+                        $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
+                            $"source: {result.AuthenticationResultMetadata.TokenSource}");
 
                 if (result.AuthenticationResultMetadata.TokenSource != TokenSource.Cache)
                 {
                     Uri canonicalAuthority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
 
                     AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                        $"Fetched access token from host {canonicalAuthority.Host}. Endpoint {canonicalAuthority}. ",
+                        $"Fetched access token from host {canonicalAuthority.Host}. Endpoint: {canonicalAuthority}. ",
                         $"Fetched access token from host {canonicalAuthority.Host}. ");
                 }
             }
@@ -406,6 +407,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
             throw e;
+        }
+
+        /// <summary>
+        /// Creates the region Details
+        /// </summary>
+        /// <param name="apiEvent"></param>
+        /// <returns></returns>
+        private static RegionDetails CreateRegionDetails(ApiEvent apiEvent)
+        {
+            return new RegionDetails(
+                apiEvent.RegionOutcome,
+                apiEvent.RegionUsed,
+                apiEvent.RegionDiscoveryFailureReason);
         }
     }
 }

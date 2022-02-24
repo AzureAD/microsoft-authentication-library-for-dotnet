@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             bool isConsumerTenant = string.Equals(webAccountProvider.Authority, "consumers", StringComparison.OrdinalIgnoreCase);
             return isConsumerTenant;
-
         }
     }
 }
