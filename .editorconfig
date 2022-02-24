@@ -176,10 +176,13 @@ end_of_line = crlf
 # Code files
 [*.{cs,vb}]
 
+# Use Async suffix for async methods
 dotnet_diagnostic.VSTHRD200.severity = error
 
+# Use .ConfigureAwait(bool)
 dotnet_diagnostic.VSTHRD111.severity = error
 
+# Avoid async void methods
 dotnet_diagnostic.VSTHRD100.severity = none
 
 # Compiler warnings that trigger SDL
