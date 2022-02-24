@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         {
             get => _regionOutcome.HasValue ? _regionOutcome.Value.ToString("D") : null;
         }
-        public string AutoDetectedRegion { get; set; }
+        public string AutoDetectedRegion { get; internal set; }
 
 
         public string RegionDiscoveryFailureReason { get; set; }

@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Region
 
             public string Region { get; }
             public RegionAutodetectionSource RegionSource { get; }
-            public string RegionDetails { get; }
+            public readonly string RegionDetails;
         }
 
         // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
