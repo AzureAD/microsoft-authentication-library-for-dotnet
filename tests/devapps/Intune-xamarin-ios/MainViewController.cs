@@ -22,7 +22,7 @@ namespace IntuneMAMSampleiOS
     public partial class MainViewController: UIViewController
 	{
         UIButton btnMSAL;
-        UISwitch dirSwitch;
+        UIButton btnSignOut;
 
         internal static IPublicClientApplication PCA { get; set; }
         MainIntuneMAMComplianceDelegate _mamComplianceDelegate;
@@ -45,6 +45,14 @@ namespace IntuneMAMSampleiOS
             this.btnMSAL.TouchUpInside += BtnMSAL_TouchUpInside;
 
             View.AddSubview(btnMSAL);
+
+            this.btnSignOut = new UIButton(UIButtonType.System);
+            this.btnSignOut.Frame = new CGRect(0, 500, 300, 30);
+            this.btnSignOut.SetTitle("Sign out", UIControlState.Normal);
+
+            this.btnSignOut.TouchUpInside += BtnSignOut_TouchUpInside;
+
+            View.AddSubview(btnSignOut);
         }
 
         /// <summary>
@@ -120,6 +128,22 @@ namespace IntuneMAMSampleiOS
             catch (Exception ex)
             {
                 ShowAlert($"{ex}", "Error");
+            }
+        }
+
+        /// <summary>
+        /// This method performs signout
+        /// </summary>
+        /// <param name="sender">Sender button</param>
+        /// <param name="e">arguments</param>
+        private async void BtnSignOut_TouchUpInside(object sender, EventArgs e)
+        {
+            var accounts = await PCA.GetAccountsAsync().ConfigureAwait(false);
+
+            while (accounts.Any())
+            {
+                await PCA.RemoveAsync(accounts.FirstOrDefault()).ConfigureAwait(false);
+                accounts = await PCA.GetAccountsAsync().ConfigureAwait(false);
             }
         }
 
