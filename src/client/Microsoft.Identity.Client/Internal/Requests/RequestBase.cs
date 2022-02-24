@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
         internal ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
-        protected IServiceBundle ServiceBundle { get; }
+        internal IServiceBundle ServiceBundle { get; }
 
         protected RequestBase(
             IServiceBundle serviceBundle,
