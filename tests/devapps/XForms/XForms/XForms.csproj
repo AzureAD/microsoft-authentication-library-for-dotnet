@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="StrongNamer" Version="0.0.8">
     </PackageReference>
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
     <PackageReference Include="Xamarin.Forms" Version="4.7.0.1351" />
   </ItemGroup>
   <ItemGroup>
