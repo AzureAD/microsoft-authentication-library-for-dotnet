@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private readonly IServiceBundle _serviceBundle;
         private readonly ICoreLogger _logger;
-        private readonly string _instanceAware = "instance_aware";
+        private readonly const string InstanceAwareParam = "instance_aware";
 
         #region For Test
         private readonly IAuthCodeRequestComponent _authCodeRequestComponentOverride;
@@ -113,9 +113,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            if (_requestParams.AppConfig.MultiCloudSupportEnabled && !_requestParams.AppConfig.ExtraQueryParameters.ContainsKey(_instanceAware))
+            if (_requestParams.AppConfig.MultiCloudSupportEnabled)
             {
-                _requestParams.AppConfig.ExtraQueryParameters.Add(_instanceAware, "true");
+                _requestParams.AppConfig.ExtraQueryParameters[InstanceAwareParam] = "true";
             }
 
             IAuthCodeRequestComponent authorizationFetcher =
