@@ -177,13 +177,31 @@ end_of_line = crlf
 [*.{cs,vb}]
 
 # Use Async suffix for async methods
-dotnet_diagnostic.VSTHRD200.severity = error
+dotnet_diagnostic.VSTHRD200.severity = none
 
 # Use .ConfigureAwait(bool)
 dotnet_diagnostic.VSTHRD111.severity = error
 
 # Avoid async void methods
 dotnet_diagnostic.VSTHRD100.severity = none
+
+# Avoid awaiting foreign Tasks
+dotnet_diagnostic.VSTHRD003.severity = none
+
+# Avoid legacy thread switching methods
+dotnet_diagnostic.VSTHRD001.severity = none
+
+# Avoid problematic synchronous waits
+dotnet_diagnostic.VSTHRD002.severity = none
+
+# Avoid unsupported async delegates
+dotnet_diagnostic.VSTHRD101.severity = none
+
+# Call async methods when in an async method
+dotnet_diagnostic.VSTHRD103.severity = none
+
+# Use AsyncLazy<T>
+dotnet_diagnostic.VSTHRD011.severity = none
 
 # Compiler warnings that trigger SDL
 dotnet_diagnostic.CS0618.severity = error
