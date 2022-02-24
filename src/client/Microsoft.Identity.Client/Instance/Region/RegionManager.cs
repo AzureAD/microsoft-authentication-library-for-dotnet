@@ -19,14 +19,16 @@ namespace Microsoft.Identity.Client.Region
     {
         private class RegionInfo
         {
-            public RegionInfo(string region, RegionAutodetectionSource regionSource)
+            public RegionInfo(string region, RegionAutodetectionSource regionSource, string regionDetails)
             {
                 Region = region;
                 RegionSource = regionSource;
+                RegionDetails = regionDetails;
             }
 
             public string Region { get; }
             public RegionAutodetectionSource RegionSource { get; }
+            public readonly string RegionDetails;
         }
 
         // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
@@ -38,6 +40,7 @@ namespace Microsoft.Identity.Client.Region
 
         private static string s_autoDiscoveredRegion;
         private static bool s_failedAutoDiscovery = false;
+        private static string s_regionDiscoveryDetails;
 
         public RegionManager(
             IHttpManager httpManager,
@@ -51,6 +54,7 @@ namespace Microsoft.Identity.Client.Region
             {
                 s_failedAutoDiscovery = false;
                 s_autoDiscoveredRegion = null;
+                s_regionDiscoveryDetails = null;
             }
         }
 
@@ -78,11 +82,15 @@ namespace Microsoft.Identity.Client.Region
             {
                 if (discoveredRegion.RegionSource != RegionAutodetectionSource.FailedAutoDiscovery)
                 {
+                    logger.Verbose($"[Region discovery] Discovered Region {discoveredRegion.Region}");
+                    requestContext.ApiEvent.RegionUsed = discoveredRegion.Region;
+                    requestContext.ApiEvent.AutoDetectedRegion = discoveredRegion.Region;
                     return discoveredRegion.Region;
                 }
                 else
                 {
-                    logger.Warning($"[Region discovery] Auto-discovery failed.");
+                    logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}");
+                    requestContext.ApiEvent.RegionDiscoveryFailureReason = s_regionDiscoveryDetails;
                     return null;
                 }
             }
@@ -117,6 +125,7 @@ namespace Microsoft.Identity.Client.Region
             else
             {
                 apiEvent.RegionUsed = azureRegionConfig;
+                apiEvent.RegionDiscoveryFailureReason = discoveredRegion.RegionDetails;
 
                 if (discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery)
                 {
@@ -144,21 +153,23 @@ namespace Microsoft.Identity.Client.Region
         {
             if (s_failedAutoDiscovery == true)
             {
-                logger.Info($"[Region discovery] Auto-discovery failed in the past. Not trying again.");
-                return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery);
+                var autoDiscoveryError = $"[Region discovery] Auto-discovery failed in the past. Not trying again. {s_regionDiscoveryDetails}. {DateTime.UtcNow}";
+                logger.Verbose(autoDiscoveryError);
+                return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, autoDiscoveryError);
             }
 
             if (s_failedAutoDiscovery == false &&
                 !string.IsNullOrEmpty(s_autoDiscoveredRegion))
             {
                 logger.Info($"[Region discovery] Auto-discovery already ran and found {s_autoDiscoveredRegion}.");
-                return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache);
+                return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache, null);
             }
 
             var result = await DiscoverAsync(logger, requestCancellationToken).ConfigureAwait(false);
 
             s_failedAutoDiscovery = result.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery;
             s_autoDiscoveredRegion = result.Region;
+            s_regionDiscoveryDetails = result.RegionDetails;
 
             return result;
         }
@@ -170,7 +181,7 @@ namespace Microsoft.Identity.Client.Region
             if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
             {
                 logger.Info($"[Region discovery] Region found in environment variable: {region}.");
-                return new RegionInfo(region, RegionAutodetectionSource.EnvVariable);
+                return new RegionInfo(region, RegionAutodetectionSource.EnvVariable, null);
             }
 
             try
@@ -200,13 +211,14 @@ namespace Microsoft.Identity.Client.Region
 
                     if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
                     {
-                        logger.Info($"[Region discovery] Call to local IMDS succeeded. Region: {region}.");
-                        return new RegionInfo(region, RegionAutodetectionSource.Imds);
+                        logger.Info($"[Region discovery] Call to local IMDS succeeded. Region: {region}. {DateTime.UtcNow}");
+                        return new RegionInfo(region, RegionAutodetectionSource.Imds, null);
                     }
                 }
                 else
                 {
-                    logger.Warning($"[Region discovery] Call to local IMDS failed with status code {response.StatusCode} or an empty response.");
+                    s_regionDiscoveryDetails = $"Call to local IMDS failed with status code {response.StatusCode} or an empty response. {DateTime.UtcNow}";
+                    logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}");
                 }
 
             }
@@ -214,28 +226,30 @@ namespace Microsoft.Identity.Client.Region
             {
                 if (e is MsalServiceException msalEx && MsalError.RequestTimeout.Equals(msalEx?.ErrorCode))
                 {
-                    logger.Warning($"[Region discovery] Call to local IMDS timed out after {_imdsCallTimeoutMs}.");
+                    s_regionDiscoveryDetails = $"Call to local IMDS timed out after {_imdsCallTimeoutMs}.";
+                    logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}.");
                 }
                 else
                 {
-                    logger.Warning($"[Region discovery] IMDS call failed with exception {e}");
+                    s_regionDiscoveryDetails = $"IMDS call failed with exception {e}. {DateTime.UtcNow}";
+                    logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}");
                 }
             }
 
-            return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery);
+            return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, s_regionDiscoveryDetails);
         }
 
         private static bool ValidateRegion(string region, string source, ICoreLogger logger)
         {
             if (string.IsNullOrEmpty(region))
             {
-                logger.Verbose($"[Region discovery] Region from {source} not detected");
+                logger.Verbose($"[Region discovery] Region from {source} not detected. {DateTime.UtcNow}");
                 return false;
             }
 
             if (!Uri.IsWellFormedUriString($"https://{region}.login.microsoft.com", UriKind.Absolute))
             {
-                logger.Error($"[Region discovery] Region from {source} was found but it's invalid: {region}");
+                logger.Error($"[Region discovery] Region from {source} was found but it's invalid: {region}. {DateTime.UtcNow}");
                 return false;
             }
 
@@ -259,10 +273,10 @@ namespace Microsoft.Identity.Client.Region
                     return errorResponse.NewestVersions[0];
                 }
 
-                logger.Info("[Region discovery] The response is empty or does not contain the newest versions.");
+                logger.Info($"[Region discovery] The response is empty or does not contain the newest versions. {DateTime.UtcNow}");
             }
 
-            logger.Info($"[Region discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}.");
+            logger.Info($"[Region discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}. {DateTime.UtcNow}");
 
             throw MsalServiceExceptionFactory.FromImdsResponse(
             MsalError.RegionDiscoveryFailed,
