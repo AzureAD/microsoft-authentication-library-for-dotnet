@@ -2,7 +2,7 @@
 ==========
 
 ### New Features
-**Multi Cloud Support** Allows 1st party public client apps which target the public cloud to log in users from other clouds. Not supported for broker flows. [2524](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2524)
+**Multi Cloud Support** Allows 1st party public client apps which target the public cloud to log in users from other clouds. Not supported for broker flows. Details at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Multi-Cloud-Support-or-Instance-Aware [2524](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2524)
 **Expose the region or error used by MSAL** in AuthenticationResult.AuthenticationResultMedatadata and in logs. See [2975](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2975) 
 **App protection (true MAM) support for iOS**. See [2894](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2894) 
 
