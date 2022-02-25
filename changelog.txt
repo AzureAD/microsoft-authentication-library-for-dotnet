@@ -1,3 +1,19 @@
+4.42.0
+==========
+
+### New Features
+**Multi Cloud Support** Allows 1st party public client apps which target the public cloud to log in users from other clouds. Not supported for broker flows. [2524](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2524)
+**Expose the region or error used by MSAL** in AuthenticationResult.AuthenticationResultMedatadata and in logs. See [2975](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2975) 
+**App protection (true MAM) support for iOS**. See [2894](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2894) 
+
+### Bug Fixes
+
+**Fix a bug causing an "Sequence Contains No Elements" exception** This occurs in rare circumstances when saving the token cache. [3130](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3130)
+**Fix a bug causing an "ArgumentOutOfRangeException: the relative expiration value must be positive" exception** This occurs in rare circumstances when saving the token cache. [2859](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2859)
+**Default OS account login with MSA fails** This affects some first party applications (MSA passthrough) only [3157](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3157)
+**WwwAuthenticateParameters should not expose Resource** [3144](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3144)
+
+
 4.41.0
 ==========
 ### New Features:
