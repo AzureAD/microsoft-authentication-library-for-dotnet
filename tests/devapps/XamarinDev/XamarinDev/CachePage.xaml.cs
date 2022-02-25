@@ -53,12 +53,12 @@ namespace XamarinDev
             accountsCacheItems.ItemsSource = accounts;
         }
 
-        protected override async void OnAppearing()
+        protected override async Task OnAppearing()
         {
             await RefreshCacheViewAsync().ConfigureAwait(false);
         }
 
-        private async void OnClearClickedAsync(object sender, EventArgs e)
+        private async Task OnClearClickedAsync(object sender, EventArgs e)
         {
             foreach (var user in await App.MsalPublicClient.GetAccountsAsync().ConfigureAwait(false))
             {
@@ -112,7 +112,7 @@ namespace XamarinDev
             RefreshCacheViewAsync().ConfigureAwait(true);
         }
 
-        public async void ShowAccessTokenDetailsAsync(object sender, EventArgs e)
+        public async Task ShowAccessTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
@@ -121,7 +121,7 @@ namespace XamarinDev
             await Navigation.PushAsync(new AccessTokenCacheItemDetails(accessTokenCacheItem, null)).ConfigureAwait(false);
         }
 
-        public async void ShowRefreshTokenDetailsAsync(object sender, EventArgs e)
+        public async Task ShowRefreshTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var refreshTokenCacheItem = (MsalRefreshTokenCacheItem)mi.CommandParameter;
@@ -129,7 +129,7 @@ namespace XamarinDev
             await Navigation.PushAsync(new RefreshTokenCacheItemDetails(refreshTokenCacheItem)).ConfigureAwait(false);
         }
 
-        public async void ShowIdTokenDetailsAsync(object sender, EventArgs e)
+        public async Task ShowIdTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var idTokenCacheItem = (MsalIdTokenCacheItem)mi.CommandParameter;
@@ -138,7 +138,7 @@ namespace XamarinDev
             await Navigation.PushAsync(new IdTokenCacheItemDetails(idTokenCacheItem)).ConfigureAwait(false);
         }
 
-        public async void ShowAccountDetailsAsync(object sender, EventArgs e)
+        public async Task ShowAccountDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var accountCacheItem = (MsalAccountCacheItem)mi.CommandParameter;

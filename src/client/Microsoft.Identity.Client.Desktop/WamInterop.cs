@@ -14,20 +14,20 @@ namespace Microsoft.Identity.Client.Platforms
 {
     internal static class WebAuthenticationCoreManagerInterop
     {
-        public static IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr hWnd, WebTokenRequest request)
+        public static IAsyncOperation<WebTokenRequestResult> RequestTokenForWindow(IntPtr hWnd, WebTokenRequest request)
         {
             IWebAuthenticationCoreManagerInterop webAuthenticationCoreManagerInterop = (IWebAuthenticationCoreManagerInterop)WindowsRuntimeMarshal.GetActivationFactory(typeof(WebAuthenticationCoreManager));
             //Guid guid = typeof(WebAuthenticationCoreManager).GetInterface("IWebAuthenticationCoreManager").GUID;
             Guid guid = typeof(IAsyncOperation<WebTokenRequestResult>).GUID;
 
-            return webAuthenticationCoreManagerInterop.RequestTokenForWindowAsync(hWnd, request, ref guid);
+            return webAuthenticationCoreManagerInterop.RequestTokenForWindow(hWnd, request, ref guid);
         }
-        public static IAsyncOperation<WebTokenRequestResult> RequestTokenWithWebAccountForWindowAsync(IntPtr hWnd, WebTokenRequest request, WebAccount webAccount)
+        public static IAsyncOperation<WebTokenRequestResult> RequestTokenWithWebAccountForWindow(IntPtr hWnd, WebTokenRequest request, WebAccount webAccount)
         {
             IWebAuthenticationCoreManagerInterop webAuthenticationCoreManagerInterop = (IWebAuthenticationCoreManagerInterop)WindowsRuntimeMarshal.GetActivationFactory(typeof(WebAuthenticationCoreManager));
             Guid guid = typeof(IAsyncOperation<WebTokenRequestResult>).GUID;
 
-            return webAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindowAsync(hWnd, request, webAccount, ref guid);
+            return webAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindow(hWnd, request, webAccount, ref guid);
         }
     }
 
@@ -53,8 +53,8 @@ namespace Microsoft.Identity.Client.Platforms
     [System.Runtime.InteropServices.InterfaceType(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIInspectable)]
     internal interface IWebAuthenticationCoreManagerInterop
     {
-        IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr appWindow, WebTokenRequest request, [System.Runtime.InteropServices.In] ref Guid riid);
-        IAsyncOperation<WebTokenRequestResult> RequestTokenWithWebAccountForWindowAsync(IntPtr appWindow, WebTokenRequest request, WebAccount webAccount, [System.Runtime.InteropServices.In] ref Guid riid);
+        IAsyncOperation<WebTokenRequestResult> RequestTokenForWindow(IntPtr appWindow, WebTokenRequest request, [System.Runtime.InteropServices.In] ref Guid riid);
+        IAsyncOperation<WebTokenRequestResult> RequestTokenWithWebAccountForWindow(IntPtr appWindow, WebTokenRequest request, WebAccount webAccount, [System.Runtime.InteropServices.In] ref Guid riid);
     }
 
     [System.Runtime.InteropServices.Guid("67A7C5CA-83F6-44C6-A3B1-0EB69E41FA8A")]

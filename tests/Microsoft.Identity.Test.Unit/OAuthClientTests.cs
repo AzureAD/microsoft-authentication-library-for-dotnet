@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit
                         .WithHttpManager(harness.HttpManager);
                 builder.Config.DeviceAuthManagerForTest = Substitute.For<IDeviceAuthManager>();
                 Uri actualUri = null;
-                builder.Config.DeviceAuthManagerForTest.TryCreateDeviceAuthChallengeResponseAsync(
+                builder.Config.DeviceAuthManagerForTest.TryCreateDeviceAuthChallengeResponse(
                     Arg.Any<HttpResponseHeaders>(),
                     Arg.Any<Uri>(),
                     out Arg.Any<string>())

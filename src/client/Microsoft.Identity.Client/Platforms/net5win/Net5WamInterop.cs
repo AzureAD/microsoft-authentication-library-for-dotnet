@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
     [SupportedOSPlatform("windows10.0.17763.0")]
     internal static class WebAuthenticationCoreManagerInterop
     {
-        public static IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr hWnd, WebTokenRequest request)
+        public static IAsyncOperation<WebTokenRequestResult> RequestTokenForWindow(IntPtr hWnd, WebTokenRequest request)
         {
             IWebAuthenticationCoreManagerInterop webAuthenticationCoreManagerInterop =
                 WebAuthenticationCoreManager.As<IWebAuthenticationCoreManagerInterop>();
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
 
             var requestPtr = MarshalInspectable<WebTokenRequest>.FromManaged(request);
 
-            webAuthenticationCoreManagerInterop.RequestTokenForWindowAsync(
+            webAuthenticationCoreManagerInterop.RequestTokenForWindow(
                hWnd,
                requestPtr,
                ref guid,
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
             return MarshalInterface<IAsyncOperation<WebTokenRequestResult>>.FromAbi(result);
         }
 
-        public static IAsyncOperation<WebTokenRequestResult> RequestTokenWithWebAccountForWindowAsync(
+        public static IAsyncOperation<WebTokenRequestResult> RequestTokenWithWebAccountForWindow(
             IntPtr hWnd, WebTokenRequest request, WebAccount webAccount)
         {
             IWebAuthenticationCoreManagerInterop webAuthenticationCoreManagerInterop =
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
             
             var requestPtr = MarshalInspectable<WebTokenRequest>.FromManaged(request);
             var webAccountPtr = MarshalInspectable<WebAccount>.FromManaged(webAccount);
-            webAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindowAsync(
+            webAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindow(
                 hWnd,
                 requestPtr, 
                 webAccountPtr, 
@@ -84,13 +84,13 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         void GetRuntimeClassName(out IntPtr className);
         void GetTrustLevel(out WinRT.TrustLevel trustLevel);
 
-        void RequestTokenForWindowAsync(
+        void RequestTokenForWindow(
             IntPtr appWindow,
             IntPtr request, // WebTokenRequest
             ref Guid riid, 
             out IntPtr result); // IAsyncOperation<WebTokenRequestResult>
 
-        void RequestTokenWithWebAccountForWindowAsync(
+        void RequestTokenWithWebAccountForWindow(
             IntPtr appWindow,
             IntPtr request, // WebTokenRequest
             IntPtr webAccount, // WebAccount
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         [STAThread]
         void GetForWindow(IntPtr appWindow,  ref Guid riid, out IntPtr result);
 
-        void ShowAddAccountForWindowAsync(IntPtr appWindow,  ref Guid riid, out IntPtr result);
+        void ShowAddAccountForWindow(IntPtr appWindow,  ref Guid riid, out IntPtr result);
     }
 
     [Guid("81EA942C-4F09-4406-A538-838D9B14B7E6")]
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
             //    (IAccountsSettingsPaneInterop)WindowsRuntimeMarshal.GetActivationFactory(typeof(AccountsSettingsPane));
             //Guid guid = typeof(IAsyncAction).GUID;
 
-            accountsSettingsPaneInterop.ShowAddAccountForWindowAsync(hWnd, ref guid, out IntPtr result);
+            accountsSettingsPaneInterop.ShowAddAccountForWindow(hWnd, ref guid, out IntPtr result);
 
             return MarshalInterface<IAsyncAction>.FromAbi(result);
         }

@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(webTokenRequest);
 #else
 
-                var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenForWindowAsync(
+                var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenForWindow(
                     _parentHandle, webTokenRequest);
 #endif
                 return new WebTokenRequestResultWrapper(wamResult);
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 wamAccount);
 #else
 
-                var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindowAsync(
+                var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindow(
                 _parentHandle, webTokenRequest, wamAccount);
 #endif
                 return new WebTokenRequestResultWrapper(wamResult);
