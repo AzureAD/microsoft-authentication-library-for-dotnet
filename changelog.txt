@@ -10,7 +10,7 @@
 
 **Fix a bug causing an "Sequence Contains No Elements" exception** This occurs in rare circumstances when saving the token cache. [3130](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3130)
 **Fix a bug causing an "ArgumentOutOfRangeException: the relative expiration value must be positive" exception** This occurs in rare circumstances when saving the token cache. [2859](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2859)
-**Default OS account login with MSA fails** This affects some first party applications (MSA passthrough) only [3157](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3157)
+**Default OS account login with MSA fails** This affects some first party applications (MSA passthrough) when using WAM [3157](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3157)
 **WwwAuthenticateParameters should not expose Resource** [3144](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3144)
 
 
