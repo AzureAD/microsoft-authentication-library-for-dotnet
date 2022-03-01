@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -153,6 +154,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
             var tenantProfiles = await CacheManager.GetTenantProfilesAsync(cachedAccessTokenItem.HomeAccountId).ConfigureAwait(false);
+            var accounts = await CacheManager.GetAccountsAsync().ConfigureAwait(false);
 
             return new AuthenticationResult(
                 cachedAccessTokenItem,
@@ -161,7 +163,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 TokenSource.Cache,
-                AuthenticationRequestParameters.RequestContext.ApiEvent);
+                AuthenticationRequestParameters.RequestContext.ApiEvent,
+                accounts?.FirstOrDefault());
         }
 
         private void ThrowIfNoScopesOnB2C()

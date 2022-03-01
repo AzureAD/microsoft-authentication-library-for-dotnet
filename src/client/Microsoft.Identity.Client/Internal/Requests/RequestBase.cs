@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -189,6 +190,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 msalTokenResponse.TokenSource,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
+                account,
                 msalTokenResponse.SpaAuthCode);
         }
 
@@ -402,7 +404,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.AuthenticationScheme,
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache,
-                    AuthenticationRequestParameters.RequestContext.ApiEvent);
+                    AuthenticationRequestParameters.RequestContext.ApiEvent,
+                    account: null);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
