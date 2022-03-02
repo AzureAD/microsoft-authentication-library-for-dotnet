@@ -38,8 +38,5 @@ steps:
 
 - template: template-pack-and-sign-all-nugets.yaml
 
-# Publish nuget packages and symbols to VSTS package manager.
-- template: template-publish-packages-and-symbols.yaml
-
 # Publish analysis and cleanup
 - template: template-publish-analysis-and-cleanup.yaml
