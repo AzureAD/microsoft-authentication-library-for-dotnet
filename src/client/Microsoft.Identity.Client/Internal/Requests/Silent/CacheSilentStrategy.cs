@@ -155,6 +155,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
             var tenantProfiles = await CacheManager.GetTenantProfilesAsync(cachedAccessTokenItem.HomeAccountId).ConfigureAwait(false);
             var accounts = await CacheManager.GetAccountsAsync().ConfigureAwait(false);
+            var account = accounts.FirstOrDefault() as Account;
 
             return new AuthenticationResult(
                 cachedAccessTokenItem,
@@ -164,7 +165,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 TokenSource.Cache,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
-                accounts?.FirstOrDefault());
+                account?.WamAccountIds);
         }
 
         private void ThrowIfNoScopesOnB2C()

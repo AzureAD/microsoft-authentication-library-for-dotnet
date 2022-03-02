@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
             var atItem = tuple.Item1;
             var idtItem = tuple.Item2;
-            var account = tuple.Item3;
+            Account account = tuple.Item3;
 
             return new AuthenticationResult(
                 atItem,
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 msalTokenResponse.TokenSource,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
-                account,
+                account?.WamAccountIds,
                 msalTokenResponse.SpaAuthCode);
         }
 
@@ -405,7 +405,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache,
                     AuthenticationRequestParameters.RequestContext.ApiEvent,
-                    account: null);
+                    wamAccountIds: null);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
