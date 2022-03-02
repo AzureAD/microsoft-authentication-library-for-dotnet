@@ -228,7 +228,7 @@
             "499b84ac-1321-427f-aa17-267ca6975798/vso.code_full",
             "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess",
             "https://management.core.chinacloudapi.cn//.default",
-            "https://management.core.usgovcloudapi.net/"});
+            "https://management.core.usgovcloudapi.net//.default"});
             this.cbxScopes.Location = new System.Drawing.Point(73, 69);
             this.cbxScopes.Name = "cbxScopes";
             this.cbxScopes.Size = new System.Drawing.Size(545, 21);
