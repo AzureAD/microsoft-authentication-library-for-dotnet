@@ -294,6 +294,29 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="AppTokenProviderDelegate"></param>
+        /// <returns></returns>
+        public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<ExternalToken>> AppTokenProviderDelegate)
+        {
+            if (AppTokenProviderDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(AppTokenProviderDelegate));
+            }
+
+            Config.AppTokenProviderDelegate = AppTokenProviderDelegate;
+            return this;
+        }
+
+        //        public delegate Task<ExternalToken> AppTokenProvider(IEnumerable<string> scopes,
+        //string? correlationId,
+
+        //  string? Claims,
+        //  string? tenantId,
+        //  CancellationToken cancellationToken);
+
         internal ConfidentialClientApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {
             Config.AppTokenCacheInternalForTest = tokenCacheInternal;

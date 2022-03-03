@@ -146,6 +146,29 @@ namespace Microsoft.Identity.Client.OAuth2
             return response;
         }
 
+        internal static MsalTokenResponse CreateFromAppProviderResponse(ExternalToken tokenResponse)
+        {
+            var response = new MsalTokenResponse
+            {
+                AccessToken = tokenResponse.RawAccessToken,
+                RefreshToken = null,
+                IdToken = null,
+                TokenType = BrokerResponseConst.Bearer,
+                CorrelationId = tokenResponse.correlationId,
+                Scope = tokenResponse.scopes[0],
+                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(DateTimeHelpers.DateTimeToUnixTimestamp(tokenResponse.Expiry)),
+                ClientInfo = null,
+                TokenSource = TokenSource.AppTokenProvider
+            };
+
+            if (tokenResponse.RefreshIn.HasValue)
+            {
+                response.RefreshIn = DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(tokenResponse.RefreshIn.Value);
+            }
+
+            return response;
+        }
+
         /// <remarks>
         /// This method does not belong here - it is more tied to the Android code. However, that code is
         /// not unit testable, and this one is. 

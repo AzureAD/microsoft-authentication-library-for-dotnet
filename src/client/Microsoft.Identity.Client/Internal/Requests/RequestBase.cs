@@ -262,11 +262,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 tokenClient.AddHeaderToClient(CcsHeader.Value.Key, CcsHeader.Value.Value);
             }
 
+            if (ServiceBundle.Config.AppTokenProviderDelegate != null)
+            {
+                return SendTokenRequestToProviderAsync();
+            }
+
             return tokenClient.SendTokenRequestAsync(
                 additionalBodyParameters,
                 scopes,
                 tokenEndpoint,
                 cancellationToken);
+        }
+
+        private async Task<MsalTokenResponse> SendTokenRequestToProviderAsync()
+        {
+            AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters();
+
+            var result = ServiceBundle.Config.AppTokenProviderDelegate.BeginInvoke(appTokenProviderParameters, null, null);
+            ExternalToken externalToken = await ServiceBundle.Config.AppTokenProviderDelegate.EndInvoke(result).ConfigureAwait(false);
+
+            return MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
         }
 
         //The AAD backup authentication system header is used by the AAD backup authentication system service

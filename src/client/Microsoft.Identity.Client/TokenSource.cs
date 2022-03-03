@@ -25,6 +25,10 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// The source of the access and Id token is a broker application - Authenticator or Company Portal. Brokers are supported only on Android and iOS.
         /// </summary>
-        Broker
+        Broker,
+        /// <summary>
+        /// 
+        /// </summary>
+        AppTokenProvider
     }
 }
