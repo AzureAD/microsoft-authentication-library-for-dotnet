@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="AppTokenProviderDelegate"></param>
         /// <returns></returns>
-        public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<ExternalToken>> AppTokenProviderDelegate)
+        public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<ExternalTokenResult>> AppTokenProviderDelegate)
         {
             if (AppTokenProviderDelegate == null)
             {

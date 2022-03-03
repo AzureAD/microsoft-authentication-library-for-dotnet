@@ -117,8 +117,32 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
-            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+            MsalTokenResponse msalTokenResponse;
+            if (ServiceBundle.Config.AppTokenProviderDelegate != null)
+            {
+                msalTokenResponse = await SendTokenRequestToProviderAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+            }
+
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+        }
+
+
+        private async Task<MsalTokenResponse> SendTokenRequestToProviderAsync(CancellationToken cancellationToken)
+        {
+            AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters();
+            appTokenProviderParameters.Scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope);
+            appTokenProviderParameters.CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId.ToString();
+            appTokenProviderParameters.Claims = AuthenticationRequestParameters.Claims;
+            appTokenProviderParameters.TenantId = AuthenticationRequestParameters.Authority.TenantId;
+            appTokenProviderParameters.CancellationToken = cancellationToken;
+
+            ExternalTokenResult externalToken = await Task.Run(() => ServiceBundle.Config.AppTokenProviderDelegate(appTokenProviderParameters)).ConfigureAwait(false);
+
+            return MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
         }
 
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)

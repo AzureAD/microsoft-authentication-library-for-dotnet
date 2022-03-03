@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// 
     /// </summary>
-    public class ExternalToken
+    public class ExternalTokenResult
     {
         public string[] scopes { get; set; } // (or resource?) 
 

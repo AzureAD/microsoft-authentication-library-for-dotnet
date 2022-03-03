@@ -15,14 +15,29 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class AppTokenProviderParameters
     {
-        public IEnumerable<string> scopes { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public IEnumerable<string> Scopes { get; internal set; }
 
-        public string correlationId { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string CorrelationId { get; internal set; }
 
-        public string Claims { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Claims { get; internal set; }
 
-        public string tenantId { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string TenantId { get; internal set; }
 
-        public CancellationToken cancellationToken { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public CancellationToken CancellationToken { get; internal set; }
     }
 }

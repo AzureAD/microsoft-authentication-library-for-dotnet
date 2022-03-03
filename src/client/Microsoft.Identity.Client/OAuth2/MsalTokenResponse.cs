@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.OAuth2
             return response;
         }
 
-        internal static MsalTokenResponse CreateFromAppProviderResponse(ExternalToken tokenResponse)
+        internal static MsalTokenResponse CreateFromAppProviderResponse(ExternalTokenResult tokenResponse)
         {
             var response = new MsalTokenResponse
             {

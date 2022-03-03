@@ -1672,6 +1672,43 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNull(acc);
             }
         }
+
+        [TestMethod]
+        public async Task ValidateAppTokenProviderAsync()
+        {
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                          .WithAppTokenProvider(async (AppTokenProviderParameters parameters) =>
+                                                          {
+                                                              Assert.IsNotNull(parameters.Scopes);
+                                                              Assert.IsNotNull(parameters.CorrelationId);
+                                                              Assert.IsNotNull(parameters.TenantId);
+                                                              Assert.IsNotNull(parameters.CancellationToken);
+
+                                                              return await GetAppTokenProviderResult().ConfigureAwait(false);
+                                                          })
+                                                          .BuildConcrete();
+            await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+
+            var tokens = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
+
+            Assert.IsTrue(tokens.Count > 0);
+
+            var token = tokens.FirstOrDefault();
+            Assert.IsNotNull(token);
+            Assert.AreEqual(TestConstants.DefaultAccessToken, token.Secret);
+        }
+
+        private async Task<ExternalTokenResult> GetAppTokenProviderResult()
+        {
+            ExternalTokenResult token = new ExternalTokenResult();
+
+            token.scopes = new[] { "Scope" };
+            token.RawAccessToken = TestConstants.DefaultAccessToken;
+            token.correlationId = Guid.NewGuid().ToString();
+            token.Expiry = DateTimeOffset.FromUnixTimeSeconds(3600);
+
+            return token;
+        }
     }
 }
 
