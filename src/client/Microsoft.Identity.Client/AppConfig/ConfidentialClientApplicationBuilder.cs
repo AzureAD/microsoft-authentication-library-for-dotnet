@@ -310,13 +310,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        //        public delegate Task<ExternalToken> AppTokenProvider(IEnumerable<string> scopes,
-        //string? correlationId,
-
-        //  string? Claims,
-        //  string? tenantId,
-        //  CancellationToken cancellationToken);
-
         internal ConfidentialClientApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {
             Config.AppTokenCacheInternalForTest = tokenCacheInternal;
