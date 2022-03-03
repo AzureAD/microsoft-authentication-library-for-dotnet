@@ -1684,7 +1684,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               Assert.IsNotNull(parameters.TenantId);
                                                               Assert.IsNotNull(parameters.CancellationToken);
 
-                                                              return await GetAppTokenProviderResult().ConfigureAwait(false);
+                                                              return await Task.Run(() => GetAppTokenProviderResult()).ConfigureAwait(false);
                                                           })
                                                           .BuildConcrete();
             await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
@@ -1698,7 +1698,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.DefaultAccessToken, token.Secret);
         }
 
-        private async Task<ExternalTokenResult> GetAppTokenProviderResult()
+        private ExternalTokenResult GetAppTokenProviderResult()
         {
             ExternalTokenResult token = new ExternalTokenResult();
 
