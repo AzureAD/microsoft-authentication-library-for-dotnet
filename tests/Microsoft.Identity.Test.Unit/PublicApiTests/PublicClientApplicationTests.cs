@@ -849,6 +849,64 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         /// 2 users have acquired tokens
         /// 1 of them is a guest in another tenant => 1 request for each tenant
         ///
+        /// The 2 accounts have wam ids in account in the response
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        [DeploymentItem(@"Resources\TokenCacheWithWamId.json")]
+        public async Task WamIdInAccountInAuthResultTestAsync()
+        {
+            const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+            const string tenant2 = "49f548d0-12b7-4169-a390-bb5304d24462";
+            string tenantedAuthority1 = $"https://login.microsoftonline.com/{tenant1}/";
+            string tenantedAuthority2 = $"https://login.microsoftonline.com/{tenant2}/";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager, tokenCacheFile: "TokenCacheWithWamId.json");
+
+                // Act
+                var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                var account = accounts.Single(a => a.HomeAccountId.TenantId == tenant1);
+                var tenantProfiles = account.GetTenantProfiles();
+
+                AuthenticationResult response = await
+                    pca.AcquireTokenSilent(new[] { "User.Read" }, account)
+                    .WithAuthority(tenantedAuthority1)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(tenant1, response.TenantId);
+                AssertWamIds(response.Account as Account, 1, "wamId1");
+                AssertTenantProfiles(tenantProfiles, tenant1, tenant2);
+                AssertTenantProfiles(response.Account.GetTenantProfiles(), tenant1, tenant2);
+                Assert.AreEqual(tenant1, response.ClaimsPrincipal.FindFirst("tid").Value);
+
+
+                // Act
+                accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                account = accounts.Single(a => a.HomeAccountId.TenantId == tenant2);
+                response = await
+                    pca.AcquireTokenSilent(new[] { "User.Read" }, account)
+                    .WithTenantId(tenant2)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                AssertWamIds(response.Account as Account, 1, "wamId2");
+                Assert.AreEqual(tenant2, response.TenantId);
+                Assert.AreEqual(tenant2, response.ClaimsPrincipal.FindFirst("tid").Value);
+            }
+        }
+
+        /// <summary>
+        /// Cache state:
+        ///
+        /// 2 users have acquired tokens
+        /// 1 of them is a guest in another tenant => 1 request for each tenant
+        ///
         /// There are 3 access tokens, 3 ATs, 3 Accounts but only 2 RT
         /// </summary>
         /// <returns></returns>
@@ -881,8 +939,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(tenant1, response.TenantId);
                 AssertTenantProfiles(tenantProfiles, tenant1, tenant2);
                 AssertTenantProfiles(response.Account.GetTenantProfiles(), tenant1, tenant2);
+                AssertWamIds(response.Account as Account, 0);
                 Assert.AreEqual(tenant1, response.ClaimsPrincipal.FindFirst("tid").Value);
-
 
                 // Act
                 accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -896,6 +954,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert
                 Assert.AreEqual(tenant2, response.TenantId);
                 Assert.AreEqual(tenant2, response.ClaimsPrincipal.FindFirst("tid").Value);
+            }
+        }
+
+        private void AssertWamIds(Account account, int count, string wamId = null)
+        {
+            Assert.IsNotNull(account);
+            if (count == 0)
+            {
+                Assert.IsNull(account.WamAccountIds);
+            }
+            else
+            {
+                Assert.IsNotNull(account.WamAccountIds);
+                Assert.AreEqual(1, account.WamAccountIds.Count);
+                Assert.AreEqual(wamId, account.WamAccountIds["1d18b3b0-251b-4714-a02a-9956cec86c2d"]);
             }
         }
 
@@ -1009,10 +1082,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private static PublicClientApplication CreatePcaFromFileWithAuthority(
             MockHttpManager httpManager,
+            string tokenCacheFile = "MultiTenantTokenCache.json",
             string authority = null)
         {
             const string clientIdInFile = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
-            const string tokenCacheFile = "MultiTenantTokenCache.json";
 
             var pcaBuilder = PublicClientApplicationBuilder
                 .Create(clientIdInFile)
