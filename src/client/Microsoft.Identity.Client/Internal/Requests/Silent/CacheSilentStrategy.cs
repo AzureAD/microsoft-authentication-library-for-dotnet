@@ -153,14 +153,12 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
             var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
-            var tenantProfiles = await CacheManager.GetTenantProfilesAsync(cachedAccessTokenItem.HomeAccountId).ConfigureAwait(false);
-            var accounts = await CacheManager.GetAccountsAsync().ConfigureAwait(false);
-            var account = accounts.FirstOrDefault() as Account;
+            var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessTokenItem).ConfigureAwait(false);
 
             return new AuthenticationResult(
                 cachedAccessTokenItem,
                 msalIdTokenItem,
-                tenantProfiles?.Values,
+                account?.TenantProfiles,
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 TokenSource.Cache,

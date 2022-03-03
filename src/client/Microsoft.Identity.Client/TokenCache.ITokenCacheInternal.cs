@@ -1150,6 +1150,35 @@ namespace Microsoft.Identity.Client
             return tenantProfiles;
         }
 
+        async Task<Account> ITokenCacheInternal.GetAccountAssociatedWithAccessTokenAsync(
+            AuthenticationRequestParameters requestParameters,
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        {
+            if (requestParameters.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+            {
+                return null;
+            }
+
+            Debug.Assert(msalAccessTokenCacheItem.HomeAccountId != null);
+
+            var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParameters, msalAccessTokenCacheItem.HomeAccountId).ConfigureAwait(false);
+
+            var accountCacheItem = Accessor.GetAccount(
+                new MsalAccountCacheKey(
+                    msalAccessTokenCacheItem.Environment,
+                    msalAccessTokenCacheItem.TenantId,
+                    msalAccessTokenCacheItem.HomeAccountId,
+                    requestParameters.Account?.Username,
+                    requestParameters.AuthorityInfo.AuthorityType.ToString()));
+
+            return new Account(
+                msalAccessTokenCacheItem.HomeAccountId,
+                accountCacheItem?.PreferredUsername,
+                accountCacheItem?.Environment,
+                accountCacheItem?.WamAccountIds,
+                tenantProfiles.Values);
+        }
+
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters)
         {
             requestParameters.RequestContext.Logger.Verbose($"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");

@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client
             string familyId = null);
 
         Task<IDictionary<string, TenantProfile>> GetTenantProfilesAsync(AuthenticationRequestParameters requestParameters, string homeAccountId);
+        Task<Account> GetAccountAssociatedWithAccessTokenAsync(AuthenticationRequestParameters requestParameters, MsalAccessTokenCacheItem msalAccessTokenCacheItem);
 
         #endregion
 

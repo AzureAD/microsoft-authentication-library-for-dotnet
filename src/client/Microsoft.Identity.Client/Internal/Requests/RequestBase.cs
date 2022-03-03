@@ -395,17 +395,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
 
                 var idToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
-                var tenantProfiles = await CacheManager.GetTenantProfilesAsync(cachedAccessTokenItem.HomeAccountId).ConfigureAwait(false);
+                var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessTokenItem).ConfigureAwait(false);
 
                 return new AuthenticationResult(
                     cachedAccessTokenItem,
                     idToken,
-                    tenantProfiles?.Values,
+                    account?.TenantProfiles,
                     AuthenticationRequestParameters.AuthenticationScheme,
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache,
                     AuthenticationRequestParameters.RequestContext.ApiEvent,
-                    wamAccountIds: null);
+                    account?.WamAccountIds);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
