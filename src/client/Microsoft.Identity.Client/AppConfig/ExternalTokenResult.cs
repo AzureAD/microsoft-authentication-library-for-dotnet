@@ -16,9 +16,10 @@ namespace Microsoft.Identity.Client
     public class ExternalTokenResult
     {
         /// <summary>
-        /// Correlationn Id to track request
+        /// Access token
+        /// Mandatory
         /// </summary>
-        public string CorrelationId { get; set; }
+        public string RawAccessToken { get; set; }
 
         /// <summary>
         /// Tenant Id for client application
@@ -26,24 +27,15 @@ namespace Microsoft.Identity.Client
         public string TenantId { get; set; }
 
         /// <summary>
-        /// Cancellation token for async operation
-        /// </summary>
-        public CancellationToken CancellationToken { get; set; }
-
-        /// <summary>
         /// Expiration of token
+        /// Mandatory
         /// </summary>
-        public long ExpiresInSeconds { get; set; } // Mandatory 
+        public long ExpiresInSeconds { get; set; } 
 
         /// <summary>
         /// When the token should be refreshed proactivly. (Optional)
         /// If not provided computed as Expiry-DateTimeOffset.Now()
         /// </summary>
         public long? RefreshInSeconds { get; set; } 
-
-        /// <summary>
-        /// Access token
-        /// </summary>
-        public string RawAccessToken { get; set; } // mandatory
     }
 }

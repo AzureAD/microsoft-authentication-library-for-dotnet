@@ -140,10 +140,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             appTokenProviderParameters.TenantId = AuthenticationRequestParameters.Authority.TenantId;
             appTokenProviderParameters.CancellationToken = cancellationToken;
 
-            ExternalTokenResult externalToken = await Task.Run(() => ServiceBundle.Config.AppTokenProviderDelegate(appTokenProviderParameters)).ConfigureAwait(false);
+            ExternalTokenResult externalToken = await ServiceBundle.Config.AppTokenProviderDelegate(appTokenProviderParameters).ConfigureAwait(false);
 
             var tokenResponse =  MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
             tokenResponse.Scope = appTokenProviderParameters.Scopes.AsSingleString();
+            tokenResponse.CorrelationId = appTokenProviderParameters.CorrelationId;
             return tokenResponse;
         }
 

@@ -146,23 +146,25 @@ namespace Microsoft.Identity.Client.OAuth2
             return response;
         }
 
-        internal static MsalTokenResponse CreateFromAppProviderResponse(ExternalTokenResult tokenResponse)
+        internal static MsalTokenResponse CreateFromAppProviderResponse(ExternalTokenResult externalTokenResponse)
         {
+            ValidateExternalTokenResult(externalTokenResponse);
+
             var response = new MsalTokenResponse
             {
-                AccessToken = tokenResponse.RawAccessToken,
+                AccessToken = externalTokenResponse.RawAccessToken,
                 RefreshToken = null,
                 IdToken = null,
                 TokenType = BrokerResponseConst.Bearer,
-                CorrelationId = tokenResponse.CorrelationId,
-                ExpiresIn = tokenResponse.ExpiresInSeconds - DateTimeHelpers.CurrDateTimeInUnixTimestamp(),
+                ExpiresIn = externalTokenResponse.ExpiresInSeconds,
                 ClientInfo = null,
-                TokenSource = TokenSource.IdentityProvider
+                TokenSource = TokenSource.IdentityProvider,
+                TenantId = externalTokenResponse.TenantId
             };
 
-            if (tokenResponse.RefreshInSeconds.HasValue)
+            if (externalTokenResponse.RefreshInSeconds.HasValue)
             {
-                response.RefreshIn = tokenResponse.RefreshInSeconds.Value;
+                response.RefreshIn = externalTokenResponse.RefreshInSeconds.Value;
             }
             else
             {
@@ -170,6 +172,29 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             return response;
+        }
+
+        private static void ValidateExternalTokenResult(ExternalTokenResult externalTokenResult)
+        {
+            if (string.IsNullOrEmpty(externalTokenResult.RawAccessToken))
+            {
+                HandleInvalidExternalValueError(nameof(externalTokenResult.RawAccessToken));
+            }
+
+            if (externalTokenResult.ExpiresInSeconds == 0 || externalTokenResult.ExpiresInSeconds < 0)
+            {
+                HandleInvalidExternalValueError(nameof(externalTokenResult.ExpiresInSeconds));
+            }
+
+            if (string.IsNullOrEmpty(externalTokenResult.TenantId))
+            {
+                HandleInvalidExternalValueError(nameof(externalTokenResult.TenantId));
+            }
+        }
+
+        private static void HandleInvalidExternalValueError(string nameOfValue)
+        {
+            throw new MsalClientException(MsalError.InvalidExternalTokenResponseValue, MsalErrorMessage.InvalidExternalTokenResponseValue(nameOfValue));
         }
 
         /// <remarks>

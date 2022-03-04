@@ -1687,7 +1687,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               return Task.Run(() => GetAppTokenProviderResult()).Result;
                                                           })
                                                           .BuildConcrete();
-            await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+
+            //AcquireToken from app provider
+            AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TestConstants.DefaultAccessToken, result.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
             var tokens = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
 
@@ -1697,20 +1703,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(token);
             Assert.AreEqual(TestConstants.DefaultAccessToken, token.Secret);
 
-            var result = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+            //AcquireToken from cache
+            result = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
             
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TestConstants.DefaultAccessToken, result.AccessToken);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+            //expire token
+            TokenCacheHelper.ExpireAllAccessTokens(app.AppTokenCacheInternal);
+
+            //acquire token from app provider with expired token
+            result = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TestConstants.DefaultAccessToken, result.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
         }
 
         private ExternalTokenResult GetAppTokenProviderResult()
         {
             ExternalTokenResult token = new ExternalTokenResult();
             token.RawAccessToken = TestConstants.DefaultAccessToken;
-            token.CorrelationId = Guid.NewGuid().ToString();
-            token.ExpiresInSeconds = 3600 + DateTimeHelpers.CurrDateTimeInUnixTimestamp();
-            token.RefreshInSeconds = 1000 + DateTimeHelpers.CurrDateTimeInUnixTimestamp();
+            token.TenantId = TestConstants.TenantId;
+            token.ExpiresInSeconds = 3600;
+            token.RefreshInSeconds = 1000;
 
             return token;
         }

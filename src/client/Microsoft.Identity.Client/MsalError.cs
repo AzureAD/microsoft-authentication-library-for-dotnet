@@ -1058,5 +1058,10 @@ namespace Microsoft.Identity.Client
         /// first or call <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/> with an already used <c>longRunningProcessSessionKey</c>.
         /// </summary>
         public const string OboCacheKeyNotInCacheError = "obo_cache_key_not_in_cache_error";
+
+        /// <summary>
+        /// A required value is missing from the external token response
+        /// </summary>
+        public const string InvalidExternalTokenResponseValue = "missing_edxternal_token_response_value";
     }
 }
