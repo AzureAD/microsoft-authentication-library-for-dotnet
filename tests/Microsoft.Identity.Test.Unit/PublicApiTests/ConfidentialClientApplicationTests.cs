@@ -1684,7 +1684,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               Assert.IsNotNull(parameters.TenantId);
                                                               Assert.IsNotNull(parameters.CancellationToken);
 
-                                                              return await Task.Run(() => GetAppTokenProviderResult()).ConfigureAwait(false);
+                                                              return Task.Run(() => GetAppTokenProviderResult()).Result;
                                                           })
                                                           .BuildConcrete();
             await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
@@ -1696,16 +1696,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var token = tokens.FirstOrDefault();
             Assert.IsNotNull(token);
             Assert.AreEqual(TestConstants.DefaultAccessToken, token.Secret);
+
+            var result = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+            
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TestConstants.DefaultAccessToken, result.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
         }
 
         private ExternalTokenResult GetAppTokenProviderResult()
         {
             ExternalTokenResult token = new ExternalTokenResult();
-
-            token.scopes = new[] { "Scope" };
             token.RawAccessToken = TestConstants.DefaultAccessToken;
-            token.correlationId = Guid.NewGuid().ToString();
-            token.Expiry = DateTimeOffset.FromUnixTimeSeconds(3600);
+            token.CorrelationId = Guid.NewGuid().ToString();
+            token.ExpiresInSeconds = 3600 + DateTimeHelpers.CurrDateTimeInUnixTimestamp();
+            token.RefreshInSeconds = 1000 + DateTimeHelpers.CurrDateTimeInUnixTimestamp();
 
             return token;
         }

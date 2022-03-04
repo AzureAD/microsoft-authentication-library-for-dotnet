@@ -154,16 +154,19 @@ namespace Microsoft.Identity.Client.OAuth2
                 RefreshToken = null,
                 IdToken = null,
                 TokenType = BrokerResponseConst.Bearer,
-                CorrelationId = tokenResponse.correlationId,
-                Scope = tokenResponse.scopes[0],
-                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(DateTimeHelpers.DateTimeToUnixTimestamp(tokenResponse.Expiry)),
+                CorrelationId = tokenResponse.CorrelationId,
+                ExpiresIn = tokenResponse.ExpiresInSeconds - DateTimeHelpers.CurrDateTimeInUnixTimestamp(),
                 ClientInfo = null,
-                TokenSource = TokenSource.AppTokenProvider
+                TokenSource = TokenSource.IdentityProvider
             };
 
-            if (tokenResponse.RefreshIn.HasValue)
+            if (tokenResponse.RefreshInSeconds.HasValue)
             {
-                response.RefreshIn = DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(tokenResponse.RefreshIn.Value);
+                response.RefreshIn = tokenResponse.RefreshInSeconds.Value;
+            }
+            else
+            {
+                response.RefreshIn = response.ExpiresIn;
             }
 
             return response;

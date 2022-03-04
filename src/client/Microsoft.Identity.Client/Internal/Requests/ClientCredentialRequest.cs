@@ -142,7 +142,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ExternalTokenResult externalToken = await Task.Run(() => ServiceBundle.Config.AppTokenProviderDelegate(appTokenProviderParameters)).ConfigureAwait(false);
 
-            return MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
+            var tokenResponse =  MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
+            tokenResponse.Scope = appTokenProviderParameters.Scopes.AsSingleString();
+            return tokenResponse;
         }
 
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)

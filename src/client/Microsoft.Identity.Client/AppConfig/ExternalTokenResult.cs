@@ -11,24 +11,39 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
+    /// Token result from external token provider
     /// </summary>
     public class ExternalTokenResult
     {
-        public string[] scopes { get; set; } // (or resource?) 
+        /// <summary>
+        /// Correlationn Id to track request
+        /// </summary>
+        public string CorrelationId { get; set; }
 
-        public string correlationId { get; set; }
+        /// <summary>
+        /// Tenant Id for client application
+        /// </summary>
+        public string TenantId { get; set; }
 
-        public string tenantId { get; set; }
+        /// <summary>
+        /// Cancellation token for async operation
+        /// </summary>
+        public CancellationToken CancellationToken { get; set; }
 
-        public CancellationToken cancellationToken { get; set; }
+        /// <summary>
+        /// Expiration of token
+        /// </summary>
+        public long ExpiresInSeconds { get; set; } // Mandatory 
 
-        public DateTimeOffset Expiry { get; set; } // Mandatory 
+        /// <summary>
+        /// When the token should be refreshed proactivly. (Optional)
+        /// If not provided computed as Expiry-DateTimeOffset.Now()
+        /// </summary>
+        public long? RefreshInSeconds { get; set; } 
 
-        public DateTimeOffset? RefreshIn { get; set; } // Optional. If not provided compute Expiry-DateTimeOffset.Now()
-
+        /// <summary>
+        /// Access token
+        /// </summary>
         public string RawAccessToken { get; set; } // mandatory
-
-        public string RawRefreshToken { get; set; } // optional
     }
 }
