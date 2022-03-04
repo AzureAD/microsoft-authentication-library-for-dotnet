@@ -1013,7 +1013,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 // Arrange
-                PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager, tenantedAuthority1);
+                PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager, authority: tenantedAuthority1);
 
                 // Act
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -1028,7 +1028,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 AssertTenantProfiles(account.GetTenantProfiles(), tenant1, tenant2);
 
                 // Arrange
-                PublicClientApplication pca2 = CreatePcaFromFileWithAuthority(httpManager, tenantedAuthority2);
+                PublicClientApplication pca2 = CreatePcaFromFileWithAuthority(httpManager, authority: tenantedAuthority2);
 
                 // Act
                 accounts = await pca2.GetAccountsAsync().ConfigureAwait(false);
