@@ -121,6 +121,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 br.Claims = _authenticationRequestParameters.Claims;
             }
 
+            if (_authenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities?.Any() == true)
+            {
+                br.Claims = ClaimsHelper.GetMergedClaimsAndClientCapabilities(br.Claims,
+                                                                              _authenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities);
+            }
+
             if (_authenticationRequestParameters.ExtraQueryParameters?.Any() == true)
             {
                 string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));

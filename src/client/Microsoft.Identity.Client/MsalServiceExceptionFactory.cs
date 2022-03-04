@@ -83,6 +83,9 @@ namespace Microsoft.Identity.Client
                 ex = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode)
                 {
                     Upn = msalTokenResponse.Upn,
+                    AuthorityUrl = msalTokenResponse.AuthorityUrl,
+                    TenantId = msalTokenResponse.TenantId,
+                    AccountUserId = msalTokenResponse.AccountUserId,
                 };
             }
 
@@ -151,8 +154,13 @@ namespace Microsoft.Identity.Client
 
         private static bool IsAppProtectionPolicyRequired(string errorCode, string subErrorCode)
         {
+#if iOS
             return string.Equals(errorCode, BrokerResponseConst.iOSBrokerProtectionPoliciesRequiredErrorCode, StringComparison.OrdinalIgnoreCase)
                              && string.Equals(subErrorCode, MsalError.ProtectionPolicyRequired, StringComparison.OrdinalIgnoreCase);
+#else
+            return string.Equals(errorCode, BrokerResponseConst.AndroidUnauthorizedClient, StringComparison.OrdinalIgnoreCase)
+                             && string.Equals(subErrorCode, MsalError.ProtectionPolicyRequired, StringComparison.OrdinalIgnoreCase);
+#endif
         }
 
         private static bool IsInvalidGrantSubError(string subError)

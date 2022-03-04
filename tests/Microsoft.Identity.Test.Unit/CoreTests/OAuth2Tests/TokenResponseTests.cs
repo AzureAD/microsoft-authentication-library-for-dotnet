@@ -53,6 +53,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             Assert.AreEqual("User.Read openid offline_access profile", msalTokenResponse.Scope);
             Assert.AreEqual("Bearer", msalTokenResponse.TokenType);
 
+            Assert.AreEqual("49f548d0-12b7-4169-a390-bb5304d24462", msalTokenResponse.TenantId);
+            Assert.AreEqual("some_user@contoso.com", msalTokenResponse.Upn);
+            Assert.AreEqual("ae821e4d-f408-451a-af82-882691148603", msalTokenResponse.AccountUserId);
+            Assert.AreEqual("https://login.microsoftonline.com/common", msalTokenResponse.AuthorityUrl);
+
             Assert.IsNull(msalTokenResponse.RefreshToken);
         }       
     }
