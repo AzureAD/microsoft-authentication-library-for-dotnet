@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (cachedAccessToken != null)
                 {
                     var cachedIdToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessToken).ConfigureAwait(false);
-                    var tenantProfiles = await CacheManager.GetTenantProfilesAsync(cachedAccessToken.HomeAccountId).ConfigureAwait(false);
+                    var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessToken).ConfigureAwait(false);
 
                     logger.Info(
                         "[OBO Request] Found a valid access token in the cache. ID token also found? " + (cachedIdToken != null));
@@ -67,12 +67,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     authResult = new AuthenticationResult(
                                                             cachedAccessToken,
                                                             cachedIdToken,
-                                                            tenantProfiles?.Values,
                                                             AuthenticationRequestParameters.AuthenticationScheme,
                                                             AuthenticationRequestParameters.RequestContext.CorrelationId,
                                                             TokenSource.Cache,
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            null);
+                                                            account);
                 }
                 else
                 {

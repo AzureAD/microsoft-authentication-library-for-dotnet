@@ -185,12 +185,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return new AuthenticationResult(
                 atItem,
                 idtItem,
-                account?.TenantProfiles,
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 msalTokenResponse.TokenSource,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
-                account?.WamAccountIds,
+                account,
                 msalTokenResponse.SpaAuthCode);
         }
 
@@ -400,12 +399,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return new AuthenticationResult(
                     cachedAccessTokenItem,
                     idToken,
-                    account?.TenantProfiles,
                     AuthenticationRequestParameters.AuthenticationScheme,
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache,
                     AuthenticationRequestParameters.RequestContext.ApiEvent,
-                    account?.WamAccountIds);
+                    account);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");

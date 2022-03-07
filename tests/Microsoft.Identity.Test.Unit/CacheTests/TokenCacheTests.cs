@@ -23,6 +23,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using NSubstitute.Extensions;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -115,7 +116,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.Utid));
             requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
 
-            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
+            var res = await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
 
             IEnumerable<IAccount> accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
             Assert.IsNotNull(accounts);
@@ -123,6 +124,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             MsalRefreshTokenCacheItem refreshToken = await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
             Assert.IsNotNull(refreshToken);
+
+            MsalIdTokenCacheItem idToken = cache.GetIdTokenCacheItem(res.Item1);
+            Assert.IsNotNull(idToken);
 
             await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
             accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);

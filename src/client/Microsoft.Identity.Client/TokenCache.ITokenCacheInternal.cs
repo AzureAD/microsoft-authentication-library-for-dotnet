@@ -1154,11 +1154,6 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParameters,
             MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            if (requestParameters.AuthorityInfo.AuthorityType != AuthorityType.Aad)
-            {
-                return null;
-            }
-
             Debug.Assert(msalAccessTokenCacheItem.HomeAccountId != null);
 
             var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParameters, msalAccessTokenCacheItem.HomeAccountId).ConfigureAwait(false);
@@ -1176,7 +1171,7 @@ namespace Microsoft.Identity.Client
                 accountCacheItem?.PreferredUsername,
                 accountCacheItem?.Environment,
                 accountCacheItem?.WamAccountIds,
-                tenantProfiles.Values);
+                tenantProfiles?.Values);
         }
 
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters)

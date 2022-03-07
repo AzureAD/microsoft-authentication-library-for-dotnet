@@ -158,12 +158,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             return new AuthenticationResult(
                 cachedAccessTokenItem,
                 msalIdTokenItem,
-                account?.TenantProfiles,
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 TokenSource.Cache,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
-                account?.WamAccountIds);
+                account);
         }
 
         private void ThrowIfNoScopesOnB2C()

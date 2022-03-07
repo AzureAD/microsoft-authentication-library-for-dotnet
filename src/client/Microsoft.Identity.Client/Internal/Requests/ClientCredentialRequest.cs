@@ -59,7 +59,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     authResult = new AuthenticationResult(
                                                             cachedAccessTokenItem,
                                                             null,
-                                                            null,
                                                             AuthenticationRequestParameters.AuthenticationScheme,
                                                             AuthenticationRequestParameters.RequestContext.CorrelationId,
                                                             TokenSource.Cache,
