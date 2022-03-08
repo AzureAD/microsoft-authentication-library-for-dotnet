@@ -149,9 +149,7 @@ namespace Microsoft.Identity.Client
                 Account = new Account(
                     homeAccountId,
                     msalIdTokenCacheItem?.GetUsername(),
-                    environment,
-                    tenantProfiles: account?.TenantProfiles,
-                    wamAccountIds: account?.WamAccountIds);
+                    environment);
             }
 
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();

@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client
                              wamAccountIds);
 
                 // Add the newly obtained id token to the list of profiles
-                var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                var tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
                 if (isAadAuthority && tenantProfiles != null)
                 {
                     TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
@@ -1003,7 +1003,7 @@ namespace Microsoft.Identity.Client
                 {
                     if (RtMatchesAccount(rtItem, account))
                     {
-                        var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParameters, account.HomeAccountId).ConfigureAwait(false);
+                        var tenantProfiles = await GetTenantProfilesAsync(requestParameters, account.HomeAccountId).ConfigureAwait(false);
 
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
@@ -1111,7 +1111,7 @@ namespace Microsoft.Identity.Client
             return idToken;
         }
 
-        async Task<IDictionary<string, TenantProfile>> ITokenCacheInternal.GetTenantProfilesAsync(
+        private async Task<IDictionary<string, TenantProfile>> GetTenantProfilesAsync(
             AuthenticationRequestParameters requestParameters,
             string homeAccountId)
         {
@@ -1156,7 +1156,7 @@ namespace Microsoft.Identity.Client
         {
             Debug.Assert(msalAccessTokenCacheItem.HomeAccountId != null);
 
-            var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParameters, msalAccessTokenCacheItem.HomeAccountId).ConfigureAwait(false);
+            var tenantProfiles = await GetTenantProfilesAsync(requestParameters, msalAccessTokenCacheItem.HomeAccountId).ConfigureAwait(false);
 
             var accountCacheItem = Accessor.GetAccount(
                 new MsalAccountCacheKey(
