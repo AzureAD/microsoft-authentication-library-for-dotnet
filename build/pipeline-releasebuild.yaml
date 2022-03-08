@@ -31,4 +31,4 @@ stages:
     steps:
     - template: template-pack-and-sign-packages.yaml
       parameters:
-        PublishArtifacts: true
+        PublishArtifacts: 'true'
