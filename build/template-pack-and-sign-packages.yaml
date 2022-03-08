@@ -1,3 +1,6 @@
+parameters:
+  PublishArtifacts: 'false'
+
 steps:
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Drop'
@@ -39,7 +42,7 @@ steps:
 - template: template-pack-and-sign-all-nugets.yaml
 
 #enabled only for legacy build
-- ${{ if eq(variables['variables.PipelineType'], 'legacy') }}:
+- ${{ if eq(variables['parameters.PublishArtifacts'], 'true') }}:
   - template: template-publish-packages-and-symbols.yaml
 
 # Publish analysis and cleanup
