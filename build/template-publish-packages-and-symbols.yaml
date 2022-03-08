@@ -8,18 +8,6 @@ parameters:
   DropArtifactName: 'packages'
 
 steps:
-- task: NuGetCommand@2
-  displayName: 'Verify packages are signed'
-  inputs:
-    command: custom
-    arguments: 'verify -Signature ${{ parameters.NugetPackagesWildcard }}'
-  continueOnError: true
-
-- task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-  displayName: 'Get Software Bill Of Materials (SBOM)'
-  inputs:
-       BuildDropPath: '${{ parameters.ArtifactPublishPath }}'
-
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: packages'
   inputs:
