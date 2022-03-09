@@ -16,6 +16,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
     {
         private readonly IPlatformLogger _platformLogger;
         private readonly LogCallback _loggingCallback;
+        private readonly Func<LogLevel> _logLevelCallback;
         private readonly LogLevel _minLogLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
         private static readonly Lazy<ICoreLogger> s_nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
@@ -27,7 +28,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
             LogLevel logLevel,
             bool enablePiiLogging,
             bool isDefaultPlatformLoggingEnabled,
-            LogCallback loggingCallback)
+            LogCallback loggingCallback,
+            Func<LogLevel> logLevelCallback)
         {
             _correlationId = correlationId.Equals(Guid.Empty)
                     ? string.Empty
@@ -40,6 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
             ClientName = clientName ?? string.Empty;
             ClientVersion = clientVersion ?? string.Empty;
+            _logLevelCallback = logLevelCallback ?? null;
 
             ClientInformation = string.Empty;
             if (!string.IsNullOrEmpty(clientName) && !ApplicationConfiguration.DefaultClientName.Equals(clientName))
@@ -68,7 +71,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 config?.LogLevel ?? LogLevel.Verbose,
                 config?.EnablePiiLogging ?? false,
                 config?.IsDefaultPlatformLoggingEnabled ?? isDefaultPlatformLoggingEnabled,
-                config?.LoggingCallback);
+                config?.LoggingCallback,
+                config?.LogLevelCallback);
         }
 
         public static ICoreLogger NullLogger => s_nullLogger.Value;
@@ -185,6 +189,11 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
+            if (_logLevelCallback != null)
+            {
+                logLevel = _logLevelCallback.Invoke();
+            }
+
             if (IsLoggingEnabled(logLevel))
             {
                 bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);

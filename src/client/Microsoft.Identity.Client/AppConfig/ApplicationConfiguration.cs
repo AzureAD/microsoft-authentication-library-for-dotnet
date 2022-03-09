@@ -79,6 +79,7 @@ namespace Microsoft.Identity.Client
         public string RedirectUri { get; internal set; }
         public bool EnablePiiLogging { get; internal set; }
         public LogLevel LogLevel { get; internal set; } = LogLevel.Info;
+        public Func<LogLevel> LogLevelCallback { get; internal set; }
         public bool IsDefaultPlatformLoggingEnabled { get; internal set; }
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
