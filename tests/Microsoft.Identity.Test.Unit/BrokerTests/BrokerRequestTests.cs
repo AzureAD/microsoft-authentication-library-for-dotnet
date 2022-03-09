@@ -199,9 +199,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         broker,
                         "install_url");
 #if NET5_WIN
-                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
+                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
-                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
+                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #endif
             }
         }
@@ -223,9 +223,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         broker);
 
 #if NET5_WIN
-                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
+                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
-                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
+                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #endif
             }
         }
@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Arg.Any<AuthorityInfo>(),
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount, expectedAccount });
-            broker.IsBrokerInstalledAndInvokable().Returns(true);
+            broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
@@ -298,8 +298,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
 
             }
-            public override bool IsBrokerInstalledAndInvokable()
+            public override bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
             {
+                // WAM does not work on pure ADFS environments
+                if (authorityType == AuthorityType.Adfs)
+                {
+                    return false;
+                }
+
                 return true;
             }
         }
@@ -468,7 +474,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>())
                 .Returns(new[] { expectedAccount });
-            mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
+            mockBroker.IsBrokerInstalledAndInvokable((pca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.AuthorityType).Returns(true);
 
             platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
@@ -478,7 +484,18 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             // Assert that MSAL acquires an account from the broker cache
             Assert.AreSame(expectedAccount, actualAccount.Single());
-        }        
+        }
+
+        [TestMethod]
+        public void PCAWithBrokerAndWithMultiCloudSupportThrowsTestAsync()
+        {
+            var ex = Assert.ThrowsException<NotSupportedException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithBroker(true)
+                .WithMultiCloudSupport(true)
+                .Build());
+            Assert.AreEqual(MsalErrorMessage.MultiCloudSupportUnavailable, ex.Message);
+        }
 #endif
 
         [TestMethod]
@@ -498,7 +515,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     Arg.Any<ICacheSessionManager>(),
                     Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount });
-                mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
                 platformProxy.CanBrokerSupportSilentAuth().Returns(true);
@@ -552,7 +569,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 // Arrange
                 var mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
                 platformProxy.CanBrokerSupportSilentAuth().Returns(true);
@@ -601,7 +618,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _parameters.Account = PublicClientApplication.OperatingSystemAccount;
                 broker.AcquireTokenSilentDefaultUserAsync(_parameters, _acquireTokenSilentParameters)
                     .Returns(Task.FromResult(_msalTokenResponse));
-                broker.IsBrokerInstalledAndInvokable().Returns(true);
+                broker.IsBrokerInstalledAndInvokable(_parameters.Authority.AuthorityInfo.AuthorityType).Returns(true);
 
                 // Act
                 var result = await brokerSilentAuthStrategy.ExecuteAsync(default).ConfigureAwait(false);

@@ -539,7 +539,7 @@ namespace Microsoft.Identity.Client
         /// <para>What happens?</para>This error happens when the authorization flow, which collects user credentials, gets redirected 
         /// to an page that is not supported, for example if the redirect occurs over http. 
         /// This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects.
-        /// <para>Mitigation</para>This usually happens when using a federated directory which is not setup correctly. 
+        /// <para>Mitigation</para>This usually happens when using a federated directory which is not setup correctly.
         /// </summary>
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
 
@@ -1012,6 +1012,12 @@ namespace Microsoft.Identity.Client
         /// for example from the WWWAuthenticate header of an HTTP request that resulted in a 401 response. 
         ///  </summary>
         public const string RegionalAuthorityValidation = "regional_authority_validation";
+
+        /// <summary>
+        /// <para>What happens?</para>You have configured both Region Discovery and Custom Instance Metadata. Custom metadata supersedes region discovery.
+        /// <para>Mitigation</para>Configure either Region Discovery or Custom Instance Discovery Metadata.
+        /// </summary>
+        public const string RegionDiscoveryWithCustomInstanceMetadata = "region_discovery_with_custom_instance_metadata";
 
         /// <summary>
         /// An HttpListenerException occurred while listening for the system browser to complete the login.

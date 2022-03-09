@@ -34,6 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly SynchronizationContext _synchronizationContext;
         private readonly Authority _authority;
         private readonly bool _isMsaPassthrough;
+        private readonly string _optionalHeaderText;
         private volatile WebAccountProvider _provider;
 
 
@@ -42,14 +43,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             ICoreLogger logger,
             SynchronizationContext synchronizationContext,
             Authority authority,
-            bool isMsaPassthrough)
+            bool isMsaPassthrough, 
+            string optionalHeaderText)
         {
             _parentHandle = parentHandle;
             _logger = logger;
             _synchronizationContext = synchronizationContext;
             _authority = authority;
             _isMsaPassthrough = isMsaPassthrough;
-
+            _optionalHeaderText = optionalHeaderText;
             _logger.Verbose("Is MSA passthrough? " + _isMsaPassthrough);
         }
 
@@ -247,6 +249,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             try
             {
                 deferral = args.GetDeferral();
+
+                if (!string.IsNullOrEmpty(_optionalHeaderText))
+                {
+                    args.HeaderText = _optionalHeaderText;
+                }
 
                 if (string.Equals("common", _authority.TenantId))
                 {

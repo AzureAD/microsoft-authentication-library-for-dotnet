@@ -1,0 +1,41 @@
+# template-OneBranch-PR-libsandsamples.yaml
+# Performs Nuget Restore and Build of LibsAndSamples.sln based on BuildPlatform and BuildConfiguration
+
+parameters:
+  BuildPlatform: 'any cpu'
+  BuildConfiguration: 'release'
+  MsalClientSemVer: '4.0.0-devopsbuild'
+  MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
+
+steps:
+- task: CmdLine@2
+  displayName: 'Clear local NuGet cache'
+  inputs:
+    script: 'nuget locals all -clear'
+
+- powershell: 'powershell.exe -File "$(MsalSourceDir)build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
+  displayName: 'Install Android'
+
+- task: VSBuild@1
+  displayName: 'NuGet restore ${{ parameters.Solution }}'
+  inputs:
+    solution: ${{ parameters.Solution }}
+    msbuildArgs: '/t:restore'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+
+- task: VSBuild@1
+  displayName: 'Build solution ${{ parameters.Solution }}'
+  inputs:
+    solution: ${{ parameters.Solution }}
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+
+# Run Post-build code analysis (e.g. Roslyn)
+- template: template-postbuild-code-analysis.yaml
+
+- template: template-pack-and-sign-all-nugets.yaml
+
+# Publish analysis and cleanup
+- template: template-publish-analysis-and-cleanup.yaml

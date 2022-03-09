@@ -82,12 +82,28 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.Inconclusive("Needs to run on win10 or equivalent");
             }
             var pcaBuilder = PublicClientApplicationBuilder
-               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3");
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
+               .WithAuthority(TestConstants.AuthorityTenant);
+
 #if !NET5_WIN
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
+
+        }
+
+        [TestMethod]
+        public void NoWamOnADFS()
+        {
+            var pcaBuilder = PublicClientApplicationBuilder
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
+               .WithAdfsAuthority(TestConstants.ADFSAuthority);
+#if !NET5_WIN
+            pcaBuilder = pcaBuilder.WithWindowsBroker();
+#endif
+
+            Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
 
         }
 
@@ -392,12 +408,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestMethod]
         public async Task ATS_DefaultAccount_Async()
         {
-            string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
-
             // Arrange
             using (var harness = CreateTestHarness())
             {
+
                 var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+
+                _webAccountProviderFactory.GetDefaultProviderAsync().ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+                
                 var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant); // AAD authority, no account
                 var webTokenRequest = new WebTokenRequest(wamAccountProvider);
                 var atsParams = new AcquireTokenSilentParameters();
@@ -435,9 +453,68 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public async Task ATS_DefaultAccount_Passthrough_Async()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var msaAccountProvider = new WebAccountProvider("id", "user@outlook.com", null);
+                var aadAccountProvider = new WebAccountProvider("id", "organizations", null);
+
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityOrganizationsTenant);
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions()
+                {
+                    MsaPassthrough = true
+                };
+                _wamBroker = new WamBroker(
+                     _coreUIParent,
+                      requestParams.AppConfig,
+                     _logger,
+                     _aadPlugin,
+                     _msaPlugin,
+                     _wamProxy,
+                     _webAccountProviderFactory,
+                     _accountPickerFactory,
+                     _msaPassthroughHandler);
+
+                _webAccountProviderFactory.GetDefaultProviderAsync().ReturnsForAnyArgs(Task.FromResult(msaAccountProvider));
+                _webAccountProviderFactory.IsConsumerProvider(msaAccountProvider).Returns(true);
+                _msaPassthroughHandler.TryFetchTransferTokenSilentDefaultAccountAsync(requestParams, msaAccountProvider).Returns("transfer_token");
+
+                _webAccountProviderFactory.GetAccountProviderAsync("organizations").Returns(aadAccountProvider);
+
+                var webTokenRequest = new WebTokenRequest(aadAccountProvider);
+                var atsParams = new AcquireTokenSilentParameters();
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _aadPlugin.CreateWebTokenRequestAsync(
+                   aadAccountProvider,
+                   requestParams,
+                   isForceLoginPrompt: false,
+                   isAccountInWam: true,
+                   isInteractive: false)
+                   .Returns(Task.FromResult(webTokenRequest));
+
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).Returns(webTokenResponseWrapper);
+                _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
+
+                // Act
+                var result = await _wamBroker.AcquireTokenSilentDefaultUserAsync(requestParams, atsParams).ConfigureAwait(false);
+
+                // Assert 
+                Assert.AreSame(_msalTokenResponse, result);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
+                _msaPassthroughHandler.Received(1).AddTransferTokenToRequest(webTokenRequest, "transfer_token");
+            }
+        }
+
+        [TestMethod]
         public async Task ATI_WithoutPicker_AccountMatch_Async()
         {
-            string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
             // Arrange
             using (var harness = CreateTestHarness())
             {
@@ -531,7 +608,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     new AcquireTokenInteractiveParameters()).ConfigureAwait(false);
 
                 // Assert                 
-                _accountPickerFactory.DidNotReceiveWithAnyArgs().Create(IntPtr.Zero, null, null, null, false);// Account Picker Is NOT used
+                _accountPickerFactory.DidNotReceiveWithAnyArgs().Create(IntPtr.Zero, null, null, null, false, null);// Account Picker Is NOT used
                 Assert.AreEqual("select_account", webTokenRequest.Properties["prompt"]);
                 Assert.AreSame(_msalTokenResponse, result);
                 AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
@@ -709,7 +786,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var accountPicker = Substitute.For<IAccountPicker>();
 
-                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
+                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false, null).ReturnsForAnyArgs(accountPicker);
 
                 var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
                 accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(wamAccountProvider));
@@ -1029,7 +1106,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             using (var harness = CreateTestHarness())
             {
-                //var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
                 var requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant);
                 requestParams.Account = new Account("a.b", "c", "env");
@@ -1152,12 +1228,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    _msaPassthroughHandler);
 
                 var accountPicker = Substitute.For<IAccountPicker>();
-                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
+                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false, null).ReturnsForAnyArgs(accountPicker);
                 var msaProvider = new WebAccountProvider("msa", "user@contoso.com", null);
                 accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(msaProvider));
                 // AAD plugin + consumer provider = Guest MSA-PT scenario
                 _webAccountProviderFactory.IsConsumerProvider(msaProvider).Returns(true);
-                _msaPassthroughHandler.TryFetchTransferTokenAsync(requestParams, msaProvider)
+                _msaPassthroughHandler.TryFetchTransferTokenInteractiveAsync(requestParams, msaProvider)
                     .Returns(Task.FromResult("transfer_token"));
 
                 var aadProvider = new WebAccountProvider("aad", "user@contoso.com", null);
@@ -1290,12 +1366,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    _accountPickerFactory,
                    _msaPassthroughHandler);
                 var accountPicker = Substitute.For<IAccountPicker>();
-                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false).ReturnsForAnyArgs(accountPicker);
+                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false, null).ReturnsForAnyArgs(accountPicker);
                 var msaProvider = new WebAccountProvider("msa", "user@contoso.com", null);
                 accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(msaProvider));
                 // AAD plugin + consumer provider = Guest MSA-PT scenario
                 _webAccountProviderFactory.IsConsumerProvider(msaProvider).Returns(true);
-                _msaPassthroughHandler.TryFetchTransferTokenAsync(requestParams, msaProvider)
+                _msaPassthroughHandler.TryFetchTransferTokenInteractiveAsync(requestParams, msaProvider)
                     .Returns(Task.FromResult<string>(null));
 
                 var aadProvider = new WebAccountProvider("aad", "user@contoso.com", null);

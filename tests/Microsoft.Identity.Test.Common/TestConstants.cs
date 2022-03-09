@@ -264,9 +264,6 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string BrokerOIDCScopes = "openid offline_access profile";
         public const string BrokerClaims = "testClaims";
 
-        public static readonly ClientCredentialWrapper s_onPremiseCredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
-        public static readonly ClientCredentialWrapper s_credentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
-
         public const string DiscoveryJsonResponse = @"{
                         ""tenant_discovery_endpoint"":""https://login.microsoftonline.com/tenant/.well-known/openid-configuration"",
                         ""api-version"":""1.1"",
@@ -359,6 +356,12 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string AadRawClientInfo = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0";
         public const string MsaRawClientInfo = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ";
         public const string B2CRawClientInfo = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9";
+
+        //Region Discovery Failures
+        public const string RegionAutoDetectOkFailureMessage = "Call to local IMDS failed with status code OK or an empty response.";
+        public const string RegionAutoDetectNotFoundFailureMessage = "Call to local IMDS failed with status code NotFound or an empty response.";
+        public const string RegionDiscoveryNotSupportedErrorMessage = "Region discovery can only be made if the service resides in Azure function or Azure VM";
+        public const string RegionDiscoveryIMDSCallFailedMessage = "IMDS call failed";
 
         public static MsalTokenResponse CreateAadTestTokenResponse()
         {

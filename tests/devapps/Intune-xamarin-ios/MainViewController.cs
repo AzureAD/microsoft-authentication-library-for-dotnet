@@ -22,7 +22,7 @@ namespace IntuneMAMSampleiOS
     public partial class MainViewController: UIViewController
 	{
         UIButton btnMSAL;
-        UISwitch dirSwitch;
+        UIButton btnSignOut;
 
         internal static IPublicClientApplication PCA { get; set; }
         MainIntuneMAMComplianceDelegate _mamComplianceDelegate;
@@ -35,7 +35,6 @@ namespace IntuneMAMSampleiOS
         public override void ViewDidLoad()
         {
             _manualReset = new ManualResetEvent(false);
-            _manualReset.Reset();
             _mamComplianceDelegate = new MainIntuneMAMComplianceDelegate(_manualReset);
             IntuneMAMComplianceManager.Instance.Delegate = _mamComplianceDelegate;
 
@@ -46,6 +45,14 @@ namespace IntuneMAMSampleiOS
             this.btnMSAL.TouchUpInside += BtnMSAL_TouchUpInside;
 
             View.AddSubview(btnMSAL);
+
+            this.btnSignOut = new UIButton(UIButtonType.System);
+            this.btnSignOut.Frame = new CGRect(0, 500, 300, 30);
+            this.btnSignOut.SetTitle("Sign out", UIControlState.Normal);
+
+            this.btnSignOut.TouchUpInside += BtnSignOut_TouchUpInside;
+
+            View.AddSubview(btnSignOut);
         }
 
         /// <summary>
@@ -55,8 +62,9 @@ namespace IntuneMAMSampleiOS
         /// <param name="e">arguments</param>
         private async void BtnMSAL_TouchUpInside(object sender, EventArgs e)
         {
-            // Configure the following parameters            
-            string clientId = "bd9933c9-a825-4f9a-82a0-bbf23c9049fd"; // my app in the lab
+            // The following parameters are for sample app in lab4. Please configure them as per your app registration.
+            // And also update corresponding entries in info.plist -> IntuneMAMSettings -> ADALClientID and ADALRedirectUri
+            string clientId = "bd9933c9-a825-4f9a-82a0-bbf23c9049fd";
             string redirectURI = $"msauth.com.xamarin.microsoftintunemamsample://auth";
             string tenantID = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
             string[] Scopes = { "api://a8bf4bd3-c92d-44d0-8307-9753d975c21e/Hello.World" }; // needs admin consent
@@ -68,11 +76,12 @@ namespace IntuneMAMSampleiOS
                 // ClientCapabilities - must have ProtApp
                 if (PCA == null)
                 {
+                    string authority = $"https://login.microsoftonline.com/{tenantID}/";
                     var pcaBuilder = PublicClientApplicationBuilder.Create(clientId)
                                                                         .WithRedirectUri(redirectURI)
                                                                         .WithIosKeychainSecurityGroup("com.microsoft.adalcache")
                                                                         .WithLogging(MSALLogCallback, LogLevel.Verbose)
-                                                                        .WithTenantId(tenantID)
+                                                                        .WithAuthority(authority)
                                                                         .WithClientCapabilities(clientCapabilities)
                                                                         .WithHttpClientFactory(new HttpSnifferClientFactory())
                                                                         .WithBroker(true);
@@ -118,7 +127,23 @@ namespace IntuneMAMSampleiOS
             }
             catch (Exception ex)
             {
-                ShowAlert($"Error {((MsalException)ex).ErrorCode}", ex.Message + "\r\n" + ex.StackTrace);
+                ShowAlert($"{ex}", "Error");
+            }
+        }
+
+        /// <summary>
+        /// This method performs signout
+        /// </summary>
+        /// <param name="sender">Sender button</param>
+        /// <param name="e">arguments</param>
+        private async void BtnSignOut_TouchUpInside(object sender, EventArgs e)
+        {
+            var accounts = await PCA.GetAccountsAsync().ConfigureAwait(false);
+
+            while (accounts.Any())
+            {
+                await PCA.RemoveAsync(accounts.FirstOrDefault()).ConfigureAwait(false);
+                accounts = await PCA.GetAccountsAsync().ConfigureAwait(false);
             }
         }
 
@@ -167,92 +192,5 @@ namespace IntuneMAMSampleiOS
                 this.PresentViewController(alertController, false, null);
             });
         }
-
-        /*
-                partial void buttonUrl_TouchUpInside (UIButton sender)
-                {
-                    string url = textUrl.Text;
-
-                    if (string.IsNullOrWhiteSpace(url))
-                    {
-                        url = "http://www.microsoft.com/en-us/server-cloud/products/microsoft-intune/";
-                    }
-
-                    UIApplication.SharedApplication.OpenUrl (NSUrl.FromString (url));
-                }
-
-                partial void buttonShare_TouchUpInside (UIButton sender)
-                {
-                    NSString text = new NSString ("Test Content Sharing from Intune Sample App");
-                    UIActivityViewController avc = new UIActivityViewController (new NSObject[] { text }, null);
-
-                    if (avc.PopoverPresentationController != null)
-                    {
-                        UIViewController topController = UIApplication.SharedApplication.KeyWindow.RootViewController;
-                        CGRect frame = UIScreen.MainScreen.Bounds;
-                        frame.Height /= 2;
-                        avc.PopoverPresentationController.SourceView = topController.View;
-                        avc.PopoverPresentationController.SourceRect = frame;
-                        avc.PopoverPresentationController.PermittedArrowDirections = UIPopoverArrowDirection.Unknown;
-                    }
-
-                    this.PresentViewController(avc, true, null);
-                }
-
-                partial void ButtonSave_TouchUpInside(UIButton sender)
-                {
-                    // Apps are responsible for enforcing Save-As policy
-                    if (!IntuneMAMPolicyManager.Instance.Policy.IsSaveToAllowedForLocation(IntuneMAMSaveLocation.LocalDrive, IntuneMAMEnrollmentManager.Instance.EnrolledAccount))
-                    {
-                        this.ShowAlert("Blocked", "Blocked from writing to local location");
-                        return;
-                    }
-
-                    string fileName = "intune-test.txt";
-                    string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), fileName);
-
-                    try
-                    {
-                        File.WriteAllText(path, "Test Save to Personal");
-                        this.ShowAlert("Success", "Wrote to " + fileName);
-                    }
-                    catch (Exception)
-                    {
-                        this.ShowAlert("Failed", "Failed to write to " + fileName);
-                    }
-                }
-
-                partial void ButtonLogIn_TouchUpInside(UIButton sender)
-                {
-                    IntuneMAMEnrollmentManager.Instance.LoginAndEnrollAccount(this.textEmail.Text);
-                }
-
-                partial void ButtonLogOut_TouchUpInside(UIButton sender)
-                {
-                    IntuneMAMEnrollmentManager.Instance.DeRegisterAndUnenrollAccount(IntuneMAMEnrollmentManager.Instance.EnrolledAccount, true);
-                }
-
-                bool DismissKeyboard (UITextField textField)
-                {
-                    textField.ResignFirstResponder ();
-                    return true;
-                }
-
-                public void HideLogInButton()
-                {
-                    this.buttonLogIn.Hidden = true;
-                    this.textEmail.Hidden = true;
-                    this.labelEmail.Hidden = true;
-                    this.buttonLogOut.Hidden = false;
-                }
-
-                public void HideLogOutButton()
-                {
-                    this.buttonLogOut.Hidden = true;
-                    this.textEmail.Hidden = false;
-                    this.labelEmail.Hidden = false;
-                    this.buttonLogIn.Hidden = false;
-                }
-        */
     }
 }

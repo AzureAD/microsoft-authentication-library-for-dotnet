@@ -11,13 +11,11 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 #endif
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
-{
+{    
     internal static class DesktopOsHelper
     {
-        private static Lazy<bool> s_win10OrServerEquivalentLazy = new Lazy<bool>(
-           () => IsWin10OrServerEquivalentInternal());
-        private static Lazy<bool> s_win10Lazy = new Lazy<bool>(
-            () => IsWin10Internal());
+        private static Lazy<bool> s_wamSupportedOSLazy = new Lazy<bool>(
+           () => IsWamSuportedOSInternal());
         private static Lazy<string> s_winVersionLazy = new Lazy<string>(
             () => GetWindowsVersionStringInternal());
 
@@ -28,13 +26,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #else
 
 
-    #if DESKTOP
+#if DESKTOP
             return Environment.OSVersion.Platform == PlatformID.Win32NT;
-    #elif SUPPORTS_WIN32
+#elif SUPPORTS_WIN32
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-    #else
+#else
             return false;
-    #endif
+#endif
 
 #endif
         }
@@ -82,42 +80,21 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #endif
         }
 
-        public static bool IsWin10()
+        /// <summary>
+        /// Checks if the OS supports WAM (Web Account Manager)
+        /// WAM Supported OS's are Windows 10 and above for Client, Windows 2019 and above for Server
+        /// </summary>
+        /// <returns>Returns <c>true</c> if the Windows Version has WAM support</returns>
+        private static bool IsWamSuportedOSInternal()
         {
-            return s_win10Lazy.Value;
-        }
-
-        private static bool IsWin10Internal()
-        {
-            if (IsWindows())
+            if (IsWindows() && Win32VersionApi.IsWamSupportedOs())
             {
-                string winVersion = GetWindowsVersionString();
-
-                if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
+                return true;
             }
 
             return false;
         }
 
-        private static bool IsWin10OrServerEquivalentInternal()
-        {
-            if (IsWindows())
-            {
-                string winVersion = GetWindowsVersionString();
-
-                if (winVersion.Contains("Windows 10", StringComparison.OrdinalIgnoreCase) ||
-                    winVersion.Contains("Windows Server 2016", StringComparison.OrdinalIgnoreCase) ||
-                    winVersion.Contains("Windows Server 2019", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
         private static string GetWindowsVersionStringInternal()
         {
             //Environment.OSVersion as it will return incorrect information on some operating systems
@@ -146,9 +123,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public static bool IsWin10OrServerEquivalent()
         {
-            return s_win10OrServerEquivalentLazy.Value;
+            return s_wamSupportedOSLazy.Value;
         }
-      
+
         public static bool IsUserInteractive()
         {
 

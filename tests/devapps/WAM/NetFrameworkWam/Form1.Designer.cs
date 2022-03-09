@@ -86,7 +86,9 @@
             "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
             "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a",
             "https://login.windows-ppe.net/organizations",
-            "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47"});
+            "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "https://login.partner.microsoftonline.cn/organizations",
+            "https://login.microsoftonline.us/organizations"});
             this.authorityCbx.Location = new System.Drawing.Point(73, 42);
             this.authorityCbx.Name = "authorityCbx";
             this.authorityCbx.Size = new System.Drawing.Size(418, 21);
@@ -224,7 +226,9 @@
             "https://management.core.windows.net//.default",
             "https://graph.microsoft.com/.default",
             "499b84ac-1321-427f-aa17-267ca6975798/vso.code_full",
-            "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess"});
+            "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess",
+            "https://management.core.chinacloudapi.cn//.default",
+            "https://management.core.usgovcloudapi.net//.default"});
             this.cbxScopes.Location = new System.Drawing.Point(73, 69);
             this.cbxScopes.Name = "cbxScopes";
             this.cbxScopes.Size = new System.Drawing.Size(545, 21);

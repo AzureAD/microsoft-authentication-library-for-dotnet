@@ -5,7 +5,7 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.PoP
+namespace Microsoft.Identity.Test.Unit.Pop
 {
 
     [TestClass]

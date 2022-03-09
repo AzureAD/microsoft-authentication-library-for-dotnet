@@ -18,7 +18,7 @@
          and aren't included as transitionary dependencies to package consumers.
          For clarity, without PrivateAssets marked here, anyone consuming Microsoft.Identity.Client
          would also be forced to install these dependencies.  PrivateAssets avoids this problem. -->
-    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.1.46" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3" PrivateAssets="All" />
   </ItemGroup>
 </Project> 

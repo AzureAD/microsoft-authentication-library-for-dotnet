@@ -6,12 +6,18 @@ using Microsoft.Intune.MAM;
 
 namespace IntuneMAMSampleiOS
 {
+    /// <summary>
+    /// When device becomes Intune MAM compliant, IdentityHasComplianceStatus method in this class will be called.
+    /// It will set the event that will let the calling app know that the device is now compliant.
+    /// And app can take the further actions such as calling silent token acquisition.
+    /// </summary>
     public class MainIntuneMAMComplianceDelegate : IntuneMAMComplianceDelegate
     {
-        ManualResetEvent _manualReset;
+        private readonly ManualResetEvent _manualReset;
         public MainIntuneMAMComplianceDelegate(ManualResetEvent manualReset)
         {
-            this._manualReset = manualReset;
+            _manualReset = manualReset;
+            _manualReset.Reset();
         }
 
         public async override void IdentityHasComplianceStatus(string identity, IntuneMAMComplianceStatus status, string errorMessage, string errorTitle)
@@ -20,6 +26,7 @@ namespace IntuneMAMSampleiOS
             {
                 try
                 {
+                    // Now the app is compliant, set the event. It will notify the App to take the next steps.
                     _manualReset.Set();
                 }
                 catch (Exception ex)

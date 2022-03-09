@@ -23,14 +23,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 try
                 {
-                    var enrollmentIDs = JsonConvert.DeserializeObject <EnrollmentIDs>(keychainData);
+                    var enrollmentIDs = JsonConvert.DeserializeObject<EnrollmentIDs>(keychainData);
 
                     return enrollmentIDs.EnrollmentIds[0].EnrollmentId;
 
                 }
-                catch (Exception ex)
+                catch (JsonException jEx)
                 {
-                    logger.Error($"Failed to retreive enrollmentID {ex.Message}");
+                    logger.ErrorPii($"Failed to parse enrollmentID for KeychainData: {keychainData}", string.Empty);
+                    logger.ErrorPii(jEx);
+
+                    return string.Empty;
                 }
             }
 #endif
@@ -40,13 +43,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// <summary>
         /// This class corresponds to the EnrollmentIDs entry in the Keychain
         /// </summary>
-        public class EnrollmentIDs
+        internal class EnrollmentIDs
         {
             private const string EnrollmentIdsKey = "enrollment_ids";
 
             private const string HomeAccountIdKey = "home_account_id";
 
-            private const string IidsKey = "tid";
+            private const string TidsKey = "tid";
 
             private const string UserIdKey = "user_id";
 
@@ -54,12 +57,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             private const string EnrollmentIdKey = "enrollment_id";
 
-            public class EnrollmentIdProps
+            internal class EnrollmentIdProps
             {
                 [JsonProperty(PropertyName = HomeAccountIdKey)]
                 public string HomeAccountId { get; set; }
 
-                [JsonProperty(PropertyName = IidsKey)]
+                [JsonProperty(PropertyName = TidsKey)]
                 public string Tid { get; set; }
 
                 [JsonProperty(PropertyName = UserIdKey)]

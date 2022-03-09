@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (!Broker.IsBrokerInstalledAndInvokable())
+            if (!Broker.IsBrokerInstalledAndInvokable(_authenticationRequestParameters.AuthorityInfo.AuthorityType))
             {
                 _logger.Warning("Broker is not installed. Cannot respond to silent request.");
                 return null;

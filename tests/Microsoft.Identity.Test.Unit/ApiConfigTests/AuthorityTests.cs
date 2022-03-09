@@ -90,35 +90,35 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             VerifyAuthority(
                 config: s_commonAuthority,
                 request: null,
-                accountTid: null,
+                account: null,
                 resultTid: "common",
                 _testRequestContext);
 
             VerifyAuthority(
                config: s_commonAuthority,
                request: s_commonAuthority,
-               accountTid: null,
+               account: null,
                resultTid: "common",
                _testRequestContext);
 
             VerifyAuthority(
               config: s_commonAuthority,
               request: s_commonAuthority,
-              accountTid: utid,
+              account: new Account(TestConstants.s_userIdentifier, "username", s_commonAuthority.AuthorityInfo.Host),              
               resultTid: utid,
               _testRequestContext);
 
             VerifyAuthority(
              config: s_commonAuthority,
              request: s_utidAuthority,
-             accountTid: null,
+             account: null,
              resultTid: utid,
              _testRequestContext);
 
             VerifyAuthority(
              config: s_commonAuthority,
              request: s_utid2Authority,
-             accountTid: utid,
+             account: new Account(TestConstants.s_userIdentifier, "username", s_utid2Authority.AuthorityInfo.Host),
              resultTid: utid2,
              _testRequestContext);
         }
@@ -204,12 +204,12 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         private static void VerifyAuthority(
             Authority config,
             Authority request,
-            string accountTid,
+            IAccount account,
             string resultTid,
             RequestContext requestContext)
         {
             requestContext.ServiceBundle.Config.Authority = config;
-            var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, request?.AuthorityInfo, accountTid).Result;
+            var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, request?.AuthorityInfo, account).Result;
             Assert.AreEqual(resultTid, resultAuthority.TenantId);
         }
     }

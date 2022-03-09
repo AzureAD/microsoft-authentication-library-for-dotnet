@@ -14,7 +14,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             ICoreLogger logger,
             SynchronizationContext synchronizationContext,
             Authority authority,
-            bool isMsaPassthrough);
+            bool isMsaPassthrough, 
+            string optionalHeaderText);
     }
 
 #if NET5_WIN
@@ -22,14 +23,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 #endif
     internal class AccountPickerFactory : IAccountPickerFactory
     {
-        public IAccountPicker Create(IntPtr parentHandle, ICoreLogger logger, SynchronizationContext synchronizationContext, Authority authority, bool isMsaPassthrough)
+        public IAccountPicker Create(
+            IntPtr parentHandle, 
+            ICoreLogger logger, 
+            SynchronizationContext synchronizationContext, 
+            Authority authority, 
+            bool isMsaPassthrough, 
+            string optionalHeaderText)
         {
             return new AccountPicker(
                  parentHandle,
                  logger,
                  synchronizationContext,
                  authority,
-                 isMsaPassthrough);
+                 isMsaPassthrough,
+                 optionalHeaderText);
         }
     }
 

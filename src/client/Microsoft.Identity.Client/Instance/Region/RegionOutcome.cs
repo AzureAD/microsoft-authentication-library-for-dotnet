@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client.Region
     /// <summary>
     /// Indicates where the region information came from. 
     /// </summary>
-    internal enum RegionOutcome
+    public enum RegionOutcome
     {
         /// <summary>
         /// Indicates that the API .WithAzureRegion() was not used

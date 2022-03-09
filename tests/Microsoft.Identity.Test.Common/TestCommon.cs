@@ -63,7 +63,8 @@ namespace Microsoft.Identity.Test.Common
             string clientId = TestConstants.ClientId,
             bool clearCaches = true,
             bool validateAuthority = true,
-            bool isLegacyCacheEnabled = true)
+            bool isLegacyCacheEnabled = true,
+            bool isMultiCloudSupportEnabled = false)
         {
 
             var appConfig = new ApplicationConfiguration()
@@ -76,7 +77,8 @@ namespace Microsoft.Identity.Test.Common
                 EnablePiiLogging = enablePiiLogging,
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled,
                 Authority = Authority.CreateAuthority(authority, validateAuthority),
-                LegacyCacheCompatibilityEnabled = isLegacyCacheEnabled
+                LegacyCacheCompatibilityEnabled = isLegacyCacheEnabled,
+                MultiCloudSupportEnabled = isMultiCloudSupportEnabled
             };
             return new ServiceBundle(appConfig, clearCaches);
         }

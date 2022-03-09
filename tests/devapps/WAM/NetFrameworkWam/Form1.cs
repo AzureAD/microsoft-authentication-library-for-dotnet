@@ -85,7 +85,8 @@ namespace NetDesktopWinForms
                 .WithWindowsBrokerOptions(new WindowsBrokerOptions()
                 {
                     ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
-                    MsaPassthrough = cbxMsaPt.Checked
+                    MsaPassthrough = cbxMsaPt.Checked, 
+                    HeaderText = "MSAL Dev App .NET FX"
                 })
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
@@ -161,7 +162,7 @@ namespace NetDesktopWinForms
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 var builder = pca.AcquireTokenSilent(GetScopes(), acc);
-                if (IsMsaPassthroughConfigured())
+                if (IsMsaPassthroughConfigured() && !useBrokerChk.Checked)
                 {
                     // this is the same in all clouds
                     const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";

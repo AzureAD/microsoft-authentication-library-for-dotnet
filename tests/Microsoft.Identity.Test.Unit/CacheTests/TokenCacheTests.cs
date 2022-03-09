@@ -5,9 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Castle.Core.Internal;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
@@ -90,6 +92,42 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 legacyCachePersistence.DidNotReceiveWithAnyArgs().LoadCache();
                 legacyCachePersistence.DidNotReceiveWithAnyArgs().WriteCache(Arg.Any<byte[]>());
             }
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task WithMultiCloudSupportTest_Async(
+            bool multiCloudSupportEnabled)
+        {
+            // Arrange
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isMultiCloudSupportEnabled: multiCloudSupportEnabled);
+            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            var response = TestConstants.CreateMsalTokenResponse();
+
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+
+            var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
+            requestParams.AuthorityManager = new AuthorityManager(
+                requestContext,
+                Authority.CreateAuthorityWithTenant(
+                    requestParams.AuthorityInfo,
+                    TestConstants.Utid));
+            requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
+
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
+
+            IEnumerable<IAccount> accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
+            Assert.IsNotNull(accounts);
+            Assert.IsNotNull(accounts.Single());
+
+            MsalRefreshTokenCacheItem refreshToken = await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
+            Assert.IsNotNull(refreshToken);
+
+            await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
+            accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
+            Assert.IsNotNull(accounts);
+            Assert.IsTrue(accounts.IsNullOrEmpty());
         }
 
         [TestMethod]
@@ -436,6 +474,80 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     account: new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null));
 
                 Assert.IsNull(cache.FindAccessTokenAsync(param).Result);
+            }
+        }
+
+        [TestMethod]
+        // regression for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3130
+        public void ExpiryNoTokens()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                ITokenCacheInternal appTokenCache = new TokenCache(harness.ServiceBundle, true);
+                ITokenCacheInternal userTokenCache = new TokenCache(harness.ServiceBundle, false);
+                var logger = Substitute.For<ICoreLogger>();
+
+                // Act
+                var appAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(appTokenCache.Accessor, logger);
+                var userAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(userTokenCache.Accessor, logger);
+
+                // Assert
+                Assert.IsNull(appAccessorExpiration );
+                Assert.IsNull(userAccessorExpiration);
+                Assert.IsFalse(appTokenCache.Accessor.HasAccessOrRefreshTokens());
+                Assert.IsFalse(userTokenCache.Accessor.HasAccessOrRefreshTokens());
+            }
+        }
+
+        [TestMethod]
+        // regression for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3130
+        public void TokensCloseToExpiry_NoTokens()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                ITokenCacheInternal appTokenCache = new TokenCache(harness.ServiceBundle, true);
+                ITokenCacheInternal userTokenCache = new TokenCache(harness.ServiceBundle, false);
+                var logger = Substitute.For<ICoreLogger>();
+
+                var t1 = TokenCacheHelper.CreateAccessTokenItem(isExpired: true);
+                var t2 = TokenCacheHelper.CreateAccessTokenItem(isExpired: true);
+                // token that expires in less than 5 min and is seen as expired by msal
+                var t3 = TokenCacheHelper.CreateAccessTokenItem(exiresIn: Constants.AccessTokenExpirationBuffer - TimeSpan.FromSeconds(1));
+
+                appTokenCache.Accessor.SaveAccessToken(t1);
+                appTokenCache.Accessor.SaveAccessToken(t2);
+                appTokenCache.Accessor.SaveAccessToken(t3);
+                userTokenCache.Accessor.SaveAccessToken(t1);
+                userTokenCache.Accessor.SaveAccessToken(t2);
+                userTokenCache.Accessor.SaveAccessToken(t3);
+
+                // Act
+                var appAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(appTokenCache.Accessor, logger);
+                var userAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(userTokenCache.Accessor, logger);
+
+                // Assert
+                Assert.IsNull(appAccessorExpiration);
+                Assert.IsNull(userAccessorExpiration);
+                Assert.IsFalse(appTokenCache.Accessor.HasAccessOrRefreshTokens());
+                Assert.IsFalse(userTokenCache.Accessor.HasAccessOrRefreshTokens());
+
+                // Arrange - token that is not seen as expired
+                var t4 = TokenCacheHelper.CreateAccessTokenItem(exiresIn: Constants.AccessTokenExpirationBuffer + TimeSpan.FromMinutes(1));
+                appTokenCache.Accessor.SaveAccessToken(t4);
+                userTokenCache.Accessor.SaveAccessToken(t4);
+
+                // Act
+                appAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(appTokenCache.Accessor, logger);
+                userAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(userTokenCache.Accessor, logger);
+
+                // Assert
+                CoreAssert.IsWithinRange(t4.ExpiresOn, appAccessorExpiration.Value, TimeSpan.FromSeconds(3));
+                CoreAssert.IsWithinRange(t4.ExpiresOn, userAccessorExpiration.Value, TimeSpan.FromSeconds(3));
+                Assert.IsTrue(appTokenCache.Accessor.HasAccessOrRefreshTokens());
+                Assert.IsTrue(userTokenCache.Accessor.HasAccessOrRefreshTokens());
+
             }
         }
 

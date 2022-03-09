@@ -1,3 +1,35 @@
+4.42.0
+==========
+
+### New Features
+**Multi Cloud Support** Allows 1st party public client apps which target the public cloud to log in users from other clouds. Not supported for broker flows. Details at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Multi-Cloud-Support-or-Instance-Aware [2524](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2524)
+**Expose the region or error used by MSAL** in AuthenticationResult.AuthenticationResultMedatadata and in logs. See [2975](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2975) 
+**App protection (true MAM) support for iOS**. See [2894](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2894) 
+
+### Bug Fixes
+
+**Fix a bug causing an "Sequence Contains No Elements" exception** This occurs in rare circumstances when saving the token cache. [3130](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3130)
+**Fix a bug causing an "ArgumentOutOfRangeException: the relative expiration value must be positive" exception** This occurs in rare circumstances when saving the token cache. [2859](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2859)
+**Default OS account login with MSA fails** This affects some first party applications (MSA passthrough) when using WAM [3157](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3157)
+**WwwAuthenticateParameters should not expose Resource** [3144](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3144)
+
+
+4.41.0
+==========
+### New Features:
+**MSAL now uses the WAM AAD plugin's account selector if authority is AAD only.** This overcomes the issue of console apps not being able to display the account picker and other issues with Account Picker instability. See [2289](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2289)
+**Added `OnBeforeTokenRequest` public API which allows to execute a custom delegate before MSAL makes a token request**. and enables support for legacy Proof-of-Possession implementations. See [3114](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3114)
+**Added `kid` in cache keys for client credential flows using Proof-of-Possession**. See [3115](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3115)
+**Improved the error message when both region and custom metadata are configured.** See [3014](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3014)
+**Exposed the ability to add a custom header text to auth dialogs such as WAM.** See [3125](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3125)
+**MSAL now supports using Linux broker via Microsoft Edge.** Use `WithBroker()` to authenticate with Microsoft Edge system browser, if installed, which integrates with Linux broker to offer a better authentication experience. See [3051](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3051)
+
+### Bug Fixes:
+**Added support for WAM on Windows Server 2022 and Windows 11,** and improved operation system detection for future versions. See [3040](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3040)
+**WAM is not supported on Windows Server 2016.** MSAL will now fall back to browser if this OS is detected. See [2946](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2946)
+**Fix for `GetAccountAsync` API by checking for null on `accountId` parameter.** See [3118](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3118)
+**WAM is not supported in pure ADFS environments.** MSAL will now fall back to browser if the ADFS authority is used. See [2836](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2836)
+
 4.40.0
 ==========
 ### New Features:

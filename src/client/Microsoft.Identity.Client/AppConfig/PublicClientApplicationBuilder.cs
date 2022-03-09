@@ -105,6 +105,19 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Enables multi cloud support for this instance of public client application.
+        /// It enables applications to use in a global public cloud authority to the library and can still get tokens for resources from national clouds.
+        /// </summary>
+        /// <param name="enableMultiCloudSupport">Enable or disable multi cloud support.</param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        public PublicClientApplicationBuilder WithMultiCloudSupport(bool enableMultiCloudSupport)
+        {
+            Config.MultiCloudSupportEnabled = enableMultiCloudSupport;
+            return this;
+        }
+
+        /// <summary>
         /// You can specify a Keychain Access Group to use for persisting the token cache across multiple applications.
         /// This enables you to share the token cache between several applications having the same Keychain access group.
         /// Sharing the token cache allows single sign-on between all of the applications that use the same Keychain access Group.
@@ -329,7 +342,7 @@ namespace Microsoft.Identity.Client
         public bool IsBrokerAvailable()
         {            
             return PlatformProxyFactory.CreatePlatformProxy(null)
-                .CreateBroker(base.Config, null).IsBrokerInstalledAndInvokable();
+                .CreateBroker(base.Config, null).IsBrokerInstalledAndInvokable(base.Config.Authority.AuthorityInfo.AuthorityType);
         }
 
         /// <summary>
@@ -357,6 +370,12 @@ namespace Microsoft.Identity.Client
             if (Config.Authority.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
             {
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
+            }
+
+            if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
+            {
+                // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139
+                throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
             }
 
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))

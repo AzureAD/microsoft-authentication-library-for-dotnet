@@ -118,13 +118,13 @@
       <ExcludeAssets>all</ExcludeAssets>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms">
-      <Version>3.5.0.129452</Version>
+      <Version>4.7.0.1351</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.TestCloud.Agent">
       <Version>0.21.8</Version>
     </PackageReference>
     <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
-      <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
+      <Project>{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
     <ProjectReference Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''" Include="..\..\AriaTelemetryProvider\AriaTelemetryProvider.csproj">
@@ -132,7 +132,7 @@
       <Name>AriaTelemetryProvider</Name>
     </ProjectReference>
     <ProjectReference Include="..\XForms\XForms.csproj">
-      <Project>{a00ac06a-694f-4fea-999f-81e753fa7c28}</Project>
+      <Project>{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}</Project>
       <Name>XForms</Name>
     </ProjectReference>
   </ItemGroup>

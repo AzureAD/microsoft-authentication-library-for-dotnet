@@ -113,6 +113,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (userAssertion != null)
             {
+                dict[OAuth2Parameter.ClientInfo] = "1";
                 dict[OAuth2Parameter.GrantType] = userAssertion.AssertionType;
                 dict[OAuth2Parameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(userAssertion.Assertion));
             }

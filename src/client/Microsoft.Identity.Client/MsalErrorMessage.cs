@@ -305,6 +305,7 @@ namespace Microsoft.Identity.Client
         public const string RegionDiscoveryFailed = "Region discovery for the instance failed. Region discovery can only be made if the service resides in Azure function or Azure VM. See https://aka.ms/msal-net-region-discovery for more details. ";
         public const string RegionDiscoveryFailedWithTimeout = "Region discovery failed due to app cancellation or timeout. ";
         public const string RegionDiscoveryNotAvailable = "Region discovery cannot be performed for ADFS authority. Do not set `WithAzureRegion` to true. ";
+        public const string RegionDiscoveryWithCustomInstanceMetadata = "Configure either region discovery or custom instance metadata. Custom instance discovery metadata overrides region discovery. ";
 
         public static string AuthorityTypeMismatch(
             AuthorityType appAuthorityType,
@@ -412,5 +413,7 @@ namespace Microsoft.Identity.Client
         public const string RegionalAndAuthorityOverride = "You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request. Use WithTenantId at the request level instead.";
 
         public const string OboCacheKeyNotInCache = "The token cache does not contain a token with an OBO cache key that matches the longRunningProcessSessionKey passed into ILongRunningWebApi.AcquireTokenInLongRunningProcess method. Call ILongRunningWebApi.InitiateLongRunningProcessInWebApi method with this longRunningProcessSessionKey first or call ILongRunningWebApi.AcquireTokenInLongRunningProcess method with an already used longRunningProcessSessionKey. See https://aka.ms/msal-net-long-running-obo .";
+
+        public const string MultiCloudSupportUnavailable = "Multi cloud support unavailable with broker.";
     }
 }

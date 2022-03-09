@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
@@ -12,6 +13,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Http;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Internal
@@ -50,8 +52,11 @@ namespace Microsoft.Identity.Client.Internal
             ThrottlingManager = SingletonThrottlingManager.GetInstance();
             DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();
 
-            if (shouldClearCaches)
+            if (shouldClearCaches) // for test
+            {
                 AuthorityManager.ClearValidationCache();
+                PoPProviderFactory.Reset();
+            }
         }
 
         /// <summary>

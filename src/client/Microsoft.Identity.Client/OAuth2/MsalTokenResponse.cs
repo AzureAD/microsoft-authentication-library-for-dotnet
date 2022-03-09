@@ -44,6 +44,8 @@ namespace Microsoft.Identity.Client.OAuth2
     [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase
     {
+        private const string iOSBrokerErrorMetadata = "error_metadata";
+        private const string iOSBrokerHomeAccountId = "home_account_id";
         [JsonProperty(PropertyName = TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
 
@@ -99,17 +101,18 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
-                string original = responseDictionary["error_metadata"];
+                string original = responseDictionary[MsalTokenResponse.iOSBrokerErrorMetadata];
                 string dataUnescaped = Uri.UnescapeDataString(original);
                 Dictionary<string, string> dictionary = Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(dataUnescaped);
-                var homeAcctId = dictionary["home_account_id"];
+                string homeAcctId = null;
+                dictionary.TryGetValue(MsalTokenResponse.iOSBrokerHomeAccountId, out homeAcctId);
                 return new MsalTokenResponse
                 {
                     Error = errorCode,
                     ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription]),
                     SubError = responseDictionary[OAuth2ResponseBaseClaim.SubError],
-                    AccountUserId = AccountId.ParseFromString(homeAcctId).ObjectId,
-                    TenantId = AccountId.ParseFromString(homeAcctId).TenantId,
+                    AccountUserId = homeAcctId != null ? AccountId.ParseFromString(homeAcctId).ObjectId : null,
+                    TenantId = homeAcctId != null ?  AccountId.ParseFromString(homeAcctId).TenantId : null,
                     Upn = dictionary[TokenResponseClaim.Upn],
                 };
             }

@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
         public async Task SetupAsync()
         {
             ClientApplication = Substitute.For<IConfidentialClientApplication, IConfidentialClientApplicationExecutor>();
-
+            
             await ((IConfidentialClientApplicationExecutor)ClientApplication).ExecuteAsync(
                 Arg.Do<AcquireTokenCommonParameters>(parameters => CommonParametersReceived = parameters),
                 Arg.Do<AcquireTokenOnBehalfOfParameters>(parameters => OnBehalfOfParametersReceived = parameters),

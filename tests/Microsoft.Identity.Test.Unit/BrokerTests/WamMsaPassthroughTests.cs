@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public async Task FetchTransferTokenAsync()
+        public async Task FetchTransferToken_Silent_Async()
         {
             // Arrange
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
@@ -71,6 +71,92 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
                 var msaRequest = new WebTokenRequest(msaProvider);
               
+                _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, false, true, MsaPassthroughHandler.TransferTokenScopes)
+                    .Returns(Task.FromResult(msaRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                WebAccount accountFromMsaProvider = new WebAccount(msaProvider, "user@outlook.com", WebAccountState.Connected);
+                var webTokenResponse = new WebTokenResponse("transfer_token", accountFromMsaProvider);
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+                _wamProxy.RequestTokenForWindowAsync(IntPtr.Zero, msaRequest, accountFromMsaProvider).Returns(webTokenResponseWrapper);
+                _msaPlugin.ParseSuccessfullWamResponse(Arg.Any<WebTokenResponse>(), out Arg.Any<Dictionary<string, string>>())
+                   .Returns(x =>
+                   {
+                       x[1] = new Dictionary<string, string>();
+                       (x[1] as Dictionary<string, string>).Add("code", "actual_transfer_token");
+                       return new MsalTokenResponse();
+                   });
+
+                // Act
+                var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenSilentAsync(
+                    requestParams,
+                    accountFromMsaProvider)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("actual_transfer_token", transferToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task FetchTransferToken_DefaultAccount_Silent_Async()
+        {
+            // Arrange
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            {
+                var msaProvider = new WebAccountProvider("id", "user@contoso.com", null);
+
+                Client.Internal.Requests.AuthenticationRequestParameters requestParams =
+                    harness.CreateAuthenticationRequestParameters(
+                        TestConstants.AuthorityHomeTenant,
+                        validateAuthority: true);
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
+                var msaRequest = new WebTokenRequest(msaProvider);
+
+                _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, false, true, MsaPassthroughHandler.TransferTokenScopes)
+                    .Returns(Task.FromResult(msaRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                WebAccount accountFromMsaProvider = new WebAccount(msaProvider, "user@outlook.com", WebAccountState.Connected);
+                var webTokenResponse = new WebTokenResponse("transfer_token", accountFromMsaProvider);
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+                _wamProxy.GetTokenSilentlyForDefaultAccountAsync(msaRequest).Returns(webTokenResponseWrapper);
+                _msaPlugin.ParseSuccessfullWamResponse(Arg.Any<WebTokenResponse>(), out Arg.Any<Dictionary<string, string>>())
+                   .Returns(x =>
+                   {
+                       x[1] = new Dictionary<string, string>();
+                       (x[1] as Dictionary<string, string>).Add("code", "actual_transfer_token");
+                       return new MsalTokenResponse();
+                   });
+
+                // Act
+                var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenSilentDefaultAccountAsync(
+                    requestParams,
+                    msaProvider)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("actual_transfer_token", transferToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task FetchTransferToken_Interactive_Async()
+        {
+            // Arrange
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            {
+                var msaProvider = new WebAccountProvider("id", "user@contoso.com", null);
+
+                Client.Internal.Requests.AuthenticationRequestParameters requestParams =
+                    harness.CreateAuthenticationRequestParameters(
+                        TestConstants.AuthorityHomeTenant,
+                        validateAuthority: true);
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
+                var msaRequest = new WebTokenRequest(msaProvider);
+
                 _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, true, false, MsaPassthroughHandler.TransferTokenScopes)
                     .Returns(Task.FromResult(msaRequest));
 
@@ -89,7 +175,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    });
 
                 // Act
-                var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenAsync(requestParams, msaProvider)
+                var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenInteractiveAsync(requestParams, msaProvider)
                     .ConfigureAwait(false);
 
                 // Assert
@@ -123,7 +209,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _wamProxy.RequestTokenForWindowAsync(IntPtr.Zero, msaRequest).Returns(webTokenResponseWrapper);
 
                 // Act
-                var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenAsync(requestParams, msaProvider)
+                var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenInteractiveAsync(requestParams, msaProvider)
                     .ConfigureAwait(false);
 
                 // Assert

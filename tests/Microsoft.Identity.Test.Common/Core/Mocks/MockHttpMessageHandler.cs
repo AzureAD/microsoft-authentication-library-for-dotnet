@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
@@ -35,6 +36,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpRequestMessage ActualRequestMessage { get; private set; }
 
         public Dictionary<string, string> ActualRequestPostData { get; private set; }
+        public HttpRequestHeaders ActualRequestHeaders { get; private set; }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
@@ -100,6 +102,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     }
                 }
             }
+
+            ActualRequestHeaders = request.Headers;
 
             if (ExpectedRequestHeaders != null )
             {
