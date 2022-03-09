@@ -160,10 +160,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     Error = errorCode,
                     ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage]?.ToString(),
-                    AuthorityUrl = authResult[BrokerResponseConst.Authority].ToString(),
-                    TenantId = authResult[BrokerResponseConst.TenantId].ToString(),
-                    Upn = authResult[BrokerResponseConst.UserName].ToString(),
-                    AccountUserId = authResult[BrokerResponseConst.LocalAccountId].ToString(),
+                    AuthorityUrl = authResult[BrokerResponseConst.Authority]?.ToString(),
+                    TenantId = authResult[BrokerResponseConst.TenantId]?.ToString(),
+                    Upn = authResult[BrokerResponseConst.UserName]?.ToString(),
+                    AccountUserId = authResult[BrokerResponseConst.LocalAccountId]?.ToString(),
                 };
             }
 
