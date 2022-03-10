@@ -213,7 +213,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                isAccountInWam: false)
                 .ConfigureAwait(false);
 
-            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger);
+            string differentAuthority = await WorkaroundOrganizationsBugAsync(authenticationRequestParameters, provider).ConfigureAwait(true);
+            WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, differentAuthority);
             AddPromptToRequest(msalPrompt == Prompt.NotSpecified ? Prompt.SelectAccount : msalPrompt, true, webTokenRequest);
 
             var wamResult = await _wamProxy.RequestTokenForWindowAsync(
@@ -280,8 +281,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
            .ConfigureAwait(false);
 
             // because of https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2476
-            string differentAuthority = WorkaroundOrganizationsBug(authenticationRequestParameters, wamAccount);
-
+            string differentAuthority = await WorkaroundOrganizationsBugAsync(authenticationRequestParameters, wamAccount?.WebAccountProvider).ConfigureAwait(true);
             WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, differentAuthority);
 
             try
@@ -313,18 +313,32 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
         }
 
-        private string WorkaroundOrganizationsBug(AuthenticationRequestParameters authenticationRequestParameters, WebAccount wamAccount)
+        private async Task<string> WorkaroundOrganizationsBugAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            WebAccountProvider webAccountProvider)
         {
             string differentAuthority = null;
-            if (!_wamOptions.MsaPassthrough &&
-                string.Equals(authenticationRequestParameters.Authority.TenantId, Constants.OrganizationsTenant) && // "organizations" tenant is configured
-                (string.Equals(wamAccount?.WebAccountProvider?.Authority, Constants.OrganizationsTenant) || // AND user is Work and School
-                PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))) // OR user is Current Windows User
+            if (string.Equals(authenticationRequestParameters.Authority.TenantId, Constants.OrganizationsTenant)) // /organizations used
             {
-                differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("common");
+                if (webAccountProvider != null && _webAccountProviderFactory.IsOrganizationsProvider(webAccountProvider) ||
+                    (await IsDefaultAccountAndAadAsync(authenticationRequestParameters.Account).ConfigureAwait(false)))
+                {
+                    differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("common");
+                }
             }
 
             return differentAuthority;
+        }
+
+        private async Task<bool> IsDefaultAccountAndAadAsync(IAccount account)
+        {
+            if (account != null && PublicClientApplication.IsOperatingSystemAccount(account))
+            {
+                bool defaultOsAccountIsAAD = !(await _webAccountProviderFactory.IsDefaultAccountMsaAsync().ConfigureAwait(false));
+                return defaultOsAccountIsAAD;
+            }
+
+            return false;
         }
 
         private static void AddPromptToRequest(Prompt prompt, bool isForceLoginPrompt, WebTokenRequest webTokenRequest)
@@ -403,7 +417,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 _msaPassthroughHandler.AddTransferTokenToRequest(webTokenRequest, transferToken);
 
-                WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger);
+                string differentAuthority = null;
+                if (transferToken == null)
+                {
+                    differentAuthority = await WorkaroundOrganizationsBugAsync(authenticationRequestParameters, accountProvider).ConfigureAwait(true);
+                }
+
+                WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, differentAuthority);
                 AddPromptToRequest(msalPrompt, isForceLoginPrompt, webTokenRequest);
 
             }
@@ -494,7 +514,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 else
                 {
                     provider = await GetProviderAsync(
-                        authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority,
+                        authenticationRequestParameters.AuthorityInfo.CanonicalAuthority,
                         isMsa).ConfigureAwait(false);
                 }
 
@@ -619,8 +639,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         }
 
         private async Task<WebAccountProvider> GetProviderAsync(
-            string authority,
-            bool isMsa)
+             string authority,
+             bool isMsa)
         {
             WebAccountProvider provider;
             string tenantOrAuthority = isMsa ? "consumers" : authority;
@@ -644,7 +664,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 }
                 // special case: passthrough + default MSA account. Need to use the transfer token protocol.
-                if (_wamOptions.MsaPassthrough && 
+                if (_wamOptions.MsaPassthrough &&
                     _webAccountProviderFactory.IsConsumerProvider(defaultAccountProvider))
                 {
                     return await AcquireTokenSilentDefaultUserPassthroughAsync(authenticationRequestParameters, defaultAccountProvider).ConfigureAwait(false);
@@ -696,8 +716,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
              .ConfigureAwait(false);
 
             _msaPassthroughHandler.AddTransferTokenToRequest(webTokenRequest, transferToken);
-            
-            string overrideAuthority =  authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true);
+
+            string overrideAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true);
 
             WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, overrideAuthority);
 

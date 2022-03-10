@@ -821,6 +821,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
+    
+
         [TestMethod]
         public async Task ATI_WithAadPlugin_LoginHint_Async()
         {
@@ -1212,7 +1214,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var harness = CreateTestHarness())
             {
                 var requestParams = harness.CreateAuthenticationRequestParameters(
-                    TestConstants.AuthorityHomeTenant); // AAD authorities for whi
+                    TestConstants.AuthorityOrganizationsTenant); // AAD authorities for whi
 
                 // msa-pt scenario
                 requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
@@ -1268,6 +1270,74 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreSame(_msalTokenResponse, result);
                 _msaPassthroughHandler.Received(1).AddTransferTokenToRequest(webTokenRequest, "transfer_token");
                 AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
+            }
+        }
+
+        [TestMethod]
+        public async Task ATI_WithPicker_MsaPt_WorkAndSchool_Async()
+        {
+            string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var requestParams = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityOrganizationsTenant); // AAD authorities for whi
+
+                // msa-pt scenario
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
+                _wamBroker = new WamBroker(
+                   _coreUIParent,
+                    requestParams.AppConfig,
+                   _logger,
+                   _aadPlugin,
+                   _msaPlugin,
+                   _wamProxy,
+                   _webAccountProviderFactory,
+                   _accountPickerFactory,
+                   _msaPassthroughHandler);
+
+                var accountPicker = Substitute.For<IAccountPicker>();
+                _accountPickerFactory.Create(Arg.Any<IntPtr>(), null, null, null, false, null).ReturnsForAnyArgs(accountPicker);
+                var aadProvider = new WebAccountProvider("work_and_school", "user@contoso.com", null);
+                accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(aadProvider));
+                _webAccountProviderFactory.IsConsumerProvider(aadProvider).Returns(false);
+                _webAccountProviderFactory.IsOrganizationsProvider(aadProvider).Returns(true);
+               
+
+                // make sure the final request is done with the AAD provider
+                var webTokenRequest = new WebTokenRequest(aadProvider);
+                _aadPlugin.CreateWebTokenRequestAsync(
+                    aadProvider,
+                    requestParams,
+                    isForceLoginPrompt: false,
+                     isInteractive: true,
+                     isAccountInWam: false)
+                    .Returns(Task.FromResult(webTokenRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
+                    Returns(Task.FromResult(webTokenResponseWrapper));
+                _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
+
+                var atiParams = new AcquireTokenInteractiveParameters();
+
+                // Act
+                var result = await _wamBroker.AcquireTokenInteractiveAsync(requestParams, atiParams)
+                    .ConfigureAwait(false);
+
+                // Assert 
+                Assert.AreSame(_msalTokenResponse, result);
+                AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
+                webTokenRequest.Properties.TryGetValue("authority", out string authority);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/common/",
+                    authority, 
+                    "Expecting the authority to have been changed from /organizations to /common, to workaround the PRT update bug");
+
             }
         }
 
