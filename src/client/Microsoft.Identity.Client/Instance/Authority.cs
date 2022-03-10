@@ -142,6 +142,9 @@ namespace Microsoft.Identity.Client.Instance
                 case AuthorityType.Aad:
                     return new AadAuthority(authorityInfo);
 
+                case AuthorityType.Dsts:
+                    return new DstsAuthority(authorityInfo);
+
                 default:
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,

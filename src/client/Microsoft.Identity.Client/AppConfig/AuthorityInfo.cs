@@ -29,36 +29,61 @@ namespace Microsoft.Identity.Client
 
             UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", Host), authorityBuilder.Port);
 
-            if (AuthorityType == AuthorityType.B2C)
+            switch (AuthorityType)
             {
-                var authorityUri = new Uri(authority);
-                string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(
-                    new[]
+                case AuthorityType.B2C:
+                    var authorityUri = new Uri(authority);
+                    string[] pathSegments = GetPathSegments(authorityUri.AbsolutePath);
+                        
+                    if (pathSegments.Length < 3)
                     {
-                        '/'
-                    },
-                    StringSplitOptions.RemoveEmptyEntries);
-                if (pathSegments.Length < 3)
-                {
-                    throw new ArgumentException(MsalErrorMessage.B2cAuthorityUriInvalidPath);
-                }
+                        throw new ArgumentException(MsalErrorMessage.B2cAuthorityUriInvalidPath);
+                    }
 
-                CanonicalAuthority = string.Format(
-                    CultureInfo.InvariantCulture,
-                    "https://{0}/{1}/{2}/{3}/",
-                    authorityUri.Authority,
-                    pathSegments[0],
-                    pathSegments[1],
-                    pathSegments[2]);
-            }
-            else
-            {
-                CanonicalAuthority = UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(
+                    CanonicalAuthority = string.Format(
+                        CultureInfo.InvariantCulture,
+                        "https://{0}/{1}/{2}/{3}/",
+                        authorityUri.Authority,
+                        pathSegments[0],
+                        pathSegments[1],
+                        pathSegments[2]);
+                    break;
+                case AuthorityType.Dsts:
+                    authorityUri = new Uri(authority);
+                    pathSegments = GetPathSegments(authorityUri.AbsolutePath);
+                    
+                    if (pathSegments.Length < 2)
+                    {
+                        throw new ArgumentException(MsalErrorMessage.DstsAuthorityUriInvalidPath);
+                    }
+
+                    CanonicalAuthority = string.Format(
+                        CultureInfo.InvariantCulture,
+                        "https://{0}/{1}/{2}/",
+                        authorityUri.Authority,
+                        pathSegments[0],
+                        pathSegments[1]);
+                    break;
+                default:
+                    CanonicalAuthority = UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(
                     CultureInfo.InvariantCulture,
                     "https://{0}/{1}/",
                     authorityBuilder.Uri.Authority,
                     GetFirstPathSegment(authority)), authorityBuilder.Port);
-            }
+                    break;
+            } 
+        }
+
+        private string[] GetPathSegments(string absolutePath)
+        {
+            string[] pathSegments = absolutePath.Substring(1).Split(
+                        new[]
+                        {
+                        '/'
+                        },
+                        StringSplitOptions.RemoveEmptyEntries);
+
+            return pathSegments;
         }
 
         private AuthorityInfo(

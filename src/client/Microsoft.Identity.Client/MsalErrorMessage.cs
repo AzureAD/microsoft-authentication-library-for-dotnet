@@ -150,6 +150,9 @@ namespace Microsoft.Identity.Client
         public const string B2cAuthorityUriInvalidPath =
           "B2C 'authority' Uri should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...). ";
 
+        public const string DstsAuthorityUriInvalidPath =
+          "Dsts 'authority' Uri should have at least 2 segments in the path (i.e. https://<host>/dstsv2/<tenant>/...). ";
+
         public const string UnsupportedAuthorityValidation =
             "Authority validation is not supported for this type of authority. See http://aka.ms/valid-authorities for details. ";
 

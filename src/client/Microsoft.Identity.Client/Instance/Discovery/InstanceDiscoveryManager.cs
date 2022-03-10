@@ -147,9 +147,10 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     return entry;
 
 
-                // ADFS and B2C do not support instance discovery 
+                // ADFS, B2C and dSTS do not support instance discovery 
                 case AuthorityType.Adfs:
                 case AuthorityType.B2C:
+                case AuthorityType.Dsts:
                     requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority. ");
                     return CreateEntryForSingleAuthority(authorityUri);
 

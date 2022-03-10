@@ -22,7 +22,6 @@ namespace Microsoft.Identity.Client.Instance
         {
         }
 
-
         internal override string GetTenantedAuthority(string tenantId, bool forceTenantless = false)
         {
             return AuthorityInfo.CanonicalAuthority;
