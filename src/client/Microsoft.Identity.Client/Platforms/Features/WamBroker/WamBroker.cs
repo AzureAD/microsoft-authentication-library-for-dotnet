@@ -403,7 +403,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     // For MSA-PT, the MSA provider will issue v1 token, which cannot be used.
                     // Only the AAD provider can issue a v2 token
                     accountProvider = await _webAccountProviderFactory.GetAccountProviderAsync(
-                        authenticationRequestParameters.Authority.TenantId)
+                            authenticationRequestParameters.AuthorityInfo.CanonicalAuthority)
                         .ConfigureAwait(false);
                 }
 

@@ -634,7 +634,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     "https://login.microsoft.com", "organizations");
                 var webAccount = new WebAccount(wamAccountProvider, "user@contoso.com", WebAccountState.Connected);
                 var webTokenRequest = new WebTokenRequest(wamAccountProvider);
-
+                _webAccountProviderFactory.IsOrganizationsProvider(wamAccountProvider).Returns(true);
                 // will use the AAD provider because the authority is tenanted (i.e. AAD only)
                 _webAccountProviderFactory
                     .GetAccountProviderAsync(TestConstants.AuthorityHomeTenant)
@@ -1214,7 +1214,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var harness = CreateTestHarness())
             {
                 var requestParams = harness.CreateAuthenticationRequestParameters(
-                    TestConstants.AuthorityOrganizationsTenant); // AAD authorities for whi
+                    TestConstants.AuthorityOrganizationsTenant); 
 
                 // msa-pt scenario
                 requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
@@ -1239,7 +1239,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Returns(Task.FromResult("transfer_token"));
 
                 var aadProvider = new WebAccountProvider("aad", "user@contoso.com", null);
-                _webAccountProviderFactory.GetAccountProviderAsync("home").Returns(aadProvider);
+                _webAccountProviderFactory.GetAccountProviderAsync(TestConstants.AuthorityOrganizationsTenant).Returns(aadProvider);
 
                 // make sure the final request is done with the AAD provider
                 var webTokenRequest = new WebTokenRequest(aadProvider);
@@ -1247,8 +1247,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     aadProvider,
                     requestParams,
                     isForceLoginPrompt: false,
-                     isInteractive: true,
-                     isAccountInWam: false)
+                    isInteractive: true,
+                    isAccountInWam: false)
                     .Returns(Task.FromResult(webTokenRequest));
 
                 var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
@@ -1445,7 +1445,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Returns(Task.FromResult<string>(null));
 
                 var aadProvider = new WebAccountProvider("aad", "user@contoso.com", null);
-                _webAccountProviderFactory.GetAccountProviderAsync("home").Returns(aadProvider);
+                _webAccountProviderFactory.GetAccountProviderAsync(TestConstants.AuthorityHomeTenant).Returns(aadProvider);
 
                 // make sure the final request is done with the AAD provider
                 var webTokenRequest = new WebTokenRequest(aadProvider);
