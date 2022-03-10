@@ -99,28 +99,25 @@ namespace NetDesktopWinForms
 
         private async Task<AuthResult> GetMSALRunAuthResult()
         {
+            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
+
 
             try
             {
-                using (var core = new Core())
-                using (var authParams = new AuthParameters("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0", "https://login.microsoftonline.com/common"))
+                var core = new Core();
+                var authParams = new AuthParameters("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0", "https://login.microsoftonline.com/common");
+                authParams.RequestedScopes = "[\"profile\"]";
+                authParams.RedirectUri = "about:blank";
+
+                IntPtr hWnd = GetForegroundWindow(); 
+
+                AuthResult result = await core.SignInInteractivelyAsync(hWnd, authParams, correlationId).ConfigureAwait(true);
+                
+                if (result.IsSuccess)
                 {
-                    IntPtr hWnd = IntPtr.Zero;
-                    hWnd = GetForegroundWindow();
-
-                    const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
-                    authParams.RequestedScopes = "[\"profile\"]";
-                    authParams.RedirectUri = "about:blank";
-
-                    using (AuthResult result = await core.SignInInteractivelyAsync(hWnd, authParams, correlationId).ConfigureAwait(true))
-                    {
-
-                        if (result.IsSuccess)
-                        {
-                            return result;
-                        }
-                    }
+                    return result;
                 }
+                
             }
             catch (msalruntime.Exception ex)
             {
