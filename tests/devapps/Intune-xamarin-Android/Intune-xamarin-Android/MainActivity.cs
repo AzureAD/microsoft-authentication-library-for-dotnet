@@ -52,7 +52,7 @@ namespace Intune_xamarin_Android
                 // If the device is enrolled, this will succeed.
                 result = await PCAWrapper.Instance.DoSilentAsync(Scopes).ConfigureAwait(false);
 
-                ShowMessage("Silent 1", result.AccessToken);
+                _ = await ShowMessage("Silent 1", result.AccessToken).ConfigureAwait(false);
             }
             catch (MsalUiRequiredException )
             {
@@ -61,7 +61,7 @@ namespace Intune_xamarin_Android
                     // This executes UI interaction
                     result = await PCAWrapper.Instance.DoInteractiveAsync(Scopes, this).ConfigureAwait(false);
 
-                    ShowMessage("Interctive 1", result.AccessToken);
+                    _ = await ShowMessage("Interactive 1", result.AccessToken).ConfigureAwait(false);
                 }
                 catch (IntuneAppProtectionPolicyRequiredException exProtection)
                 {
@@ -74,18 +74,18 @@ namespace Intune_xamarin_Android
                               // Now the device is registered, perform silent token acquisition
                               result = await PCAWrapper.Instance.DoSilentAsync(Scopes).ConfigureAwait(false);
 
-                              ShowMessage("Silent 2", result.AccessToken);
+                              _ = await ShowMessage("Silent 2", result.AccessToken).ConfigureAwait(false) ;
                           }
                           catch (Exception ex)
                           {
-                              ShowMessage("Exception 1", ex.Message);
+                              _ = await ShowMessage("Exception 1", ex.Message).ConfigureAwait(false);
                           }
                       }).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
             {
-                ShowMessage("Exception 2", ex.Message);
+                _ = await ShowMessage("Exception 2", ex.Message).ConfigureAwait(false);
             }
         }
 
@@ -112,26 +112,26 @@ namespace Intune_xamarin_Android
                                     mgr.RemediateCompliance(exProtection.Upn, exProtection.AccountUserId, exProtection.TenantId, exProtection.AuthorityUrl, false);
                                 }).ConfigureAwait(false);
 
-            // wait till the registration takes place
+            // wait till the registration completes
             IntuneSampleApp.MAMRegsiteredEvent.WaitOne();
         }
 
-        private void ShowMessage(string title, string message)
+        private Task<bool> ShowMessage(string title, string message)
         {
-            Looper.Prepare();
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
-            builder.SetTitle(title);
-            builder.SetMessage(message);
-            builder.SetNeutralButton("OK", (s, e) => { });
+            RunOnUiThread(() =>
+            {
 
-            // somehow the dialog does not show up
-            // looking at it
-            var alertDialog = builder.Show();
-            alertDialog.Show();
+                var builder = new Android.App.AlertDialog.Builder(this);
+                builder.SetTitle(title);
+                builder.SetMessage(message);
+                builder.SetNeutralButton("OK", (s, e) => { tcs.SetResult(true); });
 
-            // Write to the debug window in the meantime
-            System.Diagnostics.Debug.WriteLine($"Title = {title}  Message = {message}");
+                var alertDialog = builder.Show();
+                alertDialog.Show();
+            });
+            return tcs.Task;
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
