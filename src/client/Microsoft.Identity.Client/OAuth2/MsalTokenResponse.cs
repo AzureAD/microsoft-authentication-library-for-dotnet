@@ -181,10 +181,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
                 TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
                 TokenSource = TokenSource.Broker,
-                AuthorityUrl = authResult[BrokerResponseConst.Authority].ToString(),
-                TenantId = authResult[BrokerResponseConst.TenantId].ToString(),
-                Upn = authResult[BrokerResponseConst.UserName].ToString(),
-                AccountUserId = authResult[BrokerResponseConst.LocalAccountId].ToString(),
+                AuthorityUrl = authResult[BrokerResponseConst.Authority]?.ToString(),
+                TenantId = authResult[BrokerResponseConst.TenantId]?.ToString(),
+                Upn = authResult[BrokerResponseConst.UserName]?.ToString(),
+                AccountUserId = authResult[BrokerResponseConst.LocalAccountId]?.ToString(),
             };
 
             return msalTokenResponse;
