@@ -25,8 +25,8 @@ namespace Intune_xamarin_Android
     class MAMWEAuthCallback : Java.Lang.Object, IMAMServiceAuthenticationCallback
     {
         /// <summary>
-        /// MAM expects that the method performs silent authentication for the give resourceID
-        /// Note. This resource is not the same one from the App. This is is api for MAM service
+        /// MAM expects that this method performs silent authentication for the give resourceID
+        /// Note. This resource is not the same one from the App. The resource is api for MAM service.
         /// </summary>
         /// <param name="upn">UPN of the user</param>
         /// <param name="aadId">Active directory ID</param>
@@ -37,12 +37,11 @@ namespace Intune_xamarin_Android
             string ret = null;
             try
             {
-                // append with .default
+                // append with /.default
                 string[] scopes = new string[] { resourceId + "/.default" };
 
                 // do the silent authentication for the resource
                 var authresult = PCAWrapper.Instance.DoSilentAsync(scopes).GetAwaiter().GetResult();
-
                 ret = authresult?.AccessToken;
             }
             catch (Exception ex)
@@ -50,8 +49,6 @@ namespace Intune_xamarin_Android
                 // write the exception and return null
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
-            // this signals that MAM registration is complete and the app can proceed
-            IntuneSampleApp.MAMRegsiteredEvent.Set();
 
             return ret;
         }

@@ -66,6 +66,7 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnrollmentNotificationReceiver.cs" />
     <Compile Include="IntuneSampleApp.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="MAMWEAuthCallback.cs" />

@@ -37,10 +37,15 @@ namespace Intune_xamarin_Android
 
         public override void OnMAMCreate()
         {
-            // as per Intune SDK doc, registration must be done here.
+            // as per Intune SDK doc, callback registration must be done here.
             // https://docs.microsoft.com/en-us/mem/intune/developer/app-sdk-android
             IMAMEnrollmentManager mgr = MAMComponents.Get<IMAMEnrollmentManager>();
             mgr.RegisterAuthenticationCallback(new MAMWEAuthCallback());
+
+            // Register the notification receivers to receive MAM notifications.
+            // Along with other, this will receive notification that the device has been enrolled.
+            IMAMNotificationReceiverRegistry registry = MAMComponents.Get<IMAMNotificationReceiverRegistry>();
+            registry.RegisterReceiver(new EnrollmentNotificationReceiver(), MAMNotificationType.MamEnrollmentResult);
 
             base.OnMAMCreate();
         }
