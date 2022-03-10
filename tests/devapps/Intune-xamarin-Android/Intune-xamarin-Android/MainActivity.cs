@@ -2,18 +2,13 @@
 using Android.App;
 using Android.OS;
 using Android.Runtime;
-using Android.Views;
 using AndroidX.AppCompat.Widget;
 using AndroidX.AppCompat.App;
-using Google.Android.Material.FloatingActionButton;
-using Google.Android.Material.Snackbar;
 using Microsoft.Identity.Client;
 using Android.Content;
 using Microsoft.Intune.Mam.Policy;
 using Microsoft.Intune.Mam.Client.App;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace Intune_xamarin_Android
 {
@@ -21,22 +16,9 @@ namespace Intune_xamarin_Android
     public class MainActivity : AppCompatActivity
     {
         /// <summary>
-        /// The authority for the MSAL PublicClientApplication. Sign in will use this URL.
+        /// The scopes that are protected by conditional access
         /// </summary>
-        private const string _authority = "https://login.microsoftonline.com/organizations";
-
-        private static string _clientID = "6d50af5d-2529-4ff4-912f-c1d6ad06953e";
-
-        private static string _redirectURI = $"msauth://com.sameerk.intune.taskr.xamarin/EHyvOdXj4uLXJXDaOMy5lwANmp0=";
-        private static string _tenantID = "7257a09f-53cc-4a91-aca8-0cb6713642a5";
-
-        /// <summary>
-        /// Identifier of the target resource that is the recipient of the requested token.
-        /// </summary>
-        internal static string[] Scopes = { "https://graph.microsoft.com/User.Read" };
-        static string[] clientCapabilities = { "protapp" };
-
-        internal static IPublicClientApplication PCA { get; set; }
+        internal static string[] Scopes = { "api://09aec9b9-0b0f-488a-81d6-72fd13a3a1c1/Hello.World" };
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -54,73 +36,51 @@ namespace Intune_xamarin_Android
             signOutButton.Click += SignOutButton_Click;
         }
 
+        /// <summary>
+        /// This method shows calling pattern to access resource protected by Conditional Access with App Protection Policy
+        /// </summary>
+        /// <param name="sender">Sender button</param>
+        /// <param name="e">arguments</param>
         private async void ActButton_Click(object sender, EventArgs e)
         {
-            bool useLab20 = true;
-            if (useLab20)
-            {
-                // idlab20truemamca@msidlab20.onmicrosoft.com
-                // Config
-                _clientID = "6d50af5d-2529-4ff4-912f-c1d6ad06953e"; // my app in the lab
-                _redirectURI = $"msauth://com.sameerk.intune.test.xamarin/EHyvOdXj4uLXJXDaOMy5lwANmp0=";
-                // 
-                _tenantID = "7257a09f-53cc-4a91-aca8-0cb6713642a5";
-                Scopes[0] = "api://09aec9b9-0b0f-488a-81d6-72fd13a3a1c1/Hello.World"; // needs admin consent
-            }
-            else
-            {
-                // xammamtrust@msidlab4.onmicrosoft.com
-
-                // TODOs
-                // Lab4
-                // Wiki
-                // Shane about the dying broker + company portal
-                // Lab4
-                _clientID = "bd9933c9-a825-4f9a-82a0-bbf23c9049fd";
-                _redirectURI = $"msauth://com.sameerk.intune.test.xamarin/EHyvOdXj4uLXJXDaOMy5lwANmp0=";
-                _tenantID = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
-                Scopes[0] = "api://a8bf4bd3-c92d-44d0-8307-9753d975c21e/Hello.World"; // needs admin consent
-            }
-
-
-            // Build PCA
-            if (PCA == null)
-            {
-                PCA = PublicClientApplicationBuilder
-                    .Create(_clientID)
-                    .WithAuthority(_authority)
-                    .WithLogging(MSALLog, LogLevel.Info, true)
-                    //.WithHttpClientFactory(new HttpSnifferClientFactory())
-                    .WithBroker()
-                    .WithClientCapabilities(clientCapabilities)
-                    .WithTenantId(_tenantID)
-                    .WithRedirectUri(_redirectURI)
-                    .Build();
-            }
-
             AuthenticationResult result = null;
+
             try
             {
-                result = await PCA.AcquireTokenInteractive(Scopes)
-                                        .WithParentActivityOrWindow(this)
-                                        .WithUseEmbeddedWebView(true)
-                                        .ExecuteAsync()
-                                        .ConfigureAwait(false);
+                // attempt silent login.
+                // If this is very first time and the device is not enrolled, it will throw MsalUiRequiredException
+                // If the device is enrolled, this will succeed.
+                result = await PCAWrapper.Instance.DoSilentAsync(Scopes).ConfigureAwait(false);
 
-                
                 ShowMessage("Silent 1", result.AccessToken);
             }
-            catch (IntuneAppProtectionPolicyRequiredException exProtection)
+            catch (MsalUiRequiredException )
             {
-                DoMAMRegister(exProtection);
                 try
                 {
-                    result = await DoSilentAsync(Scopes).ConfigureAwait(false);
-                    ShowMessage("Silent 2", result.AccessToken);
+                    // This executes UI interaction
+                    result = await PCAWrapper.Instance.DoInteractiveAsync(Scopes, this).ConfigureAwait(false);
+
+                    ShowMessage("Interctive 1", result.AccessToken);
                 }
-                catch (Exception ex)
+                catch (IntuneAppProtectionPolicyRequiredException exProtection)
                 {
-                    ShowMessage("Exception 1", ex.Message);
+                    // if the scope requires App Protection Policy,  IntuneAppProtectionPolicyRequiredException is thrown.
+                    // Perform registration operation here and then do the silent token acquisition
+                    _ = await DoMAMRegister(exProtection).ContinueWith(async (s) =>
+                      {
+                          try
+                          {
+                              // Now the device is registered, perform silent token acquisition
+                              result = await PCAWrapper.Instance.DoSilentAsync(Scopes).ConfigureAwait(false);
+
+                              ShowMessage("Silent 2", result.AccessToken);
+                          }
+                          catch (Exception ex)
+                          {
+                              ShowMessage("Exception 1", ex.Message);
+                          }
+                      }).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -131,55 +91,29 @@ namespace Intune_xamarin_Android
 
         private async void SignOutButton_Click(object sender, EventArgs e)
         {
-            var accounts = await PCA.GetAccountsAsync().ConfigureAwait(false);
-            IMAMEnrollmentManager mgr = MAMComponents.Get<IMAMEnrollmentManager>();
-            while (accounts.Any())
-            {
-                var acct = accounts.FirstOrDefault();
-                // this will wipe and close the app
-                mgr.UnregisterAccountForMAM(acct.Username);
-                await PCA.RemoveAsync(acct).ConfigureAwait(false);
-                accounts = await PCA.GetAccountsAsync().ConfigureAwait(false);
-            }
+            // Even after the signout, broker may retain the token
+            await PCAWrapper.Instance.SignOut().ConfigureAwait(false);
         }
 
-        private static void DoMAMRegister(IntuneAppProtectionPolicyRequiredException exProtection)
+        /// <summary>
+        /// Perform registration with MAM
+        /// </summary>
+        /// <param name="exProtection"></param>
+        /// <returns></returns>
+        private async Task DoMAMRegister(IntuneAppProtectionPolicyRequiredException exProtection)
         {
+            // reset the registered event
             IntuneSampleApp.MAMRegsiteredEvent.Reset();
-            Task.Run(() =>
-            {
-                IMAMComplianceManager mgr = MAMComponents.Get<IMAMComplianceManager>();
-                mgr.RemediateCompliance(exProtection.Upn, exProtection.AccountUserId, exProtection.TenantId, exProtection.AuthorityUrl, false);
-            });
+            
+            // Invoke compliance API on a different thread
+            await Task.Run(() =>
+                                {
+                                    IMAMComplianceManager mgr = MAMComponents.Get<IMAMComplianceManager>();
+                                    mgr.RemediateCompliance(exProtection.Upn, exProtection.AccountUserId, exProtection.TenantId, exProtection.AuthorityUrl, false);
+                                }).ConfigureAwait(false);
 
+            // wait till the registration takes place
             IntuneSampleApp.MAMRegsiteredEvent.WaitOne();
-        }
-
-        internal static async Task<AuthenticationResult> DoSilentAsync(string[] scopes)
-        {
-            if (PCA == null)
-            {
-                return null;
-            }
-
-            var accts = await PCA.GetAccountsAsync().ConfigureAwait(false);
-            var acct = accts.FirstOrDefault();
-            if (acct != null)
-            {
-                var silentParamBuilder = PCA.AcquireTokenSilent(scopes, acct);
-                var authResult = await silentParamBuilder
-                                            .ExecuteAsync().ConfigureAwait(false);
-                return authResult;
-            }
-            else
-            {
-                throw new MsalUiRequiredException("ErrCode", "ErrMessage");
-            }
-        }
-
-        private static void MSALLog(LogLevel level, string message, bool containsPii)
-        {
-            System.Diagnostics.Debug.WriteLine(message);
         }
 
         private void ShowMessage(string title, string message)
@@ -191,9 +125,12 @@ namespace Intune_xamarin_Android
             builder.SetMessage(message);
             builder.SetNeutralButton("OK", (s, e) => { });
 
+            // somehow the dialog does not show up
+            // looking at it
             var alertDialog = builder.Show();
             alertDialog.Show();
 
+            // Write to the debug window in the meantime
             System.Diagnostics.Debug.WriteLine($"Title = {title}  Message = {message}");
         }
 

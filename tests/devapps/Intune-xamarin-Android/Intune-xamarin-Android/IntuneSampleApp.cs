@@ -30,6 +30,7 @@ namespace Intune_xamarin_Android
 #endif
     class IntuneSampleApp : MAMApplication
     {
+        // This event coordinates between different callbacks
         internal static ManualResetEvent MAMRegsiteredEvent { get; } = new ManualResetEvent(false);
         public IntuneSampleApp(IntPtr handle, Android.Runtime.JniHandleOwnership transfer)
             : base(handle, transfer) { }
