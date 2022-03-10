@@ -97,36 +97,6 @@ namespace NetDesktopWinForms
             return pca;
         }
 
-        private async Task<AuthResult> GetMSALRunAuthResult()
-        {
-            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
-
-
-            try
-            {
-                var core = new Core();
-                var authParams = new AuthParameters("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0", "https://login.microsoftonline.com/common");
-                authParams.RequestedScopes = "[\"profile\"]";
-                authParams.RedirectUri = "about:blank";
-
-                IntPtr hWnd = GetForegroundWindow(); 
-
-                AuthResult result = await core.SignInInteractivelyAsync(hWnd, authParams, correlationId).ConfigureAwait(true);
-                
-                if (result.IsSuccess)
-                {
-                    return result;
-                }
-                
-            }
-            catch (msalruntime.Exception ex)
-            {
-                Log("Exception: " + ex);
-            }
-
-            return null;
-        }
-
         private static void BindCache(ITokenCache tokenCache, string file)
         {
             tokenCache.SetBeforeAccess(notificationArgs =>
@@ -151,10 +121,9 @@ namespace NetDesktopWinForms
         {
             try
             {
-                var pca = CreatePca();
-                AuthenticationResult result = await RunAtsAsync(pca).ConfigureAwait(false);
+                AuthResult result = await RunAtsAsync().ConfigureAwait(false);
 
-                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+                await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
             }
             catch (System.Exception ex)
             {
@@ -163,10 +132,12 @@ namespace NetDesktopWinForms
 
         }
 
-        private async Task<AuthenticationResult> RunAtsAsync(IPublicClientApplication pca)
+        private async Task<AuthResult> RunAtsAsync()
         {
-            string reqAuthority = pca.Authority;
+            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
             string loginHint = GetLoginHint();
+            AuthResult result = null;
+
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
             {
                 throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account");
@@ -182,48 +153,58 @@ namespace NetDesktopWinForms
                 }
 
                 Log($"ATS with login hint: " + loginHint);
-                return await pca.AcquireTokenSilent(GetScopes(), loginHint)
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
-            }
 
-            if (cbxAccount.SelectedItem != null &&
-                (cbxAccount.SelectedItem as AccountModel).Account != s_nullAccount)
-            {
-                var acc = (cbxAccount.SelectedItem as AccountModel).Account;
-
-                var builder = pca.AcquireTokenSilent(GetScopes(), acc);
-                if (IsMsaPassthroughConfigured() && !useBrokerChk.Checked)
+                try
                 {
-                    // this is the same in all clouds
-                    const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
-
-                    // these are per cloud
-                    string publicCloudEnv = "https://login.microsoftonline.com/";
-                    string msaTenantIdPublicCloud = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
-
-                    if (acc.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
+                    using (var core = new msalruntime.Core())
+                    using (var authParams = new msalruntime.AuthParameters("26a7ee05-5602-4d76-a7ba-eae8b7b67941", "https://login.microsoftonline.com/common"))
                     {
-                        var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
+                        authParams.RequestedScopes = "[\"profile\"]";
+                        authParams.RedirectUri = "about:blank";
 
-                        builder = builder.WithAuthority(msaAuthority);
+                        IntPtr hWnd = GetForegroundWindow();
+                        result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false);
+
+                        if (result.IsSuccess)
+                        {
+                            return result;
+                        }
+
                     }
-                }
-                else
-                {
-                    builder = builder.WithAuthority(reqAuthority);
-                }
 
-                Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
-                return await builder
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+                }
+                catch (msalruntime.Exception ex)
+                {
+                    Log("Exception: " + ex);
+                }
             }
 
-            Log($"ATS with no account or login hint ... will fail with UiRequiredEx");
-            return await pca.AcquireTokenSilent(GetScopes(), (IAccount)null)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
+            //Acquire Token Silently 
+            try
+            {
+                using (var core = new msalruntime.Core())
+                using (var authParams = new msalruntime.AuthParameters("26a7ee05-5602-4d76-a7ba-eae8b7b67941", "https://login.microsoftonline.com/common"))
+                {
+                    authParams.RequestedScopes = "[\"profile\"]";
+                    authParams.RedirectUri = "about:blank";
+
+                    IntPtr hWnd = GetForegroundWindow();
+                    result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false);
+
+                    if (result.IsSuccess)
+                    {
+                        return result;
+                    }
+
+                }
+
+            }
+            catch (msalruntime.Exception ex)
+            {
+                Log("Exception: " + ex);
+            }
+
+            return result;
         }
 
         private string[] GetScopes()
@@ -247,6 +228,18 @@ namespace NetDesktopWinForms
             });
 
             return clientId;
+        }
+
+        private string GetAuthority()
+        {
+            string authority = null;
+
+            authorityCbx.Invoke((MethodInvoker)delegate
+            {
+                authority = this.authorityCbx.Text;
+            });
+
+            return authority;
         }
 
         private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar)
@@ -304,10 +297,7 @@ namespace NetDesktopWinForms
         {
             try
             {
-                //var pca = CreatePca();
-                //AuthenticationResult result = await RunAtiAsync(pca).ConfigureAwait(false);
-
-                var result = await GetMSALRunAuthResult().ConfigureAwait(false);
+                AuthResult result = await RunAtiAsync().ConfigureAwait(false);
 
                 await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
@@ -318,56 +308,72 @@ namespace NetDesktopWinForms
             }
         }
 
-        private async Task<AuthenticationResult> RunAtiAsync(IPublicClientApplication pca)
+        private async Task<AuthResult> RunAtiAsync()
         {
             string loginHint = GetLoginHint();
+            
+            string clientId = GetClientId();
+
+            string authority = GetAuthority();
+
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
             {
                 throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account, but not both");
             }
 
-            AuthenticationResult result = null;
+            AuthResult result = null;
             var scopes = GetScopes();
-
-            var builder = pca.AcquireTokenInteractive(scopes)
-                .WithUseEmbeddedWebView(true)
-                //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
-                //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
-                .WithEmbeddedWebViewOptions(
-                new EmbeddedWebViewOptions()
-                {
-                    Title = "Hello world",
-                })
-                .WithParentActivityOrWindow(this.Handle);
-
 
             Prompt? prompt = GetPrompt();
             if (prompt.HasValue)
             {
-                builder = builder.WithPrompt(prompt.Value);
+                Log($"ATI Prompt has Value  {prompt.Value}");
             }
 
             if (!string.IsNullOrEmpty(loginHint))
             {
                 Log($"ATI WithLoginHint  {loginHint}");
-                builder = builder.WithLoginHint(loginHint);
             }
             else if (cbxAccount.SelectedIndex > 0)
             {
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
                 Log($"ATI WithAccount for account {acc?.Username ?? "null" }");
-                builder = builder.WithAccount(acc);
             }
             else
             {
                 Log($"ATI without login_hint or account. It should display the account picker");
             }
 
-
             await Task.Delay(500).ConfigureAwait(false);
-            result = await builder.ExecuteAsync().ConfigureAwait(false);
 
+            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
 
+            try
+            {
+                using (var core = new msalruntime.Core())
+                using (var authParams = new msalruntime.AuthParameters(clientId, authority))
+                {
+                    authParams.RequestedScopes = "[\"profile\"]";
+                    authParams.RedirectUri = "about:blank";
+
+                    IntPtr hWnd = GetForegroundWindow();
+
+                    result = await core.SignInInteractivelyAsync(hWnd, authParams, correlationId).ConfigureAwait(false);
+                    //using (AuthResult result = await core.SignInInteractivelyAsync(hWnd, authParams, correlationId, CancellationToken.None).ConfigureAwait(false))
+                    //{
+                    if (result.IsSuccess)
+                    {
+                        return result;
+                    }
+                    //}
+                }
+
+            }
+            catch (msalruntime.Exception ex)
+            {
+                Log("Exception: " + ex);
+            }
+            
             return result;
         }
 
@@ -456,35 +462,35 @@ namespace NetDesktopWinForms
         private async void atsAtiBtn_Click(object sender, EventArgs e)
         {
 
-            var pca = CreatePca();
+            //var pca = CreatePca();
 
-            try
-            {
-                var result = await RunAtsAsync(pca).ConfigureAwait(false);
+            //try
+            //{
+            //    var result = await RunAtsAsync(pca).ConfigureAwait(false);
 
-                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+            //    await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
-            }
-            catch (MsalUiRequiredException ex)
-            {
-                await _syncContext;
+            //}
+            //catch (MsalUiRequiredException ex)
+            //{
+            //    await _syncContext;
 
-                Log("UI required Exception! " + ex.ErrorCode + " " + ex.Message);
-                try
-                {
-                    var result = await RunAtiAsync(pca).ConfigureAwait(false);
-                    await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
-                }
-                catch (System.Exception ex3)
-                {
-                    Log("Exception: " + ex3);
-                }
+            //    Log("UI required Exception! " + ex.ErrorCode + " " + ex.Message);
+            //    try
+            //    {
+            //        var result = await RunAtiAsync(pca).ConfigureAwait(false);
+            //        await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+            //    }
+            //    catch (System.Exception ex3)
+            //    {
+            //        Log("Exception: " + ex3);
+            //    }
 
-            }
-            catch (System.Exception ex2)
-            {
-                Log("Exception: " + ex2);
-            }
+            //}
+            //catch (System.Exception ex2)
+            //{
+            //    Log("Exception: " + ex2);
+            //}
         }
 
         private void clearBtn_Click(object sender, EventArgs e)
