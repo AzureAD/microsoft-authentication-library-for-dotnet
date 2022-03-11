@@ -123,9 +123,7 @@ namespace NetDesktopWinForms
         {
             try
             {
-                AuthResult result = await RunAtsAsync().ConfigureAwait(false);
-
-                await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+                await RunAtsAsync().ConfigureAwait(false);
             }
             catch (System.Exception ex)
             {
@@ -134,7 +132,7 @@ namespace NetDesktopWinForms
 
         }
 
-        private async Task<AuthResult> RunAtsAsync()
+        private async Task RunAtsAsync()
         {
             const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
             string loginHint = GetLoginHint();
@@ -168,7 +166,7 @@ namespace NetDesktopWinForms
                         {
                             if (result.IsSuccess)
                             {
-                                return result;
+                                await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                             }
                         }
                     }
@@ -192,7 +190,7 @@ namespace NetDesktopWinForms
                     {
                         if (result.IsSuccess)
                         {
-                            return result;
+                            await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                         }
                     }
                 }
@@ -201,8 +199,6 @@ namespace NetDesktopWinForms
             {
                 Log("Exception: " + ex);
             }
-
-            return result;
         }
 
         private string GetScopes()
@@ -289,10 +285,7 @@ namespace NetDesktopWinForms
         {
             try
             {
-                AuthResult result = await RunAtiAsync().ConfigureAwait(false);
-                //MessageBox.Show(result.Account.ToString());
-                await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
-
+                await RunAtiAsync().ConfigureAwait(false);
             }
             catch (System.Exception ex)
             {
@@ -300,12 +293,14 @@ namespace NetDesktopWinForms
             }
         }
 
-        private async Task<AuthResult> RunAtiAsync()
+        private async Task RunAtiAsync()
         {
             const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
             string loginHint = GetLoginHint();
             string clientId = GetClientId();
             string authority = GetAuthority();
+
+            IntPtr hWnd = GetForegroundWindow();
 
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
             {
@@ -343,13 +338,13 @@ namespace NetDesktopWinForms
                     authParams.RequestedScopes = $"[\"{scopes.ToLower()}\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    IntPtr hWnd = GetForegroundWindow();
-
-                    using (result = await core.SignInInteractivelyAsync(hWnd, authParams, correlationId).ConfigureAwait(false))
+                    using (result = await core.SignInInteractivelyAsync(this.Handle, authParams, correlationId).ConfigureAwait(false))
                     {
+                        
+
                         if (result.IsSuccess)
                         {
-                            return result;
+                            await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                         }
                     }
                 }
@@ -357,10 +352,11 @@ namespace NetDesktopWinForms
             }
             catch (msalruntime.Exception ex)
             {
+                await _syncContext;
                 Log("Exception: " + ex);
             }
-            
-            return result;
+
+            await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
         }
 
         private string GetLoginHint()
