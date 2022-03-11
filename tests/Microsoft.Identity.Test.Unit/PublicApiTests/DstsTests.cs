@@ -36,10 +36,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(string authority)
         {
+            IDictionary<string, string> expectedRequestBody = new Dictionary<string, string>();
+            expectedRequestBody.Add("scope", TestConstants.ScopeStr);
+            expectedRequestBody.Add("grant_type", "client_credentials");
+            expectedRequestBody.Add("client_id", TestConstants.ClientId);
+            expectedRequestBody.Add("client_secret", TestConstants.ClientSecret);
+
             return new MockHttpMessageHandler()
             {
                 ExpectedUrl = $"{authority}/oauth2/token",
                 ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = expectedRequestBody,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
             };
         }
