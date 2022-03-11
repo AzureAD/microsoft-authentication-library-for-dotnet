@@ -153,7 +153,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
             Assert.AreEqual("www.contoso.com", popConfig.HttpHost);
             Assert.AreEqual("/path1/path2", popConfig.HttpPath);
 
-
             request = new HttpRequestMessage(HttpMethod.Post, new Uri(ProtectedUrlWithPort));
             popConfig = new PoPAuthenticationConfiguration(request);
 
@@ -234,7 +233,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Assert.AreNotEqual(actualCacheKey, actualCacheKey2);
             }
         }
-
 
         /// <summary>
         /// A key ID that uniquely describes a public / private key pair. While KeyID is not normally

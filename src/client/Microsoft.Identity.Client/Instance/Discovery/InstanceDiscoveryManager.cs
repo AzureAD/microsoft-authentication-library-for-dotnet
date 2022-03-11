@@ -145,7 +145,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
                     return entry;
 
-
                 // ADFS and B2C do not support instance discovery 
                 case AuthorityType.Adfs:
                 case AuthorityType.B2C:

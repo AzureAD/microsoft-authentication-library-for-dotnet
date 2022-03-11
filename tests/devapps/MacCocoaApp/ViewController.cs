@@ -10,10 +10,11 @@ using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
-#pragma warning disable AvoidAsyncVoid // Avoid async void
 
 namespace MacCocoaApp
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "Async void is used for event handlers")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Async void is used for event handlers")]
     public partial class ViewController : NSViewController
     {
         private const string ClientId = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
@@ -70,9 +71,7 @@ namespace MacCocoaApp
             set => base.RepresentedObject = value;
         }
 
-
         async partial void GetTokenClickAsync(NSObject sender)
-#pragma warning restore AvoidAsyncVoid // Avoid async void
         {
             try
             {
@@ -170,5 +169,4 @@ namespace MacCocoaApp
         }
     }
 }
-#pragma warning restore AvoidAsyncVoid // Avoid async void
 

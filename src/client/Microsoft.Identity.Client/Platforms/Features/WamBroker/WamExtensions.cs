@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             stringBuilder.AppendLine($"WebAccountProvider: {webTokenRequest?.WebAccountProvider.ToLogString(pii)}");
 
-
             return stringBuilder.ToString();
         }
 

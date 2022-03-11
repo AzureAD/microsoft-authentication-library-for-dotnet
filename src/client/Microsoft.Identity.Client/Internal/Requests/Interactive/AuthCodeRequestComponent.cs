@@ -66,7 +66,6 @@ namespace Microsoft.Identity.Client.Internal
             string state = authorizationTuple.Item2;
             string codeVerifier = authorizationTuple.Item3;
 
-
             var authorizationResult = await webUi.AcquireAuthorizationAsync(
                                        authorizationUri,
                                        _requestParams.RedirectUri,

@@ -940,8 +940,6 @@ namespace Microsoft.Identity.Client
             return appMetadata.FamilyId == familyId;
         }
 
-
-
         /// <remarks>
         /// Get accounts should not make a network call, if possible. This can be achieved if
         /// all the environments in the token cache are known to MSAL, as MSAL keeps a list of

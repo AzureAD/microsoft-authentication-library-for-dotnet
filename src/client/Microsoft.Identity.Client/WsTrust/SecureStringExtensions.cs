@@ -12,7 +12,6 @@ using static System.Security.SecureStringMarshal;
 using static System.Runtime.InteropServices.Marshal;
 #endif
 
-
 namespace Microsoft.Identity.Client.WsTrust
 {
     internal static class SecureStringExtensions

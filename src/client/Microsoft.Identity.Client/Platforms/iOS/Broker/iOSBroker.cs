@@ -170,7 +170,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return brokerRequest;
         }
 
-
         public void HandleInstallUrl(string appLink)
         {
             DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(appLink)));

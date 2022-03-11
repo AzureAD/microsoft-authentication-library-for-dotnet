@@ -35,7 +35,6 @@ namespace WebApi.Controllers
             _logger = logger;
         }
 
-
         public enum TID
         {
             A,
@@ -58,10 +57,8 @@ namespace WebApi.Controllers
         static FilePartionedCacheSerializer s_l2 =
             new FilePartionedCacheSerializer(FileCachePath);
 
-
-
         [HttpGet]
-#pragma warning disable UseAsyncSuffix // Use Async suffix
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "<Pending>")]
         public async Task<string> Get(
             bool ccaPerRequest = true,            
             Flow flow = Flow.S2S,
@@ -70,8 +67,6 @@ namespace WebApi.Controllers
             Scope scope = Scope.S1,
             bool staticL1 = false,
             bool useL2 = true)
-
-#pragma warning restore UseAsyncSuffix // Use Async suffix
         {
             
 
@@ -79,7 +74,6 @@ namespace WebApi.Controllers
             var tid = new string(Enumerable.Repeat(c, 16).ToArray());
 
             IConfidentialClientApplication cca = GetOrCreateCCA(ccaPerRequest, staticL1, useL2);
-
 
             AuthenticationResult res;
             if (flow == Flow.S2S)

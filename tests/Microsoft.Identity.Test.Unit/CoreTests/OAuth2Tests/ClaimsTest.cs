@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .BuildConcrete();
 
-
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false);
 
                 Trace.WriteLine("2. Silent Request without claims returns the AT from the cache");
@@ -122,7 +121,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 Assert.IsNotNull(result, "A result is obtained from the cache, i.e. without HTTP calls");
             }
         }
-
 
         [TestMethod]
         public async Task ClaimsAreSentTo_AuthorizationEndpoint_And_TokenEndpoint_Async()

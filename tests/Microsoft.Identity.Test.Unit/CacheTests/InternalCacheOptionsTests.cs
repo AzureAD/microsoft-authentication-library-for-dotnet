@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     public class InternalCacheOptionsTests : TestBase
     {
         [TestMethod]
-        public void OptionsAndExternalCacheAreExclusiveAsync()
+        public void OptionsAndExternalCacheAreExclusive()
         {
             var app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -145,7 +145,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync().ConfigureAwait(false);
 
-
                 var accounts = await app1.GetAccountsAsync().ConfigureAwait(false);
                 Assert.AreEqual(1, accounts.Count());
                 result = await app1.AcquireTokenSilent(TestConstants.s_scope, accounts.Single()).ExecuteAsync().ConfigureAwait(false);
@@ -162,8 +161,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 result = await app2.AcquireTokenSilent(TestConstants.s_scope, accounts.Single()).ExecuteAsync().ConfigureAwait(false);
             }
         }
-
-
 
         private async Task ClientCredsAcquireAndAssertTokenSourceAsync(IConfidentialClientApplication app, string scope, TokenSource expectedSource)
         {

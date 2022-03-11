@@ -158,7 +158,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
                 .Do(x => throw validationException);
 
-
             // Act
             var actualException = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
             _discoveryManager.GetMetadataEntryAsync(
@@ -182,7 +181,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             _networkMetadataProvider
                 .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
                 .Do(x => throw new MsalServiceException("endpoint_busy", "some exception message"));
-
 
             // Act
             var actualResult = await _discoveryManager.GetMetadataEntryAsync(

@@ -55,7 +55,6 @@ namespace Microsoft.Identity.Test.Performance
             }
         }
 
-
         /// <summary>
         /// Adds mocked HTTP response to the HTTP manager before each call.
         /// Sets the index of the next app request to use.

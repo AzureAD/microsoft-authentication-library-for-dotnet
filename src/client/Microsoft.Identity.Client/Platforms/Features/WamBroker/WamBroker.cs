@@ -33,7 +33,6 @@ using System.Windows.Forms;
 using System.Runtime.Versioning;
 #endif
 
-
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     /// <summary>

@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// </summary>
     internal class NullDeviceAuthManager : IDeviceAuthManager
     {
-        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponseHeaders headers, Uri endpointUri, out string responseHeader)
+        public bool TryCreateDeviceAuthChallengeResponse(HttpResponseHeaders headers, Uri endpointUri, out string responseHeader)
         {
             if (!DeviceAuthHelper.IsDeviceAuthChallenge(headers))
             {

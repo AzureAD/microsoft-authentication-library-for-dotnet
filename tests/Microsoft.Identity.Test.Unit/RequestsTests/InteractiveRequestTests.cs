@@ -205,7 +205,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-
         [TestMethod]
         public async Task VerifyAuthorizationResultTestAsync()
         {
@@ -247,7 +246,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(
                    UiRequiredExceptionClassification.PromptNeverFailed,
                    ex.Classification);
-
 
                 webUi = new MockWebUI
                 {

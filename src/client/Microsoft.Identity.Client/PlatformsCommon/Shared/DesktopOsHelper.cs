@@ -25,7 +25,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         return true;
 #else
 
-
 #if DESKTOP
             return Environment.OSVersion.Platform == PlatformID.Win32NT;
 #elif SUPPORTS_WIN32

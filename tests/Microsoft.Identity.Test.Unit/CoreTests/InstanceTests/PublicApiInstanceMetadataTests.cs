@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
@@ -103,7 +102,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithInstanceDiscoveryMetadata(customMetadataUri)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
-
 
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));

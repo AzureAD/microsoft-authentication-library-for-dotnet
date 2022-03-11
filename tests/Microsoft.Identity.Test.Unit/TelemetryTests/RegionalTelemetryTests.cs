@@ -260,7 +260,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                         authority: TestConstants.AuthorityRegional,
                         responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
 
-
                     var app3 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                      .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId, false)
                      .WithClientSecret(TestConstants.ClientSecret)

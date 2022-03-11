@@ -56,8 +56,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             $"\"message\":\"{ExpectedMessage}\"," +
             $"}}";
 
-
-
         private HttpResponseMessage CreateDeviceCodeResponseSuccessMessage()
         {
             return MockHelpers.CreateSuccessResponseMessage(ExpectedResponseMessage);
@@ -98,7 +96,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         return Task.FromResult(0);
                     }
                 };
-
 
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
                 var authenticationResult = await request.RunAsync(CancellationToken.None).ConfigureAwait(false);

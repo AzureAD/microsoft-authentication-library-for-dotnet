@@ -113,7 +113,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
         }
 
-
         /// <summary>
         /// If this test fails, please update the <see cref="KnownMetadataProvider"/> to
         /// use whatever Evo uses (i.e. the aliases, preferred network / metadata from the url below).
