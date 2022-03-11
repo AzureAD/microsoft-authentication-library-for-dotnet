@@ -32,7 +32,8 @@ namespace NetDesktopWinForms
             new ClientEntry() { Id = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1", Name = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1 (VS)"},
             new ClientEntry() { Id = "655015be-5021-4afc-a683-a4223eb5d0e5", Name = "655015be-5021-4afc-a683-a4223eb5d0e5"},
             new ClientEntry() { Id = "c0186a6c-0bfc-4d83-9543-c2295b676f3b", Name = "MSA-PT (lab user and tenanted only)"},
-            new ClientEntry() { Id = "95de633a-083e-42f5-b444-a4295d8e9314", Name = "Whiteboard App"}
+            new ClientEntry() { Id = "95de633a-083e-42f5-b444-a4295d8e9314", Name = "Whiteboard App" },
+            new ClientEntry() { Id = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0", Name = "msidlab4.com" }
         };
 
         private BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
@@ -96,6 +97,7 @@ namespace NetDesktopWinForms
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;
         }
+            
 
         private static void BindCache(ITokenCache tokenCache, string file)
         {
@@ -162,16 +164,14 @@ namespace NetDesktopWinForms
                         authParams.RequestedScopes = "[\"profile\"]";
                         authParams.RedirectUri = "about:blank";
 
-                        IntPtr hWnd = GetForegroundWindow();
-                        result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false);
-
-                        if (result.IsSuccess)
+                        using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false))
                         {
-                            return result;
+                            if (result.IsSuccess)
+                            {
+                                return result;
+                            }
                         }
-
                     }
-
                 }
                 catch (msalruntime.Exception ex)
                 {
@@ -188,16 +188,14 @@ namespace NetDesktopWinForms
                     authParams.RequestedScopes = "[\"profile\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    IntPtr hWnd = GetForegroundWindow();
-                    result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false);
-
-                    if (result.IsSuccess)
+                    using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false))
                     {
-                        return result;
+                        if (result.IsSuccess)
+                        {
+                            return result;
+                        }
                     }
-
                 }
-
             }
             catch (msalruntime.Exception ex)
             {
@@ -207,12 +205,12 @@ namespace NetDesktopWinForms
             return result;
         }
 
-        private string[] GetScopes()
+        private string GetScopes()
         {
-            string[] result = null;
+            string result = null;
             cbxScopes.Invoke((MethodInvoker)delegate
             {
-                result = cbxScopes.Text.Split(' ');
+                result = cbxScopes.Text;
             });
 
             return result;
@@ -242,30 +240,24 @@ namespace NetDesktopWinForms
             return authority;
         }
 
-        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar)
-        {
-            string message =
-
-                $"Account.Username {ar.Account.Username}" + Environment.NewLine +
-                $"Account.HomeAccountId {ar.Account.HomeAccountId}" + Environment.NewLine +
-                $"Account.Environment {ar.Account.Environment}" + Environment.NewLine +
-                $"TenantId {ar.TenantId}" + Environment.NewLine +
-                $"Expires {ar.ExpiresOn.ToLocalTime()} local time" + Environment.NewLine +
-                $"Source {ar.AuthenticationResultMetadata.TokenSource}" + Environment.NewLine +
-                $"Scopes {String.Join(" ", ar.Scopes)}" + Environment.NewLine +
-                $"AccessToken: {ar.AccessToken} " + Environment.NewLine +
-                $"IdToken {ar.IdToken}" + Environment.NewLine;
-
-            Log(message);
-
-            await _syncContext;
-
-            Log("Refreshing accounts");
-            await RefreshAccountsAsync().ConfigureAwait(true);
-        }
-
         private async Task LogRuntimeResultAndRefreshAccountsAsync(AuthResult ar)
         {
+
+            //Old Message with WAM
+
+            //string message =
+
+            //    $"Account.Username {ar.Account.Username}" + Environment.NewLine +
+            //    $"Account.HomeAccountId {ar.Account.HomeAccountId}" + Environment.NewLine +
+            //    $"Account.Environment {ar.Account.Environment}" + Environment.NewLine +
+            //    $"TenantId {ar.TenantId}" + Environment.NewLine +
+            //    $"Expires {ar.ExpiresOn.ToLocalTime()} local time" + Environment.NewLine +
+            //    $"Source {ar.AuthenticationResultMetadata.TokenSource}" + Environment.NewLine +
+            //    $"Scopes {String.Join(" ", ar.Scopes)}" + Environment.NewLine +
+            //    $"AccessToken: {ar.AccessToken} " + Environment.NewLine +
+            //    $"IdToken {ar.IdToken}" + Environment.NewLine;
+
+            //Message Modified with MSAL Runtime
             string message =
 
                 $"Account.Id {ar.Account.Id}" + Environment.NewLine +
@@ -298,7 +290,7 @@ namespace NetDesktopWinForms
             try
             {
                 AuthResult result = await RunAtiAsync().ConfigureAwait(false);
-
+                //MessageBox.Show(result.Account.ToString());
                 await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
             }
@@ -310,10 +302,9 @@ namespace NetDesktopWinForms
 
         private async Task<AuthResult> RunAtiAsync()
         {
+            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
             string loginHint = GetLoginHint();
-            
             string clientId = GetClientId();
-
             string authority = GetAuthority();
 
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
@@ -344,28 +335,23 @@ namespace NetDesktopWinForms
                 Log($"ATI without login_hint or account. It should display the account picker");
             }
 
-            await Task.Delay(500).ConfigureAwait(false);
-
-            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
-
             try
             {
                 using (var core = new msalruntime.Core())
                 using (var authParams = new msalruntime.AuthParameters(clientId, authority))
                 {
-                    authParams.RequestedScopes = "[\"profile\"]";
+                    authParams.RequestedScopes = $"[\"{scopes.ToLower()}\"]";
                     authParams.RedirectUri = "about:blank";
 
                     IntPtr hWnd = GetForegroundWindow();
 
-                    result = await core.SignInInteractivelyAsync(hWnd, authParams, correlationId).ConfigureAwait(false);
-                    //using (AuthResult result = await core.SignInInteractivelyAsync(hWnd, authParams, correlationId, CancellationToken.None).ConfigureAwait(false))
-                    //{
-                    if (result.IsSuccess)
+                    using (result = await core.SignInInteractivelyAsync(hWnd, authParams, correlationId).ConfigureAwait(false))
                     {
-                        return result;
+                        if (result.IsSuccess)
+                        {
+                            return result;
+                        }
                     }
-                    //}
                 }
 
             }
@@ -515,6 +501,12 @@ namespace NetDesktopWinForms
         {
             ClientEntry clientEntry = (ClientEntry)clientIdCbx.SelectedItem;
 
+            if (clientEntry.Id == "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0") // MSIDLAB
+            {
+                cbxScopes.SelectedItem = "prfile";
+                authorityCbx.SelectedItem = "https://login.microsoftonline.com/common";
+            }
+
             if (clientEntry.Id == "872cd9fa-d31f-45e0-9eab-6e460a02d1f1") // VS
             {
                 cbxScopes.SelectedItem = "https://management.core.windows.net//.default";
@@ -581,6 +573,11 @@ namespace NetDesktopWinForms
             {
                 Log("Exception: " + ex);
             }
+        }
+
+        private void cbxScopes_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 

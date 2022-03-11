@@ -243,7 +243,8 @@
             this.cbxScopes.Name = "cbxScopes";
             this.cbxScopes.Size = new System.Drawing.Size(660, 21);
             this.cbxScopes.TabIndex = 18;
-            this.cbxScopes.Text = "User.Read";
+            this.cbxScopes.Text = "profile";
+            this.cbxScopes.SelectedIndexChanged += new System.EventHandler(this.cbxScopes_SelectedIndexChanged);
             // 
             // label5
             // 
