@@ -127,7 +127,7 @@ namespace NetDesktopWinForms
             }
             catch (System.Exception ex)
             {
-                Log("Exception: " + ex);
+                await Log("Exception: " + ex).ConfigureAwait(false);
             }
 
         }
@@ -136,6 +136,8 @@ namespace NetDesktopWinForms
         {
             const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
             string loginHint = GetLoginHint();
+            string scopes = "profile mail.read";//"[\"profile\"]";//GetScopes();
+
             AuthResult result = null;
 
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
@@ -152,28 +154,25 @@ namespace NetDesktopWinForms
                         "[TEST APP FAILURE] Do not use login hint on AcquireTokenSilent for MSA-Passthrough. Use the IAccount overload.");
                 }
 
-                Log($"ATS with login hint: " + loginHint);
+                await Log($"ATS with login hint: " + loginHint).ConfigureAwait(false);
 
                 try
                 {
                     using (var core = new msalruntime.Core())
                     using (var authParams = new msalruntime.AuthParameters("26a7ee05-5602-4d76-a7ba-eae8b7b67941", "https://login.microsoftonline.com/common"))
                     {
-                        authParams.RequestedScopes = "[\"profile\"]";
+                        authParams.RequestedScopes = $"[\"{scopes}\"]";
                         authParams.RedirectUri = "about:blank";
 
                         using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false))
                         {
-                            if (result.IsSuccess)
-                            {
-                                await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
-                            }
+                            await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                         }
                     }
                 }
-                catch (msalruntime.Exception ex)
+                catch (System.Exception ex)
                 {
-                    Log("Exception: " + ex);
+                    await Log("Exception: " + ex).ConfigureAwait(false);
                 }
             }
 
@@ -183,21 +182,18 @@ namespace NetDesktopWinForms
                 using (var core = new msalruntime.Core())
                 using (var authParams = new msalruntime.AuthParameters("26a7ee05-5602-4d76-a7ba-eae8b7b67941", "https://login.microsoftonline.com/common"))
                 {
-                    authParams.RequestedScopes = "[\"profile\"]";
+                    authParams.RequestedScopes = $"[\"{scopes}\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false))
+                    using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(true))
                     {
-                        if (result.IsSuccess)
-                        {
-                            await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
-                        }
+                        await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                     }
                 }
             }
-            catch (msalruntime.Exception ex)
+            catch (System.Exception ex)
             {
-                Log("Exception: " + ex);
+                await Log("Exception: " + ex).ConfigureAwait(false);
             }
         }
 
@@ -238,7 +234,6 @@ namespace NetDesktopWinForms
 
         private async Task LogRuntimeResultAndRefreshAccountsAsync(AuthResult ar)
         {
-
             //Old Message with WAM
 
             //string message =
@@ -253,8 +248,10 @@ namespace NetDesktopWinForms
             //    $"AccessToken: {ar.AccessToken} " + Environment.NewLine +
             //    $"IdToken {ar.IdToken}" + Environment.NewLine;
 
-            //Message Modified with MSAL Runtime
-            string message =
+            if (ar.IsSuccess)
+            {
+                //Message Modified with MSAL Runtime
+                string message =
 
                 $"Account.Id {ar.Account.Id}" + Environment.NewLine +
                 $"Account.ClientInfo {ar.Account.ClientInfo}" + Environment.NewLine +
@@ -264,17 +261,31 @@ namespace NetDesktopWinForms
                 $"AccessToken: {ar.AccessToken} " + Environment.NewLine +
                 $"IdToken {ar.IdToken}" + Environment.NewLine;
 
-            Log(message);
+                await Log(message).ConfigureAwait(false);
+            }
+            else
+            {
+                if (ar.Error.Status.ToString() == "Status = InteractionRequired")
+                {
+                    throw new MsalUiRequiredException("U123", ar.Error.ToString());
+                }
+                else
+                {
+                    throw new msalruntime.Exception(ar.Error);
+                }
+            }
 
             await _syncContext;
 
-            Log("Refreshing accounts");
-            await RefreshAccountsAsync().ConfigureAwait(true);
+            //await Log("Refreshing Accounts").ConfigureAwait(false);
+            //await RefreshAccountsAsync().ConfigureAwait(true);
         }
 
 
-        private void Log(string message)
+        private async Task Log(string message)
         {
+            await _syncContext;
+
             resultTbx.Invoke((MethodInvoker)delegate
             {
                 resultTbx.AppendText(message + Environment.NewLine);
@@ -289,7 +300,7 @@ namespace NetDesktopWinForms
             }
             catch (System.Exception ex)
             {
-                Log("Exception: " + ex);
+                await Log("Exception: " + ex).ConfigureAwait(false);
             }
         }
 
@@ -300,7 +311,7 @@ namespace NetDesktopWinForms
             string clientId = GetClientId();
             string authority = GetAuthority();
 
-            IntPtr hWnd = GetForegroundWindow();
+            IntPtr hWnd = this.Handle;
 
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
             {
@@ -313,21 +324,21 @@ namespace NetDesktopWinForms
             Prompt? prompt = GetPrompt();
             if (prompt.HasValue)
             {
-                Log($"ATI Prompt has Value  {prompt.Value}");
+                await Log($"ATI Prompt has Value  {prompt.Value}").ConfigureAwait(false);
             }
 
             if (!string.IsNullOrEmpty(loginHint))
             {
-                Log($"ATI WithLoginHint  {loginHint}");
+                await Log($"ATI WithLoginHint  {loginHint}").ConfigureAwait(false);
             }
             else if (cbxAccount.SelectedIndex > 0)
             {
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
-                Log($"ATI WithAccount for account {acc?.Username ?? "null" }");
+                await Log($"ATI WithAccount for account {acc?.Username ?? "null"}").ConfigureAwait(false);
             }
             else
             {
-                Log($"ATI without login_hint or account. It should display the account picker");
+                await Log($"ATI without login_hint or account. It should display the account picker").ConfigureAwait(false);
             }
 
             try
@@ -335,28 +346,20 @@ namespace NetDesktopWinForms
                 using (var core = new msalruntime.Core())
                 using (var authParams = new msalruntime.AuthParameters(clientId, authority))
                 {
-                    authParams.RequestedScopes = $"[\"{scopes.ToLower()}\"]";
+                    authParams.RequestedScopes = $"[\"{scopes}\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    using (result = await core.SignInInteractivelyAsync(this.Handle, authParams, correlationId).ConfigureAwait(false))
+                    using (result = await core.SignInInteractivelyAsync(this.Handle, authParams, correlationId).ConfigureAwait(true))
                     {
-                        
-
-                        if (result.IsSuccess)
-                        {
-                            await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
-                        }
+                        await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                     }
                 }
-
             }
             catch (msalruntime.Exception ex)
             {
-                await _syncContext;
-                Log("Exception: " + ex);
+                await Log("Exception: " + ex).ConfigureAwait(false);
             }
 
-            await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
         }
 
         private string GetLoginHint()
@@ -438,41 +441,55 @@ namespace NetDesktopWinForms
                 string.Join(
                      Environment.NewLine,
                     accounts.Select(acc => $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId}"));
-            Log(msg);
+            await Log(msg).ConfigureAwait(false);
         }
 
         private async void atsAtiBtn_Click(object sender, EventArgs e)
         {
+            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
+            string loginHint = GetLoginHint();
+            string clientId = GetClientId();
+            string authority = GetAuthority();
+            string scopes = GetScopes(); //            "profile mail.read";//"[\"profile\"]";//GetScopes();
+            AuthResult result = null;
 
-            //var pca = CreatePca();
+            //Acquire Token Silently 
+            try
+            {
+                using (var core = new msalruntime.Core())
+                using (var authParams = new msalruntime.AuthParameters(clientId, authority))
+                {
+                    authParams.RequestedScopes = $"[\"{scopes}\"]";
+                    authParams.RedirectUri = "about:blank";
 
-            //try
-            //{
-            //    var result = await RunAtsAsync(pca).ConfigureAwait(false);
+                    using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(true))
+                    {
+                        await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (msalruntime.Exception ex)
+            {
+                try
+                {
+                    using (var core = new msalruntime.Core())
+                    using (var authParams = new msalruntime.AuthParameters(clientId, authority))
+                    {
+                        authParams.RequestedScopes = $"[\"{scopes}\"]";
+                        authParams.RedirectUri = "about:blank";
 
-            //    await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+                        using (result = await core.SignInInteractivelyAsync(this.Handle, authParams, correlationId).ConfigureAwait(false))
+                        {
+                            await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+                        }
+                    }
 
-            //}
-            //catch (MsalUiRequiredException ex)
-            //{
-            //    await _syncContext;
-
-            //    Log("UI required Exception! " + ex.ErrorCode + " " + ex.Message);
-            //    try
-            //    {
-            //        var result = await RunAtiAsync(pca).ConfigureAwait(false);
-            //        await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
-            //    }
-            //    catch (System.Exception ex3)
-            //    {
-            //        Log("Exception: " + ex3);
-            //    }
-
-            //}
-            //catch (System.Exception ex2)
-            //{
-            //    Log("Exception: " + ex2);
-            //}
+                }
+                catch (System.Exception ex2)
+                {
+                    await Log("Exception: " + ex2).ConfigureAwait(false);
+                }
+            }
         }
 
         private void clearBtn_Click(object sender, EventArgs e)
@@ -482,14 +499,14 @@ namespace NetDesktopWinForms
 
         private async void btnClearCache_Click(object sender, EventArgs e)
         {
-            Log("Clearing the cache ...");
+            await Log("Clearing the cache ...").ConfigureAwait(false);
             var pca = CreatePca();
             foreach (var acc in (await pca.GetAccountsAsync().ConfigureAwait(false)))
             {
                 await pca.RemoveAsync(acc).ConfigureAwait(false);
             }
 
-            Log("Done clearing the cache.");
+            await Log("Done clearing the cache.").ConfigureAwait(false);
         }
 
 
@@ -499,7 +516,7 @@ namespace NetDesktopWinForms
 
             if (clientEntry.Id == "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0") // MSIDLAB
             {
-                cbxScopes.SelectedItem = "prfile";
+                cbxScopes.SelectedItem = "profile";
                 authorityCbx.SelectedItem = "https://login.microsoftonline.com/common";
             }
 
@@ -530,7 +547,7 @@ namespace NetDesktopWinForms
 
         private async void btnExpire_Click(object sender, EventArgs e)
         {
-            Log("Expiring tokens.");
+            await Log("Expiring tokens.").ConfigureAwait(false);
 
             var pca = CreatePca();
 
@@ -546,7 +563,7 @@ namespace NetDesktopWinForms
 
             await (task as Task).ConfigureAwait(false);
            
-            Log("Done expiring tokens.");
+            await Log("Done expiring tokens.").ConfigureAwait(false);
         }
 
         private async void btnRemoveAcc_Click(object sender, EventArgs e)
@@ -563,11 +580,11 @@ namespace NetDesktopWinForms
 
                 await pca.RemoveAsync(acc).ConfigureAwait(false);
 
-                Log("Removed account " + acc.Username);
+                await Log("Removed account " + acc.Username).ConfigureAwait(false);
             }
             catch (System.Exception ex)
             {
-                Log("Exception: " + ex);
+                await Log("Exception: " + ex).ConfigureAwait(false);
             }
         }
 
