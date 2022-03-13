@@ -313,6 +313,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
         }
 
+        /// <summary>
+        /// Some WAM operations fail for work and school accounts when the authority is env/organizations
+        /// Chaing the authority to env/common in this case works around this problem.
+        /// 
+        /// https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3217
+        /// </summary>
         private async Task<string> WorkaroundOrganizationsBugAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             WebAccountProvider webAccountProvider)

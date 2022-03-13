@@ -1270,6 +1270,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreSame(_msalTokenResponse, result);
                 _msaPassthroughHandler.Received(1).AddTransferTokenToRequest(webTokenRequest, "transfer_token");
                 AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
+                Assert.AreEqual(
+                   "https://login.microsoftonline.com/organizations/",
+                   webTokenRequest.Properties["authority"]);
             }
         }
 
@@ -1340,6 +1343,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             }
         }
+
+     
 
         [TestMethod]
         public async Task ATS_MsaPt_Async()
