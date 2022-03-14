@@ -113,6 +113,8 @@ namespace Intune_xamarin_Android
                                 }).ConfigureAwait(false);
 
             // wait till the registration completes
+            // Note: This is a sample app for MSAL.NET. Scenarios such as what if enrollment fails or user chooses not to enroll will be as
+            // per the business requirements of the app and not considered in the sample app.
             IntuneSampleApp.MAMRegsiteredEvent.WaitOne();
         }
 

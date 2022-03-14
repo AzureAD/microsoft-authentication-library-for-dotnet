@@ -97,17 +97,12 @@ namespace Intune_xamarin_Android
 
             var accts = await PCA.GetAccountsAsync().ConfigureAwait(false);
             var acct = accts.FirstOrDefault();
-            if (acct != null)
-            {
-                var silentParamBuilder = PCA.AcquireTokenSilent(scopes, acct);
-                var authResult = await silentParamBuilder
-                                            .ExecuteAsync().ConfigureAwait(false);
-                return authResult;
-            }
-            else
-            {
-                throw new MsalUiRequiredException("ErrCode", "ErrMessage");
-            }
+
+            var silentParamBuilder = PCA.AcquireTokenSilent(scopes, acct);
+            var authResult = await silentParamBuilder
+                                        .ExecuteAsync().ConfigureAwait(false);
+            return authResult;
+
         }
 
         /// <summary>
