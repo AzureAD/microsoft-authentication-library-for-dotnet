@@ -1,3 +1,6 @@
+parameters:
+  PublishArtifacts: 'false'
+
 steps:
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Drop'
@@ -37,6 +40,11 @@ steps:
     version: 2.x
 
 - template: template-pack-and-sign-all-nugets.yaml
+
+#enabled only for legacy build
+- template: template-publish-packages-and-symbols.yaml
+  parameters:
+    PublishArtifacts: ${{ parameters.PublishArtifacts }}
 
 # Publish analysis and cleanup
 - template: template-publish-analysis-and-cleanup.yaml
