@@ -58,6 +58,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.sgnBtn = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -65,7 +66,7 @@
             // 
             // resultTbx
             // 
-            this.resultTbx.Location = new System.Drawing.Point(5, 15);
+            this.resultTbx.Location = new System.Drawing.Point(5, 21);
             this.resultTbx.Multiline = true;
             this.resultTbx.Name = "resultTbx";
             this.resultTbx.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -156,7 +157,7 @@
             // 
             // atsBtn
             // 
-            this.atsBtn.Location = new System.Drawing.Point(7, 19);
+            this.atsBtn.Location = new System.Drawing.Point(87, 19);
             this.atsBtn.Name = "atsBtn";
             this.atsBtn.Size = new System.Drawing.Size(75, 23);
             this.atsBtn.TabIndex = 11;
@@ -166,7 +167,7 @@
             // 
             // atiBtn
             // 
-            this.atiBtn.Location = new System.Drawing.Point(100, 19);
+            this.atiBtn.Location = new System.Drawing.Point(180, 19);
             this.atiBtn.Name = "atiBtn";
             this.atiBtn.Size = new System.Drawing.Size(75, 23);
             this.atiBtn.TabIndex = 12;
@@ -176,7 +177,7 @@
             // 
             // atsAtiBtn
             // 
-            this.atsAtiBtn.Location = new System.Drawing.Point(190, 19);
+            this.atsAtiBtn.Location = new System.Drawing.Point(270, 19);
             this.atsAtiBtn.Name = "atsAtiBtn";
             this.atsAtiBtn.Size = new System.Drawing.Size(75, 23);
             this.atsAtiBtn.TabIndex = 13;
@@ -209,7 +210,7 @@
             // 
             // clearBtn
             // 
-            this.clearBtn.Location = new System.Drawing.Point(664, 628);
+            this.clearBtn.Location = new System.Drawing.Point(664, 713);
             this.clearBtn.Name = "clearBtn";
             this.clearBtn.Size = new System.Drawing.Size(68, 23);
             this.clearBtn.TabIndex = 16;
@@ -352,6 +353,7 @@
             // groupBox2
             // 
             this.groupBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.groupBox2.Controls.Add(this.sgnBtn);
             this.groupBox2.Controls.Add(this.btnRemoveAccount);
             this.groupBox2.Controls.Add(this.btnExpire);
             this.groupBox2.Controls.Add(this.btnClearCache);
@@ -359,9 +361,9 @@
             this.groupBox2.Controls.Add(this.atsAtiBtn);
             this.groupBox2.Controls.Add(this.atiBtn);
             this.groupBox2.Controls.Add(this.atsBtn);
-            this.groupBox2.Location = new System.Drawing.Point(5, 190);
+            this.groupBox2.Location = new System.Drawing.Point(5, 202);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(736, 70);
+            this.groupBox2.Size = new System.Drawing.Size(736, 130);
             this.groupBox2.TabIndex = 29;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Tests";
@@ -370,19 +372,29 @@
             // 
             this.groupBox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.groupBox3.Controls.Add(this.resultTbx);
-            this.groupBox3.Location = new System.Drawing.Point(5, 266);
+            this.groupBox3.Location = new System.Drawing.Point(5, 347);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(736, 356);
+            this.groupBox3.Size = new System.Drawing.Size(736, 360);
             this.groupBox3.TabIndex = 30;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Results";
+            // 
+            // sgnBtn
+            // 
+            this.sgnBtn.Location = new System.Drawing.Point(0, 19);
+            this.sgnBtn.Name = "sgnBtn";
+            this.sgnBtn.Size = new System.Drawing.Size(75, 23);
+            this.sgnBtn.TabIndex = 26;
+            this.sgnBtn.Text = "Sign In";
+            this.sgnBtn.UseVisualStyleBackColor = true;
+            this.sgnBtn.Click += new System.EventHandler(this.sgnBtn_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.ClientSize = new System.Drawing.Size(745, 663);
+            this.ClientSize = new System.Drawing.Size(745, 748);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.cbxListOsAccounts);
             this.Controls.Add(this.cbxBackgroundThread);
@@ -445,6 +457,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Button sgnBtn;
     }
 }
 

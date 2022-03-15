@@ -592,6 +592,38 @@ namespace NetDesktopWinForms
         {
 
         }
+
+        private async void sgnBtn_Click(object sender, EventArgs e)
+        {
+            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
+            string loginHint = GetLoginHint();
+            string clientId = GetClientId();
+            string authority = GetAuthority();
+            string scopes = GetScopes(); //            "profile mail.read";//"[\"profile\"]";//GetScopes();
+            IntPtr hwnd = this.Handle;
+
+            AuthResult result = null;
+
+            //Sign In
+            try
+            {
+                using (var core = new msalruntime.Core())
+                using (var authParams = new msalruntime.AuthParameters(clientId, authority))
+                {
+                    authParams.RequestedScopes = $"[\"{scopes}\"]";
+                    authParams.RedirectUri = "about:blank";
+
+                    using (result = await core.SignInAsync(hwnd, authParams, correlationId).ConfigureAwait(true))
+                    {
+                        await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (msalruntime.Exception ex)
+            {
+                await Log("Exception: " + ex).ConfigureAwait(false);
+            }
+        }
     }
 
     public class ClientEntry
