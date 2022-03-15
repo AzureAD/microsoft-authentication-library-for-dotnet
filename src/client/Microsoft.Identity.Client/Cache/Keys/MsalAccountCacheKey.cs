@@ -68,7 +68,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         public int iOSType => MsalCacheKeys.iOSAuthorityTypeToAttrType[_authorityType];
 
-
         #endregion
 
         #region Equals and GetHashCode

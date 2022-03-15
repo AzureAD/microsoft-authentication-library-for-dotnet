@@ -139,7 +139,6 @@ namespace Microsoft.Identity.Test.Unit
 
                 var builder = app.AcquireTokenForClient(TestConstants.s_scope);
 
-
                 if (requestFlag != null)
                 {
                     builder = builder.WithSendX5C(requestFlag.Value);
@@ -204,7 +203,6 @@ namespace Microsoft.Identity.Test.Unit
                 }
 
                 var builder = app.AcquireTokenForClient(TestConstants.s_scope);
-
 
                 if (requestFlag != null)
                 {

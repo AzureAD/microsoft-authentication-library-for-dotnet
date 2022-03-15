@@ -1037,7 +1037,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string StaticCacheWithExternalSerialization = "static_cache_with_external_serialization";
 
-
         /// <summary>
         /// <para>What happens?</para>You configured WithTenant at the request level, but the application is using a non-AAD authority
         /// These are mutually exclusive.

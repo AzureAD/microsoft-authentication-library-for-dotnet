@@ -17,7 +17,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             NetSetupDomainName
         }
 
-
         [DllImport("kernel32.dll")]
         public static extern uint GetCurrentProcessId();
 
@@ -71,7 +70,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 
         [DllImport("Netapi32.dll")]
         public static extern int NetApiBufferFree(IntPtr Buffer);
-
 
         [DllImport("user32.dll", EntryPoint = "GetDesktopWindow")]
         public static extern IntPtr GetDesktopWindow();

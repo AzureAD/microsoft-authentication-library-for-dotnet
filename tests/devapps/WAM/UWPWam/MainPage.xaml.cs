@@ -18,13 +18,14 @@ namespace UWP_standalone
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Async event handlers should not return task")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "Async event handlers should not return task")]
     public sealed partial class MainPage : Page
     {
         private static readonly string s_clientID = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
         private static readonly string s_authority = "https://login.microsoftonline.com/common/";
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
         private const string CacheFileName = "msal_user_cache.json";
-
 
         public MainPage()
         {
@@ -39,8 +40,6 @@ namespace UWP_standalone
             // the redirect URI
             string redirectUri = $"ms-appx-web://microsoft.aad.brokerplugin/{sid}";
         }
-
-
 
         private IPublicClientApplication CreatePublicClient()
         {
@@ -72,7 +71,6 @@ namespace UWP_standalone
 
             await DisplayResultAsync(result).ConfigureAwait(false);
         }
-
 
         private async void GetAccountsAsync(object sender, RoutedEventArgs e)
         {
@@ -161,7 +159,6 @@ namespace UWP_standalone
 
                 await DisplayResultAsync(result).ConfigureAwait(false);
 
-
             }
             catch (Exception ex)
             {
@@ -180,7 +177,6 @@ namespace UWP_standalone
         {
             await DisplayMessageAsync($"Signed in User - {result.Account.Username}\nAccess token from {result.AuthenticationResultMetadata.TokenSource}: \n{result.AccessToken}").ConfigureAwait(false);
         }
-
 
         private async Task DisplayMessageAsync(string message)
         {

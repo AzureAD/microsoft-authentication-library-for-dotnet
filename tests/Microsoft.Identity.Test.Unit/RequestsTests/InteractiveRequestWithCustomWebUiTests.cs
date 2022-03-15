@@ -117,7 +117,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         }).ConfigureAwait(false);
         }
 
-
         [TestMethod]
         public async Task TestInteractiveWithCustomWebUi_UnhandledExceptionAsync()
         {

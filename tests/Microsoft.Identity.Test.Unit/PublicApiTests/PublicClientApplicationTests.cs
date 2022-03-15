@@ -75,8 +75,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
         }
 
-
-
         [TestMethod]
         public async Task NoStateReturnedTestAsync()
         {
@@ -225,7 +223,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNull(userCacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey, "Don't suggest keys for public client");
                 Assert.IsNull(userCacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey, "Don't suggest keys for public client");
                 userCacheAccess.AssertAccessCounts(0, 1);
-
 
                 // repeat interactive call and pass in the same user
                 app.ServiceBundle.ConfigureMockWebUI();
@@ -667,7 +664,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(userToFind.Environment, acc.Environment);
         }
 
-
         [TestMethod]
         public async Task GetAccountByUserFlowTestsAsync()
         {
@@ -837,7 +833,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(TestConstants.ClientId)
                 .Build();
 
-
             await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
                app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), string.Empty).ExecuteAsync())
                 .ConfigureAwait(false);
@@ -882,7 +877,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 AssertTenantProfiles(tenantProfiles, tenant1, tenant2);
                 AssertTenantProfiles(response.Account.GetTenantProfiles(), tenant1, tenant2);
                 Assert.AreEqual(tenant1, response.ClaimsPrincipal.FindFirst("tid").Value);
-
 
                 // Act
                 accounts = await pca.GetAccountsAsync().ConfigureAwait(false);

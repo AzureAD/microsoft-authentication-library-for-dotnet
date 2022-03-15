@@ -51,13 +51,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .ConfigureAwait(false);
                 Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
 
-
                 var blockingTask = RunAsync(inMemoryTokenCache, app, true);
                 var nonBlockingTask1 = RunAsync(inMemoryTokenCache, app, false);
                 var nonBlockingTask2 = RunAsync(inMemoryTokenCache, app, false);
 
                 int res = Task.WaitAny(new[] { blockingTask, nonBlockingTask1, nonBlockingTask2 }, 100);
-
 
                 if (useCacheSyncronization)
                 {
@@ -84,7 +82,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public class BlockingCache
         {
             private byte[] _cacheData;
-
 
             public bool BlockAccess { get; set; } = false;
 

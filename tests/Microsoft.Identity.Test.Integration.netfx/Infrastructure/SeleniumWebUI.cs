@@ -142,7 +142,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
                 Trace.WriteLine($"After WhenAny: seleniumAutomationTask {seleniumAutomationTask.Status} listenForAuthCodeTask {listenForAuthCodeTask.Status}");
 
-
                 // No need to wait to post a nice message in the browser
                 if (authCodeUri != null)
                 {

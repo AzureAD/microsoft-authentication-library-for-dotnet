@@ -244,7 +244,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-
         /// <summary>
         /// Instructs MSAL.NET to use an Azure regional token service.
         /// </summary>
@@ -276,7 +275,6 @@ namespace Microsoft.Identity.Client
 
             return this;
         }
-
 
         /// <summary>
         /// When set to <c>true</c>, MSAL will lock cache access at the <see cref="ConfidentialClientApplication"/> level, i.e.

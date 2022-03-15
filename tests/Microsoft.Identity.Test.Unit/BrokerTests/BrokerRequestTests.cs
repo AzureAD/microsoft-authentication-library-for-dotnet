@@ -338,7 +338,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
-
                 // Act
                 var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
 
@@ -366,7 +365,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var app = builder.WithBroker(true).BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
-
 
                 // Act
                 var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
@@ -478,7 +476,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
-
             // Act
             var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
 
@@ -487,7 +484,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public void PCAWithBrokerAndWithMultiCloudSupportThrowsTestAsync()
+        public void PCAWithBrokerAndWithMultiCloudSupportThrowsTest()
         {
             var ex = Assert.ThrowsException<NotSupportedException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
@@ -825,6 +822,5 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             return harness;
         }
     }
-
 
 }

@@ -19,7 +19,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]

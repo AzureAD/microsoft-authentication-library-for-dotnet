@@ -226,7 +226,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     cache,
                     account: TestConstants.s_user);
 
-
                 var item = cache.FindAccessTokenAsync(param).Result;
 
                 if (expectFind == true)
@@ -294,7 +293,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 (at.CachedAt + TimeSpan.FromSeconds(1800)),
                 TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
         }
-
 
         [TestMethod]
         public void AccessToken_WithKidAndType_FromMsalResponseJson()
@@ -1129,8 +1127,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 serviceBundle,
                 Authority.CreateAuthority(TestConstants.AuthorityHomeTenant));
 
-
-
             AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefNetworkEnvironment);
 
             await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
@@ -1154,7 +1150,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual("refresh-token-2", (cache.Accessor.GetAllRefreshTokens()).First().Secret);
         }
-
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
@@ -1338,12 +1333,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     expectedResult: true, // checks for familyId "1"
                     errMessage: "Valid app metadata, should return true because family Id matches");
 
-
                 ValidateIsFociMember(cache, requestParams,
                     metadataFamilyId: "2",
                     expectedResult: false, // checks for familyId "1"
                     errMessage: "Valid app metadata, should return false because family Id does not match");
-
 
                 ValidateIsFociMember(cache, requestParams,
                     metadataFamilyId: null,

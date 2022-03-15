@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Test.Common
 
         public const string Regression = "Regression";
 
-
         public const string Arlington = "Arlington";
     }
 }

@@ -50,20 +50,19 @@ namespace Microsoft.Identity.Json.Utilities
             return cancellationToken.IsCancellationRequested ? FromCanceled<T>(cancellationToken) : null;
         }
 
-
         // From 4.6 on we could use Task.FromCanceled(), but we need an equivalent for
         // previous frameworks.
-#pragma warning disable UseAsyncSuffix // Use Async suffix
+#pragma warning disable VSTHRD200 // Use "Async" suffix for async methods
         public static Task FromCanceled(this CancellationToken cancellationToken)
-#pragma warning restore UseAsyncSuffix // Use Async suffix
+#pragma warning restore VSTHRD200 // Use "Async" suffix for async methods
         {
             Debug.Assert(cancellationToken.IsCancellationRequested);
             return new Task(() => {}, cancellationToken);
         }
 
-#pragma warning disable UseAsyncSuffix // Use Async suffix
+#pragma warning disable VSTHRD200 // Use "Async" suffix for async methods
         public static Task<T> FromCanceled<T>(this CancellationToken cancellationToken)
-#pragma warning restore UseAsyncSuffix // Use Async suffix
+#pragma warning restore VSTHRD200 // Use "Async" suffix for async methods
         {
             Debug.Assert(cancellationToken.IsCancellationRequested);
             return new Task<T>(() => default, cancellationToken);

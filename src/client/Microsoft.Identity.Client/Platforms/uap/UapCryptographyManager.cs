@@ -66,7 +66,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return hashed?.ToArray();
         }
 
-
         /// <inheritdoc />
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
