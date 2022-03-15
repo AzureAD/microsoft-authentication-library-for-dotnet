@@ -40,5 +40,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             bool isConsumerTenant = string.Equals(webAccountProvider.Authority, "consumers", StringComparison.OrdinalIgnoreCase);
             return isConsumerTenant;
         }
-    }
+
+        public bool IsOrganizationsProvider(WebAccountProvider webAccountProvider)
+        {
+            bool isOrganizations = string.Equals(webAccountProvider.Authority, "organizations", StringComparison.OrdinalIgnoreCase);
+            return isOrganizations;
+        }
+    }    
 }
