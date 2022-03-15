@@ -185,7 +185,7 @@ namespace NetDesktopWinForms
                     authParams.RequestedScopes = $"[\"{scopes}\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(true))
+                    using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false))
                     {
                         await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                     }
@@ -349,7 +349,7 @@ namespace NetDesktopWinForms
                     authParams.RequestedScopes = $"[\"{scopes}\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    using (result = await core.SignInInteractivelyAsync(this.Handle, authParams, correlationId).ConfigureAwait(true))
+                    using (result = await core.SignInInteractivelyAsync(this.Handle, authParams, correlationId).ConfigureAwait(false))
                     {
                         await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                     }
@@ -442,6 +442,39 @@ namespace NetDesktopWinForms
                      Environment.NewLine,
                     accounts.Select(acc => $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId}"));
             await Log(msg).ConfigureAwait(false);
+        }
+
+        private async Task ReadAccountsAsync()
+        {
+            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
+            string loginHint = GetLoginHint();
+            string clientId = GetClientId();
+            string authority = GetAuthority();
+            string scopes = GetScopes(); 
+            string accountId = "idlab@msidlab4.onmicrosoft.com";
+
+            Account result = null;
+
+            //Read Accounts
+            try
+            {
+                using (var core = new msalruntime.Core())
+                using (var authParams = new msalruntime.AuthParameters(clientId, authority))
+                {
+                    authParams.RequestedScopes = $"[\"{scopes}\"]";
+                    authParams.RedirectUri = "about:blank";
+
+                    using (result = await core.ReadAccountByIdAsync(accountId, correlationId).ConfigureAwait(false))
+                    {
+                        //await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (msalruntime.Exception ex)
+            {
+                await Log("Exception: " + ex).ConfigureAwait(false);
+            }
+
         }
 
         private async void atsAtiBtn_Click(object sender, EventArgs e)
@@ -613,7 +646,7 @@ namespace NetDesktopWinForms
                     authParams.RequestedScopes = $"[\"{scopes}\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    using (result = await core.SignInAsync(hwnd, authParams, correlationId).ConfigureAwait(true))
+                    using (result = await core.SignInAsync(hwnd, authParams, correlationId).ConfigureAwait(false))
                     {
                         await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                     }
@@ -623,6 +656,11 @@ namespace NetDesktopWinForms
             {
                 await Log("Exception: " + ex).ConfigureAwait(false);
             }
+        }
+
+        private async void readBtn_Click(object sender, EventArgs e)
+        {
+            await ReadAccountsAsync().ConfigureAwait(false);
         }
     }
 

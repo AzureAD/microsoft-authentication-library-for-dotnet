@@ -59,6 +59,7 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.sgnBtn = new System.Windows.Forms.Button();
+            this.readBtn = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -200,9 +201,9 @@
             // 
             // accBtn
             // 
-            this.accBtn.Location = new System.Drawing.Point(424, 19);
+            this.accBtn.Location = new System.Drawing.Point(406, 19);
             this.accBtn.Name = "accBtn";
-            this.accBtn.Size = new System.Drawing.Size(80, 23);
+            this.accBtn.Size = new System.Drawing.Size(93, 23);
             this.accBtn.TabIndex = 15;
             this.accBtn.Text = "Get Accounts";
             this.accBtn.UseVisualStyleBackColor = true;
@@ -220,7 +221,7 @@
             // 
             // btnClearCache
             // 
-            this.btnClearCache.Location = new System.Drawing.Point(619, 34);
+            this.btnClearCache.Location = new System.Drawing.Point(619, 70);
             this.btnClearCache.Name = "btnClearCache";
             this.btnClearCache.Size = new System.Drawing.Size(108, 23);
             this.btnClearCache.TabIndex = 17;
@@ -298,7 +299,7 @@
             // 
             // btnExpire
             // 
-            this.btnExpire.Location = new System.Drawing.Point(619, 5);
+            this.btnExpire.Location = new System.Drawing.Point(619, 19);
             this.btnExpire.Name = "btnExpire";
             this.btnExpire.Size = new System.Drawing.Size(108, 23);
             this.btnExpire.TabIndex = 24;
@@ -310,7 +311,7 @@
             // 
             this.btnRemoveAccount.Location = new System.Drawing.Point(511, 19);
             this.btnRemoveAccount.Name = "btnRemoveAccount";
-            this.btnRemoveAccount.Size = new System.Drawing.Size(89, 23);
+            this.btnRemoveAccount.Size = new System.Drawing.Size(92, 23);
             this.btnRemoveAccount.TabIndex = 25;
             this.btnRemoveAccount.Text = "Remove Acc";
             this.btnRemoveAccount.UseVisualStyleBackColor = true;
@@ -353,6 +354,7 @@
             // groupBox2
             // 
             this.groupBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.groupBox2.Controls.Add(this.readBtn);
             this.groupBox2.Controls.Add(this.sgnBtn);
             this.groupBox2.Controls.Add(this.btnRemoveAccount);
             this.groupBox2.Controls.Add(this.btnExpire);
@@ -388,6 +390,16 @@
             this.sgnBtn.Text = "Sign In";
             this.sgnBtn.UseVisualStyleBackColor = true;
             this.sgnBtn.Click += new System.EventHandler(this.sgnBtn_Click);
+            // 
+            // readBtn
+            // 
+            this.readBtn.Location = new System.Drawing.Point(406, 70);
+            this.readBtn.Name = "readBtn";
+            this.readBtn.Size = new System.Drawing.Size(93, 23);
+            this.readBtn.TabIndex = 27;
+            this.readBtn.Text = "Read Accounts";
+            this.readBtn.UseVisualStyleBackColor = true;
+            this.readBtn.Click += new System.EventHandler(this.readBtn_Click);
             // 
             // Form1
             // 
@@ -458,6 +470,7 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Button sgnBtn;
+        private System.Windows.Forms.Button readBtn;
     }
 }
 
