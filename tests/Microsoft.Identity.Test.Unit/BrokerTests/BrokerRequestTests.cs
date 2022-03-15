@@ -43,7 +43,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private AcquireTokenSilentParameters _acquireTokenSilentParameters;
         private HttpResponse _brokerHttpResponse;
 
-
         [TestMethod]
         public void BrokerResponseTest()
         {
@@ -696,6 +695,56 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 }
 
                 Assert.Fail("Wrong Exception thrown. ");
+            }
+        }
+
+        [TestMethod]
+        public void InteractiveStrategy_ProtectionPolicyNotEnabled_Throws_Exception()
+        {
+            ProtectionPolicyNotEnabled_Throws_Exception_Common((msalToken) =>
+            {
+                _brokerInteractiveRequest.ValidateResponseFromBroker(msalToken);
+            });
+        }
+
+        [TestMethod]
+        public void SilentStrategy_ProtectionPolicyNotEnabled_Throws_Exception()
+        {
+            ProtectionPolicyNotEnabled_Throws_Exception_Common((msalToken) =>
+            {
+                _brokerSilentAuthStrategy.ValidateResponseFromBroker(msalToken);
+            });
+        }
+
+        private void ProtectionPolicyNotEnabled_Throws_Exception_Common(Action<MsalTokenResponse> action)
+        {
+            using (var harness = CreateBrokerHelper())
+            {
+                try
+                {
+                    // Arrange
+                    MsalTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
+                    msalTokenResponse.SubError = BrokerResponseConst.AndroidProtectionPolicyRequired;
+                    msalTokenResponse.TenantId = TestConstants.TenantId;
+                    msalTokenResponse.Upn = TestConstants.Username;
+                    msalTokenResponse.AccountUserId = TestConstants.LocalAccountId;
+                    msalTokenResponse.AuthorityUrl = TestConstants.AuthorityUtid2Tenant;
+
+                    // Act
+                    action(msalTokenResponse);
+                }
+                catch (MsalServiceException ex) // Since IntuneAppProtectionPolicyRequiredException is throw only on Android and iOS platforms, this is the workaround
+                {
+                    // Assert
+                    Assert.AreEqual(BrokerResponseConst.AndroidUnauthorizedClient, ex.ErrorCode);
+                    Assert.AreEqual(BrokerResponseConst.AndroidProtectionPolicyRequired, ex.SubError);
+
+                    return;
+                }
+                catch(Exception ex)
+                {
+                    Assert.Fail($"Wrong Exception thrown {ex.Message}.");
+                }
             }
         }
 

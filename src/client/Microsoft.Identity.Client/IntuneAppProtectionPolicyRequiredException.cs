@@ -15,6 +15,21 @@ namespace Microsoft.Identity.Client
         public string Upn { get; set; }
 
         /// <summary>
+        /// Local account id
+        /// </summary>
+        public string AccountUserId { get; set; }
+
+        /// <summary>
+        /// Tenant ID of the App
+        /// </summary>
+        public string TenantId { get; set; }
+
+        /// <summary>
+        /// Authority URL
+        /// </summary>
+        public string AuthorityUrl { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code and error message.
         /// </summary>
