@@ -36,6 +36,23 @@ namespace NetDesktopWinForms
             new ClientEntry() { Id = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0", Name = "msidlab4.com" }
         };
 
+        private static List<Authority> s_authority = new List<Authority>()
+        {
+            new Authority() { Id = "https://login.microsoftonline.com/organizations", Endpoint = "https://login.microsoftonline.com/organizations (ORG)"},
+            new Authority() { Id = "https://login.microsoftonline.com/consumers", Endpoint = "https://login.microsoftonline.com/consumers (Consumers)"},
+            new Authority() { Id = "https://login.microsoftonline.com/common", Endpoint = "https://login.microsoftonline.com/common (Common)"},
+            new Authority() { Id = "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", Endpoint = "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca (Lab 4)"},
+            new Authority() { Id = "https://login.microsoftonline.com/61411618-6f67-4fc5-ba6a-4a0fe32d4eec", Endpoint = "https://login.microsoftonline.com/61411618-6f67-4fc5-ba6a-4a0fe32d4eec (MSA-PT)"},
+            new Authority() { Id = "https://login.microsoftonline.com/49f548d0-12b7-4169-a390-bb5304d24462", Endpoint = "https://login.microsoftonline.com/49f548d0-12b7-4169-a390-bb5304d24462"},
+            new Authority() { Id = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47", Endpoint = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47 (MS PROD)"},
+            new Authority() { Id = "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a", Endpoint = "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a"},
+            new Authority() { Id = "https://login.windows-ppe.net/organizations", Endpoint = "https://login.windows-ppe.net/organizations (PPE-ORG)"},
+            new Authority() { Id = "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47", Endpoint = "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47 (MSA-PPE)"},
+            new Authority() { Id = "https://login.partner.microsoftonline.cn/organizations", Endpoint = "https://login.partner.microsoftonline.cn/organizations (Mooncake)"},
+            new Authority() { Id = "https://login.microsoftonline.us/organizations", Endpoint = "https://login.microsoftonline.us/organizations (Arlington)"},
+           
+        };
+
         private BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
         private static IAccount s_nullAccount = new NullAccount();
         private static AccountModel s_nullAccountModel = new AccountModel(s_nullAccount, "");
@@ -51,6 +68,14 @@ namespace NetDesktopWinForms
 
             clientIdCbx.DisplayMember = "Name";
             clientIdCbx.ValueMember = "Id";
+
+            var authorityBindingSource = new BindingSource();
+            clientIdBindingSource.DataSource = s_authority;
+
+            authorityCbx.DataSource = clientIdBindingSource.DataSource;
+
+            authorityCbx.DisplayMember = "Endpoint";
+            authorityCbx.ValueMember = "Id";
 
             //var accountBidingSource = new BindingSource();
             //accountBidingSource.DataSource = s_accounts;
@@ -185,7 +210,7 @@ namespace NetDesktopWinForms
                     authParams.RequestedScopes = $"[\"{scopes}\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false))
+                    using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(true))
                     {
                         await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                     }
@@ -226,7 +251,7 @@ namespace NetDesktopWinForms
 
             authorityCbx.Invoke((MethodInvoker)delegate
             {
-                authority = this.authorityCbx.Text;
+                authority = (this.authorityCbx.SelectedItem as Authority)?.Id ?? this.authorityCbx.Text;
             });
 
             return authority;
@@ -549,8 +574,8 @@ namespace NetDesktopWinForms
 
             if (clientEntry.Id == "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0") // MSIDLAB
             {
-                cbxScopes.SelectedItem = "profile";
-                authorityCbx.SelectedItem = "https://login.microsoftonline.com/common";
+                cbxScopes.SelectedItem = "https://graph.microsoft.com/.default";
+                authorityCbx.SelectedItem = "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
             }
 
             if (clientEntry.Id == "872cd9fa-d31f-45e0-9eab-6e460a02d1f1") // VS
@@ -667,6 +692,12 @@ namespace NetDesktopWinForms
     public class ClientEntry
     {
         public string Name { get; set; }
+        public string Id { get; set; }
+    }
+
+    public class Authority
+    {
+        public string Endpoint { get; set; }
         public string Id { get; set; }
     }
 
