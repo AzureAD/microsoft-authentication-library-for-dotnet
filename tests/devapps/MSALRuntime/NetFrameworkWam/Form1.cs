@@ -24,6 +24,8 @@ namespace NetDesktopWinForms
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
 
+        private static string CorrelationID = "5819031d-ab63-42fc-a9fa-69ac7b1f7397";
+
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
             new ClientEntry() { Id = "04f0c124-f2bc-4f59-8241-bf6df9866bbd", Name = "04f0c124-f2bc-4f59-8241-bf6df9866bbd (new VS)"},
@@ -53,7 +55,12 @@ namespace NetDesktopWinForms
            
         };
 
-        private BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
+        private static List<RuntimeAccount> s_accounts = new List<RuntimeAccount>()
+        {
+            new RuntimeAccount() { Id = "9f4880d8-80ba-4c40-97bc-f7a23c703084", Name = "9f4880d8-80ba-4c40-97bc-f7a23c703084 (idlab@msidlab4)"},
+        };
+
+        //private BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
         private static IAccount s_nullAccount = new NullAccount();
         private static AccountModel s_nullAccountModel = new AccountModel(s_nullAccount, "");
         private static AccountModel s_osAccountModel = new AccountModel(PublicClientApplication.OperatingSystemAccount, "Default OS Account");
@@ -77,16 +84,16 @@ namespace NetDesktopWinForms
             authorityCbx.DisplayMember = "Endpoint";
             authorityCbx.ValueMember = "Id";
 
-            //var accountBidingSource = new BindingSource();
-            //accountBidingSource.DataSource = s_accounts;
+            var accountBidingSource = new BindingSource();
+            accountBidingSource.DataSource = s_accounts;
 
-            s_accounts.Add(s_nullAccountModel);
-            s_accounts.Add(s_osAccountModel);
+            //s_accounts.Add(s_nullAccountModel); 
+            //s_accounts.Add(s_osAccountModel); 
 
             cbxAccount.DataSource = s_accounts;
 
-            cbxAccount.DisplayMember = "DisplayValue";
-            cbxAccount.SelectedItem = null;
+            cbxAccount.DisplayMember = "Name";
+            cbxAccount.SelectedItem = "Id";
 
             _syncContext = SynchronizationContext.Current;
         }
@@ -94,7 +101,10 @@ namespace NetDesktopWinForms
         public static readonly string UserCacheFile =
             System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.user.json";
 
-
+        /// <summary>
+        /// Not using PCA for MSALRuntime. Calling directly into the Interop 
+        /// </summary>
+        /// <returns></returns>
         private IPublicClientApplication CreatePca()
         {
             string clientId = GetClientId();
@@ -159,22 +169,32 @@ namespace NetDesktopWinForms
 
         private async Task RunAtsAsync()
         {
-            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
             string loginHint = GetLoginHint();
-            string scopes = "profile mail.read";//"[\"profile\"]";//GetScopes();
+            string scopes = GetScopes();
+            string accountId = GetAccounts();
+            string authority = GetAuthority();
+            string clientId = GetClientId();
+
+            Account account = null;
 
             AuthResult result = null;
+
+            await Log($"Authority : " + authority).ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(accountId))
+            {
+                throw new InvalidOperationException("[TEST APP FAILURE] Account must be selected for Acquire Token Silent Calls");
+            }
 
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
             {
                 throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account");
             }
 
-            if (!string.IsNullOrEmpty(loginHint))
+            if (!string.IsNullOrEmpty(loginHint)) //No login hint in MSALRuntime
             {
-                if (IsMsaPassthroughConfigured())
+                if (IsMsaPassthroughConfigured()) //No MSA-PT in MSALRuntime
                 {
-                    // TODO: bogavril - move this exception in WAM
                     throw new InvalidOperationException(
                         "[TEST APP FAILURE] Do not use login hint on AcquireTokenSilent for MSA-Passthrough. Use the IAccount overload.");
                 }
@@ -184,12 +204,13 @@ namespace NetDesktopWinForms
                 try
                 {
                     using (var core = new msalruntime.Core())
-                    using (var authParams = new msalruntime.AuthParameters("26a7ee05-5602-4d76-a7ba-eae8b7b67941", "https://login.microsoftonline.com/common"))
+                    using (var authParams = new msalruntime.AuthParameters(clientId, authority))
                     {
                         authParams.RequestedScopes = $"[\"{scopes}\"]";
                         authParams.RedirectUri = "about:blank";
 
-                        using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(false))
+                        using (account = await core.ReadAccountByIdAsync(accountId, CorrelationID).ConfigureAwait(true))
+                        using (result = await core.AcquireTokenSilentlyAsync(authParams, CorrelationID, account).ConfigureAwait(true))
                         {
                             await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                         }
@@ -205,12 +226,13 @@ namespace NetDesktopWinForms
             try
             {
                 using (var core = new msalruntime.Core())
-                using (var authParams = new msalruntime.AuthParameters("26a7ee05-5602-4d76-a7ba-eae8b7b67941", "https://login.microsoftonline.com/common"))
+                using (var authParams = new msalruntime.AuthParameters(clientId, authority))
                 {
                     authParams.RequestedScopes = $"[\"{scopes}\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(true))
+                    using (account = await core.ReadAccountByIdAsync(accountId, CorrelationID).ConfigureAwait(true))
+                    using (result = await core.AcquireTokenSilentlyAsync(authParams, CorrelationID, account).ConfigureAwait(true))
                     {
                         await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                     }
@@ -243,6 +265,18 @@ namespace NetDesktopWinForms
             });
 
             return clientId;
+        }
+
+        private string GetAccounts()
+        {
+            string accountId = null;
+
+            clientIdCbx.Invoke((MethodInvoker)delegate
+            {
+                accountId = (this.cbxAccount.SelectedItem as RuntimeAccount)?.Id ?? this.cbxAccount.Text;
+            });
+
+            return accountId;
         }
 
         private string GetAuthority()
@@ -331,10 +365,11 @@ namespace NetDesktopWinForms
 
         private async Task RunAtiAsync()
         {
-            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
             string loginHint = GetLoginHint();
             string clientId = GetClientId();
             string authority = GetAuthority();
+            string accountId = GetAccounts();
+            Account account = null;
 
             IntPtr hWnd = this.Handle;
 
@@ -350,6 +385,11 @@ namespace NetDesktopWinForms
             if (prompt.HasValue)
             {
                 await Log($"ATI Prompt has Value  {prompt.Value}").ConfigureAwait(false);
+            }
+
+            if (string.IsNullOrEmpty(accountId))
+            {
+                throw new InvalidOperationException("[TEST APP FAILURE] Please select an account from the Account Provider for ATI");
             }
 
             if (!string.IsNullOrEmpty(loginHint))
@@ -374,7 +414,8 @@ namespace NetDesktopWinForms
                     authParams.RequestedScopes = $"[\"{scopes}\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    using (result = await core.SignInInteractivelyAsync(this.Handle, authParams, correlationId).ConfigureAwait(false))
+                    using (account = await core.ReadAccountByIdAsync(accountId, CorrelationID).ConfigureAwait(true))
+                    using (result = await core.AcquireTokenInteractivelyAsync( this.Handle, authParams, CorrelationID, account).ConfigureAwait(false))
                     {
                         await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                     }
@@ -450,23 +491,23 @@ namespace NetDesktopWinForms
 
         private async Task RefreshAccountsAsync()
         {
-            var pca = CreatePca();
-            var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
+            //var pca = CreatePca();
+            //var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
 
-            s_accounts.Clear();
-            s_accounts.Add(s_nullAccountModel);
-            s_accounts.Add(s_osAccountModel);
+            //s_accounts.Clear();
+            //s_accounts.Add(s_nullAccountModel);
+            //s_accounts.Add(s_osAccountModel);
 
-            foreach (var acc in accounts)
-            {
-                s_accounts.Add(new AccountModel(acc));
-            }
+            //foreach (var acc in accounts)
+            //{
+            //    s_accounts.Add(new AccountModel(acc));
+            //}
 
-            string msg = "Accounts " + Environment.NewLine +
-                string.Join(
-                     Environment.NewLine,
-                    accounts.Select(acc => $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId}"));
-            await Log(msg).ConfigureAwait(false);
+            //string msg = "Accounts " + Environment.NewLine +
+            //    string.Join(
+            //         Environment.NewLine,
+            //        accounts.Select(acc => $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId}"));
+            //await Log(msg).ConfigureAwait(false);
         }
 
         private async Task ReadAccountsAsync()
@@ -475,10 +516,16 @@ namespace NetDesktopWinForms
             string loginHint = GetLoginHint();
             string clientId = GetClientId();
             string authority = GetAuthority();
-            string scopes = GetScopes(); 
-            string accountId = "idlab@msidlab4.onmicrosoft.com";
+            string scopes = GetScopes();
+            string accountId = GetAccounts();
+            ;
 
             Account result = null;
+
+            if (string.IsNullOrEmpty(accountId))
+            {
+                throw new InvalidOperationException("[TEST APP FAILURE] Please select an account from the Account Provider");
+            }
 
             //Read Accounts
             try
@@ -491,7 +538,7 @@ namespace NetDesktopWinForms
 
                     using (result = await core.ReadAccountByIdAsync(accountId, correlationId).ConfigureAwait(false))
                     {
-                        //await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+                        await Log(string.Format("Results : Account ID - {0}. Client Info : {1}", result.Id, result.ClientInfo)).ConfigureAwait(false);
                     }
                 }
             }
@@ -504,12 +551,14 @@ namespace NetDesktopWinForms
 
         private async void atsAtiBtn_Click(object sender, EventArgs e)
         {
-            const string correlationId = "1c4c45ab-4dfc-4891-ad98-cdc13ce265fb";
             string loginHint = GetLoginHint();
             string clientId = GetClientId();
             string authority = GetAuthority();
-            string scopes = GetScopes(); //            "profile mail.read";//"[\"profile\"]";//GetScopes();
+            string scopes = GetScopes();
+            string accountId = GetAccounts();
+
             AuthResult result = null;
+            Account account = null;
 
             //Acquire Token Silently 
             try
@@ -520,7 +569,8 @@ namespace NetDesktopWinForms
                     authParams.RequestedScopes = $"[\"{scopes}\"]";
                     authParams.RedirectUri = "about:blank";
 
-                    using (result = await core.SignInSilentlyAsync(authParams, correlationId).ConfigureAwait(true))
+                    using (account = await core.ReadAccountByIdAsync(accountId, CorrelationID).ConfigureAwait(true))
+                    using (result = await core.AcquireTokenSilentlyAsync(authParams, CorrelationID, account).ConfigureAwait(true))
                     {
                         await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                     }
@@ -536,7 +586,8 @@ namespace NetDesktopWinForms
                         authParams.RequestedScopes = $"[\"{scopes}\"]";
                         authParams.RedirectUri = "about:blank";
 
-                        using (result = await core.SignInInteractivelyAsync(this.Handle, authParams, correlationId).ConfigureAwait(false))
+                        using (account = await core.ReadAccountByIdAsync(accountId, CorrelationID).ConfigureAwait(true))
+                        using (result = await core.AcquireTokenInteractivelyAsync(this.Handle, authParams, CorrelationID, account).ConfigureAwait(true))
                         {
                             await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                         }
@@ -558,11 +609,12 @@ namespace NetDesktopWinForms
         private async void btnClearCache_Click(object sender, EventArgs e)
         {
             await Log("Clearing the cache ...").ConfigureAwait(false);
-            var pca = CreatePca();
-            foreach (var acc in (await pca.GetAccountsAsync().ConfigureAwait(false)))
-            {
-                await pca.RemoveAsync(acc).ConfigureAwait(false);
-            }
+
+            //var pca = CreatePca();
+            //foreach (var acc in (await pca.GetAccountsAsync().ConfigureAwait(false)))
+            //{
+            //    await pca.RemoveAsync(acc).ConfigureAwait(false);
+            //}
 
             await Log("Done clearing the cache.").ConfigureAwait(false);
         }
@@ -607,19 +659,19 @@ namespace NetDesktopWinForms
         {
             await Log("Expiring tokens.").ConfigureAwait(false);
 
-            var pca = CreatePca();
+            //var pca = CreatePca();
 
-            // do something that loads the cache first
-            await pca.GetAccountsAsync().ConfigureAwait(false);
+            //// do something that loads the cache first
+            //await pca.GetAccountsAsync().ConfigureAwait(false);
 
-            var m = pca.UserTokenCache.GetType().GetRuntimeMethods().Where(n => n.Name == "ExpireAllAccessTokensForTestAsync");
+            //var m = pca.UserTokenCache.GetType().GetRuntimeMethods().Where(n => n.Name == "ExpireAllAccessTokensForTestAsync");
 
-            var task = pca.UserTokenCache.GetType()
-                .GetRuntimeMethods()
-                .Single(n => n.Name == "ExpireAllAccessTokensForTestAsync")
-                .Invoke(pca.UserTokenCache, null);
+            //var task = pca.UserTokenCache.GetType()
+            //    .GetRuntimeMethods()
+            //    .Single(n => n.Name == "ExpireAllAccessTokensForTestAsync")
+            //    .Invoke(pca.UserTokenCache, null);
 
-            await (task as Task).ConfigureAwait(false);
+            //await (task as Task).ConfigureAwait(false);
            
             await Log("Done expiring tokens.").ConfigureAwait(false);
         }
@@ -633,10 +685,10 @@ namespace NetDesktopWinForms
                     throw new InvalidOperationException("[TEST APP FAILURE] Please select an account");
                 }
 
-                var pca = CreatePca();
+                //var pca = CreatePca();
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
-                await pca.RemoveAsync(acc).ConfigureAwait(false);
+                //await pca.RemoveAsync(acc).ConfigureAwait(false);
 
                 await Log("Removed account " + acc.Username).ConfigureAwait(false);
             }
@@ -698,6 +750,12 @@ namespace NetDesktopWinForms
     public class Authority
     {
         public string Endpoint { get; set; }
+        public string Id { get; set; }
+    }
+
+    public class RuntimeAccount
+    {
+        public string Name { get; set; }
         public string Id { get; set; }
     }
 
