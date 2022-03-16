@@ -34,14 +34,14 @@ namespace Intune_xamarin_Android
         /// </summary>
         private const string _authority = "https://login.microsoftonline.com/organizations";
 
-        // ClientID of the application
-        private static string _clientID = "6d50af5d-2529-4ff4-912f-c1d6ad06953e"; // TODO - Replace with your client Id. And also replace in the AndroidManifest.xml
+        // ClientID of the application in (msidlab4.com)
+        private static string _clientID = "bd9933c9-a825-4f9a-82a0-bbf23c9049fd"; // TODO - Replace with your client Id. And also replace in the AndroidManifest.xml
 
         // redirect URI for the application
         private static string _redirectURI = $"msauth://com.sameerk.intune.test.xamarin/EHyvOdXj4uLXJXDaOMy5lwANmp0="; // TODO - Replace with your redirectURI
 
-        // TenantID of your organization
-        private static string _tenantID = "7257a09f-53cc-4a91-aca8-0cb6713642a5"; // TODO - Replace with your TenantID. And also replace in the AndroidManifest.xml
+        // TenantID of the organization (msidlab4.com)
+        private static string _tenantID = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca"; // TODO - Replace with your TenantID. And also replace in the AndroidManifest.xml
 
         static string[] clientCapabilities = { "ProtApp" }; // It is must to have these capabilities
 
