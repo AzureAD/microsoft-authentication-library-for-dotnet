@@ -26,7 +26,8 @@ namespace Microsoft.Identity.Client
           string suggestedCacheKey,
           bool hasTokens,
           DateTimeOffset? suggestedCacheExpiry,
-          CancellationToken cancellationToken)
+          CancellationToken cancellationToken,
+          ICoreLogger msalLogger)
             : this(tokenCache,
                    clientId,
                    account,
@@ -36,7 +37,8 @@ namespace Microsoft.Identity.Client
                    hasTokens,
                    suggestedCacheExpiry,
                    cancellationToken,
-                   default)
+                   default,
+                   msalLogger)
             {
             }
 
@@ -53,7 +55,8 @@ namespace Microsoft.Identity.Client
             bool hasTokens,
             DateTimeOffset? suggestedCacheExpiry,
             CancellationToken cancellationToken,
-            Guid correlationId)
+            Guid correlationId,
+            ICoreLogger msalLogger)
         {
             TokenCache = tokenCache;
             ClientId = clientId;
@@ -65,6 +68,7 @@ namespace Microsoft.Identity.Client
             CancellationToken = cancellationToken;
             CorrelationId = correlationId;
             SuggestedCacheExpiry = suggestedCacheExpiry;
+            MsalLogger = msalLogger;
         }
         
         /// <summary>
@@ -142,5 +146,10 @@ namespace Microsoft.Identity.Client
         /// access tokens are refreshable.
         /// </summary> 
         public DateTimeOffset? SuggestedCacheExpiry { get; private set; }
+
+        /// <summary>
+        /// Logger to be used to log important information during cahcing operations.
+        /// </summary>
+        public ICoreLogger MsalLogger { get; }
     }
 }

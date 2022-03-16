@@ -3,10 +3,7 @@
 
 using System;
 using System.Globalization;
-using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
@@ -16,7 +13,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
     {
         private readonly IPlatformLogger _platformLogger;
         private readonly LogCallback _loggingCallback;
-        private readonly Func<LogLevel> _logLevelCallback;
         private readonly LogLevel _minLogLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
         private static readonly Lazy<ICoreLogger> s_nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
@@ -36,13 +32,20 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     : " - " + correlationId;
             PiiLoggingEnabled = enablePiiLogging;
             _loggingCallback = loggingCallback;
-            _minLogLevel = logLevel;
+
+            if (logLevelCallback != null)
+            {
+                _minLogLevel = logLevelCallback.Invoke();
+            }
+            else
+            {
+                _minLogLevel = logLevel;
+            }
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
 
             _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
             ClientName = clientName ?? string.Empty;
             ClientVersion = clientVersion ?? string.Empty;
-            _logLevelCallback = logLevelCallback ?? null;
 
             ClientInformation = string.Empty;
             if (!string.IsNullOrEmpty(clientName) && !ApplicationConfiguration.DefaultClientName.Equals(clientName))
@@ -86,85 +89,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         internal string ClientInformation { get; }
 
-        public void Info(string messageScrubbed)
-        {
-            Log(LogLevel.Info, string.Empty, messageScrubbed);
-        }
-
-        public void InfoPii(string messageWithPii, string messageScrubbed)
-        {
-            Log(LogLevel.Info, messageWithPii, messageScrubbed);
-        }
-
-        public void InfoPii(Exception exWithPii)
-        {
-            Log(LogLevel.Info, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
-        }
-
-        public void InfoPiiWithPrefix(Exception exWithPii, string prefix)
-        {
-            Log(LogLevel.Info, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
-        }
-
-        public void Verbose(string messageScrubbed)
-        {
-            Log(LogLevel.Verbose, string.Empty, messageScrubbed);
-        }
-
-        public void VerbosePii(string messageWithPii, string messageScrubbed)
-        {
-            Log(LogLevel.Verbose, messageWithPii, messageScrubbed);
-        }
-
-        public void Warning(string messageScrubbed)
-        {
-            Log(LogLevel.Warning, string.Empty, messageScrubbed);
-        }
-
-        public void WarningPii(string messageWithPii, string messageScrubbed)
-        {
-            Log(LogLevel.Warning, messageWithPii, messageScrubbed);
-        }
-
-        public void WarningPii(Exception exWithPii)
-        {
-            Log(LogLevel.Warning, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
-        }
-
-        public void WarningPiiWithPrefix(Exception exWithPii, string prefix)
-        {
-            Log(LogLevel.Warning, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
-        }
-
-        public void Error(string messageScrubbed)
-        {
-            Log(LogLevel.Error, string.Empty, messageScrubbed);
-        }
-
-        public void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
-        {
-            Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
-        }
-
-        public void ErrorPii(string messageWithPii, string messageScrubbed)
-        {
-            Log(LogLevel.Error, messageWithPii, messageScrubbed);
-        }
-
-        public void ErrorPii(Exception exWithPii)
-        {
-            Log(LogLevel.Error, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
-        }
-
-        public void Always(string messageScrubbed)
-        {
-            Log(LogLevel.Always, string.Empty, messageScrubbed);
-        }
-
-        public void AlwaysPii(string messageWithPii, string messageScrubbed)
-        {
-            Log(LogLevel.Always, messageWithPii, messageScrubbed);
-        }
 
         private static Lazy<string> s_osLazy = new Lazy<string>(() =>
         {
@@ -189,11 +113,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            if (_logLevelCallback != null)
-            {
-                logLevel = _logLevelCallback.Invoke();
-            }
-
             if (IsLoggingEnabled(logLevel))
             {
                 bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
@@ -273,17 +192,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
             }
 
             return sb.ToString();
-        }
-
-        public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
-        {
-            return new DurationLogHelper(this, measuredBlockName, logLevel);
-        }
-
-        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
-        {
-            string fileName = !string.IsNullOrEmpty(filePath) ? Path.GetFileNameWithoutExtension(filePath) : "";
-            return LogBlockDuration(fileName + ":" + methodName, logLevel);
         }
 
         public bool IsLoggingEnabled(LogLevel logLevel)

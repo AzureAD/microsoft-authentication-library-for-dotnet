@@ -452,7 +452,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     throw new NotImplementedException();
             }
 
-
             MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
             return (app, handler);

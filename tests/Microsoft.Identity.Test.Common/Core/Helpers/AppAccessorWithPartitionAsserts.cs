@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -20,20 +19,20 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         }
 
-        public override IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
+        public override IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
-            return base.GetAllAccessTokens(partitionKey);
+            return base.GetAllAccessTokens(partitionKey, requestlogger);
         }
 
-        public override IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
+        public override IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             Assert.Fail("App token cache - do not call GetAllAccounts");
             throw new InvalidOperationException();
         }
 
-        public override IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
+        public override IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
 
@@ -41,7 +40,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             throw new InvalidOperationException();
         }
 
-        public override IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
+        public override IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
 

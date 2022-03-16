@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2.Throttling;
@@ -26,8 +25,9 @@ namespace Microsoft.Identity.Client.Internal
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
         IDeviceAuthManager DeviceAuthManager { get; }
         IThrottlingProvider ThrottlingManager { get; }
-
         IHttpTelemetryManager HttpTelemetryManager { get; }
+        string ClientName { get; }
+        string ClientVersion { get; }
 
         #region Testing
         void SetPlatformProxyForTest(IPlatformProxy platformProxy);

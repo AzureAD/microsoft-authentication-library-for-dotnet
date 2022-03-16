@@ -8,7 +8,6 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -177,14 +176,14 @@ namespace Microsoft.Identity.Client.OAuth2
             _headers.Add(OAuth2Header.CorrelationId, requestContext.CorrelationId.ToString());
             _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
 
-            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName))
+            if (!string.IsNullOrWhiteSpace(requestContext.ServiceBundle.ClientName))
             {
-                _headers.Add(OAuth2Header.AppName, requestContext.Logger.ClientName);
+                _headers.Add(OAuth2Header.AppName, requestContext.ServiceBundle.ClientName);
             }
 
-            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientVersion))
+            if (!string.IsNullOrWhiteSpace(requestContext.ServiceBundle.ClientVersion))
             {
-                _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
+                _headers.Add(OAuth2Header.AppVer, requestContext.ServiceBundle.ClientVersion);
             }
         }
 
