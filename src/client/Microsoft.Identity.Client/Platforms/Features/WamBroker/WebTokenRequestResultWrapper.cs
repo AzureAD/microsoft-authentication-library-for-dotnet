@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Windows.Security.Authentication.Web.Core;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker

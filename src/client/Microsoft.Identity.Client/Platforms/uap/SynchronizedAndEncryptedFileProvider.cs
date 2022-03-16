@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Cache.CacheImpl;
-using Microsoft.Identity.Client.Core;
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
@@ -20,9 +19,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         private const string ProtectionDescriptor = "LOCAL=user";
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
-        private readonly ICoreLogger _logger;
+        private readonly IMsalLogger _logger;
 
-        public SynchronizedAndEncryptedFileProvider(ICoreLogger logger)
+        public SynchronizedAndEncryptedFileProvider(IMsalLogger logger)
         {
             _logger = logger;
         }

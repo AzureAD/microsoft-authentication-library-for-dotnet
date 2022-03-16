@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
     internal class Net5WinPlatformProxy : NetCorePlatformProxy
     {
         /// <inheritdoc />
-        public Net5WinPlatformProxy(ICoreLogger logger)
+        public Net5WinPlatformProxy(IMsalLogger logger)
             : base(logger)
         {
         }

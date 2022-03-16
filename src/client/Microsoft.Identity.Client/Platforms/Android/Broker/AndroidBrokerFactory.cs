@@ -2,18 +2,9 @@
 // Licensed under the MIT License.
 
 using Android.App;
-using Android.Content;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
@@ -29,7 +20,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             ContentProvider
         }
 
-        private static async Task<IBroker> GetInstalledBrokerAsync(CoreUIParent uIParent, ICoreLogger logger)
+        private static async Task<IBroker> GetInstalledBrokerAsync(CoreUIParent uIParent, IMsalLogger logger)
         {
             AndroidBrokerHelper brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
 
@@ -68,7 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return new AndroidContentProviderBroker(uIParent, logger);
         }
 
-        public static IBroker CreateBroker(CoreUIParent uIParent, ICoreLogger logger)
+        public static IBroker CreateBroker(CoreUIParent uIParent, IMsalLogger logger)
         {
             if (s_installedBroker == BrokerType.NoneOrUnknown)
             {

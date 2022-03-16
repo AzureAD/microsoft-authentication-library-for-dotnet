@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
@@ -28,7 +26,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public ICustomWebUi CustomWebUi { get; set; }
         public string CodeVerifier { get; set; }
 
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters(IMsalLogger logger)
         {
             var builder = new StringBuilder();
             builder.AppendLine("=== InteractiveParameters Data ===");

@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Client.Utils
 {

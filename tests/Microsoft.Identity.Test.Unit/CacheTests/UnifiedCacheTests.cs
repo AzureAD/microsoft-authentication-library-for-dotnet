@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
@@ -281,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        private void CreateAdalCache(ICoreLogger logger, ILegacyCachePersistence legacyCachePersistence, string scopes)
+        private void CreateAdalCache(IMsalLogger logger, ILegacyCachePersistence legacyCachePersistence, string scopes)
         {
             var key = new AdalTokenCacheKey(
                 TestConstants.AuthorityHomeTenant,

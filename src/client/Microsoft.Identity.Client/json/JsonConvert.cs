@@ -33,7 +33,6 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Json.Utilities;
 using System.Xml;
 using Microsoft.Identity.Json.Converters;
-using Microsoft.Identity.Json.Serialization;
 using System.Text;
 using System.Diagnostics;
 #if HAVE_XLINQ

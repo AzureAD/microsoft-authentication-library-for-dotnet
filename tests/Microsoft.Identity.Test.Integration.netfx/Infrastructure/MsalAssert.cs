@@ -6,7 +6,6 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Client;
 using System.Threading.Tasks;
 using System.Linq;
-using System.Globalization;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {

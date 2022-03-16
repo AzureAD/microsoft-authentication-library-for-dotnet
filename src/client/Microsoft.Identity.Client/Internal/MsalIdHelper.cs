@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client.Internal
@@ -64,7 +63,7 @@ namespace Microsoft.Identity.Client.Internal
                 return version[1];
             });
 
-        public static IDictionary<string, string> GetMsalIdParameters(ICoreLogger logger)
+        public static IDictionary<string, string> GetMsalIdParameters(IMsalLogger logger)
         {
             var platformProxy = PlatformProxyFactory.CreatePlatformProxy(logger);
             if (platformProxy == null)

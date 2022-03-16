@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Security.Cryptography;
-
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
     // TODO: we can expose this interface to users for a simple but low-level extensibility mechanism.

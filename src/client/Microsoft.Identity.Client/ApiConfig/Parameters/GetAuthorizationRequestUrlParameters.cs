@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
@@ -31,7 +29,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         }
 
         /// <inheritdoc />
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters(IMsalLogger logger)
         {
         }
     }

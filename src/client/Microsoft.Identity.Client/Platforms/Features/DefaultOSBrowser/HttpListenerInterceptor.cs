@@ -5,14 +5,13 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 {
     internal class HttpListenerInterceptor : IUriInterceptor
     {
-        private ICoreLogger _logger;
+        private IMsalLogger _logger;
 
         #region Test Hooks 
         public Action TestBeforeTopLevelCall { get; set; }
@@ -20,7 +19,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
         public Action TestBeforeGetContext { get; set; }
         #endregion
 
-        public HttpListenerInterceptor(ICoreLogger logger)
+        public HttpListenerInterceptor(IMsalLogger logger)
         {
             _logger = logger;
         }

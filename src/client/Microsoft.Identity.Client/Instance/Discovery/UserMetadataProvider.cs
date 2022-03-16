@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
@@ -25,7 +22,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
         }
 
-        public InstanceDiscoveryMetadataEntry GetMetadataOrThrow(string environment, ICoreLogger logger)
+        public InstanceDiscoveryMetadataEntry GetMetadataOrThrow(string environment, IMsalLogger logger)
         {
             _entries.TryGetValue(environment ?? "", out InstanceDiscoveryMetadataEntry entry);
 

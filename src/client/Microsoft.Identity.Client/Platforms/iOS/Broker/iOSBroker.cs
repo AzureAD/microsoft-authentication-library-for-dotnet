@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
@@ -34,13 +33,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private static SemaphoreSlim s_brokerResponseReady = null;
         private static NSUrl s_brokerResponse = null;
 
-        private readonly ICoreLogger _logger;
+        private readonly IMsalLogger _logger;
         private readonly ICryptographyManager _cryptoManager;
         private readonly CoreUIParent _uIParent;
         private string _brokerRequestNonce;
         private bool _brokerV3Installed = false;
 
-        public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
+        public iOSBroker(IMsalLogger logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
         {
             _logger = logger;
             _cryptoManager = cryptoManager;

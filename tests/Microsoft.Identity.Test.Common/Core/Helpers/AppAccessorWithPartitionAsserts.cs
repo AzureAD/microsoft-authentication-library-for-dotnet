@@ -13,26 +13,26 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     internal class AppAccessorWithPartitionAsserts : InMemoryPartitionedAppTokenCacheAccessor
     {
         public AppAccessorWithPartitionAsserts(
-            ICoreLogger logger, 
+            IMsalLogger logger, 
             CacheOptions tokenCacheAccessorOptions) : base(logger, tokenCacheAccessorOptions)
         {
 
         }
 
-        public override IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ICoreLogger requestlogger = null)
+        public override IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, IMsalLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             return base.GetAllAccessTokens(partitionKey, requestlogger);
         }
 
-        public override IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ICoreLogger requestlogger = null)
+        public override IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, IMsalLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             Assert.Fail("App token cache - do not call GetAllAccounts");
             throw new InvalidOperationException();
         }
 
-        public override IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, ICoreLogger requestlogger = null)
+        public override IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, IMsalLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
 
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             throw new InvalidOperationException();
         }
 
-        public override IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ICoreLogger requestlogger = null)
+        public override IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, IMsalLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
 

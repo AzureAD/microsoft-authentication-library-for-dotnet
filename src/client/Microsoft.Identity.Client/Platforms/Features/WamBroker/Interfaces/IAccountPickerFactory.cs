@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Threading;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
@@ -11,7 +10,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     {
         IAccountPicker Create(
             IntPtr parentHandle,
-            ICoreLogger logger,
+            IMsalLogger logger,
             SynchronizationContext synchronizationContext,
             Authority authority,
             bool isMsaPassthrough, 
@@ -25,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     {
         public IAccountPicker Create(
             IntPtr parentHandle, 
-            ICoreLogger logger, 
+            IMsalLogger logger, 
             SynchronizationContext synchronizationContext, 
             Authority authority, 
             bool isMsaPassthrough, 

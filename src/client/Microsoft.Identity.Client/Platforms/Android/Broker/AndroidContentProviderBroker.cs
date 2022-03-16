@@ -10,7 +10,6 @@ using Android.Database;
 using Android.OS;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -27,11 +26,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
     internal class AndroidContentProviderBroker : IBroker
     {
         private readonly AndroidBrokerHelper _brokerHelper;
-        private readonly ICoreLogger _logger;
+        private readonly IMsalLogger _logger;
         private readonly Activity _parentActivity;
         private string _negotiatedBrokerProtocolKey = string.Empty;
 
-        public AndroidContentProviderBroker(CoreUIParent uiParent, ICoreLogger logger)
+        public AndroidContentProviderBroker(CoreUIParent uiParent, IMsalLogger logger)
         {
             _parentActivity = uiParent?.Activity;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

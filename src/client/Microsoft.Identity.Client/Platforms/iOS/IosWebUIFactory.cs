@@ -5,7 +5,6 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview;
 using Microsoft.Identity.Client.Platforms.iOS.SystemWebview;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.iOS

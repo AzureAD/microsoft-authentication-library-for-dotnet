@@ -5,11 +5,8 @@ using System;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Windows.Security.Cryptography.DataProtection;
-using Windows.Security.Cryptography;
 using Windows.Storage.Streams;
 using System.Runtime.InteropServices.WindowsRuntime;
 
@@ -30,9 +27,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
         private const int MaxCompositeValueLength = 1024;
 
         private readonly ICryptographyManager _cryptographyManager;
-        private readonly ICoreLogger _logger;
+        private readonly IMsalLogger _logger;
 
-        public UapLegacyCachePersistence(ICoreLogger logger, ICryptographyManager cryptographyManager)
+        public UapLegacyCachePersistence(IMsalLogger logger, ICryptographyManager cryptographyManager)
         {
             _logger = logger;
             _cryptographyManager = cryptographyManager;

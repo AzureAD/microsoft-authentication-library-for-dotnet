@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-    internal class NullLogger : ICoreLogger
+    internal class NullLogger : IMsalLogger
     {
         public string ClientName { get; } = string.Empty;
         public string ClientVersion { get; } = string.Empty;

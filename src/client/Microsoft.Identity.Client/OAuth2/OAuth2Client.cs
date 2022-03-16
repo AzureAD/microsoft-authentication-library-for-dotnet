@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
 
-        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager)
+        public OAuth2Client(IMsalLogger logger, IHttpManager httpManager)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));

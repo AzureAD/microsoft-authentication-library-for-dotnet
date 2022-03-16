@@ -1,5 +1,4 @@
-﻿using System;
-namespace Microsoft.Identity.Client
+﻿namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// This exception is thrown when Intune requires app protection policy.

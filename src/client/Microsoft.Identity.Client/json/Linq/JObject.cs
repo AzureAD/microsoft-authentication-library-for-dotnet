@@ -26,7 +26,6 @@
 using System;
 using System.Collections.Generic;
 #if HAVE_INOTIFY_COLLECTION_CHANGED
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 #endif
 using System.ComponentModel;

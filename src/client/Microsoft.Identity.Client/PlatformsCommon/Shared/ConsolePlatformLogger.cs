@@ -7,7 +7,7 @@ using System;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
-    #if !WINDOWS_APP
+#if !WINDOWS_APP
     class ConsolePlatformLogger : IPlatformLogger
     {
         public void Always(string message)
@@ -35,5 +35,5 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             Console.WriteLine(message);
         }
     }
-    #endif
+#endif
 }

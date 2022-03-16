@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Android.Util;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.Android

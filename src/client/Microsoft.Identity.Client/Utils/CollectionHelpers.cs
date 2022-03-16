@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 #if HAVE_METHOD_IMPL_ATTRIBUTE
 using System.Runtime.CompilerServices;

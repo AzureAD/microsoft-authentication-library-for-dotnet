@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Microsoft.Identity.Client.AuthScheme.PoP
+﻿namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
     /// <summary>
     /// Names for Json Web Key Values

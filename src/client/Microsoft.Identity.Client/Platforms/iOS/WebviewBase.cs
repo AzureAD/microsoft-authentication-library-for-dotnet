@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             RequestContext requestContext,
             CancellationToken cancellationToken);
 
-        public static bool ContinueAuthentication(string url, Core.ICoreLogger logger)
+        public static bool ContinueAuthentication(string url, IMsalLogger logger)
         {
             if (s_returnedUriReady == null)
             {

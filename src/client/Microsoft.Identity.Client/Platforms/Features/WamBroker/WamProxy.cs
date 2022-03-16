@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
@@ -24,10 +23,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 #endif
     internal class WamProxy : IWamProxy
     {
-        private readonly ICoreLogger _logger;
+        private readonly IMsalLogger _logger;
         private readonly SynchronizationContext _synchronizationContext;
 
-        public WamProxy(ICoreLogger logger, System.Threading.SynchronizationContext synchronizationContext)
+        public WamProxy(IMsalLogger logger, System.Threading.SynchronizationContext synchronizationContext)
         {
             _logger = logger;
             _synchronizationContext = synchronizationContext;

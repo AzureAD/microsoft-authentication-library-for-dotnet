@@ -24,8 +24,6 @@
 #endregion
 
 using System;
-using Microsoft.Identity.Json.Utilities;
-using System.Globalization;
 
 namespace Microsoft.Identity.Json
 {

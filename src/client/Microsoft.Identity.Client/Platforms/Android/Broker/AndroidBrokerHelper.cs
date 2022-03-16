@@ -12,22 +12,12 @@ using Android.OS;
 using Android.Content.PM;
 using Android.Util;
 using Java.Security;
-using Java.Util.Concurrent;
 using Signature = Android.Content.PM.Signature;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
-using System.Threading.Tasks;
-using OperationCanceledException = Android.Accounts.OperationCanceledException;
-using AndroidUri = Android.Net.Uri;
-using Android.Database;
-using Microsoft.Identity.Json.Utilities;
-using System.Threading;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Http;
 using AndroidNative = Android;
-using System.Linq;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -41,9 +31,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         // Important: this object MUST be accessed on a background thread. Android will check this and throw otherwise.
         public AccountManager AndroidAccountManager { get; }
-        private readonly ICoreLogger _logger;
+        private readonly IMsalLogger _logger;
 
-        public AndroidBrokerHelper(Context androidContext, ICoreLogger logger)
+        public AndroidBrokerHelper(Context androidContext, IMsalLogger logger)
         {
             _androidContext = androidContext ?? throw new ArgumentNullException(nameof(androidContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

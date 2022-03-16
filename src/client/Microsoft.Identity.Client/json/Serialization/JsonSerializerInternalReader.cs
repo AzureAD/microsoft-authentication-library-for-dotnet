@@ -26,7 +26,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 #if HAVE_DYNAMIC
 using System.ComponentModel;
 using System.Dynamic;

@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client
                 : refreshTokens;
         }
 
-        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string partitionKey = null, ICoreLogger requestlogger = null)
+        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string partitionKey = null, IMsalLogger requestlogger = null)
         {
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey, requestlogger);
             return filterByClientId

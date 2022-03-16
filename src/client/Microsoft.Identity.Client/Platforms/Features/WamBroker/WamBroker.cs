@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
@@ -16,12 +15,10 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using System.Diagnostics;
 #if !UAP10_0
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Utils.Windows;
@@ -50,7 +47,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
         private readonly IAccountPickerFactory _accountPickerFactory;
-        private readonly ICoreLogger _logger;
+        private readonly IMsalLogger _logger;
         private readonly IntPtr _parentHandle;
         private readonly SynchronizationContext _synchronizationContext;
         private readonly IMsaPassthroughHandler _msaPassthroughHandler;
@@ -64,7 +61,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         public WamBroker(
             CoreUIParent uiParent,
             ApplicationConfiguration appConfig,
-            ICoreLogger logger,
+            IMsalLogger logger,
             IWamPlugin testAadPlugin = null,
             IWamPlugin testmsaPlugin = null,
             IWamProxy wamProxy = null,

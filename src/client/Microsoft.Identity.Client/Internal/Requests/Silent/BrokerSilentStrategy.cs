@@ -5,7 +5,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.OAuth2;
@@ -20,7 +19,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly SilentRequest _silentRequest;
         internal IBroker Broker { get; }
-        private readonly ICoreLogger _logger;
+        private readonly IMsalLogger _logger;
 
         public BrokerSilentStrategy(
             SilentRequest request,

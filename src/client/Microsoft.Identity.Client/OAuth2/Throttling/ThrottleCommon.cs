@@ -3,8 +3,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
@@ -44,7 +42,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             return sb.ToString();
         }
 
-        public static void TryThrowServiceException(string thumbprint, ThrottlingCache cache, ICoreLogger logger, string providerName)
+        public static void TryThrowServiceException(string thumbprint, ThrottlingCache cache, IMsalLogger logger, string providerName)
         {
             if (cache.TryGetOrRemoveExpired(thumbprint, logger, out var ex))
             {

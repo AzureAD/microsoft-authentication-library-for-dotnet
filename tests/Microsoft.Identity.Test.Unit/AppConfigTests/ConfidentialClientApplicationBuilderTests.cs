@@ -2,13 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Drawing.Text;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Permissions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

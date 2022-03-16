@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -18,20 +17,20 @@ namespace Microsoft.Identity.Client.Http
             Uri endpoint,
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
-            ICoreLogger logger,
+            IMsalLogger logger,
             CancellationToken cancellationToken = default);
 
         Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
-            ICoreLogger logger,
+            IMsalLogger logger,
             CancellationToken cancellationToken = default);
 
         Task<HttpResponse> SendGetAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
-            ICoreLogger logger,
+            IMsalLogger logger,
             bool retry = true,
             CancellationToken cancellationToken = default);
 
@@ -39,7 +38,7 @@ namespace Microsoft.Identity.Client.Http
             Uri uri,
             Dictionary<string, string> headers,
             StringContent body,
-            ICoreLogger logger,
+            IMsalLogger logger,
             CancellationToken cancellationToken = default);
     }
 }

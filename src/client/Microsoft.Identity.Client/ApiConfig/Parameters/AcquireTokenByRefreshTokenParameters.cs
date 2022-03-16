@@ -1,16 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Text;
-using Microsoft.Identity.Client.Core;
-
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
     internal class AcquireTokenByRefreshTokenParameters : AbstractAcquireTokenConfidentialClientParameters, IAcquireTokenParameters
     {
         public string RefreshToken { get; set; }
 
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters(IMsalLogger logger)
         {
         }
     }

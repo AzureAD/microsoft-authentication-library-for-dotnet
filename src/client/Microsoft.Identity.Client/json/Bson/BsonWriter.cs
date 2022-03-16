@@ -24,15 +24,11 @@
 #endregion
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
 #endif
-using System.Text;
 using Microsoft.Identity.Json.Utilities;
-using Microsoft.Identity.Json.Linq;
 using System.Globalization;
 
 namespace Microsoft.Identity.Json.Bson

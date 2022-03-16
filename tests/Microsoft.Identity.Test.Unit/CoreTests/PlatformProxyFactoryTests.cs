@@ -1,21 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
 using System.Net;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal;
 
 #if SUPPORTS_BROKER
-using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 #endif
 
 namespace Microsoft.Identity.Test.Unit.CoreTests

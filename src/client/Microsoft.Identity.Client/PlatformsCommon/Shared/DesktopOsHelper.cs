@@ -2,16 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Linq;
 using System.Runtime.InteropServices;
-using Microsoft.Identity.Client.Utils;
 
 #if SUPPORTS_WIN32 && !WINDOWS_APP
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 #endif
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
-{    
+{
     internal static class DesktopOsHelper
     {
         private static Lazy<bool> s_wamSupportedOSLazy = new Lazy<bool>(

@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Internal
     internal class RequestContext
     {
         public Guid CorrelationId { get; }
-        public ICoreLogger Logger { get; }
+        public IMsalLogger Logger { get; }
         public IServiceBundle ServiceBundle { get; }
 
         /// <summary>

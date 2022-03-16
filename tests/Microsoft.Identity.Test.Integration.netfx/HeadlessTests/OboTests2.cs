@@ -3,25 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
-using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Json.Utilities;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -30,10 +17,7 @@ using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {

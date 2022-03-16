@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Security;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
@@ -11,7 +10,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public SecureString Password { get; set; }
 
         /// <inheritdoc />
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters(IMsalLogger logger)
         {
         }
     }

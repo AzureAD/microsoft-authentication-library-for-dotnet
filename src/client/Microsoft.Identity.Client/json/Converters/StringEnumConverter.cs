@@ -26,16 +26,12 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Reflection;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Json.Utilities;
 using Microsoft.Identity.Json.Serialization;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else
-using System.Linq;
 
 #endif
 

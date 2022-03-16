@@ -5,7 +5,6 @@ using System;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {

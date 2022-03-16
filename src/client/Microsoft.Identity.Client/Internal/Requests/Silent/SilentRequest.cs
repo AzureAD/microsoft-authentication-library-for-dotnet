@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -18,7 +17,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly ISilentAuthRequestStrategy _clientStrategy;
         private readonly Lazy<ISilentAuthRequestStrategy> _brokerStrategyLazy;
-        private readonly ICoreLogger _logger;
+        private readonly IMsalLogger _logger;
 
         public SilentRequest(
             IServiceBundle serviceBundle,

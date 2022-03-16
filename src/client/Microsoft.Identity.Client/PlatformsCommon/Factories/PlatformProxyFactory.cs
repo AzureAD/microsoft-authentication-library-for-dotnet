@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using System;
 using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Factories
@@ -15,7 +14,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
         /// <summary>
         ///     Gets the platform proxy, which can be used to perform platform specific operations
         /// </summary>
-        public static IPlatformProxy CreatePlatformProxy(ICoreLogger logger)
+        public static IPlatformProxy CreatePlatformProxy(IMsalLogger logger)
         {
             var finalLogger = logger ?? MsalLogger.NullLogger;
 

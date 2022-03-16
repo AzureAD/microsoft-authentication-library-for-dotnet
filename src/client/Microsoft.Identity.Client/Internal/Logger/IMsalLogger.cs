@@ -1,15 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Runtime.CompilerServices;
-using Microsoft.Identity.Client.Internal.Logger;
-
 namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Logger interface for MSAL logging operations
     /// </summary>
-    public interface ICoreLogger
+    public interface IMsalLogger
     {
         /// <summary>
         /// Indicates whether or not PII loggign si enabled

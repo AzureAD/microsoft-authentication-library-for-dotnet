@@ -3,15 +3,11 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

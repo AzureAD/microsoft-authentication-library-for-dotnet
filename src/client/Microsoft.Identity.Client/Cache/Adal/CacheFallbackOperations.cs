@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Cache
@@ -19,7 +17,7 @@ namespace Microsoft.Identity.Client.Cache
             "Not expecting authority to have a different env than the RT and IdT";
 
         public static void WriteAdalRefreshToken(
-            ICoreLogger logger,
+            IMsalLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
             MsalRefreshTokenCacheItem rtItem,
             MsalIdTokenCacheItem idItem,
@@ -93,7 +91,7 @@ namespace Microsoft.Identity.Client.Cache
         /// Item2 is a list of AdalUserInfo for those users that do not have ClientInfo
         /// </summary>
         public static AdalUsersForMsal GetAllAdalUsersForMsal(
-            ICoreLogger logger,
+            IMsalLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
             string clientId)
         {
@@ -142,7 +140,7 @@ namespace Microsoft.Identity.Client.Cache
         ///
         /// </summary>
         public static void RemoveAdalUser(
-            ICoreLogger logger,
+            IMsalLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
             string clientId,
             string displayableId,
@@ -169,7 +167,7 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         private static void RemoveEntriesWithMatchingName(
-            ICoreLogger logger,
+            IMsalLogger logger,
             string clientId,
             string displayableId,
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache)
@@ -231,7 +229,7 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         public static MsalRefreshTokenCacheItem GetRefreshToken(
-           ICoreLogger logger,
+           IMsalLogger logger,
            ILegacyCachePersistence legacyCachePersistence,
            IEnumerable<string> environmentAliases,
            string clientId,

@@ -7,7 +7,6 @@ using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -20,7 +19,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     public class CacheFallbackOperationsTests
     {
         private InMemoryLegacyCachePersistence _legacyCachePersistence;
-        private ICoreLogger _logger;
+        private IMsalLogger _logger;
 
         [TestInitialize]
         public void TestInitialize()
@@ -29,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // Methods in CacheFallbackOperations silently catch all exceptions and log them;
             // By setting this to null, logging will fail, making the test fail.
-            _logger = Substitute.For<ICoreLogger>();
+            _logger = Substitute.For<IMsalLogger>();
 
             // Use the net45 accessor for tests
             _legacyCachePersistence = new InMemoryLegacyCachePersistence();

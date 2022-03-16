@@ -3,7 +3,6 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,7 +11,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
     [TestClass]
     public class ThrottlingCacheTests
     {
-        private readonly ICoreLogger _logger = NSubstitute.Substitute.For<ICoreLogger>();
+        private readonly IMsalLogger _logger = NSubstitute.Substitute.For<IMsalLogger>();
 
         private readonly MsalServiceException _ex1 = new MsalServiceException("code1", "msg1");
         private readonly MsalServiceException _ex2 = new MsalServiceException("code2", "msg2");

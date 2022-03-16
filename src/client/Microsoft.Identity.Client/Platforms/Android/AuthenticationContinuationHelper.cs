@@ -4,7 +4,6 @@
 using System;
 using Android.App;
 using Android.Content;
-using Java.Sql;
 using Microsoft.Identity.Client.Platforms.Android;
 using Microsoft.Identity.Client.Platforms.Android.Broker;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
@@ -21,7 +20,7 @@ namespace Microsoft.Identity.Client
         /// Because this class needs to be static, we can only inject a logger from each request at a time, so 
         /// the correlation IDs from here are not reliable.
         /// </summary>
-        internal static ICoreLogger LastRequestLogger { get; set; } // can be null
+        internal static IMsalLogger LastRequestLogger { get; set; } // can be null
 
         /// <summary>
         /// Sets authentication response from the webview for token acquisition continuation.

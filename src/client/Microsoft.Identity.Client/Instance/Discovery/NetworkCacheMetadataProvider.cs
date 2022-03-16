@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Concurrent;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
@@ -11,7 +10,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> s_cache =
              new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
-        public InstanceDiscoveryMetadataEntry GetMetadata(string environment, ICoreLogger logger)
+        public InstanceDiscoveryMetadataEntry GetMetadata(string environment, IMsalLogger logger)
         {
             s_cache.TryGetValue(environment, out InstanceDiscoveryMetadataEntry entry);
             logger.Verbose($"[Instance Discovery] Tried to use network cache provider for {environment}. Success? {entry != null}. ");

@@ -5,12 +5,11 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
-    internal class TraceLogger : ICoreLogger
+    internal class TraceLogger : IMsalLogger
     {
         private readonly string _prefix;
 

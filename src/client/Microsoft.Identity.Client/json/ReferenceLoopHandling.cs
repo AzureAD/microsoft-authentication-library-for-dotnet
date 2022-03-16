@@ -23,9 +23,6 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Identity.Json
 {

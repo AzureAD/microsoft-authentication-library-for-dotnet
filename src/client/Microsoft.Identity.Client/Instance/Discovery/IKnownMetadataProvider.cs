@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
@@ -11,6 +10,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         InstanceDiscoveryMetadataEntry GetMetadata(
             string environment, 
             IEnumerable<string> existingEnvironmentsInCache, 
-            ICoreLogger logger);
+            IMsalLogger logger);
     }
 }

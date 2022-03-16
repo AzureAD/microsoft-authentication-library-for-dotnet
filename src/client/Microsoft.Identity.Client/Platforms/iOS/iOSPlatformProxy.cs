@@ -1,19 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Foundation;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using UIKit;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -24,7 +20,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     {
         internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
 
-        public iOSPlatformProxy(ICoreLogger logger)
+        public iOSPlatformProxy(IMsalLogger logger)
             : base(logger)
         {
         }
