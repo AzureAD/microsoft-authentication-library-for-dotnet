@@ -18,7 +18,7 @@ namespace Intune_xamarin_Android
         /// <summary>
         /// The scopes that are protected by conditional access
         /// </summary>
-        internal static string[] Scopes = { "api://09aec9b9-0b0f-488a-81d6-72fd13a3a1c1/Hello.World" };
+        internal static string[] Scopes = { "api://a8bf4bd3-c92d-44d0-8307-9753d975c21e/Hello.World" }; // TODO - change scopes are per your enterprise app
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
