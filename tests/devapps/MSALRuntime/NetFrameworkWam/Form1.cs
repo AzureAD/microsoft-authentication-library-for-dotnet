@@ -415,7 +415,7 @@ namespace NetDesktopWinForms
                     authParams.RedirectUri = "about:blank";
 
                     using (account = await core.ReadAccountByIdAsync(accountId, CorrelationID).ConfigureAwait(true))
-                    using (result = await core.AcquireTokenInteractivelyAsync( this.Handle, authParams, CorrelationID, account).ConfigureAwait(false))
+                    using (result = await core.AcquireTokenInteractivelyAsync( this.Handle, authParams, CorrelationID, account).ConfigureAwait(true))
                     {
                         await LogRuntimeResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                     }
