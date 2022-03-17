@@ -1,9 +1,9 @@
 4.42.1
 ==========
 
-### Bug fixes
-
-Fix a bug affecting WAM authentication with new accounts when the authority ends in "/organizations". Details on issue [3217](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3217)
+### Bug Fixes
+**Fixed a bug affecting WAM authentication with new accounts when the authority ends in `/organizations`**. See  [3217](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3217).
+**Fixed an error in creating UWP package for Microsoft Store upload**.  See [3184](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3184).
 
 4.42.0
 ==========
