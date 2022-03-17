@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client
             (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
 #endif
         }
-       
+
         private void UpdateAppMetadata(string clientId, string environment, string familyId)
         {
             if (_featureFlags.IsFociEnabled)
@@ -208,9 +208,9 @@ namespace Microsoft.Identity.Client
                 : refreshTokens;
         }
 
-        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string partitionKey = null, IMsalLogger requestlogger = null)
+        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
         {
-            var accessTokens = Accessor.GetAllAccessTokens(partitionKey, requestlogger);
+            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
             return filterByClientId
                 ? accessTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
                 : accessTokens;

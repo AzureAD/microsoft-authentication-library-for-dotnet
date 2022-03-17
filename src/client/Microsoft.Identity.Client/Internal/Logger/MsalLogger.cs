@@ -32,14 +32,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
             PiiLoggingEnabled = enablePiiLogging;
             _loggingCallback = loggingCallback;
 
-            if (logLevelCallback != null)
-            {
-                _minLogLevel = logLevelCallback.Invoke();
-            }
-            else
-            {
-                _minLogLevel = logLevel;
-            }
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
 
             _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
