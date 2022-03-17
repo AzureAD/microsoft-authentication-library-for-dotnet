@@ -24,6 +24,7 @@
 #endregion
 
 using System;
+using System.Reflection;
 using Microsoft.Identity.Json.Utilities;
 
 #if !HAVE_LINQ

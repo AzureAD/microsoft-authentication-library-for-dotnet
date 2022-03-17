@@ -25,7 +25,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
+using System.Text;
 using System.Collections;
 using System.Diagnostics;
 #if !HAVE_LINQ
@@ -33,9 +35,11 @@ using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
+using System.Globalization;
 #if HAVE_METHOD_IMPL_ATTRIBUTE
 using System.Runtime.CompilerServices;
 #endif
+using Microsoft.Identity.Json.Serialization;
 
 namespace Microsoft.Identity.Json.Utilities
 {

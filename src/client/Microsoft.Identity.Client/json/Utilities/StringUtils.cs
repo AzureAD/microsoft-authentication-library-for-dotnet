@@ -33,6 +33,7 @@ using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
+using Microsoft.Identity.Json.Serialization;
 
 namespace Microsoft.Identity.Json.Utilities
 {

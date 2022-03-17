@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Microsoft.Identity.Json.Serialization;
 
 namespace Microsoft.Identity.Json.Utilities

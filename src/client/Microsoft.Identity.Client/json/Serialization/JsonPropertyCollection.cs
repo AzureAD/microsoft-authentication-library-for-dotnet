@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Collections.ObjectModel;
 using Microsoft.Identity.Json.Utilities;
 using System.Globalization;

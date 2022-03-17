@@ -31,6 +31,7 @@ using Microsoft.Identity.Json.Utilities.LinqBridge;
 using System.Linq;
 #endif
 using System.Reflection;
+using System.Text;
 using Microsoft.Identity.Json.Serialization;
 
 namespace Microsoft.Identity.Json.Utilities

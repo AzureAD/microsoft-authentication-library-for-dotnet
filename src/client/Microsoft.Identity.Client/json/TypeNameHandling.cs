@@ -24,6 +24,7 @@
 #endregion
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Json
 {

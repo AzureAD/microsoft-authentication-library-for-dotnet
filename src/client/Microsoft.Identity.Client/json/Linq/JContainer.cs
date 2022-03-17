@@ -36,6 +36,7 @@ using System.ComponentModel;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else
+using System.Linq;
 
 #endif
 
