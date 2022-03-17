@@ -1163,8 +1163,7 @@ namespace Microsoft.Identity.Client
                     msalAccessTokenCacheItem.Environment,
                     msalAccessTokenCacheItem.TenantId,
                     msalAccessTokenCacheItem.HomeAccountId,
-                    requestParameters.Account?.Username,
-                    requestParameters.AuthorityInfo.AuthorityType.ToString()));
+                    requestParameters.Account?.Username));
 
             return new Account(
                 msalAccessTokenCacheItem.HomeAccountId,
