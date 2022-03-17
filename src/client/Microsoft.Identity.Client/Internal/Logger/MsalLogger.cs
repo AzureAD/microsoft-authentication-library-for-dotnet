@@ -24,8 +24,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             LogLevel logLevel,
             bool enablePiiLogging,
             bool isDefaultPlatformLoggingEnabled,
-            LogCallback loggingCallback,
-            Func<LogLevel> logLevelCallback)
+            LogCallback loggingCallback)
         {
             _correlationId = correlationId.Equals(Guid.Empty)
                     ? string.Empty
@@ -74,8 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 config?.LogLevel ?? LogLevel.Verbose,
                 config?.EnablePiiLogging ?? false,
                 config?.IsDefaultPlatformLoggingEnabled ?? isDefaultPlatformLoggingEnabled,
-                config?.LoggingCallback,
-                config?.LogLevelCallback);
+                config?.LoggingCallback);
         }
 
         public static IMsalLogger NullLogger => s_nullLogger.Value;

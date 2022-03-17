@@ -274,32 +274,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="loggingCallback"></param>
-        /// <param name="logLevelCallback"></param>
-        /// <param name="enablePiiLogging"></param>
-        /// <param name="enableDefaultPlatformLogging"></param>
-        /// <returns></returns>
-        public T WithLogging(
-            LogCallback loggingCallback,
-            Func<LogLevel> logLevelCallback,
-            bool? enablePiiLogging = null,
-            bool? enableDefaultPlatformLogging = null)
-        {
-            if (Config.LoggingCallback != null)
-            {
-                throw new InvalidOperationException(MsalErrorMessage.LoggingCallbackAlreadySet);
-            }
-
-            Config.LoggingCallback = loggingCallback;
-            Config.LogLevelCallback = logLevelCallback;
-            Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
-            Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
-            return (T)this;
-        }
-
-        /// <summary>
         /// Sets the Debug logging callback to a default debug method which displays
         /// the level of the message and the message itself. For details see https://aka.ms/msal-net-logging
         /// </summary>

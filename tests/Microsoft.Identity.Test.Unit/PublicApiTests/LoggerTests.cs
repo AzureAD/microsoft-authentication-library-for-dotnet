@@ -23,21 +23,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             _callback = Substitute.For<LogCallback>();
         }
 
-        private MsalLogger CreateLogger(LogLevel logLevel = LogLevel.Verbose, bool enablePiiLogging = false, Func<LogLevel> logLevelCallback = null)
+        private MsalLogger CreateLogger(LogLevel logLevel = LogLevel.Verbose, bool enablePiiLogging = false)
         {
-            return new MsalLogger(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback, logLevelCallback);
+            return new MsalLogger(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback);
         }
 
         [TestMethod()]
         public void ConstructorComponentTest()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null, null, LogLevel.Verbose, false, true, null, null);
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, null, LogLevel.Verbose, false, true, null);
             Assert.AreEqual(string.Empty, logger.ClientName);
             Assert.AreEqual(string.Empty, logger.ClientVersion);
             Assert.AreEqual(string.Empty, logger.ClientInformation);
-            logger = new MsalLogger(Guid.Empty, "comp1", null, LogLevel.Verbose, false, true, null, null);
+            logger = new MsalLogger(Guid.Empty, "comp1", null, LogLevel.Verbose, false, true, null);
             Assert.AreEqual(" (comp1)", logger.ClientInformation);
-            logger = new MsalLogger(Guid.Empty, "comp1", "version1", LogLevel.Verbose, false, true, null, null);
+            logger = new MsalLogger(Guid.Empty, "comp1", "version1", LogLevel.Verbose, false, true, null);
             Assert.AreEqual(" (comp1: version1)", logger.ClientInformation);
         }
 
@@ -148,64 +148,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void LogLevelCallbackLoggerTest()
-        {
-            LogLevel level = LogLevel.Always;
-            MsalLogger logger = CreateLogger(LogLevel.Always, false, () => { return level; });
-            var counter = 0;
-            var validationCounter = 1;
-
-            _callback.When(x => x(LogLevel.Always, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Always(TestConstants.TestMessage);
-            Assert.AreEqual(validationCounter, counter);
-            _callback.Received().Invoke(Arg.Is((LogLevel)validationCounter - 2), Arg.Any<string>(), Arg.Is(false));
-
-            validationCounter++;
-            level = LogLevel.Error;
-            logger = CreateLogger(LogLevel.Always, false, () => { return level; });
-
-            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Error(TestConstants.TestMessage);
-            Assert.AreEqual(validationCounter, counter);
-            _callback.Received().Invoke(Arg.Is((LogLevel)validationCounter - 2), Arg.Any<string>(), Arg.Is(false));
-
-            validationCounter++;
-            level = LogLevel.Warning;
-            logger = CreateLogger(LogLevel.Always, false, () => { return level; });
-
-            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Warning(TestConstants.TestMessage);
-            Assert.AreEqual(validationCounter, counter);
-            _callback.Received().Invoke(Arg.Is((LogLevel)validationCounter - 2), Arg.Any<string>(), Arg.Is(false));
-
-            validationCounter++;
-            level = LogLevel.Info;
-            logger = CreateLogger(LogLevel.Always, false, () => { return level; });
-
-            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Info(TestConstants.TestMessage);
-            Assert.AreEqual(validationCounter, counter);
-
-            validationCounter++;
-            level = LogLevel.Verbose;
-            logger = CreateLogger(LogLevel.Always, false, () => { return level; });
-
-            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Verbose(TestConstants.TestMessage);
-            Assert.AreEqual(validationCounter, counter);
-        }
-
-        [TestMethod]
         public void IsEnabled()
         {
-            var infoLoggerWithCallback = new MsalLogger(Guid.Empty, null, null, LogLevel.Info, true, true, _callback, null);
+            var infoLoggerWithCallback = new MsalLogger(Guid.Empty, null, null, LogLevel.Info, true, true, _callback);
             Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Info));
             Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Always));
             Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Error));
             Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Warning));
             Assert.IsFalse(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Verbose));
 
-            var loggerNoCallback = new MsalLogger(Guid.Empty, null, null, LogLevel.Warning, true, true, null, null);
+            var loggerNoCallback = new MsalLogger(Guid.Empty, null, null, LogLevel.Warning, true, true, null);
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Info));
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Always));
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Error));
