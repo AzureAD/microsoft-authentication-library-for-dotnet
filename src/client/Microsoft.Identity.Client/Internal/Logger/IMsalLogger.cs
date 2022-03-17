@@ -17,6 +17,13 @@ namespace Microsoft.Identity.Client
         /// Log messages into MSAL
         /// </summary>
         /// <param name="logLevel"></param>
+        /// <param name="messageScrubbed"></param>
+        void Log(LogLevel logLevel, string messageScrubbed);
+
+        /// <summary>
+        /// Log messages into MSAL with Pii
+        /// </summary>
+        /// <param name="logLevel"></param>
         /// <param name="messageWithPii"></param>
         /// <param name="messageScrubbed"></param>
         void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed);

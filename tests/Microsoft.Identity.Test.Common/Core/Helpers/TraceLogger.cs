@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public bool PiiLoggingEnabled => true;
 
+        //TODO: Overwrite extension methods for trace logger?
         public void Always(string messageScrubbed)
         {
             Trace.WriteLine($"{_prefix}[Always] {messageScrubbed}");
@@ -79,6 +80,11 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         public bool IsLoggingEnabled(LogLevel logLevel)
         {
             return true;
+        }
+
+        public void Log(LogLevel logLevel, string messageScrubbed)
+        {
+            Log(logLevel, string.Empty, messageScrubbed);
         }
 
         public void Log(LogLevel msalLogLevel, string messageWithPii, string messageScrubbed)

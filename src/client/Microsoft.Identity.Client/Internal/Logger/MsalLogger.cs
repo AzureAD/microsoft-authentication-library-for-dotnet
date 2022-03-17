@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     : " - " + correlationId;
             PiiLoggingEnabled = enablePiiLogging;
             _loggingCallback = loggingCallback;
-
+            _minLogLevel = logLevel;
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
 
             _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
@@ -100,6 +100,11 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         private static Lazy<string> s_msalVersionLazy = new Lazy<string>(() => MsalIdHelper.GetMsalVersion());
         private static Lazy<string> s_runtimeVersionLazy = new Lazy<string>(() => PlatformProxyFactory.CreatePlatformProxy(null).GetRuntimeVersion());
+
+        public void Log(LogLevel logLevel, string messageScrubbed)
+        {
+            Log(logLevel, string.Empty, messageScrubbed);
+        }
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {

@@ -179,5 +179,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #pragma warning restore CS0183 //
             };
         }
+
+
     }
 }

@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -33,11 +34,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class ConfidentialClientApplicationTests
     {
         private byte[] _serializedCache;
+        StringBuilder _stringBuilder;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
+            _stringBuilder = new StringBuilder();
         }
 
         [TestMethod]
@@ -1668,6 +1671,55 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNull(acc);
             }
+        }
+
+        [TestMethod]
+        public async Task ExternalMsalLoggerTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret("secret")
+                    .WithLogging(LoggingMethod, LogLevel.Info)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                app.UserTokenCache.SetBeforeAccess(BeforeCacheAccessWithLogging);
+                app.UserTokenCache.SetAfterAccess(AfterCacheAccessWithLogging);
+
+                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var result = await app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "some-code")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.IsTrue(_stringBuilder.ToString().Contains("MsalExternalLogMessage"));
+            }
+        }
+
+        private void BeforeCacheAccessWithLogging(TokenCacheNotificationArgs args)
+        {
+            args.MsalLogger.Log(LogLevel.Info, "MsalExternalLogMessage: Deserializing Cache Pii", "MsalExternalLogMessage: Deserializing Cache");
+            args.TokenCache.DeserializeMsalV3(_serializedCache);
+        }
+
+        private void AfterCacheAccessWithLogging(TokenCacheNotificationArgs args)
+        {
+            args.MsalLogger.Log(LogLevel.Info, "MsalExternalLogMessage: Serializing Cache Pii", "MsalExternalLogMessage: Serializing Cache");
+            _serializedCache = args.TokenCache.SerializeMsalV3();
+        }
+
+        private void LoggingMethod(LogLevel level, string message, bool containsPii)
+        {
+            _stringBuilder.AppendLine(message);
         }
     }
 }
