@@ -37,8 +37,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertException.Throws<ArgumentNullException>(() => new MsalAccessTokenCacheKey("env", "tid", "uid", null, "scopes", "bearer"));
             AssertException.Throws<ArgumentNullException>(() => new MsalAccessTokenCacheKey("env", "tid", "uid", "cid", "scopes", null));
 
-            AssertException.Throws<ArgumentNullException>(() => new MsalAccountCacheKey("", "tid", "uid", "localid", "aad"));
-            AssertException.Throws<ArgumentNullException>(() => new MsalAccountCacheKey(null, "tid", "uid", "localid", "msa"));
+            AssertException.Throws<ArgumentNullException>(() => new MsalAccountCacheKey("", "tid", "uid", "localid"));
+            AssertException.Throws<ArgumentNullException>(() => new MsalAccountCacheKey(null, "tid", "uid", "localid"));
         }
 
         [TestMethod]
@@ -133,22 +133,20 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 "login.microsoftonline.com",
                 "contoso.com",
                 "uid.utid",
-                "localId",
-                "AAD");
+                "localId");
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com-contoso.com", key.ToString());
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com", key.iOSAccount);
             Assert.AreEqual("contoso.com", key.iOSService);
             Assert.AreEqual("localid", key.iOSGeneric);
-            Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["AAD"], key.iOSType);
+            Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["MSSTS"], key.iOSType);
 
             Assert.AreEqual(key, new MsalAccountCacheKey(
                 "login.microsoftonline.com",
                 "contoso.com",
                 "uid.utid",
-                "localId",
-                "AAD"));
+                "localId"));
         }
 
         [TestMethod]
