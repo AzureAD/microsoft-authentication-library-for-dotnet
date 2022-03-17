@@ -9,7 +9,7 @@ using Microsoft.Identity.Client.Internal.Logger;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Extension methods for ICoreLogger
+    /// Extension methods for IMsalLogger
     /// </summary>
     internal static class MsalLoggerExtensions
     {

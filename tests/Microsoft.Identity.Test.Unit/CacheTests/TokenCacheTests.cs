@@ -9,7 +9,6 @@ using Castle.Core.Internal;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
@@ -486,7 +485,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Arrange
                 ITokenCacheInternal appTokenCache = new TokenCache(harness.ServiceBundle, true);
                 ITokenCacheInternal userTokenCache = new TokenCache(harness.ServiceBundle, false);
-                var logger = Substitute.For<ICoreLogger>();
+                var logger = Substitute.For<IMsalLogger>();
 
                 // Act
                 var appAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(appTokenCache.Accessor, logger);
@@ -509,7 +508,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Arrange
                 ITokenCacheInternal appTokenCache = new TokenCache(harness.ServiceBundle, true);
                 ITokenCacheInternal userTokenCache = new TokenCache(harness.ServiceBundle, false);
-                var logger = Substitute.For<ICoreLogger>();
+                var logger = Substitute.For<IMsalLogger>();
 
                 var t1 = TokenCacheHelper.CreateAccessTokenItem(isExpired: true);
                 var t2 = TokenCacheHelper.CreateAccessTokenItem(isExpired: true);

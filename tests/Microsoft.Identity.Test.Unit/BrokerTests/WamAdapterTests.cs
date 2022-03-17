@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
@@ -32,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             wamResponse.ResponseStatus.Returns(Windows.Security.Authentication.Web.Core.WebTokenRequestStatus.ProviderError);
 
             var wamPlugin = Substitute.For<IWamPlugin>();
-            var logger = Substitute.For<ICoreLogger>();
+            var logger = Substitute.For<IMsalLogger>();
             wamPlugin.MapTokenRequestError(Windows.Security.Authentication.Web.Core.WebTokenRequestStatus.ProviderError, 0, true)
                 .Returns(Tuple.Create("some_provider_error", "", false));
 

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
@@ -22,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     [TestClass]
     public class WamAadPluginTests : TestBase
     {
-        private ICoreLogger _logger;
+        private IMsalLogger _logger;
         private IWamPlugin _aadPlugin;
         private IWamProxy _wamProxy;
         private IWebAccountProviderFactory _webAccountProviderFactory;
@@ -46,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestInitialize]
         public void Init()
         {
-            _logger = Substitute.For<ICoreLogger>();
+            _logger = Substitute.For<IMsalLogger>();
             _wamProxy = Substitute.For<IWamProxy>();
             _webAccountProviderFactory = Substitute.For<IWebAccountProviderFactory>();
             _accountPickerFactory = Substitute.For<IAccountPickerFactory>();

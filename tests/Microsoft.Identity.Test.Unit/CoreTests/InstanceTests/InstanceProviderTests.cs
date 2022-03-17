@@ -4,7 +4,6 @@
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.Utils;
@@ -16,7 +15,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     public class InstanceProviderTests : TestBase
     {
         private const string LoginMicrosoftOnlineCom = "login.microsoftonline.com";
-        private readonly ICoreLogger _logger = new NullLogger();
+        private readonly IMsalLogger _logger = new NullLogger();
 
         [TestMethod]
         public void StaticProviderPreservesStateAcrossInstances()

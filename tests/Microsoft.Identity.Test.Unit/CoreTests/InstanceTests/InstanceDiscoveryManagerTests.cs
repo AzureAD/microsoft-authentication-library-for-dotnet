@@ -4,7 +4,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -91,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Substitute.For<IHttpManager>(),
                 _networkCacheMetadataProvider);
 
-            _networkCacheMetadataProvider.GetMetadata("some_env.com", Arg.Any<ICoreLogger>()).Returns(_expectedResult);
+            _networkCacheMetadataProvider.GetMetadata("some_env.com", Arg.Any<IMsalLogger>()).Returns(_expectedResult);
 
             _discoveryManager = new InstanceDiscoveryManager(
               _harness.HttpManager,
@@ -108,13 +107,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 new[] { "env1", "env2" },
                 _testRequestContext)
                 .ConfigureAwait(false);
-            _networkCacheMetadataProvider.Received(1).GetMetadata("some_env.com", Arg.Any<ICoreLogger>());
+            _networkCacheMetadataProvider.Received(1).GetMetadata("some_env.com", Arg.Any<IMsalLogger>());
 
             InstanceDiscoveryMetadataEntry actualResult2 = await _discoveryManager.GetMetadataEntryAsync(
                 AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 _testRequestContext)
                 .ConfigureAwait(false);
-            _networkCacheMetadataProvider.Received(2).GetMetadata("some_env.com", Arg.Any<ICoreLogger>());
+            _networkCacheMetadataProvider.Received(2).GetMetadata("some_env.com", Arg.Any<IMsalLogger>());
             _networkCacheMetadataProvider.AddMetadata(null, null);
 
             // Assert
@@ -129,9 +128,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             var otherEnvs = new[] { "env1", "env2" };
 
             // No response from the static provider
-            _networkCacheMetadataProvider.GetMetadata("some_env.com", Arg.Any<ICoreLogger>()).Returns((InstanceDiscoveryMetadataEntry)null);
+            _networkCacheMetadataProvider.GetMetadata("some_env.com", Arg.Any<IMsalLogger>()).Returns((InstanceDiscoveryMetadataEntry)null);
 
-            _knownMetadataProvider.GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>()).Returns(_expectedResult);
+            _knownMetadataProvider.GetMetadata("some_env.com", otherEnvs, Arg.Any<IMsalLogger>()).Returns(_expectedResult);
 
             // Act
             InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
@@ -142,8 +141,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Assert
             Assert.AreSame(_expectedResult, actualResult, "The known metadata provider should be queried second");
-            _networkCacheMetadataProvider.Received(1).GetMetadata("some_env.com", Arg.Any<ICoreLogger>());
-            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>());
+            _networkCacheMetadataProvider.Received(1).GetMetadata("some_env.com", Arg.Any<IMsalLogger>());
+            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<IMsalLogger>());
         }
 
         [TestMethod]
@@ -176,7 +175,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             // Arrange
             _networkCacheMetadataProvider = new NetworkCacheMetadataProvider();
-            _knownMetadataProvider.GetMetadata("some_env.com", Enumerable.Empty<string>(), Arg.Any<ICoreLogger>()).Returns(_expectedResult);
+            _knownMetadataProvider.GetMetadata("some_env.com", Enumerable.Empty<string>(), Arg.Any<IMsalLogger>()).Returns(_expectedResult);
 
             // network fails with something other than invalid_instance exception
             _networkMetadataProvider
@@ -192,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Assert
             Assert.AreSame(_expectedResult, actualResult, "The known metadata provider should be queried second");
-            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", Enumerable.Empty<string>(), Arg.Any<ICoreLogger>());
+            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", Enumerable.Empty<string>(), Arg.Any<IMsalLogger>());
         }
 
         [TestMethod]
@@ -202,7 +201,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             _networkCacheMetadataProvider = new NetworkCacheMetadataProvider();
 
             // no known metadata 
-            _knownMetadataProvider.GetMetadata(null, null, Arg.Any<ICoreLogger>()).ReturnsForAnyArgs((InstanceDiscoveryMetadataEntry)null);
+            _knownMetadataProvider.GetMetadata(null, null, Arg.Any<IMsalLogger>()).ReturnsForAnyArgs((InstanceDiscoveryMetadataEntry)null);
 
             // network fails with something other than invalid_instance exception
             _networkMetadataProvider
@@ -216,7 +215,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 .ConfigureAwait(false);
 
             // Assert
-            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", Enumerable.Empty<string>(), Arg.Any<ICoreLogger>());
+            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", Enumerable.Empty<string>(), Arg.Any<IMsalLogger>());
             ValidateSingleEntryMetadata(new Uri("https://some_env.com/tid"), actualResult);
         }
 
@@ -238,7 +237,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // No response from the static and known provider
             _knownMetadataProvider
-                .GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>())
+                .GetMetadata("some_env.com", otherEnvs, Arg.Any<IMsalLogger>())
                 .Returns((InstanceDiscoveryMetadataEntry)null);
 
             _networkMetadataProvider
@@ -254,7 +253,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Assert
             Assert.AreSame(_expectedResult, actualResult, "The known metadata provider should be queried second");
-            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>());
+            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<IMsalLogger>());
             await _networkMetadataProvider.Received(1).GetMetadataAsync(authorityUri, _testRequestContext).ConfigureAwait(false);
         }
 
@@ -276,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // No response from the static and known provider
             _knownMetadataProvider
-                .GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>())
+                .GetMetadata("some_env.com", otherEnvs, Arg.Any<IMsalLogger>())
                 .Returns((InstanceDiscoveryMetadataEntry)null);
 
             _networkMetadataProvider
@@ -292,7 +291,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Assert
             Assert.AreSame(_expectedResult, actualResult, "The known metadata provider should be queried second");
-            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>());
+            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<IMsalLogger>());
             await _networkMetadataProvider.Received(1).GetMetadataAsync(authorityUri, _testRequestContext).ConfigureAwait(false);
         }
 
@@ -316,7 +315,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // No response from the static and known provider
             _knownMetadataProvider
-                .GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>())
+                .GetMetadata("some_env.com", otherEnvs, Arg.Any<IMsalLogger>())
                 .Returns((InstanceDiscoveryMetadataEntry)null);
 
             _networkMetadataProvider
@@ -332,7 +331,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Assert
             Assert.AreSame(_expectedResult, actualResult, "The known metadata provider should be queried second");
-            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>());
+            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<IMsalLogger>());
             await _networkMetadataProvider.Received(1).GetMetadataAsync(authorityUri, _testRequestContext).ConfigureAwait(false);
         }
 

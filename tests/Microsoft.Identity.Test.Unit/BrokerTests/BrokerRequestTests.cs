@@ -29,7 +29,6 @@ using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -295,7 +294,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
         internal class IosBrokerMock : NullBroker
         {
-            public IosBrokerMock(ICoreLogger logger) : base(logger)
+            public IosBrokerMock(IMsalLogger logger) : base(logger)
             {
 
             }
