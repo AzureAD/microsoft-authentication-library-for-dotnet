@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Text;
 using System.Threading;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers

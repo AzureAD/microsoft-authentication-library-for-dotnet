@@ -1,5 +1,6 @@
 ﻿#if SUPPORTS_BROKER
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -7,11 +8,13 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -32,7 +35,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     public class WamTests : TestBase
     {
         private CoreUIParent _coreUIParent;
-        private IMsalLogger _logger;
+        private ICoreLogger _logger;
         private IWamPlugin _aadPlugin;
         private IWamPlugin _msaPlugin;
         private IWamProxy _wamProxy;
@@ -51,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
-            _logger = Substitute.For<IMsalLogger>();
+            _logger = Substitute.For<ICoreLogger>();
             _aadPlugin = Substitute.For<IWamPlugin>();
             _msaPlugin = Substitute.For<IWamPlugin>();
             _wamProxy = Substitute.For<IWamProxy>();

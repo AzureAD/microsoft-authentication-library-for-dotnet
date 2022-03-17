@@ -6,6 +6,7 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Xamarin.UITest;
 using Microsoft.Identity.Test.Common;

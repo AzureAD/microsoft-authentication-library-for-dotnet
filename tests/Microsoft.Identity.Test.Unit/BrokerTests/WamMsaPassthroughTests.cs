@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -19,14 +22,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     public class WamMsaPassthroughTests : TestBase
     {
         private MsaPassthroughHandler _msaPassthroughHandler;
-        private IMsalLogger _logger;
+        private ICoreLogger _logger;
         private IWamPlugin _msaPlugin;
         private IWamProxy _wamProxy;
 
         [TestInitialize]
         public void Init()
         {
-            _logger = Substitute.For<IMsalLogger>();
+            _logger = Substitute.For<ICoreLogger>();
             _msaPlugin = Substitute.For<IWamPlugin>();
             _wamProxy = Substitute.For<IWamProxy>();
 

@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -21,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private IServiceBundle _serviceBundle;
         private IPlatformProxy _platformProxy;
-        private IMsalLogger _logger;
+        private ICoreLogger _logger;
         private ICryptographyManager _crypto;
 
         [TestInitialize]

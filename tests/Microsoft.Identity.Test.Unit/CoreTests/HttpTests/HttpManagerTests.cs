@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
 using NSubstitute;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using System.Threading;
 
@@ -38,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
                     null,
                     (IDictionary<string, string>)null,
-                    Substitute.For<IMsalLogger>()).Result;
+                    Substitute.For<ICoreLogger>()).Result;
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -73,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
                     queryParams,
                     bodyParameters,
-                    Substitute.For<IMsalLogger>()).Result;
+                    Substitute.For<ICoreLogger>()).Result;
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -97,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 var response = httpManager.SendGetAsync(
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
                     queryParams,
-                    Substitute.For<IMsalLogger>()).Result;
+                    Substitute.For<ICoreLogger>()).Result;
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -125,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     var response = httpManager.SendGetAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
                         queryParams,
-                        Substitute.For<IMsalLogger>(),
+                        Substitute.For<ICoreLogger>(),
                         cancellationToken: cts.Token).Result;
                     
                     Assert.Fail("Request should have failed due to cancelled token.");
@@ -150,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     var msalHttpResponse = await httpManager.SendGetAsync(
                                                                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 null,
-                                                                Substitute.For<IMsalLogger>(),
+                                                                Substitute.For<ICoreLogger>(),
                                                                 retry: false)
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
@@ -176,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     var msalHttpResponse = await httpManager.SendGetAsync(
                                                                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 null,
-                                                                Substitute.For<IMsalLogger>())
+                                                                Substitute.For<ICoreLogger>())
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
@@ -203,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
                 var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(
                     () => httpManager.SendGetAsync(
-                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"), null, Substitute.For<IMsalLogger>()))
+                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"), null, Substitute.For<ICoreLogger>()))
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(0, httpManager.QueueSize, "HttpManager must not retry because a RetryAfter header is present");
@@ -223,7 +225,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                                                             new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                             null,
                                                             new StringContent("body"),
-                                                            Substitute.For<IMsalLogger>())
+                                                            Substitute.For<ICoreLogger>())
                                                         .ConfigureAwait(false);
 
                 Assert.AreEqual(HttpStatusCode.BadGateway, msalHttpResponse.StatusCode);
@@ -244,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                                                                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 null,
                                                                 (IDictionary<string, string>)null,
-                                                               Substitute.For<IMsalLogger>())
+                                                               Substitute.For<ICoreLogger>())
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
@@ -269,7 +271,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     var msalHttpResponse = await httpManager.SendGetAsync(
                                                                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
-                                                                Substitute.For<IMsalLogger>())
+                                                                Substitute.For<ICoreLogger>())
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
@@ -296,7 +298,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                                                                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 new Dictionary<string, string>(),
-                                                                Substitute.For<IMsalLogger>())
+                                                                Substitute.For<ICoreLogger>())
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }

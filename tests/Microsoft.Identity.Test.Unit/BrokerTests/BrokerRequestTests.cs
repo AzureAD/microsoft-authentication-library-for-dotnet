@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -22,10 +23,13 @@ using NSubstitute.ExceptionExtensions;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.Http;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -291,7 +295,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
         internal class IosBrokerMock : NullBroker
         {
-            public IosBrokerMock(IMsalLogger logger) : base(logger)
+            public IosBrokerMock(ICoreLogger logger) : base(logger)
             {
 
             }
