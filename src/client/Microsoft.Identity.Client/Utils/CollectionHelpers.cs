@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 #if HAVE_METHOD_IMPL_ATTRIBUTE
 using System.Runtime.CompilerServices;
@@ -18,11 +17,19 @@ namespace Microsoft.Identity.Client.Utils
 #endif
         public static IReadOnlyList<T> GetEmptyReadOnlyList<T>()
         {
-#if !NET45
-            return Array.Empty<T>();
-#else
+#if NET45
             return new List<T>();
+#else
+            return Array.Empty<T>();
 #endif
+        }
+
+#if HAVE_METHOD_IMPL_ATTRIBUTE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static List<T> GetEmptyList<T>()
+        {
+            return new List<T>();
         }
 
         public static IDictionary<TKey, TValue> GetEmptyDictionary<TKey, TValue>()

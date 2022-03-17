@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client
             (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
 #endif
         }
-       
+
         private void UpdateAppMetadata(string clientId, string environment, string familyId)
         {
             if (_featureFlags.IsFociEnabled)
@@ -127,9 +127,11 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        // delete all cache entries with intersecting scopes.
-        // this should not happen but we have this as a safe guard
-        // against multiple matches.
+        /// <summary>
+        /// delete all cache entries with intersecting scopes.
+        /// this should not happen but we have this as a safe guard
+        /// against multiple matches.
+        /// </summary>
         private void DeleteAccessTokensWithIntersectingScopes(
             AuthenticationRequestParameters requestParams,
             IEnumerable<string> environmentAliases,
@@ -145,9 +147,9 @@ namespace Microsoft.Identity.Client
                     requestParams.Scope.AsSingleString());
             }
 
-            IList<MsalAccessTokenCacheItem> accessTokenItemList = new List<MsalAccessTokenCacheItem>();
+            var accessTokensToDelete = new List<MsalAccessTokenCacheItem>();
             var partitionKeyFromResponse = CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId);
-            Debug.Assert(partitionKeyFromResponse != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partition");
+            Debug.Assert(partitionKeyFromResponse != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
             foreach (var accessToken in Accessor.GetAllAccessTokens(partitionKeyFromResponse))
             {
@@ -158,23 +160,21 @@ namespace Microsoft.Identity.Client
                     accessToken.ScopeSet.Overlaps(scopeSet))
                 {
                     requestParams.RequestContext.Logger.Verbose("Intersecting scopes found");
-                    accessTokenItemList.Add(accessToken);
+                    accessTokensToDelete.Add(accessToken);
                 }
             }
 
-            requestParams.RequestContext.Logger.Info("Intersecting scope entries count - " + accessTokenItemList.Count);
+            requestParams.RequestContext.Logger.Info("Intersecting scope entries count - " + accessTokensToDelete.Count);
 
             if (!requestParams.IsClientCredentialRequest)
             {
                 // filter by identifier of the user instead
-                accessTokenItemList =
-                    accessTokenItemList.Where(
-                            item => item.HomeAccountId.Equals(homeAccountId, StringComparison.OrdinalIgnoreCase))
-                        .ToList();
-                requestParams.RequestContext.Logger.Info("Matching entries after filtering by user - " + accessTokenItemList.Count);
+                accessTokensToDelete.RemoveAll(
+                            item => !item.HomeAccountId.Equals(homeAccountId, StringComparison.OrdinalIgnoreCase));
+                requestParams.RequestContext.Logger.Info("Matching entries after filtering by user - " + accessTokensToDelete.Count);
             }
 
-            foreach (var cacheItem in accessTokenItemList)
+            foreach (var cacheItem in accessTokensToDelete)
             {
                 Accessor.DeleteAccessToken(cacheItem);
             }
@@ -200,33 +200,39 @@ namespace Microsoft.Identity.Client
             return homeAccIdMatch && clientIdMatch;
         }
 
-        private IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
+        private List<MsalRefreshTokenCacheItem> GetAllRefreshTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
         {
             var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
-            return filterByClientId
-                ? refreshTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
-                : refreshTokens;
+            if (filterByClientId)
+            {
+                refreshTokens.RemoveAll(x => !x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase));
+            }
+            return refreshTokens;
         }
 
-        private IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
+        private List<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
         {
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
-            return filterByClientId
-                ? accessTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
-                : accessTokens;
+            if (filterByClientId)
+            {
+                accessTokens.RemoveAll(x => !x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase));
+            }
+            return accessTokens;
         }
 
-        private IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokensWithNoLocks(bool filterByClientId, string partitionKey)
+        private List<MsalIdTokenCacheItem> GetAllIdTokensWithNoLocks(bool filterByClientId, string partitionKey)
         {
             var idTokens = Accessor.GetAllIdTokens(partitionKey);
-            return filterByClientId
-                ? idTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)).ToList()
-                : idTokens;
+            if (filterByClientId)
+            {
+                idTokens.RemoveAll(x => !x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase));
+            }
+            return idTokens;
         }
 
-        private static bool FrtExists(List<MsalRefreshTokenCacheItem> allRefreshTokens)
+        private static bool FrtExists(IEnumerable<MsalRefreshTokenCacheItem> refreshTokens)
         {
-            return allRefreshTokens.Any(rt => rt.IsFRT);
+            return refreshTokens.Any(rt => rt.IsFRT);
         }
     }
 }
