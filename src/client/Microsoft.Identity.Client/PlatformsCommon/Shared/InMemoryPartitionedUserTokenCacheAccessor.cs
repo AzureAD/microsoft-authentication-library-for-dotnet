@@ -204,9 +204,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
-        public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
+        public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, IMsalLogger requestlogger = null)
         {
-            _logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
+            var logger = requestlogger ?? _logger;
+            logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
             if (string.IsNullOrEmpty(partitionKey))
             {
                 return AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
@@ -220,9 +221,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
-        public virtual IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
+        public virtual IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, IMsalLogger requestlogger = null)
         {
-            _logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting refresh tokens: {RefreshTokenCacheDictionary.Count}");
+            var logger = requestlogger ?? _logger;
+            logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting refresh tokens: {RefreshTokenCacheDictionary.Count}");
             if (string.IsNullOrEmpty(partitionKey))
             {
                 return RefreshTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
@@ -236,7 +238,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
-        public virtual IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
+        public virtual IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, IMsalLogger requestlogger = null)
         {
             if (string.IsNullOrEmpty(partitionKey))
             {
@@ -251,7 +253,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
-        public virtual IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
+        public virtual IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, IMsalLogger requestlogger = null)
         {
             if (string.IsNullOrEmpty(partitionKey))
             {
@@ -275,9 +277,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             throw new NotImplementedException();
         }
 
-        public virtual void Clear()
+        public virtual void Clear(IMsalLogger requestlogger = null)
         {
-            _logger.Always("[Clear] Clearing access token cache data.");
+            var logger = requestlogger ?? _logger;
+            logger.Always("[Clear] Clearing access token cache data.");
             AccessTokenCacheDictionary.Clear();
             RefreshTokenCacheDictionary.Clear();
             IdTokenCacheDictionary.Clear();

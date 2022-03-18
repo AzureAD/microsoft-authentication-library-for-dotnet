@@ -33,7 +33,8 @@ namespace Microsoft.Identity.Client.Internal
                 config.LogLevel,
                 config.EnablePiiLogging,
                 config.IsDefaultPlatformLoggingEnabled,
-                config.LoggingCallback);
+                config.LoggingCallback,
+                config.LogLevelCallback);
 
             PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(ApplicationLogger);
             HttpManager = config.HttpManager ?? new HttpManager(

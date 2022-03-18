@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Cache
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
-        IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null);
+        IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null, IMsalLogger requestlogger = null);
 
         /// <summary>
         /// Returns all refresh tokens from the underlying cache collection.
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Cache
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
-        IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null);
+        IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null, IMsalLogger requestlogger = null);
 
         /// <summary>
         /// Returns all ID tokens from the underlying cache collection.
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Cache
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
-        IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null);
+        IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null, IMsalLogger requestlogger = null);
 
         /// <summary>
         /// Returns all accounts from the underlying cache collection.
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Cache
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
-        IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null);
+        IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null, IMsalLogger requestlogger = null);
 
         IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata();
 
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Cache
         void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);
 #endif
 
-        void Clear();
+        void Clear(IMsalLogger requestlogger = null);
 
         /// <remarks>
         /// WARNING: this API is slow as it loads all tokens, not just from 1 partition. 
