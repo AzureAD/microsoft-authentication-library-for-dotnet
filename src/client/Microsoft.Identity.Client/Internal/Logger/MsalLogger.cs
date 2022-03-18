@@ -197,11 +197,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            if (_logLevelCallback != null)
-            {
-                logLevel = _logLevelCallback.Invoke();
-            }
-
             if (IsLoggingEnabled(logLevel))
             {
                 bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);

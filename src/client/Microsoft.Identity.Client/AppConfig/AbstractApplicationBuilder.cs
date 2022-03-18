@@ -274,13 +274,25 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
+        /// Sets the Debug logging callback to a default debug method which displays
+        /// the level of the message and the message itself. For details see https://aka.ms/msal-net-logging
         /// </summary>
-        /// <param name="loggingCallback"></param>
-        /// <param name="logLevelCallback"></param>
-        /// <param name="enablePiiLogging"></param>
-        /// <param name="enableDefaultPlatformLogging"></param>
-        /// <returns></returns>
+        /// <param name="loggingCallback">Called when a log message is logged</param>
+        /// <param name="logLevelCallback">A callback that provides the desired level of logging.</param>
+        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
+        /// Personally Identifiable Information (PII).
+        /// PII logs are never written to default outputs like Console, Logcat or NSLog
+        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
+        /// You can set it to <c>true</c> for advanced debugging requiring PII
+        /// </param>
+        /// <param name="enableDefaultPlatformLogging">Flag to enable/disable logging to platform defaults.
+        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
+        /// In android, logcat is used. The default value is <c>false</c>
+        /// </param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
+        /// was already set on the application builder by calling <see cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
+        /// <seealso cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
         public T WithLogging(
             LogCallback loggingCallback,
             Func<LogLevel> logLevelCallback,
