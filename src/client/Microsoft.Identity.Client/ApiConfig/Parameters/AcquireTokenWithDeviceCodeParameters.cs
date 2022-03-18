@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
@@ -11,7 +12,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public Func<DeviceCodeResult, Task> DeviceCodeResultCallback { get; set; }
 
         /// <inheritdoc />
-        public void LogParameters(IMsalLogger logger)
+        public void LogParameters(ICoreLogger logger)
         {
         }
     }

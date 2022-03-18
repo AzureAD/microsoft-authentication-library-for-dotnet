@@ -7,7 +7,10 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance.Discovery

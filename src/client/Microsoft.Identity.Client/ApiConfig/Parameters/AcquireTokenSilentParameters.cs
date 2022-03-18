@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Identity.Client.ApiConfig.Parameters
+﻿using Microsoft.Identity.Client.Core;
+
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
     internal class AcquireTokenSilentParameters : IAcquireTokenParameters
     {
@@ -8,7 +10,7 @@
         public bool? SendX5C { get; set; } 
 
         /// <inheritdoc />
-        public void LogParameters(IMsalLogger logger)
+        public void LogParameters(ICoreLogger logger)
         {
             logger.Info("=== AcquireTokenSilent Parameters ===");
             logger.Info("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));

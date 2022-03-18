@@ -24,6 +24,7 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Identity.Json.Utilities;
 using System.Globalization;

@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -166,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit
 
         private static void ValidateCacheEntitiesEnvironment(ITokenCacheInternal cache, string expectedEnvironment)
         {
-            IMsalLogger logger = Substitute.For<IMsalLogger>();
+            ICoreLogger logger = Substitute.For<ICoreLogger>();
             IEnumerable<Client.Cache.Items.MsalAccessTokenCacheItem> accessTokens = cache.Accessor.GetAllAccessTokens();
             foreach (Client.Cache.Items.MsalAccessTokenCacheItem at in accessTokens)
             {

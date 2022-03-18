@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -196,7 +197,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client.AddHeader(name, value);
         }
 
-        private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, IMsalLogger logger)
+        private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, ICoreLogger logger)
         {
             UriBuilder builder = new UriBuilder(tokenEndpoint);
             builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);

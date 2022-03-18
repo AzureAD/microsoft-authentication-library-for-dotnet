@@ -2,12 +2,17 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.Platforms.net45.Native

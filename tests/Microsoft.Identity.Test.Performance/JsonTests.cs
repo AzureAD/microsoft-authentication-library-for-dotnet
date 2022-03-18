@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;

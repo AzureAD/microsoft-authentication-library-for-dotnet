@@ -2,7 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared

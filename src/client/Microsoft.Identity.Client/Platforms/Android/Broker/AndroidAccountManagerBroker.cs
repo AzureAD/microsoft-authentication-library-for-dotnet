@@ -3,17 +3,22 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using AndroidNative = Android;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Http;
+using System.Net;
 using Android.OS;
+using System.Linq;
 using Android.Accounts;
 using Java.Util.Concurrent;
 using Microsoft.Identity.Client.Utils;
@@ -27,10 +32,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
     {
         private long AccountManagerTimeoutSeconds { get; } = 5 * 60;
         private readonly AndroidBrokerHelper _brokerHelper;
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
         private readonly Activity _parentActivity;
 
-        public AndroidAccountManagerBroker(CoreUIParent uiParent, IMsalLogger logger)
+        public AndroidAccountManagerBroker(CoreUIParent uiParent, ICoreLogger logger)
         {
             _parentActivity = uiParent?.Activity;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

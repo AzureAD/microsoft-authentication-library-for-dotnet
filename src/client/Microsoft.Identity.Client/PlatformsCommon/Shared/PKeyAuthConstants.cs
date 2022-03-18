@@ -1,4 +1,10 @@
-﻿namespace Microsoft.Identity.Client.PlatformsCommon.Shared
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal class PKeyAuthConstants
     {

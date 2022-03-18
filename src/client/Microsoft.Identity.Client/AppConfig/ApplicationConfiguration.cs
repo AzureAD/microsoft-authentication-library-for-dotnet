@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
 
         public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
 
-        public Func<CoreUIParent, ApplicationConfiguration, IMsalLogger, IBroker> BrokerCreatorFunc { get; set; }
+        public Func<CoreUIParent, ApplicationConfiguration, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
         public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }
 
         /// <summary>

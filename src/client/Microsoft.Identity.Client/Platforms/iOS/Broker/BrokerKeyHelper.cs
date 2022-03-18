@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Foundation;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Security;
 using System.IO;
@@ -17,7 +18,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     /// </summary>
     internal static class BrokerKeyHelper
     {
-        internal static byte[] GetOrCreateBrokerKey(IMsalLogger logger)
+        internal static byte[] GetOrCreateBrokerKey(ICoreLogger logger)
         {
             if (TryGetBrokerKey(out byte[] brokerKey))
             {
@@ -30,7 +31,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return brokerKey;
         }
 
-        private static byte[] CreateAndStoreBrokerKey(IMsalLogger logger)
+        private static byte[] CreateAndStoreBrokerKey(ICoreLogger logger)
         {
             logger.Info("CreateAndStoreBrokerKey - creating a new key");
 
@@ -104,7 +105,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return false;
         }
 
-        internal static string DecryptBrokerResponse(string encryptedBrokerResponse, IMsalLogger logger)
+        internal static string DecryptBrokerResponse(string encryptedBrokerResponse, ICoreLogger logger)
         {
             byte[] outputBytes = Base64UrlHelpers.DecodeBytes(encryptedBrokerResponse);
 

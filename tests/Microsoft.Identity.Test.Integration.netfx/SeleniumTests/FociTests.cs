@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     {
         private static readonly string[] s_scopes = new[] { "https://graph.microsoft.com/.default" };
 
-    #region MSTest Hooks
+#region MSTest Hooks
         /// <summary>
         /// Initialized by MSTest (do not make private or readonly)
         /// </summary>
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-    #endregion
+#endregion
 
         /// <summary>
         /// Tests: 

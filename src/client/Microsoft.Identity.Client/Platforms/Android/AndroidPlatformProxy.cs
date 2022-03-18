@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Android.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
     internal class AndroidPlatformProxy : AbstractPlatformProxy
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
-        public AndroidPlatformProxy(IMsalLogger logger) : base(logger)
+        public AndroidPlatformProxy(ICoreLogger logger) : base(logger)
         {
         }
 

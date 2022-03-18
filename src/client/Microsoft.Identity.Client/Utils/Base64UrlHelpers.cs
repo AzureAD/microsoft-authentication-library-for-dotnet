@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Utils

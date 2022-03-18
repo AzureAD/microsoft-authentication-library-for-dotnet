@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         private readonly string _optionalBrokerInstallUrl; // can be null
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
 
         public BrokerInteractiveRequestComponent(
             AuthenticationRequestParameters authenticationRequestParameters,

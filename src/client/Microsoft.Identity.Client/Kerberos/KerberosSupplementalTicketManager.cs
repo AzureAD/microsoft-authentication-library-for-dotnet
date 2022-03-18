@@ -12,6 +12,7 @@ using Microsoft.Identity.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Kerberos

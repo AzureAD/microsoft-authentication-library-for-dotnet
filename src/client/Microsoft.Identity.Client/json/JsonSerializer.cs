@@ -30,6 +30,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters;
+using Microsoft.Identity.Json.Converters;
 using Microsoft.Identity.Json.Serialization;
 using Microsoft.Identity.Json.Utilities;
 using System.Runtime.Serialization;

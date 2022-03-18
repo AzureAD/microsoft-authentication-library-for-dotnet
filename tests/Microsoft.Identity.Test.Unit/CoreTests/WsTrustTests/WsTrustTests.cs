@@ -10,6 +10,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 using System.Linq;

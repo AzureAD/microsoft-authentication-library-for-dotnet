@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Utils
 {
@@ -32,7 +33,7 @@ namespace Microsoft.Identity.Client.Utils
         internal static IReadOnlyList<T> FilterWithLogging<T>(
             this IReadOnlyList<T> list,
             Func<T, bool> predicate,
-            IMsalLogger logger,
+            ICoreLogger logger,
             string logPrefix)
         {
             if (logger.IsLoggingEnabled(LogLevel.Verbose))

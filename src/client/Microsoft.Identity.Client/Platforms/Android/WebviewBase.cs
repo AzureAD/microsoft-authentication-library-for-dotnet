@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
@@ -14,7 +15,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         protected static SemaphoreSlim returnedUriReady;
         protected static AuthorizationResult authorizationResult;
 
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, IMsalLogger logger)
+        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, ICoreLogger logger)
         {
             if (returnedUriReady != null)
             {

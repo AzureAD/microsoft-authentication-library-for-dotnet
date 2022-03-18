@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client
           bool hasTokens,
           DateTimeOffset? suggestedCacheExpiry,
           CancellationToken cancellationToken,
-          IMsalLogger msalLogger)
+          ICoreLogger msalLogger)
             : this(tokenCache,
                    clientId,
                    account,
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
             DateTimeOffset? suggestedCacheExpiry,
             CancellationToken cancellationToken,
             Guid correlationId,
-            IMsalLogger msalLogger)
+            ICoreLogger msalLogger)
         {
             TokenCache = tokenCache;
             ClientId = clientId;
@@ -150,6 +150,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Logger to be used to log important information during cahcing operations.
         /// </summary>
-        public IMsalLogger MsalLogger { get; }
+        public ICoreLogger MsalLogger { get; }
     }
 }

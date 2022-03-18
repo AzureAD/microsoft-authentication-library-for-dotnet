@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Utils

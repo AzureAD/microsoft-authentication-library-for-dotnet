@@ -2,7 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Windows.Security.Credentials;
 
@@ -19,13 +23,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     {
         public const string TransferTokenScopes =
             "openid profile offline_access service::http://Passport.NET/purpose::PURPOSE_AAD_WAM_TRANSFER";
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
         private readonly IWamPlugin _msaPlugin;
         private readonly IWamProxy _wamProxy;
         private readonly IntPtr _parentHandle;
 
         public MsaPassthroughHandler(
-            IMsalLogger logger,
+            ICoreLogger logger,
             IWamPlugin msaPlugin,
             IWamProxy wamProxy,
             IntPtr parentHandle)

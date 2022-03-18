@@ -30,6 +30,7 @@ using System.Text;
 using System.IO;
 using Microsoft.Identity.Json.Serialization;
 using Microsoft.Identity.Json.Utilities;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Json.Bson
 {

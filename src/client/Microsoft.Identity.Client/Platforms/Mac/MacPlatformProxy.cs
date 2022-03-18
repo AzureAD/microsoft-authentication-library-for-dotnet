@@ -8,9 +8,11 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
@@ -22,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
     {
         internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
 
-        public MacPlatformProxy(IMsalLogger logger)
+        public MacPlatformProxy(ICoreLogger logger)
             : base(logger)
         {
         }

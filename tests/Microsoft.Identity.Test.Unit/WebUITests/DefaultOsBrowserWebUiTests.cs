@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -16,6 +17,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Microsoft.Identity.Test.Unit.WebUITests
 {
@@ -45,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         private const int TestPort = 50997;
         private IUriInterceptor _tcpInterceptor;
         private IPlatformProxy _platformProxy;
-        private IMsalLogger _logger;
+        private ICoreLogger _logger;
 
         [TestInitialize]
         public override void TestInitialize()
@@ -53,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             base.TestInitialize();
             _tcpInterceptor = Substitute.For<IUriInterceptor>();
             _platformProxy = Substitute.For<IPlatformProxy>();
-            _logger = Substitute.For<IMsalLogger>();
+            _logger = Substitute.For<ICoreLogger>();
 
         }
 

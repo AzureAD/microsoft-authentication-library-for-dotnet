@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, IMsalLogger logger)
+        private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ICoreLogger logger)
         {
             var sb = new StringBuilder(250);
             sb.AppendLine();

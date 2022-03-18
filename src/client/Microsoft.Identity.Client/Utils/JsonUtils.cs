@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Utils

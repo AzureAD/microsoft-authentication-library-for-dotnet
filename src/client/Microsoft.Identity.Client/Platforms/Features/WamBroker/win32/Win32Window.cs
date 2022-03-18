@@ -2,7 +2,13 @@
 // Licensed under the MIT License.	// Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker.SplashScreen
 {

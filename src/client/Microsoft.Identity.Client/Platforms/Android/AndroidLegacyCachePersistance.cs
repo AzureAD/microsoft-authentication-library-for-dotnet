@@ -5,6 +5,7 @@ using System;
 using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -14,9 +15,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private const string SharedPreferencesName = "ActiveDirectoryAuthenticationLibrary";
         private const string SharedPreferencesKey = "cache";
 
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
 
-        public AndroidLegacyCachePersistence(IMsalLogger logger)
+        public AndroidLegacyCachePersistence(ICoreLogger logger)
         {
             _logger = logger;
         }

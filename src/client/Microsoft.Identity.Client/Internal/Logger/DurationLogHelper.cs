@@ -8,13 +8,13 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal sealed class DurationLogHelper : IDisposable
     {
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
         private readonly string _measuredBlockName;
         private readonly LogLevel _logLevel;
         private readonly Stopwatch _stopwatch;
 
         public DurationLogHelper(
-            IMsalLogger logger,
+            ICoreLogger logger,
             string measuredBlockName,
             LogLevel logLevel = LogLevel.Verbose)
         {

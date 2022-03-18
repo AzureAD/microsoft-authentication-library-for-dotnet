@@ -1,8 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Android.Content;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
@@ -20,7 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and re-injected into the response at the end.
         public static string InteractiveRequestCorrelationId { get; set; }
 
-        internal static void SetBrokerResult(Intent data, int resultCode, IMsalLogger unreliableLogger)
+        internal static void SetBrokerResult(Intent data, int resultCode, ICoreLogger unreliableLogger)
         {
             try
             {

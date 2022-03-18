@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     /// </summary>
     internal static class LegacyOsWamProxy
     {
-        public static async Task<IReadOnlyList<WebAccount>> FindAllAccountsAsync(WebAccountProvider provider, string clientID, IMsalLogger logger)
+        public static async Task<IReadOnlyList<WebAccount>> FindAllAccountsAsync(WebAccountProvider provider, string clientID, ICoreLogger logger)
         {
             FindAllAccountsResult findResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider, clientID);
 

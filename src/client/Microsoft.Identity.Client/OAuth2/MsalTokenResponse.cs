@@ -9,7 +9,9 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Core;
 using System.Text;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -180,7 +182,7 @@ namespace Microsoft.Identity.Client.OAuth2
             return msalTokenResponse;
         }
 
-        public void Log(IMsalLogger logger, LogLevel logLevel)
+        public void Log(ICoreLogger logger, LogLevel logLevel)
         {
             if (logger.IsLoggingEnabled(logLevel))
             {

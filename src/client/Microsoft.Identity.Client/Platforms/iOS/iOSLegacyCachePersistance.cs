@@ -4,6 +4,8 @@
 using System;
 using Foundation;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Security;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
@@ -14,9 +16,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
         private string _keychainGroup;
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
 
-        public iOSLegacyCachePersistence(IMsalLogger logger)
+        public iOSLegacyCachePersistence(ICoreLogger logger)
         {
             _logger = logger;
         }

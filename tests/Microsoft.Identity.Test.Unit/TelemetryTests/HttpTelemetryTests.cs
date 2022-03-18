@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Http;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;

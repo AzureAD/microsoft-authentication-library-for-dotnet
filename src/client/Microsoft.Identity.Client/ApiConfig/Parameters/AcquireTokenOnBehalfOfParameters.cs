@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Text;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
@@ -18,7 +19,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool ForceRefresh { get; set; }
 
         /// <inheritdoc />
-        public void LogParameters(IMsalLogger logger)
+        public void LogParameters(ICoreLogger logger)
         {
             var builder = new StringBuilder();
             builder.AppendLine("=== OnBehalfOfParameters ===");

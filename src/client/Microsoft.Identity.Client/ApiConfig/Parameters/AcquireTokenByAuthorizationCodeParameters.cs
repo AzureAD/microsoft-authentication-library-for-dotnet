@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public string PkceCodeVerifier { get; set; }
 
-        public void LogParameters(IMsalLogger logger)
+        public void LogParameters(ICoreLogger logger)
         {
         }
     }

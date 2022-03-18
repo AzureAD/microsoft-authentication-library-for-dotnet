@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
@@ -87,7 +88,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         public InstanceDiscoveryMetadataEntry GetMetadata(
             string environment,
             IEnumerable<string> existingEnvironmentsInCache,
-            IMsalLogger logger)
+            ICoreLogger logger)
         {
             if (existingEnvironmentsInCache == null)
             {

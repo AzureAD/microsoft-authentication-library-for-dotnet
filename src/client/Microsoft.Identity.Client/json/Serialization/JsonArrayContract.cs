@@ -26,12 +26,15 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 using Microsoft.Identity.Json.Utilities;
 using System.Collections;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else
+using System.Linq;
 
 #endif
 

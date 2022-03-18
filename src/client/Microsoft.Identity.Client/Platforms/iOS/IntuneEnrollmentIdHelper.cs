@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Json;
 #if iOS
 using Foundation;
@@ -13,7 +15,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     {
         const string EnrollmentIdKey = "intune_app_protection_enrollment_id_V1";
 
-        internal static string GetEnrollmentId(IMsalLogger logger)
+        internal static string GetEnrollmentId(ICoreLogger logger)
         {
 #if iOS
             var keychainData = NSUserDefaults.StandardUserDefaults.StringForKey(EnrollmentIdKey);

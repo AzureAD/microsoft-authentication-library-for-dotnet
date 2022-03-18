@@ -19,9 +19,9 @@ namespace Microsoft.Identity.Client.Internal.Broker
     /// </summary>
     internal class NullBroker : IBroker
     {
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
 
-        public NullBroker(IMsalLogger logger)
+        public NullBroker(ICoreLogger logger)
         {
             _logger = logger ?? new NullLogger();
         }

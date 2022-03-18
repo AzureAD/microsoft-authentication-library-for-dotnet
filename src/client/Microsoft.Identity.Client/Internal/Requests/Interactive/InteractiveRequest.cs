@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
@@ -28,7 +29,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AuthenticationRequestParameters _requestParams;
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private readonly IServiceBundle _serviceBundle;
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
         private const string InstanceAwareParam = "instance_aware";
 
         #region For Test

@@ -9,13 +9,13 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-    internal class MsalLogger : IMsalLogger
+    internal class MsalLogger : ICoreLogger
     {
         private readonly IPlatformLogger _platformLogger;
         private readonly LogCallback _loggingCallback;
         private readonly LogLevel _minLogLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
-        private static readonly Lazy<IMsalLogger> s_nullLogger = new Lazy<IMsalLogger>(() => new NullLogger());
+        private static readonly Lazy<ICoreLogger> s_nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
 
         internal MsalLogger(
             Guid correlationId,
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             }
         }
 
-        public static IMsalLogger Create(
+        public static ICoreLogger Create(
             Guid correlationId,
             ApplicationConfiguration config,
             bool isDefaultPlatformLoggingEnabled = false)
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 config?.LogLevelCallback);
         }
 
-        public static IMsalLogger NullLogger => s_nullLogger.Value;
+        public static ICoreLogger NullLogger => s_nullLogger.Value;
 
         private readonly string _correlationId;
 

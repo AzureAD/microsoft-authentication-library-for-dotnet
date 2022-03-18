@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
     internal class NetDesktopPlatformProxy : AbstractPlatformProxy
     {
         /// <inheritdoc />
-        public NetDesktopPlatformProxy(IMsalLogger logger)
+        public NetDesktopPlatformProxy(ICoreLogger logger)
             : base(logger)
         {
         }

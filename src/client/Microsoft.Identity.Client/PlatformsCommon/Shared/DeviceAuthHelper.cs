@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared

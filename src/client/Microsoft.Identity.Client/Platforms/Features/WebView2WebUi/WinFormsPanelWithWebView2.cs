@@ -4,6 +4,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Web.WebView2.Core;
@@ -16,7 +17,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
     {
         private const int UIWidth = 566;
         private readonly EmbeddedWebViewOptions _embeddedWebViewOptions;
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
         private readonly Uri _startUri;
         private readonly Uri _endUri;
         private WebView2 _webView2;
@@ -29,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         public WinFormsPanelWithWebView2(
          object ownerWindow,
          EmbeddedWebViewOptions embeddedWebViewOptions,
-         IMsalLogger logger,
+         ICoreLogger logger,
          Uri startUri,
          Uri endUri)
         {

@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -13,7 +15,7 @@ namespace Microsoft.Identity.Client.Cache
         private const int SchemaVersion = 3;
         private const string Delimiter = ":::";
 
-        public static byte[] Serialize(IMsalLogger logger, IDictionary<AdalTokenCacheKey, AdalResultWrapper> tokenCacheDictionary)
+        public static byte[] Serialize(ICoreLogger logger, IDictionary<AdalTokenCacheKey, AdalResultWrapper> tokenCacheDictionary)
         {
             using (Stream stream = new MemoryStream())
             {
@@ -36,7 +38,7 @@ namespace Microsoft.Identity.Client.Cache
             }
         }
 
-        public static IDictionary<AdalTokenCacheKey, AdalResultWrapper> Deserialize(IMsalLogger logger, byte[] state)
+        public static IDictionary<AdalTokenCacheKey, AdalResultWrapper> Deserialize(ICoreLogger logger, byte[] state)
         {
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                 new Dictionary<AdalTokenCacheKey, AdalResultWrapper>();

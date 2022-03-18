@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Http
@@ -42,7 +43,7 @@ namespace Microsoft.Identity.Client.Http
             }
         }
 
-        public static void ValidateIosBrokerRedirectUri(Uri redirectUri, string bundleId, IMsalLogger logger)
+        public static void ValidateIosBrokerRedirectUri(Uri redirectUri, string bundleId, ICoreLogger logger)
         {
             string expectedRedirectUri = $"msauth.{bundleId}://auth";
 

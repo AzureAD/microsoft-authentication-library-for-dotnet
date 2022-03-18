@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client.Platforms.Android

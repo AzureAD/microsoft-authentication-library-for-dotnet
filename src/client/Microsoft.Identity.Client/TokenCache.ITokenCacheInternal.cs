@@ -349,7 +349,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal /* for testing */ static DateTimeOffset? CalculateSuggestedCacheExpiry(
             ITokenCacheAccessor accessor, 
-            IMsalLogger logger)
+            ICoreLogger logger)
         {
             // If we have refresh tokens in the cache, we cannot suggest expiration
             // because refresh token expiration is not disclosed to SDKs and RTs are long lived anyway (3 months by default)
@@ -1154,7 +1154,7 @@ namespace Microsoft.Identity.Client
 
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters)
         {
-            IMsalLogger logger = requestParameters.RequestContext.Logger;
+            ICoreLogger logger = requestParameters.RequestContext.Logger;
             logger.Verbose($"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
             await _semaphoreSlim.WaitAsync(requestParameters.RequestContext.UserCancellationToken).ConfigureAwait(false);
             logger.Verbose("[RemoveAccountAsync] Entered token cache semaphore");

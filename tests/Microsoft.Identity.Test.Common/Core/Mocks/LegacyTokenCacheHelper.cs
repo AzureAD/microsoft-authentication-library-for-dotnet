@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Unit;
 
@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal class LegacyTokenCacheHelper
     {
-        internal static void PopulateLegacyCache(IMsalLogger logger, ILegacyCachePersistence legacyCachePersistence, int tokenQuantity = 1)
+        internal static void PopulateLegacyCache(ICoreLogger logger, ILegacyCachePersistence legacyCachePersistence, int tokenQuantity = 1)
         {
             for (int i = 1; i <= tokenQuantity; i++)
             {
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
         }
 
-        internal static void PopulateLegacyCache(IMsalLogger logger, ILegacyCachePersistence legacyCachePersistence)
+        internal static void PopulateLegacyCache(ICoreLogger logger, ILegacyCachePersistence legacyCachePersistence)
         {
             PopulateLegacyWithRtAndId(
                 logger,
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         internal static void PopulateLegacyWithRtAndId(
-            IMsalLogger logger,
+            ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
             string clientId,
             string env,
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         internal static void PopulateLegacyWithRtAndId(
-            IMsalLogger logger,
+            ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
             string clientId,
             string env,

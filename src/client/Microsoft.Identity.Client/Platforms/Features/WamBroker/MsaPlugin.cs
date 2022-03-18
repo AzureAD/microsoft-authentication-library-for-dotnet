@@ -26,9 +26,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private const string MsaErrorCode = "wam_msa_error";
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
 
-        public MsaPlugin(IWamProxy wamProxy, IWebAccountProviderFactory webAccountProviderFactory, IMsalLogger logger)
+        public MsaPlugin(IWamProxy wamProxy, IWebAccountProviderFactory webAccountProviderFactory, ICoreLogger logger)
         {
             _wamProxy = wamProxy;
             _webAccountProviderFactory = webAccountProviderFactory;

@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Utils
 {
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Client.Utils
             return unixTimestamp;
         }
 
-        public static long GetDurationFromWindowsTimestamp(string windowsTimestampInFuture, IMsalLogger logger)
+        public static long GetDurationFromWindowsTimestamp(string windowsTimestampInFuture, ICoreLogger logger)
         {
             if (string.IsNullOrEmpty(windowsTimestampInFuture))
             {

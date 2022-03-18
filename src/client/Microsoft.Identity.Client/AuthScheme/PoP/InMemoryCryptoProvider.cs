@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Security.Cryptography;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP

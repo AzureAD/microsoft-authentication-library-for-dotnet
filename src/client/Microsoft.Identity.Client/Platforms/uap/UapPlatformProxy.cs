@@ -7,15 +7,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.UI;
 using Windows.ApplicationModel;
+using Windows.Networking;
+using Windows.Networking.Connectivity;
 using Windows.Security.Authentication.Web;
 using Windows.Security.ExchangeActiveSyncProvisioning;
+using Windows.Storage;
 using Windows.System;
 
 namespace Microsoft.Identity.Client.Platforms.uap
@@ -25,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
     /// </summary>
     internal class UapPlatformProxy : AbstractPlatformProxy
     {
-        public UapPlatformProxy(IMsalLogger logger)
+        public UapPlatformProxy(ICoreLogger logger)
             : base(logger)
         {
         }

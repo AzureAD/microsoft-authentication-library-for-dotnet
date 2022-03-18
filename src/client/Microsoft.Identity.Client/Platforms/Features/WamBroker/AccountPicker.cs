@@ -4,10 +4,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
+using System.Runtime.InteropServices;
 
 #if !UAP10_0
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
@@ -28,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     internal class AccountPicker : IAccountPicker
     {
         private readonly IntPtr _parentHandle;
-        private readonly IMsalLogger _logger;
+        private readonly ICoreLogger _logger;
         private readonly SynchronizationContext _synchronizationContext;
         private readonly Authority _authority;
         private readonly bool _isMsaPassthrough;
@@ -38,7 +40,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public AccountPicker(
             IntPtr parentHandle,
-            IMsalLogger logger,
+            ICoreLogger logger,
             SynchronizationContext synchronizationContext,
             Authority authority,
             bool isMsaPassthrough, 

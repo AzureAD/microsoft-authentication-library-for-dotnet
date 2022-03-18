@@ -26,13 +26,16 @@
 using System;
 using System.Collections;
 #if HAVE_CONCURRENT_DICTIONARY
+using System.Collections.Concurrent;
 #endif
+using Microsoft.Identity.Json.Schema;
 using System.Collections.Generic;
 using System.ComponentModel;
 #if HAVE_DYNAMIC
 using System.Dynamic;
 #endif
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
 #if HAVE_CAS
@@ -48,6 +51,7 @@ using Microsoft.Identity.Json.Utilities.LinqBridge;
 using System.Linq;
 
 #endif
+using Microsoft.Identity.Json.Serialization;
 
 namespace Microsoft.Identity.Json.Serialization
 {

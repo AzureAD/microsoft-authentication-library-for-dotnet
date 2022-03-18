@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

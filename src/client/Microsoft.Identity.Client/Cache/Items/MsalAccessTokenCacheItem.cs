@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;

@@ -2,10 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -14,14 +17,18 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Integration.net45;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
