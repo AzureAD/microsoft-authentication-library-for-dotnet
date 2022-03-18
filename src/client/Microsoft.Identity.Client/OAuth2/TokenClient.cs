@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client.AddHeader(name, value);
         }
 
-        private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, ICoreLogger logger)
+        private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, Core.ICoreLogger logger)
         {
             UriBuilder builder = new UriBuilder(tokenEndpoint);
             builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);

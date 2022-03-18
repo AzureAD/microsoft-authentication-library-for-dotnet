@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {

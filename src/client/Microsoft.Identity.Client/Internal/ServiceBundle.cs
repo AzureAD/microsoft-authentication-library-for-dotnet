@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -12,6 +13,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Http;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Internal
@@ -31,8 +33,7 @@ namespace Microsoft.Identity.Client.Internal
                 config.LogLevel,
                 config.EnablePiiLogging,
                 config.IsDefaultPlatformLoggingEnabled,
-                config.LoggingCallback,
-                config.LogLevelCallback);
+                config.LoggingCallback);
 
             PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(ApplicationLogger);
             HttpManager = config.HttpManager ?? new HttpManager(
@@ -56,9 +57,6 @@ namespace Microsoft.Identity.Client.Internal
                 AuthorityManager.ClearValidationCache();
                 PoPProviderFactory.Reset();
             }
-
-            ClientName = config.ClientName;
-            ClientVersion = config.ClientName;
         }
 
         /// <summary>
@@ -96,8 +94,5 @@ namespace Microsoft.Identity.Client.Internal
         {
             PlatformProxy = platformProxy;
         }
-
-        public string ClientName { get; }
-        public string ClientVersion { get; }
     }
 }

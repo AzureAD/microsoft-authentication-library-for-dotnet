@@ -3,6 +3,7 @@
 
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using System;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Factories

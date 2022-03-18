@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
