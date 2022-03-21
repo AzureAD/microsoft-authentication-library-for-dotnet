@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.1.32210.238
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32228.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9B0B5396-4D95-4C15-82ED-DC22B5A3123F}"
 EndProject
@@ -33,8 +33,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopTestApp", "tests\dev
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.UIAutomation.Infrastructure", "tests\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.UIAutomation.Infrastructure.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Android.UIAutomation", "tests\Microsoft.Identity.Test.Android.UIAutomation\Microsoft.Identity.Test.Android.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
-EndProject
+#OneBranch CredScan Work around for build
+#Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Android.UIAutomation", "tests\Microsoft.Identity.Test.Android.UIAutomation\Microsoft.Identity.Test.Android.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
+#EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.LabInfrastructure", "tests\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj", "{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572-BBD7-424E-81D5-E59E6884EB3A}"
@@ -430,34 +431,6 @@ Global
 		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x64.Build.0 = Release|Any CPU
 		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x86.ActiveCfg = Release|Any CPU
 		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x86.Build.0 = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|ARM.Build.0 = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|iPhone.Build.0 = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|x64.Build.0 = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|x86.Build.0 = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|ARM.ActiveCfg = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|ARM.Build.0 = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|ARM64.Build.0 = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|iPhone.Build.0 = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|x64.ActiveCfg = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|x64.Build.0 = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|x86.ActiveCfg = Release|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Release|x86.Build.0 = Release|Any CPU
 		{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}.Debug|ARM.ActiveCfg = Debug|Any CPU
@@ -1563,7 +1536,6 @@ Global
 		{72F0ADCA-3A0B-44AA-8129-21A1B27CD841} = {384BA371-F17F-4A70-9423-D54F71BB3FCB}
 		{3A8EC886-C71D-4384-BFE4-73378CC7293D} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4} = {45EBC624-6277-4EA2-A89C-A730A3214503}
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE} = {45EBC624-6277-4EA2-A89C-A730A3214503}
 		{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{18559D36-C735-4933-AA86-398C8222D4F6} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5} = {45EBC624-6277-4EA2-A89C-A730A3214503}
