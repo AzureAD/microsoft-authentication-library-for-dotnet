@@ -3,10 +3,15 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
+    <!-- https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype -->
+    <!--<DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>-->
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.1" />
   </ItemGroup>
 
   <ItemGroup>

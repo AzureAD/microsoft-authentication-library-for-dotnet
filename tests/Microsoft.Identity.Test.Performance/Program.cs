@@ -13,13 +13,19 @@ namespace Microsoft.Identity.Test.Performance
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<TokenCacheTests>(
-                DefaultConfig.Instance
-                    .WithOptions(ConfigOptions.DontOverwriteResults)
-                    .AddDiagnoser(MemoryDiagnoser.Default)
-                    .AddJob(
-                        Job.Default
-                            .WithId("Job-PerfTests")));
+            BenchmarkSwitcher.FromTypes(new[] {
+                typeof(AcquireTokenForClientCacheTests),
+                typeof(AcquireTokenForOboCacheTests),
+                typeof(TokenCacheTests),
+            }).RunAll(DefaultConfig.Instance
+                //.WithOptions(ConfigOptions.DisableLogFile)
+                .WithOptions(ConfigOptions.JoinSummary)
+                .WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually
+                .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
+                                                       //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
+                .AddJob(
+                    Job.Default
+                        .WithId("Job-PerfTests")));
 
             Console.ReadKey();
         }
