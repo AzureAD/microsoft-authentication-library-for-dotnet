@@ -6,9 +6,11 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
+
     /// <summary>
     /// Windows OS Version checks
     /// </summary>
+    /// <remarks>Do not include this code in UWP, it causes packaging errors</remarks>
     internal static class Win32VersionApi
     {
 
@@ -215,4 +217,5 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
     }
+
 }
