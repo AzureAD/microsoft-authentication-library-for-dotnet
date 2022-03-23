@@ -89,12 +89,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
 #if WINDOWS_APP
             return true;
-#else
+#elif SUPPORTS_WIN32
             if (IsWindows() && Win32VersionApi.IsWamSupportedOs())
             {
                 return true;
             }
 
+            return false;
+#else
             return false;
 #endif
         }
