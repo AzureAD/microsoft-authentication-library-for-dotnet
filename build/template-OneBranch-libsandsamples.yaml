@@ -32,12 +32,6 @@ steps:
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
-- task: DeleteFiles@1 # Workaround for failing component governance.
-  inputs:
-    SourceFolder: 'microsoft-authentication-library-for-dotnet\tests\Microsoft.Identity.Test.Android.UIAutomation'
-    Contents: '**/*'
-    RemoveSourceFolder: true
-
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml
 
