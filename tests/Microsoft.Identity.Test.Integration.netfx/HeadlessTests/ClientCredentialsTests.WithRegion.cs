@@ -13,6 +13,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
@@ -34,7 +35,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string RegionalHost = "centralus.r.login.microsoftonline.com";
         private const string GlobalHost = "login.microsoftonline.com";
         private IConfidentialClientApplication _confidentialClientApplication;
-
 
         [TestInitialize]
         public void TestInitialize()
@@ -196,8 +196,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #endif
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var cert = ConfidentialAppSettings.GetSettings(Cloud.Public).GetCertificate();
-            var clientCredential = ClientCredentialWrapper.CreateWithCertificate(cert, claims);
-            return jwtToken.Sign(clientCredential, true);
+            
+            return jwtToken.Sign(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), true);
         }
     }
 }

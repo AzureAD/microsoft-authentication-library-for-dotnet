@@ -170,7 +170,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return CreateSuccessResponseMessage(tokenResponse);
         }
 
-
         public static HttpResponseMessage CreateAdfsSuccessTokenResponseMessage()
         {
             return CreateSuccessResponseMessage(DefaultAdfsTokenResponse);
@@ -235,8 +234,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"trace_id\":\"21c3e4db-d2fd-44f7-a3e0-5939f84e6000\",\"correlation_id\":" +
                 "\"3d483b09-1198-4acb-929f-c648674e32bd\"}");
         }
-
-
 
         public static HttpResponseMessage CreateNoErrorFieldResponseMessage()
         {
@@ -391,7 +388,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return httpResponse;
         }
 
-
         public static HttpResponseMessage CreatePKeyAuthChallengeResponse()
         {
             HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized)
@@ -467,7 +463,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 }
             };
         }
-
 
     }
 }

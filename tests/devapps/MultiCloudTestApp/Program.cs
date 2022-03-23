@@ -23,7 +23,6 @@ namespace MultiCloudTestApp
         // TODO: replace with an app that lives in multiple clouds, e.g. VS
         private const string APP_LIVING_IN_MULTIPLE_CLOUDS = "";
 
-
         private static readonly string[] s_scopesPublicCloud = new[] { "https://graph.microsoft.com/.default" };
         private static readonly string[] s_scopesDeCloud = new[] { "https://graph.cloudapi.de/.default" };
         private static readonly string[] s_scopesCnCloud = new[] { "https://microsoftgraph.chinacloudapi.cn/.default" };
@@ -54,7 +53,6 @@ namespace MultiCloudTestApp
              .WithAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
              .WithLogging(Log, LogLevel.Verbose, true)
              .Build();
-
 
             SetCacheSerializationToFile(s_publicCloudApp);
             SetCacheSerializationToFile(s_deCloudApp);
@@ -197,7 +195,7 @@ namespace MultiCloudTestApp
             if (accounts.Count() > 1)
             {
                 Log(LogLevel.Error, "Not expecting to handle multiple accounts", false);
-                return null;
+                return Task.FromResult<AuthenticationResult>(null);
             }
 
             return pca.AcquireTokenSilent(scopes, accounts.FirstOrDefault()).ExecuteAsync();
@@ -218,15 +216,11 @@ namespace MultiCloudTestApp
             Console.WriteLine("Token is {0}", authTask.Result.AccessToken);
             Console.ResetColor();
 
-
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
             await DisplayAllAccountsAsync().ConfigureAwait(false);
 
-
             Console.ResetColor();
         }
-
-
 
         private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
         {
@@ -265,9 +259,6 @@ namespace MultiCloudTestApp
             Console.WriteLine($"{level} {message}");
             Console.ResetColor();
         }
-
-
-
 
     }
 }

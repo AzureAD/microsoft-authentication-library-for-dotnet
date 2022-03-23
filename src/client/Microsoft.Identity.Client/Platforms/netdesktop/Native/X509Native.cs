@@ -46,7 +46,6 @@ namespace Microsoft.Identity.Client.Platforms.net45.Native
                                                                           [Out, MarshalAs(UnmanagedType.Bool)] out bool pfCallerFreeProvOrNCryptKey);
         }
 
-
         /// <summary>
         ///     Duplicate the certificate context into a safe handle
         /// </summary>

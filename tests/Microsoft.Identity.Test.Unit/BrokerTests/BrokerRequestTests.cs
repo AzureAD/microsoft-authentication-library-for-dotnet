@@ -43,7 +43,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private AcquireTokenSilentParameters _acquireTokenSilentParameters;
         private HttpResponse _brokerHttpResponse;
 
-
         [TestMethod]
         public void BrokerResponseTest()
         {
@@ -200,9 +199,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         broker,
                         "install_url");
 #if NET5_WIN
-                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
+                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
-                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
+                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #endif
             }
         }
@@ -224,9 +223,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         broker);
 
 #if NET5_WIN
-                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
+                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
-                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
+                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #endif
             }
         }
@@ -277,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Arg.Any<AuthorityInfo>(),
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount, expectedAccount });
-            broker.IsBrokerInstalledAndInvokable().Returns(true);
+            broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
@@ -299,8 +298,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
 
             }
-            public override bool IsBrokerInstalledAndInvokable()
+            public override bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
             {
+                // WAM does not work on pure ADFS environments
+                if (authorityType == AuthorityType.Adfs)
+                {
+                    return false;
+                }
+
                 return true;
             }
         }
@@ -333,7 +338,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
-
                 // Act
                 var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
 
@@ -361,7 +365,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var app = builder.WithBroker(true).BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
-
 
                 // Act
                 var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
@@ -469,17 +472,27 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>())
                 .Returns(new[] { expectedAccount });
-            mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
+            mockBroker.IsBrokerInstalledAndInvokable((pca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.AuthorityType).Returns(true);
 
             platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
-
 
             // Act
             var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
 
             // Assert that MSAL acquires an account from the broker cache
             Assert.AreSame(expectedAccount, actualAccount.Single());
-        }        
+        }
+
+        [TestMethod]
+        public void PCAWithBrokerAndWithMultiCloudSupportThrowsTest()
+        {
+            var ex = Assert.ThrowsException<NotSupportedException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithBroker(true)
+                .WithMultiCloudSupport(true)
+                .Build());
+            Assert.AreEqual(MsalErrorMessage.MultiCloudSupportUnavailable, ex.Message);
+        }
 #endif
 
         [TestMethod]
@@ -499,7 +512,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true),
                     Arg.Any<ICacheSessionManager>(),
                     Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount });
-                mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
                 platformProxy.CanBrokerSupportSilentAuth().Returns(true);
@@ -553,7 +566,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 // Arrange
                 var mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
                 platformProxy.CanBrokerSupportSilentAuth().Returns(true);
@@ -602,7 +615,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _parameters.Account = PublicClientApplication.OperatingSystemAccount;
                 broker.AcquireTokenSilentDefaultUserAsync(_parameters, _acquireTokenSilentParameters)
                     .Returns(Task.FromResult(_msalTokenResponse));
-                broker.IsBrokerInstalledAndInvokable().Returns(true);
+                broker.IsBrokerInstalledAndInvokable(_parameters.Authority.AuthorityInfo.AuthorityType).Returns(true);
 
                 // Act
                 var result = await brokerSilentAuthStrategy.ExecuteAsync(default).ConfigureAwait(false);
@@ -679,6 +692,56 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 }
 
                 Assert.Fail("Wrong Exception thrown. ");
+            }
+        }
+
+        [TestMethod]
+        public void InteractiveStrategy_ProtectionPolicyNotEnabled_Throws_Exception()
+        {
+            ProtectionPolicyNotEnabled_Throws_Exception_Common((msalToken) =>
+            {
+                _brokerInteractiveRequest.ValidateResponseFromBroker(msalToken);
+            });
+        }
+
+        [TestMethod]
+        public void SilentStrategy_ProtectionPolicyNotEnabled_Throws_Exception()
+        {
+            ProtectionPolicyNotEnabled_Throws_Exception_Common((msalToken) =>
+            {
+                _brokerSilentAuthStrategy.ValidateResponseFromBroker(msalToken);
+            });
+        }
+
+        private void ProtectionPolicyNotEnabled_Throws_Exception_Common(Action<MsalTokenResponse> action)
+        {
+            using (var harness = CreateBrokerHelper())
+            {
+                try
+                {
+                    // Arrange
+                    MsalTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
+                    msalTokenResponse.SubError = BrokerResponseConst.AndroidProtectionPolicyRequired;
+                    msalTokenResponse.TenantId = TestConstants.TenantId;
+                    msalTokenResponse.Upn = TestConstants.Username;
+                    msalTokenResponse.AccountUserId = TestConstants.LocalAccountId;
+                    msalTokenResponse.AuthorityUrl = TestConstants.AuthorityUtid2Tenant;
+
+                    // Act
+                    action(msalTokenResponse);
+                }
+                catch (MsalServiceException ex) // Since IntuneAppProtectionPolicyRequiredException is throw only on Android and iOS platforms, this is the workaround
+                {
+                    // Assert
+                    Assert.AreEqual(BrokerResponseConst.AndroidUnauthorizedClient, ex.ErrorCode);
+                    Assert.AreEqual(BrokerResponseConst.AndroidProtectionPolicyRequired, ex.SubError);
+
+                    return;
+                }
+                catch(Exception ex)
+                {
+                    Assert.Fail($"Wrong Exception thrown {ex.Message}.");
+                }
             }
         }
 
@@ -759,6 +822,5 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             return harness;
         }
     }
-
 
 }

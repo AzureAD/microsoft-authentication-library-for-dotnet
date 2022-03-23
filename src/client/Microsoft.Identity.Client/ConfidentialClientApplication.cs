@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string AttemptRegionDiscovery = "TryAutoDetect";
 
-
         internal ConfidentialClientApplication(
             ApplicationConfiguration configuration)
             : base(configuration)
@@ -197,8 +196,6 @@ namespace Microsoft.Identity.Client
                 scopes,
                 refreshToken);
         }
-
-        internal ClientCredentialWrapper ClientCredential => ServiceBundle.Config.ClientCredential;
 
         /// <summary>
         /// Application token cache. This case holds access tokens for the application. It's maintained

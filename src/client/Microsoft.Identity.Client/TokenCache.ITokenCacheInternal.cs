@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.AuthScheme.Bearer;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
@@ -34,7 +35,8 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
-            response.Log(requestParams.RequestContext.Logger, LogLevel.Verbose);
+            var logger = requestParams.RequestContext.Logger;
+            response.Log(logger, LogLevel.Verbose);
 
             MsalAccessTokenCacheItem msalAccessTokenCacheItem = null;
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
@@ -44,7 +46,7 @@ namespace Microsoft.Identity.Client
             IdToken idToken = IdToken.Parse(response.IdToken);
             if (idToken == null)
             {
-                requestParams.RequestContext.Logger.Info("ID Token not present in response. ");
+                logger.Info("ID Token not present in response. ");
             }
 
             var tenantId = GetTenantId(idToken, requestParams);
@@ -121,7 +123,7 @@ namespace Microsoft.Identity.Client
                              wamAccountIds);
 
                 // Add the newly obtained id token to the list of profiles
-                var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                var tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
                 if (isAadAuthority && tenantProfiles != null)
                 {
                     TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
@@ -138,9 +140,9 @@ namespace Microsoft.Identity.Client
 
             #endregion
 
-            requestParams.RequestContext.Logger.Verbose($"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
+            logger.Verbose($"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
             await _semaphoreSlim.WaitAsync(requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
-            requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore. ");
+            logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore. ");
             ITokenCacheInternal tokenCacheInternal = this;
 
             try
@@ -174,7 +176,7 @@ namespace Microsoft.Identity.Client
 
                     if (msalAccessTokenCacheItem != null)
                     {
-                        requestParams.RequestContext.Logger.Info("Saving AT in cache and removing overlapping ATs...");
+                        logger.Info("Saving AT in cache and removing overlapping ATs...");
 
                         DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
@@ -189,7 +191,7 @@ namespace Microsoft.Identity.Client
 
                     if (idToken != null)
                     {
-                        requestParams.RequestContext.Logger.Info("Saving Id Token and Account in cache ...");
+                        logger.Info("Saving Id Token and Account in cache ...");
                         Accessor.SaveIdToken(msalIdTokenCacheItem);
                         MergeWamAccountIds(msalAccountCacheItem);
                         Accessor.SaveAccount(msalAccountCacheItem);
@@ -198,7 +200,7 @@ namespace Microsoft.Identity.Client
                     // if server returns the refresh token back, save it in the cache.
                     if (msalRefreshTokenCacheItem != null)
                     {
-                        requestParams.RequestContext.Logger.Info("Saving RT in cache...");
+                        logger.Info("Saving RT in cache...");
                         Accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
                     }
 
@@ -219,12 +221,7 @@ namespace Microsoft.Identity.Client
                 {
                     if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
-                        DateTimeOffset? cacheExpiry = null;
-
-                        if (!Accessor.GetAllRefreshTokens().Any())
-                        {
-                            cacheExpiry = CalculateSuggestedCacheExpiry();
-                        }
+                        DateTimeOffset? cacheExpiry = CalculateSuggestedCacheExpiry(Accessor, logger);
 
                         var args = new TokenCacheNotificationArgs(
                             tokenCache: this,
@@ -255,7 +252,7 @@ namespace Microsoft.Identity.Client
             finally
             {
                 _semaphoreSlim.Release();
-                requestParams.RequestContext.Logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
+                logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
             }
         }
 
@@ -346,11 +343,35 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private DateTimeOffset CalculateSuggestedCacheExpiry()
+        /// <summary>
+        /// Important note: we should not be suggesting expiration dates that are in the past, as it breaks some cache implementations.
+        /// </summary>
+        internal /* for testing */ static DateTimeOffset? CalculateSuggestedCacheExpiry(
+            ITokenCacheAccessor accessor, 
+            ICoreLogger logger)
         {
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
-            DateTimeOffset cacheExpiry = tokenCacheItems.Max(item => item.ExpiresOn);
-            return cacheExpiry;
+            // If we have refresh tokens in the cache, we cannot suggest expiration
+            // because refresh token expiration is not disclosed to SDKs and RTs are long lived anyway (3 months by default)
+            if (accessor.GetAllRefreshTokens().Count == 0)
+            {
+                IReadOnlyList<MsalAccessTokenCacheItem> tokenCacheItems = accessor.GetAllAccessTokens(optionalPartitionKey: null);
+                if (tokenCacheItems.Count == 0)
+                {
+                    logger.Warning("[CalculateSuggestedCacheExpiry] No access tokens or refresh tokens found in the accessor. Not returning any expiration.");
+                    return null;
+                }
+
+                DateTimeOffset cacheExpiry = tokenCacheItems.Max(item => item.ExpiresOn);
+                
+                // do not suggest an expiration date from the past or within 5 min, as tokens will not be usable anyway
+                // and HasTokens will be set to false, letting implementers know to delete the cache node
+                if (cacheExpiry < DateTimeOffset.UtcNow + Constants.AccessTokenExpirationBuffer)
+                    return null;
+
+                return cacheExpiry;
+            }
+
+            return null;
         }
 
         private string GetTenantId(IdToken idToken, AuthenticationRequestParameters requestParams)
@@ -781,17 +802,21 @@ namespace Microsoft.Identity.Client
 
             if (allRts.Count != 0)
             {
-                var metadata =
+                allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
+
+                if (!requestParams.AppConfig.MultiCloudSupportEnabled)
+                {
+                    var metadata =
                     await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                         requestParams.AuthorityInfo,
                         allRts.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
                         requestParams.RequestContext)
                     .ConfigureAwait(false);
-                var aliases = metadata.Aliases;
+                    var aliases = metadata.Aliases;
 
-                allRts = FilterRtsByHomeAccountIdOrAssertion(requestParams, allRts, familyId);
-                allRts = allRts.Where(
-                    item => aliases.ContainsOrdinalIgnoreCase(item.Environment)).ToList();
+                    allRts = allRts.Where(
+                        item => aliases.ContainsOrdinalIgnoreCase(item.Environment)).ToList();
+                }
 
                 IReadOnlyList<MsalRefreshTokenCacheItem> finalList = allRts.ToList();
                 requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (finalList.Count != 0));
@@ -915,8 +940,6 @@ namespace Microsoft.Identity.Client
             return appMetadata.FamilyId == familyId;
         }
 
-
-
         /// <remarks>
         /// Get accounts should not make a network call, if possible. This can be achieved if
         /// all the environments in the token cache are known to MSAL, as MSAL keeps a list of
@@ -960,8 +983,13 @@ namespace Microsoft.Identity.Client
                 allEnvironmentsInCache,
                 requestParameters.RequestContext).ConfigureAwait(false);
 
-            rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment)).ToList();
-            accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment)).ToList();
+            // If the client application is instance aware then we skip the filter with environment
+            // since the authority in request is different from the authority used to get the token
+            if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
+            {
+                rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment)).ToList();
+                accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment)).ToList();
+            }
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
@@ -973,12 +1001,14 @@ namespace Microsoft.Identity.Client
                 {
                     if (RtMatchesAccount(rtItem, account))
                     {
-                        var tenantProfiles = await (this as ITokenCacheInternal).GetTenantProfilesAsync(requestParameters, account.HomeAccountId).ConfigureAwait(false);
+                        var tenantProfiles = await GetTenantProfilesAsync(requestParameters, account.HomeAccountId).ConfigureAwait(false);
 
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
                             account.PreferredUsername,
-                            environment, // Preserve the environment passed in by the user
+                            requestParameters.AppConfig.MultiCloudSupportEnabled ? 
+                                account.Environment : // If multi cloud support is enabled keep the cached environment
+                                environment, // Preserve the environment passed in by the user
                             account.WamAccountIds,
                             tenantProfiles?.Values);
 
@@ -1079,7 +1109,7 @@ namespace Microsoft.Identity.Client
             return idToken;
         }
 
-        async Task<IDictionary<string, TenantProfile>> ITokenCacheInternal.GetTenantProfilesAsync(
+        private async Task<IDictionary<string, TenantProfile>> GetTenantProfilesAsync(
             AuthenticationRequestParameters requestParameters,
             string homeAccountId)
         {
@@ -1092,16 +1122,20 @@ namespace Microsoft.Identity.Client
 
             var idTokenCacheItems = GetAllIdTokensWithNoLocks(true, homeAccountId);
 
-            ISet<string> allEnvironmentsInCache = new HashSet<string>(
+            if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
+            {
+                ISet<string> allEnvironmentsInCache = new HashSet<string>(
                 idTokenCacheItems.Select(aci => aci.Environment),
                 StringComparer.OrdinalIgnoreCase);
 
-            InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                requestParameters.AuthorityInfo,
-                allEnvironmentsInCache,
-                requestParameters.RequestContext).ConfigureAwait(false);
+                InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                    requestParameters.AuthorityInfo,
+                    allEnvironmentsInCache,
+                    requestParameters.RequestContext).ConfigureAwait(false);
 
-            idTokenCacheItems = idTokenCacheItems.Where(idToken => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(idToken.Environment)).ToList();
+                idTokenCacheItems = idTokenCacheItems.Where(idToken => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(idToken.Environment)).ToList();
+            }
+
             // some accessors might not support partitioning, so make sure to filter by home account id
             idTokenCacheItems = idTokenCacheItems.Where(idToken => homeAccountId.Equals(idToken.HomeAccountId)).ToList();
 
@@ -1112,6 +1146,29 @@ namespace Microsoft.Identity.Client
             }
 
             return tenantProfiles;
+        }
+
+        async Task<Account> ITokenCacheInternal.GetAccountAssociatedWithAccessTokenAsync(
+            AuthenticationRequestParameters requestParameters,
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        {
+            Debug.Assert(msalAccessTokenCacheItem.HomeAccountId != null);
+
+            var tenantProfiles = await GetTenantProfilesAsync(requestParameters, msalAccessTokenCacheItem.HomeAccountId).ConfigureAwait(false);
+
+            var accountCacheItem = Accessor.GetAccount(
+                new MsalAccountCacheKey(
+                    msalAccessTokenCacheItem.Environment,
+                    msalAccessTokenCacheItem.TenantId,
+                    msalAccessTokenCacheItem.HomeAccountId,
+                    requestParameters.Account?.Username));
+
+            return new Account(
+                msalAccessTokenCacheItem.HomeAccountId,
+                accountCacheItem?.PreferredUsername,
+                accountCacheItem?.Environment,
+                accountCacheItem?.WamAccountIds,
+                tenantProfiles?.Values);
         }
 
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters)

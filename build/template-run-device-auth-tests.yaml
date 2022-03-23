@@ -13,6 +13,7 @@ steps:
 
 - task: VSTest@2
   displayName: 'DeviceAuthTests'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: ${{ parameters.TestFilter }}

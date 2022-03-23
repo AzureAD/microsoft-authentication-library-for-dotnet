@@ -70,7 +70,6 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         void DeserializeAdalV3(byte[] adalV3State);
 
-
         /// <summary>
         /// Serializes the token cache to the MSAL.NET 2.x unified cache format, which is compatible with ADAL.NET v4 and other MSAL.NET v2 applications.
         /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,

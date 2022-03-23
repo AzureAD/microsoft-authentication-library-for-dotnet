@@ -36,7 +36,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Arrange
             var webUIFactory = new WebView2WebUiFactory(() => true);
 
-
             // Act
             var webUi = webUIFactory.CreateAuthenticationDialog(
                     _parent,
@@ -54,7 +53,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Arrange
             var webUIFactory = new WebView2WebUiFactory(
                 isWebView2AvailableForTest: () => false);
-
 
             // Act
             var webUi = webUIFactory.CreateAuthenticationDialog(

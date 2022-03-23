@@ -13,8 +13,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
 {
     internal interface IBroker
     {
-        bool IsBrokerInstalledAndInvokable();
-        
+        bool IsBrokerInstalledAndInvokable(AuthorityType authorityType);
+
         Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters);

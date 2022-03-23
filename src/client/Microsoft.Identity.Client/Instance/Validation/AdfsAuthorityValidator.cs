@@ -28,7 +28,6 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 string resource = string.Format(CultureInfo.InvariantCulture, "https://{0}", authorityInfo.Host);
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
 
-
                 Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendGetAsync(
                     new Uri(webFingerUrl), 
                     null,

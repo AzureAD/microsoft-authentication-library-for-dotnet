@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             AndroidBrokerHelper brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
 
-            if (brokerHelper.IsBrokerInstalledAndInvokable())
+            if (brokerHelper.IsBrokerInstalledAndInvokable(AuthorityType.Aad)) //authorityType is actually not used by the brokerHelper.IsBrokerInstalledAndInvokable
             {
                 try
                 {

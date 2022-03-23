@@ -221,7 +221,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-
         internal static string CanonicalizeAuthorityUri(string uri)
         {
             if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))

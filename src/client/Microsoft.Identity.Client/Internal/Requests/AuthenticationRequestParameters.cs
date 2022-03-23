@@ -4,12 +4,16 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -114,7 +118,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
-
         // This should be set on a per-application basis, but can be overridden on a per-request basis should it be needed. 
         public bool SendX5C { get; set; }
 
@@ -135,6 +138,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IAccount Account { get; set; }
 
         public string HomeAccountId { get; }
+
+        /// <summary>
+        /// If set, MSAL should add the key / value pairs from the provider to the token endpoint instead of generating a client assertion
+        /// </summary>
+        public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get => _commonParameters.OnBeforeTokenRequestHandler; }
 
         public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 

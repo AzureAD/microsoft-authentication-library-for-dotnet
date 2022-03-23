@@ -61,7 +61,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string UserAssertionNullError = "user_assertion_null";
 
-
         /// <summary>
         /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when the 
         /// <see cref="PublicClientApplication.OperatingSystemAccount"/> user is passed as the <c>account</c> parameter. Only some brokers (WAM) can login the current user.
@@ -161,6 +160,15 @@ namespace Microsoft.Identity.Client
         /// Use a different authority
         /// </summary>
         public const string InvalidAuthorityType = "invalid_authority_type";
+
+        /// <summary>
+        /// The client is unauthorized to access resource.
+        /// This commonly happens when Mobile App Management (MAM) policies are enabled. MSAL will throw an exception in that case with <c>protection_policy_required</c> sub-error.
+        /// <para>Mitigation</para>
+        /// Catch the exception and use the properties in it to obtain the right parameters from Intune SDK.
+        /// <see href="https://aka.ms/msal-net-trueMAM">IntuneAppProtectionPolicyRequiredException</see>
+        /// </summary>
+        public const string UnauthorizedClient = "unauthorized_client";
 
         /// <summary>
         /// Unknown Error occurred.
@@ -531,7 +539,7 @@ namespace Microsoft.Identity.Client
         /// <para>What happens?</para>This error happens when the authorization flow, which collects user credentials, gets redirected 
         /// to an page that is not supported, for example if the redirect occurs over http. 
         /// This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects.
-        /// <para>Mitigation</para>This usually happens when using a federated directory which is not setup correctly. 
+        /// <para>Mitigation</para>This usually happens when using a federated directory which is not setup correctly.
         /// </summary>
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
 
@@ -1006,6 +1014,12 @@ namespace Microsoft.Identity.Client
         public const string RegionalAuthorityValidation = "regional_authority_validation";
 
         /// <summary>
+        /// <para>What happens?</para>You have configured both Region Discovery and Custom Instance Metadata. Custom metadata supersedes region discovery.
+        /// <para>Mitigation</para>Configure either Region Discovery or Custom Instance Discovery Metadata.
+        /// </summary>
+        public const string RegionDiscoveryWithCustomInstanceMetadata = "region_discovery_with_custom_instance_metadata";
+
+        /// <summary>
         /// An HttpListenerException occurred while listening for the system browser to complete the login.
         /// </summary>
         public const string HttpListenerError = "http_listener_error";
@@ -1022,7 +1036,6 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para> Use only one option. Web site and web API scenarios should rely on external cache serialization, as internal cache serialization cannot scale. See https://aka.ms/msal-net-cca-token-cache-serialization
         /// </summary>
         public const string StaticCacheWithExternalSerialization = "static_cache_with_external_serialization";
-
 
         /// <summary>
         /// <para>What happens?</para>You configured WithTenant at the request level, but the application is using a non-AAD authority

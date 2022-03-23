@@ -76,7 +76,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-
         internal virtual async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
@@ -169,7 +168,12 @@ namespace Microsoft.Identity.Client
         /// </param>
         public async Task<IAccount> GetAccountAsync(string accountId)
         {
-            return await GetAccountAsync(accountId, default(CancellationToken)).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(accountId))
+            {
+                return await GetAccountAsync(accountId, default(CancellationToken)).ConfigureAwait(false);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -216,7 +220,7 @@ namespace Microsoft.Identity.Client
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
-                if (broker.IsBrokerInstalledAndInvokable())
+                if (broker.IsBrokerInstalledAndInvokable(authority.AuthorityInfo.AuthorityType))
                 {
                     await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
                 }
@@ -267,7 +271,7 @@ namespace Microsoft.Identity.Client
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
-                if (broker.IsBrokerInstalledAndInvokable())
+                if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
                 {
                     var brokerAccounts =
                         (await broker.GetAccountsAsync(
@@ -307,7 +311,6 @@ namespace Microsoft.Identity.Client
                 AuthorityInfo,
                 allEnvs,
                 CreateRequestContext(Guid.NewGuid(), cancellationToken)).ConfigureAwait(false);
-
 
             brokerAccounts = brokerAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 

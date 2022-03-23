@@ -65,5 +65,10 @@ namespace Microsoft.Identity.Client
         /// Specifies the reason for fetching the access token from the identity provider.
         /// </summary>
         public CacheRefreshReason CacheRefreshReason { get; set; }
+
+        /// <summary>
+        /// Contains the Outcome of the region discovery if Region was used.
+        /// </summary>
+        public RegionDetails RegionDetails { get; set; }
     }
 }

@@ -24,7 +24,6 @@ namespace DesktopTestApp
 
             #region IDisposable Support
 
-
             public void Dispose()
             {
                 this.mainForm.Enabled = true;

@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Linq;
 
-
 namespace Microsoft.Identity.Client.Http
 {
     internal class HttpResponse

@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
         public bool IsBrokerAvailable()
         {
             return
-                ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null).IsBrokerInstalledAndInvokable();
+                ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null).IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType);
         }
 
         /// <summary>

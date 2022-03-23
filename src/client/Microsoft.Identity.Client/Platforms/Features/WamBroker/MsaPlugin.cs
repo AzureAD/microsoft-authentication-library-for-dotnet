@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccounProvider, clientID).ConfigureAwait(false);
              
             var msalAccounts = webAccounts
-                .Select(webAcc => ConvertToMsalAccountOrNull(webAcc))
+                .Select(webAcc => ConvertToMsalAccountOrNull(webAcc, clientID))
                 .Where(a => a != null)
                 .ToList();
 
@@ -166,12 +166,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return msalAccounts;
         }
 
-        private IAccount ConvertToMsalAccountOrNull(WebAccount webAccount)
+        private IAccount ConvertToMsalAccountOrNull(WebAccount webAccount, string clientID)
         {
             const string environment = "login.windows.net"; //TODO: is MSA available in other clouds?
             string homeAccountId = GetHomeAccountIdOrNull(webAccount);
 
-            return new Account(homeAccountId, webAccount.UserName, environment);
+            return new Account(
+                homeAccountId, 
+                webAccount.UserName, 
+                environment, 
+                new Dictionary<string, string>() { { clientID, webAccount.Id } });
         }
 
         // There are two commonly used formats for MSA CIDs:
@@ -193,18 +197,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return true;
         }
 
-
-        public string MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive)
+        public Tuple<string, string, bool> MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive)
         {
             if (status != WebTokenRequestStatus.UserInteractionRequired)
             {
-                return MsaErrorCode;
+                return Tuple.Create(MsaErrorCode, "", false);
             }
 
             // TODO: can further drill into errors by looking at HResult 
             // https://github.com/AzureAD/microsoft-authentication-library-for-cpp/blob/75de1a8aee5f83d86941de6081fa351f207d9446/source/windows/broker/MSATokenRequest.cpp#L104
 
-            return MsalError.InteractionRequired;
+            return Tuple.Create(MsalError.InteractionRequired, "", false);
         }
 
         public MsalTokenResponse ParseSuccessfullWamResponse(WebTokenResponse webTokenResponse, 

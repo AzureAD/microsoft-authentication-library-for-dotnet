@@ -35,5 +35,4 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public string KeyVaultSecret { get; set; }
     }
 
-
 }

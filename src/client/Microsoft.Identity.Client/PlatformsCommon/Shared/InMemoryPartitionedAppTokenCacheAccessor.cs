@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             string itemKey = item.GetKey().ToString();
-            string partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId);
+            string partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId, item.KeyId);
 
             // if a conflict occurs, pick the latest value
             AccessTokenCacheDictionary
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Delete
         public void DeleteAccessToken(MsalAccessTokenCacheItem item)
         {
-            var partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId);
+            var partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId, item.KeyId);
 
             AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
             if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))

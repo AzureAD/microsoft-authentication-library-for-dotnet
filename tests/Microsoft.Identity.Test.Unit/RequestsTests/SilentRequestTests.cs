@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     brokerID);
 
                 IBroker mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable().ReturnsForAnyArgs(brokerIsInstalledAndInvokable);
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).ReturnsForAnyArgs(brokerIsInstalledAndInvokable);
 
                 harness.ServiceBundle.Config.BrokerCreatorFunc = (app, config, logger) => mockBroker;
 

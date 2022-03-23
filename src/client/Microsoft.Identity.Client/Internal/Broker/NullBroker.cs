@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             _logger = logger ?? new NullLogger();
         }
 
-        public virtual bool IsBrokerInstalledAndInvokable()
+        public virtual bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
             _logger.Info("NullBroker - acting as not installed.");
             return false;

@@ -64,7 +64,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public int QueueSize => _httpMessageHandlerQueue.Count;
 
-
         /// <inheritdoc />
 
         protected override HttpClient GetHttpClient()
@@ -82,7 +81,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     Assert.Fail("The MockHttpManager's queue is empty. Cannot serve another response");
                 }
             }
-
 
             Trace.WriteLine($"Test {_testContext?.TestName ?? ""} dequeued a mock handler for { GetExpectedUrlFromHandler(messageHandler) }");
 

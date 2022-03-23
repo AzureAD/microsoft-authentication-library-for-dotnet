@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (!Broker.IsBrokerInstalledAndInvokable())
+            if (!Broker.IsBrokerInstalledAndInvokable(_authenticationRequestParameters.AuthorityInfo.AuthorityType))
             {
                 _logger.Warning("Broker is not installed. Cannot respond to silent request.");
                 return null;
@@ -99,12 +99,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     throw new MsalUiRequiredException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription);
                 }
 
-                throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse.Error,
-                                                     MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription,
-                                                     string.IsNullOrEmpty(msalTokenResponse.SubError) ?
-                                                     MsalError.UnknownBrokerError : msalTokenResponse.SubError,
-                                                     msalTokenResponse.CorrelationId,
-                                                     msalTokenResponse.HttpResponse);
+                throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse,
+                                                     MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
             }
 
             _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);

@@ -27,6 +27,8 @@ using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -254,7 +256,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                  result).ConfigureAwait(false);
         }
 
-
         [TestMethod]
         public async Task PopTestWithRSAAsync()
         {
@@ -338,7 +339,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(
                 TokenSource.Cache, 
                 result2.AuthenticationResultMetadata.TokenSource);
-
         }
 
         [TestMethod]
@@ -498,7 +498,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         public string CryptographicAlgorithm { get => "RS256"; }
 
-
         /// <summary>
         /// Creates the canonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
         /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint
@@ -508,5 +507,4 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             return $@"{{""e"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""kty"":""RSA"",""n"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
         }
     }
-
 }

@@ -3,15 +3,6 @@
 trigger: none
 pr: none
 
-# Create a daily midnight build for release builds on master to ensure our release builds function
-schedules:
-- cron: "0 0 * * *"
-  displayName: Daily midnight build
-  branches:
-    include:
-    - master
-  always: true
-
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
@@ -39,3 +30,5 @@ stages:
 
     steps:
     - template: template-pack-and-sign-packages.yaml
+      parameters:
+        PublishArtifacts: 'true'

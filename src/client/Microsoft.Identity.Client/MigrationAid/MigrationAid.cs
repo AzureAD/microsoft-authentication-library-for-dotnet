@@ -1195,7 +1195,6 @@ namespace Microsoft.Identity.Client
             throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
-
         /// <summary>
         /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
         /// Available only on .net desktop and .net core. See https://aka.ms/msal-net-up for details.
@@ -1211,7 +1210,6 @@ namespace Microsoft.Identity.Client
         {
             throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
-
 
         /// <summary>
         /// Acquires a security token on a device without a web browser, by letting the user authenticate on
@@ -1391,7 +1389,6 @@ namespace Microsoft.Identity.Client
         {
             throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
-
 
         #endregion MSAL3X deprecations
     }
@@ -1604,7 +1601,7 @@ namespace Microsoft.Identity.Client
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
         /// <param name="redirectUri">URL where the STS will call back the application with the security token. REQUIRED</param>
         /// <param name="clientCredential">Credential, previously shared with Azure AD during the application registration and proving the identity
-        /// of the application. An instance of <see cref="ClientCredential"/> can be created either from an application secret, or a certificate. REQUIRED.</param>
+        /// of the application. An instance of ClientCredential can be created either from an application secret, or a certificate. REQUIRED.</param>
         /// <param name="userTokenCache">Token cache for saving user tokens. Can be set to null if the confidential client
         /// application only uses the Client Credentials grants (that is requests token in its own name and not in the name of users).
         /// Otherwise should be provided. REQUIRED</param>

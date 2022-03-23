@@ -55,7 +55,6 @@ namespace Microsoft.Identity.Test.Unit
 
             }
 
-
             byte[] tokenCacheBlob = new UTF8Encoding().GetBytes(content);
             ((ITokenCacheSerializer)app.UserTokenCache).DeserializeMsalV3(tokenCacheBlob);
         }

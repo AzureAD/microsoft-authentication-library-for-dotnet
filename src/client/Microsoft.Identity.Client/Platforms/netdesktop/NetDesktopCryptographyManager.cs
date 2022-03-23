@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Platforms.net45.Native;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -54,11 +55,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
       
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-            if (certificate.PublicKey.Key.KeySize < ClientCredentialWrapper.MinKeySizeInBits)
+            if (certificate.PublicKey.Key.KeySize < CertificateClientCredential.MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException(nameof(certificate),
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
-                        ClientCredentialWrapper.MinKeySizeInBits));
+                        CertificateClientCredential.MinKeySizeInBits));
             }
 
 #if NET45
@@ -136,7 +137,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             return rsaProvider;
         }
-
 
         /// <summary>
         ///     <para>

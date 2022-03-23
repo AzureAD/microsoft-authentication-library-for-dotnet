@@ -61,7 +61,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// </summary>
         public const string Nonce = "nonce";
 
-
         #endregion
     }
 

@@ -599,7 +599,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app4.Authority);
 
-
             var app5 = PublicClientApplicationBuilder
                 .CreateWithApplicationOptions(options)
                 .WithAuthority($"https://login.microsoftonline.com/{TestConstants.TenantId}")
@@ -629,7 +628,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void IsBrokerAvailable_net5()
         {
             var appBuilder = PublicClientApplicationBuilder
-                    .Create(TestConstants.ClientId);
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTenant);
 
             Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), appBuilder.IsBrokerAvailable());
         }
@@ -640,18 +640,46 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void IsBrokerAvailable_OldDotNet()
         {
             var builder1 = PublicClientApplicationBuilder
-                    .Create(TestConstants.ClientId);
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTenant);
 
             // broker is not available out of the box
             Assert.AreEqual(false, builder1.IsBrokerAvailable());
 
             var builder2 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
-                   .WithDesktopFeatures();
-
+                   .WithDesktopFeatures()
+                   .WithAuthority(TestConstants.AuthorityTenant);
 
             // broker is not available out of the box
             Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), builder2.IsBrokerAvailable());
+        }
+
+        [TestMethod]
+        public void NoBrokerADFS_OldDotNet()
+        {
+            var builder1 = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.ADFSAuthority);
+
+            // broker is not available out of the box
+            Assert.AreEqual(false, builder1.IsBrokerAvailable());
+
+            var builder2 = PublicClientApplicationBuilder
+                   .Create(TestConstants.ClientId)
+                   .WithDesktopFeatures()
+                   .WithAuthority(TestConstants.ADFSAuthority);
+
+            // broker is not available on ADFS
+            Assert.AreEqual(false, builder2.IsBrokerAvailable());
+
+            var builder3 = PublicClientApplicationBuilder
+                   .Create(TestConstants.ClientId)
+                   .WithDesktopFeatures()
+                   .WithAdfsAuthority(TestConstants.ADFSAuthority);
+
+            // broker is not available on ADFS
+            Assert.AreEqual(false, builder3.IsBrokerAvailable());
         }
 #endif
     }

@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
@@ -89,23 +90,48 @@ namespace Microsoft.Identity.Client
         public bool ExperimentalFeaturesEnabled { get; set; } = false;
 
         public IEnumerable<string> ClientCapabilities { get; set; }
-
-
-        public ClientCredentialWrapper ClientCredential { get; internal set; }
-        public string ClientSecret { get; internal set; }
-        public string SignedClientAssertion { get; internal set; }
-        public Func<CancellationToken, Task<string>> SignedClientAssertionDelegate { get; internal set; }
-
-        public X509Certificate2 ClientCredentialCertificate { get; internal set; }
         public bool SendX5C { get; internal set; } = false;
-
-        public IDictionary<string, string> ClaimsToSign { get; internal set; }
-        public bool MergeWithDefaultClaims { get; internal set; }
-        internal int ConfidentialClientCredentialCount;
-
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
+        public bool MultiCloudSupportEnabled { get; set; } = false;
 
+        #region ClientCredentials
+
+        public IClientCredential ClientCredential { get; internal set; }
+
+        /// <summary>
+        /// This is here just to support the public IAppConfig. Should not be used internally, instead use the <see cref="ClientCredential" /> abstraction.
+        /// </summary>
+        public string ClientSecret
+        {
+            get
+            {
+                if (ClientCredential is SecretStringClientCredential secretCred)
+                {
+                    return secretCred.Secret;
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// This is here just to support the public IAppConfig. Should not be used internally, instead use the <see cref="ClientCredential" /> abstraction.
+        /// </summary>
+        public X509Certificate2 ClientCredentialCertificate
+        {
+            get
+            {
+                if (ClientCredential is CertificateAndClaimsClientCredential cred)
+                {
+                    return cred.Certificate;
+                }
+               
+                return null;
+            }
+        }
+
+        #endregion
 
         #region Region
         public string AzureRegion { get; set; }

@@ -21,7 +21,6 @@ namespace NetCoreWinFormsWAM
     {
         private readonly SynchronizationContext _syncContext;
 
-
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
             new ClientEntry() { Id = "1d18b3b0-251b-4714-a02a-9956cec86c2d", Name = "1d18b3b0-251b-4714-a02a-9956cec86c2d (App in 49f)"},
@@ -63,7 +62,6 @@ namespace NetCoreWinFormsWAM
         public static readonly string UserCacheFile =
             System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.user.json";
 
-
         private IPublicClientApplication CreatePca()
         {
             string clientId = GetClientId();
@@ -87,7 +85,6 @@ namespace NetCoreWinFormsWAM
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;
         }
-
 
         private static void BindCache(ITokenCache tokenCache, string file)
         {
@@ -129,7 +126,6 @@ namespace NetCoreWinFormsWAM
         private async Task<AuthenticationResult> RunAtsAsync(IPublicClientApplication pca)
         {
             string reqAuthority = pca.Authority;
-
 
             string loginHint = GetLoginHint();
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
@@ -192,7 +188,6 @@ namespace NetCoreWinFormsWAM
             return clientId;
         }
 
-
         private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar)
         {
             string message =
@@ -253,7 +248,6 @@ namespace NetCoreWinFormsWAM
             var builder = pca.AcquireTokenInteractive(scopes)                
                 .WithParentActivityOrWindow(this.Handle);
 
-
             Prompt? prompt = GetPrompt();
             if (prompt.HasValue)
             {
@@ -276,10 +270,8 @@ namespace NetCoreWinFormsWAM
                 Log($"ATI without login_hint or account. It should display the account picker");
             }
 
-
             await Task.Delay(500).ConfigureAwait(false);
             result = await builder.ExecuteAsync().ConfigureAwait(false); 
-
 
             return result;
         }
@@ -517,9 +509,7 @@ namespace NetCoreWinFormsWAM
             DisplayValue = displayValue ?? $"{Account.Username} {env} {homeTenantId}";
         }
 
-
     }
-
 
     public class NullAccount : IAccount
     {

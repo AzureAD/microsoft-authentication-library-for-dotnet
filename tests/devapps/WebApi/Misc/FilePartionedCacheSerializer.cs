@@ -109,8 +109,6 @@ namespace WebApi.Misc
         }
     }
 
-
-
     internal class FilePartionedCacheSerializer
         : AbstractPartitionedCacheSerializer
     {
@@ -159,5 +157,4 @@ namespace WebApi.Misc
     }
 
 }
-
 

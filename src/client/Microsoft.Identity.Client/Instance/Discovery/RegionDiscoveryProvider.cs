@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Region
                 return CreateEntry(requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host, authority.Host);
             }
 
-            string regionalEnv = GetRegionalizedEnviroment(authority, region);
+            string regionalEnv = GetRegionalizedEnvironment(authority, region, requestContext);
             return CreateEntry(authority.Host, regionalEnv);
         }
 
@@ -53,13 +53,14 @@ namespace Microsoft.Identity.Client.Region
             };
         }
 
-        private string GetRegionalizedEnviroment(Uri authority, string region)
+        private string GetRegionalizedEnvironment(Uri authority, string region, RequestContext requestContext)
         {
 
             string host = authority.Host;
 
             if (KnownMetadataProvider.IsPublicEnvironment(host))
             {
+                requestContext.Logger.Info($"[Region discovery] Regionalized Environment is : {region}.{PublicEnvForRegional}. ");
                 return $"{region}.{PublicEnvForRegional}";
             }
 
@@ -70,6 +71,7 @@ namespace Microsoft.Identity.Client.Region
                 host = preferredNetworkEnv;
             }
 
+            requestContext.Logger.Info($"[Region discovery] Regionalized Environment is : {region}.{host}. ");
             return $"{region}.{host}";
         }
     }

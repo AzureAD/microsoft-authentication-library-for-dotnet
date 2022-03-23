@@ -1,0 +1,1 @@
+License files in this folder are created by running the licenses command found in the andorid SDK tools package via the command line. The tool will show you all of the licenses and will allow you to accept them via command line input. Once accepted, you can copy the license files to this directory and the build will work.

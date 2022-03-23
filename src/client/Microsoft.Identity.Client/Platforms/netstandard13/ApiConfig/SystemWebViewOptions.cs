@@ -32,13 +32,13 @@ namespace Microsoft.Identity.Client
             else
             {
                 var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
-                await proxy.StartDefaultOsBrowserAsync(url).ConfigureAwait(false);
+                await proxy.StartDefaultOsBrowserAsync(url, true).ConfigureAwait(false);
             }
         }
 
         /// <summary>
         /// Use Microsoft Edge Chromium to navigate to the given URI. Requires the browser to be installed.
-        /// On Linux, uses the default system browser instead, as Edge is not available.
+        /// On Linux, uses the default system browser if Edge is not available.
         /// </summary>
         public static async Task OpenWithChromeEdgeBrowserAsync(Uri uri)
         {
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
-                await proxy.StartDefaultOsBrowserAsync(url).ConfigureAwait(false);
+                await proxy.StartDefaultOsBrowserAsync(url, true).ConfigureAwait(false);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {

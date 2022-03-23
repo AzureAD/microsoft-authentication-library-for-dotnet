@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
 
         protected override IFeatureFlags CreateFeatureFlags() => new MacFeatureFlags();
 
-        public override Task StartDefaultOsBrowserAsync(string url)
+        public override Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured)
         {
             Process.Start("open", url);
             return Task.FromResult(0);

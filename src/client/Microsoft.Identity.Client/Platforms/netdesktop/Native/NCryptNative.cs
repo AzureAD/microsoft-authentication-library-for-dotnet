@@ -216,7 +216,6 @@ namespace Microsoft.Identity.Client.Platforms.net45.Native
                                                        out int pcbResult,
                                                        AsymmetricPaddingMode dwFlags);
 
-
         /// <summary>
         ///     Generic signature method, wrapped by signature calls for specific padding modes
         /// </summary>
@@ -314,7 +313,6 @@ namespace Microsoft.Identity.Client.Platforms.net45.Native
                             UnsafeNativeMethods.NCryptSignHash);
         }
     }
-
 
     /// <summary>
     ///     Handle for buffers that need to be released with NCryptFreeBuffer

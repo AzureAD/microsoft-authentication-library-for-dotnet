@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
@@ -44,6 +45,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string internalErrorCode = null;
             string errorMessage;
             string errorCode;
+            Tuple<string, string, bool> error;
 
             switch (wamResponse.ResponseStatus)
             {
@@ -58,45 +60,45 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     return wamPlugin.ParseSuccessfullWamResponse(wamResponse.ResponseData[0], out _);
 
                 case WebTokenRequestStatus.UserInteractionRequired:
-                    errorCode =
-                        wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError?.ErrorCode ?? 0, isInteractive);
+                    error = wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError?.ErrorCode ?? 0, isInteractive);
+                    errorCode = error?.Item1;
                     internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
                     errorMessage = WamErrorPrefix +
-                        $"Wam plugin {wamPlugin.GetType()}" +
-                        $" Error code: {internalErrorCode}" +
-                        $" Error Message: " + wamResponse.ResponseError?.ErrorMessage;
-                    break;
-                case WebTokenRequestStatus.UserCancel:
-                    errorCode = MsalError.AuthenticationCanceledError;
-                    errorMessage = MsalErrorMessage.AuthenticationCanceled;
-                    break;
-                case WebTokenRequestStatus.ProviderError:
-                    errorCode =
-                        wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError?.ErrorCode ?? 0, isInteractive);
+                        $"Wam Plugin: {wamPlugin.GetType()}" +
+                        $" Error Code: {internalErrorCode}" +
+                        $" Error Message: {wamResponse.ResponseError?.ErrorMessage}" +
+                        $" Internal Error Code: {internalErrorCode}"; 
+                    throw new MsalUiRequiredException(errorCode, errorMessage);
+
+                case WebTokenRequestStatus.UserCancel: 
+                    throw new MsalClientException(MsalError.AuthenticationCanceledError, MsalErrorMessage.AuthenticationCanceled);
+
+                case WebTokenRequestStatus.ProviderError: 
+                    error = wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError?.ErrorCode ?? 0, isInteractive);
+                    errorCode = error?.Item1;
+                    internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
                     errorMessage =
                         $"{WamErrorPrefix} {wamPlugin.GetType()} \n" +
                         $" Error Code: {errorCode} \n" +
-                        $" Error Message: {wamResponse.ResponseError?.ErrorMessage} \n"  +
+                        $" Error Message: {error?.Item2} \n"  +
+                        $" WAM Error Message: {wamResponse.ResponseError?.ErrorMessage} \n" +
+                        $" Internal Error Code: {internalErrorCode} \n" +
+                        $" Is Retryable: {error?.Item3} \n" +
                         $" Possible causes: \n " +
                         $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: {GetExpectedRedirectUri(clientId)} \n" +
                         $"- No Internet connection \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
 
-                internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
-                    break;
+                    MsalServiceException serviceException = new MsalServiceException(errorCode, errorMessage);
+                    serviceException.IsRetryable = serviceException.IsRetryable || error.Item3;
+                    throw serviceException;
+                    
                 default:
-                    errorCode = MsalError.UnknownBrokerError;
                     internalErrorCode = wamResponse.ResponseError.ErrorCode.ToString(CultureInfo.InvariantCulture);
                     errorMessage = $"Unknown WebTokenRequestStatus {wamResponse.ResponseStatus} (internal error code {internalErrorCode})";
-                    break;
-            }
 
-            return new MsalTokenResponse()
-            {
-                Error = errorCode,
-                ErrorCodes = internalErrorCode != null ? new[] { internalErrorCode } : null,
-                ErrorDescription = errorMessage
-            };
+                    throw new MsalServiceException(MsalError.UnknownBrokerError, errorMessage);
+            }
         }
 
         private static string GetExpectedRedirectUri(string clientId)
