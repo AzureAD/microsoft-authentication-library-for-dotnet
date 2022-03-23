@@ -200,36 +200,6 @@ namespace Microsoft.Identity.Client
             return homeAccIdMatch && clientIdMatch;
         }
 
-        private List<MsalRefreshTokenCacheItem> GetAllRefreshTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
-        {
-            var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
-            if (filterByClientId)
-            {
-                refreshTokens.RemoveAll(x => !x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase));
-            }
-            return refreshTokens;
-        }
-
-        private List<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId, string partitionKey = null)
-        {
-            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
-            if (filterByClientId)
-            {
-                accessTokens.RemoveAll(x => !x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase));
-            }
-            return accessTokens;
-        }
-
-        private List<MsalIdTokenCacheItem> GetAllIdTokensWithNoLocks(bool filterByClientId, string partitionKey)
-        {
-            var idTokens = Accessor.GetAllIdTokens(partitionKey);
-            if (filterByClientId)
-            {
-                idTokens.RemoveAll(x => !x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase));
-            }
-            return idTokens;
-        }
-
         private static bool FrtExists(IEnumerable<MsalRefreshTokenCacheItem> refreshTokens)
         {
             return refreshTokens.Any(rt => rt.IsFRT);

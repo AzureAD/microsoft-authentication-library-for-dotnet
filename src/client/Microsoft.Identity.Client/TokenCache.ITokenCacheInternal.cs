@@ -263,8 +263,8 @@ namespace Microsoft.Identity.Client
 
             if (requestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Verbose))
             {
-                var accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
-                var refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
+                var accessTokenCacheItems = Accessor.GetAllAccessTokens();
+                var refreshTokenCacheItems = Accessor.GetAllRefreshTokens();
                 var accessTokenCacheKeys = accessTokenCacheItems.Take(10).Select(item => item.GetKey()).ToList();
 
                 StringBuilder tokenCacheKeyDump = new StringBuilder();
@@ -459,7 +459,7 @@ namespace Microsoft.Identity.Client
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
-            var accessTokens = GetAllAccessTokensWithNoLocks(true, partitionKey);
+            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
 
             requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
 
@@ -482,6 +482,7 @@ namespace Microsoft.Identity.Client
             FilterByTokenType(requestParams, accessTokens);
             FilterByScopes(requestParams, accessTokens);
             accessTokens = await FilterByEnvironmentAsync(requestParams, accessTokens).ConfigureAwait(false);
+            FilterByClientId(accessTokens);
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
@@ -749,6 +750,11 @@ namespace Microsoft.Identity.Client
         }
         #endregion
 
+        private void FilterByClientId<T>(List<T> tokenCacheItems) where T : MsalCredentialCacheItemBase
+        {
+            tokenCacheItems.RemoveAll(x => !x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase));
+        }
+
         /// <summary>
         /// For testing purposes only. Expires ALL access tokens in memory and fires OnAfterAccessAsync event with no cache key
         /// </summary>
@@ -944,8 +950,13 @@ namespace Microsoft.Identity.Client
             // this will either be the home account ID or null, it can never be OBO assertion or tenant ID
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParameters);
 
-            var refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId, partitionKey);
+            var refreshTokenCacheItems = Accessor.GetAllRefreshTokens(partitionKey);
             var accountCacheItems = Accessor.GetAllAccounts(partitionKey);
+
+            if (filterByClientId)
+            {
+                FilterByClientId(refreshTokenCacheItems);
+            }
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
@@ -1109,7 +1120,8 @@ namespace Microsoft.Identity.Client
 
             Debug.Assert(homeAccountId != null);
 
-            var idTokenCacheItems = GetAllIdTokensWithNoLocks(true, homeAccountId);
+            var idTokenCacheItems = Accessor.GetAllIdTokens(homeAccountId);
+            FilterByClientId(idTokenCacheItems);
 
             if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
             {
@@ -1248,7 +1260,7 @@ namespace Microsoft.Identity.Client
 
             string partitionKey = account.HomeAccountId.Identifier;
 
-            var refreshTokens = GetAllRefreshTokensWithNoLocks(false, partitionKey);
+            var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
             refreshTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
 
             // To maintain backward compatibility with other MSALs, filter all credentials by clientID if
@@ -1258,7 +1270,7 @@ namespace Microsoft.Identity.Client
             // Delete all credentials associated with this IAccount
             if (filterByClientId)
             {
-                refreshTokens.RemoveAll(x => !x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase));
+                FilterByClientId(refreshTokens);
             }
 
             foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in refreshTokens)
@@ -1268,8 +1280,12 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info($"Deleted {refreshTokens.Count} refresh tokens.");
 
-            var accessTokens = GetAllAccessTokensWithNoLocks(filterByClientId, partitionKey);
+            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
             accessTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
+            if (filterByClientId)
+            {
+                FilterByClientId(accessTokens);
+            }
 
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in accessTokens)
             {
@@ -1278,8 +1294,12 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info($"Deleted {accessTokens.Count} access tokens.");
 
-            var idTokens = GetAllIdTokensWithNoLocks(filterByClientId, partitionKey);
+            var idTokens = Accessor.GetAllIdTokens(partitionKey);
             idTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
+            if (filterByClientId)
+            {
+                FilterByClientId(idTokens);
+            }
 
             foreach (MsalIdTokenCacheItem idTokenCacheItem in idTokens)
             {
