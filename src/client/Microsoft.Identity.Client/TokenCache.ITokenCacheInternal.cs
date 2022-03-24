@@ -478,11 +478,11 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            FilterByHomeAccountTenantOrAssertion(requestParams, accessTokens);
-            FilterByTokenType(requestParams, accessTokens);
-            FilterByScopes(requestParams, accessTokens);
-            accessTokens = await FilterByEnvironmentAsync(requestParams, accessTokens).ConfigureAwait(false);
-            FilterByClientId(accessTokens);
+            FilterTokensByHomeAccountTenantOrAssertion(accessTokens, requestParams);
+            FilterTokensByTokenType(accessTokens, requestParams);
+            FilterTokensByScopes(accessTokens, requestParams);
+            accessTokens = await FilterTokensByEnvironmentAsync(accessTokens, requestParams).ConfigureAwait(false);
+            FilterTokensByClientId(accessTokens);
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
@@ -499,9 +499,9 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, accessTokens);
-            msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
-            msalAccessTokenCacheItem = FilterByExpiry(msalAccessTokenCacheItem, requestParams);
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleToken(accessTokens, requestParams);
+            msalAccessTokenCacheItem = FilterTokensByKeyId(msalAccessTokenCacheItem, requestParams);
+            msalAccessTokenCacheItem = FilterTokensByExpiry(msalAccessTokenCacheItem, requestParams);
 
             if (msalAccessTokenCacheItem == null)
             {
@@ -513,9 +513,9 @@ namespace Microsoft.Identity.Client
             return msalAccessTokenCacheItem;
         }
 
-        private static void FilterByScopes(
-            AuthenticationRequestParameters requestParams,
-            List<MsalAccessTokenCacheItem> tokenCacheItems)
+        private static void FilterTokensByScopes(
+            List<MsalAccessTokenCacheItem> tokenCacheItems,
+            AuthenticationRequestParameters requestParams)
         {
             var logger = requestParams.RequestContext.Logger;
             if (tokenCacheItems.Count == 0)
@@ -543,9 +543,9 @@ namespace Microsoft.Identity.Client
                 "Filtering by scopes");
         }
 
-        private static void FilterByTokenType(
-            AuthenticationRequestParameters requestParams,
-            List<MsalAccessTokenCacheItem> tokenCacheItems)
+        private static void FilterTokensByTokenType(
+            List<MsalAccessTokenCacheItem> tokenCacheItems,
+            AuthenticationRequestParameters requestParams)
         {
             tokenCacheItems.FilterWithLogging(item =>
                             string.Equals(
@@ -556,9 +556,9 @@ namespace Microsoft.Identity.Client
                             "Filtering by token type");
         }
 
-        private static void FilterByHomeAccountTenantOrAssertion(
-            AuthenticationRequestParameters requestParams,
-            List<MsalAccessTokenCacheItem> tokenCacheItems)
+        private static void FilterTokensByHomeAccountTenantOrAssertion(
+            List<MsalAccessTokenCacheItem> tokenCacheItems,
+            AuthenticationRequestParameters requestParams)
         {
             string requestTenantId = requestParams.Authority.TenantId;
             bool filterByTenantId = true;
@@ -608,7 +608,9 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private MsalAccessTokenCacheItem FilterByExpiry(MsalAccessTokenCacheItem msalAccessTokenCacheItem, AuthenticationRequestParameters requestParams)
+        private MsalAccessTokenCacheItem FilterTokensByExpiry(
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem,
+            AuthenticationRequestParameters requestParams)
         {
             var logger = requestParams.RequestContext.Logger;
             if (msalAccessTokenCacheItem != null)
@@ -660,9 +662,9 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        private static MsalAccessTokenCacheItem GetSingleResult(
-            AuthenticationRequestParameters requestParams,
-            IList<MsalAccessTokenCacheItem> tokenCacheItems)
+        private static MsalAccessTokenCacheItem GetSingleToken(
+            List<MsalAccessTokenCacheItem> tokenCacheItems,
+            AuthenticationRequestParameters requestParams)
         {
             // if only one cached token found
             if (tokenCacheItems.Count == 1)
@@ -676,9 +678,9 @@ namespace Microsoft.Identity.Client
                 MsalErrorMessage.MultipleTokensMatched);
         }
 
-        private async Task<List<MsalAccessTokenCacheItem>> FilterByEnvironmentAsync(
-            AuthenticationRequestParameters requestParams,
-            List<MsalAccessTokenCacheItem> tokenCacheItems)
+        private async Task<List<MsalAccessTokenCacheItem>> FilterTokensByEnvironmentAsync(
+            List<MsalAccessTokenCacheItem> tokenCacheItems,
+            AuthenticationRequestParameters requestParams)
         {
             var logger = requestParams.RequestContext.Logger;
 
@@ -720,7 +722,7 @@ namespace Microsoft.Identity.Client
                 $"Filtering AT by environment");
         }
 
-        private MsalAccessTokenCacheItem FilterByKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
+        private MsalAccessTokenCacheItem FilterTokensByKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
         {
             if (item == null)
             {
@@ -750,7 +752,7 @@ namespace Microsoft.Identity.Client
         }
         #endregion
 
-        private void FilterByClientId<T>(List<T> tokenCacheItems) where T : MsalCredentialCacheItemBase
+        private void FilterTokensByClientId<T>(List<T> tokenCacheItems) where T : MsalCredentialCacheItemBase
         {
             tokenCacheItems.RemoveAll(x => !x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase));
         }
@@ -800,7 +802,7 @@ namespace Microsoft.Identity.Client
 
             if (refreshTokens.Count != 0)
             {
-                FilterRtsByHomeAccountIdOrAssertion(requestParams, refreshTokens, familyId);
+                FilterRefreshTokensByHomeAccountIdOrAssertion(refreshTokens, requestParams, familyId);
 
                 if (!requestParams.AppConfig.MultiCloudSupportEnabled)
                 {
@@ -859,14 +861,14 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        private static void FilterRtsByHomeAccountIdOrAssertion(
+        private static void FilterRefreshTokensByHomeAccountIdOrAssertion(
+            List<MsalRefreshTokenCacheItem> cacheItems,
             AuthenticationRequestParameters requestParams,
-            List<MsalRefreshTokenCacheItem> rtCacheItems,
             string familyId)
         {
             if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
             {
-                rtCacheItems.FilterWithLogging(item =>
+                cacheItems.FilterWithLogging(item =>
                                 !string.IsNullOrEmpty(item.OboCacheKey) &&
                                 item.OboCacheKey.Equals(
                                 !string.IsNullOrEmpty(requestParams.LongRunningOboCacheKey) ? requestParams.LongRunningOboCacheKey : requestParams.UserAssertion.AssertionHash,
@@ -878,14 +880,14 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                rtCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
+                cacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
                                 requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
                                 "Filtering RT by home account id");
             }
 
             // This will also filter for the case when familyId is null and exclude RTs with familyId in filtered list
-            rtCacheItems.FilterWithLogging(item =>
+            cacheItems.FilterWithLogging(item =>
                     string.Equals(item.FamilyId ?? string.Empty,
                     familyId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
                     requestParams.RequestContext.Logger,
@@ -894,7 +896,7 @@ namespace Microsoft.Identity.Client
             // if there is a value in familyId, we are looking for FRT and hence ignore filter with clientId
             if (string.IsNullOrEmpty(familyId))
             {
-                rtCacheItems.FilterWithLogging(item => item.ClientId.Equals(
+                cacheItems.FilterWithLogging(item => item.ClientId.Equals(
                             requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
                             requestParams.RequestContext.Logger,
                             "Filtering RT by client id");
@@ -955,7 +957,7 @@ namespace Microsoft.Identity.Client
 
             if (filterByClientId)
             {
-                FilterByClientId(refreshTokenCacheItems);
+                FilterTokensByClientId(refreshTokenCacheItems);
             }
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
@@ -1121,7 +1123,7 @@ namespace Microsoft.Identity.Client
             Debug.Assert(homeAccountId != null);
 
             var idTokenCacheItems = Accessor.GetAllIdTokens(homeAccountId);
-            FilterByClientId(idTokenCacheItems);
+            FilterTokensByClientId(idTokenCacheItems);
 
             if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
             {
@@ -1270,7 +1272,7 @@ namespace Microsoft.Identity.Client
             // Delete all credentials associated with this IAccount
             if (filterByClientId)
             {
-                FilterByClientId(refreshTokens);
+                FilterTokensByClientId(refreshTokens);
             }
 
             foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in refreshTokens)
@@ -1284,7 +1286,7 @@ namespace Microsoft.Identity.Client
             accessTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
             if (filterByClientId)
             {
-                FilterByClientId(accessTokens);
+                FilterTokensByClientId(accessTokens);
             }
 
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in accessTokens)
@@ -1298,7 +1300,7 @@ namespace Microsoft.Identity.Client
             idTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
             if (filterByClientId)
             {
-                FilterByClientId(idTokens);
+                FilterTokensByClientId(idTokens);
             }
 
             foreach (MsalIdTokenCacheItem idTokenCacheItem in idTokens)

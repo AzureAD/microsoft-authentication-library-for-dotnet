@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Test.Performance
                 typeof(AcquireTokenForOboCacheTests),
                 typeof(TokenCacheTests),
             }).RunAll(DefaultConfig.Instance
-                //.WithOptions(ConfigOptions.DisableLogFile)
+                .WithOptions(ConfigOptions.DisableLogFile)
                 .WithOptions(ConfigOptions.JoinSummary)
                 .WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually
                 .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
