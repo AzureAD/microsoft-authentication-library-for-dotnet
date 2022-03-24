@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         private void InvokeLogCallback(LogEntry logEntry, bool containsPii = false)
         {
-            _logCallback.Invoke(GetLegacyLogLevel(logEntry.EventLevel), logEntry.Message, false);
+            _logCallback.Invoke(GetLegacyLogLevel(logEntry.EventLevel), logEntry.Message, containsPii);
         }
 
         public LegacyIdentityLoggerAdapter(LogLevel logLevel, LogCallback logCallback)
