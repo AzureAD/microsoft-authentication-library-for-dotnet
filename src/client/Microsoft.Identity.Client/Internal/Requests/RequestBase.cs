@@ -347,6 +347,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
 
                 authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
+                authenticationRequestParameters.RequestContext.IdentityLogger.InfoPii(messageWithPii, messageWithoutPii); //sample log message
             }
 
             if (authenticationRequestParameters.IsConfidentialClient &&

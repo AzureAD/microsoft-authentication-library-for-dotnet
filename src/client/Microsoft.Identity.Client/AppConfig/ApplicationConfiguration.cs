@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
+using Microsoft.IdentityModel.Logging.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
@@ -83,6 +84,7 @@ namespace Microsoft.Identity.Client
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
         public LogCallback LoggingCallback { get; internal set; }
+        public IIdentityLogger IdentityLogger { get; internal set; }
         public string Component { get; internal set; }
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
         public bool UseRecommendedDefaultRedirectUri { get; internal set; }

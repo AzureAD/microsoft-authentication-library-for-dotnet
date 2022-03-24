@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.IdentityModel.Logging.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -15,6 +16,7 @@ namespace Microsoft.Identity.Client.Internal
         public Guid CorrelationId { get; }
         public ICoreLogger Logger { get; }
         public IServiceBundle ServiceBundle { get; }
+        public IIdentityLogger IdentityLogger { get; }
 
         /// <summary>
         /// One and only one ApiEvent is associated with each request.
@@ -27,6 +29,8 @@ namespace Microsoft.Identity.Client.Internal
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
             Logger = MsalLogger.Create(correlationId, ServiceBundle.Config);
+            IdentityLogger = ServiceBundle.Config.IdentityLogger != null ? //For testing purposes
+                                        ServiceBundle.Config.IdentityLogger : new LegacyIdentityLoggerAdapter(ServiceBundle.Config.LogLevel, ServiceBundle.Config.LoggingCallback);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
         }

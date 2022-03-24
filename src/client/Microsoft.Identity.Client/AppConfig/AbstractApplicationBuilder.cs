@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
+using Microsoft.IdentityModel.Logging.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
@@ -270,6 +271,17 @@ namespace Microsoft.Identity.Client
             Config.LogLevel = logLevel ?? Config.LogLevel;
             Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
             Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Provide a logger to be used to log MSAL messages
+        /// </summary>
+        /// <param name="identityLogger"></param>
+        /// <returns></returns>
+        public T WithLogging(IIdentityLogger identityLogger)
+        {
+            Config.IdentityLogger = identityLogger;
             return (T)this;
         }
 
