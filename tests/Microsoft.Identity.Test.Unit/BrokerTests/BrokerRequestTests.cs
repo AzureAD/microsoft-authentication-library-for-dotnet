@@ -2,34 +2,32 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading;
-using System.Threading.Tasks;
 using NSubstitute;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using NSubstitute.ExceptionExtensions;
-using Microsoft.Identity.Client.Internal.Requests.Silent;
-using Microsoft.Identity.Client.Http;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using Microsoft.Identity.Client.AuthScheme;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -422,6 +420,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 var platformProxy = Substitute.For<IPlatformProxy>();
                 platformProxy.CanBrokerSupportSilentAuth().Returns(false);
+                platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), true)
+                    .Returns(new InMemoryPartitionedAppTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
+                platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), false)
+                    .Returns(new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
 
                 harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
 
@@ -456,6 +458,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
+            platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), true)
+                .Returns(new InMemoryPartitionedAppTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
+            platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), false)
+                .Returns(new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
@@ -466,7 +472,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var mockBroker = Substitute.For<IBroker>();
             var expectedAccount = new Account("a.b", "user", "login.windows.net");
             mockBroker.GetAccountsAsync(
-                TestConstants.ClientId, 
+                TestConstants.ClientId,
                 TestConstants.RedirectUri,
                 (pca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo,
                 Arg.Any<ICacheSessionManager>(),
@@ -738,7 +744,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                     return;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Assert.Fail($"Wrong Exception thrown {ex.Message}.");
                 }

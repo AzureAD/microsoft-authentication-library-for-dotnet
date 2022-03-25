@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
-        public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
+        public virtual List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
         {
             _logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
             if (string.IsNullOrEmpty(partitionKey))
@@ -214,13 +214,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalAccessTokenCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalAccessTokenCacheItem>();
             }
         }
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
-        public virtual IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
+        public virtual List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
         {
             _logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting refresh tokens: {RefreshTokenCacheDictionary.Count}");
             if (string.IsNullOrEmpty(partitionKey))
@@ -230,13 +230,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 RefreshTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalRefreshTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalRefreshTokenCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalRefreshTokenCacheItem>();
             }
         }
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
-        public virtual IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
+        public virtual List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
         {
             if (string.IsNullOrEmpty(partitionKey))
             {
@@ -245,13 +245,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 IdTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalIdTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalIdTokenCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalIdTokenCacheItem>();
             }
         }
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
-        public virtual IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
+        public virtual List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
         {
             if (string.IsNullOrEmpty(partitionKey))
             {
@@ -260,11 +260,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 AccountCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccountCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalAccountCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalAccountCacheItem>();
             }
         }
 
-        public virtual IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        public virtual List<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
             return AppMetadataDictionary.Select(kv => kv.Value).ToList();
         }

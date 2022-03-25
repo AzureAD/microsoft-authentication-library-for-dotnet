@@ -16,16 +16,18 @@ namespace Microsoft.Identity.Test.Performance
             Logger.Log("Started running performance tests.");
 
             BenchmarkSwitcher.FromTypes(new[] {
-                typeof(TokenCacheTests),
                 typeof(AcquireTokenForClientCacheTests),
                 typeof(AcquireTokenForOboCacheTests),
-                }).RunAll(DefaultConfig.Instance
-                        .WithOptions(ConfigOptions.DisableLogFile)
-                        // .WithOptions(ConfigOptions.DontOverwriteResults) // Helpful when running manually
-                        .AddDiagnoser(MemoryDiagnoser.Default)
-                        .AddJob(
-                            Job.Default
-                                .WithId("Job-PerfTests")));
+                typeof(TokenCacheTests),
+            }).RunAll(DefaultConfig.Instance
+                .WithOptions(ConfigOptions.DisableLogFile)
+                .WithOptions(ConfigOptions.JoinSummary)
+                .WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually
+                .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
+                                                       //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
+                .AddJob(
+                    Job.Default
+                        .WithId("Job-PerfTests")));
 
             Logger.Log("Completed running performance tests.");
         }
