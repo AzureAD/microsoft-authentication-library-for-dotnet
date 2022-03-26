@@ -28,15 +28,16 @@ namespace Microsoft.Identity.Test.Performance
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class TokenCacheTests
     {
-        readonly string _tenantPrefix = "l6a331n5-4fh7-7788-a78a-";
-        readonly string _scopePrefix = "https://resource.com/.default";
-        ConfidentialClientApplication _cca;
-        string _scope;
-        string _authority;
-        IAccount _account;
-        string _tokenId;
-        string _userId;
+        private readonly string _tenantPrefix = "l6a331n5-4fh7-7788-a78a-96f19f5d7a73";
+        private readonly string _scopePrefix = "https://resource.com/.default";
+        private ConfidentialClientApplication _cca;
+        private string _scope;
+        private string _authority;
+        private IAccount _account;
+        private string _tokenId;
+        private string _userId;
 
+        // i.e. (partitions, tokens per partition)
         [ParamsSource(nameof(CacheSizeSource), Priority = 0)]
         public (int TotalUsers, int TokensPerUser) CacheSize { get; set; }
 

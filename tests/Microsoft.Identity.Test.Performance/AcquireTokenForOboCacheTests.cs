@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Performance.Helpers;
 using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Performance
@@ -29,30 +31,38 @@ namespace Microsoft.Identity.Test.Performance
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenForOboCacheTests
     {
-        readonly string _tenantPrefix = "l6a331n5-4fh7-7788-a78a-";
-        readonly string _scopePrefix = "https://resource.com/.default";
-        ConfidentialClientApplication _cca;
-        string _scope;
-        string _authority;
-        UserAssertion _userAssertion;
+        private readonly string _tenantPrefix = "l6a331n5-4fh7-7788-a78a-96f19f5d7a73";
+        private readonly string _scopePrefix = "https://resource.com/.default";
+        private ConfidentialClientApplication _cca;
+        private InMemoryCache _serializationCache;
+        private string _scope;
+        private string _authority;
+        private UserAssertion _userAssertion;
 
+        // i.e. (partitions, tokens per partition)
         [ParamsSource(nameof(CacheSizeSource), Priority = 0)]
-        public (int TotalUsers, int TokensPerUser) CacheSize { get; set; }
+        public (int TotalUsers, int TokensPerUser) CacheSize { get; set; } = (3, 2);
 
         // By default, benchmarks are run for all combinations of params.
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
-            (1, 10000),
-            (100, 10000),
-            (1000, 1000),
+            //(1, 10000),
+            //(100, 10000),
+            //(1000, 1000),
+            (1, 1),
+            (1, 10),
+            (1, 1000),
         };
+
+        [ParamsAllValues]
+        public bool EnableCacheSerialization { get; set; } = true;
 
         // If the tokens are saved with different tenants.
         // This results in ID tokens and accounts having multiple tenant profiles.
         public bool IsMultiTenant { get; set; } = false;
 
         [GlobalSetup]
-        public void GlobalSetup()
+        public async Task GlobalSetupAsync()
         {
             _cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
@@ -61,7 +71,12 @@ namespace Microsoft.Identity.Test.Performance
                 .WithLegacyCacheCompatibility(false)
                 .BuildConcrete();
 
-            PopulateUserCache(CacheSize.TotalUsers, CacheSize.TokensPerUser);
+            if (EnableCacheSerialization)
+            {
+                _serializationCache = new InMemoryCache(_cca.UserTokenCache);
+            }
+
+            await PopulateUserCacheAsync(CacheSize.TotalUsers, CacheSize.TokensPerUser, EnableCacheSerialization).ConfigureAwait(false);
         }
 
         [IterationSetup]
@@ -86,14 +101,15 @@ namespace Microsoft.Identity.Test.Performance
                 .ConfigureAwait(false);
         }
 
-        private void PopulateUserCache(int totalUsers, int tokensPerUser)
+        private async Task PopulateUserCacheAsync(int totalUsers, int tokensPerUser, bool enableCacheSerialization)
         {
             for (int user = 0; user < totalUsers; user++)
             {
+                string userAssertionHash = new UserAssertion($"{TestConstants.DefaultAccessToken}{user}").AssertionHash;
+                string homeAccountId = $"{user}.{_tenantPrefix}";
+
                 for (int token = 0; token < tokensPerUser; token++)
                 {
-                    string userAssertionHash = new UserAssertion($"{TestConstants.DefaultAccessToken}{user}").AssertionHash;
-                    string homeAccountId = $"{user}.{_tenantPrefix}";
                     string tenant = IsMultiTenant ? $"{_tenantPrefix}{token}" : _tenantPrefix;
                     string scope = $"{_scopePrefix}{token}";
 
@@ -108,6 +124,22 @@ namespace Microsoft.Identity.Test.Performance
 
                     MsalAccountCacheItem accItem = TokenCacheHelper.CreateAccountItem(tenant, homeAccountId);
                     _cca.UserTokenCacheInternal.Accessor.SaveAccount(accItem);
+                }
+
+                if (enableCacheSerialization)
+                {
+                    var args = new TokenCacheNotificationArgs(
+                        _cca.UserTokenCacheInternal,
+                         _cca.AppConfig.ClientId,
+                         account: null,
+                         hasStateChanged: true,
+                         isApplicationCache: false,
+                         suggestedCacheKey: userAssertionHash,
+                         hasTokens: true,
+                         suggestedCacheExpiry: null,
+                         cancellationToken: CancellationToken.None);
+                    await _cca.UserTokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                    _cca.UserTokenCacheInternal.Accessor.Clear();
                 }
             }
         }
