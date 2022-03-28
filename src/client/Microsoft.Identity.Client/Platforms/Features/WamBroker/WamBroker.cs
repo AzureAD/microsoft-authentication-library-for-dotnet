@@ -872,7 +872,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 // If it's an AAD account, only 
                 bool isMsaRequest = await IsMsaRequestAsync(
                    appConfig.Authority,
-                   appConfig.TenantId,
+                   homeTenantId,
                    _wamOptions.MsaPassthrough).ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsaRequest ? _msaPlugin : _aadPlugin;
