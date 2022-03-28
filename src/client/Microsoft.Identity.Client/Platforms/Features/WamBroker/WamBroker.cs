@@ -869,7 +869,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string homeTenantId = account?.HomeAccountId?.TenantId;
             if (!string.IsNullOrEmpty(homeTenantId))
             {
-                // If it's an AAD account, only 
+                // If it's an AAD account, only the AAD plugin should remove it
+                // If it's an MSA account - MSA plugin should remove it, but in MSA-PT scenarios it's still the AAD plugin
                 bool isMsaRequest = await IsMsaRequestAsync(
                    appConfig.Authority,
                    homeTenantId,
