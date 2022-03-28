@@ -869,6 +869,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string homeTenantId = account?.HomeAccountId?.TenantId;
             if (!string.IsNullOrEmpty(homeTenantId))
             {
+                // If it's an AAD account, only 
                 bool isMsaRequest = await IsMsaRequestAsync(
                    appConfig.Authority,
                    appConfig.TenantId,
