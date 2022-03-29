@@ -23,10 +23,8 @@ namespace Microsoft.Identity.Test.Performance
     /// Testing combinations
     /// Tenants (partitions) - Tokens per partition - Total tokens
     /// 1 - 10,000 - 10,000
-    /// 1 - 100,000 - 100,000
     /// 100 - 10,000 - 1,000,000
     /// 1,000 - 1,000 - 1,000,000
-    /// 10,000 - 100 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenForClientCacheTests
@@ -40,21 +38,18 @@ namespace Microsoft.Identity.Test.Performance
 
         // i.e. (partitions, tokens per partition)
         [ParamsSource(nameof(CacheSizeSource))]
-        public (int TotalTenants, int TokensPerTenant) CacheSize { get; set; } = (3, 2);
+        public (int TotalTenants, int TokensPerTenant) CacheSize { get; set; }
 
         // By default, benchmarks are run for all combinations of params.
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
-            //(1, 10000),
-            //(100, 10000),
-            //(1000, 1000),
-            (1, 1),
-            (1, 10),
-            (1, 1000),
+            (1, 10000),
+            (100, 10000),
+            (1000, 1000),
         };
 
-        [ParamsAllValues]
-        public bool EnableCacheSerialization { get; set; } = true;
+        //[ParamsAllValues]
+        public bool EnableCacheSerialization { get; set; } = false;
 
         [GlobalSetup]
         public async Task GlobalSetupAsync()

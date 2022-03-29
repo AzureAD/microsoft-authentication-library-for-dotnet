@@ -41,21 +41,18 @@ namespace Microsoft.Identity.Test.Performance
 
         // i.e. (partitions, tokens per partition)
         [ParamsSource(nameof(CacheSizeSource), Priority = 0)]
-        public (int TotalUsers, int TokensPerUser) CacheSize { get; set; } = (3, 2);
+        public (int TotalUsers, int TokensPerUser) CacheSize { get; set; }
 
         // By default, benchmarks are run for all combinations of params.
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
-            //(1, 10000),
-            //(100, 10000),
-            //(1000, 1000),
-            (1, 1),
-            (1, 10),
-            (1, 1000),
+            (1, 10000),
+            (100, 10000),
+            (1000, 1000),
         };
 
-        [ParamsAllValues]
-        public bool EnableCacheSerialization { get; set; } = true;
+        //[ParamsAllValues]
+        public bool EnableCacheSerialization { get; set; } = false;
 
         // If the tokens are saved with different tenants.
         // This results in ID tokens and accounts having multiple tenant profiles.
@@ -80,7 +77,7 @@ namespace Microsoft.Identity.Test.Performance
         }
 
         [IterationSetup]
-        public void IterationSetup_AcquireTokenOnBehalfOf()
+        public void IterationSetup()
         {
             Random random = new Random();
             _userAssertion = new UserAssertion($"{TestConstants.DefaultAccessToken}{random.Next(0, CacheSize.TotalUsers)}");
