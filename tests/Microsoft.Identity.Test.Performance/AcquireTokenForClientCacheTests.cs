@@ -28,14 +28,14 @@ namespace Microsoft.Identity.Test.Performance
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenForClientCacheTests
     {
-        readonly string _tenantPrefix = TestConstants.Utid;
-        readonly string _scopePrefix = "scope";
+        readonly string _tenantPrefix = "l6a331n5-4fh7-7788-a78a-";
+        readonly string _scopePrefix = "https://resource.com/.default";
         ConfidentialClientApplication _cca;
         string _tenantId;
         string _scope;
 
         [ParamsSource(nameof(CacheSizeSource))]
-        public (int Tenants, int TokensPerTenant) CacheSize { get; set; }
+        public (int TotalTenants, int TokensPerTenant) CacheSize { get; set; }
 
         // By default, benchmarks are run for all combinations of params.
         // This is a workaround to specify the exact param combinations to be used.
@@ -55,14 +55,14 @@ namespace Microsoft.Identity.Test.Performance
                 .WithLegacyCacheCompatibility(false)
                 .BuildConcrete();
 
-            PopulateAppCache(_cca, CacheSize.Tenants, CacheSize.TokensPerTenant);
+            PopulateAppCache(_cca, CacheSize.TotalTenants, CacheSize.TokensPerTenant);
         }
 
         [IterationSetup]
         public void IterationSetup()
         {
             Random random = new Random();
-            _tenantId = $"{_tenantPrefix}{random.Next(0, CacheSize.Tenants)}";
+            _tenantId = $"{_tenantPrefix}{random.Next(0, CacheSize.TotalTenants)}";
             _scope = $"{_scopePrefix}{random.Next(0, CacheSize.TokensPerTenant)}";
         }
 
@@ -76,11 +76,11 @@ namespace Microsoft.Identity.Test.Performance
               .ConfigureAwait(false);
         }
 
-        private void PopulateAppCache(ConfidentialClientApplication cca, int tenantsNumber, int tokensNumber)
+        private void PopulateAppCache(ConfidentialClientApplication cca, int totalTenants, int tokensPerTenant)
         {
-            for (int tenant = 0; tenant < tenantsNumber; tenant++)
+            for (int tenant = 0; tenant < totalTenants; tenant++)
             {
-                for (int token = 0; token < tokensNumber; token++)
+                for (int token = 0; token < tokensPerTenant; token++)
                 {
                     MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                           TestConstants.ProductionPrefCacheEnvironment,

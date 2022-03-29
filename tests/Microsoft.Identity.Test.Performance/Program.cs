@@ -9,10 +9,12 @@ using BenchmarkDotNet.Running;
 
 namespace Microsoft.Identity.Test.Performance
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
+            Logger.Log("Started running performance tests.");
+
             BenchmarkSwitcher.FromTypes(new[] {
                 typeof(AcquireTokenForClientCacheTests),
                 typeof(AcquireTokenForOboCacheTests),
@@ -27,7 +29,13 @@ namespace Microsoft.Identity.Test.Performance
                     Job.Default
                         .WithId("Job-PerfTests")));
 
-            Console.ReadKey();
+            Logger.Log("Completed running performance tests.");
         }
+    }
+
+    public static class Logger
+    {
+        private const string LogPrefix = "[Microsoft.Identity.Test.Performance]";
+        public static void Log(string message) => Console.WriteLine($"{LogPrefix} {message}");
     }
 }
