@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Threading.Tasks;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
@@ -12,7 +11,7 @@ namespace Microsoft.Identity.Test.Performance
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             Logger.Log("Started running performance tests.");
 
@@ -24,7 +23,6 @@ namespace Microsoft.Identity.Test.Performance
                     typeof(TokenCacheTests),
             }).RunAll(DefaultConfig.Instance
                 .WithOptions(ConfigOptions.DisableLogFile)
-                .WithOptions(ConfigOptions.JoinSummary)
                 //.WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually
                 .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
                                                        //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
