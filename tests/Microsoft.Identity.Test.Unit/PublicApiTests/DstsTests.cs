@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             return new MockHttpMessageHandler()
             {
-                ExpectedUrl = $"{authority}/oauth2/token",
+                ExpectedUrl = $"{authority}/oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedPostData = expectedRequestBody,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
