@@ -9,8 +9,10 @@ using BenchmarkDotNet.Attributes;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Performance.Helpers;
 using Microsoft.Identity.Test.Unit;
+using Microsoft.Identity.Web;
 
 namespace Microsoft.Identity.Test.Performance
 {
@@ -19,12 +21,6 @@ namespace Microsoft.Identity.Test.Performance
     /// </summary>
     /// <remarks>
     /// For app cache, the number of partitions is the number of tenants
-    /// 
-    /// Testing combinations
-    /// Tenants (partitions) - Tokens per partition - Total tokens
-    /// 1 - 10,000 - 10,000
-    /// 100 - 10,000 - 1,000,000
-    /// 1,000 - 1,000 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenForClientCacheTests
@@ -43,13 +39,18 @@ namespace Microsoft.Identity.Test.Performance
         // By default, benchmarks are run for all combinations of params.
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
+            (1, 10),
             (1, 10000),
-            (100, 10000),
-            (1000, 1000),
+            (1000, 10),
+            (10000, 10),
+            (100000, 10),
         };
 
-        //[ParamsAllValues]
-        public bool EnableCacheSerialization { get; set; } = false;
+        [ParamsAllValues]
+        public bool EnableCacheSerialization { get; set; }
+
+        [Params(true)]
+        public bool UseMicrosoftIdentityWebCache { get; set; }
 
         [GlobalSetup]
         public async Task GlobalSetupAsync()
@@ -63,7 +64,14 @@ namespace Microsoft.Identity.Test.Performance
 
             if (EnableCacheSerialization)
             {
-                _serializationCache = new InMemoryCache(_cca.AppTokenCache);
+                if (UseMicrosoftIdentityWebCache)
+                {
+                    (_cca as IConfidentialClientApplication).AddInMemoryTokenCache();
+                }
+                else
+                {
+                    _serializationCache = new InMemoryCache(_cca.AppTokenCache);
+                }
             }
 
             await PopulateAppCacheAsync(_cca, CacheSize.TotalTenants, CacheSize.TokensPerTenant, EnableCacheSerialization).ConfigureAwait(false);
@@ -100,17 +108,11 @@ namespace Microsoft.Identity.Test.Performance
 
                 for (int token = 0; token < tokensPerTenant; token++)
                 {
-                    MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
-                          TestConstants.ProductionPrefCacheEnvironment,
-                          TestConstants.ClientId,
-                          $"{_scopePrefix}{token}",
-                          $"{_tenantPrefix}{tenant}",
-                          "",
-                          new DateTimeOffset(DateTime.UtcNow),
-                          new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
-                          new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
-                          null,
-                          null);
+                    MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(
+                        scopes: $"{_scopePrefix}{token}",
+                        tenant: $"{_tenantPrefix}{tenant}",
+                        accessToken: TestConstants.AppAccessToken);
+
                     cca.AppTokenCacheInternal.Accessor.SaveAccessToken(atItem);
                 }
 

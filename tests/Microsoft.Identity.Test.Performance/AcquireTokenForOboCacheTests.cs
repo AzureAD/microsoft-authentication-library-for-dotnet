@@ -21,12 +21,6 @@ namespace Microsoft.Identity.Test.Performance
     /// For OBO user cache, the partition key is
     /// AT, RT: user assertion hash.
     /// IDT, Accounts: home account ID.
-    /// 
-    /// Testing combinations
-    /// Users - Tokens - Total tokens
-    /// 1 - 10,000 - 10,000
-    /// 100 - 10,000 - 1,000,000
-    /// 1,000 - 1,000 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenForOboCacheTests
@@ -46,13 +40,18 @@ namespace Microsoft.Identity.Test.Performance
         // By default, benchmarks are run for all combinations of params.
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
+            (1, 10),
             (1, 10000),
-            (100, 10000),
-            (1000, 1000),
+            (1000, 10),
+            (10000, 10),
+            (100000, 10),
         };
 
-        //[ParamsAllValues]
-        public bool EnableCacheSerialization { get; set; } = false;
+        [ParamsAllValues]
+        public bool EnableCacheSerialization { get; set; }
+
+        [Params(true)]
+        public bool UseMicrosoftIdentityWebCache { get; set; }
 
         // If the tokens are saved with different tenants.
         // This results in ID tokens and accounts having multiple tenant profiles.
@@ -110,13 +109,25 @@ namespace Microsoft.Identity.Test.Performance
                     string tenant = IsMultiTenant ? $"{_tenantPrefix}{token}" : _tenantPrefix;
                     string scope = $"{_scopePrefix}{token}";
 
-                    MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(scope, tenant, homeAccountId, oboCacheKey: userAssertionHash);
+                    MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(
+                        scope,
+                        tenant,
+                        homeAccountId,
+                        oboCacheKey: userAssertionHash,
+                        accessToken: TestConstants.UserAccessToken);
                     _cca.UserTokenCacheInternal.Accessor.SaveAccessToken(atItem);
 
-                    MsalRefreshTokenCacheItem rtItem = TokenCacheHelper.CreateRefreshTokenItem(userAssertionHash, homeAccountId);
+                    MsalRefreshTokenCacheItem rtItem = TokenCacheHelper.CreateRefreshTokenItem(
+                        userAssertionHash,
+                        homeAccountId,
+                        refreshToken: TestConstants.RefreshToken);
                     _cca.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
 
-                    MsalIdTokenCacheItem idtItem = TokenCacheHelper.CreateIdTokenCacheItem(tenant, homeAccountId, user.ToString());
+                    MsalIdTokenCacheItem idtItem = TokenCacheHelper.CreateIdTokenCacheItem(
+                        tenant,
+                        homeAccountId,
+                        uid: user.ToString(),
+                        idToken: TestConstants.IdToken);
                     _cca.UserTokenCacheInternal.Accessor.SaveIdToken(idtItem);
 
                     MsalAccountCacheItem accItem = TokenCacheHelper.CreateAccountItem(tenant, homeAccountId);
