@@ -86,7 +86,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             ErrorDescription = errorDescription,
                             SubError = errorResult[BrokerResponseConst.BrokerSubError],
                             HttpResponse = httpResponse,
-                            CorrelationId = InteractiveRequestCorrelationId
+                            CorrelationId = InteractiveRequestCorrelationId,
+                            TenantId = errorResult[BrokerResponseConst.TenantId]?.ToString(),
+                            Upn = errorResult[BrokerResponseConst.UserName]?.ToString(),
+                            AccountUserId = errorResult[BrokerResponseConst.LocalAccountId]?.ToString(),
+                            AuthorityUrl = errorResult[BrokerResponseConst.Authority]?.ToString(),
                         };
                         break;
                     default:

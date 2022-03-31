@@ -140,22 +140,22 @@ namespace Microsoft.Identity.Client.Platforms.Android
         #endregion
 
         #region GetAll
-        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
+        public List<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
         {
             return _accessTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
+        public List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
         {
             return _refreshTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalRefreshTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
+        public List<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
         {
             return _idTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalIdTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
+        public List<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
         {
             return _accountSharedPreference.All.Values.Cast<string>().Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
         }
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             throw new NotImplementedException();
         }
 
-        public IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        public List<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
             throw new NotImplementedException();
         }

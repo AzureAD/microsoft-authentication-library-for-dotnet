@@ -128,7 +128,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     Arg.Any<IEnumerable<string>>(), rq)
                     .Returns(CreateEntryForSingleAuthority(new Uri(TestConstants.AuthorityCommonTenant))); // user set this authority in config
 
-
                 // Act
                 var accounts = await _aadPlugin.GetAccountsAsync(
                     TestConstants.ClientId,
@@ -321,7 +320,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual("Id_From_ESTS", accounts.Single().HomeAccountId.Identifier);
             }
         }
-
 
         private static IWebTokenRequestResultWrapper CreateSuccessResponse(WebAccount account)
         {

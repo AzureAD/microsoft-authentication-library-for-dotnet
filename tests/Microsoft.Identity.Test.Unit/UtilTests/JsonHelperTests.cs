@@ -216,6 +216,4 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         }
     }
 
-
-
 }

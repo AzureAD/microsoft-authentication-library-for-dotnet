@@ -334,7 +334,6 @@ namespace Microsoft.Identity.Test.Unit
             {
                 httpManager.AddRegionDiscoveryMockHandlerNotFound();
 
-
                 var discoveryHandler = MockHelpers.CreateInstanceDiscoveryMockHandler(
                      "https://login.microsoftonline.com/common/discovery/instance",
                      TestConstants.DiscoveryJsonResponse);

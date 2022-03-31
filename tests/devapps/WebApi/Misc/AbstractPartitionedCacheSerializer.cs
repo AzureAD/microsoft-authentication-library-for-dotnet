@@ -76,7 +76,7 @@ namespace WebApi.Misc
         /// </summary>
         /// <param name="homeAccountId">HomeAccountId for a user account in the cache.</param>
         /// <returns>A <see cref="Task"/> that represents a completed clear operation.</returns>
-        public void ClearAsync(string homeAccountId)
+        public void Clear(string homeAccountId)
         {
             // This is a user token cache
             RemoveKey(homeAccountId);

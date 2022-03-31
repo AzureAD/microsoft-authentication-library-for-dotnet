@@ -76,7 +76,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return isDeepImmutable;
         }
 
-
         private static bool DictionariesAreEqual<TKey, TValue>(
             IDictionary<TKey, TValue> dict1, 
             IDictionary<TKey, TValue> dict2, 

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -179,16 +180,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
             var atItem = tuple.Item1;
             var idtItem = tuple.Item2;
-            var account = tuple.Item3;
+            Account account = tuple.Item3;
 
             return new AuthenticationResult(
                 atItem,
                 idtItem,
-                account?.TenantProfiles,
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 msalTokenResponse.TokenSource,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
+                account,
                 msalTokenResponse.SpaAuthCode);
         }
 
@@ -393,16 +394,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
 
                 var idToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
-                var tenantProfiles = await CacheManager.GetTenantProfilesAsync(cachedAccessTokenItem.HomeAccountId).ConfigureAwait(false);
+                var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessTokenItem).ConfigureAwait(false);
 
                 return new AuthenticationResult(
                     cachedAccessTokenItem,
                     idToken,
-                    tenantProfiles?.Values,
                     AuthenticationRequestParameters.AuthenticationScheme,
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache,
-                    AuthenticationRequestParameters.RequestContext.ApiEvent);
+                    AuthenticationRequestParameters.RequestContext.ApiEvent,
+                    account);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");

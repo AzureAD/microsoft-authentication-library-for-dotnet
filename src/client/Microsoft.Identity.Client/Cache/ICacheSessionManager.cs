@@ -25,8 +25,7 @@ namespace Microsoft.Identity.Client.Cache
         Task<bool?> IsAppFociMemberAsync(string familyId);
         
         Task<IEnumerable<IAccount>> GetAccountsAsync();
-        Task<IDictionary<string, TenantProfile>> GetTenantProfilesAsync(string homeAccountId);
-
+        Task<Account> GetAccountAssociatedWithAccessTokenAsync(MsalAccessTokenCacheItem msalAccessTokenCacheItem);
         
     }
 }

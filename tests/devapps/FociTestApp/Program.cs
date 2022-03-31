@@ -20,7 +20,6 @@ namespace FociTestApp
         private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
         private static bool s_useIWA = false;
 
-
         private static readonly string[] s_scopes = new[] { "user.read" };
 
         private static readonly string s_cacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.json";
@@ -52,7 +51,6 @@ namespace FociTestApp
              .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
              .WithLogging(Log, LogLevel.Verbose, true)
              .Build();
-
 
             SetCacheSerializationToFile(s_pcaFam1);
             SetCacheSerializationToFile(s_pcaFam2);
@@ -140,7 +138,6 @@ namespace FociTestApp
                             var accounts2 = await s_pcaFam2.GetAccountsAsync().ConfigureAwait(false);
                             var accounts3 = await s_pcaNonFam.GetAccountsAsync().ConfigureAwait(false);
 
-
                             foreach (var acc in accounts1)
                             {
                                 await s_pcaFam1.RemoveAsync(acc).ConfigureAwait(false);
@@ -151,7 +148,6 @@ namespace FociTestApp
                             accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
                             accounts2 = await s_pcaFam2.GetAccountsAsync().ConfigureAwait(false);
                             accounts3 = await s_pcaNonFam.GetAccountsAsync().ConfigureAwait(false);
-
 
                             foreach (var acc in accounts2)
                             {
@@ -202,7 +198,7 @@ namespace FociTestApp
             if (accounts.Count() > 1)
             {
                 Log(LogLevel.Error, "Not expecting to handle multiple accounts", false);
-                return null;
+                return Task.FromResult<AuthenticationResult>(null);
             }
 
             return pca.AcquireTokenSilent(s_scopes, accounts.FirstOrDefault()).ExecuteAsync();
@@ -221,14 +217,11 @@ namespace FociTestApp
             Console.WriteLine("Token is {0}", authTask.Result.AccessToken);
             Console.ResetColor();
 
-
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
             await DisplayAccountsAsync(pca).ConfigureAwait(false);
 
             Console.ResetColor();
         }
-
-
 
         private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
         {
@@ -267,9 +260,6 @@ namespace FociTestApp
             Console.WriteLine($"{level} {message}");
             Console.ResetColor();
         }
-
-
-
 
     }
 }

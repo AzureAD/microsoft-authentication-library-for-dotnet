@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Cache
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
-        IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null);
+        List<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null);
 
         /// <summary>
         /// Returns all refresh tokens from the underlying cache collection.
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Cache
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
-        IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null);
+        List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null);
 
         /// <summary>
         /// Returns all ID tokens from the underlying cache collection.
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Cache
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
-        IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null);
+        List<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null);
 
         /// <summary>
         /// Returns all accounts from the underlying cache collection.
@@ -76,9 +76,9 @@ namespace Microsoft.Identity.Client.Cache
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         /// Not all classes that implement this method are required to filter by partition (e.g. mobile)
         /// </remarks>
-        IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null, ICoreLogger requestlogger = null);
+        List<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null, ICoreLogger requestlogger = null);
 
-        IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata();
+        List<MsalAppMetadataCacheItem> GetAllAppMetadata();
 
 #if iOS
         void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);

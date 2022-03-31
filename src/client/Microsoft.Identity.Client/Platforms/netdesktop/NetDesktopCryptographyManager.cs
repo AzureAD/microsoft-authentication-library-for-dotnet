@@ -138,7 +138,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return rsaProvider;
         }
 
-
         /// <summary>
         ///     <para>
         ///         The GetCngPrivateKey method will return a <see cref="CngKey" /> representing the private

@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Identity.Client;
 
-
 namespace WebApi.MockHttp
 {
     /// <summary>
@@ -86,7 +85,6 @@ namespace WebApi.MockHttp
                 if (tidGroup == null)
                     throw new InvalidOperationException("Should not happen");
                 string tid = tidGroup.Value;
-
 
                 System.Collections.Specialized.NameValueCollection parsedData =
                     await GetRequestPayloadAsync(request).ConfigureAwait(false);

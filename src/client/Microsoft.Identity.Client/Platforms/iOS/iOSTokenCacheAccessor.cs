@@ -138,28 +138,28 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         #endregion
 
         #region GetAllItems
-        public IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
+        public List<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
         {
             return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken)
                 .Select(x => MsalAccessTokenCacheItem.FromJsonString(x))
                 .ToList();
         }
 
-        public IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
+        public List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
         {
             return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken)
                 .Select(x => MsalRefreshTokenCacheItem.FromJsonString(x))
                 .ToList();
         }
 
-        public IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
+        public List<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
         {
             return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.IdToken)
                 .Select(x => MsalIdTokenCacheItem.FromJsonString(x))
                 .ToList();
         }
 
-        public IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
+        public List<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null, ICoreLogger requestlogger = null)
         {
             return GetPayloadAsString(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()])
                 .Select(x => MsalAccountCacheItem.FromJsonString(x))
@@ -367,7 +367,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             throw new NotImplementedException();
         }
 
-        public IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        public List<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
             throw new NotImplementedException();
         }

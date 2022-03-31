@@ -1,0 +1,35 @@
+# template-publish-packages-and-symbols.yaml
+# Publishes all nuget packages and symbols to appropriate destinations.
+
+parameters:
+  NugetPackagesWildcard: '$(Build.ArtifactStagingDirectory)\packages\*.nupkg'
+  ArtifactPublishPath: '$(Build.ArtifactStagingDirectory)\packages'
+  SymbolPublishWildcard: '**/bin/**/microsoft.identity.client.*'
+  DropArtifactName: 'packages'
+  parameters:
+  PublishArtifacts: 'false'
+
+steps:
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: packages'
+  inputs:
+    PathtoPublish: '${{ parameters.ArtifactPublishPath }}'
+    ArtifactName: '${{ parameters.DropArtifactName }}'
+  condition: eq(${{ parameters.PublishArtifacts }}, 'true')
+
+- task: NuGetCommand@2
+  displayName: 'Publish packages to VSTS feed'
+  inputs:
+    command: push
+    packagesToPush: '${{ parameters.NugetPackagesWildcard }}'
+    publishVstsFeed: '46419298-b96c-437f-bd4c-12c8df7f868d'
+    allowPackageConflicts: true
+  continueOnError: true
+  condition: eq(${{ parameters.PublishArtifacts }}, 'true')
+
+- task: PublishSymbols@2
+  displayName: 'Publish symbols'
+  inputs:
+    SearchPattern: '${{ parameters.SymbolPublishWildcard }}'
+    SymbolServerType: TeamServices
+  condition: eq(${{ parameters.PublishArtifacts }}, 'true')

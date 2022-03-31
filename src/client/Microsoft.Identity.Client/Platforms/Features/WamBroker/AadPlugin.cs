@@ -139,7 +139,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync account {webAccount.UserName} matched a cached account",
                     $"[WAM AAD Provider] Account matched a cache account");
 
-
                 return new Account(
                     homeAccountId.Identifier,
                     webAccount.UserName,
@@ -184,7 +183,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             // Note that this is never a guest flow, we are always acquiring a token for the home realm,
             // since we only need the client info.
-
 
             var wamResult = await _wamProxy.GetTokenSilentlyAsync(webAccount, request).ConfigureAwait(false);
 

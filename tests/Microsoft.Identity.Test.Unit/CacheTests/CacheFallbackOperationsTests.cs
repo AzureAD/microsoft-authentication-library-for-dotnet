@@ -498,7 +498,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             _logger.Received().Error(Arg.Is<string>(CacheFallbackOperations.DifferentEnvError));
         }
 
-
         [TestMethod]
         public void DoNotWriteFRTs()
         {

@@ -57,7 +57,6 @@ namespace NetFx
         // These are not really secret as they do not protect anything, but validaton tools will complain
         // if we have secrets in the code. 
 
-
         // Simple confidential client app with access to https://graph.microsoft.com/.default
         private static readonly string s_clientIdForConfidentialApp =
             Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID");
@@ -77,7 +76,6 @@ namespace NetFx
 
         public static readonly string UserCacheFile = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.user.json";
         public static readonly string AppCacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.app.json";
-
 
         private static readonly string[] s_authorities = new[]  {
             "https://login.microsoftonline.com/61411618-6f67-4fc5-ba6a-4a0fe32d4eec",
@@ -172,11 +170,9 @@ namespace NetFx
             });
         }
 
-
         private static async Task RunConsoleAppLogicAsync(
             IPublicClientApplication pca)
         {
-
 
             while (true)
             {
@@ -222,7 +218,6 @@ namespace NetFx
                             var iwaBuilder =
                                 pca.AcquireTokenByIntegratedWindowsAuth(s_scopes)
                                 .WithUsername(s_username);
-
 
                             var result = await iwaBuilder.ExecuteAsync().ConfigureAwait(false);
 
@@ -318,7 +313,6 @@ namespace NetFx
                                     .WithProofOfPossession(popConfig);
                             }
 
-
                             // this is the same in all clouds
                             const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
 
@@ -332,7 +326,6 @@ namespace NetFx
 
                                 silentBuilder = silentBuilder.WithAuthority(msaAuthority);
                             }
-
 
                             result = await silentBuilder.ExecuteAsync().ConfigureAwait(false);
                             await CallApiAsync(pca, result).ConfigureAwait(false);
@@ -460,7 +453,6 @@ namespace NetFx
             }
         }
 
-
         //private static T ConfigurePoP<T>(AbstractPublicClientAcquireTokenParameterBuilder<T> builder)
         //    where T : AbstractPublicClientAcquireTokenParameterBuilder<T>
         //{
@@ -491,7 +483,6 @@ namespace NetFx
             {
                 await CallGraphAsync(authHeader).ConfigureAwait(false);
             }
-
 
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
             await DisplayAccountsAsync(pca).ConfigureAwait(false);
@@ -600,7 +591,6 @@ namespace NetFx
             Console.WriteLine($"{level} {message}");
             Console.ResetColor();
         }
-
 
         private static SecureString GetPasswordFromConsole()
         {

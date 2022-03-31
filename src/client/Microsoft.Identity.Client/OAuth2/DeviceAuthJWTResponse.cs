@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client.OAuth2
         public string Nonce { get; private set; }
     }
 
-
     internal class DeviceAuthJWTResponse
     {
         private readonly DeviceAuthHeader _header;

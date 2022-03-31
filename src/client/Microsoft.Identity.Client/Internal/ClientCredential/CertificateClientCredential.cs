@@ -15,7 +15,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         public static int MinKeySizeInBits { get; } = 2048;
 
-
         public CertificateClientCredential(X509Certificate2 certificate) : base(certificate, null, true) 
         { 
 

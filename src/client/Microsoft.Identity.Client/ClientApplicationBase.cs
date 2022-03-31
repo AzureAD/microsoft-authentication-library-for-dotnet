@@ -76,7 +76,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-
         internal virtual async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
@@ -312,7 +311,6 @@ namespace Microsoft.Identity.Client
                 AuthorityInfo,
                 allEnvs,
                 CreateRequestContext(Guid.NewGuid(), cancellationToken)).ConfigureAwait(false);
-
 
             brokerAccounts = brokerAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 

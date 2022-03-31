@@ -22,7 +22,6 @@ namespace DesktopTestApp
                 .WithLogging(logCallback, LogLevel.Verbose, true)
                 .BuildConcrete();
 
-
             CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
         }
 

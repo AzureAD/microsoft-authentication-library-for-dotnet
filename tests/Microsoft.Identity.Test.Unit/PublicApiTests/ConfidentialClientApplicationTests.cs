@@ -110,7 +110,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                       .WithClientSecret(TestConstants.ClientSecret)
                                                       .BuildConcrete();
 
-
             Assert.AreEqual(TestConstants.OnPremiseAuthority, app.Authority);
         }
 
@@ -453,12 +452,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     throw new NotImplementedException();
             }
 
-
             MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
             return (app, handler);
         }
-
 
         private static Task ModifyRequestAsync(OnBeforeTokenRequestData requestData)
         {
@@ -515,7 +512,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(
                     "key1",
                     (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
-
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
@@ -618,7 +614,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no RTs are returned
 
-
                 var actualAssertion = tokenHttpHandler.ActualRequestPostData["client_assertion"];
 
                 // assert client credential
@@ -716,7 +711,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
 
-
                 Assert.AreEqual(
                     TestConstants.DefaultClientAssertion, 
                     setup.Handler.ActualRequestPostData["client_assertion"]);
@@ -726,7 +720,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     setup.Handler.ActualRequestPostData["client_assertion_type"]);
             }
         }
-
 
         [TestMethod]
         public async Task ConfidentialClientUsingSignedClientAssertion_AsyncDelegate_CancellationTestAsync()
@@ -1084,7 +1077,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #endif
         }
 
-
         [TestMethod]
         public async Task GetAuthorizationRequestUrlValidateDefaultPromptTestAsync()
         {
@@ -1185,7 +1177,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 return qp;
             }
         }
-
 
         [TestMethod]
         public async Task HttpRequestExceptionIsNotSuppressedAsync()
@@ -1342,7 +1333,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithHttpManager(httpManager)
                 .BuildConcrete();
-
 
                 string expectedSpaCode = "my_spa_code";
                 httpManager.AddInstanceDiscoveryMockHandler();
