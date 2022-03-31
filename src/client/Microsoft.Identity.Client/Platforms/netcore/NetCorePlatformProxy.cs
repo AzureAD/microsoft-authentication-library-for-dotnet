@@ -189,7 +189,8 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                         }
                     }
                     
-                    if (opened == false)
+                    if (!opened)
+
                     {
                         throw new MsalClientException(
                             MsalError.LinuxXdgOpen,
