@@ -41,7 +41,7 @@ using Microsoft.Identity.Json.Serialization;
 
 namespace Microsoft.Identity.Json.Utilities
 {
-#if (DOTNET || PORTABLE || PORTABLE40) && !ANDROID && !NET_CORE
+#if (DOTNET || PORTABLE || PORTABLE40) && !ANDROID && !NET_CORE && !WIN_UI
     [Flags]
     internal enum MemberTypes
     {
@@ -815,17 +815,17 @@ namespace Microsoft.Identity.Json.Utilities
             switch (provider)
             {
                 case Type t:
-                    return (attributeType != null)
+                    return (Attribute[])((attributeType != null)
                         ? t.GetTypeInfo().GetCustomAttributes(attributeType, inherit).ToArray()
-                        : t.GetTypeInfo().GetCustomAttributes(inherit).ToArray();
+                        : t.GetTypeInfo().GetCustomAttributes(inherit).ToArray());
                 case Assembly a:
                     return (attributeType != null) ? a.GetCustomAttributes(attributeType).ToArray() : a.GetCustomAttributes().ToArray();
                 case MemberInfo memberInfo:
-                    return (attributeType != null) ? memberInfo.GetCustomAttributes(attributeType, inherit).ToArray() : memberInfo.GetCustomAttributes(inherit).ToArray();
+                    return (Attribute[])((attributeType != null) ? memberInfo.GetCustomAttributes(attributeType, inherit).ToArray() : memberInfo.GetCustomAttributes(inherit).ToArray());
                 case Module module:
                     return (attributeType != null) ? module.GetCustomAttributes(attributeType).ToArray() : module.GetCustomAttributes().ToArray();
                 case ParameterInfo parameterInfo:
-                    return (attributeType != null) ? parameterInfo.GetCustomAttributes(attributeType, inherit).ToArray() : parameterInfo.GetCustomAttributes(inherit).ToArray();
+                    return (Attribute[])((attributeType != null) ? parameterInfo.GetCustomAttributes(attributeType, inherit).ToArray() : parameterInfo.GetCustomAttributes(inherit).ToArray());
             }
 
 #pragma warning disable CA2201 // Do not raise reserved exception types

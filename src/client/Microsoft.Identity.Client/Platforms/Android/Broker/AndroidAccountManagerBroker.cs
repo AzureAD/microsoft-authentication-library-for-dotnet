@@ -27,7 +27,11 @@ using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
+#if MAUI
+    [Preserve(AllMembers = true)]
+#else
     [AndroidNative.Runtime.Preserve(AllMembers = true)]
+#endif
     internal class AndroidAccountManagerBroker : IBroker
     {
         private long AccountManagerTimeoutSeconds { get; } = 5 * 60;

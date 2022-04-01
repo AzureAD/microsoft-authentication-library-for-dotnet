@@ -9,7 +9,11 @@ using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
+#if MAUI
+    [Preserve(AllMembers = true)]
+#else
     [global::Android.Runtime.Preserve(AllMembers = true)]
+#endif
     internal class AndroidLegacyCachePersistence : ILegacyCachePersistence
     {
         private const string SharedPreferencesName = "ActiveDirectoryAuthenticationLibrary";

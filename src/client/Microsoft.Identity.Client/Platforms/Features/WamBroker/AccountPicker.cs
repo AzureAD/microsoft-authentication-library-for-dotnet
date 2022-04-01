@@ -11,7 +11,7 @@ using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 using System.Runtime.InteropServices;
 
-#if !UAP10_0
+#if !UAP10_0 && !MAUI
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 #endif
 

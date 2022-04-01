@@ -3,7 +3,7 @@
 
 using System;
 
-#if DESKTOP || ANDROID || iOS || MAC || NET_CORE || NET5_WIN
+#if DESKTOP || ANDROID || iOS || MAC || NET_CORE || NET5_WIN || WIN_UI
 using System.Security;
 using static System.Runtime.InteropServices.Marshal;
 #else
