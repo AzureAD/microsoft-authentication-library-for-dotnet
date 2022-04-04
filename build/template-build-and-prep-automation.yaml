@@ -12,7 +12,9 @@ steps:
 - task: UseDotNet@2
   displayName: 'Use .Net Core sdk 5.x'
   inputs:
-    version: 5.x
+    version: 6.x
+    includePreviewVersions: true
+
 
 # Nuget Restore and Build 
 - template: template-restore-build-libsandsamples.yaml
