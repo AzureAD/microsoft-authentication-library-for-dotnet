@@ -124,6 +124,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)
         {
+            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            
             if (IsLongRunningObo())
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] Long-running OBO flow, trying to refresh using an refresh token flow.");
@@ -134,9 +136,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // If a refresh token is not found, fetch a new access token
                 if (cachedRefreshToken != null)
                 {
-                    var clientInfo = ClientInfo.CreateFromJson(cachedRefreshToken.RawClientInfo);
-                    _ccsRoutingHint = CoreHelpers.GetCcsClientInfoHint(clientInfo.UniqueObjectIdentifier,
-                                                                                      clientInfo.UniqueTenantIdentifier);
+                    logger.Info("[OBO request] Found a refresh token");
+                    if (!string.IsNullOrEmpty(cachedRefreshToken.RawClientInfo))
+                    {
+                        var clientInfo = ClientInfo.CreateFromJson(cachedRefreshToken.RawClientInfo);
+                        
+                        _ccsRoutingHint = CoreHelpers.GetCcsClientInfoHint(
+                            clientInfo.UniqueObjectIdentifier,
+                            clientInfo.UniqueTenantIdentifier);
+                    }
+                    else
+                    {
+                        logger.Info("[OBO request] No client info associated with RT. This is OBO for a Service Principal.");
+                    }
 
                     var msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(cachedRefreshToken, this, AuthenticationRequestParameters, cancellationToken)
                     .ConfigureAwait(false);
@@ -144,11 +156,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
                 }
 
-                AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] No Refresh Token was found in the cache. Fetching OBO token from ESTS");
+                logger.Info("[OBO request] No Refresh Token was found in the cache. Fetching OBO token from ESTS");
             }
             else
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] Normal OBO flow, skipping to fetching access token via OBO flow.");
+                logger.Info("[OBO request] Normal OBO flow, skipping to fetching access token via OBO flow.");
             }
 
             return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);

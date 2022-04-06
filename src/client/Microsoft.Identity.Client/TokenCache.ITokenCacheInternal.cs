@@ -323,9 +323,10 @@ namespace Microsoft.Identity.Client
             string tenantId,
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata)
         {
-            if (IsLegacyAdalCacheEnabled(requestParams))
+            if (msalRefreshTokenCacheItem?.RawClientInfo != null && 
+                msalIdTokenCacheItem?.IdToken?.ObjectId != null &&
+                IsLegacyAdalCacheEnabled(requestParams) )
             {
-                requestParams.RequestContext.Logger.Info("Saving to ADAL legacy cache. ");
 
                 var tenatedAuthority = Authority.CreateAuthorityWithTenant(requestParams.AuthorityInfo, tenantId);
                 var authorityWithPreferredCache = Authority.CreateAuthorityWithEnvironment(
@@ -341,13 +342,17 @@ namespace Microsoft.Identity.Client
                     msalIdTokenCacheItem.IdToken.ObjectId,
                     response.Scope);
             }
+            else
+            {
+                requestParams.RequestContext.Logger.Verbose("Not saving to ADAL legacy cache. ");
+            }
         }
 
         /// <summary>
         /// Important note: we should not be suggesting expiration dates that are in the past, as it breaks some cache implementations.
         /// </summary>
         internal /* for testing */ static DateTimeOffset? CalculateSuggestedCacheExpiry(
-            ITokenCacheAccessor accessor, 
+            ITokenCacheAccessor accessor,
             ICoreLogger logger)
         {
             // If we have refresh tokens in the cache, we cannot suggest expiration
@@ -362,7 +367,7 @@ namespace Microsoft.Identity.Client
                 }
 
                 DateTimeOffset cacheExpiry = tokenCacheItems.Max(item => item.ExpiresOn);
-                
+
                 // do not suggest an expiration date from the past or within 5 min, as tokens will not be usable anyway
                 // and HasTokens will be set to false, letting implementers know to delete the cache node
                 if (cacheExpiry < DateTimeOffset.UtcNow + Constants.AccessTokenExpirationBuffer)
@@ -1008,7 +1013,7 @@ namespace Microsoft.Identity.Client
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
                             account.PreferredUsername,
-                            requestParameters.AppConfig.MultiCloudSupportEnabled ? 
+                            requestParameters.AppConfig.MultiCloudSupportEnabled ?
                                 account.Environment : // If multi cloud support is enabled keep the cached environment
                                 environment, // Preserve the environment passed in by the user
                             account.WamAccountIds,
