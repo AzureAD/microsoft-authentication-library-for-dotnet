@@ -12,6 +12,7 @@ using Windows.UI.ApplicationSettings;
 
 namespace Microsoft.Identity.Client.Platforms
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "Uses a non-traditional method of async")]
     internal static class WebAuthenticationCoreManagerInterop
     {
         public static IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr hWnd, WebTokenRequest request)
@@ -51,6 +52,7 @@ namespace Microsoft.Identity.Client.Platforms
     //};
     [System.Runtime.InteropServices.Guid("F4B8E804-811E-4436-B69C-44CB67B72084")]
     [System.Runtime.InteropServices.InterfaceType(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIInspectable)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "Uses a non-traditional method of async")]
     internal interface IWebAuthenticationCoreManagerInterop
     {
         IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr appWindow, WebTokenRequest request, [System.Runtime.InteropServices.In] ref Guid riid);
@@ -90,7 +92,6 @@ namespace Microsoft.Identity.Client.Platforms
         //     The web account for the request.
         WebAccount WebAccount { get; }
     }
-
 
     //------------------------IAccountsSettingsPaneInterop----------------------------
     //MIDL_INTERFACE("D3EE12AD-3865-4362-9746-B75A682DF0E6")

@@ -104,7 +104,6 @@ namespace Microsoft.Identity.Test.UIAutomation
             Assert.IsFalse(hasFailed, $"Test Failed. {stringBuilderMessage}");
         }
 
-
         /// <summary>
         /// Runs through the standard acquire token flow, using the default app configured UiBehavior = Login
         /// </summary>

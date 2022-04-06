@@ -138,7 +138,6 @@ namespace Microsoft.Identity.Client.Http
                     MsalErrorMessage.HttpRequestUnsuccessful,
                     (int)response.StatusCode, response.StatusCode));
 
-
                 is5xxError = (int)response.StatusCode >= 500 && (int)response.StatusCode < 600;
                 isRetryable = is5xxError && !HasRetryAfterHeader(response);
             }

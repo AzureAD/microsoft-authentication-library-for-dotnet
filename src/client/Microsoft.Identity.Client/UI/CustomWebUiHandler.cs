@@ -70,7 +70,6 @@ namespace Microsoft.Identity.Client.UI
             }
         }
 
-
         /// <inheritdoc />
         public Uri UpdateRedirectUri(Uri redirectUri)
         {

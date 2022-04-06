@@ -95,7 +95,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(validationCounter, counter);
         }
 
-
         [TestMethod()]
         [DataRow(LogLevel.Always)]
         [DataRow(LogLevel.Error)]

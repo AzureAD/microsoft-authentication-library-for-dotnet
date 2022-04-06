@@ -2191,7 +2191,6 @@ namespace Microsoft.Identity.Json.Linq
                     // Any content encountered here other than a comment will throw in the reader.
                 }
 
-
                 return t;
             }
         }

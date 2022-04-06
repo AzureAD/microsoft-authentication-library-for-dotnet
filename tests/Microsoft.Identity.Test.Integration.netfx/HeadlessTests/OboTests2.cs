@@ -220,9 +220,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 "The cache expiry is not set because there is an RT in the cache");
         }
 
-        
-
-
         [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
@@ -308,7 +305,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
-
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);

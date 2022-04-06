@@ -109,7 +109,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-
         /// <summary>
         /// Specifies options for using the embedded web view for interactive authentication.
         /// </summary>
@@ -184,7 +183,6 @@ namespace Microsoft.Identity.Client
          * since Activity, ViewController etc. do not exist in NetStandard.
          */
 
-
         /// <summary>
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
@@ -200,7 +198,6 @@ namespace Microsoft.Identity.Client
         {
             return WithParentObject(parent);
         }
-
 
         private AcquireTokenInteractiveParameterBuilder WithParentObject(object parent)
         {
@@ -293,7 +290,6 @@ namespace Microsoft.Identity.Client
             return WithParentObject((object)window);
         }
 #endif
-
 
 #if DESKTOP || NET5_WIN || NET_CORE
 

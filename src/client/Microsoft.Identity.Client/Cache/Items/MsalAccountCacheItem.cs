@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal MsalAccountCacheKey GetKey()
         {
-            return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername, AuthorityType);
+            return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
         }
 
         internal static MsalAccountCacheItem FromJsonString(string json)

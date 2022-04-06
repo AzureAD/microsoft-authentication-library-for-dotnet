@@ -163,7 +163,6 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
             }
 
-
             return CreateResponse<T>(response, requestContext);
         }
 

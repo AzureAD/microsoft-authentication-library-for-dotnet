@@ -301,15 +301,12 @@ namespace NetCoreTestApp
                 .WithClientSecret(s_confidentialClientSecret)
                 .Build();
 
-
             //cca.AppTokenCache.SetBeforeAccess((t) => { });
 
             //cca.AcquireTokenForClient(new[] "12345-123321-1111/default");
 
             return cca;
         }
-
-
 
         private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
         {
@@ -414,7 +411,6 @@ namespace NetCoreTestApp
                 return ex.ToString();
             }
         }
-
 
         public class ThreadWork
         {

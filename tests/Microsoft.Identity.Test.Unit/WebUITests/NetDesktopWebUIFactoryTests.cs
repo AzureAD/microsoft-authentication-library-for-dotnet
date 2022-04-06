@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         private readonly CoreUIParent _parent = new CoreUIParent();
         private readonly RequestContext _requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
 
-
         [TestMethod]
         public void Net45Factory_DefaultEmbedded()
         {

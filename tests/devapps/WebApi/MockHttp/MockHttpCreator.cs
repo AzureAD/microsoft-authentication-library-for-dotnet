@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 
-
 namespace WebApi.MockHttp
 {
     public static class MockHttpCreator

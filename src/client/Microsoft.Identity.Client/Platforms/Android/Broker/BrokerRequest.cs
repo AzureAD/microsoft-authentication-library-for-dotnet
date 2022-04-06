@@ -101,13 +101,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return br;
         }
 
-        private static BrokerRequest FromAuthenticationParameters(AuthenticationRequestParameters _authenticationRequestParameters)
+        private static BrokerRequest FromAuthenticationParameters(AuthenticationRequestParameters authenticationRequestParameters)
         {
             BrokerRequest br = new BrokerRequest();
-            br.Authority = _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
-            br.Scopes = EnumerableExtensions.AsSingleString(_authenticationRequestParameters.Scope);
-            br.ClientId = _authenticationRequestParameters.AppConfig.ClientId;
-            br.CorrelationId = _authenticationRequestParameters.RequestContext.CorrelationId.ToString();
+            br.Authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            br.Scopes = EnumerableExtensions.AsSingleString(authenticationRequestParameters.Scope);
+            br.ClientId = authenticationRequestParameters.AppConfig.ClientId;
+            br.CorrelationId = authenticationRequestParameters.RequestContext.CorrelationId.ToString();
             
             br.ClientAppVersion = Application.Context.PackageManager.GetPackageInfo(
                 Application.Context.PackageName,
@@ -115,15 +115,16 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             br.ClientAppName = Application.Context.PackageName;
             br.ClientVersion = MsalIdHelper.GetMsalVersion();
 
-            br.RedirectUri = _authenticationRequestParameters.RedirectUri;
-            if (!string.IsNullOrEmpty(br.Claims))
+            br.RedirectUri = authenticationRequestParameters.RedirectUri;
+
+            if (authenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities?.Any() == true)
             {
-                br.Claims = _authenticationRequestParameters.Claims;
+                br.Claims = authenticationRequestParameters.ClaimsAndClientCapabilities;
             }
 
-            if (_authenticationRequestParameters.ExtraQueryParameters?.Any() == true)
+            if (authenticationRequestParameters.ExtraQueryParameters?.Any() == true)
             {
-                string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
+                string extraQP = string.Join("&", authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
                 br.ExtraQueryParameters = extraQP;
             }
 

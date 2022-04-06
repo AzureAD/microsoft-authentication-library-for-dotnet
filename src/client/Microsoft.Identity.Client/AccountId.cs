@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-
 using System;
 using System.Diagnostics;
 
@@ -55,7 +54,6 @@ namespace Microsoft.Identity.Client
         public AccountId(string adfsIdentifier)
             : this(adfsIdentifier, adfsIdentifier, null)
         { }
-
 
         internal static AccountId ParseFromString(string str)
         {

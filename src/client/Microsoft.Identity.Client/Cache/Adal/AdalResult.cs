@@ -4,7 +4,6 @@
 using System;
 using Microsoft.Identity.Json;
 
-
 namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>

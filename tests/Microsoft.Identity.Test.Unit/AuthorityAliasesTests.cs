@@ -133,13 +133,13 @@ namespace Microsoft.Identity.Test.Unit
                 {
                 }
 
-
                 Assert.IsNull(result);
             }
         }
 
         [TestMethod]
-        public void AuthorityNotIncludedInAliasesTestAsync()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
+        public void AuthorityNotIncludedInAliasesTest()
         {
             //Make sure MSAL is able to create an entry for instance discovery when the configured environment is not present in the
             //instance discovery metadata. This is for non-public cloud scenarios. See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2701

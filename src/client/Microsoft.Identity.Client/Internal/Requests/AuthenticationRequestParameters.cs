@@ -118,7 +118,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
-
         // This should be set on a per-application basis, but can be overridden on a per-request basis should it be needed. 
         public bool SendX5C { get; set; }
 

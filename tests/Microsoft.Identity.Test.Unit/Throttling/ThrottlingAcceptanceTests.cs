@@ -316,7 +316,6 @@ namespace Microsoft.Identity.Test.Unit.Throttling
 
         #region UiRequired test
 
-
         /// <summary>
         /// UI required cache for the same request (invalid_grant)
         /// Create a request that should have the response with HTTP status 400 and OAuth error invalid_grant.

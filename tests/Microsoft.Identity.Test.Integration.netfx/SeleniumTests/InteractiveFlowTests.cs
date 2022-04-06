@@ -78,7 +78,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
-
         [TestMethod]
         public async Task Interactive_AdfsV3_FederatedAsync()
         {
@@ -256,7 +255,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount))
                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                .ConfigureAwait(false);
-
 
             var CcsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
             var userObjectId = labResponse.User.ObjectId;

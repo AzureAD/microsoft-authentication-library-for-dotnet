@@ -163,7 +163,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
                 { JwtClaimTypes.Typ, "JWT"}
             };
 
-
             if (header == null && signingCredentials.Key is X509SecurityKey x509SecurityKey)
                 actualHeader[JwtClaimTypes.X5t] = x509SecurityKey.X5t;
 

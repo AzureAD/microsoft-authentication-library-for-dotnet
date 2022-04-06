@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.LabInfrastructure;
+#pragma warning disable VSTHRD100 // Avoid async void methods
 
 namespace DesktopTestApp
 {
@@ -56,7 +57,6 @@ namespace DesktopTestApp
             _publicClientHandler = new PublicClientHandler(PublicClientId, LogDelegate);
             LoadSettings();
         }
-
 
         public void LogDelegate(LogLevel level, string message, bool containsPii)
         {
@@ -335,7 +335,6 @@ namespace DesktopTestApp
             {
                 output = ex.Message + Environment.NewLine + ex.StackTrace;
             }
-
 
             callResult.Text = output;
         }
@@ -733,3 +732,4 @@ namespace DesktopTestApp
         }
     }
 }
+#pragma warning restore VSTHRD100 // Avoid async void methods

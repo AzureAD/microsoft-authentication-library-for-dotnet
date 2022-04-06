@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -105,7 +104,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
-
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 Task<AuthenticationResult> task = app
@@ -131,7 +129,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(new Uri(TestConstants.AuthorityGuestTenant), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
-
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -184,7 +181,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(authority, true)
                                                                             .WithHttpManager(testHarness.HttpManager)
                                                                             .BuildConcrete();
-
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
@@ -277,7 +273,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
-
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid1", "utid");
@@ -328,7 +323,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
-
 
                 TokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
                 var cacheAccess = app.UserTokenCache.RecordAccess();

@@ -295,7 +295,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var webTokenRequest = new WebTokenRequest(wamAccountProvider);
             IWebTokenRequestResultWrapper webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
 
-
             _webAccountProviderFactory.GetAccountProviderAsync(null).ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
             _wamProxy.FindAccountAsync(Arg.Any<WebAccountProvider>(), "wam_id_1").Returns(Task.FromResult(webAccount));
             _aadPlugin.CreateWebTokenRequestAsync(
@@ -306,14 +305,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 isInteractive: false)
                 .Returns(Task.FromResult(webTokenRequest));
 
-
-
             _wamProxy.GetTokenSilentlyAsync(webAccount, webTokenRequest).
                 Returns(Task.FromResult(webTokenResponseWrapper));
 
             return (requestParams, webTokenResponseWrapper);
         }
-
 
 #endregion
 
@@ -359,7 +355,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     Returns(Task.FromResult(webTokenResponseWrapper));
                 _msaPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
 
-
                 // Act
                 var result = await _wamBroker.AcquireTokenSilentAsync(requestParams, atsParams).ConfigureAwait(false);
 
@@ -397,7 +392,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var atsParams = new AcquireTokenSilentParameters();
                 _webAccountProviderFactory.GetAccountProviderAsync(null).ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
-
 
                 // Act / Assert
                 var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
@@ -497,7 +491,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    isAccountInWam: true,
                    isInteractive: false)
                    .Returns(Task.FromResult(webTokenRequest));
-
 
                 _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).Returns(webTokenResponseWrapper);
                 _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
@@ -948,12 +941,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var webAccount = new WebAccount(wamAccountProvider, "user@contoso.com", WebAccountState.Connected);
                 IReadOnlyList<WebAccount> webAccounts = new List<WebAccount>() { webAccount };
 
-
                 _wamProxy.FindAllWebAccountsAsync(wamAccountProvider, TestConstants.ClientId).Returns(Task.FromResult(webAccounts));
 
                 // WAM can give MSAL the home account ID of a Wam account, which MSAL matches to a WAM account
                 _aadPlugin.GetHomeAccountIdOrNull(webAccount).Returns(aadHomeAccId);
-
 
                 var atsParams = new AcquireTokenSilentParameters();
                 _webAccountProviderFactory.GetAccountProviderAsync("organizations").ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
@@ -1053,7 +1044,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-
         [TestMethod]
         public async Task GetAccounts_CallsPlugins_Async()
         {
@@ -1116,7 +1106,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 _webAccountProviderFactory.GetAccountProviderAsync("organizations").
                     ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
-
 
                 // Act Assert
                 await _wamBroker.RemoveAccountAsync(harness.ServiceBundle.Config, requestParams.Account)
@@ -1416,7 +1405,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual("https://login.microsoftonline.com/organizations/", webTokenRequest.Properties["authority"]);
             }
         }
-
 
         [TestMethod]
         public async Task ATI_WithPicker_MsaPt_NoTransferToken_Async()

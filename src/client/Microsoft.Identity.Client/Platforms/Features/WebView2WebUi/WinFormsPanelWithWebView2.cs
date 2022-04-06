@@ -96,7 +96,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             }
         }
 
-
         private void PlaceOnTop(object sender, EventArgs e)
         {
             // If we don't have an owner we need to make sure that the pop up browser
@@ -106,7 +105,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 Activate();
             }
         }
-
 
         /// <summary>
         /// Some calls need to be made on the UI thread and this is the central place to check if we have an owner

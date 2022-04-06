@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         protected abstract byte[] SignWithCertificate(DeviceAuthJWTResponse responseJwt, X509Certificate2 certificate);
 
-        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponseHeaders responseHeaders, Uri endpointUri, out string responseHeader)
+        public bool TryCreateDeviceAuthChallengeResponse(HttpResponseHeaders responseHeaders, Uri endpointUri, out string responseHeader)
         {
             responseHeader = string.Empty;
             X509Certificate2 certificate = null;

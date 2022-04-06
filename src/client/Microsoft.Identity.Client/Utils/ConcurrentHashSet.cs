@@ -182,7 +182,6 @@ namespace Microsoft.Identity.Client.Utils
             InitializeFromCollection(collection);
         }
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentHashSet{T}"/> 
         /// class that contains elements copied from the specified <see cref="T:System.Collections.IEnumerable"/>, 
@@ -755,7 +754,6 @@ namespace Microsoft.Identity.Client.Utils
             }
         }
     }
-
 
     internal static class ProcessorCounter
     {

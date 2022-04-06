@@ -115,7 +115,6 @@ namespace Microsoft.Identity.Client.Cache
             return hashString.GetHashCode();
         }
 
-
         private bool ClientIdEquals(string otherClientId)
         {
             return string.Equals(otherClientId, ClientId, StringComparison.OrdinalIgnoreCase);

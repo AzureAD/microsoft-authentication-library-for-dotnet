@@ -197,7 +197,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return true;
         }
 
-
         public Tuple<string, string, bool> MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive)
         {
             if (status != WebTokenRequestStatus.UserInteractionRequired)

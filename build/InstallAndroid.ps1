@@ -3,7 +3,8 @@ $fileName = "AndroidTools.zip"
 $source = "C:\Downloads\$fileName"
 $destination = "C:\Downloads\AndroidSdkTools"
 $androidSdk = "C:\Program Files (x86)\Android\android-sdk"
-$androidSdkVersion = "platforms;android-29"
+$androidSdkVersion29 = "platforms;android-29"
+$androidSdkVersion30 = "platforms;android-30"
 
 #$ErrorActionPreference = "Stop"
 
@@ -30,6 +31,9 @@ Copy-Item -Path microsoft-authentication-library-for-dotnet\build\AndroidSdkLice
 
 dir "$androidSdk\licenses"
 
-echo "installing android"
+echo "installing android 29"
 C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager --licenses --sdk_root="$androidSdk"
-echo y y y y y y y |C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager "$androidSdkVersion" --sdk_root="$androidSdk"
+echo y y y y y y y |C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager "$androidSdkVersion29" --sdk_root="$androidSdk"
+
+echo "installing android 30"
+echo y y y y y y y |C:\Downloads\AndroidSdkTools\cmdline-tools\bin\.\sdkmanager "$androidSdkVersion30" --sdk_root="$androidSdk"

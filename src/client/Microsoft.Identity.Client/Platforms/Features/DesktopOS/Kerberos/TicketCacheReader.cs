@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
             _context = new SspiSecurityContext(Credential.Current(), package, logonId);
         }
 
-
         /// <summary>
         /// Read out a Kerberos Ticket.
         /// </summary>

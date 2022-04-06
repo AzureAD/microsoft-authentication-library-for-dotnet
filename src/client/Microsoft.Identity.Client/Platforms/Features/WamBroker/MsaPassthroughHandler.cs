@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             var transferResponse = await _wamProxy.RequestTokenForWindowAsync(_parentHandle, webTokenRequestMsa)
                 .ConfigureAwait(true);
 
-            return ExtractTransferTokenAsync(
+            return ExtractTransferToken(
                 authenticationRequestParameters.AppConfig.ClientId, 
                 transferResponse,
                 isInteractive: true);
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             var transferResponse = await _wamProxy.GetTokenSilentlyForDefaultAccountAsync(webTokenRequestMsa)
                 .ConfigureAwait(true);
 
-            return ExtractTransferTokenAsync(
+            return ExtractTransferToken(
                 authenticationRequestParameters.AppConfig.ClientId, 
                 transferResponse,
                 isInteractive: false);
@@ -122,13 +122,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 account)
                     .ConfigureAwait(true);
 
-            return ExtractTransferTokenAsync(
+            return ExtractTransferToken(
                 authenticationRequestParameters.AppConfig.ClientId, 
                 transferResponse, 
                 isInteractive: false);
         }
 
-        private string ExtractTransferTokenAsync(
+        private string ExtractTransferToken(
             string clientId, 
             IWebTokenRequestResultWrapper transferResponse, 
             bool isInteractive)
