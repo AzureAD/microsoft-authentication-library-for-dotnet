@@ -66,21 +66,42 @@ namespace NetCoreWinFormsWAM
         {
             string clientId = GetClientId();
             bool msaPt = IsMsaPassthroughConfigured();
+            IPublicClientApplication pca = null;
 
-            var pca = PublicClientApplicationBuilder
+            if (this.brokerTypeChk.Checked)
+            {
+                pca = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
 #if !NET5_0
                 .WithDesktopFeatures()
 #endif
-                .WithBroker(this.useBrokerChk.Checked)
+                .WithRuntimeBroker(this.brokerTypeChk.Checked)
 
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
-                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")                
-                .WithWindowsBrokerOptions(new WindowsBrokerOptions() {  MsaPassthrough = cbxMsaPt.Checked})
+                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
+                .WithWindowsBrokerOptions(new WindowsBrokerOptions() { MsaPassthrough = cbxMsaPt.Checked })
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
+            }
+            else
+            {
+                pca = PublicClientApplicationBuilder
+                                .Create(clientId)
+                                .WithAuthority(this.authorityCbx.Text)
+#if !NET5_0
+                .WithDesktopFeatures()
+#endif
+                .WithBroker(this.useBrokerChk.Checked)
+
+                                // there is no need to construct the PCA with this redirect URI, 
+                                // but WAM uses it. We could enforce it.
+                                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
+                                .WithWindowsBrokerOptions(new WindowsBrokerOptions() { MsaPassthrough = cbxMsaPt.Checked })
+                                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+                                .Build();
+            }
 
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;

@@ -68,7 +68,33 @@ namespace NetDesktopWinForms
             string clientId = GetClientId();
             bool msaPt = IsMsaPassthroughConfigured();
 
-            var pca = PublicClientApplicationBuilder
+            IPublicClientApplication pca = null;
+            ;
+
+            if (this.brokerTypeChk.Checked)
+            {
+                pca = PublicClientApplicationBuilder
+                .Create(clientId)
+                .WithAuthority(this.authorityCbx.Text)
+                //.WithDesktopFeatures()
+                //.WithWindowsBroker()
+                .WithWindowsRuntimeBroker(this.brokerTypeChk.Checked)
+                // there is no need to construct the PCA with this redirect URI, 
+                // but WAM uses it. We could enforce it.
+                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
+                //.WithRedirectUri("ms-appx-web://microsoft.aad.brokerplugin/95de633a-083e-42f5-b444-a4295d8e9314")
+                .WithWindowsBrokerOptions(new WindowsBrokerOptions()
+                {
+                    ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
+                    MsaPassthrough = cbxMsaPt.Checked,
+                    HeaderText = "MSAL Dev App .NET FX"
+                })
+                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+                .Build();
+            }
+            else
+            {
+                pca = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
                 //.WithDesktopFeatures()
@@ -81,11 +107,12 @@ namespace NetDesktopWinForms
                 .WithWindowsBrokerOptions(new WindowsBrokerOptions()
                 {
                     ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
-                    MsaPassthrough = cbxMsaPt.Checked, 
+                    MsaPassthrough = cbxMsaPt.Checked,
                     HeaderText = "MSAL Dev App .NET FX"
                 })
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
+            }
 
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;
@@ -512,6 +539,11 @@ namespace NetDesktopWinForms
             {
                 Log("Exception: " + ex);
             }
+        }
+
+        private void useBrokerChk_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 

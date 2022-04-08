@@ -49,6 +49,8 @@ namespace Microsoft.Identity.Client
 
         public bool IsBrokerEnabled { get; internal set; }
 
+        public bool IsRuntimeBrokerEnabled { get; internal set; }
+
         public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
 
         public Func<CoreUIParent, ApplicationConfiguration, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }

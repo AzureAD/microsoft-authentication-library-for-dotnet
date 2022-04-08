@@ -43,5 +43,38 @@ namespace Microsoft.Identity.Client.Desktop
                    };
             }
         }
+
+        /// <summary>
+        /// Enables MSAL Runtime Windows broker flows on older platforms, such as .NET framework, where these are not available in the box with Microsoft.Identity.Client
+        /// For details about Windows broker, see https://aka.ms/msal-net-wam
+        /// </summary>
+        public static PublicClientApplicationBuilder WithWindowsRuntimeBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
+        {
+            builder.Config.IsBrokerEnabled = enableBroker;
+            AddRuntimeSupportForWam(builder);
+            return builder;
+        }
+
+        internal static void AddRuntimeSupportForWam(PublicClientApplicationBuilder builder)
+        {
+            if (DesktopOsHelper.IsWin10OrServerEquivalent())
+            {
+                builder.Config.BrokerCreatorFunc =
+                     (uiParent, appConfig, logger) =>
+                     {
+                         logger.Info("WAM supported OS.");
+                         return new Platforms.Features.WamBroker.RuntimeBroker(uiParent, appConfig, logger);
+                     };
+            }
+            else
+            {
+                builder.Config.BrokerCreatorFunc =
+                   (uiParent, appConfig, logger) =>
+                   {
+                       logger.Info("Not a Win10 machine. WAM is not available");
+                       return new NullBroker(logger);
+                   };
+            }
+        }
     }
 }

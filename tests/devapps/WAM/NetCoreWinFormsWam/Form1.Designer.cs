@@ -53,6 +53,7 @@
             this.cbxMsaPt = new System.Windows.Forms.CheckBox();
             this.btnExpire = new System.Windows.Forms.Button();
             this.btnRemoveAccount = new System.Windows.Forms.Button();
+            this.brokerTypeChk = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // resultTbx
@@ -90,7 +91,7 @@
             this.authorityCbx.Location = new System.Drawing.Point(80, 41);
             this.authorityCbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.authorityCbx.Name = "authorityCbx";
-            this.authorityCbx.Size = new System.Drawing.Size(418, 21);
+            this.authorityCbx.Size = new System.Drawing.Size(418, 23);
             this.authorityCbx.TabIndex = 3;
             this.authorityCbx.Text = "https://login.microsoftonline.com/common";
             // 
@@ -100,7 +101,7 @@
             this.clientIdCbx.Location = new System.Drawing.Point(80, 12);
             this.clientIdCbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.clientIdCbx.Name = "clientIdCbx";
-            this.clientIdCbx.Size = new System.Drawing.Size(418, 21);
+            this.clientIdCbx.Size = new System.Drawing.Size(418, 23);
             this.clientIdCbx.TabIndex = 4;
             this.clientIdCbx.Text = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
             this.clientIdCbx.SelectedIndexChanged += new System.EventHandler(this.clientIdCbx_SelectedIndexChanged);
@@ -314,11 +315,25 @@
             this.btnRemoveAccount.UseVisualStyleBackColor = true;
             this.btnRemoveAccount.Click += new System.EventHandler(this.btnRemoveAcc_Click);
             // 
+            // brokerTypeChk
+            // 
+            this.brokerTypeChk.AutoSize = true;
+            this.brokerTypeChk.Checked = true;
+            this.brokerTypeChk.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.brokerTypeChk.Location = new System.Drawing.Point(6, 171);
+            this.brokerTypeChk.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.brokerTypeChk.Name = "brokerTypeChk";
+            this.brokerTypeChk.Size = new System.Drawing.Size(71, 19);
+            this.brokerTypeChk.TabIndex = 26;
+            this.brokerTypeChk.Text = "Runtime";
+            this.brokerTypeChk.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(729, 748);
+            this.Controls.Add(this.brokerTypeChk);
             this.Controls.Add(this.btnRemoveAccount);
             this.Controls.Add(this.btnExpire);
             this.Controls.Add(this.cbxMsaPt);
@@ -376,6 +391,7 @@
         private System.Windows.Forms.CheckBox cbxMsaPt;
         private System.Windows.Forms.Button btnExpire;
         private System.Windows.Forms.Button btnRemoveAccount;
+        private System.Windows.Forms.CheckBox brokerTypeChk;
     }
 }
 

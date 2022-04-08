@@ -187,6 +187,57 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Brokers enable Single-Sign-On, device identification,
+        /// and application identification verification. To enable one of these features,
+        /// you need to set the WithRuntimeBroker() parameters to true. See https://aka.ms/msal-net-brokers 
+        /// for more information on platform specific settings required to enable the broker.
+        /// 
+        /// On iOS and Android, Authenticator and Company Portal serve as brokers.
+        /// On Windows, WAM (Windows Account Manager) serves as broker. See https://aka.ms/msal-net-wam
+        /// </summary>
+        /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        /// <remarks>If your app uses .NET classic or .NET Core 3.x, and you wish to use the Windows broker, 
+        /// please install the nuget package Microsoft.Identity.Client.Desktop and call .WithDesktopFeatures()</remarks>
+        public PublicClientApplicationBuilder WithRuntimeBroker(bool enableBroker = true)
+        {
+#pragma warning disable CS0162 // Unreachable code detected
+
+#if NET45
+            throw new PlatformNotSupportedException(
+                "The Windows broker is not available on .NET Framework 4.5, please use at least .NET Framework 4.6.2");
+#endif
+
+#if NET461
+            if (Config.BrokerCreatorFunc == null)
+            {
+                throw new PlatformNotSupportedException(
+                    "The Windows broker is not directly available on MSAL for .NET Framework" +
+                    " To use it, please install the nuget package named Microsoft.Identity.Client.Desktop " +
+                    "and call the extension method .WithWindowsBroker() first.");
+            }
+#endif
+
+#if NET_CORE
+            if (Config.BrokerCreatorFunc == null && DesktopOsHelper.IsWindows())
+            {
+                throw new PlatformNotSupportedException(
+                    "If you have a Windows application which targets net5 or net5-windows, please change the target to net5-windows10.0.17763.0. \nYour app can still run on earlier versions of Windows such as Win7 if you add <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion> in the csproj.\n The broker (WAM) is available only on Win10 and this library will fallback to a browser on older systems. " +
+
+                    "\n\r\n\rIf you have a NET5 cross-platform (Windows, Mac, Linux) application, please dual target net5 and net5-windows10.0.17763.0. Your installer should deploy the net5 version on Mac and Linux and the net5-window10.0.17763.0 on Windows." +
+                    "\n\r\n\rIf you have a .NET Core 3.1 application, please install the nuget package named Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsBroker() first. " +
+                    "\n\rFor details see https://aka.ms/msal-net-wam and https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md ");
+            }
+#endif
+
+            Config.IsBrokerEnabled = enableBroker;
+            Config.IsRuntimeBrokerEnabled = enableBroker;
+            return this;
+#pragma warning restore CS0162 // Unreachable code detected
+        }
+
+        /// <summary>
         /// Allows customization of the Windows 10 Broker experience
         /// </summary>
 #if !SUPPORTS_BROKER || __MOBILE__

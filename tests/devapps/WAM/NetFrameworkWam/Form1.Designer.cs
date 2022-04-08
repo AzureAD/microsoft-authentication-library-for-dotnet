@@ -55,6 +55,7 @@
             this.btnRemoveAccount = new System.Windows.Forms.Button();
             this.cbxBackgroundThread = new System.Windows.Forms.CheckBox();
             this.cbxListOsAccounts = new System.Windows.Forms.CheckBox();
+            this.brokerTypeChk = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // resultTbx
@@ -186,6 +187,7 @@
             this.useBrokerChk.TabIndex = 14;
             this.useBrokerChk.Text = "Use WAM";
             this.useBrokerChk.UseVisualStyleBackColor = true;
+            this.useBrokerChk.CheckedChanged += new System.EventHandler(this.useBrokerChk_CheckedChanged);
             // 
             // accBtn
             // 
@@ -320,11 +322,24 @@
             this.cbxListOsAccounts.Text = "List OS accounts";
             this.cbxListOsAccounts.UseVisualStyleBackColor = true;
             // 
+            // brokerTypeChk
+            // 
+            this.brokerTypeChk.AutoSize = true;
+            this.brokerTypeChk.Checked = true;
+            this.brokerTypeChk.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.brokerTypeChk.Location = new System.Drawing.Point(12, 155);
+            this.brokerTypeChk.Name = "brokerTypeChk";
+            this.brokerTypeChk.Size = new System.Drawing.Size(65, 17);
+            this.brokerTypeChk.TabIndex = 28;
+            this.brokerTypeChk.Text = "Runtime";
+            this.brokerTypeChk.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(634, 642);
+            this.Controls.Add(this.brokerTypeChk);
             this.Controls.Add(this.cbxListOsAccounts);
             this.Controls.Add(this.cbxBackgroundThread);
             this.Controls.Add(this.btnRemoveAccount);
@@ -386,6 +401,7 @@
         private System.Windows.Forms.Button btnRemoveAccount;
         private System.Windows.Forms.CheckBox cbxBackgroundThread;
         private System.Windows.Forms.CheckBox cbxListOsAccounts;
+        private System.Windows.Forms.CheckBox brokerTypeChk;
     }
 }
 

@@ -47,6 +47,19 @@ namespace NetDesktopWpf
             return pca;
         }
 
+        private IPublicClientApplication CreatePublicClientForRuntime()
+        {
+            var pca = PublicClientApplicationBuilder.Create(s_clientID)
+                .WithAuthority(s_authority)
+                .WithWindowsRuntimeBroker(true)
+                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+                .Build();
+
+            BindCache(pca.UserTokenCache, UserCacheFile);
+
+            return pca;
+        }
+
         private static void BindCache(ITokenCache tokenCache, string file)
         {
             tokenCache.SetBeforeAccess(notificationArgs =>
@@ -96,6 +109,50 @@ namespace NetDesktopWpf
 
                     result = await task.ConfigureAwait(false);
                                      
+                }
+                catch (Exception ex3)
+                {
+                    DisplayMessage(ex3.ToString());
+                }
+
+            }
+            catch (Exception ex2)
+            {
+                DisplayMessage(ex2.ToString());
+            }
+
+            DisplayMessage($"Success! We have a token for {result.Account.Username} valid until {result.ExpiresOn}");
+        }
+
+        private async void AtsAti_Runtime_Click(object sender, RoutedEventArgs e)
+        {
+            var pca = CreatePublicClientForRuntime();
+            var upnPrefix = UpnTbx.Text;
+
+            IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
+            var acc = accounts.SingleOrDefault(
+                a => !String.IsNullOrEmpty(upnPrefix) &&
+                a.Username.StartsWith(upnPrefix));
+
+            AuthenticationResult result = null;
+            try
+            {
+                result = await pca
+                    .AcquireTokenSilent(s_scopes, acc)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+            }
+            catch (MsalUiRequiredException ex)
+            {
+                try
+                {
+                    var task = await Dispatcher.InvokeAsync(() =>
+                        pca.AcquireTokenInteractive(s_scopes)
+                                     .WithAccount(acc)
+                                     .ExecuteAsync());
+
+                    result = await task.ConfigureAwait(false);
+
                 }
                 catch (Exception ex3)
                 {
