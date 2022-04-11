@@ -31,17 +31,9 @@ namespace Microsoft.Identity.Client.Platforms.net5win
             {
                 Logger.Info("WAM supported OS. ");
 
-                if (appConfig.IsRuntimeBrokerEnabled) //Returning Runtime broker was MSALRuntime Interop testing 
-                {
-                    return appConfig.BrokerCreatorFunc != null ?
-                        appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
-                        new Features.WamBroker.RuntimeBroker(uiParent, appConfig, Logger);
-                }
-                {
-                    return appConfig.BrokerCreatorFunc != null ?
-                        appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
-                        new Features.WamBroker.WamBroker(uiParent, appConfig, Logger);
-                }
+                return appConfig.BrokerCreatorFunc != null ?
+                    appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
+                    new Features.WamBroker.WamBroker(uiParent, appConfig, Logger);
             }
             else
             {

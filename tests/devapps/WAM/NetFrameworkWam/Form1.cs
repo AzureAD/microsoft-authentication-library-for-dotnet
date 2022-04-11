@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Desktop;
 
 namespace NetDesktopWinForms
@@ -58,6 +58,19 @@ namespace NetDesktopWinForms
             cbxAccount.SelectedItem = null;
 
             _syncContext = SynchronizationContext.Current;
+
+            cbxUseWam.DataSource = Enum.GetValues(typeof(BrokerOrBrowser));
+
+        }
+
+        private BrokerOrBrowser GetBrokerOrBrowser()
+        {
+            BrokerOrBrowser status;
+            if (Enum.TryParse<BrokerOrBrowser>(cbxUseWam.SelectedValue.ToString(), out status))
+            {
+                return status;
+            }
+            throw new NotImplementedException();
         }
 
         public static readonly string UserCacheFile =
@@ -68,51 +81,43 @@ namespace NetDesktopWinForms
             string clientId = GetClientId();
             bool msaPt = IsMsaPassthroughConfigured();
 
-            IPublicClientApplication pca = null;
-            ;
+            var builder = PublicClientApplicationBuilder
+                .Create(clientId)
+                .WithAuthority(this.authorityCbx.Text);
 
-            if (this.brokerTypeChk.Checked)
+            var useWam = GetBrokerOrBrowser();
+
+            switch (useWam)
             {
-                pca = PublicClientApplicationBuilder
-                .Create(clientId)
-                .WithAuthority(this.authorityCbx.Text)
-                //.WithDesktopFeatures()
-                //.WithWindowsBroker()
-                .WithWindowsRuntimeBroker(this.brokerTypeChk.Checked)
-                // there is no need to construct the PCA with this redirect URI, 
-                // but WAM uses it. We could enforce it.
-                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
-                //.WithRedirectUri("ms-appx-web://microsoft.aad.brokerplugin/95de633a-083e-42f5-b444-a4295d8e9314")
-                .WithWindowsBrokerOptions(new WindowsBrokerOptions()
-                {
-                    ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
-                    MsaPassthrough = cbxMsaPt.Checked,
-                    HeaderText = "MSAL Dev App .NET FX"
-                })
-                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
-                .Build();
+                case BrokerOrBrowser.WAM:
+                    builder = builder.WithWindowsBroker();
+                    break;
+                case BrokerOrBrowser.WAMRuntime:
+                    builder = builder.WithBroker2();
+                    break;
+                case BrokerOrBrowser.EmbeddedBrowser:
+                    builder = builder.WithBroker2(false);
+                    builder = builder.WithWindowsBroker(false);
+                    builder = builder.WithRedirectUri("http://localhost");
+                    break;
+                case BrokerOrBrowser.SystemBrowser:
+                    builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
+                    builder = builder.WithBroker2(false);
+                    builder = builder.WithWindowsBroker(false);
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
-            else
+
+            builder = builder.WithWindowsBrokerOptions(new WindowsBrokerOptions()
             {
-                pca = PublicClientApplicationBuilder
-                .Create(clientId)
-                .WithAuthority(this.authorityCbx.Text)
-                //.WithDesktopFeatures()
-                .WithWindowsBroker()
-                .WithBroker(this.useBrokerChk.Checked)
-                // there is no need to construct the PCA with this redirect URI, 
-                // but WAM uses it. We could enforce it.
-                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
-                //.WithRedirectUri("ms-appx-web://microsoft.aad.brokerplugin/95de633a-083e-42f5-b444-a4295d8e9314")
-                .WithWindowsBrokerOptions(new WindowsBrokerOptions()
-                {
-                    ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
-                    MsaPassthrough = cbxMsaPt.Checked,
-                    HeaderText = "MSAL Dev App .NET FX"
-                })
-                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
-                .Build();
-            }
+                ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
+                MsaPassthrough = cbxMsaPt.Checked,
+                HeaderText = "MSAL Dev App .NET FX"
+            })
+            .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true);
+
+            var pca = builder.Build();
 
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;
@@ -184,7 +189,7 @@ namespace NetDesktopWinForms
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 var builder = pca.AcquireTokenSilent(GetScopes(), acc);
-                if (IsMsaPassthroughConfigured() && !useBrokerChk.Checked)
+                if (IsMsaPassthroughConfigured() && (GetBrokerOrBrowser() == BrokerOrBrowser.SystemBrowser || GetBrokerOrBrowser() == BrokerOrBrowser.EmbeddedBrowser))
                 {
                     // this is the same in all clouds
                     const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
@@ -250,7 +255,7 @@ namespace NetDesktopWinForms
                 $"TenantId {ar.TenantId}" + Environment.NewLine +
                 $"Expires {ar.ExpiresOn.ToLocalTime()} local time" + Environment.NewLine +
                 $"Source {ar.AuthenticationResultMetadata.TokenSource}" + Environment.NewLine +
-                $"Scopes {String.Join(" ", ar.Scopes)}" + Environment.NewLine +
+                $"Scopes {string.Join(" ", ar.Scopes)}" + Environment.NewLine +
                 $"AccessToken: {ar.AccessToken} " + Environment.NewLine +
                 $"IdToken {ar.IdToken}" + Environment.NewLine;
 
@@ -330,7 +335,10 @@ namespace NetDesktopWinForms
                 Log($"ATI without login_hint or account. It should display the account picker");
             }
 
-            await Task.Delay(500).ConfigureAwait(false);
+            if (cbxBackgroundThread.Checked)
+            {
+                await Task.Delay(500).ConfigureAwait(false);
+            }
             result = await builder.ExecuteAsync().ConfigureAwait(false);
 
             return result;
@@ -515,7 +523,7 @@ namespace NetDesktopWinForms
                 .Invoke(pca.UserTokenCache, null);
 
             await (task as Task).ConfigureAwait(false);
-           
+
             Log("Done expiring tokens.");
         }
 
@@ -578,5 +586,13 @@ namespace NetDesktopWinForms
         public string Environment => "";
 
         public AccountId HomeAccountId => null;
+    }
+
+    public enum BrokerOrBrowser
+    {
+        WAM = 1,
+        WAMRuntime = 2,
+        EmbeddedBrowser = 3,
+        SystemBrowser = 4,
     }
 }

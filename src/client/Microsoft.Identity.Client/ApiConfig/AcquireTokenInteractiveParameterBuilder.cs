@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="window">The current window as a IWin32Window</param>
         /// <returns>The builder to chain the .With methods</returns>
-        [CLSCompliant(false)]
+        [CLSCompliant(false)]        
         public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(IWin32Window window)
         {
             if (window == null)
@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(window));
             }
 
-            return WithParentObject((object)window);
+            return WithParentObject(window.Handle);
         }
 #endif
 
@@ -304,7 +304,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(IntPtr window)
         {
-            return WithParentObject((object)window);
+            return WithParentObject(window);
         }
 #endif
 
