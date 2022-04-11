@@ -71,22 +71,25 @@ namespace Microsoft.Identity.Client.Internal
 
             try
             {
-                if (TryParseJSON(idToken, out _))
+                string[] idTokenSegments = idToken.Split(new[] { '.' });
+
+                //JWT contains 2 parts and JSON from Runtime contains the decoded JWT in JSON format
+                if (idTokenSegments.Length < 2)
                 {
-                    payload = idToken;
+                    throw new MsalClientException(
+                        MsalError.InvalidJwtError,
+                        MsalErrorMessage.IDTokenMustHaveTwoParts);
                 }
-                else
+
+                //JWT format
+                if (idTokenSegments.Length == 2)
                 {
-                    string[] idTokenSegments = idToken.Split(new[] { '.' });
-
-                    if (idTokenSegments.Length < 2)
-                    {
-                        throw new MsalClientException(
-                            MsalError.InvalidJwtError,
-                            MsalErrorMessage.IDTokenMustHaveTwoParts);
-                    }
-
                     payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
+                }
+                //JSON format
+                else
+                { 
+                    payload = idToken;
                 }
 
                 var idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
@@ -114,20 +117,6 @@ namespace Microsoft.Identity.Client.Internal
                     MsalError.JsonParseError,
                     MsalErrorMessage.FailedToParseIDToken,
                     exc);
-            }
-        }
-
-        private static bool TryParseJSON(string json, out JObject jObject)
-        {
-            try
-            {
-                jObject = JObject.Parse(json);
-                return true;
-            }
-            catch
-            {
-                jObject = null;
-                return false;
             }
         }
 
