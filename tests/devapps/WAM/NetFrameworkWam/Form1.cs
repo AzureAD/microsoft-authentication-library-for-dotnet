@@ -60,6 +60,7 @@ namespace NetDesktopWinForms
             _syncContext = SynchronizationContext.Current;
 
             cbxUseWam.DataSource = Enum.GetValues(typeof(BrokerOrBrowser));
+            cbxUseWam.SelectedIndex = 1;
 
         }
 
