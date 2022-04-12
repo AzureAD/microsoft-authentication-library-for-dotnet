@@ -12,7 +12,9 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Performance.Helpers;
 using Microsoft.Identity.Test.Unit;
+#if USE_IDENTITY_WEB
 using Microsoft.Identity.Web;
+#endif
 
 namespace Microsoft.Identity.Test.Performance
 {
@@ -49,7 +51,7 @@ namespace Microsoft.Identity.Test.Performance
         [ParamsAllValues]
         public bool EnableCacheSerialization { get; set; }
 
-        [Params(true)]
+        //[Params(false)]
         public bool UseMicrosoftIdentityWebCache { get; set; }
 
         [GlobalSetup]
@@ -66,7 +68,9 @@ namespace Microsoft.Identity.Test.Performance
             {
                 if (UseMicrosoftIdentityWebCache)
                 {
+#if USE_IDENTITY_WEB
                     (_cca as IConfidentialClientApplication).AddInMemoryTokenCache();
+#endif
                 }
                 else
                 {
