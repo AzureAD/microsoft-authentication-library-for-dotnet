@@ -18,11 +18,6 @@ namespace Microsoft.IdentityModel.Logging.Abstractions
     public interface IIdentityLogger
     {
         /// <summary>
-        /// 
-        /// </summary>
-        bool IsPiiEnabled { get; }
-
-        /// <summary>
         /// Checks to see if logging is enabled at given <paramref name="eventLevel"/>.
         /// </summary>
         /// <param name="eventLevel">Log level of an Event.</param>

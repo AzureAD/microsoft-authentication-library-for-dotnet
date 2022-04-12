@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -14,9 +15,11 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal.Logger.LogScrubber;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.IdentityModel.Logging.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -322,10 +325,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
+                string logFormat = "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t";
                 string scopes = authenticationRequestParameters.Scope.AsSingleString();
                 string messageWithPii = string.Format(
                     CultureInfo.InvariantCulture,
-                    "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t",
+                    logFormat,
                     authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
                     scopes,
                     authenticationRequestParameters.AppConfig.ClientId,
@@ -347,7 +351,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
 
                 authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
-                authenticationRequestParameters.RequestContext.IdentityLogger.InfoPii(messageWithPii, messageWithoutPii); //sample log message
+
+                //New Pii format with scrubbing. Still needs redesign to be cleaner but this the basic concept
+                authenticationRequestParameters.RequestContext.IdentityLogger.LogWithPii(new PiiLogEntry(logFormat,
+                                                                                                    EventLevel.Informational,
+                                                                                                    new LogArgument(authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority, DataClassification.AccessControlData),
+                                                                                                    new LogArgument(scopes, DataClassification.AccessControlData),
+                                                                                                    new LogArgument(authenticationRequestParameters.AppConfig.ClientId, DataClassification.AccessControlData),
+                                                                                                    new LogArgument(GetType().Name, DataClassification.AccessControlData))
+                    )); //sample log message
             }
 
             if (authenticationRequestParameters.IsConfidentialClient &&

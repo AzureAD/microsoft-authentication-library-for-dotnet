@@ -275,13 +275,23 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Provide a logger to be used to log MSAL messages
+        /// 
         /// </summary>
         /// <param name="identityLogger"></param>
+        /// <param name="logLevel"></param>
+        /// <param name="enablePiiLogging"></param>
+        /// <param name="enableDefaultPlatformLogging"></param>
         /// <returns></returns>
-        public T WithLogging(IIdentityLogger identityLogger)
+        public T WithLogging(
+            IIdentityLogger identityLogger,
+            LogLevel? logLevel = null,
+            bool? enablePiiLogging = null,
+            bool? enableDefaultPlatformLogging = null)
         {
             Config.IdentityLogger = identityLogger;
+            Config.LogLevel = logLevel ?? Config.LogLevel;
+            Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
+            Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
             return (T)this;
         }
 

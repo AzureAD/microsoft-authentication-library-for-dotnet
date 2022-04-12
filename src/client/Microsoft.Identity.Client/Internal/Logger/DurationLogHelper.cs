@@ -3,19 +3,21 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using Microsoft.Identity.Client.Core;
+using Microsoft.IdentityModel.Logging.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal sealed class DurationLogHelper : IDisposable
     {
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly string _measuredBlockName;
         private readonly LogLevel _logLevel;
         private readonly Stopwatch _stopwatch;
 
         public DurationLogHelper(
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             string measuredBlockName,
             LogLevel logLevel = LogLevel.Verbose)
         {
@@ -24,12 +26,20 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _logLevel = logLevel;
             _stopwatch = Stopwatch.StartNew();
 
-            logger.Log(logLevel, null, $"Starting {measuredBlockName}");
+            logger.Log(new LogEntry()
+            {
+                Message = $"Starting {measuredBlockName}",
+                EventLevel = EventLevel.Verbose
+            });
         }
 
         public void Dispose()
         {
-            _logger.Log(_logLevel, null, $"Finished {_measuredBlockName} in {_stopwatch.ElapsedMilliseconds} ms");
+            _logger.Log(new LogEntry()
+            {
+                Message = $"Finished {_measuredBlockName} in {_stopwatch.ElapsedMilliseconds} ms",
+                EventLevel = EventLevel.Verbose
+            });
         }
     }
 }

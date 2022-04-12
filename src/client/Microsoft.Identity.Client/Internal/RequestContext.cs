@@ -16,7 +16,8 @@ namespace Microsoft.Identity.Client.Internal
         public Guid CorrelationId { get; }
         public ICoreLogger Logger { get; }
         public IServiceBundle ServiceBundle { get; }
-        public IIdentityLogger IdentityLogger { get; }
+        //New Logger implementation
+        public ILoggerAdapter IdentityLogger { get; }
 
         /// <summary>
         /// One and only one ApiEvent is associated with each request.
@@ -29,8 +30,16 @@ namespace Microsoft.Identity.Client.Internal
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
             Logger = MsalLogger.Create(correlationId, ServiceBundle.Config);
-            IdentityLogger = ServiceBundle.Config.IdentityLogger != null ? //For testing purposes
-                                        ServiceBundle.Config.IdentityLogger : new LegacyIdentityLoggerAdapter(ServiceBundle.Config.LogLevel, ServiceBundle.Config.LoggingCallback);
+
+            if (ServiceBundle.Config.IdentityLogger != null)
+            {
+                IdentityLogger = new IdentityLoggerAdapter(ServiceBundle.Config.IdentityLogger, ServiceBundle.Config.EnablePiiLogging, new LogScrubber());
+            }
+            else
+            {
+                IdentityLogger = new LegacyIdentityLoggerAdapter(ServiceBundle.Config.LogLevel, ServiceBundle.Config.LoggingCallback);
+            }
+
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
         }
