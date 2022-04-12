@@ -84,29 +84,30 @@ namespace Microsoft.Identity.Client.Broker
             MsalTokenResponse tokenResponse = null;
 
             using (var core = new NativeInterop.Core())
+            using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authority))
             {
-                using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authority))
+                authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
+                authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
+
+                string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
+
+                using (var result = await core.SignInInteractivelyAsync(
+                    _parentHandle,
+                    authParams,
+                    authenticationRequestParameters.CorrelationId.ToString("D"),
+                    loginHint,
+                    cancellationToken).ConfigureAwait(false))
                 {
-                    authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
-                    authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
-
-                    using (var result = await core.SignInInteractivelyAsync(
-                        _parentHandle,
-                        authParams,
-                        authenticationRequestParameters.CorrelationId.ToString("D"),
-                        cancellationToken).ConfigureAwait(false))
+                    if (result.IsSuccess)
                     {
-                        if (result.IsSuccess)
-                        {
-                            tokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
-                            _logger.Verbose("[WamBroker] Successfully retrieved token.");
+                        tokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
+                        _logger.Verbose("[WamBroker] Successfully retrieved token.");
 
-                        }
-                        else
-                        {
-                            _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
-                            throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider - account picker. {result.Error}");
-                        }
+                    }
+                    else
+                    {
+                        _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
+                        throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider - account picker. {result.Error}");
                     }
                 }
             }
@@ -119,6 +120,7 @@ namespace Microsoft.Identity.Client.Broker
             {
                 _logger.Error("HANDLE LEAK! " + ex);
             }
+
 
             return tokenResponse;
         }
