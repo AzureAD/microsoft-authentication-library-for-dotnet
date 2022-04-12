@@ -7,9 +7,14 @@ Quick links:
 | [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/#quickstarts) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [Library Reference](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet) | [Support](README.md#community-help-and-support) | [Feedback](https://ncv.microsoft.com/JvKFQ1WGSh)
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
-## Nuget package
+## NuGet package
 
- [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/) 
+**Microsoft.Identity.Client**  
+[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)  
+
+**Microsoft.Identity.Client.Desktop**  
+[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Desktop.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Desktop/)  
+
 
 ## Build Status
  
@@ -32,7 +37,7 @@ MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to
 ## Using MSAL.NET
 
 - The conceptual documentation is currently available from the [Microsoft identity platform documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-overview) and our [Wiki pages](https://aka.ms/msal-net)
-- The reference documentation is available from the dotnet APIs reference in [docs.microsoft.com](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet)
+- The reference documentation is available from the .NET APIs reference in [docs.microsoft.com](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet)
 - A number of quickstarts are available for:
   - [.NET desktop application](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-windows-desktop)
   - [Universal Windows Platform (UWP)](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-uwp)
@@ -41,7 +46,7 @@ MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to
 
 ## Where do I file issues
 
-This is the correct repo to file [issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues)
+This is the correct repo to file [issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues).
 
 ## Requirements
 
