@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +11,9 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Broker
 {
+    /// <summary>
+    /// MSAL Broker Extension for WAM support
+    /// </summary>
     public static class BrokerExtension
     {
         /// <summary>
