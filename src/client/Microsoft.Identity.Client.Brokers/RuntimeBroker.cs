@@ -190,7 +190,6 @@ namespace Microsoft.Identity.Client.Broker
                 return false;
             }
 
-
             _logger.Verbose("[WAM Broker] IsBrokerInstalledAndInvokable true");
             return true;
         }
@@ -228,13 +227,33 @@ namespace Microsoft.Identity.Client.Broker
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
-
             using (var core = new NativeInterop.Core())
             using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority))
             {
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
-                authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();               
+                authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
 
+                //if OperatingSystemAccount is passed then we use the user signed-in on the machine
+                if (PublicClientApplication.IsOperatingSystemAccount(acquireTokenSilentParameters.Account))
+                {
+                    using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        cancellationToken).ConfigureAwait(false))
+                    {
+                        if (result.IsSuccess)
+                        {
+                            msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
+                            return msalTokenResponse;
+                        }
+                        else
+                        {
+                            throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
+                        }
+                    }
+                }
+
+                //For all other accounts read account by id and sign in the user silently
                 using (var account = await core.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
                     authenticationRequestParameters.CorrelationId.ToString("D"),
