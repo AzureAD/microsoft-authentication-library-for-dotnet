@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             InstanceDiscoveryMetadataEntry ppeCloudEntry = new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { "login.windows-ppe.net" },
+                Aliases = new[] { "login.windows-ppe.net", "sts.windows-ppe.net", "login.microsoft-ppe.com" },
                 PreferredNetwork = "login.windows-ppe.net",
                 PreferredCache = "login.windows-ppe.net"
             };
