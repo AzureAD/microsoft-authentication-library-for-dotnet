@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
 
                 //JWT format
-                if (idTokenSegments.Length == 2)
+                if (idTokenSegments.Length == 3)
                 {
                     payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
                 }
