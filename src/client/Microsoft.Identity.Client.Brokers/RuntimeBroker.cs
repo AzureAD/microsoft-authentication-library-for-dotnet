@@ -21,22 +21,23 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client.Broker
 {
 
-    // TODO: login hint or account.Username is ATI
+    // TODO: x64 on WPF not working
     // TODO: need to map exceptions 
     //   - TODO: WAM's retrayble exception?
-    // TODO: add logging
-    // TODO: investigate bug around double interactive auth
-    // TODO: configure for MSA-PT (via extra query params) 
-    // TODO: silent auth with default account / given account
-    // TODO: remove account is not implemented    
-    // TODO: pass in claims
+    // TODO: add logging (Blocked - a C++ API exists, no C# API yet as it's pretty complex, waiting for msalruntime to exposit it)
+    // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419
+    // TODO: configure for MSA-PT (via extra query params - msal_request_type for the key and consumer_passthrough for the value)
 
+    // TODO: silent auth with default account 
+    // TODO: interactive auth with default account 
+    // TODO: remove account is not implemented    
+    // TODO: pass in claims - try {"access_token":{"deviceid":{"essential":true}}}
 
     internal class RuntimeBroker : IBroker
     {
         private readonly ICoreLogger _logger;
         private readonly IntPtr _parentHandle = IntPtr.Zero;
-        private readonly SynchronizationContext _synchronizationContext;
+        
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
 
@@ -49,9 +50,9 @@ namespace Microsoft.Identity.Client.Broker
             ICoreLogger logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _synchronizationContext = uiParent?.SynchronizationContext;
+            
 
-            _parentHandle = GetParentWindow(uiParent); // TODO: can we move to ATI only?
+            _parentHandle = GetParentWindow(uiParent);
 
             _wamOptions = appConfig.WindowsBrokerOptions ??
                 WindowsBrokerOptions.CreateDefault();
@@ -69,7 +70,9 @@ namespace Microsoft.Identity.Client.Broker
         {
             if (_parentHandle == IntPtr.Zero)
             {
-                throw new MsalClientException("window_handle_required", "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
+                throw new MsalClientException(
+                    "window_handle_required",
+                    "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
             }
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -108,16 +111,6 @@ namespace Microsoft.Identity.Client.Broker
                     }
                 }
             }
-
-            try
-            {
-                NativeInterop.Core.VerifyHandleLeaksForTest();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("HANDLE LEAK! " + ex);
-            }
-
 
             return tokenResponse;
         }
@@ -216,13 +209,6 @@ namespace Microsoft.Identity.Client.Broker
             return await AcquireTokenSilentlyAsync(authenticationRequestParameters, acquireTokenSilentParameters).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// AcquireTokenSilentDefaultUserAsync
-        /// </summary>ter
-        /// <param name="authenticationRequestParameters"></param>
-        /// <param name="acquireTokenSilentParameters"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public async Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
             return await AcquireTokenSilentlyAsync(authenticationRequestParameters, acquireTokenSilentParameters).ConfigureAwait(false);
@@ -247,7 +233,7 @@ namespace Microsoft.Identity.Client.Broker
             using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority))
             {
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
-                authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
+                authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();               
 
                 using (var account = await core.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
@@ -278,13 +264,10 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            throw new MsalServiceException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
+                            throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
                         }
                     }
                 }
-
-                NativeInterop.Core.VerifyHandleLeaksForTest();
-
             }
 
             return msalTokenResponse;
