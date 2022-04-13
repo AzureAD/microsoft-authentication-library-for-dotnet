@@ -72,11 +72,19 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 PreferredCache = "login-us.microsoftonline.com"
             };
 
+            InstanceDiscoveryMetadataEntry ppeCloudEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "login.windows-ppe.net" },
+                PreferredNetwork = "login.windows-ppe.net",
+                PreferredCache = "login.windows-ppe.net"
+            };
+
             AddToKnownCache(publicCloudEntry);
             AddToKnownCache(cloudEntryChina);
             AddToKnownCache(cloudEntryGermanay);
             AddToKnownCache(usGovCloudEntry);
             AddToKnownCache(usCloudEntry);
+            AddToKnownCache(ppeCloudEntry);
             AddToPublicEnvironment(publicCloudEntry);
         }
 
