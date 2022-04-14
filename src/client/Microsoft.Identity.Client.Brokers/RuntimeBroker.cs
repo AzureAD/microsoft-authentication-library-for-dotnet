@@ -149,31 +149,38 @@ namespace Microsoft.Identity.Client.Broker
         private MsalTokenResponse ParseRuntimeResponse(
                 NativeInterop.AuthResult authResult, AuthenticationRequestParameters authenticationRequestParameters)
         {
-            string expiresOn = authResult.ExpiresOn.ToString();
-            string correlationId = authenticationRequestParameters.CorrelationId.ToString("D");
-
-            if (string.IsNullOrWhiteSpace(correlationId))
+            try
             {
-                _logger.Warning("No correlation ID in response");
-                correlationId = null;
+                string expiresOn = authResult.ExpiresOn.ToString();
+                string correlationId = authenticationRequestParameters.CorrelationId.ToString("D");
+
+                if (string.IsNullOrWhiteSpace(correlationId))
+                {
+                    _logger.Warning("No correlation ID in response");
+                    correlationId = null;
+                }
+
+                MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
+                {
+                    AccessToken = authResult.AccessToken,
+                    IdToken = authResult.IdToken,
+                    CorrelationId = correlationId,
+                    Scope = authResult.GrantedScopes,
+                    ExpiresIn = DateTimeHelpers.GetDurationFromWindowsTimestamp(expiresOn, _logger),
+                    ClientInfo = authResult.Account.ClientInfo.ToString(),
+                    TokenType = "Bearer",
+                    WamAccountId = authResult.Account.Id,
+                    TokenSource = TokenSource.Broker
+                };
+
+                _logger.Info("WAM response status success");
+
+                return msalTokenResponse;
             }
-
-            MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
+            catch (NativeInterop.MsalRuntimeException ex)
             {
-                AccessToken = authResult.AccessToken,
-                IdToken = authResult.IdToken,
-                CorrelationId = correlationId,
-                Scope = authResult.GrantedScopes,
-                ExpiresIn = DateTimeHelpers.GetDurationFromWindowsTimestamp(expiresOn, _logger),
-                ClientInfo = authResult.Account.ClientInfo.ToString(),
-                TokenType = "Bearer",
-                WamAccountId = authResult.Account.Id,
-                TokenSource = TokenSource.Broker
-            };
-
-            _logger.Info("WAM response status success");
-
-            return msalTokenResponse;
+                throw new MsalServiceException("wam_failed", $"Could not acquire token using WAM. {ex.Message}");
+            }
 
         }
 
