@@ -328,7 +328,7 @@ namespace NetDesktopWinForms
             else if (cbxAccount.SelectedIndex > 0)
             {
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
-                Log($"ATI WithAccount for account {acc?.Username ?? "null" }");
+                Log($"ATI WithAccount for account {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 builder = builder.WithAccount(acc);
             }
             else

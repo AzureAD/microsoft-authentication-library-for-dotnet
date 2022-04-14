@@ -28,8 +28,8 @@ namespace Microsoft.Identity.Client.Broker
     // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419
     // TODO: configure for MSA-PT (via extra query params - msal_request_type for the key and consumer_passthrough for the value)
 
-    // TODO: silent auth with default account 
-    // TODO: interactive auth with default account 
+    // TODO: silent auth with default account (Completed)
+    // TODO: interactive auth with default account (Completed)
     // TODO: remove account is not implemented    
     // TODO: pass in claims - try {"access_token":{"deviceid":{"essential":true}}}
 
@@ -51,7 +51,6 @@ namespace Microsoft.Identity.Client.Broker
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             
-
             _parentHandle = GetParentWindow(uiParent);
 
             _wamOptions = appConfig.WindowsBrokerOptions ??
@@ -81,7 +80,7 @@ namespace Microsoft.Identity.Client.Broker
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
             var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
-            MsalTokenResponse tokenResponse = null;
+            MsalTokenResponse msalTokenResponse = null;
 
             using (var core = new NativeInterop.Core())
             using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authority))
@@ -89,7 +88,35 @@ namespace Microsoft.Identity.Client.Broker
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
                 authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
 
+                //if OperatingSystemAccount is passed then we use the user signed-in on the machine
+                if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
+                {
+                    using (NativeInterop.AuthResult result = await core.SignInAsync(
+                        _parentHandle,
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        cancellationToken).ConfigureAwait(false))
+                    {
+                        if (result.IsSuccess)
+                        {
+                            msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
+                            return msalTokenResponse;
+                        }
+                        else
+                        {
+                            _logger.Error($"[WamBroker] Could not login interactively with the Default OS Account. {result.Error}");
+                            throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider for the default OS Account - account picker. {result.Error}");
+                        }
+                    }
+                }
+
+                
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
+
+                if (!string.IsNullOrEmpty(loginHint))
+                {
+                    _logger.Verbose("[WamBroker] AcquireTokenIntractive - account information provided. Trying to find a Windows account that matches.");
+                }
 
                 using (var result = await core.SignInInteractivelyAsync(
                     _parentHandle,
@@ -100,7 +127,7 @@ namespace Microsoft.Identity.Client.Broker
                 {
                     if (result.IsSuccess)
                     {
-                        tokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
+                        msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
                         _logger.Verbose("[WamBroker] Successfully retrieved token.");
 
                     }
@@ -112,7 +139,7 @@ namespace Microsoft.Identity.Client.Broker
                 }
             }
 
-            return tokenResponse;
+            return msalTokenResponse;
         }
 
         private MsalTokenResponse ParseRuntimeResponse(
@@ -139,6 +166,8 @@ namespace Microsoft.Identity.Client.Broker
                 WamAccountId = authResult.Account.Id,
                 TokenSource = TokenSource.Broker
             };
+
+            _logger.Info("WAM response status success");
 
             return msalTokenResponse;
 
