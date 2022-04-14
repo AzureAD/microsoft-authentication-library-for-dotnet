@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (AcquireTokenInLongRunningOboWasCalled())
                 {
-                    AuthenticationRequestParameters.RequestContext.Logger.Error("[FindAccessTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
+                    AuthenticationRequestParameters.RequestContext.Logger.Error("[OBO request] AcquireTokenInLongRunningProcess was called and no access or refresh tokens were found in the cache.");
                     throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
                 }
 
@@ -176,8 +176,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         // Returns whether AcquireTokenInLongRunningProcess was called (user assertion is null in this case)
         private bool AcquireTokenInLongRunningOboWasCalled()
         {
-            return AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf &&
-                AuthenticationRequestParameters.UserAssertion == null &&
+            return AuthenticationRequestParameters.UserAssertion == null &&
                 !string.IsNullOrEmpty(AuthenticationRequestParameters.LongRunningOboCacheKey);
         }
 
