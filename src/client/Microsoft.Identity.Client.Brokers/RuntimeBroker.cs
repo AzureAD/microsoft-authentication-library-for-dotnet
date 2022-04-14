@@ -110,12 +110,16 @@ namespace Microsoft.Identity.Client.Broker
                     }
                 }
 
-                
+                //Sign in Interactively for other accounts 
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
 
                 if (!string.IsNullOrEmpty(loginHint))
                 {
-                    _logger.Verbose("[WamBroker] AcquireTokenIntractive - account information provided. Trying to find a Windows account that matches.");
+                    _logger.Verbose("[WamBroker] AcquireTokenInteractive - account information provided. Trying to find a Windows account that matches.");
+                }
+                else
+                {
+                    _logger.Verbose("[WamBroker] Account information was not provided. Using an account picker.");
                 }
 
                 using (var result = await core.SignInInteractivelyAsync(
