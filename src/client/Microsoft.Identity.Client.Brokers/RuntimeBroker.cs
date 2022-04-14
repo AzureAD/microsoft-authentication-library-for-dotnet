@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Broker
     //   - TODO: WAM's retrayble exception?
     // TODO: add logging (Blocked - a C++ API exists, no C# API yet as it's pretty complex, waiting for msalruntime to exposit it)
     // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419
-    // TODO: configure for MSA-PT (via extra query params - msal_request_type for the key and consumer_passthrough for the value)
+    // TODO: configure for MSA-PT (via extra query params - msal_request_type for the key and consumer_passthrough for the value) (Completed)
 
     // TODO: silent auth with default account (Completed)
     // TODO: interactive auth with default account (Completed)
@@ -37,9 +37,13 @@ namespace Microsoft.Identity.Client.Broker
     {
         private readonly ICoreLogger _logger;
         private readonly IntPtr _parentHandle = IntPtr.Zero;
-        
+
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
+
+        private const string InfrastructureTenant = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
+        private const string NativeInteropMsalRequestType = "msal_request_type"; 
+        private const string ConsumersPassthroughRequest = "consumer_passthrough";
 
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
@@ -50,7 +54,7 @@ namespace Microsoft.Identity.Client.Broker
             ICoreLogger logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            
+
             _parentHandle = GetParentWindow(uiParent);
 
             _wamOptions = appConfig.WindowsBrokerOptions ??
@@ -58,7 +62,7 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
-        /// AcquireTokenInteractiveAsync
+        /// Acquire Token Interactively 
         /// </summary>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="acquireTokenInteractiveParameters"></param>
@@ -86,7 +90,11 @@ namespace Microsoft.Identity.Client.Broker
             _logger.Verbose("[WamBroker] Using Windows account picker.");
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
-            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+
+            var authority = isMsaPassthrough ?
+                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
+                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+
             MsalTokenResponse msalTokenResponse = null;
 
             using (var core = new NativeInterop.Core())
@@ -94,7 +102,10 @@ namespace Microsoft.Identity.Client.Broker
             {
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
                 authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
-                                
+
+                if(isMsaPassthrough)
+                    authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
+
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
 
                 if (!string.IsNullOrEmpty(loginHint))
@@ -153,7 +164,11 @@ namespace Microsoft.Identity.Client.Broker
             _logger.Verbose("[WamBroker] Signing in with the default user account.");
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
-            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+
+            var authority = isMsaPassthrough ?
+                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
+                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+
             MsalTokenResponse msalTokenResponse = null;
 
             using (var core = new NativeInterop.Core())
@@ -161,6 +176,9 @@ namespace Microsoft.Identity.Client.Broker
             {
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
                 authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
+
+                if (isMsaPassthrough)
+                    authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
 
                 using (NativeInterop.AuthResult result = await core.SignInAsync(
                         _parentHandle,
@@ -184,7 +202,7 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
-        /// Parse MSAL Runtime AuthResult to MSAL Token Response
+        /// Parse Native Interop AuthResult Response to MSAL Token Response
         /// </summary>
         /// <param name="authResult"></param>
         /// <param name="authenticationRequestParameters"></param>
@@ -255,7 +273,7 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
-        /// Check to see if broker is installed and invokabale
+        /// Check to see if broker is installed and invokable
         /// </summary>
         /// <param name="authorityType"></param>
         /// <returns></returns>
@@ -289,16 +307,26 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
-            
+
             _logger.Verbose("[WamBroker] Acquiring token silently.");
-            
+
+            bool isMsaPassthrough = _wamOptions.MsaPassthrough;
+
+            var authority = isMsaPassthrough ?
+                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
+                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+
+            MsalTokenResponse msalTokenResponse = null;
+
             using (var core = new NativeInterop.Core())
-            using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority))
+            using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authority))
             {
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
                 authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
+
+                if (isMsaPassthrough)
+                    authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
 
                 using (var account = await core.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
@@ -348,16 +376,26 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
             _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
 
+            bool isMsaPassthrough = _wamOptions.MsaPassthrough;
+
+            var authority = isMsaPassthrough ?
+                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
+                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+
+            MsalTokenResponse msalTokenResponse = null;
+
             using (var core = new NativeInterop.Core())
-            using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority))
+            using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authority))
             {
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
                 authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
+
+                if (isMsaPassthrough)
+                    authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
 
                 using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
                         authParams,
