@@ -10,11 +10,13 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Desktop;
 
 namespace NetDesktopWpf
@@ -51,7 +53,7 @@ namespace NetDesktopWpf
         {
             var pca = PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
-                .WithWindowsRuntimeBroker(true)
+                .WithBroker2(true)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
@@ -146,8 +148,10 @@ namespace NetDesktopWpf
             {
                 try
                 {
+                    IntPtr handle = new WindowInteropHelper(this).Handle;
                     var task = await Dispatcher.InvokeAsync(() =>
                         pca.AcquireTokenInteractive(s_scopes)
+                                     .WithParentActivityOrWindow(handle)
                                      .WithAccount(acc)
                                      .ExecuteAsync());
 

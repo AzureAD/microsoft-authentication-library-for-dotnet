@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,22 +10,27 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Broker;
+
 #if NETCOREAPP3_1
 using Microsoft.Identity.Client.Desktop;
 #endif
-namespace NetCoreWinFormsWAM
-{
 
+namespace NetDesktopWinForms
+{
     public partial class Form1 : Form
     {
         private readonly SynchronizationContext _syncContext;
 
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
+            new ClientEntry() { Id = "04f0c124-f2bc-4f59-8241-bf6df9866bbd", Name = "04f0c124-f2bc-4f59-8241-bf6df9866bbd (new VS)"},
+            new ClientEntry() { Id = "d735b71b-9eee-4a4f-ad23-421660877ba6", Name = "d735b71b-9eee-4a4f-ad23-421660877ba6 (new GCM)"},
             new ClientEntry() { Id = "1d18b3b0-251b-4714-a02a-9956cec86c2d", Name = "1d18b3b0-251b-4714-a02a-9956cec86c2d (App in 49f)"},
             new ClientEntry() { Id = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1", Name = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1 (VS)"},
             new ClientEntry() { Id = "655015be-5021-4afc-a683-a4223eb5d0e5", Name = "655015be-5021-4afc-a683-a4223eb5d0e5"},
-            new ClientEntry() { Id = "c0186a6c-0bfc-4d83-9543-c2295b676f3b", Name = "MSA-PT (lab user and tenanted only)"}
+            new ClientEntry() { Id = "c0186a6c-0bfc-4d83-9543-c2295b676f3b", Name = "MSA-PT (lab user and tenanted only)"},
+            new ClientEntry() { Id = "95de633a-083e-42f5-b444-a4295d8e9314", Name = "Whiteboard App"}
         };
 
         private BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
@@ -57,6 +61,20 @@ namespace NetCoreWinFormsWAM
             cbxAccount.SelectedItem = null;
 
             _syncContext = SynchronizationContext.Current;
+
+            cbxUseWam.DataSource = Enum.GetValues(typeof(AuthMethod));
+            cbxUseWam.SelectedIndex = 1;
+
+        }
+
+        private AuthMethod GetAuthMethod()
+        {
+            AuthMethod status;
+            if (Enum.TryParse<AuthMethod>(cbxUseWam.SelectedValue.ToString(), out status))
+            {
+                return status;
+            }
+            throw new NotImplementedException();
         }
 
         public static readonly string UserCacheFile =
@@ -66,45 +84,59 @@ namespace NetCoreWinFormsWAM
         {
             string clientId = GetClientId();
             bool msaPt = IsMsaPassthroughConfigured();
-            IPublicClientApplication pca = null;
 
-            if (this.brokerTypeChk.Checked)
-            {
-                pca = PublicClientApplicationBuilder
+            var builder = PublicClientApplicationBuilder
                 .Create(clientId)
-                .WithAuthority(this.authorityCbx.Text)
-#if !NET5_0
-                .WithDesktopFeatures()
-#endif
-                .WithRuntimeBroker(this.brokerTypeChk.Checked)
+                .WithAuthority(this.authorityCbx.Text);
 
-                // there is no need to construct the PCA with this redirect URI, 
-                // but WAM uses it. We could enforce it.
-                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
-                .WithWindowsBrokerOptions(new WindowsBrokerOptions() { MsaPassthrough = cbxMsaPt.Checked })
-                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
-                .Build();
-            }
-            else
+            var authMethod = GetAuthMethod();
+
+            switch (authMethod)
             {
-                pca = PublicClientApplicationBuilder
-                                .Create(clientId)
-                                .WithAuthority(this.authorityCbx.Text)
-#if !NET5_0
-                .WithDesktopFeatures()
-#endif
-                .WithBroker(this.useBrokerChk.Checked)
+                case AuthMethod.WAM:
+                    builder = ToggleOldBroker(builder, true);
+                    break;
+                case AuthMethod.WAMRuntime:
+                    builder = builder.WithBroker2();
+                    break;
+                case AuthMethod.SystemBrowser:
+                    builder = builder.WithBroker2(false);
+                    builder = ToggleOldBroker(builder, false);
 
-                                // there is no need to construct the PCA with this redirect URI, 
-                                // but WAM uses it. We could enforce it.
-                                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
-                                .WithWindowsBrokerOptions(new WindowsBrokerOptions() { MsaPassthrough = cbxMsaPt.Checked })
-                                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
-                                .Build();
+                    builder = builder.WithRedirectUri("http://localhost");
+                    break;
+                case AuthMethod.EmbeddedBrowser:
+                    builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
+                    builder = builder.WithBroker2(false);
+                    builder = ToggleOldBroker(builder, false);
+
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
+
+            builder = builder.WithWindowsBrokerOptions(new WindowsBrokerOptions()
+            {
+                ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
+                MsaPassthrough = cbxMsaPt.Checked,
+                HeaderText = "MSAL Dev App .NET FX"
+            })
+            .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true);
+
+            var pca = builder.Build();
 
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;
+        }
+
+        private static PublicClientApplicationBuilder ToggleOldBroker(PublicClientApplicationBuilder builder, bool enable)
+        {
+#if NETCOREAPP3_1
+            builder = builder.WithWindowsBroker(enable);
+#else
+            builder = builder.WithBroker(enable);
+#endif
+            return builder;
         }
 
         private static void BindCache(ITokenCache tokenCache, string file)
@@ -129,7 +161,6 @@ namespace NetCoreWinFormsWAM
 
         private async void atsBtn_Click(object sender, EventArgs e)
         {
-
             try
             {
                 var pca = CreatePca();
@@ -147,7 +178,6 @@ namespace NetCoreWinFormsWAM
         private async Task<AuthenticationResult> RunAtsAsync(IPublicClientApplication pca)
         {
             string reqAuthority = pca.Authority;
-
             string loginHint = GetLoginHint();
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
             {
@@ -158,7 +188,8 @@ namespace NetCoreWinFormsWAM
             {
                 if (IsMsaPassthroughConfigured())
                 {
-                    throw new InvalidAsynchronousStateException(
+                    // TODO: bogavril - move this exception in WAM
+                    throw new InvalidOperationException(
                         "[TEST APP FAILURE] Do not use login hint on AcquireTokenSilent for MSA-Passthrough. Use the IAccount overload.");
                 }
 
@@ -173,9 +204,30 @@ namespace NetCoreWinFormsWAM
             {
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
+                var builder = pca.AcquireTokenSilent(GetScopes(), acc);
+                if (IsMsaPassthroughConfigured() && (GetAuthMethod() == AuthMethod.SystemBrowser || GetAuthMethod() == AuthMethod.EmbeddedBrowser))
+                {
+                    // this is the same in all clouds
+                    const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
+
+                    // these are per cloud
+                    string publicCloudEnv = "https://login.microsoftonline.com/";
+                    string msaTenantIdPublicCloud = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
+
+                    if (acc.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
+                    {
+                        var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
+
+                        builder = builder.WithAuthority(msaAuthority);
+                    }
+                }
+                else
+                {
+                    builder = builder.WithAuthority(reqAuthority);
+                }
+
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
-                return await pca.AcquireTokenSilent(GetScopes(), acc)
-                    .WithAuthority(reqAuthority)
+                return await builder
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
@@ -219,7 +271,7 @@ namespace NetCoreWinFormsWAM
                 $"TenantId {ar.TenantId}" + Environment.NewLine +
                 $"Expires {ar.ExpiresOn.ToLocalTime()} local time" + Environment.NewLine +
                 $"Source {ar.AuthenticationResultMetadata.TokenSource}" + Environment.NewLine +
-                $"Scopes {String.Join(" ", ar.Scopes)}" + Environment.NewLine +
+                $"Scopes {string.Join(" ", ar.Scopes)}" + Environment.NewLine +
                 $"AccessToken: {ar.AccessToken} " + Environment.NewLine +
                 $"IdToken {ar.IdToken}" + Environment.NewLine;
 
@@ -266,7 +318,15 @@ namespace NetCoreWinFormsWAM
             AuthenticationResult result = null;
             var scopes = GetScopes();
 
-            var builder = pca.AcquireTokenInteractive(scopes)                
+            var builder = pca.AcquireTokenInteractive(scopes)
+                .WithUseEmbeddedWebView(true)
+                //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
+                //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
+                .WithEmbeddedWebViewOptions(
+                new EmbeddedWebViewOptions()
+                {
+                    Title = "Hello world",
+                })
                 .WithParentActivityOrWindow(this.Handle);
 
             Prompt? prompt = GetPrompt();
@@ -291,8 +351,11 @@ namespace NetCoreWinFormsWAM
                 Log($"ATI without login_hint or account. It should display the account picker");
             }
 
-            await Task.Delay(500).ConfigureAwait(false);
-            result = await builder.ExecuteAsync().ConfigureAwait(false); 
+            if (cbxBackgroundThread.Checked)
+            {
+                await Task.Delay(500).ConfigureAwait(false);
+            }
+            result = await builder.ExecuteAsync().ConfigureAwait(false);
 
             return result;
         }
@@ -405,6 +468,7 @@ namespace NetCoreWinFormsWAM
                 {
                     Log("Exception: " + ex3);
                 }
+
             }
             catch (Exception ex2)
             {
@@ -420,7 +484,6 @@ namespace NetCoreWinFormsWAM
         private async void btnClearCache_Click(object sender, EventArgs e)
         {
             Log("Clearing the cache ...");
-
             var pca = CreatePca();
             foreach (var acc in (await pca.GetAccountsAsync().ConfigureAwait(false)))
             {
@@ -437,7 +500,19 @@ namespace NetCoreWinFormsWAM
             if (clientEntry.Id == "872cd9fa-d31f-45e0-9eab-6e460a02d1f1") // VS
             {
                 cbxScopes.SelectedItem = "https://management.core.windows.net//.default";
-                authorityCbx.SelectedItem = "https://login.windows-ppe.net/organizations";
+                authorityCbx.SelectedItem = "https://login.microsoftonline.com/organizations";
+            }
+
+            if (clientEntry.Id == "04f0c124-f2bc-4f59-8241-bf6df9866bbd") // VS
+            {
+                cbxScopes.SelectedItem = "https://management.core.windows.net//.default";
+                authorityCbx.SelectedItem = "https://login.microsoftonline.com/organizations";
+            }
+
+            if (clientEntry.Id == "d735b71b-9eee-4a4f-ad23-421660877ba6") // new GCM
+            {
+                cbxScopes.SelectedItem = "499b84ac-1321-427f-aa17-267ca6975798/vso.code_full";
+                authorityCbx.SelectedItem = "https://login.microsoftonline.com/organizations";
             }
 
             if (clientEntry.Id == "c0186a6c-0bfc-4d83-9543-c2295b676f3b") // MSA-PT app
@@ -456,28 +531,12 @@ namespace NetCoreWinFormsWAM
             // do something that loads the cache first
             await pca.GetAccountsAsync().ConfigureAwait(false);
 
-            string expiredValue = ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
-                    .ToString(CultureInfo.InvariantCulture);
+            var m = pca.UserTokenCache.GetType().GetRuntimeMethods().Where(n => n.Name == "ExpireAllAccessTokensForTestAsync");
 
-            var accessor = pca.UserTokenCache.GetType()
-                .GetRuntimeProperties()
-                .Single(p => p.Name == "Microsoft.Identity.Client.ITokenCacheInternal.Accessor")
-                .GetValue(pca.UserTokenCache);
-
-            var internalAccessTokens = accessor.GetType().GetMethod("GetAllAccessTokens").Invoke(accessor, null) as IEnumerable<object>;
-
-            foreach (var internalAt in internalAccessTokens)
-            {
-                internalAt.GetType().GetRuntimeMethods().Single(m => m.Name == "set_ExpiresOnUnixTimestamp").Invoke(internalAt, new[] { expiredValue });
-                accessor.GetType().GetMethod("SaveAccessToken").Invoke(accessor, new[] { internalAt });
-            }
-
-            var ctor = typeof(TokenCacheNotificationArgs).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Single();
-
-            var argz = ctor.Invoke(new object[] { pca.UserTokenCache, GetClientId(), null, true, false, true, null });
-            var task = pca.UserTokenCache.GetType().GetRuntimeMethods()
-                .Single(m => m.Name == "Microsoft.Identity.Client.ITokenCacheInternal.OnAfterAccessAsync")
-                .Invoke(pca.UserTokenCache, new[] { argz });
+            var task = pca.UserTokenCache.GetType()
+                .GetRuntimeMethods()
+                .Single(n => n.Name == "ExpireAllAccessTokensForTestAsync")
+                .Invoke(pca.UserTokenCache, null);
 
             await (task as Task).ConfigureAwait(false);
 
@@ -499,11 +558,13 @@ namespace NetCoreWinFormsWAM
                 await pca.RemoveAsync(acc).ConfigureAwait(false);
 
                 Log("Removed account " + acc.Username);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log("Exception: " + ex);
             }
         }
+
     }
 
     public class ClientEntry
@@ -517,7 +578,6 @@ namespace NetCoreWinFormsWAM
         public IAccount Account { get; }
 
         public string DisplayValue { get; }
-        //public string IdValue => $"{_account.HomeAccountId.Identifier}";
 
         public AccountModel(IAccount account, string displayValue = null)
         {
@@ -529,7 +589,6 @@ namespace NetCoreWinFormsWAM
 
             DisplayValue = displayValue ?? $"{Account.Username} {env} {homeTenantId}";
         }
-
     }
 
     public class NullAccount : IAccount
@@ -540,5 +599,12 @@ namespace NetCoreWinFormsWAM
 
         public AccountId HomeAccountId => null;
     }
-}
 
+    public enum AuthMethod
+    {
+        WAM = 1,
+        WAMRuntime = 2,
+        EmbeddedBrowser = 3,
+        SystemBrowser = 4,
+    }
+}

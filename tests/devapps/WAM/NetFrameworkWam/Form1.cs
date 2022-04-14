@@ -59,15 +59,15 @@ namespace NetDesktopWinForms
 
             _syncContext = SynchronizationContext.Current;
 
-            cbxUseWam.DataSource = Enum.GetValues(typeof(BrokerOrBrowser));
+            cbxUseWam.DataSource = Enum.GetValues(typeof(AuthMethod));
             cbxUseWam.SelectedIndex = 1;
 
         }
 
-        private BrokerOrBrowser GetBrokerOrBrowser()
+        private AuthMethod GetAuthMethod()
         {
-            BrokerOrBrowser status;
-            if (Enum.TryParse<BrokerOrBrowser>(cbxUseWam.SelectedValue.ToString(), out status))
+            AuthMethod status;
+            if (Enum.TryParse<AuthMethod>(cbxUseWam.SelectedValue.ToString(), out status))
             {
                 return status;
             }
@@ -86,22 +86,22 @@ namespace NetDesktopWinForms
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text);
 
-            var useWam = GetBrokerOrBrowser();
+            var authMethod = GetAuthMethod();
 
-            switch (useWam)
+            switch (authMethod)
             {
-                case BrokerOrBrowser.WAM:
+                case AuthMethod.WAM:
                     builder = builder.WithWindowsBroker();
                     break;
-                case BrokerOrBrowser.WAMRuntime:
+                case AuthMethod.WAMRuntime:
                     builder = builder.WithBroker2();
                     break;
-                case BrokerOrBrowser.EmbeddedBrowser:
+                case AuthMethod.SystemBrowser:
                     builder = builder.WithBroker2(false);
                     builder = builder.WithWindowsBroker(false);
                     builder = builder.WithRedirectUri("http://localhost");
                     break;
-                case BrokerOrBrowser.SystemBrowser:
+                case AuthMethod.EmbeddedBrowser:
                     builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
                     builder = builder.WithBroker2(false);
                     builder = builder.WithWindowsBroker(false);
@@ -190,7 +190,7 @@ namespace NetDesktopWinForms
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 var builder = pca.AcquireTokenSilent(GetScopes(), acc);
-                if (IsMsaPassthroughConfigured() && (GetBrokerOrBrowser() == BrokerOrBrowser.SystemBrowser || GetBrokerOrBrowser() == BrokerOrBrowser.EmbeddedBrowser))
+                if (IsMsaPassthroughConfigured() && (GetAuthMethod() == AuthMethod.SystemBrowser || GetAuthMethod() == AuthMethod.EmbeddedBrowser))
                 {
                     // this is the same in all clouds
                     const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
@@ -589,7 +589,7 @@ namespace NetDesktopWinForms
         public AccountId HomeAccountId => null;
     }
 
-    public enum BrokerOrBrowser
+    public enum AuthMethod
     {
         WAM = 1,
         WAMRuntime = 2,
