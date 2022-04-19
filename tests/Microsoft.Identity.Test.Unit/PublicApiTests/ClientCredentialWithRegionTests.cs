@@ -350,7 +350,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 var app = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
-                                 .WithAuthority("https://login.windows-ppe.org/common", true)
+                                 .WithAuthority("https://login.windows-ppe.org/common", true) //login.windows-ppe.org is not known to MSAL
                                  .WithHttpManager(httpManager)
                                  .WithAzureRegion(EastUsRegion)
                                  .WithClientSecret(TestConstants.ClientSecret)
