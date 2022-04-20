@@ -509,7 +509,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
 
-            // Returns long-running token
+            // No matching AT, uses RT to retrieve new AT.
             result = await cca.AcquireTokenInLongRunningProcess(scopes2, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
