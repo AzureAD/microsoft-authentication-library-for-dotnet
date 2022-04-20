@@ -177,8 +177,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         // Returns whether AcquireTokenInLongRunningProcess was called (user assertion is null in this case)
         private bool AcquireTokenInLongRunningOboWasCalled()
         {
-            return AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf &&
-                AuthenticationRequestParameters.UserAssertion == null &&
+            return AuthenticationRequestParameters.UserAssertion == null &&
                 !string.IsNullOrEmpty(AuthenticationRequestParameters.LongRunningOboCacheKey);
         }
 
