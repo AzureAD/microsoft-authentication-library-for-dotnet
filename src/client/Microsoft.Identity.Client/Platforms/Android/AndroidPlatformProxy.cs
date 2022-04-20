@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return new AndroidWebUIFactory();
         }
 
-        protected override ICryptographyManager InternalGetCryptographyManager() => new AndroidCryptographyManager();
+        protected override ICryptographyManager InternalGetCryptographyManager() => new CommonCryptographyManager();
 
         protected override IPlatformLogger InternalGetPlatformLogger() => new AndroidPlatformLogger();
 

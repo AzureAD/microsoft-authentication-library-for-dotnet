@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new IosWebUIFactory();
         }
 
-        protected override ICryptographyManager InternalGetCryptographyManager() => new iOSCryptographyManager();
+        protected override ICryptographyManager InternalGetCryptographyManager() => new CommonCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new ConsolePlatformLogger();
 
         protected override IFeatureFlags CreateFeatureFlags() => new iOSFeatureFlags();
