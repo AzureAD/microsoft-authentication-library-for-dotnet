@@ -41,7 +41,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 var rec = new SecRecord(SecKind.GenericPassword)
                 {
                     Generic = NSData.FromString(LocalSettingsContainerName),
-                    Accessible = SecAccessible.Always,
+#if MAUI
+                    Accessible = SecAccessible.AfterFirstUnlock,
+#else
+                    Accessible = SecAccessible.Always,                
+#endif
                     Service = NAME + " Service",
                     Account = NAME + " cache",
                     Label = NAME + " Label",
@@ -76,7 +80,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 var s = new SecRecord(SecKind.GenericPassword)
                 {
                     Generic = NSData.FromString(LocalSettingsContainerName),
-                    Accessible = SecAccessible.Always,
+#if MAUI
+                    Accessible = SecAccessible.AfterFirstUnlock,
+#else
+                    Accessible = SecAccessible.Always,            
+#endif
                     Service = NAME + " Service",
                     Account = NAME + " cache",
                     Label = NAME + " Label",

@@ -1,11 +1,12 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
 
-  
+
   <PropertyGroup Label="Targets required for unit tests to run">
-    
+
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>
+    
   </PropertyGroup>
 
   <!-- Mobile and legacy targets - comment these out or set env variable MSAL_DESKTOP_ONLY_DEV to speedup the build -->
@@ -17,15 +18,16 @@
     <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
-    <TargetFrameworkNetAndroid>net6.0-android</TargetFrameworkNetAndroid>
-    <TargetFrameworkNetIos>net6.0-ios</TargetFrameworkNetIos>
-    <TargetFrameworkNetMac>net6.0-maccatalyst</TargetFrameworkNetMac>
-    <TargetFrameworkNetWindows>net6.0-windows10.0.19041</TargetFrameworkNetWindows>
+    
+    <!-- MAUI -->
+    <TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
+    <TargetFrameworkNet6Ios>net6.0-ios</TargetFrameworkNet6Ios>
+    <TargetFrameworkNet6Mac>net6.0-maccatalyst</TargetFrameworkNet6Mac>
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNet5Win);$(TargetFrameworkNetAndroid);$(TargetFrameworkNetIos);$(TargetFrameworkNetMac);$(TargetFrameworkNetWindows)</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNetAndroid);$(TargetFrameworkNetIos);$(TargetFrameworkNetMac);$(TargetFrameworkNetWindows)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNet5Win);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Mac);$(TargetFrameworkNetWindows)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Mac);$(TargetFrameworkNetWindows)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
@@ -84,6 +86,7 @@
     <!-- These are for MSAL json/* build infra -->
     <DefineConstants>$(DefineConstants);HAVE_ADO_NET;HAVE_APP_DOMAIN;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_BINARY_FORMATTER;HAVE_BINARY_SERIALIZATION;HAVE_BINARY_EXCEPTION_SERIALIZATION;HAVE_CHAR_TO_LOWER_WITH_CULTURE;HAVE_CHAR_TO_STRING_WITH_CULTURE;HAVE_COM_ATTRIBUTES;HAVE_COMPONENT_MODEL;HAVE_CONCURRENT_COLLECTIONS;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DB_NULL_TYPE_CODE;HAVE_DYNAMIC;HAVE_EMPTY_TYPES;HAVE_ENTITY_FRAMEWORK;HAVE_EXPRESSIONS;HAVE_FAST_REVERSE;HAVE_FSHARP_TYPES;HAVE_FULL_REFLECTION;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_ICLONEABLE;HAVE_ICONVERTIBLE;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_MEMORY_BARRIER;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_EMIT;HAVE_SECURITY_SAFE_CRITICAL_ATTRIBUTE;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STREAM_READER_WRITER_CLOSE;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TRACE_WRITER;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_XML_DOCUMENT_TYPE;HAVE_CONCURRENT_DICTIONARY;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet5Win)' ">
     <!-- These are for MSAL json/* build infra -->
     <DefineConstants>$(DefineConstants);HAVE_ADO_NET;HAVE_APP_DOMAIN;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_BINARY_FORMATTER;HAVE_BINARY_SERIALIZATION;HAVE_BINARY_EXCEPTION_SERIALIZATION;HAVE_CHAR_TO_LOWER_WITH_CULTURE;HAVE_CHAR_TO_STRING_WITH_CULTURE;HAVE_COM_ATTRIBUTES;HAVE_COMPONENT_MODEL;HAVE_CONCURRENT_COLLECTIONS;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DB_NULL_TYPE_CODE;HAVE_DYNAMIC;HAVE_EMPTY_TYPES;HAVE_ENTITY_FRAMEWORK;HAVE_EXPRESSIONS;HAVE_FAST_REVERSE;HAVE_FSHARP_TYPES;HAVE_FULL_REFLECTION;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_ICLONEABLE;HAVE_ICONVERTIBLE;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_MEMORY_BARRIER;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_EMIT;HAVE_SECURITY_SAFE_CRITICAL_ATTRIBUTE;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STREAM_READER_WRITER_CLOSE;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TRACE_WRITER;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_XML_DOCUMENT_TYPE;HAVE_CONCURRENT_DICTIONARY;$(AdditionalConstants)</DefineConstants>
@@ -100,7 +103,7 @@
     <DefineConstants>$(DefineConstants);PORTABLE;DOTNET;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_OBSOLETE_FORMATTER_ASSEMBLY_STYLE;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;$(AdditionalConstants)</DefineConstants>
     <TargetPlatformMinVersion>10.0.0.0</TargetPlatformMinVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) Or '$(TargetFramework)' == '$(TargetFrameworkNet6Android)' ">
     <!-- These are for MSAL json/* build infra -->
     <DefineConstants>$(DefineConstants);HAVE_APP_DOMAIN;HAVE_ASYNC;HAVE_BINARY_FORMATTER;HAVE_BINARY_SERIALIZATION;HAVE_BINARY_EXCEPTION_SERIALIZATION;HAVE_CHAR_TO_LOWER_WITH_CULTURE;HAVE_CHAR_TO_STRING_WITH_CULTURE;HAVE_COM_ATTRIBUTES;HAVE_COMPONENT_MODEL;HAVE_CONCURRENT_COLLECTIONS;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DB_NULL_TYPE_CODE;HAVE_DYNAMIC;HAVE_EMPTY_TYPES;HAVE_ENTITY_FRAMEWORK;HAVE_EXPRESSIONS;HAVE_FAST_REVERSE;HAVE_FSHARP_TYPES;HAVE_FULL_REFLECTION;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_ICLONEABLE;HAVE_ICONVERTIBLE;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_MEMORY_BARRIER;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_SECURITY_SAFE_CRITICAL_ATTRIBUTE;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STREAM_READER_WRITER_CLOSE;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TRACE_WRITER;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_XML_DOCUMENT_TYPE;HAVE_CONCURRENT_DICTIONARY;$(AdditionalConstants)</DefineConstants>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
@@ -120,7 +123,7 @@
     <DefineConstants>$(DefineConstants);HAVE_ADO_NET;HAVE_APP_DOMAIN;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_BINARY_FORMATTER;HAVE_BINARY_SERIALIZATION;HAVE_BINARY_EXCEPTION_SERIALIZATION;HAVE_CHAR_TO_LOWER_WITH_CULTURE;HAVE_CHAR_TO_STRING_WITH_CULTURE;HAVE_COM_ATTRIBUTES;HAVE_COMPONENT_MODEL;HAVE_CONCURRENT_COLLECTIONS;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DB_NULL_TYPE_CODE;HAVE_DYNAMIC;HAVE_EMPTY_TYPES;HAVE_ENTITY_FRAMEWORK;HAVE_EXPRESSIONS;HAVE_FAST_REVERSE;HAVE_FSHARP_TYPES;HAVE_FULL_REFLECTION;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_ICLONEABLE;HAVE_ICONVERTIBLE;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_MEMORY_BARRIER;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_EMIT;HAVE_SECURITY_SAFE_CRITICAL_ATTRIBUTE;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STREAM_READER_WRITER_CLOSE;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TRACE_WRITER;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_XML_DOCUMENT_TYPE;HAVE_CONCURRENT_DICTIONARY;$(AdditionalConstants)</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">
     <!-- These are for MSAL json/* build infra -->
     <DefineConstants>$(DefineConstants);HAVE_ASYNC;HAVE_BINARY_SERIALIZATION;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DYNAMIC;HAVE_EXPRESSIONS;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;HAVE_XML_DOCUMENT_TYPE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
@@ -133,8 +136,37 @@
     <!-- UNITY flag based on https://github.com/jilleJr/Newtonsoft.Json-for-Unity -->
     <DefineConstants>$(DefineConstants);UNITY;PORTABLE;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_BINARY_SERIALIZATION;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DYNAMIC;HAVE_EXPRESSIONS;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_OBSOLETE_FORMATTER_ASSEMBLY_STYLE;HAVE_XML_DOCUMENT;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
+
+
+
+  <!--<PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetWindows)' ">
+    -->
+  <!-- These are for MSAL json/* build infra -->
+  <!--
+    <DefineConstants>$(DefineConstants);WINDOWS_APP;WIN_UI;PORTABLE;DOTNET;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_OBSOLETE_FORMATTER_ASSEMBLY_STYLE;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>-->
+
+
   <PropertyGroup Condition="'$(APPCENTER_BUILD)' != ''">
     <DefineConstants>$(DefineConstants);IS_APPCENTER_BUILD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Android)' ">
+    <!-- These are for MSAL json/* build infra -->
+    <DefineConstants>$(DefineConstants);HAVE_APP_DOMAIN;HAVE_ASYNC;HAVE_BINARY_FORMATTER;HAVE_BINARY_SERIALIZATION;HAVE_BINARY_EXCEPTION_SERIALIZATION;HAVE_CHAR_TO_LOWER_WITH_CULTURE;HAVE_CHAR_TO_STRING_WITH_CULTURE;HAVE_COM_ATTRIBUTES;HAVE_COMPONENT_MODEL;HAVE_CONCURRENT_COLLECTIONS;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DB_NULL_TYPE_CODE;HAVE_DYNAMIC;HAVE_EMPTY_TYPES;HAVE_ENTITY_FRAMEWORK;HAVE_EXPRESSIONS;HAVE_FAST_REVERSE;HAVE_FSHARP_TYPES;HAVE_FULL_REFLECTION;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_ICLONEABLE;HAVE_ICONVERTIBLE;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_MEMORY_BARRIER;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_SECURITY_SAFE_CRITICAL_ATTRIBUTE;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STREAM_READER_WRITER_CLOSE;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TRACE_WRITER;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_XML_DOCUMENT_TYPE;HAVE_CONCURRENT_DICTIONARY;$(AdditionalConstants)</DefineConstants>
+    <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
+    <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
+    <AndroidResgenClass>Resource</AndroidResgenClass>
+    <!-- Ensures that the Resources.designer.cs do not end up in the dll, see #1449 -->
+    <AndroidUseIntermediateDesignerFile>false</AndroidUseIntermediateDesignerFile>
+  </PropertyGroup>
+
+
+  <!-- net6.0 (MAUI) -->
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net6.0-'))">
+    <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)'">14.2</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">14.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">21.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -216,7 +248,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" Exclude="$(PathToMsalSources)\Platforms\Features\WamBroker\win32\**\*.cs" />
-    
+
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
@@ -297,67 +329,26 @@
     </None>
   </ItemGroup>
 
-  <!-- net6.0 (MAUI) -->
-  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net6.0-'))">
-    <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
-    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == 'net6.0-ios'">14.2</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == 'net6.0-maccatalyst'">14.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == 'net6.0-android'">21.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('net6.0-windows'))">10.0.17763.0</SupportedOSPlatformVersion>
-    <TargetPlatformMinVersion Condition="$(TargetFramework.Contains('net6.0-windows'))">10.0.17763.0</TargetPlatformMinVersion>
-  </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)' ">
-    <DefineConstants>$(DefineConstants);ANDROID</DefineConstants>
-  </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">
-    <!-- These are for MSAL json/* build infra -->
-    <DefineConstants>$(DefineConstants);iOS;HAVE_ASYNC;HAVE_BINARY_SERIALIZATION;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DYNAMIC;HAVE_EXPRESSIONS;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;HAVE_XML_DOCUMENT_TYPE;$(AdditionalConstants)</DefineConstants>
-  </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetMac)'">
-    <!-- These are for MSAL json/* build infra -->
-    <DefineConstants>$(DefineConstants);iOS;HAVE_ASYNC;HAVE_BINARY_SERIALIZATION;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DYNAMIC;HAVE_EXPRESSIONS;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;HAVE_XML_DOCUMENT_TYPE;$(AdditionalConstants)</DefineConstants>
-  </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetWindows)' ">
-    <!-- These are for MSAL json/* build infra -->
-    <DefineConstants>$(DefineConstants);WINDOWS_APP;WIN_UI;PORTABLE;DOTNET;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_OBSOLETE_FORMATTER_ASSEMBLY_STYLE;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;$(AdditionalConstants)</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)' ">
-    <!-- These are for MSAL json/* build infra -->
-    <DefineConstants>$(DefineConstants);HAVE_APP_DOMAIN;HAVE_ASYNC;HAVE_BINARY_FORMATTER;HAVE_BINARY_SERIALIZATION;HAVE_BINARY_EXCEPTION_SERIALIZATION;HAVE_CHAR_TO_LOWER_WITH_CULTURE;HAVE_CHAR_TO_STRING_WITH_CULTURE;HAVE_COM_ATTRIBUTES;HAVE_COMPONENT_MODEL;HAVE_CONCURRENT_COLLECTIONS;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DB_NULL_TYPE_CODE;HAVE_DYNAMIC;HAVE_EMPTY_TYPES;HAVE_ENTITY_FRAMEWORK;HAVE_EXPRESSIONS;HAVE_FAST_REVERSE;HAVE_FSHARP_TYPES;HAVE_FULL_REFLECTION;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_ICLONEABLE;HAVE_ICONVERTIBLE;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_MEMORY_BARRIER;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_SECURITY_SAFE_CRITICAL_ATTRIBUTE;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STREAM_READER_WRITER_CLOSE;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TRACE_WRITER;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_XML_DOCUMENT_TYPE;HAVE_CONCURRENT_DICTIONARY;$(AdditionalConstants)</DefineConstants>
-    <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
-    <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
-    <AndroidResgenClass>Resource</AndroidResgenClass>
-    <!-- Ensures that the Resources.designer.cs do not end up in the dll, see #1449 -->
-    <AndroidUseIntermediateDesignerFile>false</AndroidUseIntermediateDesignerFile>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Android)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
     <PackageReference Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetIos)' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\Apple\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetMac)' ">
-    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\Apple\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
-    <PackageReference Include="System.Security.SecureString" Version="4.3.0" PrivateAssets="All" />
-  </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetWindows)' ">
+  <!--<ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetWindows)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" Exclude="$(PathToMsalSources)\Platforms\Features\WamBroker\win32\**\*.cs" />
@@ -370,10 +361,12 @@
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
 
-    <!-- 4.1.3 has CVE-2018-0786 -->
+    -->
+  <!-- 4.1.3 has CVE-2018-0786 -->
+  <!--
     <PackageReference Include="System.ServiceModel.Http" Version="4.5.3" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.5.3" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.5.3" />
-  </ItemGroup>
-  
+  </ItemGroup>-->
+
 </Project>

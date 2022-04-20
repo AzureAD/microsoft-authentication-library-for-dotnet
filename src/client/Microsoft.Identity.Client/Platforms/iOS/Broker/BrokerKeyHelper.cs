@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 KeySize = 256,
                 BlockSize = 128
             };
-
+           
             if (key != null)
             {
                 algorithm.Key = key;
