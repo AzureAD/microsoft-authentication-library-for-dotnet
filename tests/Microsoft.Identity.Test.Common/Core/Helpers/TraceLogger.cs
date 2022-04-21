@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
-    internal class TraceLogger : ICoreLogger
+    internal class TraceLogger : ILoggerAdapter
     {
         private readonly string _prefix;
 

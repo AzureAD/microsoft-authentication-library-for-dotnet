@@ -41,10 +41,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> s_appMetadataDictionary =
             new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
 
-        protected readonly ICoreLogger _logger;
+        protected readonly ILoggerAdapter _logger;
         private readonly CacheOptions _tokenCacheAccessorOptions;
 
-        public InMemoryPartitionedUserTokenCacheAccessor(ICoreLogger logger, CacheOptions tokenCacheAccessorOptions)
+        public InMemoryPartitionedUserTokenCacheAccessor(ILoggerAdapter logger, CacheOptions tokenCacheAccessorOptions)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _tokenCacheAccessorOptions = tokenCacheAccessorOptions ?? new CacheOptions();

@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _signedAssertionDelegate = signedAssertionDelegate;
         }
 
-        public async Task AddConfidentialClientParametersAsync(OAuth2Client oAuth2Client, ICoreLogger logger, ICryptographyManager cryptographyManager, string clientId, string tokenEndpoint, bool sendX5C, CancellationToken cancellationToken)
+        public async Task AddConfidentialClientParametersAsync(OAuth2Client oAuth2Client, ILoggerAdapter logger, ICryptographyManager cryptographyManager, string clientId, string tokenEndpoint, bool sendX5C, CancellationToken cancellationToken)
         {
             string signedAssertion = await _signedAssertionDelegate(cancellationToken).ConfigureAwait(false);
 

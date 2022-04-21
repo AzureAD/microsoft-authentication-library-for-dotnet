@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.Core;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-    internal class NullLogger : ICoreLogger
+    internal class NullLogger : ILoggerAdapter
     {
         public string ClientName { get; } = string.Empty;
         public string ClientVersion { get; } = string.Empty;
@@ -15,87 +17,29 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public Guid CorrelationId { get; } = Guid.Empty;
         public bool PiiLoggingEnabled { get; } = false;
 
-        public void Always(string messageScrubbed)
-        {
-        }
+        string ILoggerAdapter.CorrelationId { get; } = string.Empty;
 
-        public void AlwaysPii(string messageWithPii, string messageScrubbed)
-        {
-        }
+        public string ClientInformation { get; } = string.Empty;
 
-        public void Error(string messageScrubbed)
-        {
-        }
+        public bool IsDefaultPlatformLoggingEnabled { get; } = false;
 
-        public void ErrorPii(string messageWithPii, string messageScrubbed)
-        {
-        }
-
-        public void ErrorPii(Exception exWithPii)
-        {
-        }
-
-        public void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
-        {
-        }
-
-        public void Warning(string messageScrubbed)
-        {
-        }
-
-        public void WarningPii(string messageWithPii, string messageScrubbed)
-        {
-        }
-
-        public void WarningPii(Exception exWithPii)
-        {
-        }
-
-        public void WarningPiiWithPrefix(Exception exWithPii, string prefix)
-        {
-        }
-
-        public void Info(string messageScrubbed)
-        {
-        }
-
-        public void InfoPii(string messageWithPii, string messageScrubbed)
-        {
-        }
-
-        public void InfoPii(Exception exWithPii)
-        {
-        }
-
-        public void InfoPiiWithPrefix(Exception exWithPii, string prefix)
-        {
-        }
-
-        public void Verbose(string messageScrubbed)
-        {
-        }
-
-        public void VerbosePii(string messageWithPii, string messageScrubbed)
-        {
-        }
-
-        public void Log(LogLevel msalLogLevel, string messageWithPii, string messageScrubbed)
-        {
-        }
-
-        public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
-        {
-            return new DurationLogHelper(this, measuredBlockName, logLevel);
-        }
-
-        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
-        {
-            return LogBlockDuration(methodName, logLevel);
-        }
-
-        public bool IsLoggingEnabled(LogLevel logLevel)
+        public bool IsLoggingEnabled(EventLevel logLevel)
         {
             return false;
+        }
+
+        public void Log(EventLevel logLevel, string messageWithPii, string messageScrubbed)
+        {
+        }
+
+        public DurationLogHelper LogBlockDuration(string measuredBlockName, EventLevel logLevel = EventLevel.Verbose)
+        {
+            return null;
+        }
+
+        public DurationLogHelper LogMethodDuration(EventLevel logLevel = EventLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
+        {
+            return null;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
     [TestClass]
     public class ThrottlingCacheTests
     {
-        private readonly ICoreLogger _logger = NSubstitute.Substitute.For<ICoreLogger>();
+        private readonly ILoggerAdapter _logger = NSubstitute.Substitute.For<ILoggerAdapter>();
 
         private readonly MsalServiceException _ex1 = new MsalServiceException("code1", "msg1");
         private readonly MsalServiceException _ex2 = new MsalServiceException("code2", "msg2");

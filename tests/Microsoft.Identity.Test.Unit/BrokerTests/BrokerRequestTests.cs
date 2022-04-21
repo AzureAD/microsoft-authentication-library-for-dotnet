@@ -294,7 +294,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
         internal class IosBrokerMock : NullBroker
         {
-            public IosBrokerMock(ICoreLogger logger) : base(logger)
+            public IosBrokerMock(ILoggerAdapter logger) : base(logger)
             {
 
             }

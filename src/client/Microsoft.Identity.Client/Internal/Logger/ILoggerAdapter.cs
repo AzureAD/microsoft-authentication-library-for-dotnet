@@ -1,20 +1,25 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.Logger.LogScrubber;
-using Microsoft.IdentityModel.Logging.Abstractions;
+using System.Diagnostics.Tracing;
+using System.Runtime.CompilerServices;
+using Microsoft.Identity.Client.Internal.Logger;
 
-namespace Microsoft.Identity.Client.Internal.Logger
+namespace Microsoft.Identity.Client.Core
 {
-    interface ILoggerAdapter
+    internal interface ILoggerAdapter
     {
-        bool IsPiiEnabled { get; }
-        void Log(LogEntry entry);
-        void LogWithPii(PiiLogEntry piiEntry);
+        bool PiiLoggingEnabled { get; }
+        bool IsDefaultPlatformLoggingEnabled { get; }
+        MsalCacheLoggerWrapper CacheLogger { get; }
+
+        /// <summary>
+        /// For expensive logging messsages (e.g. when the log message evaluates a variable), 
+        /// it is better to check the log level ahead of time so as not to evaluate the expensive message and then discard it.
+        /// </summary>
+        bool IsLoggingEnabled(EventLevel eventLevel);
+        void Log(EventLevel logLevel, string messageWithPii, string messageScrubbed);
+        DurationLogHelper LogBlockDuration(string measuredBlockName, EventLevel logLevel = EventLevel.Verbose);
+        DurationLogHelper LogMethodDuration(EventLevel logLevel = EventLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null);
     }
 }

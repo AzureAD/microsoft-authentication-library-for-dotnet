@@ -35,13 +35,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private static SemaphoreSlim s_brokerResponseReady = null;
         private static NSUrl s_brokerResponse = null;
 
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly ICryptographyManager _cryptoManager;
         private readonly CoreUIParent _uIParent;
         private string _brokerRequestNonce;
         private bool _brokerV3Installed = false;
 
-        public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
+        public iOSBroker(ILoggerAdapter logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
         {
             _logger = logger;
             _cryptoManager = cryptoManager;

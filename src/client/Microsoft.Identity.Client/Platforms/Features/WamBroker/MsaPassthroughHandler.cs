@@ -23,13 +23,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     {
         public const string TransferTokenScopes =
             "openid profile offline_access service::http://Passport.NET/purpose::PURPOSE_AAD_WAM_TRANSFER";
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly IWamPlugin _msaPlugin;
         private readonly IWamProxy _wamProxy;
         private readonly IntPtr _parentHandle;
 
         public MsaPassthroughHandler(
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             IWamPlugin msaPlugin,
             IWamProxy wamProxy,
             IntPtr parentHandle)

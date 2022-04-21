@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
     {
         private readonly Action<IWebDriver> _seleniumAutomationLogic;
         private readonly TestContext _testContext;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
         private readonly TimeSpan tcpTimeoutAfterSelenium = TimeSpan.FromSeconds(3);
 
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
   </body>
 </html>";
 
-        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TestContext testContext, ICoreLogger logger = null)
+        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TestContext testContext, ILoggerAdapter logger = null)
         {
             _seleniumAutomationLogic = seleniumAutomationLogic;
             _testContext = testContext;

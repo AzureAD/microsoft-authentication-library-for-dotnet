@@ -27,11 +27,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
     internal class AndroidContentProviderBroker : IBroker
     {
         private readonly AndroidBrokerHelper _brokerHelper;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly Activity _parentActivity;
         private string _negotiatedBrokerProtocolKey = string.Empty;
 
-        public AndroidContentProviderBroker(CoreUIParent uiParent, ICoreLogger logger)
+        public AndroidContentProviderBroker(CoreUIParent uiParent, ILoggerAdapter logger)
         {
             _parentActivity = uiParent?.Activity;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

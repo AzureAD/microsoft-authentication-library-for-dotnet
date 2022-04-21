@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
         /// Because this class needs to be static, we can only inject a logger from one request a time, making
         /// the correlation IDs reported unreliable in case multiple requests in parallel.
         /// </summary>
-        internal static ICoreLogger LastRequestLogger { get; set; } // can be null
+        internal static ILoggerAdapter LastRequestLogger { get; set; } // can be null
 
         /// <summary>
         /// Sets response for continuing authentication flow. This function will return true if the response was meant for MSAL, else it will return false.

@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal
         internal static void ProcessFetchInBackground(
             MsalAccessTokenCacheItem oldAccessToken,
             Func<Task<AuthenticationResult>> fetchAction,
-            ICoreLogger logger)
+            ILoggerAdapter logger)
         {
             _ = Task.Run(async () =>
             {

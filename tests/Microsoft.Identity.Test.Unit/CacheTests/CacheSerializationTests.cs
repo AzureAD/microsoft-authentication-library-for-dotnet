@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             int numIdTokens,
             int numAccounts)
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null);
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null);
 
             for (int i = 1; i <= numAccessTokens; i++)
             {
@@ -485,7 +485,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize(null);
             string json = new UTF8Encoding().GetString(bytes);
 
-            var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null);
+            var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null);
             var s2 = new TokenCacheDictionarySerializer(otherAccessor);
             s2.Deserialize(bytes, false);
 
@@ -544,7 +544,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson), JObject.Parse(expectedJson)));
 
-            var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null);
+            var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null);
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
             s2.Deserialize(bytes, false);
 
@@ -653,7 +653,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DeploymentItem(@"Resources\cachecompat_dotnet_dictionary.bin")]
         public void TestMsalNet2XCacheSerializationInterop()
         {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null);
+            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null);
             var s = new TokenCacheDictionarySerializer(accessor);
             string binFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_dotnet_dictionary.bin");
             byte[] bytes = File.ReadAllBytes(binFilePath);

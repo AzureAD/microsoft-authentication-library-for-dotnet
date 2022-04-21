@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public SecureString Password { get; set; }
 
         /// <inheritdoc />
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters(ILoggerAdapter logger)
         {
         }
     }

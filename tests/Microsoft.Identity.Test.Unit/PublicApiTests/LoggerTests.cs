@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics.Tracing;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,21 +25,26 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             _callback = Substitute.For<LogCallback>();
         }
 
-        private MsalLogger CreateLogger(LogLevel logLevel = LogLevel.Verbose, bool enablePiiLogging = false)
+        private ILoggerAdapter CreateLogger(LogLevel logLevel = LogLevel.Verbose, bool enablePiiLogging = false, bool legacyLogger = false)
         {
-            return new MsalLogger(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback);
+            if (legacyLogger)
+            {
+                return new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback);
+            }
+
+            return new IdentityLoggerAdapter(Guid.Empty, null, null, enablePiiLogging, true);
         }
 
         [TestMethod()]
         public void ConstructorComponentTest()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null, null, LogLevel.Verbose, false, true, null);
+            IdentityLoggerAdapter logger = new IdentityLoggerAdapter(Guid.Empty, null, null, false, true);
             Assert.AreEqual(string.Empty, logger.ClientName);
             Assert.AreEqual(string.Empty, logger.ClientVersion);
             Assert.AreEqual(string.Empty, logger.ClientInformation);
-            logger = new MsalLogger(Guid.Empty, "comp1", null, LogLevel.Verbose, false, true, null);
+            logger = new IdentityLoggerAdapter(Guid.Empty, "comp1", null, false, true);
             Assert.AreEqual(" (comp1)", logger.ClientInformation);
-            logger = new MsalLogger(Guid.Empty, "comp1", "version1", LogLevel.Verbose, false, true, null);
+            logger = new IdentityLoggerAdapter(Guid.Empty, "comp1", "version1", false, true);
             Assert.AreEqual(" (comp1: version1)", logger.ClientInformation);
         }
 
@@ -49,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(LogLevel.Verbose)]
         public void CallbackLoggerTest(LogLevel level)
         {
-            MsalLogger logger = CreateLogger(level);
+            ILoggerAdapter logger = CreateLogger(level, false, true);
             var counter = 0;
             var validationCounter = 1;
             var levelToValidate = LogLevel.Always;
@@ -103,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(LogLevel.Verbose)]
         public void CallbackTestLoggersPii(LogLevel level)
         {
-            MsalLogger logger = CreateLogger(level, true);
+            ILoggerAdapter logger = CreateLogger(level, true);
             var counter = 0;
             var validationCounter = 1;
             var levelToValidate = LogLevel.Always;
@@ -149,19 +156,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void IsEnabled()
         {
-            var infoLoggerWithCallback = new MsalLogger(Guid.Empty, null, null, LogLevel.Info, true, true, _callback);
-            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Info));
-            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Always));
-            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Error));
-            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Warning));
-            Assert.IsFalse(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Verbose));
+            var infoLoggerWithCallback = new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, LogLevel.Info, true, true, _callback);
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(EventLevel.Informational));
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(EventLevel.LogAlways));
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(EventLevel.Error));
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(EventLevel.Warning));
+            Assert.IsFalse(infoLoggerWithCallback.IsLoggingEnabled(EventLevel.Verbose));
 
-            var loggerNoCallback = new MsalLogger(Guid.Empty, null, null, LogLevel.Warning, true, true, null);
-            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Info));
-            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Always));
-            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Error));
-            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Warning));
-            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Verbose));
+            var loggerNoCallback = new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, LogLevel.Warning, true, true, null);
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(EventLevel.Informational));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(EventLevel.LogAlways));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(EventLevel.Error));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(EventLevel.Warning));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(EventLevel.Verbose));
 
         }
 

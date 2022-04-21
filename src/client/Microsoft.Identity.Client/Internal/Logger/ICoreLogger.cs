@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Client.Core
 {
-    internal interface ICoreLogger
+    internal interface ILoggerAdapterx
     {
         string ClientName { get; }
         string ClientVersion { get; }

@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     internal class AppAccessorWithPartitionAsserts : InMemoryPartitionedAppTokenCacheAccessor
     {
         public AppAccessorWithPartitionAsserts(
-            ICoreLogger logger, 
+            ILoggerAdapter logger, 
             CacheOptions tokenCacheAccessorOptions) : base(logger, tokenCacheAccessorOptions)
         {
 

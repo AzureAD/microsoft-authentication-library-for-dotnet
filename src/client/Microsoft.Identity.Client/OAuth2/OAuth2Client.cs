@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
 
-        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager)
+        public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _headers.Add(OAuth2Header.CorrelationId, requestContext.CorrelationId.ToString());
             _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
 
-            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName))
+            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName)) //TODO: Move client information out of logger
             {
                 _headers.Add(OAuth2Header.AppName, requestContext.Logger.ClientName);
             }

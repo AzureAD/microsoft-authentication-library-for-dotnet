@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly ISilentAuthRequestStrategy _clientStrategy;
         private readonly Lazy<ISilentAuthRequestStrategy> _brokerStrategyLazy;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
         public SilentRequest(
             IServiceBundle serviceBundle,

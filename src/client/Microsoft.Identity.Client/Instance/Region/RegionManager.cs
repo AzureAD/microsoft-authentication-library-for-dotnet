@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Region
                  apiEvent.RegionOutcome == default(RegionOutcome));
         }
 
-        private async Task<RegionInfo> DiscoverAndCacheAsync(string azureRegionConfig, ICoreLogger logger, CancellationToken requestCancellationToken)
+        private async Task<RegionInfo> DiscoverAndCacheAsync(string azureRegionConfig, ILoggerAdapter logger, CancellationToken requestCancellationToken)
         {
             if (s_failedAutoDiscovery == true)
             {
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client.Region
             return result;
         }
 
-        private async Task<RegionInfo> DiscoverAsync(ICoreLogger logger, CancellationToken requestCancellationToken)
+        private async Task<RegionInfo> DiscoverAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
         {
             string region = Environment.GetEnvironmentVariable("REGION_NAME")?.Replace(" ", string.Empty).ToLowerInvariant();
 
@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Client.Region
             return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, s_regionDiscoveryDetails);
         }
 
-        private static bool ValidateRegion(string region, string source, ICoreLogger logger)
+        private static bool ValidateRegion(string region, string source, ILoggerAdapter logger)
         {
             if (string.IsNullOrEmpty(region))
             {
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Client.Region
             return true;
         }
 
-        private async Task<string> GetImdsUriApiVersionAsync(ICoreLogger logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
+        private async Task<string> GetImdsUriApiVersionAsync(ILoggerAdapter logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
         {
             Uri imdsErrorUri = new Uri(ImdsEndpoint);
 

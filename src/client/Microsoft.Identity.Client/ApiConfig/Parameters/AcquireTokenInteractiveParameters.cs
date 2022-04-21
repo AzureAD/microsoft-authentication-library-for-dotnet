@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public ICustomWebUi CustomWebUi { get; set; }
         public string CodeVerifier { get; set; }
 
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters(ILoggerAdapter logger)
         {
             var builder = new StringBuilder();
             builder.AppendLine("=== InteractiveParameters Data ===");

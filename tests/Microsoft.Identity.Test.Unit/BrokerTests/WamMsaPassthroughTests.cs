@@ -22,14 +22,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     public class WamMsaPassthroughTests : TestBase
     {
         private MsaPassthroughHandler _msaPassthroughHandler;
-        private ICoreLogger _logger;
+        private ILoggerAdapter _logger;
         private IWamPlugin _msaPlugin;
         private IWamProxy _wamProxy;
 
         [TestInitialize]
         public void Init()
         {
-            _logger = Substitute.For<ICoreLogger>();
+            _logger = Substitute.For<ILoggerAdapter>();
             _msaPlugin = Substitute.For<IWamPlugin>();
             _wamProxy = Substitute.For<IWamProxy>();
 

@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public Task AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client, 
-            ICoreLogger logger, 
+            ILoggerAdapter logger, 
             ICryptographyManager cryptographyManager, 
             string clientId, 
             string tokenEndpoint, 

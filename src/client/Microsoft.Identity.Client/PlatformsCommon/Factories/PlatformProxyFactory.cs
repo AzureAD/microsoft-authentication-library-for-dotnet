@@ -16,9 +16,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
         /// <summary>
         ///     Gets the platform proxy, which can be used to perform platform specific operations
         /// </summary>
-        public static IPlatformProxy CreatePlatformProxy(ICoreLogger logger)
+        public static IPlatformProxy CreatePlatformProxy(ILoggerAdapter logger)
         {
-            var finalLogger = logger ?? MsalLogger.NullLogger;
+            var finalLogger = logger ?? LoggerAdapterHelper.NullLogger;
 
 #if NET_CORE
             return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(finalLogger);

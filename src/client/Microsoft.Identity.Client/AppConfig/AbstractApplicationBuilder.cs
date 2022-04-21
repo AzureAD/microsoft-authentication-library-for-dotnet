@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
-using Microsoft.IdentityModel.Logging.Abstractions;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
@@ -278,18 +278,15 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="identityLogger"></param>
-        /// <param name="logLevel"></param>
         /// <param name="enablePiiLogging"></param>
         /// <param name="enableDefaultPlatformLogging"></param>
         /// <returns></returns>
         public T WithLogging(
             IIdentityLogger identityLogger,
-            LogLevel? logLevel = null,
             bool? enablePiiLogging = null,
             bool? enableDefaultPlatformLogging = null)
         {
             Config.IdentityLogger = identityLogger;
-            Config.LogLevel = logLevel ?? Config.LogLevel;
             Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
             Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
             return (T)this;

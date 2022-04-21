@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Cache
             "Not expecting authority to have a different env than the RT and IdT";
 
         public static void WriteAdalRefreshToken(
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             ILegacyCachePersistence legacyCachePersistence,
             MsalRefreshTokenCacheItem rtItem,
             MsalIdTokenCacheItem idItem,
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client.Cache
         /// Item2 is a list of AdalUserInfo for those users that do not have ClientInfo
         /// </summary>
         public static AdalUsersForMsal GetAllAdalUsersForMsal(
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             ILegacyCachePersistence legacyCachePersistence,
             string clientId)
         {
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.Cache
         ///
         /// </summary>
         public static void RemoveAdalUser(
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             ILegacyCachePersistence legacyCachePersistence,
             string clientId,
             string displayableId,
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         private static void RemoveEntriesWithMatchingName(
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             string clientId,
             string displayableId,
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache)
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         public static MsalRefreshTokenCacheItem GetRefreshToken(
-           ICoreLogger logger,
+           ILoggerAdapter logger,
            ILegacyCachePersistence legacyCachePersistence,
            IEnumerable<string> environmentAliases,
            string clientId,

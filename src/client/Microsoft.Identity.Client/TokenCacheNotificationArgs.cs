@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
@@ -26,7 +27,8 @@ namespace Microsoft.Identity.Client
           string suggestedCacheKey,
           bool hasTokens,
           DateTimeOffset? suggestedCacheExpiry,
-          CancellationToken cancellationToken)
+          CancellationToken cancellationToken,
+          IIdentityLogger msalIdentityLogger)
             : this(tokenCache,
                    clientId,
                    account,
@@ -36,7 +38,8 @@ namespace Microsoft.Identity.Client
                    hasTokens,
                    suggestedCacheExpiry,
                    cancellationToken,
-                   default)
+                   default,
+                   msalIdentityLogger)
             {
             }
 
@@ -53,7 +56,8 @@ namespace Microsoft.Identity.Client
             bool hasTokens,
             DateTimeOffset? suggestedCacheExpiry,
             CancellationToken cancellationToken,
-            Guid correlationId)
+            Guid correlationId,
+            IIdentityLogger msalIdentityLogger)
         {
             TokenCache = tokenCache;
             ClientId = clientId;
@@ -65,6 +69,7 @@ namespace Microsoft.Identity.Client
             CancellationToken = cancellationToken;
             CorrelationId = correlationId;
             SuggestedCacheExpiry = suggestedCacheExpiry;
+            MsalIdentityLogger = msalIdentityLogger;
         }
         
         /// <summary>
@@ -142,5 +147,10 @@ namespace Microsoft.Identity.Client
         /// access tokens are refreshable.
         /// </summary> 
         public DateTimeOffset? SuggestedCacheExpiry { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public IIdentityLogger MsalIdentityLogger { get; private set; }
     }
 }

@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Utils
         internal static IReadOnlyList<T> FilterWithLogging<T>(
             this IReadOnlyList<T> list,
             Func<T, bool> predicate,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             string logPrefix)
         {
             if (logger.IsLoggingEnabled(LogLevel.Verbose))

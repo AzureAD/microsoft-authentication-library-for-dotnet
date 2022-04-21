@@ -3,73 +3,93 @@
 
 using System;
 using System.Diagnostics.Tracing;
-using System.IO;
-using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.Identity.Client.Internal.Logger.LogScrubber;
-using Microsoft.IdentityModel.Logging.Abstractions;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Core
 {
     /// <summary>
-    /// Extension methods for ICoreLogger
+    /// Extension methods for ILoggerAdapter
     /// </summary>
     internal static class MsalLoggerExtensions
     {
         public static void Always(this ILoggerAdapter logger, string message)
         {
-            var logEntry = new LogEntry();
-            logEntry.Message = message;
-            logEntry.EventLevel = EventLevel.LogAlways;
+            logger.Log(EventLevel.LogAlways, string.Empty, message);
+        }
 
-            logger.Log(logEntry);
+        public static void AlwaysPii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
+        {
+            logger.Log(EventLevel.LogAlways, messageWithPii, messageScrubbed);
         }
 
         public static void Error(this ILoggerAdapter logger, string message)
         {
-            var logEntry = new LogEntry();
-            logEntry.Message = message;
-            logEntry.EventLevel = EventLevel.Error;
+            logger.Log(EventLevel.Error, string.Empty, message);
+        }
 
-            logger.Log(logEntry);
+        public static void ErrorPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
+        {
+            logger.Log(EventLevel.Error, prefix + exWithPii.ToString(), prefix + LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+        }
+
+        public static void ErrorPii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
+        {
+            logger.Log(EventLevel.Error, messageWithPii, messageScrubbed);
+        }
+
+        public static void ErrorPii(this ILoggerAdapter logger, Exception exWithPii)
+        {
+            logger.Log(EventLevel.Error, exWithPii.ToString(), LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void Warning(this ILoggerAdapter logger, string message)
         {
-            var logEntry = new LogEntry();
-            logEntry.Message = message;
-            logEntry.EventLevel = EventLevel.Warning;
+            logger.Log(EventLevel.Warning, string.Empty, message);
+        }
 
-            logger.Log(logEntry);
+        public static void WarningPii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
+        {
+            logger.Log(EventLevel.Warning, messageWithPii, messageScrubbed);
+        }
+
+        public static void WarningPii(this ILoggerAdapter logger, Exception exWithPii)
+        {
+            logger.Log(EventLevel.Warning, exWithPii.ToString(), LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+        }
+
+        public static void WarningPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
+        {
+            logger.Log(EventLevel.Warning, prefix + exWithPii.ToString(), prefix + LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void Info(this ILoggerAdapter logger, string message)
         {
-            var logEntry = new LogEntry();
-            logEntry.Message = message;
-            logEntry.EventLevel = EventLevel.Informational;
+            logger.Log(EventLevel.Informational, string.Empty, message);
+        }
 
-            logger.Log(logEntry);
+        public static void InfoPii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
+        {
+            logger.Log(EventLevel.Informational, messageWithPii, messageScrubbed);
+        }
+
+        public static void InfoPii(this ILoggerAdapter logger, Exception exWithPii)
+        {
+            logger.Log(EventLevel.Informational, exWithPii.ToString(), LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+        }
+
+        public static void InfoPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
+        {
+            logger.Log(EventLevel.Informational, prefix + exWithPii.ToString(), prefix + LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void Verbose(this ILoggerAdapter logger, string message)
         {
-            var logEntry = new LogEntry();
-            logEntry.Message = message;
-            logEntry.EventLevel = EventLevel.Verbose;
-
-            logger.Log(logEntry);
+            logger.Log(EventLevel.Verbose, string.Empty, message);
         }
 
-        public static DurationLogHelper LogBlockDuration(this ILoggerAdapter logger, string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
+        public static void VerbosePii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
         {
-            return new DurationLogHelper(logger, measuredBlockName, logLevel);
-        }
-
-        public static DurationLogHelper LogMethodDuration(this ILoggerAdapter logger, LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
-        {
-            string fileName = !string.IsNullOrEmpty(filePath) ? Path.GetFileNameWithoutExtension(filePath) : "";
-            return LogBlockDuration(logger, fileName + ":" + methodName, logLevel);
+            logger.Log(EventLevel.Verbose, messageWithPii, messageScrubbed);
         }
     }
 }

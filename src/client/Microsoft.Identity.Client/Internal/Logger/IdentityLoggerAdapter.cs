@@ -2,51 +2,71 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Tracing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.Logger.LogScrubber;
-using Microsoft.IdentityModel.Logging.Abstractions;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using Microsoft.Identity.Client.Core;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class IdentityLoggerAdapter : ILoggerAdapter
     {
-        private IIdentityLogger _identityLogger;
-        private ILogScrubber _scrubber;
+        private readonly IIdentityLogger _identityLogger;
+        private LoggerAdapterHelper _loggerAdapterHelper;
 
-        public bool IsPiiEnabled { get; }
+        public bool PiiLoggingEnabled { get; }
+        public bool IsDefaultPlatformLoggingEnabled { get; } = false;
+        public MsalCacheLoggerWrapper CacheLogger { get; }
 
-        public IdentityLoggerAdapter(IIdentityLogger identityLogger, bool piiEnabled, ILogScrubber scrubber)
+        internal IdentityLoggerAdapter(
+            IIdentityLogger identityLogger,
+            Guid correlationId,
+            string clientName,
+            string clientVersion,
+            bool enablePiiLogging)
         {
             _identityLogger = identityLogger;
-            _scrubber = scrubber;
-            IsPiiEnabled = piiEnabled;
+            var _correlationId = correlationId.Equals(Guid.Empty)
+                    ? string.Empty
+                    : " - " + correlationId;
+            _loggerAdapterHelper = new LoggerAdapterHelper(_correlationId, clientName, clientVersion);
+            
+            PiiLoggingEnabled = enablePiiLogging;
+            CacheLogger = new MsalCacheLoggerWrapper(identityLogger, _loggerAdapterHelper.CorrelationId, _loggerAdapterHelper.ClientInformation);
         }
 
-        public void Log(LogEntry entry)
+        public static ILoggerAdapter Create(
+            Guid correlationId,
+            ApplicationConfiguration config)
         {
+            return new IdentityLoggerAdapter(
+                config?.IdentityLogger,
+                correlationId,
+                config?.ClientName ?? string.Empty,
+                config?.ClientVersion ?? string.Empty,
+                config?.EnablePiiLogging ?? false); ;
+        }
+
+        public void Log(EventLevel logLevel, string messageWithPii, string messageScrubbed)
+        {
+            LogEntry entry = _loggerAdapterHelper.Log(this, logLevel, messageWithPii, messageScrubbed);
             _identityLogger.Log(entry);
         }
 
-        public bool IsEnabled(EventLevel eventLevel)
+        public bool IsLoggingEnabled(EventLevel eventLevel)
         {
             return _identityLogger.IsEnabled(eventLevel);
         }
 
-        public void LogWithPii(PiiLogEntry piiEntry)
+        public DurationLogHelper LogBlockDuration(string measuredBlockName, EventLevel logLevel = EventLevel.Verbose)
         {
-            _scrubber.ScrubLogArguments(piiEntry.LogArgements);
+            return _loggerAdapterHelper.LogBlockDuration(this, measuredBlockName, logLevel);
+        }
 
-            var LogArgementsAsStrings = piiEntry.LogArgements.Select(x => x.ToString());
-
-            _identityLogger.Log(new LogEntry()
-            {
-                Message = string.Format(piiEntry.LogFormat, LogArgementsAsStrings),
-                EventLevel = piiEntry.Level
-            });
+        public DurationLogHelper LogMethodDuration(EventLevel logLevel = EventLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
+        {
+            return _loggerAdapterHelper.LogMethodDuration(this, logLevel, methodName, filePath);
         }
     }
 }

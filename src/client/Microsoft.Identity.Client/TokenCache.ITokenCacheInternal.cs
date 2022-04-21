@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -36,7 +37,7 @@ namespace Microsoft.Identity.Client
             MsalTokenResponse response)
         {
             var logger = requestParams.RequestContext.Logger;
-            response.Log(logger, LogLevel.Verbose);
+            response.Log(logger, EventLevel.Verbose);
 
             MsalAccessTokenCacheItem msalAccessTokenCacheItem = null;
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
@@ -165,7 +166,8 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: requestParams.RequestContext.UserCancellationToken,
-                            correlationId: requestParams.RequestContext.CorrelationId);
+                            correlationId: requestParams.RequestContext.CorrelationId,
+                            msalIdentityLogger: logger.CacheLogger);
 
                         Stopwatch sw = Stopwatch.StartNew();
 
@@ -233,7 +235,8 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: cacheExpiry,
                             cancellationToken: requestParams.RequestContext.UserCancellationToken,
-                            correlationId: requestParams.RequestContext.CorrelationId);
+                            correlationId: requestParams.RequestContext.CorrelationId,
+                            msalIdentityLogger: logger.CacheLogger);
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -261,7 +264,7 @@ namespace Microsoft.Identity.Client
         private void DumpCacheToLogs(AuthenticationRequestParameters requestParameters)
         {
 
-            if (requestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Verbose))
+            if (requestParameters.RequestContext.Logger.IsLoggingEnabled(EventLevel.Verbose))
             {
                 IReadOnlyList<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
                 IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
@@ -348,7 +351,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal /* for testing */ static DateTimeOffset? CalculateSuggestedCacheExpiry(
             ITokenCacheAccessor accessor, 
-            ICoreLogger logger)
+            ILoggerAdapter logger)
         {
             // If we have refresh tokens in the cache, we cannot suggest expiration
             // because refresh token expiration is not disclosed to SDKs and RTs are long lived anyway (3 months by default)
@@ -533,7 +536,7 @@ namespace Microsoft.Identity.Client
                 {
                     bool accepted = ScopeHelper.ScopeContains(item.ScopeSet, requestScopes);
 
-                    if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                    if (logger.IsLoggingEnabled(EventLevel.Verbose))
                     {
                         logger.Verbose($"Access token with scopes {string.Join(" ", item.ScopeSet)} " +
                             $"passes scope filter? {accepted} ");
@@ -632,7 +635,7 @@ namespace Microsoft.Identity.Client
                         return null;
                     }
 
-                    if (logger.IsLoggingEnabled(LogLevel.Info))
+                    if (logger.IsLoggingEnabled(EventLevel.Informational))
                     {
                         logger.Info(
                             "Access token is not expired. Returning the found cache entry. " +
@@ -645,7 +648,7 @@ namespace Microsoft.Identity.Client
                 if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled &&
                     msalAccessTokenCacheItem.ExtendedExpiresOn > DateTime.UtcNow + Constants.AccessTokenExpirationBuffer)
                 {
-                    if (logger.IsLoggingEnabled(LogLevel.Info))
+                    if (logger.IsLoggingEnabled(EventLevel.Informational))
                     {
                         logger.Info(
                             "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
@@ -656,7 +659,7 @@ namespace Microsoft.Identity.Client
                     return msalAccessTokenCacheItem;
                 }
 
-                if (logger.IsLoggingEnabled(LogLevel.Info))
+                if (logger.IsLoggingEnabled(EventLevel.Informational))
                 {
                     logger.Info(
                         "Access token has expired or about to expire. " +
@@ -712,7 +715,7 @@ namespace Microsoft.Identity.Client
 
             if (filteredByPreferredAlias.Count > 0)
             {
-                if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                if (logger.IsLoggingEnabled(EventLevel.Verbose))
                 {
                     logger.Verbose($"Filtered AT by preferred alias returning {filteredByPreferredAlias.Count} tokens");
                 }
@@ -783,7 +786,8 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: default,
-                            correlationId: default);
+                            correlationId: default,
+                            msalIdentityLogger: null);
 
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
@@ -958,7 +962,7 @@ namespace Microsoft.Identity.Client
             IReadOnlyList<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId, partitionKey);
             IReadOnlyList<MsalAccountCacheItem> accountCacheItems = Accessor.GetAllAccounts(partitionKey);
 
-            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            if (logger.IsLoggingEnabled(EventLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
 
             // Multi-cloud support - must filter by environment.
@@ -991,7 +995,7 @@ namespace Microsoft.Identity.Client
                 accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment)).ToList();
             }
 
-            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            if (logger.IsLoggingEnabled(EventLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
@@ -1059,7 +1063,7 @@ namespace Microsoft.Identity.Client
                     requestParameters.HomeAccountId,
                     StringComparison.OrdinalIgnoreCase)).ToList();
 
-                if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                if (logger.IsLoggingEnabled(EventLevel.Verbose))
                     logger.Verbose($"Filtered by home account id. Remaining accounts {accounts.Count()} ");
             }
 
@@ -1197,7 +1201,8 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: requestParameters.RequestContext.UserCancellationToken,
-                            correlationId: requestParameters.RequestContext.CorrelationId);
+                            correlationId: requestParameters.RequestContext.CorrelationId,
+                            msalIdentityLogger: requestParameters.RequestContext.Logger.CacheLogger);
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
@@ -1228,7 +1233,8 @@ namespace Microsoft.Identity.Client
                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                            suggestedCacheExpiry: null,
                            cancellationToken: requestParameters.RequestContext.UserCancellationToken,
-                           correlationId: requestParameters.RequestContext.CorrelationId);
+                           correlationId: requestParameters.RequestContext.CorrelationId,
+                           msalIdentityLogger: requestParameters.RequestContext.Logger.CacheLogger);
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     }

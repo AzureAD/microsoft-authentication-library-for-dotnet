@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     /// </summary>
     internal static class BrokerKeyHelper
     {
-        internal static byte[] GetOrCreateBrokerKey(ICoreLogger logger)
+        internal static byte[] GetOrCreateBrokerKey(ILoggerAdapter logger)
         {
             if (TryGetBrokerKey(out byte[] brokerKey))
             {
@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return brokerKey;
         }
 
-        private static byte[] CreateAndStoreBrokerKey(ICoreLogger logger)
+        private static byte[] CreateAndStoreBrokerKey(ILoggerAdapter logger)
         {
             logger.Info("CreateAndStoreBrokerKey - creating a new key");
 
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return false;
         }
 
-        internal static string DecryptBrokerResponse(string encryptedBrokerResponse, ICoreLogger logger)
+        internal static string DecryptBrokerResponse(string encryptedBrokerResponse, ILoggerAdapter logger)
         {
             byte[] outputBytes = Base64UrlHelpers.DecodeBytes(encryptedBrokerResponse);
 

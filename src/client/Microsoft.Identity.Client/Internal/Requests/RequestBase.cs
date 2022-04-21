@@ -15,11 +15,9 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Internal.Logger.LogScrubber;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.IdentityModel.Logging.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -109,7 +107,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ICoreLogger logger)
+        private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
         {
             var sb = new StringBuilder(250);
             sb.AppendLine();
@@ -323,7 +321,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
         {
-            if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
+            if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(EventLevel.Informational))
             {
                 string logFormat = "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t";
                 string scopes = authenticationRequestParameters.Scope.AsSingleString();
@@ -351,15 +349,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
 
                 authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
-
-                //New Pii format with scrubbing. Still needs redesign to be cleaner but this the basic concept
-                authenticationRequestParameters.RequestContext.IdentityLogger.LogWithPii(new PiiLogEntry(logFormat,
-                                                                                                    EventLevel.Informational,
-                                                                                                    new LogArgument(authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority, DataClassification.AccessControlData),
-                                                                                                    new LogArgument(scopes, DataClassification.AccessControlData),
-                                                                                                    new LogArgument(authenticationRequestParameters.AppConfig.ClientId, DataClassification.AccessControlData),
-                                                                                                    new LogArgument(GetType().Name, DataClassification.AccessControlData))
-                    )); //sample log message
             }
 
             if (authenticationRequestParameters.IsConfidentialClient &&
@@ -374,7 +363,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private void LogReturnedToken(AuthenticationResult result)
         {
             if (result.AccessToken != null &&
-                AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
+                AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(EventLevel.Informational))
             {
                 string scopes = string.Join(" ", result.Scopes);
                 
