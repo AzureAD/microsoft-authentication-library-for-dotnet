@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 
 namespace Microsoft.Identity.Client
@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client
     /// <list type="bullet">
     /// <item><description>Contrary to <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, public clients are unable to hold configuration time secrets,
     /// and as a result have no client secret</description></item>
-    /// <item><description>The redirect URL is pre-proposed by the library. It does not need to be passed in the constructor</description></item>
+    /// <item><description>The redirect URL is proposed by the library. It does not need to be passed in the constructor</description></item>
     /// </list>
     /// </remarks>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication, IByRefreshToken
@@ -69,10 +69,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Returns true if MSAL can use an embedded webview (browser). 
+        /// Returns true if MSAL can use an embedded web view (browser). 
         /// </summary>
         /// <remarks>
-        /// Currently there are no embedded webviews on Mac and Linux. On Windows, app developers or users should install 
+        /// Currently there are no embedded web views on Mac and Linux. On Windows, app developers or users should install 
         /// the WebView2 runtime and this property will inform if the runtime is available, see https://aka.ms/msal-net-webview2
         /// </remarks>
         public bool IsEmbeddedWebViewAvailable()
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Returns false when the program runs in headless OS, for example when SSH-ed into a Linux machine.
-        /// Browsers (webviews) and brokers cannot be used if there is no UI support. Instead, please use <see cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>
+        /// Browsers (web views) and brokers cannot be used if there is no UI support. Instead, please use <see cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>
         /// </summary>
         public bool IsUserInteractive()
         {
@@ -97,10 +97,12 @@ namespace Microsoft.Identity.Client
         /// On Mac, Linux and older versions of Windows a broker is not available.
         /// On mobile, the device must be Intune joined and Authenticator or Company Portal must be installed.
         /// </remarks>
+        [Obsolete("Use WithBroker by itself, which will fall back to using a web view if broker is unavailable.", false)]
         public bool IsBrokerAvailable()
         {
-            return
-                ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null).IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType);
+            return ServiceBundle.Config.Authority?.AuthorityInfo?.AuthorityType == null ? false :
+                ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null)
+                    .IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType);
         }
 
         /// <summary>
