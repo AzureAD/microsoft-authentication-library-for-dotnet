@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Test.Performance
 {
     [SimpleJob(RuntimeMoniker.Net472)]
     [SimpleJob(RuntimeMoniker.NetCoreApp31)]
-    public class Base64Encode
+    public class Base64EncodeTests
     {
         const string s1 = "The quick brown fox jumps over the lazy dog";
         const string s2 = "The quick brown fox jumps over the lazy dog==";

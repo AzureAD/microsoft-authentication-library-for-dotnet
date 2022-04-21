@@ -27,8 +27,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string tenant = TestConstants.Utid,
             string homeAccountId = TestConstants.HomeAccountId,
             bool isExpired = false,
-            string oboCacheKey = null, 
-            TimeSpan? exiresIn = null)
+            string oboCacheKey = null,
+            TimeSpan? exiresIn = null,
+            string accessToken = TestConstants.ATSecret)
         {
             var expiresIn = (exiresIn.HasValue ? exiresIn.Value : TimeSpan.FromSeconds(ValidExpiresIn));
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
@@ -36,12 +37,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                TestConstants.ClientId,
                scopes,
                tenantId: tenant,
-               secret: "",
+               secret: accessToken,
                cachedAt: DateTimeOffset.UtcNow,
                expiresOn: isExpired ? new DateTimeOffset(DateTime.UtcNow) : new DateTimeOffset(DateTime.UtcNow + expiresIn),
                extendedExpiresOn: isExpired ? new DateTimeOffset(DateTime.UtcNow) : new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
                MockHelpers.CreateClientInfo(),
-               homeAccountId, 
+               homeAccountId,
                oboCacheKey: oboCacheKey);
 
             return atItem;
@@ -52,11 +53,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return new MsalTokenResponse
             {
                 IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                AccessToken = "access-token",
+                AccessToken = TestConstants.ATSecret,
                 ClientInfo = MockHelpers.CreateClientInfo(),
                 ExpiresIn = 3599,
                 CorrelationId = "correlation-id",
-                RefreshToken = includeRefreshToken ? "refresh-token" : null, // brokers don't return RT
+                RefreshToken = includeRefreshToken ? TestConstants.RTSecret : null, // brokers don't return RT
                 Scope = TestConstants.s_scope.AsSingleString(),
                 TokenType = "Bearer",
                 WamAccountId = "wam_account_id",
@@ -65,7 +66,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         internal static MsalRefreshTokenCacheItem CreateRefreshTokenItem(
             string oboCacheKey = TestConstants.UserAssertion,
-            string homeAccountId = TestConstants.HomeAccountId)
+            string homeAccountId = TestConstants.HomeAccountId,
+            string refreshToken = TestConstants.RTSecret)
         {
             return new MsalRefreshTokenCacheItem()
             {
@@ -73,14 +75,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
                 HomeAccountId = homeAccountId,
                 OboCacheKey = oboCacheKey,
-                Secret = string.Empty
+                Secret = refreshToken,
             };
         }
 
         internal static MsalIdTokenCacheItem CreateIdTokenCacheItem(
             string tenant = TestConstants.Utid,
             string homeAccountId = TestConstants.HomeAccountId,
-            string uid = TestConstants.Uid)
+            string uid = TestConstants.Uid,
+            string idToken = "")
         {
             return new MsalIdTokenCacheItem()
             {
@@ -88,7 +91,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
                 HomeAccountId = homeAccountId,
                 TenantId = tenant,
-                Secret = MockHelpers.CreateIdToken(uid, TestConstants.DisplayableId, tenant)
+                Secret = !string.IsNullOrEmpty(idToken) ? idToken : MockHelpers.CreateIdToken(uid, TestConstants.DisplayableId, tenant),
             };
         }
 
@@ -157,7 +160,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 accessTokenExpiresOn,
                 extendedAccessTokenExpiresOn,
                 clientInfo,
-                homeAccId, 
+                homeAccId,
                 oboCacheKey: userAssertionHash);
 
             // add access token
@@ -218,12 +221,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
         }
 
-        internal static IEnumerable<Tuple<MsalAccessTokenCacheItem, 
-                                          MsalRefreshTokenCacheItem, 
-                                          MsalIdTokenCacheItem, 
+        internal static IEnumerable<Tuple<MsalAccessTokenCacheItem,
+                                          MsalRefreshTokenCacheItem,
+                                          MsalIdTokenCacheItem,
                                           MsalAccountCacheItem>> PopulateCacheWithAccessTokens(ITokenCacheAccessor accessor, int tokensQuantity = 1)
         {
-            IList<Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem>> tokens 
+            IList<Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem>> tokens
                                         = new List<Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem>>();
 
             bool randomizeClientInfo = tokensQuantity > 1;
@@ -231,10 +234,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             for (int i = 1; i <= tokensQuantity; i++)
             {
                 var result = PopulateCacheWithOneAccessToken(accessor, randomizeClientInfo);
-                Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem> token = 
-                    new Tuple<MsalAccessTokenCacheItem, 
-                              MsalRefreshTokenCacheItem, 
-                              MsalIdTokenCacheItem, 
+                Tuple<MsalAccessTokenCacheItem, MsalRefreshTokenCacheItem, MsalIdTokenCacheItem, MsalAccountCacheItem> token =
+                    new Tuple<MsalAccessTokenCacheItem,
+                              MsalRefreshTokenCacheItem,
+                              MsalIdTokenCacheItem,
                               MsalAccountCacheItem>(result.AT, result.RT, result.ID, result.Account);
 
                 tokens.Add(token);
@@ -383,7 +386,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                atItem.HomeAccountId,
                atItem.KeyId,
                refreshOn,
-               atItem.TokenType, 
+               atItem.TokenType,
                atItem.OboCacheKey);
 
             return newAtItem;

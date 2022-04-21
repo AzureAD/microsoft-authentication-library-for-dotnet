@@ -43,14 +43,25 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                     coreUIParent.SystemWebViewOptions);
             }
 
-            if (_isWebView2AvailableFunc())
+            AuthorityType authorityType = requestContext.ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType;
+            bool isAadOrAdfsAuthority =
+                authorityType == AuthorityType.Aad ||
+                authorityType == AuthorityType.Adfs;
+
+            if (isAadOrAdfsAuthority)
             {
-                requestContext.Logger.Info("Using WebView2 embedded browser.");
-                return new WebView2WebUi(coreUIParent, requestContext);
+                requestContext.Logger.Info($"Using WebView1 embedded browser because the authority is {authorityType}. WebView2 does not provide SSO.");
+                return new InteractiveWebUI(coreUIParent, requestContext);
             }
 
-            requestContext.Logger.Info("Using legacy embedded browser.");
-            return new InteractiveWebUI(coreUIParent, requestContext);
+            if (!_isWebView2AvailableFunc())
+            {
+                requestContext.Logger.Info("Using WebView1 embedded browser because WebView2 is not available.");
+                return new InteractiveWebUI(coreUIParent, requestContext);
+            }
+
+            requestContext.Logger.Info("Using WebView2 embedded browser.");
+            return new WebView2WebUi(coreUIParent, requestContext);
         }
 
         private bool IsWebView2Available()

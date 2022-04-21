@@ -93,6 +93,11 @@ namespace Microsoft.Identity.Test.Common
             return CreateServiceBundleWithCustomHttpManager(null, authority: TestConstants.OnPremiseAuthority);
         }
 
+        public static IServiceBundle CreateDefaultB2CServiceBundle()
+        {
+            return CreateServiceBundleWithCustomHttpManager(null, authority: TestConstants.B2CAuthority);
+        }
+
         public static AuthenticationRequestParameters CreateAuthenticationRequestParameters(
             IServiceBundle serviceBundle,
             Authority authority = null,
