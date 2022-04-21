@@ -159,8 +159,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (AcquireTokenInLongRunningOboWasCalled())
                 {
-                    AuthenticationRequestParameters.RequestContext.Logger.Error("[OBO request] AcquireTokenInLongRunningProcess was called and no access or refresh tokens were found in the cache.);
-
+                    AuthenticationRequestParameters.RequestContext.Logger.Error("[OBO request] AcquireTokenInLongRunningProcess was called and no access or refresh tokens were found in the cache.");
                     throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
                 }
 
