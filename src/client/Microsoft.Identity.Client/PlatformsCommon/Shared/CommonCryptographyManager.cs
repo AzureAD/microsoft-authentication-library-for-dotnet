@@ -56,15 +56,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <inheritdoc />
         public virtual byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-
-#if !NETSTANDARD            
-            if (certificate.PublicKey.Key.KeySize < CertificateClientCredential.MinKeySizeInBits)
+            if (certificate.GetRSAPublicKey().KeySize < CertificateClientCredential.MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException(nameof(certificate),
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
                         CertificateClientCredential.MinKeySizeInBits));
             }
-#endif
 
             if (!s_certificateToRsaMap.TryGetValue(certificate.Thumbprint, out RSA rsa))
             {
