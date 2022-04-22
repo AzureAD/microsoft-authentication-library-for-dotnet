@@ -91,9 +91,7 @@ namespace Microsoft.Identity.Client.Broker
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
 
-            var authority = isMsaPassthrough ?
-                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            var authority = GetAuthority(authenticationRequestParameters, _wamOptions.MsaPassthrough);
 
             MsalTokenResponse msalTokenResponse = null;
 
@@ -133,7 +131,7 @@ namespace Microsoft.Identity.Client.Broker
                     else
                     {
                         _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
-                        throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider - account picker. {result.Error}");
+                        throw new MsalServiceException(MsalError.WamPickerError, $"Could not get the account provider - account picker. {result.Error}");
                     }
                 }
             }
@@ -165,9 +163,7 @@ namespace Microsoft.Identity.Client.Broker
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
 
-            var authority = isMsaPassthrough ?
-                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            var authority = GetAuthority(authenticationRequestParameters, _wamOptions.MsaPassthrough);
 
             MsalTokenResponse msalTokenResponse = null;
 
@@ -193,7 +189,7 @@ namespace Microsoft.Identity.Client.Broker
                     else
                     {
                         _logger.Error($"[WamBroker] Could not login interactively with the Default OS Account. {result.Error}");
-                        throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider for the default OS Account. {result.Error}");
+                        throw new MsalServiceException(MsalError.WamPickerError, $"Could not get the account provider for the default OS Account. {result.Error}");
                     }
                 }
             }
@@ -235,7 +231,7 @@ namespace Microsoft.Identity.Client.Broker
                     TokenSource = TokenSource.Broker
                 };
 
-                _logger.Info("WAM response status success");
+                _logger.Info("WAM response status success.");
 
                 return msalTokenResponse;
             }
@@ -313,9 +309,7 @@ namespace Microsoft.Identity.Client.Broker
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
 
-            var authority = isMsaPassthrough ?
-                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            var authority = GetAuthority(authenticationRequestParameters, _wamOptions.MsaPassthrough);
 
             MsalTokenResponse msalTokenResponse = null;
 
@@ -382,9 +376,7 @@ namespace Microsoft.Identity.Client.Broker
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
 
-            var authority = isMsaPassthrough ?
-                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            var authority = GetAuthority(authenticationRequestParameters, _wamOptions.MsaPassthrough);
 
             MsalTokenResponse msalTokenResponse = null;
 
@@ -448,6 +440,22 @@ namespace Microsoft.Identity.Client.Broker
         public Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets Authority
+        /// </summary>
+        /// <param name="authenticationRequestParameters"></param>
+        /// <param name="isMsaPassthrough"></param>
+        /// <returns></returns>
+        private string GetAuthority(AuthenticationRequestParameters authenticationRequestParameters, bool isMsaPassthrough)
+        {
+            _logger.Verbose("[WamBroker] Determining WAM Authority.");
+
+            return
+                isMsaPassthrough ?
+                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
+                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
         }
     }
 }
