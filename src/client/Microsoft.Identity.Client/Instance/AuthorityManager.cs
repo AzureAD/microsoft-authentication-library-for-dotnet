@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Client.Instance
 
         public Authority Authority => _currentAuthority;
 
-
         private InstanceDiscoveryMetadataEntry _metadata;
         public async Task<InstanceDiscoveryMetadataEntry> GetInstanceDiscoveryEntryAsync()
         {

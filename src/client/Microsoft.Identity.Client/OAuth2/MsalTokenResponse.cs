@@ -11,6 +11,7 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Core;
 using System.Text;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -33,12 +34,18 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string SpaCode = "spa_code";
         public const string ErrorSubcode = "error_subcode";
         public const string ErrorSubcodeCancel = "cancel";
+
+        public const string TenantId = "tenant_id";
+        public const string Upn = "username";
+        public const string LocalAccountId = "local_account_id";
     }
 
     [JsonObject]
     [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase
     {
+        private const string iOSBrokerErrorMetadata = "error_metadata";
+        private const string iOSBrokerHomeAccountId = "home_account_id";
         [JsonProperty(PropertyName = TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
 
@@ -75,6 +82,15 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonProperty(PropertyName = TokenResponseClaim.SpaCode)]
         public string SpaAuthCode { get; set; }
 
+        [JsonProperty(PropertyName = TokenResponseClaim.Authority)]
+        public string AuthorityUrl { get; set; }
+
+        public string TenantId { get; set; }
+
+        public string Upn { get; set; }
+
+        public string AccountUserId { get; set; }
+
         public string WamAccountId { get; set; }
 
         public TokenSource TokenSource { get; set; }
@@ -85,10 +101,19 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
+                string original = responseDictionary[MsalTokenResponse.iOSBrokerErrorMetadata];
+                string dataUnescaped = Uri.UnescapeDataString(original);
+                Dictionary<string, string> dictionary = Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(dataUnescaped);
+                string homeAcctId = null;
+                dictionary.TryGetValue(MsalTokenResponse.iOSBrokerHomeAccountId, out homeAcctId);
                 return new MsalTokenResponse
                 {
                     Error = errorCode,
-                    ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription])
+                    ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription]),
+                    SubError = responseDictionary[OAuth2ResponseBaseClaim.SubError],
+                    AccountUserId = homeAcctId != null ? AccountId.ParseFromString(homeAcctId).ObjectId : null,
+                    TenantId = homeAcctId != null ?  AccountId.ParseFromString(homeAcctId).TenantId : null,
+                    Upn = dictionary[TokenResponseClaim.Upn],
                 };
             }
 
@@ -106,8 +131,8 @@ namespace Microsoft.Identity.Client.OAuth2
                                 DateTimeHelpers.GetDurationFromNowInSeconds(expiresOn) :
                                 0,
                 ClientInfo = responseDictionary.ContainsKey(BrokerResponseConst.ClientInfo)
-                    ? responseDictionary[BrokerResponseConst.ClientInfo]
-                    : null,
+                                ? responseDictionary[BrokerResponseConst.ClientInfo]
+                                : null,
                 TokenSource = TokenSource.Broker
             };
 
@@ -138,6 +163,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     Error = errorCode,
                     ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage]?.ToString(),
+                    AuthorityUrl = authResult[BrokerResponseConst.Authority]?.ToString(),
+                    TenantId = authResult[BrokerResponseConst.TenantId]?.ToString(),
+                    Upn = authResult[BrokerResponseConst.UserName]?.ToString(),
+                    AccountUserId = authResult[BrokerResponseConst.LocalAccountId]?.ToString(),
                 };
             }
 
@@ -151,7 +180,11 @@ namespace Microsoft.Identity.Client.OAuth2
                 ExtendedExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
                 ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
                 TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
-                TokenSource = TokenSource.Broker
+                TokenSource = TokenSource.Broker,
+                AuthorityUrl = authResult[BrokerResponseConst.Authority]?.ToString(),
+                TenantId = authResult[BrokerResponseConst.TenantId]?.ToString(),
+                Upn = authResult[BrokerResponseConst.UserName]?.ToString(),
+                AccountUserId = authResult[BrokerResponseConst.LocalAccountId]?.ToString(),
             };
 
             return msalTokenResponse;

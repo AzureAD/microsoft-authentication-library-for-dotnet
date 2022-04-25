@@ -139,7 +139,6 @@ namespace Microsoft.Identity.Test.Unit
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .BuildConcrete();
 
-
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
@@ -171,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit
                         .WithHttpManager(harness.HttpManager);
                 builder.Config.DeviceAuthManagerForTest = Substitute.For<IDeviceAuthManager>();
                 Uri actualUri = null;
-                builder.Config.DeviceAuthManagerForTest.TryCreateDeviceAuthChallengeResponseAsync(
+                builder.Config.DeviceAuthManagerForTest.TryCreateDeviceAuthChallengeResponse(
                     Arg.Any<HttpResponseHeaders>(),
                     Arg.Any<Uri>(),
                     out Arg.Any<string>())
@@ -181,7 +180,6 @@ namespace Microsoft.Identity.Test.Unit
                         actualUri = (Uri)x[1];
                         return true;
                     });
-
 
                 var pca = builder.BuildConcrete();
 

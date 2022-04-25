@@ -59,7 +59,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             _keyVaultClient = new KeyVaultClient(AuthenticationCallbackAsync);
         }
 
-
         ~KeyVaultSecretsProvider()
         {
             Dispose();

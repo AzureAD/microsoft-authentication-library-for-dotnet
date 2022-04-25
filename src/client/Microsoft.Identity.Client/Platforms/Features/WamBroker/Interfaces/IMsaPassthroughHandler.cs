@@ -11,6 +11,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     internal interface IMsaPassthroughHandler
     {
         void AddTransferTokenToRequest(WebTokenRequest webTokenRequest, string transferToken);
-        Task<string> TryFetchTransferTokenAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider accountProvider);
+        Task<string> TryFetchTransferTokenSilentDefaultAccountAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider accountProvider);
+        Task<string> TryFetchTransferTokenInteractiveAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider accountProvider);
+        Task<string> TryFetchTransferTokenSilentAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccount account);
     }
 }
+

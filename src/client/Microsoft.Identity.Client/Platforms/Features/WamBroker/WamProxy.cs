@@ -151,7 +151,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
         }
 
-
         public bool TryGetAccountProperty(WebAccount webAccount, string propertyName, out string propertyValue)
         {
             return webAccount.Properties.TryGetValue("Authority", out propertyValue);

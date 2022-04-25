@@ -75,7 +75,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsNull(result);
         }
 
-
         [TestMethod]
         [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
         public void UserMetadataProvider_RespondsIfEnvironmentsAreKnown()

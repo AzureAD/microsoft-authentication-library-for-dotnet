@@ -3,6 +3,7 @@
 
 using Microsoft.Identity.Client.Core;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
@@ -139,6 +140,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 brokerRequest.Add(BrokerParameter.ExtraQp, extraQP);
             }
 
+            if (authenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities?.Any() == true)
+            {
+                var capabilities = String.Join(',', authenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities);
+                brokerRequest.Add(BrokerParameter.ClientCapabilities, capabilities);
+            }
+
             brokerRequest.Add(BrokerParameter.Username, authenticationRequestParameters.Account?.Username ?? string.Empty);
             brokerRequest.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
 
@@ -162,7 +169,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             return brokerRequest;
         }
-
 
         public void HandleInstallUrl(string appLink)
         {
@@ -271,13 +277,19 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                         responseDictionary[iOSBrokerConstants.ApplicationToken]);
                 }
 
-                if (responseDictionary.ContainsKey(BrokerResponseConst.BrokerErrorCode) &&
-                    responseDictionary[BrokerResponseConst.BrokerErrorCode] == BrokerResponseConst.iOSBrokerUserCancellationErrorCode)
-                {
-                    responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.AuthenticationCanceledError;
-                }
-
                 brokerTokenResponse = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
+
+                if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errCode))
+                {
+                    if(errCode == BrokerResponseConst.iOSBrokerUserCancellationErrorCode)
+                    {
+                        responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.AuthenticationCanceledError;
+                    }
+                    else if (errCode == BrokerResponseConst.iOSBrokerProtectionPoliciesRequiredErrorCode)
+                    {
+                        responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.ProtectionPolicyRequired;
+                    }
+                }
             }
             else
             {

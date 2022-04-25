@@ -1195,7 +1195,6 @@ namespace Microsoft.Identity.Client
             throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
-
         /// <summary>
         /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
         /// Available only on .net desktop and .net core. See https://aka.ms/msal-net-up for details.
@@ -1211,7 +1210,6 @@ namespace Microsoft.Identity.Client
         {
             throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
-
 
         /// <summary>
         /// Acquires a security token on a device without a web browser, by letting the user authenticate on
@@ -1391,7 +1389,6 @@ namespace Microsoft.Identity.Client
         {
             throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
-
 
         #endregion MSAL3X deprecations
     }

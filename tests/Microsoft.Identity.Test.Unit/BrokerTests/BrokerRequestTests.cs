@@ -2,34 +2,32 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading;
-using System.Threading.Tasks;
 using NSubstitute;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using NSubstitute.ExceptionExtensions;
-using Microsoft.Identity.Client.Internal.Requests.Silent;
-using Microsoft.Identity.Client.Http;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using Microsoft.Identity.Client.AuthScheme;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -42,7 +40,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private AuthenticationRequestParameters _parameters;
         private AcquireTokenSilentParameters _acquireTokenSilentParameters;
         private HttpResponse _brokerHttpResponse;
-
 
         [TestMethod]
         public void BrokerResponseTest()
@@ -339,7 +336,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
-
                 // Act
                 var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
 
@@ -367,7 +363,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var app = builder.WithBroker(true).BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
-
 
                 // Act
                 var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
@@ -425,6 +420,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 var platformProxy = Substitute.For<IPlatformProxy>();
                 platformProxy.CanBrokerSupportSilentAuth().Returns(false);
+                platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), true)
+                    .Returns(new InMemoryPartitionedAppTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
+                platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), false)
+                    .Returns(new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
 
                 harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
 
@@ -459,6 +458,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
+            platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), true)
+                .Returns(new InMemoryPartitionedAppTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
+            platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), false)
+                .Returns(new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
@@ -469,7 +472,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var mockBroker = Substitute.For<IBroker>();
             var expectedAccount = new Account("a.b", "user", "login.windows.net");
             mockBroker.GetAccountsAsync(
-                TestConstants.ClientId, 
+                TestConstants.ClientId,
                 TestConstants.RedirectUri,
                 (pca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo,
                 Arg.Any<ICacheSessionManager>(),
@@ -479,13 +482,23 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
-
             // Act
             var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
 
             // Assert that MSAL acquires an account from the broker cache
             Assert.AreSame(expectedAccount, actualAccount.Single());
-        }        
+        }
+
+        [TestMethod]
+        public void PCAWithBrokerAndWithMultiCloudSupportThrowsTest()
+        {
+            var ex = Assert.ThrowsException<NotSupportedException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithBroker(true)
+                .WithMultiCloudSupport(true)
+                .Build());
+            Assert.AreEqual(MsalErrorMessage.MultiCloudSupportUnavailable, ex.Message);
+        }
 #endif
 
         [TestMethod]
@@ -688,6 +701,56 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
+        [TestMethod]
+        public void InteractiveStrategy_ProtectionPolicyNotEnabled_Throws_Exception()
+        {
+            ProtectionPolicyNotEnabled_Throws_Exception_Common((msalToken) =>
+            {
+                _brokerInteractiveRequest.ValidateResponseFromBroker(msalToken);
+            });
+        }
+
+        [TestMethod]
+        public void SilentStrategy_ProtectionPolicyNotEnabled_Throws_Exception()
+        {
+            ProtectionPolicyNotEnabled_Throws_Exception_Common((msalToken) =>
+            {
+                _brokerSilentAuthStrategy.ValidateResponseFromBroker(msalToken);
+            });
+        }
+
+        private void ProtectionPolicyNotEnabled_Throws_Exception_Common(Action<MsalTokenResponse> action)
+        {
+            using (var harness = CreateBrokerHelper())
+            {
+                try
+                {
+                    // Arrange
+                    MsalTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
+                    msalTokenResponse.SubError = BrokerResponseConst.AndroidProtectionPolicyRequired;
+                    msalTokenResponse.TenantId = TestConstants.TenantId;
+                    msalTokenResponse.Upn = TestConstants.Username;
+                    msalTokenResponse.AccountUserId = TestConstants.LocalAccountId;
+                    msalTokenResponse.AuthorityUrl = TestConstants.AuthorityUtid2Tenant;
+
+                    // Act
+                    action(msalTokenResponse);
+                }
+                catch (MsalServiceException ex) // Since IntuneAppProtectionPolicyRequiredException is throw only on Android and iOS platforms, this is the workaround
+                {
+                    // Assert
+                    Assert.AreEqual(BrokerResponseConst.AndroidUnauthorizedClient, ex.ErrorCode);
+                    Assert.AreEqual(BrokerResponseConst.AndroidProtectionPolicyRequired, ex.SubError);
+
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Assert.Fail($"Wrong Exception thrown {ex.Message}.");
+                }
+            }
+        }
+
         private static MsalTokenResponse CreateErrorResponse(string errorCode)
         {
             return new MsalTokenResponse
@@ -765,6 +828,5 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             return harness;
         }
     }
-
 
 }

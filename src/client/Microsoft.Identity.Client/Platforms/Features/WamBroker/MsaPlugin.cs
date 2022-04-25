@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccounProvider, clientID).ConfigureAwait(false);
              
             var msalAccounts = webAccounts
-                .Select(webAcc => ConvertToMsalAccountOrNull(webAcc))
+                .Select(webAcc => ConvertToMsalAccountOrNull(webAcc, clientID))
                 .Where(a => a != null)
                 .ToList();
 
@@ -166,12 +166,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return msalAccounts;
         }
 
-        private IAccount ConvertToMsalAccountOrNull(WebAccount webAccount)
+        private IAccount ConvertToMsalAccountOrNull(WebAccount webAccount, string clientID)
         {
             const string environment = "login.windows.net"; //TODO: is MSA available in other clouds?
             string homeAccountId = GetHomeAccountIdOrNull(webAccount);
 
-            return new Account(homeAccountId, webAccount.UserName, environment);
+            return new Account(
+                homeAccountId, 
+                webAccount.UserName, 
+                environment, 
+                new Dictionary<string, string>() { { clientID, webAccount.Id } });
         }
 
         // There are two commonly used formats for MSA CIDs:
@@ -192,7 +196,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             localAccountId = "00000000-0000-0000-" + lowercaseCid.Insert(4, "-");
             return true;
         }
-
 
         public Tuple<string, string, bool> MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive)
         {

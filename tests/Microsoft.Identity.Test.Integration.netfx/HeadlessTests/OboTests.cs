@@ -101,7 +101,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .ExecuteAsync(CancellationToken.None)
             ).ConfigureAwait(false);
 
-
             // User1 - no AT, RT in cache - retrieves from IdP
             var authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(user1AuthResult.AccessToken))
                 .ExecuteAsync(CancellationToken.None)
@@ -146,7 +145,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 cca.AcquireTokenSilent(s_scopes, user2.Upn)
                     .ExecuteAsync(CancellationToken.None)
             ).ConfigureAwait(false);
-
 
             IConfidentialClientApplication CreateCCA()
             {

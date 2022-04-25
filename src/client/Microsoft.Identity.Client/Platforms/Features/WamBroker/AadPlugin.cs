@@ -96,13 +96,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 var msalAccounts = (await Task.WhenAll(msalAccountTasks).ConfigureAwait(false)).Where(a => a != null).ToList();
 
-                _logger.Info($"[WAM AAD Provider] GetAccountsAsync converted {msalAccounts.Count()} accounts from {wamAccounts.Count} WAM accounts");
+                _logger.Info($"[WAM AAD Provider] GetAccountsAsync converted {msalAccounts.Count} accounts from {wamAccounts.Count} WAM accounts");
                 return msalAccounts;
             }
 
+            _logger.Info("[WAM AAD provider] No accounts found.");
             return Array.Empty<IAccount>();
         }
-
 
         private async Task<Account> ConvertToMsalAccountOrNullAsync(
             string clientId,
@@ -138,7 +138,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 _logger.VerbosePii(
                     $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync account {webAccount.UserName} matched a cached account",
                     $"[WAM AAD Provider] Account matched a cache account");
-
 
                 return new Account(
                     homeAccountId.Identifier,
@@ -184,7 +183,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             // Note that this is never a guest flow, we are always acquiring a token for the home realm,
             // since we only need the client info.
-
 
             var wamResult = await _wamProxy.GetTokenSilentlyAsync(webAccount, request).ConfigureAwait(false);
 

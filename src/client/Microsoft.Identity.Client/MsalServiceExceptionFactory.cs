@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
@@ -67,13 +68,26 @@ namespace Microsoft.Identity.Client
         }
 
         internal static MsalServiceException FromBrokerResponse(
-          string errorCode,
-          string errorMessage,
-          string subErrorCode,
-          string correlationId,
-          HttpResponse brokerHttpResponse)
+          MsalTokenResponse msalTokenResponse,
+          string errorMessage)
         {
+            string errorCode = msalTokenResponse.Error;
+            string correlationId = msalTokenResponse.CorrelationId;
+            string subErrorCode = string.IsNullOrEmpty(msalTokenResponse.SubError)?
+                                                                     MsalError.UnknownBrokerError : msalTokenResponse.SubError;
+            HttpResponse brokerHttpResponse = msalTokenResponse.HttpResponse;
             MsalServiceException ex = null;
+
+            if (IsAppProtectionPolicyRequired(errorCode, subErrorCode))
+            {
+                ex = new IntuneAppProtectionPolicyRequiredException(errorCode, subErrorCode)
+                {
+                    Upn = msalTokenResponse.Upn,
+                    AuthorityUrl = msalTokenResponse.AuthorityUrl,
+                    TenantId = msalTokenResponse.TenantId,
+                    AccountUserId = msalTokenResponse.AccountUserId,
+                };
+            }
 
             if (IsInvalidGrant(errorCode, subErrorCode) || IsInteractionRequired(errorCode))
             {
@@ -136,6 +150,19 @@ namespace Microsoft.Identity.Client
         {
             return string.Equals(errorCode, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase)
                              && IsInvalidGrantSubError(subErrorCode);
+        }
+
+        private static bool IsAppProtectionPolicyRequired(string errorCode, string subErrorCode)
+        {
+#if iOS
+            return string.Equals(errorCode, BrokerResponseConst.iOSBrokerProtectionPoliciesRequiredErrorCode, StringComparison.OrdinalIgnoreCase)
+                             && string.Equals(subErrorCode, MsalError.ProtectionPolicyRequired, StringComparison.OrdinalIgnoreCase);
+#elif ANDROID
+            return string.Equals(errorCode, BrokerResponseConst.AndroidUnauthorizedClient, StringComparison.OrdinalIgnoreCase)
+                             && string.Equals(subErrorCode, MsalError.ProtectionPolicyRequired, StringComparison.OrdinalIgnoreCase);
+#else
+            return false;
+#endif
         }
 
         private static bool IsInvalidGrantSubError(string subError)

@@ -7,7 +7,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Identity.Test.Core.UIAutomation</RootNamespace>
     <AssemblyName>Microsoft.Identity.Test.Core.UIAutomation</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <SignAssembly>false</SignAssembly>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -34,7 +34,7 @@
       <Version>0.2.5</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.UITest" Version="2.2.7">
-          <PrivateAssets>all</PrivateAssets>
+      <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />

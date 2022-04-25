@@ -6,9 +6,11 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
+
     /// <summary>
     /// Windows OS Version checks
     /// </summary>
+    /// <remarks>Do not include this code in UWP, it causes packaging errors</remarks>
     internal static class Win32VersionApi
     {
 
@@ -71,7 +73,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// which input structure is used by setting the dwOSVersionInfoSize member of the structure to the size in bytes of 
         /// the structure that is used.</param>
         /// <returns>RtlGetVersion returns Status_Success.</returns>
-        [DllImport("ntdll.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [DllImport("ntdll.dll", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true)]
         private static extern int RtlGetVersion(ref OSVERSIONINFOEXW versionInformation);
 
         /// <summary>
@@ -215,4 +217,5 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
     }
+
 }

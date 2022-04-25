@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string AttemptRegionDiscovery = "TryAutoDetect";
 
-
         internal ConfidentialClientApplication(
             ApplicationConfiguration configuration)
             : base(configuration)

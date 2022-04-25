@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             var tenantedAuthority = await Authority.CreateAuthorityForRequestAsync(
                 AuthenticationRequestParameters.RequestContext,
                 AuthenticationRequestParameters.AuthorityOverride,
-                account?.HomeAccountId?.TenantId).ConfigureAwait(false);
+                account).ConfigureAwait(false);
 
             AuthenticationRequestParameters.AuthorityManager =
                 new AuthorityManager(

@@ -3,15 +3,30 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
+    <!-- https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype -->
+    <!--<DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>-->
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+  <PropertyGroup Condition="'$(UseIdentityWeb)' == 'true'">
+    <DefineConstants>$(DefineConstants);USE_IDENTITY_WEB;</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UseIdentityWeb)' == 'true'">
+    <PackageReference Include="Microsoft.Identity.Web.TokenCache" Version="*" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="*" />
+    <PackageReference Include="Microsoft.Identity.Client.Desktop" Version="*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseIdentityWeb)' != 'true'">
+    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+    <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-    <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.1" />
   </ItemGroup>
 
   <ItemGroup>

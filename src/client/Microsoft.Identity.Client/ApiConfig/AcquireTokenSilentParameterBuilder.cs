@@ -44,7 +44,6 @@ namespace Microsoft.Identity.Client
             return new AcquireTokenSilentParameterBuilder(clientApplicationBaseExecutor).WithScopes(scopes).WithLoginHint(loginHint);
         }
 
-
         private AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
         {
             Parameters.Account = account;

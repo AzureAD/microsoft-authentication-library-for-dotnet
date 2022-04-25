@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
             _tenantId = tenantId;
         }
 
-
         public override string ToString()
         {
             return MsalCacheKeys.GetCredentialKey(
@@ -54,7 +53,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
         }
 
         #region iOS
-
 
         public string iOSAccount => MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
 

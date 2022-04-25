@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private readonly MsalTokenResponse _msalTokenResponseWithTokenSource = TestConstants.CreateMsalTokenResponseWithTokenSource();
         private const string AuthCodeWithAppLink = "msauth://wpj?username=joe@contoso.onmicrosoft.com&app_link=itms%3a%2f%2fitunes.apple.com%2fapp%2fazure-authenticator%2fid983156458%3fmt%3d8";
 
-
         [TestInitialize]
         public override void TestInitialize()
         {
@@ -84,6 +83,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
                 // Assert - orchestration
+#pragma warning disable VSTHRD101 // Avoid unsupported async delegates
                 Received.InOrder(async () =>
                 {
                     await _authCodeRequestComponentOverride
@@ -94,6 +94,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                        .FetchTokensAsync(default)
                        .ConfigureAwait(false);
                 });
+#pragma warning restore VSTHRD101 // Avoid unsupported async delegates
 
                 await _brokerExchangeComponentOverride
                    .DidNotReceiveWithAnyArgs()
@@ -214,6 +215,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert - orchestration
 
                 // Assert - orchestration
+#pragma warning disable VSTHRD101 // Avoid unsupported async delegates
                 Received.InOrder(async () =>
                 {
                     await _brokerExchangeComponentOverride
@@ -228,6 +230,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                        .FetchTokensAsync(default)
                        .ConfigureAwait(false);
                 });
+#pragma warning restore VSTHRD101 // Avoid unsupported async delegates
             }
         }
 
@@ -279,6 +282,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
                 // Assert - orchestration
+#pragma warning disable VSTHRD101 // Avoid unsupported async delegates
                 Received.InOrder(async () =>
                 {
                     await _authCodeRequestComponentOverride
@@ -288,6 +292,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .FetchTokensAsync(default)
                         .ConfigureAwait(false);
                 });
+#pragma warning restore VSTHRD101 // Avoid unsupported async delegates
 
                 await _authCodeExchangeComponentOverride
                        .DidNotReceiveWithAnyArgs()

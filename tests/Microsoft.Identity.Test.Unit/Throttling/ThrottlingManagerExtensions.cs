@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 manager.ThrottlingProviders.Single(p => p is UiRequiredProvider) as UiRequiredProvider);
         }
 
-
         private static void MoveToPast(TimeSpan delay, ConcurrentDictionary<string, ThrottlingCacheEntry> cacheDictionary)
         {
             foreach (var kvp in cacheDictionary)

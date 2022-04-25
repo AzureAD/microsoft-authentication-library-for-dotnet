@@ -205,7 +205,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     ClientInformation,
                     messageToLog);
 
-
                 if (_isDefaultPlatformLoggingEnabled)
                 {
                     switch (logLevel)

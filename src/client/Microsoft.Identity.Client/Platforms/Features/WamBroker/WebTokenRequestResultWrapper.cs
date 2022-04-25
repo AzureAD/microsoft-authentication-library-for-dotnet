@@ -8,7 +8,6 @@ using Windows.Security.Authentication.Web.Core;
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
 
-
     /// <summary>
     /// Wrapper class to enable testing, since WebTokenRequestResult object doesn't have any ctor
     /// and interface is not accessible.

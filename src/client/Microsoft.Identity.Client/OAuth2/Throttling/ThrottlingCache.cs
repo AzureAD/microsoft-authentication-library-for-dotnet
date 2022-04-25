@@ -77,7 +77,6 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         internal ConcurrentDictionary<string, ThrottlingCacheEntry> CacheForTest => _cache; 
 
-
         private void CleanCache(ICoreLogger logger)
         {
             if (_lastCleanupTime + s_cleanupCacheInterval < DateTimeOffset.UtcNow &&

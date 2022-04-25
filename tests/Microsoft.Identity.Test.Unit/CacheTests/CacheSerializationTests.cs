@@ -237,7 +237,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertAccessTokenCacheItemsAreEqual(item, item2, "123"); // TODO: fix this
         }
 
-
         [TestMethod]
         public void TestSerializeMsalAccessTokenCacheItem_WithKidAndTokenType()
         {
@@ -472,7 +471,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertContainsKeys(asJObject, s_appMetadataKeys);
             AssertContainsKeys(asJObject, new[] { "unsupported_field_name" });
         }
-
 
         #endregion // APP METADATA TESTS
 

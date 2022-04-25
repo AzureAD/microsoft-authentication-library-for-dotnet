@@ -599,7 +599,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app4.Authority);
 
-
             var app5 = PublicClientApplicationBuilder
                 .CreateWithApplicationOptions(options)
                 .WithAuthority($"https://login.microsoftonline.com/{TestConstants.TenantId}")
@@ -652,7 +651,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                    .WithDesktopFeatures()
                    .WithAuthority(TestConstants.AuthorityTenant);
 
-
             // broker is not available out of the box
             Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), builder2.IsBrokerAvailable());
         }
@@ -672,7 +670,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                    .WithDesktopFeatures()
                    .WithAuthority(TestConstants.ADFSAuthority);
 
-
             // broker is not available on ADFS
             Assert.AreEqual(false, builder2.IsBrokerAvailable());
 
@@ -680,7 +677,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                    .Create(TestConstants.ClientId)
                    .WithDesktopFeatures()
                    .WithAdfsAuthority(TestConstants.ADFSAuthority);
-
 
             // broker is not available on ADFS
             Assert.AreEqual(false, builder3.IsBrokerAvailable());

@@ -205,7 +205,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-
         [TestMethod]
         public async Task VerifyAuthorizationResultTestAsync()
         {
@@ -247,7 +246,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(
                    UiRequiredExceptionClassification.PromptNeverFailed,
                    ex.Classification);
-
 
                 webUi = new MockWebUI
                 {
@@ -339,6 +337,78 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         MsalError.DuplicateQueryParameterError,
                         ((MsalException)exc.InnerException).ErrorCode);
                 }
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task WithMultiCloudSupportEnabledAsync(bool multiCloudSupportEnabled)
+        {
+            var expectedQueryParams = TestConstants.ExtraQueryParameters;
+            var authorizationResultUri = TestConstants.AuthorityHomeTenant + "?code=some-code";
+
+            if (multiCloudSupportEnabled)
+            {
+                expectedQueryParams.Add("instance_aware", "true");
+                authorizationResultUri = authorizationResultUri + "&cloud_instance_name=microsoftonline.us&cloud_instance_host_name=login.microsoftonline.us";
+            }
+                
+
+            using (MockHttpAndServiceBundle harness = CreateTestHarness(isMultiCloudSupportEnabled: multiCloudSupportEnabled))
+            {
+                var cache = new TokenCache(harness.ServiceBundle, false);
+
+                var ui = new MockWebUI()
+                {
+                    MockResult = AuthorizationResult.FromUri(authorizationResultUri),
+                    QueryParamsToValidate = expectedQueryParams
+                };
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle, ui);
+
+                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+
+                var tokenResponseHandler = new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedQueryParams = expectedQueryParams,
+                    ExpectedPostData = new Dictionary<string, string>()
+                        { {OAuth2Parameter.Claims,  TestConstants.Claims } },
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                };
+                harness.HttpManager.AddMockHandler(tokenResponseHandler);
+
+                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope,
+                    cache,
+                    extraQueryParameters: TestConstants.ExtraQueryParameters,
+                    claims: TestConstants.Claims);
+
+                parameters.RedirectUri = new Uri("some://uri");
+                parameters.LoginHint = TestConstants.DisplayableId;
+
+                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+                {
+                    Prompt = Prompt.SelectAccount,
+                    ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
+                };
+
+                var request = new InteractiveRequest(
+                    parameters,
+                    interactiveParameters);
+
+                AuthenticationResult result = await request.RunAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                if (multiCloudSupportEnabled)
+                    Assert.AreEqual("https://login.microsoftonline.us/home/oauth2/v2.0/token", result.AuthenticationResultMetadata.TokenEndpoint);
+                else
+                    Assert.AreEqual("https://login.microsoftonline.com/home/oauth2/v2.0/token", result.AuthenticationResultMetadata.TokenEndpoint);
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(result.AccessToken, "some-access-token");
             }
         }
 

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -176,7 +175,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
                 UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor);
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
-
 
                 Trace.WriteLine("3. Configure AAD to respond with the typical Invalid Grant error");
                 harness.HttpManager.AddAllMocks(TokenResponseType.InvalidGrant);
@@ -471,7 +469,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         #endregion
-
 
         private static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
             ITokenCacheAccessor accessor,

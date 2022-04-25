@@ -116,7 +116,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public const string Environment = "environment";
 
-
         /**
          * Certificate authorities are passed with delimiter.
          */

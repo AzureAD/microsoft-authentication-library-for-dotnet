@@ -6,25 +6,16 @@ parameters:
   ArtifactPublishPath: '$(Build.ArtifactStagingDirectory)\packages'
   SymbolPublishWildcard: '**/bin/**/microsoft.identity.client.*'
   DropArtifactName: 'packages'
+  parameters:
+  PublishArtifacts: 'false'
 
 steps:
-- task: NuGetCommand@2
-  displayName: 'Verify packages are signed'
-  inputs:
-    command: custom
-    arguments: 'verify -Signature ${{ parameters.NugetPackagesWildcard }}'
-  continueOnError: true
-
-- task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-  displayName: 'Get Software Bill Of Materials (SBOM)'
-  inputs:
-       BuildDropPath: '${{ parameters.ArtifactPublishPath }}'
-
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: packages'
   inputs:
     PathtoPublish: '${{ parameters.ArtifactPublishPath }}'
     ArtifactName: '${{ parameters.DropArtifactName }}'
+  condition: eq(${{ parameters.PublishArtifacts }}, 'true')
 
 - task: NuGetCommand@2
   displayName: 'Publish packages to VSTS feed'
@@ -34,9 +25,11 @@ steps:
     publishVstsFeed: '46419298-b96c-437f-bd4c-12c8df7f868d'
     allowPackageConflicts: true
   continueOnError: true
+  condition: eq(${{ parameters.PublishArtifacts }}, 'true')
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols'
   inputs:
     SearchPattern: '${{ parameters.SymbolPublishWildcard }}'
     SymbolServerType: TeamServices
+  condition: eq(${{ parameters.PublishArtifacts }}, 'true')

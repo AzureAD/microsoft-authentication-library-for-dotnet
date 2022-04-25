@@ -96,7 +96,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsTrue(factory is SimpleHttpClientFactory);
             Assert.AreSame(client1, client2, "On NetDesktop and NetCore, the HttpClient should be static");
 
-
         }
 #endif
 #if DESKTOP
@@ -144,7 +143,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 ServicePointManager.DefaultConnectionLimit = originalConnLimit;
             }
         }
-
 
         [TestMethod]
         public void FlagDefaultsTest()

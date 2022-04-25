@@ -1,3 +1,6 @@
+parameters:
+  PublishArtifacts: 'false'
+
 steps:
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Drop'
@@ -38,8 +41,10 @@ steps:
 
 - template: template-pack-and-sign-all-nugets.yaml
 
-# Publish nuget packages and symbols to VSTS package manager.
+#enabled only for legacy build
 - template: template-publish-packages-and-symbols.yaml
+  parameters:
+    PublishArtifacts: ${{ parameters.PublishArtifacts }}
 
 # Publish analysis and cleanup
 - template: template-publish-analysis-and-cleanup.yaml

@@ -56,10 +56,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            var result = await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
-#if DESKTOP // no point in running these tests on NetCore - the code path is similar
 
+#if DESKTOP // no point in running these tests on NetCore - the code path is similar
         [TestMethod]
         [TestCategory(TestCategories.Arlington)]
         public async Task Arlington_Interactive_AADAsync()
@@ -77,7 +77,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
-
 
         [TestMethod]
         public async Task Interactive_AdfsV3_FederatedAsync()
@@ -122,6 +121,59 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, false).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Interactive_Arlington_MultiCloudSupport_AADAsync()
+        {
+            // Arrange
+            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+                    .Create(labResponse.App.AppId)
+                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithAuthority("https://login.microsoftonline.com/common")
+                    .WithMultiCloudSupport(true)
+                    .WithTestLogging()
+                    .Build();
+
+            Trace.WriteLine("Part 1 - Acquire a token interactively");
+            AuthenticationResult result = await pca
+                .AcquireTokenInteractive(s_scopes)
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false))
+                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Account);
+            Assert.IsNotNull(result.Account.GetTenantProfiles());
+            Assert.IsTrue(result.Account.GetTenantProfiles().Any());
+            Assert.AreEqual(labResponse.User.Upn, result.Account.Username);
+            Assert.IsTrue(labResponse.Lab.Authority.Contains(result.Account.Environment));
+
+            Trace.WriteLine("Part 2 - Get Accounts");
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(accounts);
+            Assert.IsNotNull(accounts.Single());
+
+            var account = accounts.Single();
+
+            Assert.IsNotNull(account.GetTenantProfiles());
+            Assert.IsTrue(account.GetTenantProfiles().Any());
+            Assert.AreEqual(labResponse.User.Upn, account.Username);
+            Assert.AreEqual("login.microsoftonline.us", account.Environment);
+
+            Trace.WriteLine("Part 3 - Acquire a token silently");
+            result = await pca
+                .AcquireTokenSilent(s_scopes, result.Account)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Account);
+            Assert.IsNotNull(result.Account.GetTenantProfiles());
+            Assert.IsTrue(result.Account.GetTenantProfiles().Any());
+            Assert.IsTrue(labResponse.Lab.Authority.Contains(result.Account.Environment));
         }
 
 #endif
@@ -203,7 +255,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount))
                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                .ConfigureAwait(false);
-
 
             var CcsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
             var userObjectId = labResponse.User.ObjectId;
@@ -293,6 +344,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .AcquireTokenSilent(s_scopes, account)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 
             Trace.WriteLine("Part 5 - Acquire a token silently with force refresh");

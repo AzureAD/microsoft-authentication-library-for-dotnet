@@ -61,55 +61,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private KeyVaultSecretsProvider _keyVault;
 
-        [TestMethod]
-        public async Task ClientCreds_ServicePrincipal_OBO_PPE_Async()
-        {
-            //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
-            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            var cert = settings.GetCertificate(); 
-
-            IReadOnlyList<string> scopes = new List<string>() { OBOServicePpeClientID + "/.default" };
-            IReadOnlyList<string> scopes2 = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
-
-            var confidentialSPApp = ConfidentialClientApplicationBuilder
-                                    .Create(OBOClientPpeClientID)
-                                    .WithAuthority(PPEAuthenticationAuthority)
-                                    .WithCertificate(cert)
-                                    .WithTestLogging()
-                                    .Build();
-
-            var authenticationResult = await confidentialSPApp.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
-
-            string appToken = authenticationResult.AccessToken;
-            var userAssertion = new UserAssertion(appToken);
-            string atHash = userAssertion.AssertionHash;
-
-            var _confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(OBOServicePpeClientID)
-                .WithAuthority(PPEAuthenticationAuthority)
-                .WithCertificate(cert)
-                .Build();
-
-            var userCacheRecorder = _confidentialApp.UserTokenCache.RecordAccess();
-
-            authenticationResult = await _confidentialApp.AcquireTokenOnBehalfOf(scopes2, userAssertion)
-                                                         .ExecuteAsync().ConfigureAwait(false);
-
-            Assert.IsNotNull(authenticationResult);
-            Assert.IsNotNull(authenticationResult.AccessToken);
-            Assert.AreEqual(TokenSource.IdentityProvider, authenticationResult.AuthenticationResultMetadata.TokenSource);
-
-            authenticationResult = await _confidentialApp.AcquireTokenOnBehalfOf(scopes2, userAssertion)
-                                                         .ExecuteAsync().ConfigureAwait(false);
-
-            Assert.IsNotNull(authenticationResult);
-            Assert.IsNotNull(authenticationResult.AccessToken);
-            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
-            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
-            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
-            Assert.AreEqual(TokenSource.Cache, authenticationResult.AuthenticationResultMetadata.TokenSource);
-        }
-
         [TestInitialize]
         public void TestInitialize()
         {
@@ -120,7 +71,155 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 _keyVault = new KeyVaultSecretsProvider();
             }
         }
+        
+        /// <summary>
+        /// Client -> Middletier -> RP
+        /// This is OBO for SP without RT support.
+        /// Currently this is supported only by 1p, i.e. Client (3P) -> Middletier (1p) -> RP (1p)
+        /// </summary>
+        /// <remarks>
+        /// For details see https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO, which explains
+        /// the structure of the access token received from OBO.
+        /// </remarks>
+        [TestMethod]
+        public async Task ServicePrincipal_OBO_PPE_Async()
+        {
+            //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
+            
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            var cert = settings.GetCertificate(); 
 
+            IReadOnlyList<string> middleTierApiScopes = new List<string>() { OBOServicePpeClientID + "/.default" };
+            IReadOnlyList<string> downstreamApiScopes = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
+
+            var clientConfidentialApp = ConfidentialClientApplicationBuilder
+                                    .Create(OBOClientPpeClientID)
+                                    .WithAuthority(PPEAuthenticationAuthority)
+                                    .WithCertificate(cert)
+                                    .WithTestLogging()
+                                    .Build();
+
+            var authenticationResult = await clientConfidentialApp
+                .AcquireTokenForClient(middleTierApiScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            string appToken = authenticationResult.AccessToken;
+            var userAssertion = new UserAssertion(appToken);
+            string atHash = userAssertion.AssertionHash;
+
+            var middletierServiceApp = ConfidentialClientApplicationBuilder
+                .Create(OBOServicePpeClientID)
+                .WithAuthority(PPEAuthenticationAuthority)
+                .WithCertificate(cert)
+                .Build();
+            var userCacheRecorder = middletierServiceApp.UserTokenCache.RecordAccess();
+
+            authenticationResult = await middletierServiceApp
+                .AcquireTokenOnBehalfOf(downstreamApiScopes, userAssertion)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            
+            Assert.IsNotNull(authenticationResult.AccessToken);
+            Assert.IsFalse(userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.IdentityProvider, authenticationResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsNotNull(
+                userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
+                "When writing the OBO token response, MSAL should ignore the RT and propose expiry");
+
+            authenticationResult = await middletierServiceApp
+                .AcquireTokenOnBehalfOf(downstreamApiScopes, userAssertion)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+           
+            Assert.IsNotNull(authenticationResult.AccessToken);
+            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.Cache, authenticationResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsNull(
+                userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
+                "The cache expiry is not set because the node did not change");
+        }
+
+
+        [TestMethod]
+        public async Task ServicePrincipal_OBO_LongRunningProcess_PPE_Async()
+        {
+            //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
+
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            var cert = settings.GetCertificate();
+
+            IReadOnlyList<string> middleTierApiScopes = new List<string>() { OBOServicePpeClientID + "/.default" };
+            IReadOnlyList<string> downstreamApiScopes = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
+
+            
+            var clientConfidentialApp = ConfidentialClientApplicationBuilder
+                                    .Create(OBOClientPpeClientID)
+                                    .WithAuthority(PPEAuthenticationAuthority)
+                                    .WithCertificate(cert)
+                                    .WithTestLogging()
+                                    .Build();
+
+
+
+            var middletierServiceApp = ConfidentialClientApplicationBuilder
+                                    .Create(OBOServicePpeClientID)
+                                    .WithAuthority(PPEAuthenticationAuthority)
+                                    .WithCertificate(cert)
+                                    .Build();
+            var userCacheRecorder = middletierServiceApp.UserTokenCache.RecordAccess();
+
+            Trace.WriteLine("1. Upstream client gets an app token");            
+            var authenticationResult = await clientConfidentialApp
+                .AcquireTokenForClient(middleTierApiScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            string clientToken = authenticationResult.AccessToken;
+
+            Trace.WriteLine("2. MidTier kicks off the long running process by getting an OBO token");            
+            string cacheKey = null;
+            authenticationResult = await (middletierServiceApp as ILongRunningWebApi).
+                InitiateLongRunningProcessInWebApi(downstreamApiScopes, clientToken, ref cacheKey)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(authenticationResult.AccessToken);
+            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(cacheKey, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.IdentityProvider, authenticationResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsNull(
+                userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
+                "The cache expiry is not set because there is an RT in the cache");
+
+            Trace.WriteLine("3. Later, mid-tier needs the token again, and one is in the cache");
+            authenticationResult = await (middletierServiceApp as ILongRunningWebApi)
+                .AcquireTokenInLongRunningProcess(downstreamApiScopes, cacheKey)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, authenticationResult.AuthenticationResultMetadata.TokenSource);
+
+            Trace.WriteLine("4. After the original token expires, the mid-tier needs a token again. RT will be used.");
+            TokenCacheHelper.ExpireAllAccessTokens(middletierServiceApp.UserTokenCache as ITokenCacheInternal);
+
+            authenticationResult = await (middletierServiceApp as ILongRunningWebApi)
+               .AcquireTokenInLongRunningProcess(downstreamApiScopes, cacheKey)
+               .ExecuteAsync()
+               .ConfigureAwait(false);
+
+            Assert.IsNotNull(authenticationResult.AccessToken);
+            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(cacheKey, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.IdentityProvider, authenticationResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsNull(
+                userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
+                "The cache expiry is not set because there is an RT in the cache");
+        }
 
         [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfUserTestAsync()
@@ -207,7 +306,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
-
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);

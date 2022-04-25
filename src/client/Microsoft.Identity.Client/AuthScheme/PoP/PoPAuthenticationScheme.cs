@@ -48,7 +48,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public string AccessTokenType => PoPRequestParameters.PoPTokenType;
 
-
         /// <summary>
         /// For PoP, we chose to use the base64(jwk_thumbprint)
         /// </summary>

@@ -391,8 +391,8 @@ namespace Microsoft.Identity.Client
                 certificateName);
         }
 
-        public const string LinuxOpenToolFailed = "Unable to open a web page using xdg-open, gnome-open, or kfmclient tools. See inner exception for details. Possible causes for this error are: tools are not installed or they cannot open a URL. Make sure you can open a web page by invoking from a terminal: xdg-open https://www.bing.com ";
-        public const string LinuxOpenAsSudoNotSupported = "Unable to open a web page using xdg-open, gnome-open, or kfmclient tools in sudo mode. Please run the process as non-sudo user.";
+        public const string LinuxOpenToolFailed = "Unable to open a web page using xdg-open, gnome-open, kfmclient or wslview tools. See inner exception for details. Possible causes for this error are: tools are not installed or they cannot open a URL. Make sure you can open a web page by invoking from a terminal: xdg-open https://www.bing.com ";
+        public const string LinuxOpenAsSudoNotSupported = "Unable to open a web page using xdg-open, gnome-open, kfmclient or wslview tools in sudo mode. Please run the process as non-sudo user.";
 
         public const string WebView2LoaderNotFound = "The embedded WebView2 browser cannot be started because a runtime component cannot be loaded. For troubleshooting details, see https://aka.ms/msal-net-webview2 .";
 
@@ -418,5 +418,7 @@ namespace Microsoft.Identity.Client
         public const string RegionalAndAuthorityOverride = "You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request. Use WithTenantId at the request level instead.";
 
         public const string OboCacheKeyNotInCache = "The token cache does not contain a token with an OBO cache key that matches the longRunningProcessSessionKey passed into ILongRunningWebApi.AcquireTokenInLongRunningProcess method. Call ILongRunningWebApi.InitiateLongRunningProcessInWebApi method with this longRunningProcessSessionKey first or call ILongRunningWebApi.AcquireTokenInLongRunningProcess method with an already used longRunningProcessSessionKey. See https://aka.ms/msal-net-long-running-obo .";
+
+        public const string MultiCloudSupportUnavailable = "Multi cloud support unavailable with broker.";
     }
 }

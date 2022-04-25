@@ -16,11 +16,10 @@ namespace Microsoft.Identity.Client.Cache.Keys
         private readonly string _homeAccountId;
         private readonly string _tenantId;
         private readonly string _username;
-        private readonly string _authorityType;
 
         internal string HomeAccountId => _homeAccountId;
 
-        public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier, string username, string authorityType)
+        public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier, string username)
         {
             if (string.IsNullOrEmpty(environment))
             {
@@ -31,7 +30,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
             _environment = environment;
             _homeAccountId = userIdentifier;
             _username = username;
-            _authorityType = authorityType;
         }
 
         public override string ToString()
@@ -66,8 +64,10 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         public string iOSService => (_tenantId ?? "").ToLowerInvariant();
 
-        public int iOSType => MsalCacheKeys.iOSAuthorityTypeToAttrType[_authorityType];
-
+        // This is a known issue.
+        // Normally AuthorityType should be passed here but sice while building the MsalAccountCacheItem it is defaulted to "MSSTS",
+        // keeping the default value here.
+        public int iOSType => MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()];
 
         #endregion
 

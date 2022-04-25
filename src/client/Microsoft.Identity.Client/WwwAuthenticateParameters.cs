@@ -25,35 +25,15 @@ namespace Microsoft.Identity.Client
         /// Resource for which to request scopes.
         /// This is the App ID URI of the API that returned the WWW-Authenticate header.
         /// </summary>
+        [Obsolete("The client apps should know which App ID URI it requests scopes for.", true)]
         public string Resource { get; set; }
 
         /// <summary>
         /// Scopes to request.
         /// If it's not provided by the web API, it's computed from the Resource.
         /// </summary>
-        public IEnumerable<string> Scopes
-        {
-            get
-            {
-                if (_scopes != null)
-                {
-                    return _scopes;
-                }
-
-                if (!string.IsNullOrEmpty(Resource))
-                {
-                    return new[] { $"{Resource}/.default" };
-                }
-
-                return null;
-            }
-            set
-            {
-                _scopes = value;
-            }
-        }
-
-        private IEnumerable<string> _scopes;
+        [Obsolete("The client apps should know which scopes to request for.", true)]
+        public IEnumerable<string> Scopes { get; set; }
 
         /// <summary>
         /// Authority from which to request an access token.
@@ -238,27 +218,6 @@ namespace Microsoft.Identity.Client
                 if (values.TryGetValue("authority", out value))
                 {
                     wwwAuthenticateParameters.Authority = value.TrimEnd('/');
-                }
-            }
-
-            if (values.TryGetValue("resource_id", out value))
-            {
-                wwwAuthenticateParameters.Resource = value;
-            }
-
-            if (string.IsNullOrEmpty(wwwAuthenticateParameters.Resource))
-            {
-                if (values.TryGetValue("resource", out value))
-                {
-                    wwwAuthenticateParameters.Resource = value;
-                }
-            }
-
-            if (string.IsNullOrEmpty(wwwAuthenticateParameters.Resource))
-            {
-                if (values.TryGetValue("client_id", out value))
-                {
-                    wwwAuthenticateParameters.Resource = value;
                 }
             }
 
