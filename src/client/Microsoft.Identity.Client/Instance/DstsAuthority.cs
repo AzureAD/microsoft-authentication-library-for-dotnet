@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Client.Instance
         public DstsAuthority(AuthorityInfo authorityInfo)
             : base(authorityInfo)
         {
+            TenantId = AuthorityInfo.GetSecondPathSegment(AuthorityInfo.CanonicalAuthority);
         }
 
         internal override string GetTenantedAuthority(string tenantId, bool forceTenantless = false)
@@ -57,6 +58,6 @@ namespace Microsoft.Identity.Client.Instance
             return deviceEndpoint;
         }
 
-        internal override string TenantId => null;
+        internal override string TenantId { get; }
     }
 }

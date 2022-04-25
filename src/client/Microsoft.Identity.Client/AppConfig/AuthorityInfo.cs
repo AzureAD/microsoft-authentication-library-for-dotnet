@@ -325,6 +325,18 @@ namespace Microsoft.Identity.Client
             throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments);
         }
 
+        internal static string GetSecondPathSegment(string authority)
+        {
+            var uri = new Uri(authority);
+            if (uri.Segments.Length >= 3)
+            {
+                return new Uri(authority).Segments[2]
+                                         .TrimEnd('/');
+            }
+
+            throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments);
+        }
+
         private static AuthorityType GetAuthorityType(string authority) 
         {
             string firstPathSegment = GetFirstPathSegment(authority);
