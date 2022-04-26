@@ -622,6 +622,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
         }
+#pragma warning disable CS0618 // Type or member is obsolete
 
 #if NET5_WIN
         [TestMethod]
@@ -644,7 +645,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                     .WithAuthority(TestConstants.AuthorityTenant);
 
             // broker is not available out of the box
-            Assert.AreEqual(false, builder1.IsBrokerAvailable());
+            Assert.IsFalse(builder1.IsBrokerAvailable());
 
             var builder2 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
@@ -663,7 +664,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                     .WithAuthority(TestConstants.ADFSAuthority);
 
             // broker is not available out of the box
-            Assert.AreEqual(false, builder1.IsBrokerAvailable());
+            Assert.IsFalse(builder1.IsBrokerAvailable());
 
             var builder2 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
@@ -671,7 +672,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                    .WithAuthority(TestConstants.ADFSAuthority);
 
             // broker is not available on ADFS
-            Assert.AreEqual(false, builder2.IsBrokerAvailable());
+            Assert.IsFalse(builder2.IsBrokerAvailable());
 
             var builder3 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
@@ -679,8 +680,18 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                    .WithAdfsAuthority(TestConstants.ADFSAuthority);
 
             // broker is not available on ADFS
-            Assert.AreEqual(false, builder3.IsBrokerAvailable());
+            Assert.IsFalse(builder3.IsBrokerAvailable());
         }
 #endif
+
+        [TestMethod]
+        public void IsBrokerAvailable_NoAuthorityInBuilder_ReturnsFalse()
+        {
+            var builder1 = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId);
+
+            Assert.IsFalse(builder1.IsBrokerAvailable());
+        }
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

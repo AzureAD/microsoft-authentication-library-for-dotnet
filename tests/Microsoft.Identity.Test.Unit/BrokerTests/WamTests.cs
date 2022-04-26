@@ -1,6 +1,5 @@
 ﻿#if SUPPORTS_BROKER
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -14,7 +13,6 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -89,7 +87,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 
+#pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
+#pragma warning restore CS0618 // Type or member is obsolete
 
         }
 
@@ -103,7 +103,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 
+#pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
+#pragma warning restore CS0618 // Type or member is obsolete
 
         }
 
@@ -189,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-#region CreateMsalTokenResponse
+        #region CreateMsalTokenResponse
         [TestMethod]
         public async Task WAMBroker_CreateMsalTokenResponse_AccountSwitch_Async()
         {
@@ -311,7 +313,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             return (requestParams, webTokenResponseWrapper);
         }
 
-#endregion
+        #endregion
 
         [TestMethod]
         public async Task ATS_AccountMatchingInWAM_MatchingHomeAccId_Async()
@@ -364,7 +366,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-     
+
         [TestMethod]
         public async Task ATS_NoAccountMatching_ThrowsUiRequiredException_Async()
         {
@@ -409,7 +411,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
 
                 _webAccountProviderFactory.GetDefaultProviderAsync().ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
-                
+
                 var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant); // AAD authority, no account
                 var webTokenRequest = new WebTokenRequest(wamAccountProvider);
                 var atsParams = new AcquireTokenSilentParameters();
@@ -568,16 +570,16 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange 
             using (var harness = CreateTestHarness())
             {
-                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityOrganizationsTenant); 
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityOrganizationsTenant);
                 var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
-               
+
                 var webTokenRequest = new WebTokenRequest(wamAccountProvider);
 
                 // will use the AAD provider because the authority is organizations (i.e. AAD only)
                 _webAccountProviderFactory
                     .GetAccountProviderAsync("organizations")
                     .ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
-                
+
                 _aadPlugin.CreateWebTokenRequestAsync(
                     wamAccountProvider,
                     requestParams,
@@ -616,7 +618,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var harness = CreateTestHarness())
             {
                 var requestParams = harness.CreateAuthenticationRequestParameters(
-                    TestConstants.AuthorityOrganizationsTenant); 
+                    TestConstants.AuthorityOrganizationsTenant);
                 requestParams.Account = new Account(
                    $"{TestConstants.Uid}.{TestConstants.Utid}",
                    TestConstants.DisplayableId,
@@ -756,7 +758,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Assert 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/common/",
-                    webTokenRequest.Properties["authority"], 
+                    webTokenRequest.Properties["authority"],
                     "The workaround rewrites the tenant from organizations to common");
                 Assert.AreSame(_msalTokenResponse, result);
                 AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
@@ -814,7 +816,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-    
+
 
         [TestMethod]
         public async Task ATI_WithAadPlugin_LoginHint_Async()
@@ -898,7 +900,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _aadPlugin.CreateWebTokenRequestAsync(
                     wamAccountProvider,
                     requestParams,
-                    isForceLoginPrompt: false, 
+                    isForceLoginPrompt: false,
                     isInteractive: true,
                     isAccountInWam: true)
                     .Returns(Task.FromResult(webTokenRequest));
@@ -970,7 +972,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
 
                 requestParams.Account = new Account(
-                                    aadHomeAccId, 
+                                    aadHomeAccId,
                                     "user@outlook.com", // matching is not on UPN
                                     null); // account does not have wam_id, might be coming directly from WAM
 
@@ -985,7 +987,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var atsParams = new AcquireTokenSilentParameters();
                 _webAccountProviderFactory.GetAccountProviderAsync("organizations").ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
 
-                
+
                 // This assertion ensures that WebAccount.SignOutAsync() is called. Since the WebAccount is fake, it throws a specific exception.
                 // This can be improved with a extra layer of abstraction over WebAccount, but it is sufficient for testing
 
@@ -1003,7 +1005,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var harness = CreateTestHarness())
             {
                 var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
-                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant); 
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant);
 
                 requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { ListWindowsWorkAndSchoolAccounts = true };
                 _wamBroker = new WamBroker(
@@ -1015,7 +1017,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    _wamProxy,
                    _webAccountProviderFactory,
                    _accountPickerFactory,
-                   _msaPassthroughHandler);              
+                   _msaPassthroughHandler);
 
                 var cacheSessionManager = NSubstitute.Substitute.For<ICacheSessionManager>();
                 var discoveryManager = NSubstitute.Substitute.For<IInstanceDiscoveryManager>();
@@ -1053,8 +1055,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant);
 
-                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { 
-                    ListWindowsWorkAndSchoolAccounts = false};
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions()
+                {
+                    ListWindowsWorkAndSchoolAccounts = false
+                };
                 _wamBroker = new WamBroker(
                    _coreUIParent,
                     requestParams.AppConfig,
@@ -1194,7 +1198,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 #endif
 
-#region MSA-PT 
+        #region MSA-PT 
         [TestMethod]
         public async Task ATI_WithPicker_MsaPt_Async()
         {
@@ -1203,7 +1207,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var harness = CreateTestHarness())
             {
                 var requestParams = harness.CreateAuthenticationRequestParameters(
-                    TestConstants.AuthorityOrganizationsTenant); 
+                    TestConstants.AuthorityOrganizationsTenant);
 
                 // msa-pt scenario
                 requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
@@ -1294,7 +1298,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 accountPicker.DetermineAccountInteractivelyAsync().Returns(Task.FromResult(aadProvider));
                 _webAccountProviderFactory.IsConsumerProvider(aadProvider).Returns(false);
                 _webAccountProviderFactory.IsOrganizationsProvider(aadProvider).Returns(true);
-               
+
 
                 // make sure the final request is done with the AAD provider
                 var webTokenRequest = new WebTokenRequest(aadProvider);
@@ -1327,13 +1331,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 webTokenRequest.Properties.TryGetValue("authority", out string authority);
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/common/",
-                    authority, 
+                    authority,
                     "Expecting the authority to have been changed from /organizations to /common, to workaround the PRT update bug");
 
             }
         }
 
-     
+
 
         [TestMethod]
         public async Task ATS_MsaPt_Async()
@@ -1345,7 +1349,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 _webAccountProviderFactory.ClearReceivedCalls();
 
-                
+
                 var requestParams = harness.CreateAuthenticationRequestParameters(
                     $"https://login.microsoftonline.com/{TestConstants.MsaTenantId}", // this is how MSAL displays the tenant id                
                     validateAuthority: true);
@@ -1473,7 +1477,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 AssertTelemetryHeadersInRequest(webTokenRequest.Properties);
             }
         }
-#endregion
+        #endregion
 
         private async Task RunPluginSelectionTestAsync(string inputAuthority, bool expectMsaPlugin)
         {
