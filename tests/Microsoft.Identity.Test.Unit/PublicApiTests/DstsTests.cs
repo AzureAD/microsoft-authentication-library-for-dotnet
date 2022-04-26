@@ -53,7 +53,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [DataTestMethod]
         [DataRow("common")]
-        [DataRow("tenantid")]
         public async Task DstsClientCredentialSuccessfulTestAsync(string tenantId)
         {
             string authority = $"https://co2agg04-passive-dsts.dsts.core.azure-test.net/dstsv2/{tenantId}";
