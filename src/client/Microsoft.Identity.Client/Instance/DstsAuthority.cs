@@ -12,11 +12,10 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class DstsAuthority : Authority
     {
-        // TODO: find the /token endpoint templates
         // updating token endpoints to include v2.0 so DSTS can troubleshoot the scopes issue
-        private const string TokenEndpointTemplate = "{0}oauth2/v2.0/token";
-        private const string AuthorizationEndpointTemplate = "{0}oauth2/v2.0/authorize";
-        private const string DeviceCodeEndpointTemplate = "{0}oauth2/v2.0/devicecode";
+        private const string TokenEndpointTemplate = "{0}dstsv2/token";
+        private const string AuthorizationEndpointTemplate = "{0}dstsv2/authorize";
+        private const string DeviceCodeEndpointTemplate = "{0}dstsv2/devicecode";
 
         public DstsAuthority(AuthorityInfo authorityInfo)
             : base(authorityInfo)
