@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             return new MockHttpMessageHandler()
             {
-                ExpectedUrl = $"{authority}/oauth2/v2.0/token",
+                ExpectedUrl = $"{authority}/dstsv2/token",
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedPostData = expectedRequestBody,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [DataTestMethod]
         [DataRow("common")]
+        [DataRow("tenantid")]
         public async Task DstsClientCredentialSuccessfulTestAsync(string tenantId)
         {
             string authority = $"https://co2agg04-passive-dsts.dsts.core.azure-test.net/dstsv2/{tenantId}";

@@ -177,9 +177,6 @@ namespace Microsoft.Identity.Client
                     if (msalAccessTokenCacheItem != null)
                     {
                         logger.Info("Saving AT in cache and removing overlapping ATs...");
-#if !UAP10_0 && !NETSTANDARD1_3
-                        Trace.WriteLine("Saving AT in cache and removing overlapping ATs...");
-#endif
                         DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
                             instanceDiscoveryMetadata.Aliases,
@@ -188,13 +185,7 @@ namespace Microsoft.Identity.Client
                             msalAccessTokenCacheItem.HomeAccountId,
                             msalAccessTokenCacheItem.TokenType);
 
-#if !UAP10_0 && !NETSTANDARD1_3
-                        Trace.WriteLine($"Accessor pre-count {Accessor.GetAllAccessTokens().Count}");
-#endif
                         Accessor.SaveAccessToken(msalAccessTokenCacheItem);
-#if !UAP10_0 && !NETSTANDARD1_3
-                        Trace.WriteLine($"Accessor post-count {Accessor.GetAllAccessTokens().Count}");
-#endif
                     }
 
                     if (idToken != null)
