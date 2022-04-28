@@ -181,14 +181,6 @@ namespace Microsoft.Identity.Client.Region
                     return regionInfo;
                 }
 
-                string region = Environment.GetEnvironmentVariable("REGION_NAME")?.Replace(" ", string.Empty).ToLowerInvariant();
-
-                if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
-                {
-                    logger.Info($"[Region discovery] Region found in environment variable: {region}.");
-                    return new RegionInfo(region, RegionAutodetectionSource.EnvVariable, null);
-                }
-
                 try
                 {
                     var headers = new Dictionary<string, string>
@@ -212,7 +204,7 @@ namespace Microsoft.Identity.Client.Region
 
                     if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                     {
-                        region = response.Body;
+                        string region = response.Body;
 
                         if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
                         {
@@ -265,6 +257,14 @@ namespace Microsoft.Identity.Client.Region
             {
                 logger.Info($"[Region discovery] Auto-discovery already ran and found {s_autoDiscoveredRegion}.");
                 return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache, null);
+            }
+
+            string region = Environment.GetEnvironmentVariable("REGION_NAME")?.Replace(" ", string.Empty).ToLowerInvariant();
+
+            if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
+            {
+                logger.Info($"[Region discovery] Region found in environment variable: {region}.");
+                return new RegionInfo(region, RegionAutodetectionSource.EnvVariable, null);
             }
 
             return null;
