@@ -311,7 +311,6 @@ namespace Microsoft.Identity.Client
             return string.Format(CultureInfo.InvariantCulture, "{0}/{1}", cloudUrl, tenantValue);
         }
 
-        // TODO: consolidate this with the same method in Authority.cs
         internal static string GetFirstPathSegment(string authority)
         {
             var uri = new Uri(authority);
@@ -333,7 +332,7 @@ namespace Microsoft.Identity.Client
                                          .TrimEnd('/');
             }
 
-            throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments);
+            throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveThreeSegments);
         }
 
         private static AuthorityType GetAuthorityType(string authority) 
