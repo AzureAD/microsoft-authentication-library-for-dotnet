@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             var handler = new MockHttpMessageHandler()
             {
-                ExpectedUrl = authority + "dstsv2/token",
+                ExpectedUrl = authority + "oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateFailureTokenResponseMessage(
                     error, 
