@@ -21,7 +21,12 @@ namespace Microsoft.Identity.Test.Performance
                     typeof(AcquireTokenForClientCacheTests),
                     typeof(AcquireTokenForOboCacheTests),
                     typeof(TokenCacheTests),
-            }).RunAll(DefaultConfig.Instance
+            }).RunAll(
+#if DEBUG
+                    new DebugInProcessConfig()
+#else
+                    DefaultConfig.Instance
+#endif
                 .WithOptions(ConfigOptions.DisableLogFile)
                 //.WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually
                 .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
@@ -32,7 +37,9 @@ namespace Microsoft.Identity.Test.Performance
             }
             catch (Exception ex)
             {
+                Logger.Log("Error running performance tests.");
                 Logger.Log(ex.ToString());
+                throw;
             }
 
             Logger.Log("Completed running performance tests.");

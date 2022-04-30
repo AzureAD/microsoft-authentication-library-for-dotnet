@@ -138,8 +138,7 @@ namespace Microsoft.Identity.Test.Performance
                     MsalIdTokenCacheItem idtItem = TokenCacheHelper.CreateIdTokenCacheItem(
                         tenant,
                         homeAccountId,
-                        uid: user.ToString(),
-                        idToken: TestConstants.IdToken);
+                        uid: user.ToString());
                     _cca.UserTokenCacheInternal.Accessor.SaveIdToken(idtItem);
 
                     MsalAccountCacheItem accItem = TokenCacheHelper.CreateAccountItem(tenant, homeAccountId);

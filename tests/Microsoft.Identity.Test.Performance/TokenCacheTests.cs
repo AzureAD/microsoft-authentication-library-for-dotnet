@@ -103,9 +103,8 @@ namespace Microsoft.Identity.Test.Performance
         [BenchmarkCategory("With cache")]
         public async Task<IAccount> GetAccountsAsync_TestAsync()
         {
-            var result = await _cca.GetAccountsAsync()
-                .ConfigureAwait(false);
-            return result.FirstOrDefault();
+            return (await _cca.GetAccountsAsync()
+                .ConfigureAwait(false)).FirstOrDefault();
         }
 
         [Benchmark(Description = "RemoveAccount")]
@@ -146,8 +145,8 @@ namespace Microsoft.Identity.Test.Performance
         private void InsertCacheItem(string userId, string tokenId)
         {
             string userAssertionHash = null;
-            string homeAccountId = $"{userId}.{TestConstants.Utid}";
             string tenant = IsMultiTenant ? $"{_tenantPrefix}{tokenId}" : _tenantPrefix;
+            string homeAccountId = $"{userId}.{tenant}";
             string scope = $"{_scopePrefix}{tokenId}";
 
             MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(
@@ -167,8 +166,7 @@ namespace Microsoft.Identity.Test.Performance
             MsalIdTokenCacheItem idtItem = TokenCacheHelper.CreateIdTokenCacheItem(
                 tenant,
                 homeAccountId,
-                uid: userId,
-                idToken: TestConstants.IdToken);
+                uid: userId);
             _cca.UserTokenCacheInternal.Accessor.SaveIdToken(idtItem);
 
             MsalAccountCacheItem accItem = TokenCacheHelper.CreateAccountItem(tenant, homeAccountId);
