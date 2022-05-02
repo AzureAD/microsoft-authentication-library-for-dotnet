@@ -6,11 +6,11 @@ namespace Net5TestApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
-                var result = TryAuthAsync().Result;
+                var result = await TryAuthAsync().ConfigureAwait(false);
                 Console.BackgroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine("Access Token = " + result?.AccessToken);
                 Console.ResetColor();
@@ -27,16 +27,17 @@ namespace Net5TestApp
 
         private static async Task<AuthenticationResult> TryAuthAsync()
         {
-            var pca = PublicClientApplicationBuilder.Create("16dab2ba-145d-4b1b-8569-bf4b9aed4dc8")
-                .WithLogging(MyLoggingMethod, LogLevel.Info,
-                             enablePiiLogging: true,
-                             enableDefaultPlatformLogging: true)
-                .WithDefaultRedirectUri()
-                .Build();
+            var pca = PublicClientApplicationBuilder.Create("04b07795-8ddb-461a-bbee-02f9e1bf7b46")
+                 .WithTenantId("72f988bf-86f1-41af-91ab-2d7cd011db47")
+                 .WithDefaultRedirectUri()
+                 .WithLogging(MyLoggingMethod, LogLevel.Info, true, false)
+                 .Build();
 
-            return await pca.AcquireTokenInteractive(new[] { "user.read" })
-               .WithUseEmbeddedWebView(true)
-               .ExecuteAsync().ConfigureAwait(false);
+            var result = await pca.AcquireTokenInteractive(new[] { "https://storage.azure.com/.default" })
+                .WithUseEmbeddedWebView(true)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            return result;
         }
 
         static void MyLoggingMethod(LogLevel level, string message, bool containsPii)
