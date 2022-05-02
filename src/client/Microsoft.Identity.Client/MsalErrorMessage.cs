@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Client
 
         public const string AuthorityDoesNotHaveTwoSegments =
             "Authority should be in the form <host>/<audience>, for example https://login.microsoftonline.com/common. ";
-        public const string AuthorityDoesNotHaveThreeSegments =
+        public const string DSTSAuthorityDoesNotHaveThreeSegments =
             "Authority should be in the form <host>/<audience>/<tenantID>, for example https://login.microsoftonline.com/dsts/<tenantid>. ";
         public const string AzureAdMyOrgRequiresSpecifyingATenant = "When specifying AadAuthorityAudience.AzureAdMyOrg, you must also specify a tenant domain or tenant GUID. ";
 

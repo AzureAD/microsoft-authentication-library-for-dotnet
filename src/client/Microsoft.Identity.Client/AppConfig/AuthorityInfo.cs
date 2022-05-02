@@ -336,7 +336,7 @@ namespace Microsoft.Identity.Client
                                          .TrimEnd('/');
             }
 
-            throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveThreeSegments);
+            throw new InvalidOperationException(MsalErrorMessage.DSTSAuthorityDoesNotHaveThreeSegments);
         }
 
         private static AuthorityType GetAuthorityType(string authority) 
