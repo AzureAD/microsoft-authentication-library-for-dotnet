@@ -350,7 +350,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 var app = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
-                                 .WithAuthority("https://login.windows-ppe.org/common", true) //login.windows-ppe.org is not known to MSAL
+                                 .WithAuthority("https://" + TestConstants.PpeOrgEnvironment + "/common", true) //login.windows-ppe.org is not known to MSAL
                                  .WithHttpManager(httpManager)
                                  .WithAzureRegion(EastUsRegion)
                                  .WithClientSecret(TestConstants.ClientSecret)
@@ -359,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit
 #pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority("https://login.windows-ppe.org/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                    .WithAuthority("https://" + TestConstants.PpeOrgEnvironment + "/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -375,7 +375,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 result = await app
                    .AcquireTokenForClient(TestConstants.s_scope)
-                   .WithAuthority("https://login.windows-ppe.org/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                   .WithAuthority("https://" + TestConstants.PpeOrgEnvironment + "/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
                    .ExecuteAsync()
                    .ConfigureAwait(false);
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -498,7 +498,7 @@ namespace Microsoft.Identity.Test.Unit
                 }
                 var tokenHttpCallHandler = new MockHttpMessageHandler()
                 {
-                    ExpectedUrl = "https://eastus.login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
+                    ExpectedUrl = "https://eastus.login.windows-ppe.org/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",//login.windows-ppe.org is not known to MSAL or AAD
                     ExpectedMethod = HttpMethod.Post,
                     ResponseMessage = CreateResponse(true)
                 };
@@ -511,7 +511,7 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
                 var app = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
-                                 .WithAuthority("https://login.windows-ppe.net/common", validateAuthority)
+                                 .WithAuthority("https://" + TestConstants.PpeOrgEnvironment + "/common", validateAuthority)//login.windows-ppe.org is not known to MSAL or AAD
                                  .WithHttpManager(harness.HttpManager)
                                  .WithAzureRegion(EastUsRegion)
                                  .WithClientSecret(TestConstants.ClientSecret)
@@ -526,7 +526,7 @@ namespace Microsoft.Identity.Test.Unit
 
                     Assert.AreEqual(MsalError.InvalidInstance, ex.ErrorCode);
                     var qp = CoreHelpers.ParseKeyValueList(discoveryHandler.ActualRequestMessage.RequestUri.Query.Substring(1), '&', true, null);
-                    Assert.AreEqual("https://login.windows-ppe.net/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/authorize", qp["authorization_endpoint"]);
+                    Assert.AreEqual("https://login.windows-ppe.org/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/authorize", qp["authorization_endpoint"]);//login.windows-ppe.org is not known to MSAL or AAD
                 }
                 else
                 {
@@ -544,7 +544,7 @@ namespace Microsoft.Identity.Test.Unit
                     if (validateAuthority)
                     {
                         Assert.AreEqual(
-                            "https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F17b189bc-2b81-4ec5-aa51-3e628cbc931b%2Foauth2%2Fv2.0%2Fauthorize",
+                            "https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.org%2F17b189bc-2b81-4ec5-aa51-3e628cbc931b%2Foauth2%2Fv2.0%2Fauthorize",//login.windows-ppe.org is not known to MSAL or AAD
                             discoveryHandler.ActualRequestMessage.RequestUri.AbsoluteUri,
                             "Authority validation is made on https://login.microsoftonline.com/ and it validates the auth_endpoint of the non-regional authority");
                     }

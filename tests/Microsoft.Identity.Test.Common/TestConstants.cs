@@ -59,6 +59,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.r.login.microsoftonline.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
         public const string PpeEnvironment = "login.windows-ppe.net";
+        public const string PpeOrgEnvironment = "login.windows-ppe.org"; //This environment is not known to MSAL or AAD
 
         public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
         public const string AuthorityNotKnownTenanted = "https://sts.access.edu/" + Utid + "/";
