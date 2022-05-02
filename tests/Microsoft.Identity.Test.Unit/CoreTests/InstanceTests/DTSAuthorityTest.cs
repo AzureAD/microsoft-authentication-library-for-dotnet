@@ -41,20 +41,19 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(tenantedAuth, updatedAuthority, "Not changed, original authority already has tenant id");
 
             string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
-            Assert.AreEqual(tenantedAuth, updatedAuthority2, "Not changed with forced flag");
+            Assert.AreEqual("https://co2agg04-passive-dsts.dsts.core.azure-test.net/other_tenant_id/", updatedAuthority2, "Not changed with forced flag");
         }
 
         [TestMethod]
         public void CreateAuthorityFromCommonWithTenantTest()
         {
-            string commonAuth = _authorityUri + "common/";
-            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(commonAuth);
+            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl("https://login.microsoft.com/common");
 
             string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
-            Assert.AreEqual(commonAuth, updatedAuthority, "Not changed, original is common");
+            Assert.AreEqual("https://login.microsoft.com/other_tenant_id/", updatedAuthority, "Changed, original is common");
 
             string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
-            Assert.AreEqual(commonAuth, updatedAuthority2, "Not changed with forced flag");
+            Assert.AreEqual("https://login.microsoft.com/other_tenant_id/", updatedAuthority2, "Changed with forced flag");
         }
 
         [TestMethod]

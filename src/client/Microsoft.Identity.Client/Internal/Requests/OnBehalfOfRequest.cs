@@ -191,8 +191,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             if (msalTokenResponse.ClientInfo is null &&
-                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs &&
-                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Dsts)
+                !AuthenticationRequestParameters.AuthorityInfo.IsServicePricipalObOSupported)
             {
                 var logger = AuthenticationRequestParameters.RequestContext.Logger;
                 logger.Info("[OBO request] This is an on behalf of request for a service principal as no client info returned in the token response.");

@@ -9,22 +9,18 @@ namespace Microsoft.Identity.Client
     internal enum AuthorityType
     {
         /// <summary>
-        /// Azure Active Directory
         /// </summary>
         Aad,
 
         /// <summary>
-        /// ADFS authority
         /// </summary>
         Adfs,
 
         /// <summary>
-        /// For perosnal/social accounts
         /// </summary>
         B2C, 
 
         /// <summary>
-        /// For DSTS only
         /// </summary>
         Dsts,
     }

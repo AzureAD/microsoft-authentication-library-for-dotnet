@@ -7,11 +7,14 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
 {
     internal class DstsAuthority : Authority
     {
+        public const string DSTSCanonicalAuthorityTemplate = "https://{0}/{1}/";
+
         // updating token endpoints to include v2.0 so DSTS can troubleshoot the scopes issue
         private const string TokenEndpointTemplate = "{0}dstsv2/token";
         private const string AuthorizationEndpointTemplate = "{0}dstsv2/authorize";
@@ -23,8 +26,20 @@ namespace Microsoft.Identity.Client.Instance
             TenantId = AuthorityInfo.GetSecondPathSegment(AuthorityInfo.CanonicalAuthority);
         }
 
-        internal override string GetTenantedAuthority(string tenantId, bool forceTenantless = false)
+        internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
+            if (!string.IsNullOrEmpty(tenantId) &&
+                (forceSpecifiedTenant || AadAuthority.IsCommonOrganizationsOrConsumersTenant(TenantId)))
+            {
+                var authorityUri = new Uri(AuthorityInfo.CanonicalAuthority);
+
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    DSTSCanonicalAuthorityTemplate,
+                    authorityUri.Authority,
+                    tenantId);
+            }
+
             return AuthorityInfo.CanonicalAuthority;
         }
 

@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
                     authorityBuilder.Uri.Authority,
                     GetFirstPathSegment(authority)), authorityBuilder.Port);
                     break;
-            } 
+            }
         }
 
         private string[] GetPathSegments(string absolutePath)
@@ -115,6 +115,10 @@ namespace Microsoft.Identity.Client
         public AuthorityType AuthorityType { get; }
         public string UserRealmUriPrefix { get; }
         public bool ValidateAuthority { get; }
+
+        internal bool IsInstanceDiscoverySupported => (AuthorityType == AuthorityType.Aad);
+
+        internal bool IsServicePricipalObOSupported => (AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts);
 
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
