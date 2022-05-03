@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client
 
         internal bool IsInstanceDiscoverySupported => (AuthorityType == AuthorityType.Aad);
 
-        internal bool IsServicePricipalObOSupported => (AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts);
+        internal bool IsClientInfoSupported => (AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts);
 
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
@@ -336,7 +336,7 @@ namespace Microsoft.Identity.Client
                                          .TrimEnd('/');
             }
 
-            throw new InvalidOperationException(MsalErrorMessage.DSTSAuthorityDoesNotHaveThreeSegments);
+            throw new InvalidOperationException(MsalErrorMessage.DstsAuthorityDoesNotHaveThreeSegments);
         }
 
         private static AuthorityType GetAuthorityType(string authority) 

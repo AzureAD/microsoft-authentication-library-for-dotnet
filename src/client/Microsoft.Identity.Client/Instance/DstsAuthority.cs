@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class DstsAuthority : Authority
     {
-        public const string DSTSCanonicalAuthorityTemplate = "https://{0}/{1}/";
+        public const string DstsCanonicalAuthorityTemplate = "https://{0}/{1}/";
 
         // updating token endpoints to include v2.0 so DSTS can troubleshoot the scopes issue
         private const string TokenEndpointTemplate = "{0}dstsv2/token";
@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Instance
 
                 return string.Format(
                     CultureInfo.InvariantCulture,
-                    DSTSCanonicalAuthorityTemplate,
+                    DstsCanonicalAuthorityTemplate,
                     authorityUri.Authority,
                     tenantId);
             }

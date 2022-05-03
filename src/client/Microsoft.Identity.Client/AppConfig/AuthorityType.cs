@@ -8,20 +8,12 @@ namespace Microsoft.Identity.Client
     /// </summary>
     internal enum AuthorityType
     {
-        /// <summary>
-        /// </summary>
         Aad,
 
-        /// <summary>
-        /// </summary>
         Adfs,
 
-        /// <summary>
-        /// </summary>
         B2C, 
 
-        /// <summary>
-        /// </summary>
         Dsts,
     }
 }

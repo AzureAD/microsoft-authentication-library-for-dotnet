@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
             else
             {
-                requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority. ");
+                requestContext.Logger.Info($"Skipping Instance discovery for {authorityInfo.AuthorityType} authority");
                 return await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
             }
         }

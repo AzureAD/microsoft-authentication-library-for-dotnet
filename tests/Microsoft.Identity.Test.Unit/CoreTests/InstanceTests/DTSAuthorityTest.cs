@@ -11,16 +11,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
     [TestClass]
-    public class DTSAuthorityTest
+    public class DstsAuthorityTest
+
     {
-        string _authorityUri = $"https://co2agg04-passive-dsts.dsts.core.azure-test.net/dstsv2/";
+        private const string _tenantlessDstsAuthority = "https://foo.bar.test.core.azure-test.net/dstsv2/";
 
         [TestMethod]
         public void Validate_MinNumberOfSegments()
         {
             try
             {
-                var instance = Authority.CreateAuthority(_authorityUri);
+                var instance = Authority.CreateAuthority(_tenantlessDstsAuthority);
 
                 Assert.Fail("test should have failed");
             }
@@ -34,62 +35,24 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void CreateAuthorityFromTenantedWithTenantTest()
         {
-            string tenantedAuth = _authorityUri + Guid.NewGuid().ToString() + "/";
+            string tenantedAuth = _tenantlessDstsAuthority + Guid.NewGuid().ToString() + "/";
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(tenantedAuth);
 
             string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
             Assert.AreEqual(tenantedAuth, updatedAuthority, "Not changed, original authority already has tenant id");
 
             string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
-            Assert.AreEqual("https://co2agg04-passive-dsts.dsts.core.azure-test.net/other_tenant_id/", updatedAuthority2, "Not changed with forced flag");
-        }
-
-        [TestMethod]
-        public void CreateAuthorityFromCommonWithTenantTest()
-        {
-            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl("https://login.microsoft.com/common");
-
-            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
-            Assert.AreEqual("https://login.microsoft.com/other_tenant_id/", updatedAuthority, "Changed, original is common");
-
-            string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
-            Assert.AreEqual("https://login.microsoft.com/other_tenant_id/", updatedAuthority2, "Changed with forced flag");
+            Assert.AreEqual("https://foo.bar.test.core.azure-test.net/other_tenant_id/", updatedAuthority2, "Not changed with forced flag");
         }
 
         [TestMethod]
         public void TenantlessAuthorityChanges()
         {
-            string commonAuth = _authorityUri + "common/";
+            string commonAuth = _tenantlessDstsAuthority + "common/";
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(
                 commonAuth);
 
             Assert.AreEqual("common", authority.TenantId);
         }
-
-        [TestMethod]
-        public void CanonicalAuthorityInitTest()
-        {
-            string UriNoPort = TestConstants.B2CAuthority;
-            string UriNoPortTailSlash = TestConstants.B2CAuthority;
-
-            string UriDefaultPort = $"https://login.microsoftonline.in:443/tfp/tenant/{TestConstants.B2CSignUpSignIn}";
-
-            string UriCustomPort = $"https://login.microsoftonline.in:444/tfp/tenant/{TestConstants.B2CSignUpSignIn}";
-            string UriCustomPortTailSlash = $"https://login.microsoftonline.in:444/tfp/tenant/{TestConstants.B2CSignUpSignIn}/";
-            string UriVanityPort = TestConstants.B2CLoginAuthority;
-
-            var authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriNoPort, true));
-            Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
-
-            authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriDefaultPort, true));
-            Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
-
-            authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriCustomPort, true));
-            Assert.AreEqual(UriCustomPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
-
-            authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriVanityPort, true));
-            Assert.AreEqual(UriVanityPort, authority.AuthorityInfo.CanonicalAuthority);
-        }
-
     }
 }

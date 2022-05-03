@@ -25,8 +25,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class DstsTests : TestBase
     {
-        private const string CommonAuthority = "https://co2agg04-passive-dsts.dsts.core.azure-test.net/dstsv2/common";
-        private const string TenantedAuthority = "https://co2agg04-passive-dsts.dsts.core.azure-test.net/dstsv2/tenantId";
+        private const string CommonAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/common";
+        private const string TenantedAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/tenantId";
 
         [TestInitialize]
         public override void TestInitialize()
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow("tenantid")]
         public async Task DstsClientCredentialSuccessfulTestAsync(string tenantId)
         {
-            string authority = $"https://co2agg04-passive-dsts.dsts.core.azure-test.net/dstsv2/{tenantId}";
+            string authority = $"https://foo.bar.test.core.azure-test.net/dstsv2/{tenantId}";
 
             using (var httpManager = new MockHttpManager())
             {
@@ -66,6 +66,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(authority)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
+
+                Assert.AreEqual(authority + "/", app.Authority);
+                var confidentailClientApp = (ConfidentialClientApplication)app;
+                Assert.AreEqual(AuthorityType.Dsts, confidentailClientApp.AuthorityInfo.AuthorityType);
 
                 httpManager.AddMockHandler(CreateTokenResponseHttpHandler(authority));
 
