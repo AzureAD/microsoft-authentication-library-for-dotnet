@@ -21,6 +21,9 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         private static readonly string s_ppeCommonUri = $@"https://{TestConstants.PpeEnvironment}/{TestConstants.TenantId}";
         private static readonly Authority s_ppeAuthority =
           Authority.CreateAuthority(s_ppeCommonUri, true);
+        private static readonly string s_ppeOrgCommonUri = $@"https://{TestConstants.PpeOrgEnvironment}/{TestConstants.TenantId}";
+        private static readonly Authority s_ppeOrgAuthority =
+          Authority.CreateAuthority(s_ppeOrgCommonUri, true);
         private static readonly Authority s_utidAuthority =
             Authority.CreateAuthority(TestConstants.AuthorityUtidTenant, true);
         private static readonly Authority s_utid2Authority =
@@ -151,11 +154,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             _testRequestContext.ServiceBundle.Config.HttpManager = _harness.HttpManager;
             _testRequestContext.ServiceBundle.Config.Authority = s_commonAuthority;
             var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
-                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_ppeAuthority.AuthorityInfo, null)).ConfigureAwait(false);
+                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_ppeOrgAuthority.AuthorityInfo, null)).ConfigureAwait(false);
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.ErrorCode);
 
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-            _testRequestContext.ServiceBundle.Config.Authority = s_ppeAuthority;
+            _testRequestContext.ServiceBundle.Config.Authority = s_ppeOrgAuthority;
             var ex2 = await Assert.ThrowsExceptionAsync<MsalClientException>(
               () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority.AuthorityInfo, null)).ConfigureAwait(false);
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex2.ErrorCode);
