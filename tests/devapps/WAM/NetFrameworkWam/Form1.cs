@@ -408,23 +408,30 @@ namespace NetDesktopWinForms
 
         private async Task RefreshAccountsAsync()
         {
-            var pca = CreatePca();
-            var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
-
-            s_accounts.Clear();
-            s_accounts.Add(s_nullAccountModel);
-            s_accounts.Add(s_osAccountModel);
-
-            foreach (var acc in accounts)
+            try
             {
-                s_accounts.Add(new AccountModel(acc));
-            }
+                var pca = CreatePca();
+                var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
 
-            string msg = "Accounts " + Environment.NewLine +
-                string.Join(
-                     Environment.NewLine,
-                    accounts.Select(acc => $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId}"));
-            Log(msg);
+                s_accounts.Clear();
+                s_accounts.Add(s_nullAccountModel);
+                s_accounts.Add(s_osAccountModel);
+
+                foreach (var acc in accounts)
+                {
+                    s_accounts.Add(new AccountModel(acc));
+                }
+
+                string msg = "Accounts " + Environment.NewLine +
+                    string.Join(
+                         Environment.NewLine,
+                        accounts.Select(acc => $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId}"));
+                Log(msg);
+            }
+            catch (Exception ex)
+            {
+                Log(ex.Message);
+            }
         }
 
         private async void atsAtiBtn_Click(object sender, EventArgs e)
