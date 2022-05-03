@@ -62,36 +62,23 @@ namespace Microsoft.Identity.Client.Internal
 
         public static IdToken Parse(string idToken)
         {
-            string payload = string.Empty;
-
             if (string.IsNullOrEmpty(idToken))
             {
                 return null;
             }
 
+            string[] idTokenSegments = idToken.Split(new[] { '.' });
+
+            if (idTokenSegments.Length < 2)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidJwtError,
+                    MsalErrorMessage.IDTokenMustHaveTwoParts);
+            }
+
             try
             {
-                string[] idTokenSegments = idToken.Split(new[] { '.' });
-
-                //JWT contains 2 parts and JSON from Runtime contains the decoded JWT in JSON format
-                if (idTokenSegments.Length < 2)
-                {
-                    throw new MsalClientException(
-                        MsalError.InvalidJwtError,
-                        MsalErrorMessage.IDTokenMustHaveTwoParts);
-                }
-
-                //JWT format
-                if (idTokenSegments.Length == 3)
-                {
-                    payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
-                }
-                //JSON format
-                else
-                { 
-                    payload = idToken;
-                }
-
+                string payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
                 var idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
 
                 IdToken parsedIdToken = new IdToken();

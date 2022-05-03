@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Client.Broker
                 MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
                 {
                     AccessToken = authResult.AccessToken,
-                    IdToken = authResult.IdToken,
+                    IdToken = authResult.RawIdToken,
                     CorrelationId = correlationId,
                     Scope = authResult.GrantedScopes,
                     ExpiresIn = DateTimeHelpers.GetDurationFromWindowsTimestamp(expiresOn, _logger),
