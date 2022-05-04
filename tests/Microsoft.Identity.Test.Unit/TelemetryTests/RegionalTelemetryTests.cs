@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
-                RegionAutodetectionSource.EnvVariable.ToString("D"),
+                RegionAutodetectionSource.Cache.ToString("D"),
                 RegionOutcome.AutodetectSuccess.ToString("D"));
             AssertPreviousTelemetry(
                 result.HttpRequest,
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
 
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
-                RegionAutodetectionSource.EnvVariable.ToString("D"),
+                RegionAutodetectionSource.Cache.ToString("D"),
                 RegionOutcome.AutodetectSuccess.ToString("D"));
         }
 

@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Region
         private readonly int _imdsCallTimeoutMs;
 
         // lock for discovery. So it is done only once
-        private readonly SemaphoreSlim _lockDiscover = new SemaphoreSlim(1);
+        private static readonly SemaphoreSlim _lockDiscover = new SemaphoreSlim(1);
 
         private static string s_autoDiscoveredRegion;
         private static bool s_failedAutoDiscovery = false;
@@ -183,6 +183,14 @@ namespace Microsoft.Identity.Client.Region
 
                 try
                 {
+                    string region = Environment.GetEnvironmentVariable("REGION_NAME")?.Replace(" ", string.Empty).ToLowerInvariant();
+
+                    if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
+                    {
+                        logger.Info($"[Region discovery] Region found in environment variable: {region}.");
+                        return new RegionInfo(region, RegionAutodetectionSource.EnvVariable, null);
+                    }
+
                     var headers = new Dictionary<string, string>
                     {
                         { "Metadata", "true" }
@@ -204,7 +212,7 @@ namespace Microsoft.Identity.Client.Region
 
                     if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                     {
-                        string region = response.Body;
+                        region = response.Body;
 
                         if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
                         {
@@ -257,14 +265,6 @@ namespace Microsoft.Identity.Client.Region
             {
                 logger.Info($"[Region discovery] Auto-discovery already ran and found {s_autoDiscoveredRegion}.");
                 return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache, null);
-            }
-
-            string region = Environment.GetEnvironmentVariable("REGION_NAME")?.Replace(" ", string.Empty).ToLowerInvariant();
-
-            if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
-            {
-                logger.Info($"[Region discovery] Region found in environment variable: {region}.");
-                return new RegionInfo(region, RegionAutodetectionSource.EnvVariable, null);
             }
 
             return null;
