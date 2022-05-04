@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2.Throttling;
@@ -23,6 +24,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
     public class RegionalTelemetryTests : TestBase
     {
         private MockHttpAndServiceBundle _harness;
+        private bool _isSingleThread = true;
 
         [TestInitialize]
         public override void TestInitialize()
@@ -37,7 +39,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         public override void TestCleanup()
         {
             Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
-            _harness?.Dispose();
+            if (_isSingleThread)
+            {
+                _harness?.Dispose();
+            }
             base.TestCleanup();
         }
 
@@ -91,6 +96,43 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
                 RegionAutodetectionSource.Cache.ToString("D"),
                 RegionOutcome.AutodetectSuccess.ToString("D"));
+        }
+
+        [TestMethod]
+        public void TelemetryAcceptanceTest_MultiThreads()
+        {
+            _isSingleThread = false;
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+
+            int iCountDiscovery = 0;
+
+            var result = Parallel.For(0, 5, async (i) =>
+                                                    {
+                                                        try
+                                                        {
+                                                            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, logCallback: DelayLogCallback).ConfigureAwait(false);
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+                                                            Assert.Fail(ex.Message);
+                                                        }
+                                                    });
+
+            void DelayLogCallback(LogLevel logLevel, string message, bool hasPii)
+            {
+                if (message.Contains("[Region discovery]"))
+                {
+                    Thread.Sleep(1 * 1000);// sleep 1 sec
+                }
+
+                if (message.Contains("[Region discovery] Region found in environment variable:"))
+                {
+                    iCountDiscovery++;
+                }
+            }
+
+            Assert.AreEqual(1, iCountDiscovery);
+            Assert.IsTrue(result.IsCompleted);
         }
 
         /// <summary>
@@ -198,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenForClientAsync(
-            AcquireTokenForClientOutcome outcome, bool forceRefresh = false, bool serializeCache = false)
+            AcquireTokenForClientOutcome outcome, bool forceRefresh = false, bool serializeCache = false, LogCallback logCallback = null)
         {
             MockHttpMessageHandler tokenRequestHandler = null;
             Guid correlationId = default;
@@ -212,6 +254,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                        .WithClientSecret(TestConstants.ClientSecret)
                        .WithHttpManager(_harness.HttpManager)
                        .WithAzureRegion()
+                       .WithLogging(logCallback)
                        .WithExperimentalFeatures(true)
                        .BuildConcrete();
 
