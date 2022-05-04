@@ -554,7 +554,7 @@ namespace NetDesktopWinForms
         {
             try
             {
-                if (cbxAccount.SelectedIndex == 0)
+                if (cbxAccount.SelectedIndex <= 0)
                 {
                     throw new InvalidOperationException("[TEST APP FAILURE] Please select an account");
                 }

@@ -24,9 +24,9 @@ namespace Microsoft.Identity.Client.Broker
     // TODO: need to map exceptions 
     //   - WAM's retrayble exception?
     //   - cancellation exception for when the user closes the browser
+    // TODO: remove account is not implemented    
     // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419 - block users from calling ATI twice with a semaphore
     // TODO: call start-up only once (i.e. initialize core object only once) 
-    // TODO: remove account is not implemented    
     // TODO: pass in claims - try {"access_token":{"deviceid":{"essential":true}}}
     // TODO: pass is other "extra query params"
     // TODO: multi-cloud support (blocked by WAM bug)
@@ -160,14 +160,11 @@ namespace Microsoft.Identity.Client.Broker
             }
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+            bool isMsaPassthrough = _wamOptions.MsaPassthrough;
+            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            MsalTokenResponse msalTokenResponse = null;
 
             _logger.Verbose("[WamBroker] Signing in with the default user account.");
-
-            bool isMsaPassthrough = _wamOptions.MsaPassthrough;
-
-            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
-
-            MsalTokenResponse msalTokenResponse = null;
 
             using (var core = new NativeInterop.Core())
             using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authority))
@@ -306,15 +303,11 @@ namespace Microsoft.Identity.Client.Broker
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+            bool isMsaPassthrough = _wamOptions.MsaPassthrough;
+            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            MsalTokenResponse msalTokenResponse = null;
 
             _logger.Verbose("[WamBroker] Acquiring token silently.");
-
-            bool isMsaPassthrough = _wamOptions.MsaPassthrough;
-
-            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
-
-
-            MsalTokenResponse msalTokenResponse = null;
 
             using (var core = new NativeInterop.Core())
             using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authority))
@@ -374,14 +367,11 @@ namespace Microsoft.Identity.Client.Broker
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+            bool isMsaPassthrough = _wamOptions.MsaPassthrough;
+            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            MsalTokenResponse msalTokenResponse = null;
 
             _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
-
-            bool isMsaPassthrough = _wamOptions.MsaPassthrough;
-
-            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
-
-            MsalTokenResponse msalTokenResponse = null;
 
             using (var core = new NativeInterop.Core())
             using (var authParams = new NativeInterop.AuthParameters(authenticationRequestParameters.AppConfig.ClientId, authority))
@@ -440,10 +430,44 @@ namespace Microsoft.Identity.Client.Broker
         /// <param name="account"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
+        public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
-            // TODO: needs to be implemeted
-            return Task.CompletedTask;
+            string correlationId = Guid.NewGuid().ToString();
+
+            _logger.Verbose("[WamBroker] Removing WAM Account.");
+
+            using (var core = new NativeInterop.Core())
+            using (var authParams = new NativeInterop.AuthParameters(appConfig.ClientId, account.Environment))
+            {
+                using (var wamAccount = await core.ReadAccountByIdAsync(
+                    account.HomeAccountId.ObjectId,
+                    correlationId).ConfigureAwait(false))
+                {
+                    if (wamAccount == null)
+                    {
+                        _logger.WarningPii(
+                            $"Could not find a WAM account for the selected user {account.Username}",
+                            "Could not find a WAM account for the selected user");
+
+                        throw new MsalServiceException("wam_failed", $"Could not find a WAM account for the selected user {account.Username}");
+                    }
+                    
+                    using (NativeInterop.SignOutResult result = await core.SignOutSilentlyAsync(
+                        appConfig.ClientId,
+                        correlationId,
+                        wamAccount).ConfigureAwait(false))
+                    {
+                        if (result.IsSuccess)
+                        {
+                            _logger.Verbose("[WamBroker] Account signed out successfully. .");
+                        }
+                        else
+                        {
+                            throw new MsalServiceException("Failed to sign out", $"Failed to sign out account. {result.Error}");
+                        }
+                    }
+                }
+            }
         }
     }
 }
