@@ -24,10 +24,10 @@ namespace Microsoft.Identity.Client.Broker
     // TODO: need to map exceptions 
     //   - WAM's retrayble exception?
     //   - cancellation exception for when the user closes the browser
-    // TODO: remove account is not implemented    
+    // TODO: remove account is not implemented (Completed)
     // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419 - block users from calling ATI twice with a semaphore
     // TODO: call start-up only once (i.e. initialize core object only once) 
-    // TODO: pass in claims - try {"access_token":{"deviceid":{"essential":true}}}
+    // TODO: pass in claims - try {"access_token":{"deviceid":{"essential":true}}} (Completed)
     // TODO: pass is other "extra query params"
     // TODO: multi-cloud support (blocked by WAM bug)
     // TODO: add logging (Blocked - a C++ API exists, no C# API yet as it's pretty complex, waiting for msalruntime to expose it)
@@ -103,9 +103,17 @@ namespace Microsoft.Identity.Client.Broker
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
                 authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
 
+                //MSA-PT
                 if(isMsaPassthrough)
                     authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
 
+                //Client Claims
+                if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ClaimsAndClientCapabilities))
+                {
+                    authParams.DecodedClaims = authenticationRequestParameters.ClaimsAndClientCapabilities;
+                }
+
+                //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
 
                 if (!string.IsNullOrEmpty(loginHint))
@@ -172,8 +180,15 @@ namespace Microsoft.Identity.Client.Broker
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
                 authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
 
+                //MSA-PT
                 if (isMsaPassthrough)
                     authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
+
+                //Client Claims
+                if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ClaimsAndClientCapabilities))
+                {
+                    authParams.DecodedClaims = authenticationRequestParameters.ClaimsAndClientCapabilities;
+                }
 
                 using (NativeInterop.AuthResult result = await core.SignInAsync(
                         _parentHandle,
@@ -315,8 +330,15 @@ namespace Microsoft.Identity.Client.Broker
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
                 authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
 
+                //MSA-PT
                 if (isMsaPassthrough)
                     authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
+
+                //Client Claims
+                if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ClaimsAndClientCapabilities))
+                {
+                    authParams.DecodedClaims = authenticationRequestParameters.ClaimsAndClientCapabilities;
+                }
 
                 using (var account = await core.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
@@ -379,8 +401,15 @@ namespace Microsoft.Identity.Client.Broker
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
                 authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
 
+                //MSA-PT
                 if (isMsaPassthrough)
                     authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
+
+                //Client Claims
+                if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ClaimsAndClientCapabilities))
+                {
+                    authParams.DecodedClaims = authenticationRequestParameters.ClaimsAndClientCapabilities;
+                }
 
                 using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
                         authParams,
