@@ -190,7 +190,7 @@ namespace NetDesktopWinForms
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 var builder = pca.AcquireTokenSilent(GetScopes(), acc);
-                if (IsMsaPassthroughConfigured() && (GetAuthMethod() == AuthMethod.SystemBrowser || GetAuthMethod() == AuthMethod.EmbeddedBrowser))
+                if (IsMsaPassthroughConfigured() )
                 {
                     // this is the same in all clouds
                     const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
@@ -202,7 +202,6 @@ namespace NetDesktopWinForms
                     if (acc.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
                     {
                         var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
-
                         builder = builder.WithAuthority(msaAuthority);
                     }
                 }

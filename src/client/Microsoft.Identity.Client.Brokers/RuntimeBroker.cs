@@ -21,24 +21,16 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client.Broker
 {
 
-    // TODO: x64 on WPF not working
     // TODO: need to map exceptions 
     //   - WAM's retrayble exception?
     //   - cancellation exception for when the user closes the browser
-    // TODO: add logging (Blocked - a C++ API exists, no C# API yet as it's pretty complex, waiting for msalruntime to exposit it)
-    // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419
-    // TODO: configure for MSA-PT (via extra query params - msal_request_type for the key and consumer_passthrough for the value) (Completed)
-
-    // TODO: silent auth with default account (Completed)
-    // TODO: interactive auth with default account (Completed)
+    // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419 - block users from calling ATI twice with a semaphore
+    // TODO: call start-up only once (i.e. initialize core object only once) 
     // TODO: remove account is not implemented    
     // TODO: pass in claims - try {"access_token":{"deviceid":{"essential":true}}}
     // TODO: pass is other "extra query params"
-    // TODO: multi-cloud support
-    // TODO: tenant profiles are missing from accounts. maybe due to id token issue? Let's wait until msalruntime solves this or let's take the json and re-create the jwt format 
-    // TODO: can we write some integration test for this? i.e. for flows which do not result in interactive auth.
-
-    
+    // TODO: multi-cloud support (blocked by WAM bug)
+    // TODO: add logging (Blocked - a C++ API exists, no C# API yet as it's pretty complex, waiting for msalruntime to expose it)
 
     internal class RuntimeBroker : IBroker
     {
@@ -47,8 +39,7 @@ namespace Microsoft.Identity.Client.Broker
 
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
-
-        private const string InfrastructureTenant = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
+        
         private const string NativeInteropMsalRequestType = "msal_request_type"; 
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
 
@@ -102,15 +93,12 @@ namespace Microsoft.Identity.Client.Broker
             _logger.Verbose("[WamBroker] Using Windows account picker.");
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
-            var authority = isMsaPassthrough ?
-               authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
-               authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
             MsalTokenResponse msalTokenResponse = null;
 
             using (var core = new NativeInterop.Core())
             using (var authParams = new NativeInterop.AuthParameters(
                 authenticationRequestParameters.AppConfig.ClientId,
-                authority))
+                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority))
             {
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
                 authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
@@ -177,10 +165,7 @@ namespace Microsoft.Identity.Client.Broker
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
 
-            var authority = 
-                isMsaPassthrough ?
-                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
 
             MsalTokenResponse msalTokenResponse = null;
 
@@ -326,10 +311,8 @@ namespace Microsoft.Identity.Client.Broker
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
 
-            var authority = 
-                isMsaPassthrough ?
-                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+
 
             MsalTokenResponse msalTokenResponse = null;
 
@@ -396,10 +379,7 @@ namespace Microsoft.Identity.Client.Broker
 
             bool isMsaPassthrough = _wamOptions.MsaPassthrough;
 
-            var authority = 
-                isMsaPassthrough ?
-                authenticationRequestParameters.Authority.GetTenantedAuthority(InfrastructureTenant, true) :
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            var authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
 
             MsalTokenResponse msalTokenResponse = null;
 
