@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 using System;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.NativeInterop;

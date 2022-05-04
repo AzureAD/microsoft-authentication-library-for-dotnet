@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Broker
     //   - WAM's retrayble exception?
     //   - cancellation exception for when the user closes the browser
     // TODO: remove account is not implemented (Completed)
-    // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419 - block users from calling ATI twice with a semaphore
+    // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419 - block users from calling ATI twice with a semaphore (Fixed)
     // TODO: call start-up only once (i.e. initialize core object only once) 
     // TODO: pass in claims - try {"access_token":{"deviceid":{"essential":true}}} (Completed)
     // TODO: pass is other "extra query params" (Completed)
@@ -42,6 +42,8 @@ namespace Microsoft.Identity.Client.Broker
         
         private const string NativeInteropMsalRequestType = "msal_request_type"; 
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
+
+        public static SemaphoreSlim s_semaphoreSlim { get; set; } = new SemaphoreSlim(1);
 
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
@@ -88,11 +90,12 @@ namespace Microsoft.Identity.Client.Broker
                 return await AcquireTokenInteractiveDefaultUserAsync(authenticationRequestParameters, acquireTokenInteractiveParameters).ConfigureAwait(false);
             }
 
+            await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
             _logger.Verbose("[WamBroker] Using Windows account picker.");
-
+            
             using (var core = new NativeInterop.Core())
             using (var authParams = GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
@@ -129,6 +132,7 @@ namespace Microsoft.Identity.Client.Broker
                 }
             }
 
+            s_semaphoreSlim.Release();
             return msalTokenResponse;
         }
 
@@ -150,9 +154,10 @@ namespace Microsoft.Identity.Client.Broker
                     "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
             }
 
+            await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
-
+            
             _logger.Verbose("[WamBroker] Signing in with the default user account.");
 
             using (var core = new NativeInterop.Core())
@@ -176,6 +181,7 @@ namespace Microsoft.Identity.Client.Broker
                 }
             }
 
+            s_semaphoreSlim.Release();
             return msalTokenResponse;
         }
 
