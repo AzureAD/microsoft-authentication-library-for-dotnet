@@ -133,12 +133,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> SendTokenRequestToProviderAsync(CancellationToken cancellationToken)
         {
-            AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters();
-            appTokenProviderParameters.Scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope);
-            appTokenProviderParameters.CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId.ToString();
-            appTokenProviderParameters.Claims = AuthenticationRequestParameters.Claims;
-            appTokenProviderParameters.TenantId = AuthenticationRequestParameters.Authority.TenantId;
-            appTokenProviderParameters.CancellationToken = cancellationToken;
+            AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters
+            {
+                Scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope),
+                CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId.ToString(),
+                Claims = AuthenticationRequestParameters.Claims,
+                TenantId = AuthenticationRequestParameters.Authority.TenantId,
+                CancellationToken = cancellationToken,
+            };
 
             ExternalTokenResult externalToken = await ServiceBundle.Config.AppTokenProviderDelegate(appTokenProviderParameters).ConfigureAwait(false);
 
