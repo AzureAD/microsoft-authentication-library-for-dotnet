@@ -479,7 +479,7 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            throw new MsalServiceException("Failed to sign out", $"Failed to sign out account. {result.Error}");
+                            throw new MsalServiceException("wam_failed_to_signout", $"Failed to sign out account. {result.Error}");
                         }
                     }
                 }
