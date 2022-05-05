@@ -303,12 +303,7 @@ namespace Microsoft.Identity.Client
         public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<ExternalTokenResult>> appTokenProvider)
 
         {
-            if (appTokenProviderDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(appTokenProviderDelegate));
-            }
-
-            Config.AppTokenProviderDelegate = appTokenProviderDelegate;
+                        Config.AppTokenProviderDelegate = appTokenProviderDelegate ?? throw new ArgumentNullException(nameof(appTokenProviderDelegate));
             return this;
         }
 
