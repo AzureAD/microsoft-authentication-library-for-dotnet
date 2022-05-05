@@ -36,13 +36,14 @@ namespace Microsoft.Identity.Client.Broker
     {
         private readonly ICoreLogger _logger;
         private readonly IntPtr _parentHandle = IntPtr.Zero;
-
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
-        
+
+        //MSA-PT
         private const string NativeInteropMsalRequestType = "msal_request_type"; 
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
-
+        
+        //Only one broker session can exist at a time
         public static SemaphoreSlim s_semaphoreSlim { get; set; } = new SemaphoreSlim(1);
 
         /// <summary>
@@ -77,6 +78,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            //need to provide a handle
             if (_parentHandle == IntPtr.Zero)
             {
                 throw new MsalClientException(
@@ -147,6 +149,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            //need to provide a handle
             if (_parentHandle == IntPtr.Zero)
             {
                 throw new MsalClientException(
