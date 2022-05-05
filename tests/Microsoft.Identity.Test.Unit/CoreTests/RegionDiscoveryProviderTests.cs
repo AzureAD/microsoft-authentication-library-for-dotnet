@@ -86,6 +86,34 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
+        public void MultiThreadSuccessfulResponseFromLocalImds_HasOnlyOneImdsCall()
+        {
+            // add the mock response only once and call it 5 times on multiple threads
+            // if the http mock is called more than once, it will fail in dispose as queue will be non-empty
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
+            var result = Parallel.For(0, 5, async (i) =>
+            {
+                try
+                {
+
+                    _testRequestContext.ServiceBundle.Config.AzureRegion =
+                        ConfidentialClientApplication.AttemptRegionDiscovery;
+
+                    InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                        new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+                    ValidateInstanceMetadata(regionalMetadata);
+                }
+                catch (Exception ex)
+                {
+                    Assert.Fail(ex.Message);
+                }
+            });
+
+            Assert.IsTrue(result.IsCompleted);
+        }
+
+        [TestMethod]
         public async Task FetchRegionFromLocalImdsThenGetMetadataFromCacheAsync()
         {
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
