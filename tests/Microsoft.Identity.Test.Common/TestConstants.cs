@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
-        public const string AutomationTestThumbprint = "378938210C976692D7F523B8C4FFBB645D17CE92";
+        public const string AutomationTestThumbprint = "4E87313FD450985A10BC0F14A292859F2DCD6CD3";
 
         public static readonly SortedSet<string> s_scopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" }, StringComparer.OrdinalIgnoreCase);
         public static readonly SortedSet<string> s_cacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" }, StringComparer.OrdinalIgnoreCase);
@@ -59,6 +59,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.r.login.microsoftonline.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
         public const string PpeEnvironment = "login.windows-ppe.net";
+        public const string PpeOrgEnvironment = "login.windows-ppe.org"; //This environment is not known to MSAL or AAD
 
         public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
         public const string AuthorityNotKnownTenanted = "https://sts.access.edu/" + Utid + "/";
