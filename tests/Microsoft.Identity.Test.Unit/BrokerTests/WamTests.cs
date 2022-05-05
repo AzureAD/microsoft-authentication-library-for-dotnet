@@ -87,10 +87,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 
-#pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
-#pragma warning restore CS0618 // Type or member is obsolete
-
         }
 
         [TestMethod]
@@ -103,10 +100,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 
-#pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
-#pragma warning restore CS0618 // Type or member is obsolete
-
         }
 
         [TestMethod]

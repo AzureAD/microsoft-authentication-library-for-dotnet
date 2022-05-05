@@ -75,9 +75,7 @@ namespace NetCoreTestApp
                             .WithExperimentalFeatures()
                             .WithDesktopFeatures();
 
-#pragma warning disable CS0618 // Type or member is obsolete
             Console.WriteLine($"IsBrokerAvailable: {pcaBuilder.IsBrokerAvailable()}");
-#pragma warning restore CS0618 // Type or member is obsolete
 
             var pca = pcaBuilder.WithRedirectUri("http://localhost") // required for DefaultOsBrowser
                             .Build();

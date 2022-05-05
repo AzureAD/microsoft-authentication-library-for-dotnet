@@ -127,9 +127,7 @@ namespace NetFx
 #endif
                             .WithLogging(Log, LogLevel.Verbose, true);
 
-#pragma warning disable CS0618 // Type or member is obsolete
             Console.WriteLine($"IsBrokerAvailable: {builder.IsBrokerAvailable()}");
-#pragma warning restore CS0618 // Type or member is obsolete
 
             if (s_useBroker)
             {

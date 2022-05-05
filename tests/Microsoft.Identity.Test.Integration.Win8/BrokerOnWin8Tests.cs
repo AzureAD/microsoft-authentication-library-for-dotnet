@@ -21,9 +21,7 @@ namespace Microsoft.Identity.Test.Integration.Win8
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 
-#pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
-#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 }

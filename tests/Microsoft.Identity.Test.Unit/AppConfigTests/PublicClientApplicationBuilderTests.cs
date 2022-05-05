@@ -622,7 +622,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
         }
-#pragma warning disable CS0618 // Type or member is obsolete
 
 #if NET5_WIN
         [TestMethod]
@@ -685,13 +684,16 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 #endif
 
         [TestMethod]
-        public void IsBrokerAvailable_NoAuthorityInBuilder_ReturnsFalse()
+        public void IsBrokerAvailable_NoAuthorityInBuilder()
         {
             var builder1 = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId);
 
+#if DESKTOP || NET_CORE
             Assert.IsFalse(builder1.IsBrokerAvailable());
+#else
+            Assert.IsTrue(builder1.IsBrokerAvailable());
+#endif
         }
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 }
