@@ -20,7 +20,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Broker
 {
-
+    // TODO: wpf crashes on the second ATI
     // TODO: need to map exceptions 
     //   - WAM's retrayble exception?
     //   - cancellation exception for when the user closes the browser
