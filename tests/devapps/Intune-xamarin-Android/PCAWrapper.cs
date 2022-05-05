@@ -1,17 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using Microsoft.Identity.Client;
 
 namespace Intune_xamarin_Android
@@ -50,14 +42,22 @@ namespace Intune_xamarin_Android
         {
             // Create PCA once. Make sure that all the config parameters below are passed
             // ClientCapabilities - must have ProtApp
-            PCA = PublicClientApplicationBuilder
+            var builder = PublicClientApplicationBuilder
                 .Create(_clientID)
                 .WithAuthority(_authority)
-                .WithBroker()
                 .WithClientCapabilities(clientCapabilities)
                 .WithTenantId(_tenantID)
-                .WithRedirectUri(_redirectURI)
-                .Build();
+                .WithRedirectUri(_redirectURI);
+            if (builder.IsBrokerAvailable())
+            {
+                builder.WithBroker();
+            }
+            else
+            {
+                // Notify the user that broker must be installed.
+            }
+
+            PCA = builder.Build();
         }
 
         /// <summary>
