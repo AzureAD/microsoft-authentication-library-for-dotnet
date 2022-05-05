@@ -53,12 +53,15 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.8.0" />
+  </ItemGroup>
 
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
     <!-- This package has not yet been published to nuget.org !-->
-    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.1.1" />
+    
   </ItemGroup>
 
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
