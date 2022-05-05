@@ -295,9 +295,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acqwuires an access token via a provided authentication callback.
+        /// Allows setting a callback which returns an access token, based on the passed-in parameters.
         /// </summary>
-        /// <param name="appTokenProviderDelegate">Authentication callback</param>
+        /// <param name="appTokenProviderDelegate">Authentication callback which returns an access token.</param>
+
         /// <returns></returns>
         public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<ExternalTokenResult>> appTokenProviderDelegate)
         {
