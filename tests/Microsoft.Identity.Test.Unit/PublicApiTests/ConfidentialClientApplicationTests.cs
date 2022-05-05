@@ -1697,7 +1697,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var tokens = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
 
-            Assert.IsTrue(tokens.Count > 0);
+            Assert.AreEqual(1, tokens.Count);
 
             var token = tokens.FirstOrDefault();
             Assert.IsNotNull(token);
