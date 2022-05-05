@@ -88,10 +88,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public void MultiThreadSuccessfulResponseFromLocalImds_HasOnlyOneImdsCall()
         {
+            const int MaxThreadCount = 5;
             // add the mock response only once and call it 5 times on multiple threads
             // if the http mock is called more than once, it will fail in dispose as queue will be non-empty
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
-            var result = Parallel.For(0, 5, async (i) =>
+            SemaphoreSlim semaphore = new SemaphoreSlim(0);
+            int threadCount = MaxThreadCount;
+            var result = Parallel.For(0, MaxThreadCount, async (i) =>
             {
                 try
                 {
@@ -103,6 +106,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                         new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                     ValidateInstanceMetadata(regionalMetadata);
+                    Interlocked.Decrement(ref threadCount);
                 }
                 catch (Exception ex)
                 {
@@ -111,6 +115,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             });
 
             Assert.IsTrue(result.IsCompleted);
+            while (threadCount != 0)
+            {
+                Thread.Sleep(100);
+                Thread.Yield();
+            }
         }
 
         [TestMethod]
