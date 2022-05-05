@@ -162,14 +162,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 TenantId = externalTokenResponse.TenantId
             };
 
-            if (externalTokenResponse.RefreshInSeconds.HasValue)
-            {
-                response.RefreshIn = externalTokenResponse.RefreshInSeconds.Value;
-            }
-            else
-            {
-                response.RefreshIn = response.ExpiresIn;
-            }
+            response.RefreshIn = externalTokenResponse.RefreshInSeconds ?? response.ExpiresIn;
 
             return response;
         }
