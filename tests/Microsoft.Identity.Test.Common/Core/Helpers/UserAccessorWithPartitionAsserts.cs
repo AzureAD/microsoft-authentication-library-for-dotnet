@@ -18,25 +18,25 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         }
 
-        public override List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
+        public override List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             return base.GetAllAccessTokens(partitionKey);
         }
 
-        public override List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
+        public override List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             return base.GetAllAccounts(partitionKey);
         }
 
-        public override List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
+        public override List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             return base.GetAllIdTokens(partitionKey);
         }
 
-        public override List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
+        public override List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             return base.GetAllRefreshTokens(partitionKey);
