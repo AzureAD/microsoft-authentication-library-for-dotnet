@@ -300,7 +300,8 @@ namespace Microsoft.Identity.Client
         /// <param name="appTokenProviderDelegate">Authentication callback which returns an access token.</param>
 
         /// <returns></returns>
-        public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<ExternalTokenResult>> appTokenProviderDelegate)
+        public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<ExternalTokenResult>> appTokenProvider)
+
         {
             if (appTokenProviderDelegate == null)
             {
