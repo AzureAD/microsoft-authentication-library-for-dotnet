@@ -13,13 +13,13 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Token result from external token provider
     /// </summary>
-    public class ExternalTokenResult
+    public class TokenProviderResult
     {
         /// <summary>
         /// Access token
         /// Mandatory
         /// </summary>
-        public string RawAccessToken { get; set; }
+        public string AccessToken { get; set; }
 
         /// <summary>
         /// Tenant Id for client application
@@ -34,7 +34,6 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// When the token should be refreshed proactivly. (Optional)
-        /// If not provided computed as Expiry-DateTimeOffset.Now()
         /// </summary>
         public long? RefreshInSeconds { get; set; } 
     }

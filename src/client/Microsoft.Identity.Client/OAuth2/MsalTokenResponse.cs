@@ -146,48 +146,48 @@ namespace Microsoft.Identity.Client.OAuth2
             return response;
         }
 
-        internal static MsalTokenResponse CreateFromAppProviderResponse(ExternalTokenResult externalTokenResponse)
+        internal static MsalTokenResponse CreateFromAppProviderResponse(TokenProviderResult tokenProviderResponse)
         {
-            ValidateExternalTokenResult(externalTokenResponse);
+            ValidateTokenProviderResult(tokenProviderResponse);
 
             var response = new MsalTokenResponse
             {
-                AccessToken = externalTokenResponse.RawAccessToken,
+                AccessToken = tokenProviderResponse.AccessToken,
                 RefreshToken = null,
                 IdToken = null,
                 TokenType = BrokerResponseConst.Bearer,
-                ExpiresIn = externalTokenResponse.ExpiresInSeconds,
+                ExpiresIn = tokenProviderResponse.ExpiresInSeconds,
                 ClientInfo = null,
                 TokenSource = TokenSource.IdentityProvider,
-                TenantId = externalTokenResponse.TenantId
+                TenantId = null //Leaving as null so MSAL can use the original request Tid. This is ok for confidential client scenarios
             };
 
-            response.RefreshIn = externalTokenResponse.RefreshInSeconds ?? response.ExpiresIn;
+            response.RefreshIn = tokenProviderResponse.RefreshInSeconds ?? response.ExpiresIn;
 
             return response;
         }
 
-        private static void ValidateExternalTokenResult(ExternalTokenResult externalTokenResult)
+        private static void ValidateTokenProviderResult(TokenProviderResult TokenProviderResult)
         {
-            if (string.IsNullOrEmpty(externalTokenResult.RawAccessToken))
+            if (string.IsNullOrEmpty(TokenProviderResult.AccessToken))
             {
-                HandleInvalidExternalValueError(nameof(externalTokenResult.RawAccessToken));
+                HandleInvalidExternalValueError(nameof(TokenProviderResult.AccessToken));
             }
 
-            if (externalTokenResult.ExpiresInSeconds == 0 || externalTokenResult.ExpiresInSeconds < 0)
+            if (TokenProviderResult.ExpiresInSeconds == 0 || TokenProviderResult.ExpiresInSeconds < 0)
             {
-                HandleInvalidExternalValueError(nameof(externalTokenResult.ExpiresInSeconds));
+                HandleInvalidExternalValueError(nameof(TokenProviderResult.ExpiresInSeconds));
             }
 
-            if (string.IsNullOrEmpty(externalTokenResult.TenantId))
+            if (string.IsNullOrEmpty(TokenProviderResult.TenantId))
             {
-                HandleInvalidExternalValueError(nameof(externalTokenResult.TenantId));
+                HandleInvalidExternalValueError(nameof(TokenProviderResult.TenantId));
             }
         }
 
         private static void HandleInvalidExternalValueError(string nameOfValue)
         {
-            throw new MsalClientException(MsalError.InvalidExternalTokenResponseValue, MsalErrorMessage.InvalidExternalTokenResponseValue(nameOfValue));
+            throw new MsalClientException(MsalError.InvalidTokenProviderResponseValue, MsalErrorMessage.InvalidTokenProviderResponseValue(nameOfValue));
         }
 
         /// <remarks>

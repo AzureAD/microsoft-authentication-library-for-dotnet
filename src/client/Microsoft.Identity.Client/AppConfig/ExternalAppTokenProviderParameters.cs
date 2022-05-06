@@ -13,25 +13,25 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// 
     /// </summary>
-    public class AppTokenProviderParameters
+    public class ExternalAppTokenProviderParameters
     {
         /// <summary>
-        /// 
+        /// Specifies which scopes to request.
         /// </summary>
         public IEnumerable<string> Scopes { get; internal set; }
 
         /// <summary>
-        /// 
+        /// Correlation id of the authentication request.
         /// </summary>
         public string CorrelationId { get; internal set; }
 
         /// <summary>
-        /// 
+        /// A string with one or multiple claims.
         /// </summary>
         public string Claims { get; internal set; }
 
         /// <summary>
-        /// 
+        /// Tenant id of the 
         /// </summary>
         public string TenantId { get; internal set; }
 

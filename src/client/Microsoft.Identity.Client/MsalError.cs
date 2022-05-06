@@ -1060,8 +1060,8 @@ namespace Microsoft.Identity.Client
         public const string OboCacheKeyNotInCacheError = "obo_cache_key_not_in_cache_error";
 
         /// <summary>
-        /// A required value is missing from the external token response
+        /// A required value is missing from the token providerresponse
         /// </summary>
-        public const string InvalidExternalTokenResponseValue = "missing_edxternal_token_response_value";
+        public const string InvalidTokenProviderResponseValue = "invalid_token_provider_response_value";
     }
 }

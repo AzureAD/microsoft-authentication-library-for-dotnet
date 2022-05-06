@@ -297,13 +297,13 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Allows setting a callback which returns an access token, based on the passed-in parameters.
         /// </summary>
-        /// <param name="appTokenProviderDelegate">Authentication callback which returns an access token.</param>
+        /// <param name="appTokenProvider">Authentication callback which returns an access token.</param>
 
         /// <returns></returns>
-        public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<ExternalTokenResult>> appTokenProvider)
+        public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<ExternalAppTokenProviderParameters, Task<TokenProviderResult>> appTokenProvider)
 
         {
-                        Config.AppTokenProviderDelegate = appTokenProviderDelegate ?? throw new ArgumentNullException(nameof(appTokenProviderDelegate));
+            Config.AppTokenProvider = appTokenProvider ?? throw new ArgumentNullException(nameof(appTokenProvider));
             return this;
         }
 

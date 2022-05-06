@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
         public bool MultiCloudSupportEnabled { get; set; } = false;
 
-        public Func<AppTokenProviderParameters, Task<ExternalTokenResult>> AppTokenProviderDelegate;
+        public Func<ExternalAppTokenProviderParameters, Task<TokenProviderResult>> AppTokenProvider;
 
         #region ClientCredentials
 

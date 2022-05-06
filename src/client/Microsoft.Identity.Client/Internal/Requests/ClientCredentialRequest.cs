@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
             MsalTokenResponse msalTokenResponse;
-            if (ServiceBundle.Config.AppTokenProviderDelegate != null)
+            if (ServiceBundle.Config.AppTokenProvider != null)
             {
                 msalTokenResponse = await SendTokenRequestToProviderAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> SendTokenRequestToProviderAsync(CancellationToken cancellationToken)
         {
-            AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters
+            ExternalAppTokenProviderParameters appTokenProviderParameters = new ExternalAppTokenProviderParameters
             {
                 Scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope),
                 CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId.ToString(),
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 CancellationToken = cancellationToken,
             };
 
-            ExternalTokenResult externalToken = await ServiceBundle.Config.AppTokenProviderDelegate(appTokenProviderParameters).ConfigureAwait(false);
+            TokenProviderResult externalToken = await ServiceBundle.Config.AppTokenProvider(appTokenProviderParameters).ConfigureAwait(false);
 
             var tokenResponse =  MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
             tokenResponse.Scope = appTokenProviderParameters.Scopes.AsSingleString();
