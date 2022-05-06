@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Test.Performance
                     typeof(AcquireTokenForClientCacheTests),
                     typeof(AcquireTokenForOboCacheTests),
                     typeof(TokenCacheTests),
+                    typeof(AcquireTokenNoCacheTests),
             }).RunAll(
 #if DEBUG
                     new DebugInProcessConfig()
@@ -49,7 +50,7 @@ namespace Microsoft.Identity.Test.Performance
 
     public static class Logger
     {
-        private const string LogPrefix = "[Microsoft.Identity.Test.Performance]";
+        private const string LogPrefix = "[Test.Performance]";
         public static void Log(string message) => Console.WriteLine($"{LogPrefix} {message}");
     }
 }

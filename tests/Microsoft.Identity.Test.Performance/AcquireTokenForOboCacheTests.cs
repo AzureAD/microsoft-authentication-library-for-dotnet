@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +32,7 @@ namespace Microsoft.Identity.Test.Performance
         private ConfidentialClientApplication _cca;
         private InMemoryCache _serializationCache;
         private string _scope;
-        private string _authority;
+        private string _tenantId;
         private UserAssertion _userAssertion;
 
         // i.e. (partitions, tokens per partition)
@@ -45,9 +44,7 @@ namespace Microsoft.Identity.Test.Performance
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10),
             (1, 10000),
-            (1000, 10),
             (10000, 10),
-            (100000, 10),
         };
 
         [ParamsAllValues]
@@ -85,18 +82,10 @@ namespace Microsoft.Identity.Test.Performance
             }
 
             await PopulateUserCacheAsync(CacheSize.TotalUsers, CacheSize.TokensPerUser, EnableCacheSerialization).ConfigureAwait(false);
-        }
 
-        [IterationSetup]
-        public void IterationSetup()
-        {
-            Random random = new Random();
-            _userAssertion = new UserAssertion($"{TestConstants.DefaultAccessToken}{random.Next(0, CacheSize.TotalUsers)}");
-            string id = random.Next(0, CacheSize.TokensPerUser).ToString();
-            _scope = $"{_scopePrefix}{id}";
-            _authority = IsMultiTenant ?
-                $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}{id}" :
-                $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}";
+            _userAssertion = new UserAssertion($"{TestConstants.DefaultAccessToken}0");
+            _scope = $"{_scopePrefix}0";
+            _tenantId = IsMultiTenant ? $"{_tenantPrefix}0" : _tenantPrefix;
         }
 
         [Benchmark(Description = "AcquireTokenForOBO")]
@@ -104,7 +93,7 @@ namespace Microsoft.Identity.Test.Performance
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOf_TestAsync()
         {
             return await _cca.AcquireTokenOnBehalfOf(new[] { _scope }, _userAssertion)
-                .WithAuthority(_authority)
+                .WithTenantId(_tenantId)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
         }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,10 +31,8 @@ namespace Microsoft.Identity.Test.Performance
         private readonly string _scopePrefix = "https://resource.com/.default";
         private ConfidentialClientApplication _cca;
         private string _scope;
-        private string _authority;
+        private string _tenantId;
         private IAccount _account;
-        private string _tokenId;
-        private string _userId;
 
         // i.e. (partitions, tokens per partition)
         [ParamsSource(nameof(CacheSizeSource), Priority = 0)]
@@ -46,9 +43,7 @@ namespace Microsoft.Identity.Test.Performance
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10),
             (1, 10000),
-            (1000, 10),
             (10000, 10),
-            (100000, 10),
         };
 
         // If the tokens are saved with different tenants.
@@ -66,19 +61,10 @@ namespace Microsoft.Identity.Test.Performance
                 .BuildConcrete();
 
             PopulateUserCache(CacheSize.TotalUsers, CacheSize.TokensPerUser);
-        }
 
-        [IterationSetup]
-        public void IterationSetup_AcquireTokenSilent()
-        {
-            Random random = new Random();
-            _userId = random.Next(0, CacheSize.TotalUsers).ToString();
-            _account = new Account($"{_userId}.{_tenantPrefix}", TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment);
-            _tokenId = random.Next(0, CacheSize.TokensPerUser).ToString();
-            _scope = $"{_scopePrefix}{_tokenId}";
-            _authority = IsMultiTenant ?
-                $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}{_tokenId}" :
-                $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}";
+            _account = new Account($"0.{_tenantPrefix}", TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment);
+            _scope = $"{_scopePrefix}{0}";
+            _tenantId = IsMultiTenant ? $"{_tenantPrefix}0" : _tenantPrefix;
         }
 
         [Benchmark(Description = "AcquireTokenSilent")]
@@ -86,7 +72,7 @@ namespace Microsoft.Identity.Test.Performance
         public async Task<AuthenticationResult> AcquireTokenSilent_TestAsync()
         {
             return await _cca.AcquireTokenSilent(new string[] { _scope }, _account)
-                .WithAuthority(_authority)
+                .WithTenantId(_tenantId)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
         }
@@ -118,7 +104,7 @@ namespace Microsoft.Identity.Test.Performance
         [IterationCleanup(Target = nameof(RemoveAccountAsync_TestAsync))]
         public void IterationCleanup_RemoveAccount()
         {
-            PopulationPartition(_userId, CacheSize.TokensPerUser.ToString());
+            PopulationPartition("0", CacheSize.TokensPerUser.ToString());
         }
 
         private void PopulateUserCache(int totalUsers, int tokensPerUser)
@@ -137,7 +123,7 @@ namespace Microsoft.Identity.Test.Performance
         {
             for (int tokenId = 0; tokenId < int.Parse(tokensPerUser); tokenId++)
             {
-                InsertCacheItem(userId.ToString(), tokenId.ToString());
+                InsertCacheItem(userId, tokenId.ToString());
             }
         }
 

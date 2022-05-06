@@ -21,8 +21,8 @@ namespace Microsoft.Identity.Test.Performance
     {
         private ConfidentialClientApplication _cca;
         private MockHttpManager _httpManager;
-        private string[] _scope = TestConstants.s_scope.ToArray();
-        private UserAssertion _userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+        private readonly string[] _scope = TestConstants.s_scope.ToArray();
+        private readonly UserAssertion _userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
         [GlobalSetup(Target = nameof(AcquireTokenForClient_TestAsync))]
         public void GlobalSetup_ForClient()
