@@ -106,20 +106,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                         new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                     ValidateInstanceMetadata(regionalMetadata);
-                    Interlocked.Decrement(ref threadCount);
                 }
                 catch (Exception ex)
                 {
                     Assert.Fail(ex.Message);
                 }
+                finally
+                {
+                    Interlocked.Decrement(ref threadCount);
+                }
             });
 
-            Assert.IsTrue(result.IsCompleted);
             while (threadCount != 0)
             {
                 Thread.Sleep(100);
                 Thread.Yield();
             }
+            Assert.IsTrue(result.IsCompleted);
         }
 
         [TestMethod]
