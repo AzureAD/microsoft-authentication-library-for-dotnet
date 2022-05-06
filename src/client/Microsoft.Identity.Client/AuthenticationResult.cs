@@ -123,11 +123,11 @@ namespace Microsoft.Identity.Client
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
             MsalIdTokenCacheItem msalIdTokenCacheItem, 
-            IEnumerable<TenantProfile> tenantProfiles,
             IAuthenticationScheme authenticationScheme,
             Guid correlationID,
             TokenSource tokenSource, 
             ApiEvent apiEvent,
+            Account account,
             string spaAuthCode = null)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
@@ -140,13 +140,16 @@ namespace Microsoft.Identity.Client
 
             ClaimsPrincipal = msalIdTokenCacheItem?.IdToken.ClaimsPrincipal;
 
-            if (homeAccountId != null)
+            if (account != null)
+            {
+                Account = account;
+            }
+            else if (homeAccountId != null)
             {
                 Account = new Account(
                     homeAccountId,
                     msalIdTokenCacheItem?.GetUsername(),
-                    environment,
-                    tenantProfiles: tenantProfiles);
+                    environment);
             }
 
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();

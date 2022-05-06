@@ -11,6 +11,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Performance.Helpers;
 using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Performance
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Test.Performance
             _requests = new AcquireTokenForClientParameterBuilder[AppsCount];
             for (int i = 0; i < AppsCount; i++)
             {
-                X509Certificate2 certificate = CreateCertificate("CN=rsa2048", RSA.Create(2048), HashAlgorithmName.SHA256, null);
+                X509Certificate2 certificate = CertificateHelper.CreateCertificate("CN=rsa2048", RSA.Create(2048), HashAlgorithmName.SHA256, null);
                 _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
                         .WithAuthority(new Uri(TestConstants.AuthorityTestTenant))
@@ -54,7 +55,6 @@ namespace Microsoft.Identity.Test.Performance
                     .WithForceRefresh(true);
             }
         }
-
 
         /// <summary>
         /// Adds mocked HTTP response to the HTTP manager before each call.
@@ -71,28 +71,6 @@ namespace Microsoft.Identity.Test.Performance
         {
             var result = await _requests[_requestIdx].ExecuteAsync(System.Threading.CancellationToken.None).ConfigureAwait(true);
             return result;
-        }
-
-        private X509Certificate2 CreateCertificate(string x509DistinguishedName, object key, HashAlgorithmName hashAlgorithmName, X509Certificate2 issuer)
-        {
-            CertificateRequest certificateRequest = null;
-            if (key is RSA)
-                certificateRequest = new CertificateRequest(x509DistinguishedName, key as RSA, hashAlgorithmName, RSASignaturePadding.Pkcs1);
-
-            if (issuer == null)
-            {
-                certificateRequest.CertificateExtensions.Add(new X509BasicConstraintsExtension(true, true, 0, true));
-                return certificateRequest.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(20));
-            }
-            else
-            {
-                var certificate = certificateRequest.Create(issuer, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(10), Guid.NewGuid().ToByteArray());
-
-                if (key is RSA)
-                    return certificate.CopyWithPrivateKey(key as RSA);
-
-                return certificate;
-            }
         }
 
         private void AddHostToInstanceCache(IServiceBundle serviceBundle, string host)

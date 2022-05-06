@@ -256,7 +256,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                  result).ConfigureAwait(false);
         }
 
-
         [TestMethod]
         public async Task PopTestWithRSAAsync()
         {
@@ -498,7 +497,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public string CannonicalPublicKeyJwk { get; }
 
         public string CryptographicAlgorithm { get => "RS256"; }
-
 
         /// <summary>
         /// Creates the canonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3

@@ -75,7 +75,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         }
         public string AutoDetectedRegion { get; internal set; }
 
-
         public string RegionDiscoveryFailureReason { get; set; }
         #endregion
 

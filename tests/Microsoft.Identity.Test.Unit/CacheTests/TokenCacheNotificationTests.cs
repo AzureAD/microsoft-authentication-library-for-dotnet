@@ -194,7 +194,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     await Task.Delay(10).ConfigureAwait(false);
                 });
 
-
                 pca.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
 
@@ -349,12 +348,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     throw new OperationCanceledException();
                 });
 
-
                 await AssertException.TaskThrowsAsync<OperationCanceledException>(() => app.GetAccountsAsync()).ConfigureAwait(false);
             }
         }
-
-
 
         [TestMethod]
         public async Task GetAccounts_DoesNotFireNotifications_WhenTokenCacheIsNotSerialized_Async()
@@ -382,7 +378,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await cca.UserTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeWriteAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
             await cca.UserTokenCacheInternal.DidNotReceiveWithAnyArgs().OnAfterAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
 
-
             // Arrange
             userTokenCacheInternal.IsAppSubscribedToSerializationEvents().Returns(true);
 
@@ -393,7 +388,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await cca.UserTokenCacheInternal.Received().OnBeforeAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
             await cca.UserTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeWriteAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
             await cca.UserTokenCacheInternal.Received().OnAfterAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
-
 
         }
 
@@ -422,7 +416,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await cca.AppTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
             await cca.AppTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeWriteAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
             await cca.AppTokenCacheInternal.DidNotReceiveWithAnyArgs().OnAfterAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
-
 
             // Arrange
             appTokenCache.IsAppSubscribedToSerializationEvents().Returns(true);

@@ -67,7 +67,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion
 
-
         [TestMethod]
         // Regression test for: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/891
         public async Task SeleniumGetAuthCode_RedeemForAt_CommonAuthority_Async()

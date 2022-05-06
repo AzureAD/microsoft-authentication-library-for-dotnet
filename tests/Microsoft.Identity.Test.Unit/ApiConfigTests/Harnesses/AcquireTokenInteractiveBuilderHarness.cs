@@ -36,7 +36,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
                 CancellationToken.None).ConfigureAwait(false);
         }
 
-
         public void ValidateInteractiveParameters(
            IAccount expectedAccount = null,
            IEnumerable<string> expectedExtraScopesToConsent = null,

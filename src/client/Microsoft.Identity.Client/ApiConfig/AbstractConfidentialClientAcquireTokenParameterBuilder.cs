@@ -59,7 +59,6 @@ namespace Microsoft.Identity.Client
             base.Validate();
         }
 
-
         internal IConfidentialClientApplicationExecutor ConfidentialClientApplicationExecutor { get; }
 
         /// <summary>

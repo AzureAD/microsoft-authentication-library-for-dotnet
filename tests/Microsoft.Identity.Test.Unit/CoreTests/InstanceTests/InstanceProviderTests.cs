@@ -67,6 +67,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsNotNull(result);
 
             result = knownMetadataProvider.GetMetadata(
+                "login.windows-ppe.net", new[] { "login.windows-ppe.net", "sts.windows-ppe.net", "login.microsoft-ppe.com" }, _logger);
+            Assert.IsNotNull(result);
+
+            result = knownMetadataProvider.GetMetadata(
                LoginMicrosoftOnlineCom, new[] { "login.windows.net", "bogus", "login.partner.microsoftonline.cn" }, _logger);
             Assert.IsNull(result);
 
@@ -74,7 +78,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 "bogus", new[] { "login.windows.net", "login.microsoft.com", "login.partner.microsoftonline.cn" }, _logger);
             Assert.IsNull(result);
         }
-
 
         [TestMethod]
         [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]

@@ -36,7 +36,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string GlobalHost = "login.microsoftonline.com";
         private IConfidentialClientApplication _confidentialClientApplication;
 
-
         [TestInitialize]
         public void TestInitialize()
         {

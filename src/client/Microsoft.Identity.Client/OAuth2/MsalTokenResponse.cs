@@ -207,6 +207,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     Error = errorCode,
                     ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage]?.ToString(),
+                    AuthorityUrl = authResult[BrokerResponseConst.Authority]?.ToString(),
+                    TenantId = authResult[BrokerResponseConst.TenantId]?.ToString(),
+                    Upn = authResult[BrokerResponseConst.UserName]?.ToString(),
+                    AccountUserId = authResult[BrokerResponseConst.LocalAccountId]?.ToString(),
                 };
             }
 
@@ -220,7 +224,11 @@ namespace Microsoft.Identity.Client.OAuth2
                 ExtendedExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
                 ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
                 TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
-                TokenSource = TokenSource.Broker
+                TokenSource = TokenSource.Broker,
+                AuthorityUrl = authResult[BrokerResponseConst.Authority]?.ToString(),
+                TenantId = authResult[BrokerResponseConst.TenantId]?.ToString(),
+                Upn = authResult[BrokerResponseConst.UserName]?.ToString(),
+                AccountUserId = authResult[BrokerResponseConst.LocalAccountId]?.ToString(),
             };
 
             return msalTokenResponse;

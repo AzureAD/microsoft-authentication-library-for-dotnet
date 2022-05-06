@@ -61,7 +61,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
             return stringBuilder.ToString().ToLowerInvariant();
         }
 
-
         public static string GetiOSServiceKey(
             string keyDescriptor, 
             string clientId, 

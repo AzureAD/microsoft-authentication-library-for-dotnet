@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         /// </summary>
         public static int ZoomPercent { get; }
 
-
         [DllImport("User32.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
         internal static extern IntPtr GetDC(IntPtr hWnd);
 
@@ -55,5 +54,4 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         internal static extern bool IsProcessDPIAware();
     }
 }
-
 

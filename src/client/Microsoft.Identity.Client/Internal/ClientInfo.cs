@@ -9,7 +9,6 @@ using Microsoft.Identity.Json;
 namespace Microsoft.Identity.Client.Internal
 {
 
-
     [JsonObject]
     [Preserve(AllMembers = true)]
     internal class ClientInfo

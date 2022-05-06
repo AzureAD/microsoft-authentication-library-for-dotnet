@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 
         public string Callback { get; }
 
-
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();

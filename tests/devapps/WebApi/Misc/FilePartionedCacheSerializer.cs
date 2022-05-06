@@ -90,7 +90,7 @@ namespace WebApi.Misc
             return true;
         }
 
-        private async Task<byte[]?> GetValueAsync(string key)
+        private async Task<byte[]> GetValueAsync(string key)
         {
             var cacheKey = _expandKey(key);
             string file = GetPath(cacheKey);
@@ -108,8 +108,6 @@ namespace WebApi.Misc
             return Path.Combine(_filePath, cacheKey) + ".json";
         }
     }
-
-
 
     internal class FilePartionedCacheSerializer
         : AbstractPartitionedCacheSerializer
@@ -159,5 +157,4 @@ namespace WebApi.Misc
     }
 
 }
-
 

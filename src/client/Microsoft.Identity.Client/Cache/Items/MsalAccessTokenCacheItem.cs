@@ -128,7 +128,6 @@ namespace Microsoft.Identity.Client.Cache.Items
             return DateTime.UtcNow + TimeSpan.FromSeconds(duration);
         }
 
-
         internal string TenantId
         {
             get; private set;

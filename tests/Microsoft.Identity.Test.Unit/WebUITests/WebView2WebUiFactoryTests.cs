@@ -19,8 +19,14 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
     public class WebView2WebUiFactoryTests
     {
         private readonly CoreUIParent _parent = new CoreUIParent();
-        private readonly RequestContext _requestContext =
+        private readonly RequestContext _requestContextAad =
             new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
+
+        private readonly RequestContext _requestContextB2C =
+            new RequestContext(TestCommon.CreateDefaultB2CServiceBundle(), Guid.NewGuid());
+
+        private readonly RequestContext _requestContextAdfs =
+          new RequestContext(TestCommon.CreateDefaultAdfsServiceBundle(), Guid.NewGuid());
 
         [TestMethod]
         public void IsSystemWebUiAvailable()
@@ -30,22 +36,55 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             Assert.IsTrue(webUIFactory.IsSystemWebViewAvailable);
         }
 
-        [TestMethod]
-        public void DefaultEmbedded_WebView2Available()
+        [DataRow()]
+        public void WebViewTypeNotConfigured_AAD_WebView1()
         {
             // Arrange
             var webUIFactory = new WebView2WebUiFactory(() => true);
-
 
             // Act
             var webUi = webUIFactory.CreateAuthenticationDialog(
                     _parent,
                     WebViewPreference.NotSpecified,
-                    _requestContext);
+                    _requestContextAad);
+
+            // Assert
+            Assert.IsTrue(webUi is InteractiveWebUI);
+
+        }
+
+
+        [TestMethod]
+        public void WebViewTypeNotConfigured_ADFS_WebView1()
+        {
+            // Arrange
+            var webUIFactory = new WebView2WebUiFactory(() => true);
+
+            // Act
+            var webUi = webUIFactory.CreateAuthenticationDialog(
+                    _parent,
+                    WebViewPreference.NotSpecified,
+                    _requestContextAdfs);
+
+            // Assert
+            Assert.IsTrue(webUi is InteractiveWebUI);
+
+        }
+
+        [TestMethod]
+        public void WebViewTypeNotConfigured_B2C_WebView2()
+        {
+            // Arrange
+            var webUIFactory = new WebView2WebUiFactory(() => true);
+
+            // Act
+            var webUi = webUIFactory.CreateAuthenticationDialog(
+                    _parent,
+                    WebViewPreference.NotSpecified,
+                    _requestContextB2C);
 
             // Assert
             Assert.IsTrue(webUi is WebView2WebUi);
-
         }
 
         [TestMethod]
@@ -55,25 +94,50 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             var webUIFactory = new WebView2WebUiFactory(
                 isWebView2AvailableForTest: () => false);
 
-
             // Act
             var webUi = webUIFactory.CreateAuthenticationDialog(
                     _parent,
                     WebViewPreference.NotSpecified,
-                    _requestContext);
+                    _requestContextAad);
 
             // Assert
             Assert.IsTrue(webUi is InteractiveWebUI);
         }
 
         [TestMethod]
-        public void Embedded()
+        public void WebViewTypeEmbedded_AAD_WebView1()
         {
             // Arrange
             var webUIFactory = new WebView2WebUiFactory(() => true);
 
             // Act
-            var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.Embedded, _requestContext);
+            var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.Embedded, _requestContextAad);
+
+            // Assert
+            Assert.IsTrue(webUi is InteractiveWebUI);
+        }
+
+        [TestMethod]
+        public void WebViewTypeEmbedded_ADFS_WebView1()
+        {
+            // Arrange
+            var webUIFactory = new WebView2WebUiFactory(() => true);
+
+            // Act
+            var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.Embedded, _requestContextAdfs);
+
+            // Assert
+            Assert.IsTrue(webUi is InteractiveWebUI);
+        }
+
+        [TestMethod]
+        public void WebViewTypeEmbedded_B2C_WebView2()
+        {
+            // Arrange
+            var webUIFactory = new WebView2WebUiFactory(() => true);
+
+            // Act
+            var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.Embedded, _requestContextB2C);
 
             // Assert
             Assert.IsTrue(webUi is WebView2WebUi);
@@ -86,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             var webUIFactory = new WebView2WebUiFactory();
 
             // Act
-            var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.System, _requestContext);
+            var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.System, _requestContextAad);
 
             // Assert
             Assert.IsTrue(webUi is DefaultOsBrowserWebUi);

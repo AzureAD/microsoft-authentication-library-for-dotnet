@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
                 MsalErrorMessage.SSHCertUsedAsHttpHeader);
         public string AccessTokenType => SSHCertTokenType;
 
-
         public string KeyId { get; }
 
         public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)

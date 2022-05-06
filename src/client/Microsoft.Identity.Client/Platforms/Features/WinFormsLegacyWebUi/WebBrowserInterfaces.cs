@@ -410,6 +410,5 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             void PrivacyImpactedStateChange([In] bool bImpacted);
         }
 
-
     }
 }

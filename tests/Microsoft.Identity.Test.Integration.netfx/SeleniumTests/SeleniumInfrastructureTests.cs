@@ -98,6 +98,5 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.AreEqual(MsalError.AuthenticationCanceledError, ex.ErrorCode);
         }
 
-
     }
 }

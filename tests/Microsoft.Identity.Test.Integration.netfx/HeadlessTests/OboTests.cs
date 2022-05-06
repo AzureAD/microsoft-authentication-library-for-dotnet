@@ -101,7 +101,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .ExecuteAsync(CancellationToken.None)
             ).ConfigureAwait(false);
 
-
             // User1 - no AT, RT in cache - retrieves from IdP
             var authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(user1AuthResult.AccessToken))
                 .ExecuteAsync(CancellationToken.None)
@@ -146,7 +145,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 cca.AcquireTokenSilent(s_scopes, user2.Upn)
                     .ExecuteAsync(CancellationToken.None)
             ).ConfigureAwait(false);
-
 
             IConfidentialClientApplication CreateCCA()
             {
@@ -480,6 +478,56 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenByObo_LongRunning_WithDifferentScopes_TestAsync()
+        {
+            string[] scopes2 = { "api://eec635da-5760-452d-940a-448220db047c/access_as_user" };
+            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var pca = PublicClientApplicationBuilder
+                .Create(PublicClientID)
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
+                .Build();
+
+            var userAuthResult = await pca
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, new NetworkCredential("", user1.GetOrFetchPassword()).SecurePassword)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            var cca = BuildCCA(userAuthResult.TenantId);
+
+            string oboCacheKey = "obo-cache-key";
+            UserAssertion userAssertion = new UserAssertion(userAuthResult.AccessToken);
+
+            var result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            // Cache has 1 partition (user-provided key) with 1 token
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+            Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+            // No matching AT, uses RT to retrieve new AT.
+            result = await cca.AcquireTokenInLongRunningProcess(scopes2, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, result.AuthenticationResultMetadata.CacheRefreshReason);
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenByObo_LongRunning_WithNoTokensFound_TestAsync()
+        {
+            var cca = BuildCCA(Guid.NewGuid().ToString());
+
+            string oboCacheKey = "obo-cache-key";
+
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                      await cca.AcquireTokenInLongRunningProcess(s_scopes, oboCacheKey).ExecuteAsync().ConfigureAwait(false)
+                      ).ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.OboCacheKeyNotInCacheError, ex.ErrorCode);
         }
 
         [TestMethod]

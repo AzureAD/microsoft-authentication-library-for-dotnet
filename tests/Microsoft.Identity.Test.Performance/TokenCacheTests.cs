@@ -28,24 +28,27 @@ namespace Microsoft.Identity.Test.Performance
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class TokenCacheTests
     {
-        readonly string _scopePrefix = "scope";
-        readonly string _tenantPrefix = TestConstants.Utid;
-        ConfidentialClientApplication _cca;
-        string _scope;
-        string _authority;
-        IAccount _account;
-        string _tokenId;
-        string _userId;
+        private readonly string _tenantPrefix = "l6a331n5-4fh7-7788-a78a-96f19f5d7a73";
+        private readonly string _scopePrefix = "https://resource.com/.default";
+        private ConfidentialClientApplication _cca;
+        private string _scope;
+        private string _authority;
+        private IAccount _account;
+        private string _tokenId;
+        private string _userId;
 
+        // i.e. (partitions, tokens per partition)
         [ParamsSource(nameof(CacheSizeSource), Priority = 0)]
-        public (int Users, int TokensPerUser) CacheSize { get; set; }
+        public (int TotalUsers, int TokensPerUser) CacheSize { get; set; }
 
         // By default, benchmarks are run for all combinations of params.
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
+            (1, 10),
             (1, 10000),
-            (100, 10000),
-            (1000, 1000),
+            (1000, 10),
+            (10000, 10),
+            (100000, 10),
         };
 
         // If the tokens are saved with different tenants.
@@ -62,15 +65,15 @@ namespace Microsoft.Identity.Test.Performance
                 .WithLegacyCacheCompatibility(false)
                 .BuildConcrete();
 
-            PopulateUserCache(CacheSize.Users, CacheSize.TokensPerUser);
+            PopulateUserCache(CacheSize.TotalUsers, CacheSize.TokensPerUser);
         }
 
         [IterationSetup]
         public void IterationSetup_AcquireTokenSilent()
         {
             Random random = new Random();
-            _userId = random.Next(0, CacheSize.Users).ToString();
-            _account = new Account($"{_userId}.{TestConstants.Utid}", TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment);
+            _userId = random.Next(0, CacheSize.TotalUsers).ToString();
+            _account = new Account($"{_userId}.{_tenantPrefix}", TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment);
             _tokenId = random.Next(0, CacheSize.TokensPerUser).ToString();
             _scope = $"{_scopePrefix}{_tokenId}";
             _authority = IsMultiTenant ?
@@ -119,11 +122,11 @@ namespace Microsoft.Identity.Test.Performance
             PopulationPartition(_userId, CacheSize.TokensPerUser.ToString());
         }
 
-        private void PopulateUserCache(int usersNumber, int tokensNumber)
+        private void PopulateUserCache(int totalUsers, int tokensPerUser)
         {
-            for (int userId = 0; userId < usersNumber; userId++)
+            for (int userId = 0; userId < totalUsers; userId++)
             {
-                for (int tokenId = 0; tokenId < tokensNumber; tokenId++)
+                for (int tokenId = 0; tokenId < tokensPerUser; tokenId++)
                 {
                     InsertCacheItem(userId.ToString(), tokenId.ToString());
                 }
@@ -131,9 +134,9 @@ namespace Microsoft.Identity.Test.Performance
         }
 
         // Inserts cache items into a partition
-        private void PopulationPartition(string userId, string tokensNumber)
+        private void PopulationPartition(string userId, string tokensPerUser)
         {
-            for (int tokenId = 0; tokenId < int.Parse(tokensNumber); tokenId++)
+            for (int tokenId = 0; tokenId < int.Parse(tokensPerUser); tokenId++)
             {
                 InsertCacheItem(userId.ToString(), tokenId.ToString());
             }
@@ -147,14 +150,25 @@ namespace Microsoft.Identity.Test.Performance
             string tenant = IsMultiTenant ? $"{_tenantPrefix}{tokenId}" : _tenantPrefix;
             string scope = $"{_scopePrefix}{tokenId}";
 
-            MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(scope, tenant, homeAccountId, oboCacheKey: userAssertionHash);
-
+            MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(
+                scope,
+                tenant,
+                homeAccountId,
+                oboCacheKey: userAssertionHash,
+                accessToken: TestConstants.UserAccessToken);
             _cca.UserTokenCacheInternal.Accessor.SaveAccessToken(atItem);
 
-            MsalRefreshTokenCacheItem rtItem = TokenCacheHelper.CreateRefreshTokenItem(userAssertionHash, homeAccountId);
+            MsalRefreshTokenCacheItem rtItem = TokenCacheHelper.CreateRefreshTokenItem(
+                userAssertionHash,
+                homeAccountId,
+                refreshToken: TestConstants.RefreshToken);
             _cca.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
 
-            MsalIdTokenCacheItem idtItem = TokenCacheHelper.CreateIdTokenCacheItem(tenant, homeAccountId, userId);
+            MsalIdTokenCacheItem idtItem = TokenCacheHelper.CreateIdTokenCacheItem(
+                tenant,
+                homeAccountId,
+                uid: userId,
+                idToken: TestConstants.IdToken);
             _cca.UserTokenCacheInternal.Accessor.SaveIdToken(idtItem);
 
             MsalAccountCacheItem accItem = TokenCacheHelper.CreateAccountItem(tenant, homeAccountId);

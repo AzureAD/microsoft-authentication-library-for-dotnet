@@ -22,4 +22,3 @@ namespace Microsoft.Identity.Client.Region
     }
 }
 
-

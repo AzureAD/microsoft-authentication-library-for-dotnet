@@ -81,8 +81,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             cacheAccessRecorder.AssertAccessCounts(1, 0);
         }
 
-
-
         // Bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1030
         [TestMethod]
         [DeploymentItem(@"Resources\MultiCloudTokenCache.json")]

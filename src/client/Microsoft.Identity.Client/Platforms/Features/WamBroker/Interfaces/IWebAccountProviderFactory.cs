@@ -11,5 +11,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         Task<WebAccountProvider> GetDefaultProviderAsync();
         bool IsConsumerProvider(WebAccountProvider webAccountProvider);
         Task<bool> IsDefaultAccountMsaAsync();
+        bool IsOrganizationsProvider(WebAccountProvider webAccountProvider);
     }
 }

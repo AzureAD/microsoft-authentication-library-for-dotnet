@@ -1,0 +1,152 @@
+{
+    "AccessToken": {
+        "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-accesstoken-1d18b3b0-251b-4714-a02a-9956cec86c2d-72f988bf-86f1-41af-91ab-2d7cd011db47-email openid profile user.read": {
+            "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "secret",
+            "credential_type": "AccessToken",
+            "realm": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "target": "email openid profile User.Read",
+            "user_assertion_hash": null,
+            "cached_at": "1556523483",
+            "expires_on": "1556527082",
+            "extended_expires_on": "1556527082",
+            "ext_expires_on": "1556527082"
+        },
+        "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-accesstoken-1d18b3b0-251b-4714-a02a-9956cec86c2d-49f548d0-12b7-4169-a390-bb5304d24462-openid profile user.read email": {
+            "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "secret",
+            "credential_type": "AccessToken",
+            "realm": "49f548d0-12b7-4169-a390-bb5304d24462",
+            "target": "openid profile User.Read email",
+            "user_assertion_hash": null,
+            "cached_at": "1556523607",
+            "expires_on": "1556527207",
+            "extended_expires_on": "1556527207",
+            "ext_expires_on": "1556527207"
+        },
+        "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-accesstoken-1d18b3b0-251b-4714-a02a-9956cec86c2d-49f548d0-12b7-4169-a390-bb5304d24462-openid profile user.read email": {
+            "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "secret",
+            "credential_type": "AccessToken",
+            "realm": "49f548d0-12b7-4169-a390-bb5304d24462",
+            "target": "openid profile User.Read email",
+            "user_assertion_hash": null,
+            "cached_at": "1556523684",
+            "expires_on": "1556527283",
+            "extended_expires_on": "1556527283",
+            "ext_expires_on": "1556527283"
+        }
+    },
+    "RefreshToken": {
+        "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-refreshtoken-1d18b3b0-251b-4714-a02a-9956cec86c2d--": {
+            "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "secret",
+            "credential_type": "RefreshToken",
+            "family_id": null
+        },
+        "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-refreshtoken-1d18b3b0-251b-4714-a02a-9956cec86c2d--": {
+            "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "secret",
+            "credential_type": "RefreshToken",
+            "family_id": null
+        }
+    },
+    "IdToken": {
+        "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-idtoken-1d18b3b0-251b-4714-a02a-9956cec86c2d-72f988bf-86f1-41af-91ab-2d7cd011db47-": {
+            "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "foo.eyJhdWQiOiIxZDE4YjNiMC0yNTFiLTQ3MTQtYTAyYS05OTU2Y2VjODZjMmQiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3L3YyLjAiLCJpYXQiOjE1NTY1MjMxODIsIm5iZiI6MTU1NjUyMzE4MiwiZXhwIjoxNTU2NTI3MDgyLCJuYW1lIjoiVXNlciBJbiB0ZW5hbnQgMSIsIm9pZCI6IjZlZWRhM2ExLWMzYjktNGU5Mi1hOTRkLTk2NWE1MGMwNmRlNyIsInByZWZlcnJlZF91c2VybmFtZSI6InVzZXJAZG9tYWluLmNvbSIsInN1YiI6InJiXzFpRE1KdGNyLWZxTFVsV2RieGljZGxJbGxMbnA3OEpfN2lMSF8tR3ciLCJ0aWQiOiI3MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDciLCJ1dGkiOiJPdnktZmJWZ0UwZTFQVGxIU2UwTkFBIiwidmVyIjoiMi4wIn0=.bar",
+            "credential_type": "IdToken",
+            "realm": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+        },
+        "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-idtoken-1d18b3b0-251b-4714-a02a-9956cec86c2d-49f548d0-12b7-4169-a390-bb5304d24462-": {
+            "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "foo.eyJhdWQiOiIxZDE4YjNiMC0yNTFiLTQ3MTQtYTAyYS05OTU2Y2VjODZjMmQiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyL3YyLjAiLCJpYXQiOjE1NTY1MjMzMDYsIm5iZiI6MTU1NjUyMzMwNiwiZXhwIjoxNTU2NTI3MjA2LCJuYW1lIjoiT3RoZXIgVXNlciBpbiB0ZW5hbnQyIiwib2lkIjoiYWU4MjFlNGQtZjQwOC00NTFhLWFmODItODgyNjkxMTQ4NjAzIiwicHJlZmVycmVkX3VzZXJuYW1lIjoic29tZW9uZV9lbHNlQGRvbWFpbi5jb20iLCJzdWIiOiJOaEF5YXpseTljN2U0Tl9fRjA2Ul9DZll3V0ZPT3JxMEJ4ZTlCMGlqMjhFIiwidGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIiwidXRpIjoib3VLT1BucThXVXFRdkVGLTZlcFBBQSIsInZlciI6IjIuMCJ9.bar",
+            "credential_type": "IdToken",
+            "realm": "49f548d0-12b7-4169-a390-bb5304d24462"
+        },
+        "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-idtoken-1d18b3b0-251b-4714-a02a-9956cec86c2d-49f548d0-12b7-4169-a390-bb5304d24462-": {
+            "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "foo.eyJhdWQiOiIxZDE4YjNiMC0yNTFiLTQ3MTQtYTAyYS05OTU2Y2VjODZjMmQiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyL3YyLjAiLCJpYXQiOjE1NTY1MjMzODMsIm5iZiI6MTU1NjUyMzM4MywiZXhwIjoxNTU2NTI3MjgzLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDcvIiwibmFtZSI6IlVzZXIgSW4gdGVuYW50IDIiLCJvaWQiOiJmNTYwNzUyOC1jNGMwLTQzNWItODlkZC1jMTJlYTlhMWI2MzYiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ1c2VyQGRvbWFpbi5jb20iLCJzdWIiOiJLWWd1MWd0bU1LU1pTektsYW12OEh1SVBueEJHaE5MNHBsRzZnS19iQ2wwIiwidGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIiwidXRpIjoib3VLT1BucThXVXFRdkVGLU1QSlBBQSIsInZlciI6IjIuMCJ9.bar",
+            "credential_type": "IdToken",
+            "realm": "49f548d0-12b7-4169-a390-bb5304d24462"
+        }
+    },
+    "Account": {
+        "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-72f988bf-86f1-41af-91ab-2d7cd011db47": {
+            "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+            "username": "user@domain.com",
+            "name": "User In tenant 1",
+            "given_name": null,
+            "family_name": null,
+            "local_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7",
+            "authority_type": "MSSTS",
+            "realm": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "wam_account_ids": {
+                "1d18b3b0-251b-4714-a02a-9956cec86c2d": "wamId1"
+            }
+        },
+        "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-49f548d0-12b7-4169-a390-bb5304d24462": {
+            "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+            "username": "someone_else@domain.com",
+            "name": "Other User in tenant2",
+            "given_name": null,
+            "family_name": null,
+            "local_account_id": "ae821e4d-f408-451a-af82-882691148603",
+            "authority_type": "MSSTS",
+            "realm": "49f548d0-12b7-4169-a390-bb5304d24462",
+            "wam_account_ids": {
+                "1d18b3b0-251b-4714-a02a-9956cec86c2d": "wamId2"
+            }
+        },
+        "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-49f548d0-12b7-4169-a390-bb5304d24462": {
+            "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+            "username": "user@domain.com",
+            "name": "User In tenant 2",
+            "given_name": null,
+            "family_name": null,
+            "local_account_id": "f5607528-c4c0-435b-89dd-c12ea9a1b636",
+            "authority_type": "MSSTS",
+            "realm": "49f548d0-12b7-4169-a390-bb5304d24462",
+            "wam_account_ids": {
+                "1d18b3b0-251b-4714-a02a-9956cec86c2d": "wamId3"
+            }
+        }
+    },
+    "AppMetadata": {
+        "appmetadata-login.windows.net-1d18b3b0-251b-4714-a02a-9956cec86c2d": {
+            "environment": "login.windows.net",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "family_id": null
+        }
+    }
+}

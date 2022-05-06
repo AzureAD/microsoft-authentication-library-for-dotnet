@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 if (ex.StatusCode == (int)HttpStatusCode.Unauthorized)
                 {
                     string responseHeader = string.Empty;
-                    var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponseAsync(
+                    var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponse(
                         ex.Headers,
                         new Uri(tokenEndpoint), // do not add query params to PKeyAuth https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2359
                         out responseHeader);

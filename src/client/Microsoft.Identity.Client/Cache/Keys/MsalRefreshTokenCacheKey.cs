@@ -107,8 +107,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         public int iOSType => (int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken;
 
-
-
         #endregion
 
         #region Equals and GetHashCode

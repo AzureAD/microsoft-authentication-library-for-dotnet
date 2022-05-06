@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly string _optionalHeaderText;
         private volatile WebAccountProvider _provider;
 
-
         public AccountPicker(
             IntPtr parentHandle,
             ICoreLogger logger,
@@ -206,9 +205,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
         }
 
-
 #endif
-
 
 #if WINDOWS_APP
 
@@ -240,8 +237,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         }
 #endif
 
-
+#pragma warning disable VSTHRD100 // Avoid async void methods
         private async void Authenticator_AccountCommandsRequested(
+#pragma warning restore VSTHRD100 // Avoid async void methods
             AccountsSettingsPane sender,
             AccountsSettingsPaneCommandsRequestedEventArgs args)
         {

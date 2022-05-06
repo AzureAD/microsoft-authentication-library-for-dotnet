@@ -19,9 +19,6 @@ namespace NetDesktopWinForms
     {
         private readonly SynchronizationContext _syncContext;
 
-
-
-
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
             new ClientEntry() { Id = "04f0c124-f2bc-4f59-8241-bf6df9866bbd", Name = "04f0c124-f2bc-4f59-8241-bf6df9866bbd (new VS)"},
@@ -66,7 +63,6 @@ namespace NetDesktopWinForms
         public static readonly string UserCacheFile =
             System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.user.json";
 
-
         private IPublicClientApplication CreatePca()
         {
             string clientId = GetClientId();
@@ -94,7 +90,6 @@ namespace NetDesktopWinForms
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;
         }
-
 
         private static void BindCache(ITokenCache tokenCache, string file)
         {
@@ -218,7 +213,6 @@ namespace NetDesktopWinForms
             return clientId;
         }
 
-
         private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar)
         {
             string message =
@@ -287,7 +281,6 @@ namespace NetDesktopWinForms
                 })
                 .WithParentActivityOrWindow(this.Handle);
 
-
             Prompt? prompt = GetPrompt();
             if (prompt.HasValue)
             {
@@ -310,10 +303,8 @@ namespace NetDesktopWinForms
                 Log($"ATI without login_hint or account. It should display the account picker");
             }
 
-
             await Task.Delay(500).ConfigureAwait(false);
             result = await builder.ExecuteAsync().ConfigureAwait(false);
-
 
             return result;
         }
@@ -450,7 +441,6 @@ namespace NetDesktopWinForms
 
             Log("Done clearing the cache.");
         }
-
 
         private void clientIdCbx_SelectedIndexChanged(object sender, EventArgs e)
         {

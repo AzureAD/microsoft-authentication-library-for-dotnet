@@ -78,8 +78,10 @@ namespace Microsoft.Identity.Client
         /// want to call <see cref="ITokenCacheSerializer.DeserializeMsalV3(byte[], bool)"/></remarks>
 #if !SUPPORTS_CUSTOM_CACHE
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-# endif
+#endif
+#pragma warning disable VSTHRD200 // Use "Async" suffix for async methods
         void SetBeforeAccessAsync(Func<TokenCacheNotificationArgs, Task> beforeAccess);
+#pragma warning restore VSTHRD200 // Use "Async" suffix for async methods
 
         /// <summary>
         /// Sets a delegate to be notified after any library method accesses the cache. This gives an option to the
@@ -94,7 +96,9 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_CUSTOM_CACHE
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
+#pragma warning disable VSTHRD200 // Use "Async" suffix for async methods
         void SetAfterAccessAsync(Func<TokenCacheNotificationArgs, Task> afterAccess);
+#pragma warning restore VSTHRD200 // Use "Async" suffix for async methods
 
         /// <summary>
         /// Sets a delegate called before any library method writes to the cache. This gives an option to the delegate
@@ -105,7 +109,9 @@ namespace Microsoft.Identity.Client
         /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
 #if !SUPPORTS_CUSTOM_CACHE
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-# endif
+#endif
+#pragma warning disable VSTHRD200 // Use "Async" suffix for async methods
         void SetBeforeWriteAsync(Func<TokenCacheNotificationArgs, Task> beforeWrite);
+#pragma warning restore VSTHRD200 // Use "Async" suffix for async methods
     }
 }

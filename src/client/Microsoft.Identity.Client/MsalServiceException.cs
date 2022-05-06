@@ -169,7 +169,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string ResponseBody { get; set; }
 
-
         /// <summary>
         /// Contains the HTTP headers from the server response that indicated an error.
         /// </summary>
@@ -217,7 +216,6 @@ namespace Microsoft.Identity.Client
         }
 
         #region Serialization
-
 
         // DEPRECATE / OBSOLETE - this functionality is not used and should be removed in a next major version
 
