@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 TenantId = null //Leaving as null so MSAL can use the original request Tid. This is ok for confidential client scenarios
             };
 
-            response.RefreshIn = tokenProviderResponse.RefreshInSeconds ?? response.ExpiresIn;
+            response.RefreshIn = tokenProviderResponse.RefreshInSeconds;
 
             return response;
         }
