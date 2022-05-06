@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> SendTokenRequestToProviderAsync(CancellationToken cancellationToken)
         {
-            ExternalAppTokenProviderParameters appTokenProviderParameters = new ExternalAppTokenProviderParameters
+            AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters
             {
                 Scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope),
                 CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId.ToString(),

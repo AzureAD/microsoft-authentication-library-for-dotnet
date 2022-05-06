@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
+    /// The authentication parameters provided to the app token provider callback.
     /// </summary>
-    public class ExternalAppTokenProviderParameters
+    public class AppTokenProviderParameters
     {
         /// <summary>
         /// Specifies which scopes to request.
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client
         public string TenantId { get; internal set; }
 
         /// <summary>
-        /// 
+        /// Used to cancel the authentication attempt made by the token provider
         /// </summary>
         public CancellationToken CancellationToken { get; internal set; }
     }

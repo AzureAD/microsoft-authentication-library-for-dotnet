@@ -1670,7 +1670,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             bool usingClaims = false;
             string differentScopesForAt = string.Empty;
             var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                          .WithAppTokenProvider(async (ExternalAppTokenProviderParameters parameters) =>
+                                                          .WithAppTokenProvider(async (AppTokenProviderParameters parameters) =>
                                                           {
                                                               Assert.IsNotNull(parameters.Scopes);
                                                               Assert.IsNotNull(parameters.CorrelationId);
