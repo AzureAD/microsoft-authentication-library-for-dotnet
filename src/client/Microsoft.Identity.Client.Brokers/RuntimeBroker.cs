@@ -160,14 +160,6 @@ namespace Microsoft.Identity.Client.Broker
 
             try
             {
-                //need to provide a handle
-                if (_parentHandle == IntPtr.Zero)
-                {
-                    throw new MsalClientException(
-                        "window_handle_required",
-                        "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
-                }
-
                 await s_interactiveSlimLock.WaitAsync().ConfigureAwait(false);
                 var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
