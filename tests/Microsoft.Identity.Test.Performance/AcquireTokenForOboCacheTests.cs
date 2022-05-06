@@ -17,7 +17,7 @@ using Microsoft.Identity.Web;
 namespace Microsoft.Identity.Test.Performance
 {
     /// <summary>
-    /// Used to test the performance of token cache with large amount of items.
+    /// Used to test the performance of acquiring tokens using token cache with different amount of items.
     /// </summary>
     /// <remarks>
     /// For OBO user cache, the partition key is
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Performance
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10),
-            (1, 10000),
+            (1, 1000),
             (10000, 10),
         };
 

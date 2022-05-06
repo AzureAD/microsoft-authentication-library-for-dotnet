@@ -13,16 +13,10 @@ using Microsoft.Identity.Test.Unit;
 namespace Microsoft.Identity.Test.Performance
 {
     /// <summary>
-    /// Used to test the performance of token cache with large amount of items.
+    /// Used to test the performance of acquiring tokens using token cache with different amount of items.
     /// </summary>
     /// <remarks>
     /// For non-OBO user cache, the partition key is home account ID.
-    /// 
-    /// Testing combinations
-    /// Partitions - Tokens per partition - Total tokens
-    /// 1 - 10,000 - 10,000
-    /// 100 - 10,000 - 1,000,000
-    /// 1,000 - 1,000 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class TokenCacheTests
@@ -42,7 +36,7 @@ namespace Microsoft.Identity.Test.Performance
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10),
-            (1, 10000),
+            (1, 1000),
             (10000, 10),
         };
 
@@ -85,8 +79,9 @@ namespace Microsoft.Identity.Test.Performance
                 .ConfigureAwait(false);
         }
 
-        [Benchmark(Description = "GetAccounts")]
-        [BenchmarkCategory("With cache")]
+        //GetAccounts is only available in PCA and is not high-perf scenario.
+        //[Benchmark(Description = "GetAccounts")]
+        //[BenchmarkCategory("With cache")]
         public async Task<IAccount> GetAccountsAsync_TestAsync()
         {
             return (await _cca.GetAccountsAsync()

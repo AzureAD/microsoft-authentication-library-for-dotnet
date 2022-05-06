@@ -18,10 +18,10 @@ using Microsoft.Identity.Web;
 namespace Microsoft.Identity.Test.Performance
 {
     /// <summary>
-    /// Used to test the performance of token cache with large amount of items.
+    /// Used to test the performance of acquiring tokens using token cache with different number of items.
     /// </summary>
     /// <remarks>
-    /// For app cache, the number of partitions is the number of tenants
+    /// For app cache, the number of partitions is the number of tenants.
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenForClientCacheTests
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Performance
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10),
-            (1, 10000),
+            (1, 1000),
             (10000, 10),
         };
 

@@ -14,7 +14,7 @@ using Microsoft.Identity.Test.Unit;
 namespace Microsoft.Identity.Test.Performance
 {
     /// <summary>
-    /// Used to test the performance of acquire tokens without cache and mocked network calls.
+    /// Used to test the performance of acquiring tokens without cache and mocked network calls.
     /// </summary>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenNoCacheTests
