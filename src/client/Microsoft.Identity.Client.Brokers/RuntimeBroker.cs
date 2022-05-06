@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Broker
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
         
         //Only one broker session can exist at a time
-        public static SemaphoreSlim s_semaphoreSlim { get; set; } = new SemaphoreSlim(1);
+        public static SemaphoreSlim s_interactiveSlimLock { get; set; } = new SemaphoreSlim(1);
 
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
@@ -78,63 +78,70 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            //need to provide a handle
-            if (_parentHandle == IntPtr.Zero)
-            {
-                throw new MsalClientException(
-                    "window_handle_required",
-                    "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
-            }
-
-            //if OperatingSystemAccount is passed then we use the user signed-in on the machine
-            if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
-            {
-                return await AcquireTokenInteractiveDefaultUserAsync(authenticationRequestParameters, acquireTokenInteractiveParameters).ConfigureAwait(false);
-            }
-
-            await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
-            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger.Verbose("[WamBroker] Using Windows account picker.");
-            
-            using (var core = new NativeInterop.Core())
-            using (var authParams = GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            try
             {
-                //Login Hint
-                string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
-
-                if (!string.IsNullOrEmpty(loginHint))
+                //need to provide a handle
+                if (_parentHandle == IntPtr.Zero)
                 {
-                    _logger.Verbose("[WamBroker] AcquireTokenInteractive - account information provided. Trying to find a Windows account that matches.");
-                }
-                else
-                {
-                    _logger.Verbose("[WamBroker] Account information was not provided. Using an account picker.");
+                    throw new MsalClientException(
+                        "window_handle_required",
+                        "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
                 }
 
-                using (var result = await core.SignInInteractivelyAsync(
-                    _parentHandle,
-                    authParams,
-                    authenticationRequestParameters.CorrelationId.ToString("D"),
-                    loginHint,
-                    cancellationToken).ConfigureAwait(false))
+                //if OperatingSystemAccount is passed then we use the user signed-in on the machine
+                if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
                 {
-                    if (result.IsSuccess)
+                    return await AcquireTokenInteractiveDefaultUserAsync(authenticationRequestParameters, acquireTokenInteractiveParameters).ConfigureAwait(false);
+                }
+
+                await s_interactiveSlimLock.WaitAsync().ConfigureAwait(false);
+                var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+                
+                _logger.Verbose("[WamBroker] Using Windows account picker.");
+
+                using (var core = new NativeInterop.Core())
+                using (var authParams = GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+                {
+                    //Login Hint
+                    string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
+
+                    if (!string.IsNullOrEmpty(loginHint))
                     {
-                        msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
-                        _logger.Verbose("[WamBroker] Successfully retrieved token.");
-
+                        _logger.Verbose("[WamBroker] AcquireTokenInteractive - account information provided. Trying to find a Windows account that matches.");
                     }
                     else
                     {
-                        _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
-                        throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider - account picker. {result.Error}");
+                        _logger.Verbose("[WamBroker] Account information was not provided. Using an account picker.");
+                    }
+
+                    using (var result = await core.SignInInteractivelyAsync(
+                        _parentHandle,
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        loginHint,
+                        cancellationToken).ConfigureAwait(false))
+                    {
+                        if (result.IsSuccess)
+                        {
+                            msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
+                            _logger.Verbose("[WamBroker] Successfully retrieved token.");
+
+                        }
+                        else
+                        {
+                            _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
+                            throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider - account picker. {result.Error}");
+                        }
                     }
                 }
             }
-
-            s_semaphoreSlim.Release();
+            finally
+            {
+                s_interactiveSlimLock.Release();
+            }
+            
             return msalTokenResponse;
         }
 
@@ -149,43 +156,51 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            //need to provide a handle
-            if (_parentHandle == IntPtr.Zero)
-            {
-                throw new MsalClientException(
-                    "window_handle_required",
-                    "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
-            }
-
-            await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
-            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
-            
-            _logger.Verbose("[WamBroker] Signing in with the default user account.");
 
-            using (var core = new NativeInterop.Core())
-            using (var authParams = GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            try
             {
-                using (NativeInterop.AuthResult result = await core.SignInAsync(
-                        _parentHandle,
-                        authParams,
-                        authenticationRequestParameters.CorrelationId.ToString("D"),
-                        cancellationToken).ConfigureAwait(false))
+                //need to provide a handle
+                if (_parentHandle == IntPtr.Zero)
                 {
-                    if (result.IsSuccess)
+                    throw new MsalClientException(
+                        "window_handle_required",
+                        "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
+                }
+
+                await s_interactiveSlimLock.WaitAsync().ConfigureAwait(false);
+                var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+
+                _logger.Verbose("[WamBroker] Signing in with the default user account.");
+
+                using (var core = new NativeInterop.Core())
+                using (var authParams = GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+                {
+                    using (NativeInterop.AuthResult result = await core.SignInAsync(
+                            _parentHandle,
+                            authParams,
+                            authenticationRequestParameters.CorrelationId.ToString("D"),
+                            cancellationToken).ConfigureAwait(false))
                     {
-                        msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
-                    }
-                    else
-                    {
-                        _logger.Error($"[WamBroker] Could not login interactively with the Default OS Account. {result.Error}");
-                        throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider for the default OS Account. {result.Error}");
+                        if (result.IsSuccess)
+                        {
+                            msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
+                        }
+                        else
+                        {
+                            _logger.Error($"[WamBroker] Could not login interactively with the Default OS Account. {result.Error}");
+                            throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider for the default OS Account. {result.Error}");
+                        }
                     }
                 }
             }
-
-            s_semaphoreSlim.Release();
+            finally
+            {
+                s_interactiveSlimLock.Release();
+            }
+            
             return msalTokenResponse;
+
         }
 
         /// <summary>
