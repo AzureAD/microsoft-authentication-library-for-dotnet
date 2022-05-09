@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Client.Http
 
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    isRetryable = false;
+                    throw exception;
                 }
 
                 timeoutException = exception;

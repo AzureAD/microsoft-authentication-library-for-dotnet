@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 catch (AggregateException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.IsTrue(exc.InnerException is MsalServiceException);
+                    Assert.IsTrue(exc.InnerException is TaskCanceledException);
                 }
             }
         }
