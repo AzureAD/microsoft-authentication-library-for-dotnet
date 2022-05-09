@@ -715,7 +715,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 throw new MsalUiRequiredException(
                     MsalError.InteractionRequired,
-                    "Found an MSA account, but could not retrieve a transfer token for it.");
+                    "Cannot get a token silently (internal error: found an MSA account, but could not retrieve a transfer token for it when calling WAM)");
             }
 
             var aadAccountProvider = await _webAccountProviderFactory.GetAccountProviderAsync("organizations").ConfigureAwait(false);

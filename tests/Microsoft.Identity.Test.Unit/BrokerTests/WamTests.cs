@@ -507,7 +507,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
 
         [TestMethod]
-        public async Task ATS_DefaultAccount_NoTransferToken_Passthrough_Async()
+        public async Task ATS_DefaultAccount_NoTransferToken_ThrowsException_Async()
         {
             // Arrange
             using (var harness = CreateTestHarness())
