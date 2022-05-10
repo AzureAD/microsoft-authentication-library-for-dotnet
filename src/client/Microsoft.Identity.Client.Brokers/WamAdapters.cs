@@ -77,12 +77,13 @@ namespace Microsoft.Identity.Client.Broker
                 case (int)ResponseStatus.InteractionRequired:
                 case (int)ResponseStatus.AccountUnusable:
                     errorCode = authResult.Error.ErrorCode;
-                    internalErrorCode = authResult.Error.Tag.ToString();
-                    errorMessage = WamErrorPrefix +
-                        $" Error Code: {errorCode}" +
-                        $" Error Message: {authResult.Error.Status}" +
-                        $" Internal Error Code: {internalErrorCode}";
-                    throw new MsalUiRequiredException(errorCode.ToString(), errorMessage);
+                    internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
+                    errorMessage = 
+                        $"{WamErrorPrefix} \n" +
+                        $" Error Code: {errorCode} \n" +
+                        $" Error Message: {authResult.Error.Context} \n" +
+                        $" Internal Error Code: {internalErrorCode} \n";
+                    throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, errorMessage);
 
                 case (int)ResponseStatus.IncorrectConfiguration:
                 case (int)ResponseStatus.ApiContractViolation:
@@ -95,12 +96,12 @@ namespace Microsoft.Identity.Client.Broker
                         $" WAM Error Message: {authResult.Error.Context} \n" +
                         $" Internal Error Code: {internalErrorCode} \n" +
                         $" Is Retryable: false \n" +
-                        $" Possible causes: \n " +
+                        $" Possible causes: \n" +
                         $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: {WamAdapters.GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
                         $"- No Internet connection \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
 
-                    serviceException = new MsalServiceException(errorCode.ToString(), errorMessage);
+                    serviceException = new MsalServiceException($"WAM_provider_error_{errorCode}", errorMessage);
                     serviceException.IsRetryable = false;
                     throw serviceException;
 
@@ -115,11 +116,7 @@ namespace Microsoft.Identity.Client.Broker
                         $" Error Message: {authResult.Error.Status} \n" +
                         $" WAM Error Message: {authResult.Error.Context} \n" +
                         $" Internal Error Code: {internalErrorCode} \n" +
-                        $" Is Retryable: true \n" +
-                        $" Possible causes: \n " +
-                        $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: {GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
-                        $"- No Internet connection \n" +
-                        $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
+                        $" Is Retryable: true";
 
                     serviceException = new MsalServiceException(errorCode.ToString(), errorMessage);
                     serviceException.IsRetryable = false;
@@ -128,7 +125,7 @@ namespace Microsoft.Identity.Client.Broker
                 default:
                     errorCode = authResult.Error.ErrorCode;
                     internalErrorCode = (authResult.Error.ErrorCode).ToString(CultureInfo.InvariantCulture);
-                    errorMessage = $"Unknown {authResult.Error} (internal error code {errorCode}) (internal error code {internalErrorCode})";
+                    errorMessage = $"Unknown {authResult.Error} (error code {errorCode}) (internal error code {internalErrorCode})";
 
                     throw new MsalServiceException(MsalError.UnknownBrokerError, errorMessage);
             }
