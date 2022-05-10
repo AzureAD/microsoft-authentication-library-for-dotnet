@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Broker
                         $" Is Retryable: true";
                     logger.Verbose($"[WamBroker] WAM_network_error_{errorCode} {errorMessage}");
                     serviceException = new MsalServiceException(errorCode.ToString(), errorMessage);
-                    serviceException.IsRetryable = false;
+                    serviceException.IsRetryable = true;
                     throw serviceException;
 
                 default:
