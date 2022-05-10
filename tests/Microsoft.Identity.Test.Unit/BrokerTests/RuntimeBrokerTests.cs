@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !NET5_WIN || DESKTOP
+#if !NET5_WIN
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -76,9 +76,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var pcaBuilder = PublicClientApplicationBuilder
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAdfsAuthority(TestConstants.ADFSAuthority);
-#if !NET5_WIN
+
             pcaBuilder = pcaBuilder.WithBroker2();
-#endif
 
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
 
@@ -88,6 +87,36 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         public void HandleInstallUrl_Throws()
         {
             AssertException.Throws<NotImplementedException>(() => _wamBroker.HandleInstallUrl("http://app"));
+        }
+
+        [TestMethod]
+        public async Task WamSilentAuthAsync()
+        {
+            string[] scopes = new[]
+                {
+                    "user.read"
+                };
+
+            var pcaBuilder = PublicClientApplicationBuilder
+               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
+               .WithAuthority(TestConstants.AuthorityOrganizationsTenant);
+
+            pcaBuilder = pcaBuilder.WithBroker2();
+            var pca = pcaBuilder.Build();
+
+            // Act
+            try
+            {
+                var result = await pca.AcquireTokenSilent(scopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+                Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
+            }
+            catch (MsalUiRequiredException e)
+            {
+                Assert.IsNull(e);
+            }
+
         }
     }    
 }
