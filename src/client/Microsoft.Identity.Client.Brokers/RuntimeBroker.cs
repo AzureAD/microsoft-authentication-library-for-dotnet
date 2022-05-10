@@ -124,7 +124,6 @@ namespace Microsoft.Identity.Client.Broker
                     else
                     {
                         _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
-                        //throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider - account picker. {result.Error}");
                         WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
                     }
                 }
@@ -167,7 +166,6 @@ namespace Microsoft.Identity.Client.Broker
                     else
                     {
                         _logger.Error($"[WamBroker] Could not login interactively with the Default OS Account. {result.Error}");
-                        //throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider for the default OS Account. {result.Error}");
                         WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
                     }
                 }
@@ -238,7 +236,6 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            //throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
                             WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
                         }
                     }
@@ -278,7 +275,6 @@ namespace Microsoft.Identity.Client.Broker
                     }
                     else
                     {
-                        //throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
                         WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
                     }
                 }
@@ -297,6 +293,12 @@ namespace Microsoft.Identity.Client.Broker
         public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             string correlationId = Guid.NewGuid().ToString();
+
+            //if OperatingSystemAccount is passed then we use the user signed-in on the machine
+            if (PublicClientApplication.IsOperatingSystemAccount(account))
+            {
+                throw new MsalException("wam_remove_account_failed", "Could not remove the default os account");
+            }
 
             _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
 
