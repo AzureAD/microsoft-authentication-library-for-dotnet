@@ -25,9 +25,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             : this(
                 scopes: response.Scope, // token providers send pre-sorted (alphabetically) scopes
                 cachedAt: DateTimeOffset.UtcNow,
-                expiresOn: DateTimeOffsetFromDuration(response.ExpiresIn),
-                extendedExpiresOn: DateTimeOffsetFromDuration(response.ExtendedExpiresIn),
-                refreshOn: DateTimeOffsetFromDuration(response.RefreshIn),
+                expiresOn: DateTimeHelpers.DateTimeOffsetFromDuration(response.ExpiresIn),
+                extendedExpiresOn: DateTimeHelpers.DateTimeOffsetFromDuration(response.ExtendedExpiresIn),
+                refreshOn: DateTimeHelpers.DateTimeOffsetFromDuration(response.RefreshIn),
                 tenantId: tenantId,
                 keyId: keyId,
                 tokenType: response.TokenType)
@@ -113,19 +113,6 @@ namespace Microsoft.Identity.Client.Cache.Items
                OboCacheKey);
 
             return newAtItem;
-        }
-
-        private static DateTimeOffset? DateTimeOffsetFromDuration(long? duration)
-        {
-            if (duration.HasValue)
-                return DateTimeOffsetFromDuration(duration.Value);
-
-            return null;
-        }
-
-        private static DateTimeOffset DateTimeOffsetFromDuration(long duration)
-        {
-            return DateTime.UtcNow + TimeSpan.FromSeconds(duration);
         }
 
         internal string TenantId

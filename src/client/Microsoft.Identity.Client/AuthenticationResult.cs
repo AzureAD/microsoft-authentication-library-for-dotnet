@@ -10,7 +10,11 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -175,6 +179,44 @@ namespace Microsoft.Identity.Client
                     AuthenticationResultMetadata.RefreshOn = msalAccessTokenCacheItem.RefreshOn;
                 }
             }
+        }
+
+        internal AuthenticationResult(
+            MsalTokenResponse tokenResponse,
+            AuthenticationRequestParameters requestParams,
+            IdToken idToken,
+            IAccount account) 
+            //: this(
+            //                    tokenResponse.AccessToken,
+            //                    false,
+            //                    idToken.GetUniqueId(),
+            //                    DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.ExpiresIn),
+            //                    DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.ExtendedExpiresIn),
+            //                    TokenResponseHelper.GetTenantId(idToken, requestParams),
+            //                    account,
+            //                    tokenResponse.IdToken,
+            //                    requestParams.Scope,
+            //                    requestParams.CorrelationId,
+            //                    tokenResponse.TokenType,
+            //                    new AuthenticationResultMetadata(tokenResponse.TokenSource),
+            //                    idToken.ClaimsPrincipal,
+            //                    tokenResponse.SpaAuthCode
+            //    )
+        {
+            AccessToken = tokenResponse.AccessToken;
+            IsExtendedLifeTimeToken = false; //TODO: How should this be determined?
+            UniqueId = idToken.GetUniqueId();
+            ExpiresOn = DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.ExpiresIn);
+            ExtendedExpiresOn = DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.ExtendedExpiresIn);
+            TenantId = TokenResponseHelper.GetTenantId(idToken, requestParams);
+            Account = account;
+            IdToken = tokenResponse.IdToken;
+            Scopes = requestParams.Scope;
+            CorrelationId = requestParams.CorrelationId;
+            TokenType = tokenResponse.TokenType;
+            AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenResponse.TokenSource);
+            ClaimsPrincipal = idToken.ClaimsPrincipal;
+            SpaAuthCode = tokenResponse.SpaAuthCode;
         }
 
         //Default constructor for testing

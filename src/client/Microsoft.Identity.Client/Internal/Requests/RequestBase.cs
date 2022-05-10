@@ -175,6 +175,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateAccountIdentifiers(fromServer);
 
+            if (ShouldNotCacheTokenResponse())
+            {
+                return GetAuthenticationResultFromTokenResponse(msalTokenResponse);
+            }
+
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
             var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
@@ -191,6 +196,38 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account,
                 msalTokenResponse.SpaAuthCode);
+        }
+
+        /// <summary>
+        /// Determines if the token response should be saved in the cached.
+        /// This may be ovveritten by the child types that perform additional checks.
+        /// Token responses recieved from brokers should not be cached for example.
+        /// </summary>
+        protected virtual bool ShouldNotCacheTokenResponse()
+        {
+            return false;
+        }
+
+        private AuthenticationResult GetAuthenticationResultFromTokenResponse(MsalTokenResponse msalTokenResponse)
+        {
+            IdToken idToken = IdToken.Parse(msalTokenResponse.IdToken);
+
+            bool isAdfsAuthority = AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
+            string preferredUsername = TokenResponseHelper.GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
+            string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
+            string homeAccountId = TokenResponseHelper.GetHomeAccountId(AuthenticationRequestParameters, msalTokenResponse, idToken);
+            Dictionary<string, string> wamAccountIds = TokenResponseHelper.GetWamAccountIds(AuthenticationRequestParameters, msalTokenResponse);
+
+            var account = new Account(
+                  homeAccountId,
+                  username,
+                  AuthenticationRequestParameters.Authority.AuthorityInfo.Host, //TODO: Should we perform instance discovery
+                  wamAccountIds);
+
+            return new AuthenticationResult(msalTokenResponse,
+                                            AuthenticationRequestParameters,
+                                            idToken,
+                                            account);
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)

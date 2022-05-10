@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed partial class TokenCache : ITokenCacheInternal
     {
-
         #region SaveTokenResponse
         async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> ITokenCacheInternal.SaveTokenResponseAsync(
             AuthenticationRequestParameters requestParams,
@@ -49,13 +48,13 @@ namespace Microsoft.Identity.Client
                 logger.Info("ID Token not present in response. ");
             }
 
-            var tenantId = GetTenantId(idToken, requestParams);
+            var tenantId = TokenResponseHelper.GetTenantId(idToken, requestParams);
 
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
             bool isAadAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Aad;
-            string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
+            string preferredUsername = TokenResponseHelper.GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
             string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
-            string homeAccountId = GetHomeAccountId(requestParams, response, idToken);
+            string homeAccountId = TokenResponseHelper.GetHomeAccountId(requestParams, response, idToken);
             string suggestedWebCacheKey = CacheKeyFactory.GetExternalCacheKeyFromResponse(requestParams, homeAccountId);
 
             // Do a full instance discovery when saving tokens (if not cached),
@@ -112,7 +111,7 @@ namespace Microsoft.Identity.Client
                     tenantId,
                     homeAccountId);
 
-                Dictionary<string, string> wamAccountIds = GetWamAccountIds(requestParams, response);
+                Dictionary<string, string> wamAccountIds = TokenResponseHelper.GetWamAccountIds(requestParams, response);
                 msalAccountCacheItem = new MsalAccountCacheItem(
                              instanceDiscoveryMetadata.PreferredCache,
                              response.ClientInfo,
@@ -372,66 +371,11 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        private string GetTenantId(IdToken idToken, AuthenticationRequestParameters requestParams)
-        {
-            // If the input authority was tenanted, use that tenant over the IdToken.Tenant
-            // otherwise, this will result in cache misses
-            return Authority.CreateAuthorityWithTenant(
-                requestParams.Authority.AuthorityInfo,
-                idToken?.TenantId).TenantId;
-        }
-
         private void MergeWamAccountIds(MsalAccountCacheItem msalAccountCacheItem)
         {
             var existingAccount = Accessor.GetAccount(msalAccountCacheItem.GetKey());
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
-        }
-
-        private static Dictionary<string, string> GetWamAccountIds(AuthenticationRequestParameters requestParams, MsalTokenResponse response)
-        {
-            if (!string.IsNullOrEmpty(response.WamAccountId))
-            {
-                return new Dictionary<string, string>() { { requestParams.AppConfig.ClientId, response.WamAccountId } };
-            }
-
-            return new Dictionary<string, string>();
-        }
-
-        private static string GetHomeAccountId(AuthenticationRequestParameters requestParams, MsalTokenResponse response, IdToken idToken)
-        {
-            ClientInfo clientInfo = response.ClientInfo != null ? ClientInfo.CreateFromJson(response.ClientInfo) : null;
-            string homeAccountId = clientInfo?.ToAccountIdentifier() ?? idToken?.Subject; // ADFS does not have client info, so we use subject
-
-            if (homeAccountId == null)
-            {
-                requestParams.RequestContext.Logger.Info("Cannot determine home account id - or id token or no client info and no subject ");
-            }
-            return homeAccountId;
-        }
-
-        private static string GetPreferredUsernameFromIdToken(bool isAdfsAuthority, IdToken idToken)
-        {
-            // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
-            // It will be set to "preferred_username not in id token"
-            if (idToken == null)
-            {
-                return NullPreferredUsernameDisplayLabel;
-            }
-
-            if (string.IsNullOrWhiteSpace(idToken.PreferredUsername))
-            {
-                if (isAdfsAuthority)
-                {
-                    //The direct to ADFS scenario does not return preferred_username in the id token so it needs to be set to the UPN
-                    return !string.IsNullOrEmpty(idToken.Upn)
-                        ? idToken.Upn
-                        : NullPreferredUsernameDisplayLabel;
-                }
-                return NullPreferredUsernameDisplayLabel;
-            }
-
-            return idToken.PreferredUsername;
         }
         #endregion
 
