@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,11 +25,11 @@ namespace Microsoft.Identity.Client.Broker
     // TODO: need to map exceptions 
     //   - WAM's retrayble exception?
     //   - cancellation exception for when the user closes the browser
-    // TODO: remove account is not implemented (Completed)
-    // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419 - block users from calling ATI twice with a semaphore (Fixed)
+
+    // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419 - block users from calling ATI twice with a semaphore (Undo the fix)
     // TODO: call start-up only once (i.e. initialize core object only once) 
-    // TODO: pass in claims - try {"access_token":{"deviceid":{"essential":true}}} (Completed)
-    // TODO: pass is other "extra query params" (Completed)
+    // TODO: pass in claims - try {"access_token":{"deviceid":{"essential":true}}} (Clarify)
+
     // TODO: multi-cloud support (blocked by WAM bug)
     // TODO: add logging (Blocked - a C++ API exists, no C# API yet as it's pretty complex, waiting for msalruntime to expose it)
 
@@ -38,13 +39,7 @@ namespace Microsoft.Identity.Client.Broker
         private readonly IntPtr _parentHandle = IntPtr.Zero;
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
-
-        //MSA-PT
-        private const string NativeInteropMsalRequestType = "msal_request_type"; 
-        private const string ConsumersPassthroughRequest = "consumer_passthrough";
-        
-        //Only one broker session can exist at a time
-        public static SemaphoreSlim s_interactiveSlimLock { get; set; } = new SemaphoreSlim(1);
+        private const string WamErrorPrefix = "WAM Error ";
 
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
@@ -80,76 +75,68 @@ namespace Microsoft.Identity.Client.Broker
         {
             MsalTokenResponse msalTokenResponse = null;
 
-            try
+            //need to provide a handle
+            if (_parentHandle == IntPtr.Zero)
             {
-                //need to provide a handle
-                if (_parentHandle == IntPtr.Zero)
-                {
-                    throw new MsalClientException(
-                        "window_handle_required",
-                        "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
-                }
+                throw new MsalClientException(
+                    "window_handle_required",
+                    "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
+            }
 
-                //if OperatingSystemAccount is passed then we use the user signed-in on the machine
-                if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
-                {
-                    return await AcquireTokenInteractiveDefaultUserAsync(authenticationRequestParameters, acquireTokenInteractiveParameters).ConfigureAwait(false);
-                }
+            //if OperatingSystemAccount is passed then we use the user signed-in on the machine
+            if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
+            {
+                return await AcquireTokenInteractiveDefaultUserAsync(authenticationRequestParameters, acquireTokenInteractiveParameters).ConfigureAwait(false);
+            }
 
-                await s_interactiveSlimLock.WaitAsync().ConfigureAwait(false);
-                var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
                 
-                _logger.Verbose("[WamBroker] Using Windows account picker.");
+            _logger.Verbose("[WamBroker] Using Windows account picker.");
 
-                using (var core = new NativeInterop.Core())
-                using (var authParams = GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (var core = new NativeInterop.Core())
+            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            {
+                //Login Hint
+                string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
+
+                if (!string.IsNullOrEmpty(loginHint))
                 {
-                    //Login Hint
-                    string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
+                    _logger.Verbose("[WamBroker] AcquireTokenInteractive - account information provided. Trying to find a Windows account that matches.");
+                }
+                else
+                {
+                    _logger.Verbose("[WamBroker] Account information was not provided. Using an account picker.");
+                }
 
-                    if (!string.IsNullOrEmpty(loginHint))
+                // if PopAuthenticationConfiguration is set, proof of possesion will be performed via the runtime broker
+                if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
+                {
+                    _logger.Verbose("[WamBroker] Proof of posession configuration provided. Using proof of posession with broker request.");
+                    authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod.Method;
+                    authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
+                    authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
+                    authParams.PopParams.Nonce = authenticationRequestParameters.PopAuthenticationConfiguration.Nonce;
+                }
+
+                using (var result = await core.SignInInteractivelyAsync(
+                    _parentHandle,
+                    authParams,
+                    authenticationRequestParameters.CorrelationId.ToString("D"),
+                    loginHint,
+                    cancellationToken).ConfigureAwait(false))
+                {
+                    if (result.IsSuccess)
                     {
-                        _logger.Verbose("[WamBroker] AcquireTokenInteractive - account information provided. Trying to find a Windows account that matches.");
+                        msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
+                        _logger.Verbose("[WamBroker] Successfully retrieved token.");
+
                     }
                     else
                     {
-                        _logger.Verbose("[WamBroker] Account information was not provided. Using an account picker.");
-                    }
-
-                    // if PopAuthenticationConfiguration is set, proof of possesion will be performed via the runtime broker
-                    if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
-                    {
-                        _logger.Verbose("[WamBroker] Proof of posession configuration provided. Using proof of posession with broker request.");
-                        authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod.Method;
-                        authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
-                        authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
-                        authParams.PopParams.Nonce = authenticationRequestParameters.PopAuthenticationConfiguration.Nonce;
-                    }
-
-                    using (var result = await core.SignInInteractivelyAsync(
-                        _parentHandle,
-                        authParams,
-                        authenticationRequestParameters.CorrelationId.ToString("D"),
-                        loginHint,
-                        cancellationToken).ConfigureAwait(false))
-                    {
-                        if (result.IsSuccess)
-                        {
-                            msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
-                            _logger.Verbose("[WamBroker] Successfully retrieved token.");
-
-                        }
-                        else
-                        {
-                            _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
-                            throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider - account picker. {result.Error}");
-                        }
+                        _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
+                        WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
                     }
                 }
-            }
-            finally
-            {
-                s_interactiveSlimLock.Release();
             }
             
             return msalTokenResponse;
@@ -168,130 +155,33 @@ namespace Microsoft.Identity.Client.Broker
         {
             MsalTokenResponse msalTokenResponse = null;
 
-            try
+
+            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+
+            _logger.Verbose("[WamBroker] Signing in with the default user account.");
+
+            using (var core = new NativeInterop.Core())
+            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-                await s_interactiveSlimLock.WaitAsync().ConfigureAwait(false);
-                var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
-
-                _logger.Verbose("[WamBroker] Signing in with the default user account.");
-
-                using (var core = new NativeInterop.Core())
-                using (var authParams = GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+                using (NativeInterop.AuthResult result = await core.SignInAsync(
+                        _parentHandle,
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        cancellationToken).ConfigureAwait(false))
                 {
-                    using (NativeInterop.AuthResult result = await core.SignInAsync(
-                            _parentHandle,
-                            authParams,
-                            authenticationRequestParameters.CorrelationId.ToString("D"),
-                            cancellationToken).ConfigureAwait(false))
+                    if (result.IsSuccess)
                     {
-                        if (result.IsSuccess)
-                        {
-                            msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
-                        }
-                        else
-                        {
-                            _logger.Error($"[WamBroker] Could not login interactively with the Default OS Account. {result.Error}");
-                            throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider for the default OS Account. {result.Error}");
-                        }
+                        msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
+                    }
+                    else
+                    {
+                        _logger.Error($"[WamBroker] Could not login interactively with the Default OS Account. {result.Error}");
+                        WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
                     }
                 }
             }
-            finally
-            {
-                s_interactiveSlimLock.Release();
-            }
-            
+
             return msalTokenResponse;
-
-        }
-
-        /// <summary>
-        /// Parse Native Interop AuthResult Response to MSAL Token Response
-        /// </summary>
-        /// <param name="authResult"></param>
-        /// <param name="authenticationRequestParameters"></param>
-        /// <returns></returns>
-        /// <exception cref="MsalServiceException"></exception>
-        private MsalTokenResponse ParseRuntimeResponse(
-                NativeInterop.AuthResult authResult, AuthenticationRequestParameters authenticationRequestParameters)
-        {
-            try
-            {
-                string expiresOn = authResult.ExpiresOn.ToString();
-                string correlationId = authenticationRequestParameters.CorrelationId.ToString("D");
-
-                if (string.IsNullOrWhiteSpace(correlationId))
-                {
-                    _logger.Warning("No correlation ID in response");
-                    correlationId = null;
-                }
-
-                MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
-                {
-                    AccessToken = authResult.AccessToken,
-                    IdToken = authResult.RawIdToken,
-                    CorrelationId = correlationId,
-                    Scope = authResult.GrantedScopes,
-                    ExpiresIn = DateTimeHelpers.GetDurationFromWindowsTimestamp(expiresOn, _logger),
-                    ClientInfo = authResult.Account.ClientInfo.ToString(),
-                    TokenType = "Bearer",
-                    WamAccountId = authResult.Account.Id,
-                    TokenSource = TokenSource.Broker
-                };
-
-                _logger.Info("WAM response status success");
-
-                return msalTokenResponse;
-            }
-            catch (NativeInterop.MsalRuntimeException ex)
-            {
-                throw new MsalServiceException("wam_failed", $"Could not acquire token using WAM. {ex.Message}");
-            }
-
-        }
-
-        /// <summary>
-        /// Gets the Common Auth Parameters to be passed to Native Interop
-        /// </summary>
-        /// <param name="authenticationRequestParameters"></param>
-        /// <param name="isMsaPassthrough"></param>
-        /// <returns></returns>
-        private NativeInterop.AuthParameters GetCommonAuthParameters(AuthenticationRequestParameters authenticationRequestParameters, bool isMsaPassthrough)
-        {
-            _logger.Verbose("[WAM Broker] Getting rumtime common auth parameters.");
-
-            var authParams = new NativeInterop.AuthParameters
-                (authenticationRequestParameters.AppConfig.ClientId, 
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
-            
-            //scopes
-            authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
-            
-            //redirect URI
-            authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
-
-            //MSA-PT
-            if (isMsaPassthrough)
-                authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
-
-            //Client Claims
-            if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ClaimsAndClientCapabilities))
-            {
-                authParams.DecodedClaims = authenticationRequestParameters.ClaimsAndClientCapabilities;
-            }
-
-            //pass extra query parameters if there are any
-            if (authenticationRequestParameters.ExtraQueryParameters != null)
-            {
-                foreach (KeyValuePair<string, string> kvp in authenticationRequestParameters.ExtraQueryParameters)
-                {
-                    authParams.Properties[kvp.Key] = kvp.Value;
-                }
-            }
-
-            _logger.Verbose("[WAM Broker] Finished getting rumtime common auth parameters.");
-
-            return authParams;
         }
 
         /// <summary>
@@ -307,6 +197,172 @@ namespace Microsoft.Identity.Client.Broker
             }
 
             return IntPtr.Zero;
+        }
+
+        /// <summary>
+        /// AcquireTokenSilentAsync
+        /// </summary>
+        /// <param name="authenticationRequestParameters"></param>
+        /// <param name="acquireTokenSilentParameters"></param>
+        /// <returns></returns>
+        /// <exception cref="MsalUiRequiredException"></exception>
+        public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            AcquireTokenSilentParameters acquireTokenSilentParameters)
+        {
+            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+            MsalTokenResponse msalTokenResponse = null;
+
+            _logger.Verbose("[WamBroker] Acquiring token silently.");
+
+            using (var core = new NativeInterop.Core())
+            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            {
+                using (var account = await core.ReadAccountByIdAsync(
+                    acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
+                    authenticationRequestParameters.CorrelationId.ToString("D"),
+                    cancellationToken).ConfigureAwait(false))
+                {
+                    if (account == null)
+                    {
+                        _logger.WarningPii(
+                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
+                            "Could not find a WAM account for the selected user");
+
+                        throw new MsalUiRequiredException(
+                            "wam_no_account_for_id",
+                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}");
+                    }
+
+                    using (NativeInterop.AuthResult result = await core.AcquireTokenSilentlyAsync(
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        account,
+                        cancellationToken).ConfigureAwait(false))
+                    {
+                        if (result.IsSuccess)
+                        {
+                            msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
+                        }
+                        else
+                        {
+                            WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
+                        }
+                    }
+                }
+            }
+
+            return msalTokenResponse;
+        }
+
+        /// <summary>
+        /// Acquire Token Silent with Default User
+        /// </summary>ter
+        /// <param name="authenticationRequestParameters"></param>
+        /// <param name="acquireTokenSilentParameters"></param>
+        /// <returns></returns>
+        /// <exception cref="MsalUiRequiredException"></exception>
+        public async Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            AcquireTokenSilentParameters acquireTokenSilentParameters)
+        {
+            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+            MsalTokenResponse msalTokenResponse = null;
+
+            _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
+
+            using (var core = new NativeInterop.Core())
+            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            {
+                using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        cancellationToken).ConfigureAwait(false))
+                {
+                    if (result.IsSuccess)
+                    {
+                        msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
+                    }
+                    else
+                    {
+                        WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
+                    }
+                }
+            }
+
+            return msalTokenResponse;
+        }
+
+        /// <summary>
+        /// RemoveAccountAsync
+        /// </summary>
+        /// <param name="appConfig"></param>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
+        {
+            string correlationId = Guid.NewGuid().ToString();
+
+            //if OperatingSystemAccount is passed then we use the user signed-in on the machine
+            if (PublicClientApplication.IsOperatingSystemAccount(account))
+            {
+                throw new MsalException("wam_remove_account_failed", "Could not remove the default os account");
+            }
+
+            _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
+
+            using (var core = new NativeInterop.Core())
+            {
+                using (var wamAccount = await core.ReadAccountByIdAsync(
+                    account.HomeAccountId.ObjectId,
+                    correlationId).ConfigureAwait(false))
+                {
+                    if (wamAccount == null)
+                    {
+                        _logger.WarningPii(
+                            $"Could not find a WAM account for the selected user {account.Username}",
+                            "Could not find a WAM account for the selected user");
+                    }
+                    
+                    using (NativeInterop.SignOutResult result = await core.SignOutSilentlyAsync(
+                        appConfig.ClientId,
+                        correlationId,
+                        wamAccount).ConfigureAwait(false))
+                    {
+                        if (result.IsSuccess)
+                        {
+                            _logger.Verbose("[WamBroker] Account signed out successfully. ");
+                        }
+                        else
+                        {
+                            throw new MsalServiceException("wam_failed_to_signout", $"Failed to sign out account. {result.Error}");
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// GetAccountsAsync
+        /// </summary>
+        /// <param name="clientID"></param>
+        /// <param name="redirectUri"></param>
+        /// <param name="authorityInfo"></param>
+        /// <param name="cacheSessionManager"></param>
+        /// <param name="instanceDiscoveryManager"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+            string clientID,
+            string redirectUri,
+            AuthorityInfo authorityInfo,
+            ICacheSessionManager cacheSessionManager,
+            IInstanceDiscoveryManager instanceDiscoveryManager)
+        {
+            // runtime does not yet support account discovery
+
+            return Task.FromResult<IReadOnlyList<IAccount>>(Array.Empty<IAccount>());
         }
 
         /// <summary>
@@ -341,166 +397,6 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WAM Broker] IsBrokerInstalledAndInvokable true");
             return true;
-        }
-
-        /// <summary>
-        /// AcquireTokenSilentAsync
-        /// </summary>
-        /// <param name="authenticationRequestParameters"></param>
-        /// <param name="acquireTokenSilentParameters"></param>
-        /// <returns></returns>
-        /// <exception cref="MsalUiRequiredException"></exception>
-        public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenSilentParameters acquireTokenSilentParameters)
-        {
-            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
-            MsalTokenResponse msalTokenResponse = null;
-
-            _logger.Verbose("[WamBroker] Acquiring token silently.");
-
-            using (var core = new NativeInterop.Core())
-            using (var authParams = GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
-            {
-                using (var account = await core.ReadAccountByIdAsync(
-                    acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
-                    authenticationRequestParameters.CorrelationId.ToString("D"),
-                    cancellationToken).ConfigureAwait(false))
-                {
-                    if (account == null)
-                    {
-                        _logger.WarningPii(
-                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
-                            "Could not find a WAM account for the selected user");
-
-                        throw new MsalUiRequiredException(
-                            "wam_no_account_for_id",
-                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}");
-                    }
-
-                    using (NativeInterop.AuthResult result = await core.AcquireTokenSilentlyAsync(
-                        authParams,
-                        authenticationRequestParameters.CorrelationId.ToString("D"),
-                        account,
-                        cancellationToken).ConfigureAwait(false))
-                    {
-                        if (result.IsSuccess)
-                        {
-                            msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
-                        }
-                        else
-                        {
-                            throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
-                        }
-                    }
-                }
-            }
-
-            return msalTokenResponse;
-        }
-
-        /// <summary>
-        /// Acquire Token Silent with Default User
-        /// </summary>ter
-        /// <param name="authenticationRequestParameters"></param>
-        /// <param name="acquireTokenSilentParameters"></param>
-        /// <returns></returns>
-        /// <exception cref="MsalUiRequiredException"></exception>
-        public async Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenSilentParameters acquireTokenSilentParameters)
-        {
-            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
-            MsalTokenResponse msalTokenResponse = null;
-
-            _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
-
-            using (var core = new NativeInterop.Core())
-            using (var authParams = GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
-            {
-                using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
-                        authParams,
-                        authenticationRequestParameters.CorrelationId.ToString("D"),
-                        cancellationToken).ConfigureAwait(false))
-                {
-                    if (result.IsSuccess)
-                    {
-                        msalTokenResponse = ParseRuntimeResponse(result, authenticationRequestParameters);
-                    }
-                    else
-                    {
-                        throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
-                    }
-                }
-            }
-
-            return msalTokenResponse;
-        }
-
-        /// <summary>
-        /// GetAccountsAsync
-        /// </summary>
-        /// <param name="clientID"></param>
-        /// <param name="redirectUri"></param>
-        /// <param name="authorityInfo"></param>
-        /// <param name="cacheSessionManager"></param>
-        /// <param name="instanceDiscoveryManager"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
-            string clientID,
-            string redirectUri,
-            AuthorityInfo authorityInfo,
-            ICacheSessionManager cacheSessionManager,
-            IInstanceDiscoveryManager instanceDiscoveryManager)
-        {
-            // runtime does not yet support account discovery
-
-            return Task.FromResult<IReadOnlyList<IAccount>>(Array.Empty<IAccount>());
-        }
-
-        /// <summary>
-        /// RemoveAccountAsync
-        /// </summary>
-        /// <param name="appConfig"></param>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
-        {
-            string correlationId = Guid.NewGuid().ToString();
-
-            _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
-
-            using (var core = new NativeInterop.Core())
-            {
-                using (var wamAccount = await core.ReadAccountByIdAsync(
-                    account.HomeAccountId.ObjectId,
-                    correlationId).ConfigureAwait(false))
-                {
-                    if (wamAccount == null)
-                    {
-                        _logger.WarningPii(
-                            $"Could not find a WAM account for the selected user {account.Username}",
-                            "Could not find a WAM account for the selected user");
-                    }
-                    
-                    using (NativeInterop.SignOutResult result = await core.SignOutSilentlyAsync(
-                        appConfig.ClientId,
-                        correlationId,
-                        wamAccount).ConfigureAwait(false))
-                    {
-                        if (result.IsSuccess)
-                        {
-                            _logger.Verbose("[WamBroker] Account signed out successfully. ");
-                        }
-                        else
-                        {
-                            throw new MsalServiceException("wam_failed_to_signout", $"Failed to sign out account. {result.Error}");
-                        }
-                    }
-                }
-            }
         }
     }
 }
