@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,6 +39,7 @@ namespace Microsoft.Identity.Client.Broker
         private readonly IntPtr _parentHandle = IntPtr.Zero;
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
+        private const string WamErrorPrefix = "WAM Error ";
 
         //MSA-PT
         private const string NativeInteropMsalRequestType = "msal_request_type"; 
@@ -45,6 +47,26 @@ namespace Microsoft.Identity.Client.Broker
         
         //Only one broker session can exist at a time
         public static SemaphoreSlim s_interactiveSlimLock { get; set; } = new SemaphoreSlim(1);
+
+        //Error Response 
+        public enum ResponseStatus : int
+        {
+            Unexpected = 0,
+            Reserved = 1,
+            InteractionRequired = 2,
+            NoNetwork = 3,
+            NetworkTemporarilyUnavailable = 4,
+            ServerTemporarilyUnavailable = 5,
+            ApiContractViolation = 6,
+            UserCanceled = 7,
+            ApplicationCanceled = 8,
+            IncorrectConfiguration = 9,
+            InsufficientBuffer = 10,
+            AuthorityUntrusted = 11,
+            UserSwitch = 12,
+            AccountUnusable = 13,
+            UserDataRemovalRequired = 14
+        };
 
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
@@ -132,7 +154,8 @@ namespace Microsoft.Identity.Client.Broker
                         else
                         {
                             _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
-                            throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider - account picker. {result.Error}");
+                            //throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider - account picker. {result.Error}");
+                            CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
                         }
                     }
                 }
@@ -181,7 +204,8 @@ namespace Microsoft.Identity.Client.Broker
                         else
                         {
                             _logger.Error($"[WamBroker] Could not login interactively with the Default OS Account. {result.Error}");
-                            throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider for the default OS Account. {result.Error}");
+                            //throw new MsalServiceException("wam_interactive_failed", $"Could not get the account provider for the default OS Account. {result.Error}");
+                            CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
                         }
                     }
                 }
@@ -380,7 +404,8 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
+                            //throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
+                            CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
                         }
                     }
                 }
@@ -419,7 +444,8 @@ namespace Microsoft.Identity.Client.Broker
                     }
                     else
                     {
-                        throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
+                        //throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, $"Failed to acquire token silently. {result.Error}");
+                        CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
                     }
                 }
             }
@@ -491,6 +517,98 @@ namespace Microsoft.Identity.Client.Broker
                     }
                 }
             }
+        }
+
+        internal MsalException CreateWamErrorResponse(
+            NativeInterop.AuthResult authResult,
+            AuthenticationRequestParameters authenticationRequestParameters,
+            ICoreLogger logger)
+        {
+            MsalServiceException serviceException = null;
+            string internalErrorCode = null;
+            string errorMessage;
+            int errorCode;
+
+            switch ((int)authResult.Error.Status)
+            {
+                case (int)ResponseStatus.UserCanceled:
+                    throw new MsalClientException(MsalError.AuthenticationCanceledError, MsalErrorMessage.AuthenticationCanceled);
+
+                // Account Switch occurs when a login hint is passed to WAM but the user chooses a different account for login.
+                // MSAL treats this as a success scenario
+                //case (int)ResponseStatus.UserSwitch:
+                //    logger.Info("WAM response status account switch. Treating as success");
+                //    ParseRuntimeResponse(authResult, authenticationRequestParameters);
+
+                case (int)ResponseStatus.InteractionRequired:
+                case (int)ResponseStatus.AccountUnusable:
+                    errorCode = authResult.Error.ErrorCode;
+                    internalErrorCode = authResult.Error.Tag.ToString();
+                    errorMessage = WamErrorPrefix +
+                        $" Error Code: {errorCode}" +
+                        $" Error Message: {authResult.Error.Status}" +
+                        $" Internal Error Code: {internalErrorCode}";
+                    throw new MsalUiRequiredException(errorCode.ToString(), errorMessage);
+
+                case (int)ResponseStatus.IncorrectConfiguration:
+                case (int)ResponseStatus.ApiContractViolation:
+                    errorCode = authResult.Error.ErrorCode;
+                    internalErrorCode = (authResult.Error.Tag).ToString(CultureInfo.InvariantCulture);
+                    errorMessage =
+                        $"{WamErrorPrefix} \n" +
+                        $" Error Code: {errorCode} \n" +
+                        $" Error Message: {authResult.Error.Status} \n" +
+                        $" WAM Error Message: {authResult.Error.Context} \n" +
+                        $" Internal Error Code: {internalErrorCode} \n" +
+                        $" Is Retryable: false \n" +
+                        $" Possible causes: \n " +
+                        $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: {GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
+                        $"- No Internet connection \n" +
+                        $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
+
+                    serviceException = new MsalServiceException(errorCode.ToString(), errorMessage);
+                    serviceException.IsRetryable = false;
+                    throw serviceException;
+
+                case (int)ResponseStatus.NetworkTemporarilyUnavailable:
+                case (int)ResponseStatus.NoNetwork:
+                case (int)ResponseStatus.ServerTemporarilyUnavailable:
+                    errorCode = authResult.Error.ErrorCode;
+                    internalErrorCode = (authResult.Error.Tag).ToString(CultureInfo.InvariantCulture);
+                    errorMessage =
+                        $"{WamErrorPrefix} \n" +
+                        $" Error Code: {errorCode} \n" +
+                        $" Error Message: {authResult.Error.Status} \n" +
+                        $" WAM Error Message: {authResult.Error.Context} \n" +
+                        $" Internal Error Code: {internalErrorCode} \n" +
+                        $" Is Retryable: true \n" +
+                        $" Possible causes: \n " +
+                        $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: {GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
+                        $"- No Internet connection \n" +
+                        $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
+
+                    serviceException = new MsalServiceException(errorCode.ToString(), errorMessage);
+                    serviceException.IsRetryable = false;
+                    throw serviceException;
+
+                default:
+                    errorCode = authResult.Error.ErrorCode;
+                    internalErrorCode = (authResult.Error.ErrorCode).ToString(CultureInfo.InvariantCulture);
+                    errorMessage = $"Unknown {authResult.Error} (internal error code {errorCode}) (internal error code {internalErrorCode})";
+
+                    throw new MsalServiceException(MsalError.UnknownBrokerError, errorMessage);
+            }
+        }
+
+        private static string GetExpectedRedirectUri(string clientId)
+        {
+#if WINDOWS_APP
+            string sid = Windows.Security.Authentication.Web.WebAuthenticationBroker.GetCurrentApplicationCallbackUri().Host.ToUpper();            
+            return $"ms-appx-web://microsoft.aad.brokerplugin/{sid}";
+#else
+
+            return $"ms-appx-web://microsoft.aad.brokerplugin/{clientId}";
+#endif
         }
     }
 }
