@@ -464,7 +464,7 @@ namespace Microsoft.Identity.Client
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
-            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
+            var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
 
             requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
 
