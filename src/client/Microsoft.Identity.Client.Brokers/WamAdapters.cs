@@ -19,11 +19,11 @@ namespace Microsoft.Identity.Client.Broker
     {
         private const string WamErrorPrefix = "WAM Error ";
         
-        //MSA-PT
+        //MSA-PT Auth Params
         private const string NativeInteropMsalRequestType = "msal_request_type";
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
 
-        //Error Response 
+        //MSAL Runtime Error Response 
         private enum ResponseStatus : int
         {
             Unexpected = 0,
@@ -67,12 +67,6 @@ namespace Microsoft.Identity.Client.Broker
             {
                 case (int)ResponseStatus.UserCanceled:
                     throw new MsalClientException(MsalError.AuthenticationCanceledError, MsalErrorMessage.AuthenticationCanceled);
-
-                // Account Switch occurs when a login hint is passed to WAM but the user chooses a different account for login.
-                // MSAL treats this as a success scenario
-                //case (int)ResponseStatus.UserSwitch:
-                //    logger.Info("WAM response status account switch. Treating as success");
-                //    ParseRuntimeResponse(authResult, authenticationRequestParameters);
 
                 case (int)ResponseStatus.InteractionRequired:
                 case (int)ResponseStatus.AccountUnusable:
@@ -221,6 +215,11 @@ namespace Microsoft.Identity.Client.Broker
 
         }
 
+        /// <summary>
+        /// Get WAM Application Redirect URI
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         private static string GetExpectedRedirectUri(string clientId)
         {
 #if WINDOWS_APP
