@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.Fail("Expected no exception, but got: " + ex.Message);
+                Assert.IsTrue(ex.Message.Contains("Need user interaction to continue"));
             }
 
         }
