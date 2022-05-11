@@ -501,6 +501,65 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
+
+        [TestMethod]
+        public async Task ATS_DefaultAccount_NoTransferToken_ThrowsException_Async()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var msaAccountProvider = new WebAccountProvider("id", "user@outlook.com", null);
+                var aadAccountProvider = new WebAccountProvider("id", "organizations", null);
+
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityOrganizationsTenant);
+                requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions()
+                {
+                    MsaPassthrough = true
+                };
+                _wamBroker = new WamBroker(
+                     _coreUIParent,
+                      requestParams.AppConfig,
+                     _logger,
+                     _aadPlugin,
+                     _msaPlugin,
+                     _wamProxy,
+                     _webAccountProviderFactory,
+                     _accountPickerFactory,
+                     _msaPassthroughHandler);
+
+                _webAccountProviderFactory.GetDefaultProviderAsync().ReturnsForAnyArgs(Task.FromResult(msaAccountProvider));
+                _webAccountProviderFactory.IsConsumerProvider(msaAccountProvider).Returns(true);
+                _msaPassthroughHandler.TryFetchTransferTokenSilentDefaultAccountAsync(requestParams, msaAccountProvider).Returns(string.Empty);
+
+                _webAccountProviderFactory.GetAccountProviderAsync("organizations").Returns(aadAccountProvider);
+
+                var webTokenRequest = new WebTokenRequest(aadAccountProvider);
+                var atsParams = new AcquireTokenSilentParameters();
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _aadPlugin.CreateWebTokenRequestAsync(
+                   aadAccountProvider,
+                   requestParams,
+                   isForceLoginPrompt: false,
+                   isAccountInWam: true,
+                   isInteractive: false)
+                   .Returns(Task.FromResult(webTokenRequest));
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).Returns(webTokenResponseWrapper);
+                _aadPlugin.ParseSuccessfullWamResponse(webTokenResponse, out _).Returns(_msalTokenResponse);
+
+               
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                    () => _wamBroker.AcquireTokenSilentDefaultUserAsync(requestParams, atsParams)).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.InteractionRequired, ex.ErrorCode);
+            }
+        }
+
+
         [TestMethod]
         public async Task ATI_WithoutPicker_AccountMatch_Async()
         {
