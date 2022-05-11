@@ -88,66 +88,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             AssertException.Throws<NotImplementedException>(() => _wamBroker.HandleInstallUrl("http://app"));
         }
-
-        [TestMethod]
-        public async Task WamSilentAuthAsync()
-        {
-            string[] scopes = new[]
-                {
-                    "https://management.core.windows.net//.default"
-                };
-
-            var pcaBuilder = PublicClientApplicationBuilder
-               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
-               .WithAuthority(TestConstants.AuthorityOrganizationsTenant);
-
-            pcaBuilder = pcaBuilder.WithBroker2();
-            var pca = pcaBuilder.Build();
-
-            // Act
-            try
-            {
-                var result = await pca.AcquireTokenSilent(scopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result.AccessToken);
-            }
-            catch (MsalUiRequiredException ex)
-            {
-                Assert.Fail("Expected no exception, but got: " + ex.Message);
-                Assert.IsTrue(ex.Message.Contains("Need user interaction to continue"));
-            }
-
-        }
-
-        [TestMethod]
-        public async Task WamSilentAuthWithLabAppAsync()
-        {
-            string[] scopes = new[]
-                {
-                    "user.read"
-                };
-
-            var pcaBuilder = PublicClientApplicationBuilder
-               .Create("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0")
-               .WithAuthority(TestConstants.AuthorityOrganizationsTenant);
-
-            pcaBuilder = pcaBuilder.WithBroker2();
-            var pca = pcaBuilder.Build();
-
-            // Act
-            try
-            {
-                var result = await pca.AcquireTokenSilent(scopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result.AccessToken);
-            }
-            catch (MsalUiRequiredException ex)
-            {
-                Assert.Fail("Expected no exception, but got: " + ex.Message);
-                Assert.IsTrue(ex.Message.Contains("Need user interaction to continue"));
-            }
-
-        }
     }    
 }
 
