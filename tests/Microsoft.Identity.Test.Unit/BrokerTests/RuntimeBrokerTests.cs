@@ -110,11 +110,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var result = await pca.AcquireTokenSilent(scopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result.AccessToken);
-                Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
             }
-            catch (MsalUiRequiredException e)
+            catch (MsalUiRequiredException ex)
             {
-                Assert.IsNull(e);
+                Assert.Fail("Expected no exception, but got: " + ex.Message);
             }
 
         }
