@@ -14,15 +14,15 @@ using Microsoft.Identity.Test.Unit;
 namespace Microsoft.Identity.Test.Performance
 {
     /// <summary>
-    /// Used to test the performance of acquire tokens without cache and mocked network calls.
+    /// Used to test the performance of acquiring tokens without cache and mocked network calls.
     /// </summary>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenNoCacheTests
     {
         private ConfidentialClientApplication _cca;
         private MockHttpManager _httpManager;
-        private string[] _scope = TestConstants.s_scope.ToArray();
-        private UserAssertion _userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+        private readonly string[] _scope = TestConstants.s_scope.ToArray();
+        private readonly UserAssertion _userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
         [GlobalSetup(Target = nameof(AcquireTokenForClient_TestAsync))]
         public void GlobalSetup_ForClient()

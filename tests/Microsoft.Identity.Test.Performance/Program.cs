@@ -21,8 +21,15 @@ namespace Microsoft.Identity.Test.Performance
                     typeof(AcquireTokenForClientCacheTests),
                     typeof(AcquireTokenForOboCacheTests),
                     typeof(TokenCacheTests),
-            }).RunAll(DefaultConfig.Instance
+                    typeof(AcquireTokenNoCacheTests),
+            }).RunAll(
+#if DEBUG
+                    new DebugInProcessConfig()
+#else
+                    DefaultConfig.Instance
+#endif
                 .WithOptions(ConfigOptions.DisableLogFile)
+                .WithOptions(ConfigOptions.JoinSummary)
                 //.WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually
                 .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
                                                        //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
@@ -32,7 +39,9 @@ namespace Microsoft.Identity.Test.Performance
             }
             catch (Exception ex)
             {
+                Logger.Log("Error running performance tests.");
                 Logger.Log(ex.ToString());
+                throw;
             }
 
             Logger.Log("Completed running performance tests.");
@@ -41,7 +50,7 @@ namespace Microsoft.Identity.Test.Performance
 
     public static class Logger
     {
-        private const string LogPrefix = "[Microsoft.Identity.Test.Performance]";
+        private const string LogPrefix = "[Test.Performance]";
         public static void Log(string message) => Console.WriteLine($"{LogPrefix} {message}");
     }
 }
