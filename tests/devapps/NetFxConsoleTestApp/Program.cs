@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,7 +15,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Cache.Items;
 #if NET47
 using Microsoft.Identity.Client.Desktop;
 #endif
@@ -70,7 +68,7 @@ namespace NetFx
             Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET");
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private static readonly IEnumerable<string> s_scopes = new[] { "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess",  };
+        private static readonly IEnumerable<string> s_scopes = new[] { "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess", };
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -109,7 +107,7 @@ namespace NetFx
                 .Build();
 
             //cca.AcquireTokenOnBehalfOf(null, null).WithAuthority
-            
+
 
             BindCache(cca.UserTokenCache, UserCacheFile);
             BindCache(cca.AppTokenCache, UserCacheFile);
@@ -139,7 +137,7 @@ namespace NetFx
                 builder = builder
                     //.WithParentActivityOrWindow(consoleWindowHandleProvider)
                     .WithExperimentalFeatures()
-                    
+
 
                     .WithBroker(true);
             }
@@ -183,7 +181,7 @@ namespace NetFx
                      $"IsDesktopSession: {pca.IsUserInteractive()}, " +
                      $"IsEmbeddedWebViewAvailable: {pca.IsEmbeddedWebViewAvailable()} " +
                      $"IsEmbeddedWebViewAvailable: {pca.IsSystemWebViewAvailable()}");
-                     
+
                 Console.WriteLine("Authority: " + GetAuthority());
                 Console.WriteLine("Use WAM: " + s_useBroker);
                 await DisplayAccountsAsync(pca).ConfigureAwait(false);
@@ -252,8 +250,8 @@ namespace NetFx
                             //IntPtr consoleWindowHandle = GetConsoleWindow();
                             var interactiveBuilder = pca
                                 .AcquireTokenInteractive(s_scopes);
-                                //.WithParentActivityOrWindow(consoleWindowHandle);
-                            
+                            //.WithParentActivityOrWindow(consoleWindowHandle);
+
 
                             AuthenticationResult authResult = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
                             ClaimsPrincipal idTokenClaims = authResult.ClaimsPrincipal;
@@ -307,7 +305,7 @@ namespace NetFx
 
                             if (s_usePoP)
                             {
-                                var popConfig = new PoPAuthenticationConfiguration(new Uri(PoPUri)) {HttpMethod = s_popMethod };
+                                var popConfig = new PoPAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
                                 silentBuilder = silentBuilder
                                     .WithExtraQueryParameters(GetTestSliceParams())
                                     .WithProofOfPossession(popConfig);
