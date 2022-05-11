@@ -20,29 +20,37 @@ using Microsoft.Identity.Client.OAuth2;
 using System.Runtime.InteropServices;
 using System;
 using NSubstitute;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
-namespace Microsoft.Identity.Test.Integration.NetCore
+namespace Microsoft.Identity.Test.Integration.Broker
 {
     
     [TestClass]
     public class RuntimeBrokerTests
     {
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+        [DllImport("user32.dll")]
+        static extern IntPtr GetForegroundWindow();
         /// <summary>
         /// Initialized by MSTest (do not make private or readonly)
         /// </summary>
-        public TestContext TestContext { get; set; }
-        private readonly CoreUIParent _parent = new CoreUIParent();
+        //public TestContext TestContext { get; set; }
+        private CoreUIParent _coreUIParent;
         private ICoreLogger _logger;
         private RuntimeBroker _wamBroker;
+        IntPtr _parentHandle = GetForegroundWindow();
+        //private SynchronizationContext _synchronizationContext;
 
         [TestInitialize]
         public void Init()
         {
+            //_synchronizationContext = new DedicatedThreadSynchronizationContext();
+            _coreUIParent = new CoreUIParent() { OwnerWindow = _parentHandle };
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
             _logger = Substitute.For<ICoreLogger>();
-
-            _wamBroker = new RuntimeBroker(_parent, applicationConfiguration, _logger);
-
+            _wamBroker = new RuntimeBroker(_coreUIParent, applicationConfiguration, _logger);
         }
 
         [TestMethod]
@@ -53,12 +61,11 @@ namespace Microsoft.Identity.Test.Integration.NetCore
                     "https://management.core.windows.net//.default"
                 };
 
-            var pcaBuilder = PublicClientApplicationBuilder
+            PublicClientApplicationBuilder pcaBuilder = PublicClientApplicationBuilder
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            pcaBuilder = pcaBuilder.WithBroker2();
-            var pca = pcaBuilder.Build();
+            IPublicClientApplication pca = pcaBuilder.WithBroker2().Build();
 
             // Act
             try
@@ -75,30 +82,69 @@ namespace Microsoft.Identity.Test.Integration.NetCore
         }
 
         [TestMethod]
-        public async Task WamSilentAuthWithLabAppAsync()
+        public async Task WamInteractiveAuthNoWindowHandleAsync()
         {
             string[] scopes = new[]
                 {
-                    "user.read"
+                    "https://management.core.windows.net//.default"
                 };
 
-            var pcaBuilder = PublicClientApplicationBuilder
-               .Create("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0")
+            IAccount accountToLogin = PublicClientApplication.OperatingSystemAccount;
+
+            PublicClientApplicationBuilder pcaBuilder = PublicClientApplicationBuilder
+               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            pcaBuilder = pcaBuilder.WithBroker2();
-            var pca = pcaBuilder.Build();
+            IPublicClientApplication pca = pcaBuilder.WithBroker2().Build();
 
             // Act
             try
             {
-                var result = await pca.AcquireTokenSilent(scopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
+                var result = await pca.AcquireTokenInteractive(scopes)
+                    .WithAccount(accountToLogin)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
                 Assert.IsNotNull(result.AccessToken);
             }
-            catch (MsalUiRequiredException ex)
+            catch (MsalClientException ex)
             {
-                Assert.IsTrue(ex.Message.Contains("Need user interaction to continue"));
+                Assert.IsTrue(ex.Message.Contains("Public Client applications wanting to use WAM need to provide their window handle. " +
+                    "Console applications can use GetConsoleWindow Windows API for this"));
+            }
+
+        }
+
+        [TestMethod]
+        public async Task WamInteractiveAuthOperatingSystemAccountAsync()
+        {
+            string[] scopes = new[]
+                {
+                    "https://management.core.windows.net//.default"
+                };
+
+            IAccount accountToLogin = PublicClientApplication.OperatingSystemAccount;
+
+            PublicClientApplicationBuilder pcaBuilder = PublicClientApplicationBuilder
+               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
+               .WithAuthority("https://login.microsoftonline.com/organizations")
+               .WithParentActivityOrWindow(() => _parentHandle);
+
+            IPublicClientApplication pca = pcaBuilder.WithBroker2().Build();
+
+            // Act
+            try
+            {
+                var result = await pca.AcquireTokenInteractive(scopes)
+                    .WithAccount(accountToLogin)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail("Expected no exception, but got: " + ex.Message);
             }
 
         }
