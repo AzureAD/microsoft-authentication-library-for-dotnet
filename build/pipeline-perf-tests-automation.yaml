@@ -42,5 +42,7 @@ jobs:
         msbuildArguments: '/p:RunCodeAnalysis=false /p:MSAL_DESKTOP_ONLY_DEV=$(MSAL_DESKTOP_ONLY_DEV)'
         clean: true
 
+    # The parameters currently are not used, but can be uploaded into the reporting system in the future.
+    # Currently the build runs automatically but the results have to be compared manually.
     - script: '$(Build.SourcesDirectory)\tests\Microsoft.Identity.Test.Performance\bin\$(BuildConfiguration)\$(BuildRuntime)\Microsoft.Identity.Test.Performance.exe -BranchName $(Build.SourceBranch) -BranchCommit $(Build.SourceVersion)'
       displayName: 'Run performance tests'
