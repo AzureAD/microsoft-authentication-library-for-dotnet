@@ -177,7 +177,6 @@ namespace Microsoft.Identity.Client
                     if (msalAccessTokenCacheItem != null)
                     {
                         logger.Info("Saving AT in cache and removing overlapping ATs...");
-
                         DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
                             instanceDiscoveryMetadata.Aliases,
