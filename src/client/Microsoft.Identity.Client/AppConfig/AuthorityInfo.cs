@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client
 
         internal bool IsInstanceDiscoverySupported => (AuthorityType == AuthorityType.Aad);
 
-        internal bool IsClientInfoSupported => (AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts);
+        internal bool IsClientInfoSupported => (AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts || AuthorityType == AuthorityType.B2C);
 
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
@@ -342,8 +342,6 @@ namespace Microsoft.Identity.Client
         private static AuthorityType GetAuthorityType(string authority) 
         {
             string firstPathSegment = GetFirstPathSegment(authority);
-            
-
 
             if (string.Equals(firstPathSegment, "adfs", StringComparison.OrdinalIgnoreCase))
             {

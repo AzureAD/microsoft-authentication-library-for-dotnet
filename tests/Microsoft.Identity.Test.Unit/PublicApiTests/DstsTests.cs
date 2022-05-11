@@ -90,7 +90,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);    
-                //request to token endpoint
             }
         }
     }
