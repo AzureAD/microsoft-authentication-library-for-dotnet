@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -108,15 +109,7 @@ namespace Microsoft.Identity.Client.Broker
                     _logger.Verbose("[WamBroker] Account information was not provided. Using an account picker.");
                 }
 
-                // if PopAuthenticationConfiguration is set, proof of possesion will be performed via the runtime broker
-                if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
-                {
-                    _logger.Verbose("[WamBroker] Proof of posession configuration provided. Using proof of posession with broker request.");
-                    authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod.Method;
-                    authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
-                    authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
-                    authParams.PopParams.Nonce = authenticationRequestParameters.PopAuthenticationConfiguration.Nonce;
-                }
+                AddPopParams(authenticationRequestParameters, authParams);
 
                 using (var result = await core.SignInInteractivelyAsync(
                     _parentHandle,
@@ -163,6 +156,8 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
+                AddPopParams(authenticationRequestParameters, authParams);
+
                 using (NativeInterop.AuthResult result = await core.SignInAsync(
                         _parentHandle,
                         authParams,
@@ -218,6 +213,8 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
+                AddPopParams(authenticationRequestParameters, authParams);
+
                 using (var account = await core.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
                     authenticationRequestParameters.CorrelationId.ToString("D"),
@@ -274,6 +271,8 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
+                AddPopParams(authenticationRequestParameters, authParams);
+
                 using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
@@ -397,6 +396,22 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WAM Broker] IsBrokerInstalledAndInvokable true");
             return true;
+        }
+
+        /// <summary>
+        /// Configures the Msal Runtime authenticaion request to use proof of posession.
+        /// </summary>
+        private void AddPopParams(AuthenticationRequestParameters authenticationRequestParameters, AuthParameters authParams)
+        {
+            // if PopAuthenticationConfiguration is set, proof of possesion will be performed via the runtime broker
+            if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
+            {
+                _logger.Verbose("[WamBroker] Proof of posession configuration provided. Using proof of posession with broker request.");
+                authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod.Method;
+                authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
+                authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
+                authParams.PopParams.Nonce = authenticationRequestParameters.PopAuthenticationConfiguration.Nonce;
+            }
         }
     }
 }

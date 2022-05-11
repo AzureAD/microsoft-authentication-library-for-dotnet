@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
                 await requestParams.AuthorityManager.GetInstanceDiscoveryEntryAsync().ConfigureAwait(false);
 
             #region Create Cache Objects
-            if (!string.IsNullOrEmpty(response.AccessToken))
+            if (!string.IsNullOrEmpty(response.AccessToken) && !requestParams.ShouldNotCacheAccessTokens)
             {
                 msalAccessTokenCacheItem =
                     new MsalAccessTokenCacheItem(

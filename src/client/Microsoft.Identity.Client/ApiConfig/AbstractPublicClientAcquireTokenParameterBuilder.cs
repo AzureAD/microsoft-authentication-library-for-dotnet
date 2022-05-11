@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         ///  Modifies the token acquisition request so that the acquired token is a Proof of Possession token (PoP), rather than a Bearer token. 
         ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
+        ///  Note that only the host and path parts of the request URI will be bound.
         ///  See https://aka.ms/msal-net-pop
         /// </summary>
         /// <param name="httpMethod">The HTTP method ("GET", "POST" etc.) method that will be bound to the token. Leave null and the POP token will not be bound to the method.

@@ -179,11 +179,5 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Metrics.IncrementTotalAccessTokensFromBroker();
             return tokenResponse;
         }
-
-        protected override bool ShouldNotCacheTokenResponse()
-        {
-            return AuthenticationRequestParameters.PopAuthenticationConfiguration != null && //limited to pop tokens for the moment. Will be expanded later
-                ServiceBundle.Config.BrokerCreatorFunc != null; //Check to see if MSAL runtime is used.
-        }
     }
 }

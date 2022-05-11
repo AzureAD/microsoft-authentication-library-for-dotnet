@@ -185,23 +185,7 @@ namespace Microsoft.Identity.Client
             MsalTokenResponse tokenResponse,
             AuthenticationRequestParameters requestParams,
             IdToken idToken,
-            IAccount account) 
-            //: this(
-            //                    tokenResponse.AccessToken,
-            //                    false,
-            //                    idToken.GetUniqueId(),
-            //                    DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.ExpiresIn),
-            //                    DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.ExtendedExpiresIn),
-            //                    TokenResponseHelper.GetTenantId(idToken, requestParams),
-            //                    account,
-            //                    tokenResponse.IdToken,
-            //                    requestParams.Scope,
-            //                    requestParams.CorrelationId,
-            //                    tokenResponse.TokenType,
-            //                    new AuthenticationResultMetadata(tokenResponse.TokenSource),
-            //                    idToken.ClaimsPrincipal,
-            //                    tokenResponse.SpaAuthCode
-            //    )
+            IAccount account)
         {
             AccessToken = tokenResponse.AccessToken;
             IsExtendedLifeTimeToken = false; //TODO: How should this be determined?
@@ -217,6 +201,11 @@ namespace Microsoft.Identity.Client
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenResponse.TokenSource);
             ClaimsPrincipal = idToken.ClaimsPrincipal;
             SpaAuthCode = tokenResponse.SpaAuthCode;
+            
+            if (tokenResponse.RefreshIn != null)
+            {
+                AuthenticationResultMetadata.RefreshOn = DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.RefreshIn);
+            }
         }
 
         //Default constructor for testing

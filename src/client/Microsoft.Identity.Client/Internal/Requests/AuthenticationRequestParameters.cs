@@ -175,7 +175,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
 
-        #endregion
+        /// <summary>
+        /// Determines if the token response should be saved in the cached.
+        /// This may be ovveritten by the child types that perform additional checks.
+        /// Token responses recieved from brokers should not be cached for example.
+        /// </summary>
+        public bool ShouldNotCacheAccessTokens
+        {
+            get
+            {
+#if ANDROID || iOS
+                return false;
+#else
+                return PopAuthenticationConfiguration != null &&
+                        AppConfig.IsBrokerEnabled;
+#endif
+            }
+        }
+
+#endregion
 
         public void LogParameters()
         {

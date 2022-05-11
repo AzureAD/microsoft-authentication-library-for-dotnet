@@ -173,19 +173,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
             }
 
-            ValidateAccountIdentifiers(fromServer);
-
-            if (ShouldNotCacheTokenResponse())
-            {
-                return GetAuthenticationResultFromTokenResponse(msalTokenResponse);
-            }
-
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
             var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
             var atItem = tuple.Item1;
             var idtItem = tuple.Item2;
             Account account = tuple.Item3;
+
+            if (atItem == null)
+            {
+                return GetAuthenticationResultFromTokenResponse(msalTokenResponse, idtItem, account);
+            }
 
             return new AuthenticationResult(
                 atItem,
@@ -198,35 +196,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse.SpaAuthCode);
         }
 
-        /// <summary>
-        /// Determines if the token response should be saved in the cached.
-        /// This may be ovveritten by the child types that perform additional checks.
-        /// Token responses recieved from brokers should not be cached for example.
-        /// </summary>
-        protected virtual bool ShouldNotCacheTokenResponse()
+        private AuthenticationResult GetAuthenticationResultFromTokenResponse(
+            MsalTokenResponse msalTokenResponse, 
+            MsalIdTokenCacheItem idTokenCacheItem, 
+            IAccount account)
         {
-            return false;
-        }
+            if (account == null)
+            {
+                bool isAdfsAuthority = AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
+                string preferredUsername = TokenResponseHelper.GetPreferredUsernameFromIdToken(isAdfsAuthority, idTokenCacheItem?.IdToken);
+                string username = isAdfsAuthority ? idTokenCacheItem?.IdToken?.Upn : preferredUsername;
+                string homeAccountId = TokenResponseHelper.GetHomeAccountId(AuthenticationRequestParameters, msalTokenResponse, idTokenCacheItem?.IdToken);
+                Dictionary<string, string> wamAccountIds = TokenResponseHelper.GetWamAccountIds(AuthenticationRequestParameters, msalTokenResponse);
 
-        private AuthenticationResult GetAuthenticationResultFromTokenResponse(MsalTokenResponse msalTokenResponse)
-        {
-            IdToken idToken = IdToken.Parse(msalTokenResponse.IdToken);
-
-            bool isAdfsAuthority = AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
-            string preferredUsername = TokenResponseHelper.GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
-            string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
-            string homeAccountId = TokenResponseHelper.GetHomeAccountId(AuthenticationRequestParameters, msalTokenResponse, idToken);
-            Dictionary<string, string> wamAccountIds = TokenResponseHelper.GetWamAccountIds(AuthenticationRequestParameters, msalTokenResponse);
-
-            var account = new Account(
-                  homeAccountId,
-                  username,
-                  AuthenticationRequestParameters.Authority.AuthorityInfo.Host, //TODO: Should we perform instance discovery
-                  wamAccountIds);
+                account = new Account(
+                      homeAccountId,
+                      username,
+                      AuthenticationRequestParameters.Authority.AuthorityInfo.Host,
+                      wamAccountIds);
+            }
 
             return new AuthenticationResult(msalTokenResponse,
                                             AuthenticationRequestParameters,
-                                            idToken,
+                                            idTokenCacheItem?.IdToken,
                                             account);
         }
 
