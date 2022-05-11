@@ -69,8 +69,7 @@ namespace Microsoft.Identity.Test.Performance
         [Benchmark]
         public async Task<AuthenticationResult> BenchmarkAsync()
         {
-            var result = await _requests[_requestIdx].ExecuteAsync(System.Threading.CancellationToken.None).ConfigureAwait(true);
-            return result;
+            return await _requests[_requestIdx].ExecuteAsync(System.Threading.CancellationToken.None).ConfigureAwait(true);
         }
 
         private void AddHostToInstanceCache(IServiceBundle serviceBundle, string host)
