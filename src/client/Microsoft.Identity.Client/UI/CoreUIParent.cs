@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Client.UI
 {
-    internal class CoreUIParent
+    public class CoreUIParent
     {
         public CoreUIParent()
         {

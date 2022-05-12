@@ -2,11 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using System.ComponentModel;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.UI;
 
 #if iOS
 using UIKit;
@@ -330,6 +331,7 @@ namespace Microsoft.Identity.Client
         /// Returns <c>true</c> if a broker can be used.
         /// This method is only needed to be used in mobile scenarios which support Mobile Application Management. In other supported scenarios, use <c>WithBroker</c> by itself, which will fall back to use a browser if broker is unavailable.
         /// </summary>
+        /// <param name="parentWindow">Parent window handle. This parameter must be non null for iOS platform.</param>
         /// <remarks>
         /// <list type="bullet">
         /// <item><description>On Windows, the broker (WAM) can be used on Windows 10 and is always installed. See https://aka.ms/msal-net-wam </description></item>
@@ -339,10 +341,10 @@ namespace Microsoft.Identity.Client
         /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
         /// </list>
         /// </remarks>
-        public bool IsBrokerAvailable()
+        public bool IsBrokerAvailable(CoreUIParent parentWindow = null)
         {
             return PlatformProxyFactory.CreatePlatformProxy(null)
-                    .CreateBroker(Config, null).IsBrokerInstalledAndInvokable(Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
+                    .CreateBroker(Config, parentWindow).IsBrokerInstalledAndInvokable(Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
 
         /// <summary>

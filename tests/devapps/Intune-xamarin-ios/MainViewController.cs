@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreGraphics;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Intune.MAM;
 using UIKit;
 
 namespace IntuneMAMSampleiOS
@@ -79,13 +81,16 @@ namespace IntuneMAMSampleiOS
                                                                         .WithAuthority(authority)
                                                                         .WithClientCapabilities(clientCapabilities)
                                                                         .WithHttpClientFactory(new HttpSnifferClientFactory());
-                    if (pcaBuilder.IsBrokerAvailable())
+                    if (pcaBuilder.IsBrokerAvailable(new CoreUIParent(this)))
                     {
                         pcaBuilder.WithBroker();
                     }
                     else
                     {
                         // Notify the user that broker must be installed.
+                        ShowAlert("Install Broker", "Intune App Protection requires broker to be installed on your device. Please install the broker.");
+
+                        return;
                     }
 
                     PCA = pcaBuilder.Build();

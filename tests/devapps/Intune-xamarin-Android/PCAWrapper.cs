@@ -55,6 +55,9 @@ namespace Intune_xamarin_Android
             else
             {
                 // Notify the user that broker must be installed.
+                // This being developer's app, it is notified by trace and starting a debuger.
+                System.Diagnostics.Debug.WriteLine("Intune ap protection requires broker to be installed.");
+                System.Diagnostics.Debugger.Break();
             }
 
             PCA = builder.Build();
