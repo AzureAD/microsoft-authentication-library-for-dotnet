@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
-        /// AcquireToken Interactively for the default user using WAM
+        /// Acquire Token Interactively for the default user using WAM
         /// </summary>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="acquireTokenInteractiveParameters"></param>
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
-        /// AcquireTokenSilentAsync
+        /// Acquire Token Silently
         /// </summary>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="acquireTokenSilentParameters"></param>
@@ -284,7 +284,7 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
-        /// RemoveAccountAsync
+        /// Remove Account
         /// </summary>
         /// <param name="appConfig"></param>
         /// <param name="account"></param>
