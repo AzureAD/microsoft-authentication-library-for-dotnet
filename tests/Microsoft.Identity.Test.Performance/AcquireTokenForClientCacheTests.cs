@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,10 +18,10 @@ using Microsoft.Identity.Web;
 namespace Microsoft.Identity.Test.Performance
 {
     /// <summary>
-    /// Used to test the performance of token cache with large amount of items.
+    /// Used to test the performance of acquiring tokens using token cache with different number of items.
     /// </summary>
     /// <remarks>
-    /// For app cache, the number of partitions is the number of tenants
+    /// For app cache, the number of partitions is the number of tenants.
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenForClientCacheTests
@@ -42,10 +41,8 @@ namespace Microsoft.Identity.Test.Performance
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10),
-            (1, 10000),
-            (1000, 10),
+            (1, 1000),
             (10000, 10),
-            (100000, 10),
         };
 
         [ParamsAllValues]
@@ -79,14 +76,9 @@ namespace Microsoft.Identity.Test.Performance
             }
 
             await PopulateAppCacheAsync(_cca, CacheSize.TotalTenants, CacheSize.TokensPerTenant, EnableCacheSerialization).ConfigureAwait(false);
-        }
 
-        [IterationSetup]
-        public void IterationSetup()
-        {
-            Random random = new Random();
-            _tenantId = $"{_tenantPrefix}{random.Next(0, CacheSize.TotalTenants)}";
-            _scope = $"{_scopePrefix}{random.Next(0, CacheSize.TokensPerTenant)}";
+            _tenantId = $"{_tenantPrefix}0";
+            _scope = $"{_scopePrefix}0";
         }
 
         [Benchmark(Description = "AcquireTokenForClient")]
@@ -94,7 +86,7 @@ namespace Microsoft.Identity.Test.Performance
         public async Task<AuthenticationResult> AcquireTokenForClient_TestAsync()
         {
             return await _cca.AcquireTokenForClient(new[] { _scope })
-              .WithAuthority($"https://login.microsoftonline.com/{_tenantId}")
+              .WithTenantId(_tenantId)
               .ExecuteAsync()
               .ConfigureAwait(false);
         }

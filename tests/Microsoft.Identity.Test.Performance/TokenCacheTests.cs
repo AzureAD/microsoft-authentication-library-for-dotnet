@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,16 +13,10 @@ using Microsoft.Identity.Test.Unit;
 namespace Microsoft.Identity.Test.Performance
 {
     /// <summary>
-    /// Used to test the performance of token cache with large amount of items.
+    /// Used to test the performance of acquiring tokens using token cache with different amount of items.
     /// </summary>
     /// <remarks>
     /// For non-OBO user cache, the partition key is home account ID.
-    /// 
-    /// Testing combinations
-    /// Partitions - Tokens per partition - Total tokens
-    /// 1 - 10,000 - 10,000
-    /// 100 - 10,000 - 1,000,000
-    /// 1,000 - 1,000 - 1,000,000
     /// </remarks>
     [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class TokenCacheTests
@@ -32,10 +25,8 @@ namespace Microsoft.Identity.Test.Performance
         private readonly string _scopePrefix = "https://resource.com/.default";
         private ConfidentialClientApplication _cca;
         private string _scope;
-        private string _authority;
+        private string _tenantId;
         private IAccount _account;
-        private string _tokenId;
-        private string _userId;
 
         // i.e. (partitions, tokens per partition)
         [ParamsSource(nameof(CacheSizeSource), Priority = 0)]
@@ -45,10 +36,8 @@ namespace Microsoft.Identity.Test.Performance
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10),
-            (1, 10000),
-            (1000, 10),
+            (1, 1000),
             (10000, 10),
-            (100000, 10),
         };
 
         // If the tokens are saved with different tenants.
@@ -66,19 +55,10 @@ namespace Microsoft.Identity.Test.Performance
                 .BuildConcrete();
 
             PopulateUserCache(CacheSize.TotalUsers, CacheSize.TokensPerUser);
-        }
 
-        [IterationSetup]
-        public void IterationSetup_AcquireTokenSilent()
-        {
-            Random random = new Random();
-            _userId = random.Next(0, CacheSize.TotalUsers).ToString();
-            _account = new Account($"{_userId}.{_tenantPrefix}", TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment);
-            _tokenId = random.Next(0, CacheSize.TokensPerUser).ToString();
-            _scope = $"{_scopePrefix}{_tokenId}";
-            _authority = IsMultiTenant ?
-                $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}{_tokenId}" :
-                $"https://{TestConstants.ProductionPrefNetworkEnvironment}/{_tenantPrefix}";
+            _account = new Account($"0.{_tenantPrefix}", TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment);
+            _scope = $"{_scopePrefix}{0}";
+            _tenantId = IsMultiTenant ? $"{_tenantPrefix}0" : _tenantPrefix;
         }
 
         [Benchmark(Description = "AcquireTokenSilent")]
@@ -86,7 +66,7 @@ namespace Microsoft.Identity.Test.Performance
         public async Task<AuthenticationResult> AcquireTokenSilent_TestAsync()
         {
             return await _cca.AcquireTokenSilent(new string[] { _scope }, _account)
-                .WithAuthority(_authority)
+                .WithTenantId(_tenantId)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
         }
@@ -99,13 +79,13 @@ namespace Microsoft.Identity.Test.Performance
                 .ConfigureAwait(false);
         }
 
-        [Benchmark(Description = "GetAccounts")]
-        [BenchmarkCategory("With cache")]
+        //GetAccounts is only available in PCA and is not high-perf scenario.
+        //[Benchmark(Description = "GetAccounts")]
+        //[BenchmarkCategory("With cache")]
         public async Task<IAccount> GetAccountsAsync_TestAsync()
         {
-            var result = await _cca.GetAccountsAsync()
-                .ConfigureAwait(false);
-            return result.FirstOrDefault();
+            return (await _cca.GetAccountsAsync()
+                .ConfigureAwait(false)).FirstOrDefault();
         }
 
         [Benchmark(Description = "RemoveAccount")]
@@ -119,7 +99,7 @@ namespace Microsoft.Identity.Test.Performance
         [IterationCleanup(Target = nameof(RemoveAccountAsync_TestAsync))]
         public void IterationCleanup_RemoveAccount()
         {
-            PopulationPartition(_userId, CacheSize.TokensPerUser.ToString());
+            PopulationPartition("0", CacheSize.TokensPerUser.ToString());
         }
 
         private void PopulateUserCache(int totalUsers, int tokensPerUser)
@@ -138,7 +118,7 @@ namespace Microsoft.Identity.Test.Performance
         {
             for (int tokenId = 0; tokenId < int.Parse(tokensPerUser); tokenId++)
             {
-                InsertCacheItem(userId.ToString(), tokenId.ToString());
+                InsertCacheItem(userId, tokenId.ToString());
             }
         }
 
@@ -146,8 +126,8 @@ namespace Microsoft.Identity.Test.Performance
         private void InsertCacheItem(string userId, string tokenId)
         {
             string userAssertionHash = null;
-            string homeAccountId = $"{userId}.{TestConstants.Utid}";
             string tenant = IsMultiTenant ? $"{_tenantPrefix}{tokenId}" : _tenantPrefix;
+            string homeAccountId = $"{userId}.{tenant}";
             string scope = $"{_scopePrefix}{tokenId}";
 
             MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(
@@ -167,8 +147,7 @@ namespace Microsoft.Identity.Test.Performance
             MsalIdTokenCacheItem idtItem = TokenCacheHelper.CreateIdTokenCacheItem(
                 tenant,
                 homeAccountId,
-                uid: userId,
-                idToken: TestConstants.IdToken);
+                uid: userId);
             _cca.UserTokenCacheInternal.Accessor.SaveIdToken(idtItem);
 
             MsalAccountCacheItem accItem = TokenCacheHelper.CreateAccountItem(tenant, homeAccountId);
