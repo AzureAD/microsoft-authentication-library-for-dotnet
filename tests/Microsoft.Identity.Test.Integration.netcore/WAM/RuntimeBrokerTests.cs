@@ -27,8 +27,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
     [TestClass]
     public class RuntimeBrokerTests
     {
-        [DllImport("kernel32.dll")]
-        static extern IntPtr GetConsoleWindow();
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
 

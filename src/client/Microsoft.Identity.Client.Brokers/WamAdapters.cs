@@ -49,19 +49,18 @@ namespace Microsoft.Identity.Client.Broker
         /// <param name="authResult"></param>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="logger"></param>
-        /// <returns></returns>
         /// <exception cref="MsalClientException"></exception>
         /// <exception cref="MsalUiRequiredException"></exception>
         /// <exception cref="MsalServiceException"></exception>
-        internal static MsalException CreateWamErrorResponse(
+        internal static void ThrowExceptionFromWamError(
             NativeInterop.AuthResult authResult,
             AuthenticationRequestParameters authenticationRequestParameters,
             ICoreLogger logger)
         {
             MsalServiceException serviceException = null;
-            string internalErrorCode = null;
+            string internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
+            int errorCode = authResult.Error.ErrorCode;
             string errorMessage;
-            int errorCode;
 
             switch ((int)authResult.Error.Status)
             {
@@ -71,8 +70,6 @@ namespace Microsoft.Identity.Client.Broker
 
                 case (int)ResponseStatus.InteractionRequired:
                 case (int)ResponseStatus.AccountUnusable:
-                    errorCode = authResult.Error.ErrorCode;
-                    internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
                     errorMessage = 
                         $"{WamErrorPrefix} \n" +
                         $" Error Code: {errorCode} \n" +
@@ -83,8 +80,6 @@ namespace Microsoft.Identity.Client.Broker
 
                 case (int)ResponseStatus.IncorrectConfiguration:
                 case (int)ResponseStatus.ApiContractViolation:
-                    errorCode = authResult.Error.ErrorCode;
-                    internalErrorCode = (authResult.Error.Tag).ToString(CultureInfo.InvariantCulture);
                     errorMessage =
                         $"{WamErrorPrefix} \n" +
                         $" Error Code: {errorCode} \n" +
@@ -104,8 +99,6 @@ namespace Microsoft.Identity.Client.Broker
                 case (int)ResponseStatus.NetworkTemporarilyUnavailable:
                 case (int)ResponseStatus.NoNetwork:
                 case (int)ResponseStatus.ServerTemporarilyUnavailable:
-                    errorCode = authResult.Error.ErrorCode;
-                    internalErrorCode = (authResult.Error.Tag).ToString(CultureInfo.InvariantCulture);
                     errorMessage =
                         $"{WamErrorPrefix} \n" +
                         $" Error Code: {errorCode} \n" +
@@ -119,8 +112,6 @@ namespace Microsoft.Identity.Client.Broker
                     throw serviceException;
 
                 default:
-                    errorCode = authResult.Error.ErrorCode;
-                    internalErrorCode = (authResult.Error.ErrorCode).ToString(CultureInfo.InvariantCulture);
                     errorMessage = $"Unknown {authResult.Error} (error code {errorCode}) (internal error code {internalErrorCode})";
                     logger.Verbose($"[WamBroker] {MsalError.UnknownBrokerError} {errorMessage}");
                     throw new MsalServiceException(MsalError.UnknownBrokerError, errorMessage);
@@ -132,7 +123,6 @@ namespace Microsoft.Identity.Client.Broker
         /// </summary>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="isMsaPassthrough"></param>
-        /// <returns></returns>
         public static NativeInterop.AuthParameters GetCommonAuthParameters(
             AuthenticationRequestParameters authenticationRequestParameters, 
             bool isMsaPassthrough)
@@ -144,7 +134,8 @@ namespace Microsoft.Identity.Client.Broker
             //scopes
             authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
 
-            //redirect URI
+            //WAM redirect URi does not need to be configured by the user
+            //this is used internally by the interop to fallback to the browser 
             authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
 
             //MSA-PT
@@ -175,7 +166,6 @@ namespace Microsoft.Identity.Client.Broker
         /// <param name="authResult"></param>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="logger"></param>
-        /// <returns></returns>
         /// <exception cref="MsalServiceException"></exception>
         public static MsalTokenResponse ParseRuntimeResponse(
                 NativeInterop.AuthResult authResult, 
@@ -221,16 +211,9 @@ namespace Microsoft.Identity.Client.Broker
         /// Get WAM Application Redirect URI
         /// </summary>
         /// <param name="clientId"></param>
-        /// <returns></returns>
         private static string GetExpectedRedirectUri(string clientId)
         {
-#if WINDOWS_APP
-            string sid = Windows.Security.Authentication.Web.WebAuthenticationBroker.GetCurrentApplicationCallbackUri().Host.ToUpper();            
-            return $"ms-appx-web://microsoft.aad.brokerplugin/{sid}";
-#else
-
             return $"ms-appx-web://microsoft.aad.brokerplugin/{clientId}";
-#endif
         }
     }
 }
