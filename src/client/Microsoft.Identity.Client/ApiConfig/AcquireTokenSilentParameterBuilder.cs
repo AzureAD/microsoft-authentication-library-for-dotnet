@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
         public new AcquireTokenSilentParameterBuilder WithSendX5C(bool withSendX5C)
         {
             // nop
-            return this;
+            throw new NotSupportedException("Cannot use this method on public client");
         }
 
 
