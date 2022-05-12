@@ -173,6 +173,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
             }
 
+            ValidateAccountIdentifiers(fromServer);
+
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
             var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
