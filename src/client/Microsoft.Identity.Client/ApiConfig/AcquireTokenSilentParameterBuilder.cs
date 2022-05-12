@@ -25,9 +25,17 @@ namespace Microsoft.Identity.Client
         {
         }
 
-        private new AcquireTokenSilentParameterBuilder WithSendX5C(bool withSendX5C)
+        /// <summary>
+        /// Do not use on public client.
+        /// </summary>
+        /// <param name="withSendX5C"></param>
+        /// <returns></returns>
+        [Obsolete("Do not use on public client", true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new AcquireTokenSilentParameterBuilder WithSendX5C(bool withSendX5C)
         {
-            return null;
+            // nop
+            return this;
         }
 
 
