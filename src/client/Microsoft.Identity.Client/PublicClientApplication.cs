@@ -53,6 +53,8 @@ namespace Microsoft.Identity.Client
             return string.Equals(account?.HomeAccountId?.Identifier, CurrentOSAccountDescriptor, StringComparison.Ordinal);
         }
 
+
+
         /// <summary>
         /// Returns true if MSAL can use a system browser.
         /// </summary>
@@ -233,6 +235,16 @@ namespace Microsoft.Identity.Client
                 scopes,
                 username,
                 password);
+        }
+
+        PCAAcquireTokenSilentParameterBuilder IPublicClientApplication.AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
+        {
+            throw new NotImplementedException();
+        }
+
+        PCAAcquireTokenSilentParameterBuilder IPublicClientApplication.AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
+        {
+            throw new NotImplementedException();
         }
     }
 }
