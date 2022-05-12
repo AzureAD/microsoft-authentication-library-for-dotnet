@@ -57,6 +57,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private const string InfrastructureTenant = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
         private readonly WindowsBrokerOptions _wamOptions;
 
+        public bool IsPopSupported => false;
+
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
         /// </summary>

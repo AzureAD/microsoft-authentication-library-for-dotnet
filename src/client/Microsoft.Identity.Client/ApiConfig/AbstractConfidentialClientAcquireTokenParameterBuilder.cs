@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
         internal AbstractConfidentialClientAcquireTokenParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor.ServiceBundle)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
             ConfidentialClientApplicationExecutor = confidentialClientApplicationExecutor;
         }
 
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
             ValidateAndCalculateApiId();
             return ExecuteInternalAsync(cancellationToken);
         }

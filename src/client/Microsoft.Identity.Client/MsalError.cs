@@ -884,6 +884,17 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string CryptoNet45 = "crypto_net45";
 
+        /// <summary>
+        /// <para>What happens?</para>The request has broker enabled and proof of possesion configured but the boker does not support proof of possesion
+        /// <para>Mitigation</para>only configure proof of possesion for public clients on windows.
+        /// </summary>
+        public const string BrokerDoesNotSupportPop = "broker_does_not_support_pop";
+
+        /// <summary>
+        /// <para>What happens?</para>The request has proof of possesion configured but does not have broker enabled. Broker is required for proof of possesion on public clients
+        /// <para>Mitigation</para>Enable the broker when proof of possesion is configured.
+        /// </summary>
+        public const string BrokerRequiredForPop = "broker_required_for_pop";
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

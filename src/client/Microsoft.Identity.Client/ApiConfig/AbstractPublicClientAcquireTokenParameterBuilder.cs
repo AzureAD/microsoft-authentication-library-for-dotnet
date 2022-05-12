@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -56,13 +57,29 @@ namespace Microsoft.Identity.Client
         /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
         /// </list>
         /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithProofOfPossession(HttpMethod httpMethod, Uri requestUri, string nonce)
         {
+            ClientApplicationBase.GuardMobileFrameworks();
             PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
             popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
             popConfig.Nonce = nonce ?? throw new ArgumentNullException(nameof(nonce));
 
             CommonParameters.PopAuthenticationConfiguration = popConfig;
+            var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+
+            if (CommonParameters.PopAuthenticationConfiguration != null)
+            {
+                if (!broker.IsPopSupported)
+                {
+                    throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
+                }
+                
+                if (!ServiceBundle.Config.IsBrokerEnabled)
+                {
+                    throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
+                }
+            }
 
             return this as T;
         }

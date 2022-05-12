@@ -42,6 +42,8 @@ namespace Microsoft.Identity.Client.Broker
         private readonly WindowsBrokerOptions _wamOptions;
         private const string WamErrorPrefix = "WAM Error ";
 
+        public bool IsPopSupported => true;
+
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
         /// </summary>
@@ -109,8 +111,6 @@ namespace Microsoft.Identity.Client.Broker
                     _logger.Verbose("[WamBroker] Account information was not provided. Using an account picker.");
                 }
 
-                AddPopParams(authenticationRequestParameters, authParams);
-
                 using (var result = await core.SignInInteractivelyAsync(
                     _parentHandle,
                     authParams,
@@ -122,7 +122,6 @@ namespace Microsoft.Identity.Client.Broker
                     {
                         msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
                         _logger.Verbose("[WamBroker] Successfully retrieved token.");
-
                     }
                     else
                     {
@@ -156,7 +155,6 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-                AddPopParams(authenticationRequestParameters, authParams);
 
                 using (NativeInterop.AuthResult result = await core.SignInAsync(
                         _parentHandle,
@@ -213,7 +211,6 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-                AddPopParams(authenticationRequestParameters, authParams);
 
                 using (var account = await core.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
@@ -271,7 +268,6 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-                AddPopParams(authenticationRequestParameters, authParams);
 
                 using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
                         authParams,
@@ -396,22 +392,6 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WAM Broker] IsBrokerInstalledAndInvokable true");
             return true;
-        }
-
-        /// <summary>
-        /// Configures the Msal Runtime authenticaion request to use proof of posession.
-        /// </summary>
-        private void AddPopParams(AuthenticationRequestParameters authenticationRequestParameters, AuthParameters authParams)
-        {
-            // if PopAuthenticationConfiguration is set, proof of possesion will be performed via the runtime broker
-            if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
-            {
-                _logger.Verbose("[WamBroker] Proof of posession configuration provided. Using proof of posession with broker request.");
-                authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod.Method;
-                authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
-                authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
-                authParams.PopParams.Nonce = authenticationRequestParameters.PopAuthenticationConfiguration.Nonce;
-            }
         }
     }
 }

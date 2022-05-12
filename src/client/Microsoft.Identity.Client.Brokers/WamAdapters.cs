@@ -166,7 +166,25 @@ namespace Microsoft.Identity.Client.Broker
                 }
             }
 
+            AddPopParams(authenticationRequestParameters, authParams);
+
             return authParams;
+        }
+
+        /// <summary>
+        /// Configures the Msal Runtime authenticaion request to use proof of posession.
+        /// </summary>
+        private static void AddPopParams(AuthenticationRequestParameters authenticationRequestParameters, NativeInterop.AuthParameters authParams)
+        {
+            // if PopAuthenticationConfiguration is set, proof of possesion will be performed via the runtime broker
+            if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
+            {
+                //_logger.Verbose("[WamBroker] Proof of posession configuration provided. Using proof of posession with broker request.");
+                authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod.Method;
+                authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
+                authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
+                authParams.PopParams.Nonce = authenticationRequestParameters.PopAuthenticationConfiguration.Nonce;
+            }
         }
 
         /// <summary>
@@ -201,7 +219,7 @@ namespace Microsoft.Identity.Client.Broker
                     Scope = authResult.GrantedScopes,
                     ExpiresIn = DateTimeHelpers.GetDurationFromWindowsTimestamp(expiresOn, logger),
                     ClientInfo = authResult.Account.ClientInfo.ToString(),
-                    TokenType = "Bearer",
+                    TokenType = authResult.IsPopAuthorization ? "Pop" : "Bearer",
                     WamAccountId = authResult.Account.Id,
                     TokenSource = TokenSource.Broker
                 };

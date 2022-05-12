@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </remarks>
         public PoPAuthenticationConfiguration()
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
         }
 
         /// <summary>
