@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client
 #elif DESKTOP || NET5_WIN
             if (parent is IWin32Window win32Window)
             {
-                Parameters.UiParent.OwnerWindow = win32Window;
+                Parameters.UiParent.OwnerWindow = win32Window.Handle;
                 return this;
             }
 #endif
@@ -269,6 +269,25 @@ namespace Microsoft.Identity.Client
             }
 
             return WithParentObject((object)viewController);
+        }
+#endif
+
+#if DESKTOP || NET5_WIN
+        /// <summary>
+        /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
+        /// Used to center the browser (embedded web view and Windows broker) that pop-up onto this window.        
+        /// </summary>
+        /// <param name="window">The current window as a IWin32Window</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        [CLSCompliant(false)]
+        public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(IWin32Window window)
+        {
+            if (window == null)
+            {
+                throw new ArgumentNullException(nameof(window));
+            }
+
+            return WithParentObject((object)window);
         }
 #endif
 
