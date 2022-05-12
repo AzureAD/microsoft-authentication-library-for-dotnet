@@ -284,7 +284,7 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
-        /// RemoveAccountAsync
+        /// Remove Account
         /// </summary>
         /// <param name="appConfig"></param>
         /// <param name="account"></param>
