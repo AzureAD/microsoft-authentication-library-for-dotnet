@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Broker
             switch ((int)authResult.Error.Status)
             {
                 case (int)ResponseStatus.UserCanceled:
-                    logger.Verbose($"[WamBroker] {MsalError.AuthenticationCanceledError} {MsalErrorMessage.AuthenticationCanceled}");
+                    logger.Error($"[WamBroker] {MsalError.AuthenticationCanceledError} {MsalErrorMessage.AuthenticationCanceled}");
                     throw new MsalClientException(MsalError.AuthenticationCanceledError, MsalErrorMessage.AuthenticationCanceled);
 
                 case (int)ResponseStatus.InteractionRequired:
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Broker
                         $" Error Code: {errorCode} \n" +
                         $" Error Message: {authResult.Error.Context} \n" +
                         $" Internal Error Code: {internalErrorCode} \n";
-                    logger.Verbose($"[WamBroker] {MsalError.FailedToAcquireTokenSilentlyFromBroker} {errorMessage}");
+                    logger.Error($"[WamBroker] {MsalError.FailedToAcquireTokenSilentlyFromBroker} {errorMessage}");
                     throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, errorMessage);
 
                 case (int)ResponseStatus.IncorrectConfiguration:
@@ -88,10 +88,11 @@ namespace Microsoft.Identity.Client.Broker
                         $" Internal Error Code: {internalErrorCode} \n" +
                         $" Is Retryable: false \n" +
                         $" Possible causes: \n" +
-                        $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: {WamAdapters.GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
+                        $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: " +
+                        $"{WamAdapters.GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
                         $"- No Internet connection \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
-                    logger.Verbose($"[WamBroker] WAM_provider_error_{errorCode} {errorMessage}");
+                    logger.Error($"[WamBroker] WAM_provider_error_{errorCode} {errorMessage}");
                     serviceException = new MsalServiceException($"WAM_provider_error_{errorCode}", errorMessage);
                     serviceException.IsRetryable = false;
                     throw serviceException;
@@ -106,7 +107,7 @@ namespace Microsoft.Identity.Client.Broker
                         $" WAM Error Message: {authResult.Error.Context} \n" +
                         $" Internal Error Code: {internalErrorCode} \n" +
                         $" Is Retryable: true";
-                    logger.Verbose($"[WamBroker] WAM_network_error_{errorCode} {errorMessage}");
+                    logger.Error($"[WamBroker] WAM_network_error_{errorCode} {errorMessage}");
                     serviceException = new MsalServiceException(errorCode.ToString(), errorMessage);
                     serviceException.IsRetryable = true;
                     throw serviceException;
