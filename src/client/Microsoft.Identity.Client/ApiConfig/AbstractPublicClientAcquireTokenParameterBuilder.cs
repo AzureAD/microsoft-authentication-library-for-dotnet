@@ -57,7 +57,9 @@ namespace Microsoft.Identity.Client
         /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
         /// </list>
         /// </remarks>
+#if iOS || ANDROID || WINDOWS_UWP
         [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
         public T WithProofOfPossession(HttpMethod httpMethod, Uri requestUri, string nonce)
         {
             ClientApplicationBase.GuardMobileFrameworks();
