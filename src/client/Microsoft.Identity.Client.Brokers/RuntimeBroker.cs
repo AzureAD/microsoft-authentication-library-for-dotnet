@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
-        /// AcquireToken Interactively for the default user using WAM
+        /// Acquire Token Interactively for the default user using WAM
         /// </summary>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="acquireTokenInteractiveParameters"></param>
