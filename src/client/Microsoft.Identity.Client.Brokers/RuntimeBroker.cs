@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
-        /// AcquireTokenSilentAsync
+        /// Acquire Token Silently
         /// </summary>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="acquireTokenSilentParameters"></param>
