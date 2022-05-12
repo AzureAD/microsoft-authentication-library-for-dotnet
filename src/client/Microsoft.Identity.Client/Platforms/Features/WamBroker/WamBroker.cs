@@ -371,8 +371,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 isMsaPassthrough,
                 _wamOptions.HeaderText);
 
-            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
-
             IWamPlugin wamPlugin;
             WebTokenRequest webTokenRequest;
             try
