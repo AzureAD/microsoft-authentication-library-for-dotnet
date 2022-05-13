@@ -23,7 +23,8 @@ namespace Microsoft.Identity.Client.Broker
         /// <remarks>
         /// No broker integration exists on Mac and Linux yet. 
         /// Windows broker does not work on Win 8, Win Server 2016 and lower.         
-        /// If a broker does not exist or cannot be used, MSAL will fallback to a browser. Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect uri etc.)
+        /// If a broker does not exist or cannot be used, MSAL will fallback to a browser. 
+        /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect uri etc.)
         /// </remarks>
         public static PublicClientApplicationBuilder WithBroker2(this PublicClientApplicationBuilder builder, bool enableBroker = true) // TODO: naming
         {

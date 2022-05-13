@@ -27,8 +27,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
     [TestClass]
     public class RuntimeBrokerTests
     {
-        [DllImport("kernel32.dll")]
-        static extern IntPtr GetConsoleWindow();
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
 
@@ -69,7 +67,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
             {
                 var result = await pca.AcquireTokenSilent(scopes,PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
 
-                Assert.IsNotNull(result.AccessToken);
             }
             catch (MsalUiRequiredException ex)
             {
@@ -97,7 +94,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
             {
                 var result = await pca.AcquireTokenSilent(scopes, "idlab@").ExecuteAsync().ConfigureAwait(false);
 
-                Assert.IsNotNull(result.AccessToken);
             }
             catch (MsalUiRequiredException ex)
             {
@@ -131,7 +127,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.IsNotNull(result.AccessToken);
             }
             catch (MsalClientException ex)
             {

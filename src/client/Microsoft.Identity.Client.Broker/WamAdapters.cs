@@ -49,42 +49,37 @@ namespace Microsoft.Identity.Client.Broker
         /// <param name="authResult"></param>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="logger"></param>
-        /// <returns></returns>
         /// <exception cref="MsalClientException"></exception>
         /// <exception cref="MsalUiRequiredException"></exception>
         /// <exception cref="MsalServiceException"></exception>
-        internal static MsalException CreateWamErrorResponse(
+        internal static void ThrowExceptionFromWamError(
             NativeInterop.AuthResult authResult,
             AuthenticationRequestParameters authenticationRequestParameters,
             ICoreLogger logger)
         {
             MsalServiceException serviceException = null;
-            string internalErrorCode = null;
+            string internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
+            int errorCode = authResult.Error.ErrorCode;
             string errorMessage;
-            int errorCode;
 
-            switch ((int)authResult.Error.Status)
+            switch ((ResponseStatus)authResult.Error.Status)
             {
-                case (int)ResponseStatus.UserCanceled:
-                    logger.Verbose($"[WamBroker] {MsalError.AuthenticationCanceledError} {MsalErrorMessage.AuthenticationCanceled}");
+                case ResponseStatus.UserCanceled:
+                    logger.Error($"[WamBroker] {MsalError.AuthenticationCanceledError} {MsalErrorMessage.AuthenticationCanceled}");
                     throw new MsalClientException(MsalError.AuthenticationCanceledError, MsalErrorMessage.AuthenticationCanceled);
 
-                case (int)ResponseStatus.InteractionRequired:
-                case (int)ResponseStatus.AccountUnusable:
-                    errorCode = authResult.Error.ErrorCode;
-                    internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
+                case ResponseStatus.InteractionRequired:
+                case ResponseStatus.AccountUnusable:
                     errorMessage = 
                         $"{WamErrorPrefix} \n" +
                         $" Error Code: {errorCode} \n" +
                         $" Error Message: {authResult.Error.Context} \n" +
                         $" Internal Error Code: {internalErrorCode} \n";
-                    logger.Verbose($"[WamBroker] {MsalError.FailedToAcquireTokenSilentlyFromBroker} {errorMessage}");
+                    logger.Error($"[WamBroker] {MsalError.FailedToAcquireTokenSilentlyFromBroker} {errorMessage}");
                     throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, errorMessage);
 
-                case (int)ResponseStatus.IncorrectConfiguration:
-                case (int)ResponseStatus.ApiContractViolation:
-                    errorCode = authResult.Error.ErrorCode;
-                    internalErrorCode = (authResult.Error.Tag).ToString(CultureInfo.InvariantCulture);
+                case ResponseStatus.IncorrectConfiguration:
+                case ResponseStatus.ApiContractViolation:
                     errorMessage =
                         $"{WamErrorPrefix} \n" +
                         $" Error Code: {errorCode} \n" +
@@ -93,19 +88,18 @@ namespace Microsoft.Identity.Client.Broker
                         $" Internal Error Code: {internalErrorCode} \n" +
                         $" Is Retryable: false \n" +
                         $" Possible causes: \n" +
-                        $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: {WamAdapters.GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
+                        $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: " +
+                        $"{WamAdapters.GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
                         $"- No Internet connection \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
-                    logger.Verbose($"[WamBroker] WAM_provider_error_{errorCode} {errorMessage}");
+                    logger.Error($"[WamBroker] WAM_provider_error_{errorCode} {errorMessage}");
                     serviceException = new MsalServiceException($"WAM_provider_error_{errorCode}", errorMessage);
                     serviceException.IsRetryable = false;
                     throw serviceException;
 
-                case (int)ResponseStatus.NetworkTemporarilyUnavailable:
-                case (int)ResponseStatus.NoNetwork:
-                case (int)ResponseStatus.ServerTemporarilyUnavailable:
-                    errorCode = authResult.Error.ErrorCode;
-                    internalErrorCode = (authResult.Error.Tag).ToString(CultureInfo.InvariantCulture);
+                case ResponseStatus.NetworkTemporarilyUnavailable:
+                case ResponseStatus.NoNetwork:
+                case ResponseStatus.ServerTemporarilyUnavailable:
                     errorMessage =
                         $"{WamErrorPrefix} \n" +
                         $" Error Code: {errorCode} \n" +
@@ -113,14 +107,12 @@ namespace Microsoft.Identity.Client.Broker
                         $" WAM Error Message: {authResult.Error.Context} \n" +
                         $" Internal Error Code: {internalErrorCode} \n" +
                         $" Is Retryable: true";
-                    logger.Verbose($"[WamBroker] WAM_network_error_{errorCode} {errorMessage}");
+                    logger.Error($"[WamBroker] WAM_network_error_{errorCode} {errorMessage}");
                     serviceException = new MsalServiceException(errorCode.ToString(), errorMessage);
                     serviceException.IsRetryable = true;
                     throw serviceException;
 
                 default:
-                    errorCode = authResult.Error.ErrorCode;
-                    internalErrorCode = (authResult.Error.ErrorCode).ToString(CultureInfo.InvariantCulture);
                     errorMessage = $"Unknown {authResult.Error} (error code {errorCode}) (internal error code {internalErrorCode})";
                     logger.Verbose($"[WamBroker] {MsalError.UnknownBrokerError} {errorMessage}");
                     throw new MsalServiceException(MsalError.UnknownBrokerError, errorMessage);
@@ -132,7 +124,6 @@ namespace Microsoft.Identity.Client.Broker
         /// </summary>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="isMsaPassthrough"></param>
-        /// <returns></returns>
         public static NativeInterop.AuthParameters GetCommonAuthParameters(
             AuthenticationRequestParameters authenticationRequestParameters, 
             bool isMsaPassthrough)
@@ -144,7 +135,8 @@ namespace Microsoft.Identity.Client.Broker
             //scopes
             authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
 
-            //redirect URI
+            //WAM redirect URi does not need to be configured by the user
+            //this is used internally by the interop to fallback to the browser 
             authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
 
             //MSA-PT
@@ -175,7 +167,6 @@ namespace Microsoft.Identity.Client.Broker
         /// <param name="authResult"></param>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="logger"></param>
-        /// <returns></returns>
         /// <exception cref="MsalServiceException"></exception>
         public static MsalTokenResponse ParseRuntimeResponse(
                 NativeInterop.AuthResult authResult, 
@@ -221,16 +212,9 @@ namespace Microsoft.Identity.Client.Broker
         /// Get WAM Application Redirect URI
         /// </summary>
         /// <param name="clientId"></param>
-        /// <returns></returns>
         private static string GetExpectedRedirectUri(string clientId)
         {
-#if WINDOWS_APP
-            string sid = Windows.Security.Authentication.Web.WebAuthenticationBroker.GetCurrentApplicationCallbackUri().Host.ToUpper();            
-            return $"ms-appx-web://microsoft.aad.brokerplugin/{sid}";
-#else
-
             return $"ms-appx-web://microsoft.aad.brokerplugin/{clientId}";
-#endif
         }
     }
 }
