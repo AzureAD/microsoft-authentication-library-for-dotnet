@@ -254,6 +254,8 @@ namespace Microsoft.Identity.Client.Broker
                         _logger.WarningPii(
                             $"Could not find a WAM account for the selected user {account.Username}",
                             "Could not find a WAM account for the selected user");
+
+                        throw new MsalException("wam_no_account_found", "Could not find a WAM account for the selected user");
                     }
                     
                     using (NativeInterop.SignOutResult result = await core.SignOutSilentlyAsync(

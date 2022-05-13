@@ -67,7 +67,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
             {
                 var result = await pca.AcquireTokenSilent(scopes,PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
 
-                Assert.IsNotNull(result.AccessToken);
             }
             catch (MsalUiRequiredException ex)
             {
@@ -95,7 +94,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
             {
                 var result = await pca.AcquireTokenSilent(scopes, "idlab@").ExecuteAsync().ConfigureAwait(false);
 
-                Assert.IsNotNull(result.AccessToken);
             }
             catch (MsalUiRequiredException ex)
             {
@@ -129,7 +127,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.IsNotNull(result.AccessToken);
             }
             catch (MsalClientException ex)
             {

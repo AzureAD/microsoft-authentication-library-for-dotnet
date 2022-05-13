@@ -62,14 +62,14 @@ namespace Microsoft.Identity.Client.Broker
             int errorCode = authResult.Error.ErrorCode;
             string errorMessage;
 
-            switch ((int)authResult.Error.Status)
+            switch ((ResponseStatus)authResult.Error.Status)
             {
-                case (int)ResponseStatus.UserCanceled:
+                case ResponseStatus.UserCanceled:
                     logger.Error($"[WamBroker] {MsalError.AuthenticationCanceledError} {MsalErrorMessage.AuthenticationCanceled}");
                     throw new MsalClientException(MsalError.AuthenticationCanceledError, MsalErrorMessage.AuthenticationCanceled);
 
-                case (int)ResponseStatus.InteractionRequired:
-                case (int)ResponseStatus.AccountUnusable:
+                case ResponseStatus.InteractionRequired:
+                case ResponseStatus.AccountUnusable:
                     errorMessage = 
                         $"{WamErrorPrefix} \n" +
                         $" Error Code: {errorCode} \n" +
@@ -78,8 +78,8 @@ namespace Microsoft.Identity.Client.Broker
                     logger.Error($"[WamBroker] {MsalError.FailedToAcquireTokenSilentlyFromBroker} {errorMessage}");
                     throw new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, errorMessage);
 
-                case (int)ResponseStatus.IncorrectConfiguration:
-                case (int)ResponseStatus.ApiContractViolation:
+                case ResponseStatus.IncorrectConfiguration:
+                case ResponseStatus.ApiContractViolation:
                     errorMessage =
                         $"{WamErrorPrefix} \n" +
                         $" Error Code: {errorCode} \n" +
@@ -97,9 +97,9 @@ namespace Microsoft.Identity.Client.Broker
                     serviceException.IsRetryable = false;
                     throw serviceException;
 
-                case (int)ResponseStatus.NetworkTemporarilyUnavailable:
-                case (int)ResponseStatus.NoNetwork:
-                case (int)ResponseStatus.ServerTemporarilyUnavailable:
+                case ResponseStatus.NetworkTemporarilyUnavailable:
+                case ResponseStatus.NoNetwork:
+                case ResponseStatus.ServerTemporarilyUnavailable:
                     errorMessage =
                         $"{WamErrorPrefix} \n" +
                         $" Error Code: {errorCode} \n" +
