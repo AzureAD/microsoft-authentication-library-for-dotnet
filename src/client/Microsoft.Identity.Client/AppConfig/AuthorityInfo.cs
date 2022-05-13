@@ -116,6 +116,10 @@ namespace Microsoft.Identity.Client
 
         public string Host { get; }
         public string CanonicalAuthority { get; }
+
+        // Please avoid the direct use of this property.
+        // Ideally, this property should be removed. But due to
+        // dependencies and time constraints, refactoring is done in steps.
         internal AuthorityType AuthorityType { get; }
         public string UserRealmUriPrefix { get; }
         public bool ValidateAuthority { get; }
