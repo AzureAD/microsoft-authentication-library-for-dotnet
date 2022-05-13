@@ -45,17 +45,10 @@ namespace Intune_xamarin_Android
             var builder = PublicClientApplicationBuilder
                 .Create(_clientID)
                 .WithAuthority(_authority)
+                .WithBroker()
                 .WithClientCapabilities(clientCapabilities)
                 .WithTenantId(_tenantID)
                 .WithRedirectUri(_redirectURI);
-            if (builder.IsBrokerAvailable())
-            {
-                builder.WithBroker();
-            }
-            else
-            {
-                // Notify the user that broker must be installed.
-            }
 
             PCA = builder.Build();
         }
