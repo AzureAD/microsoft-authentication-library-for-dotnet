@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreGraphics;
 using Microsoft.Identity.Client;
+using Microsoft.Intune.MAM;
 using UIKit;
 
 namespace IntuneMAMSampleiOS
@@ -78,15 +79,8 @@ namespace IntuneMAMSampleiOS
                                                                         .WithLogging(MSALLogCallback, LogLevel.Verbose)
                                                                         .WithAuthority(authority)
                                                                         .WithClientCapabilities(clientCapabilities)
-                                                                        .WithHttpClientFactory(new HttpSnifferClientFactory());
-                    if (pcaBuilder.IsBrokerAvailable())
-                    {
-                        pcaBuilder.WithBroker();
-                    }
-                    else
-                    {
-                        // Notify the user that broker must be installed.
-                    }
+                                                                        .WithHttpClientFactory(new HttpSnifferClientFactory())
+                                                                        .WithBroker(true);
 
                     PCA = pcaBuilder.Build();
                 }
