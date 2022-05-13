@@ -184,7 +184,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "tests\devapps\Web
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Intune-xamarin-Android", "tests\devapps\Intune-xamarin-Android\Intune-xamarin-Android.csproj", "{C6CA2F00-E48A-478F-ABC3-1FE3FE20286B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Broker", "src\client\Microsoft.Identity.Client.Brokers\Microsoft.Identity.Client.Broker.csproj", "{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Broker", "src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj", "{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
