@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client
         public const string NonHttpsRedirectNotSupported = "Non-HTTPS URL redirect is not supported in webview. " +
             "This error happens when the authorization flow, which collects user credentials, gets redirected " +
             "to a page that is not supported, for example if the redirect occurs over http. " +
-            "This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects." + 
+            "This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects." +
             "Mitigation: This usually happens when using a federated directory which is not setup correctly. ";
 
         public const string IDTokenMustHaveTwoParts = "ID Token must have a valid JWT format. ";
@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Client
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor. ";
 
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "ClientSecret, Certificate and ClientAssertion are mutually exclusive properties. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
-        public const string ClientCredentialAuthenticationTypeMustBeDefined = "One client credential type required either: ClientSecret, Certificate OR ClientAssertion must be defined when creating a Confidential Client. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
+        public const string ClientCredentialAuthenticationTypeMustBeDefined = "One client credential type required either: ClientSecret, Certificate, ClientAssertion or AppTokenProvider must be defined when creating a Confidential Client. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
         public const string ClientIdMustBeAGuid = "Error: ClientId is not a GUID. ";
 
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)
@@ -420,5 +420,13 @@ namespace Microsoft.Identity.Client
         public const string OboCacheKeyNotInCache = "The token cache does not contain a token with an OBO cache key that matches the longRunningProcessSessionKey passed into ILongRunningWebApi.AcquireTokenInLongRunningProcess method. Call ILongRunningWebApi.InitiateLongRunningProcessInWebApi method with this longRunningProcessSessionKey first or call ILongRunningWebApi.AcquireTokenInLongRunningProcess method with an already used longRunningProcessSessionKey. See https://aka.ms/msal-net-long-running-obo .";
 
         public const string MultiCloudSupportUnavailable = "Multi cloud support unavailable with broker.";
+
+        public static string InvalidTokenProviderResponseValue(string invalidValueName)
+            {
+            return string.Format(
+                                CultureInfo.InvariantCulture,
+                                "The following token provider result value is invalid: {0}.",
+                                invalidValueName);
+        }
     }
 }

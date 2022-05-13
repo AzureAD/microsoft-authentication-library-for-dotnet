@@ -146,6 +146,50 @@ namespace Microsoft.Identity.Client.OAuth2
             return response;
         }
 
+        internal static MsalTokenResponse CreateFromAppProviderResponse(TokenProviderResult tokenProviderResponse)
+        {
+            ValidateTokenProviderResult(tokenProviderResponse);
+
+            var response = new MsalTokenResponse
+            {
+                AccessToken = tokenProviderResponse.AccessToken,
+                RefreshToken = null,
+                IdToken = null,
+                TokenType = BrokerResponseConst.Bearer,
+                ExpiresIn = tokenProviderResponse.ExpiresInSeconds,
+                ClientInfo = null,
+                TokenSource = TokenSource.IdentityProvider,
+                TenantId = null //Leaving as null so MSAL can use the original request Tid. This is ok for confidential client scenarios
+            };
+
+            response.RefreshIn = tokenProviderResponse.RefreshInSeconds;
+
+            return response;
+        }
+
+        private static void ValidateTokenProviderResult(TokenProviderResult TokenProviderResult)
+        {
+            if (string.IsNullOrEmpty(TokenProviderResult.AccessToken))
+            {
+                HandleInvalidExternalValueError(nameof(TokenProviderResult.AccessToken));
+            }
+
+            if (TokenProviderResult.ExpiresInSeconds == 0 || TokenProviderResult.ExpiresInSeconds < 0)
+            {
+                HandleInvalidExternalValueError(nameof(TokenProviderResult.ExpiresInSeconds));
+            }
+
+            if (string.IsNullOrEmpty(TokenProviderResult.TenantId))
+            {
+                HandleInvalidExternalValueError(nameof(TokenProviderResult.TenantId));
+            }
+        }
+
+        private static void HandleInvalidExternalValueError(string nameOfValue)
+        {
+            throw new MsalClientException(MsalError.InvalidTokenProviderResponseValue, MsalErrorMessage.InvalidTokenProviderResponseValue(nameOfValue));
+        }
+
         /// <remarks>
         /// This method does not belong here - it is more tied to the Android code. However, that code is
         /// not unit testable, and this one is. 
