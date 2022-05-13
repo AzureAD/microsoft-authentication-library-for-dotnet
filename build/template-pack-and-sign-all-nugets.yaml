@@ -21,7 +21,14 @@ steps:
   parameters:
     BuildConfiguration: ${{ parameters.BuildConfiguration }}
     ProjectRootPath: '$(Build.SourcesDirectory)\$(MsalSourceDir)src\client'
-    AssemblyName: 'Microsoft.Identity.Client.Desktop'    
+    AssemblyName: 'Microsoft.Identity.Client.Desktop'
+
+ # Pack and sign Microsoft.Identity.Client.Broker
+- template: template-pack-and-sign-nuget.yaml
+  parameters:
+    BuildConfiguration: ${{ parameters.BuildConfiguration }}
+    ProjectRootPath: '$(Build.SourcesDirectory)\$(MsalSourceDir)src\client'
+    AssemblyName: 'Microsoft.Identity.Client.Broker'
 
 # Copy all packages out to staging
 - task: CopyFiles@2
