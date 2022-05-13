@@ -182,17 +182,14 @@ namespace Microsoft.Identity.Client
             CommonParameters.PopAuthenticationConfiguration = popConfig;
             var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
 
-            if (CommonParameters.PopAuthenticationConfiguration != null)
+            if (!broker.IsPopSupported)
             {
-                if (!broker.IsPopSupported)
-                {
-                    throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
-                }
+                throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
+            }
 
-                if (!ServiceBundle.Config.IsBrokerEnabled)
-                {
-                    throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
-                }
+            if (!ServiceBundle.Config.IsBrokerEnabled)
+            {
+                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
             }
 
             return this;

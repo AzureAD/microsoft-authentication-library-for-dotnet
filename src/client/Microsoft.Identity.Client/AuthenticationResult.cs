@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
             IAccount account)
         {
             AccessToken = tokenResponse.AccessToken;
-            IsExtendedLifeTimeToken = false; //TODO: How should this be determined?
+            IsExtendedLifeTimeToken = false;
             UniqueId = idToken.GetUniqueId();
             ExpiresOn = DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.ExpiresIn);
             ExtendedExpiresOn = DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.ExtendedExpiresIn);
