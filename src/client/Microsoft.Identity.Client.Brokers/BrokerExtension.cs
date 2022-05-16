@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Broker
         /// If a broker does not exist or cannot be used, MSAL will fallback to a browser. 
         /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect uri etc.)
         /// </remarks>
-        public static PublicClientApplicationBuilder WithBroker2(this PublicClientApplicationBuilder builder, bool enableBroker = true) // TODO: naming
+        public static PublicClientApplicationBuilder WithBrokerPreview(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
             builder.Config.IsBrokerEnabled = enableBroker;
             AddRuntimeSupportForWam(builder);

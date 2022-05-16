@@ -163,9 +163,11 @@ namespace Microsoft.Identity.Client
             if (Config.BrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
-                    "The Windows broker is not directly available on MSAL for .NET Framework" +
-                    " To use it, please install the nuget package named Microsoft.Identity.Client.Desktop " +
-                    "and call the extension method .WithWindowsBroker() first.");
+                    "The Windows broker is not directly available on MSAL for .NET Framework " +
+                    "To use it, please install the nuget package named Microsoft.Identity.Client.Desktop " +
+                    "and call the extension method .WithWindowsBroker() first. " +
+                    "If you want to try the new broker preview, please install the nuget package named Microsoft.Identity.Client.Broker " +
+                    "and call the extension method .WithBrokerPreview().");
             }
 #endif
 
@@ -177,6 +179,7 @@ namespace Microsoft.Identity.Client
 
                     "\n\r\n\rIf you have a NET5 cross-platform (Windows, Mac, Linux) application, please dual target net5 and net5-windows10.0.17763.0. Your installer should deploy the net5 version on Mac and Linux and the net5-window10.0.17763.0 on Windows." +
                     "\n\r\n\rIf you have a .NET Core 3.1 application, please install the nuget package named Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsBroker() first. " +
+                    "\n\r\n\rIf you want to try the new broker preview, please install the nuget package named Microsoft.Identity.Client.Broker and call the extension method .WithBrokerPreview(). " +
                     "\n\rFor details see https://aka.ms/msal-net-wam and https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md ");
             }
 #endif
