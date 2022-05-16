@@ -212,10 +212,13 @@ namespace Microsoft.Identity.Client.Broker
                     logger.Warning("No correlation ID in response");
                     correlationId = null;
                 }
+                
+                //parsing Pop token from auth header if pop was performed. Otherwise use access token field.
+                var token = authResult.IsPopAuthorization ? authResult.AuthorizationHeader.Split(' ')[1] : authResult.AccessToken;
 
                 MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
                 {
-                    AccessToken = authResult.AccessToken,
+                    AccessToken = token,
                     IdToken = authResult.RawIdToken,
                     CorrelationId = correlationId,
                     Scope = authResult.GrantedScopes,
