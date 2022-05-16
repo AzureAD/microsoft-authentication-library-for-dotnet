@@ -193,32 +193,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse.SpaAuthCode);
         }
 
-        //private AuthenticationResult GetAuthenticationResultFromTokenResponse(
-        //    MsalTokenResponse msalTokenResponse, 
-        //    MsalIdTokenCacheItem idTokenCacheItem, 
-        //    IAccount account)
-        //{
-        //    if (account == null)
-        //    {
-        //        bool isAdfsAuthority = AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
-        //        string preferredUsername = TokenResponseHelper.GetPreferredUsernameFromIdToken(isAdfsAuthority, idTokenCacheItem?.IdToken);
-        //        string username = isAdfsAuthority ? idTokenCacheItem?.IdToken?.Upn : preferredUsername;
-        //        string homeAccountId = TokenResponseHelper.GetHomeAccountId(AuthenticationRequestParameters, msalTokenResponse, idTokenCacheItem?.IdToken);
-        //        Dictionary<string, string> wamAccountIds = TokenResponseHelper.GetWamAccountIds(AuthenticationRequestParameters, msalTokenResponse);
-
-        //        account = new Account(
-        //              homeAccountId,
-        //              username,
-        //              AuthenticationRequestParameters.Authority.AuthorityInfo.Host,
-        //              wamAccountIds);
-        //    }
-
-        //    return new AuthenticationResult(msalTokenResponse,
-        //                                    AuthenticationRequestParameters,
-        //                                    idTokenCacheItem?.IdToken,
-        //                                    account);
-        //}
-
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
         {
             if (fromServer == null ||
