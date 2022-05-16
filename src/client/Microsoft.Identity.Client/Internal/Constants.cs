@@ -34,6 +34,9 @@ namespace Microsoft.Identity.Client.Internal
         public const int DefaultJitterRangeInSeconds = 300;
         public static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);
         public const string EnableSpaAuthCode = "1";
+        public const string PoPTokenType = "pop";
+        public const string PoPAuthHeaderPrefix = "PoP";
+        public const string RequestConfirmation = "req_cnf";
 
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {

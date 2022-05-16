@@ -181,33 +181,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal AuthenticationResult(
-            MsalTokenResponse tokenResponse,
-            AuthenticationRequestParameters requestParams,
-            IdToken idToken,
-            IAccount account)
-        {
-            AccessToken = tokenResponse.AccessToken;
-            IsExtendedLifeTimeToken = false;
-            UniqueId = idToken.GetUniqueId();
-            ExpiresOn = DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.ExpiresIn);
-            ExtendedExpiresOn = DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.ExtendedExpiresIn);
-            TenantId = TokenResponseHelper.GetTenantId(idToken, requestParams);
-            Account = account;
-            IdToken = tokenResponse.IdToken;
-            Scopes = requestParams.Scope;
-            CorrelationId = requestParams.CorrelationId;
-            TokenType = tokenResponse.TokenType;
-            AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenResponse.TokenSource);
-            ClaimsPrincipal = idToken.ClaimsPrincipal;
-            SpaAuthCode = tokenResponse.SpaAuthCode;
-            
-            if (tokenResponse.RefreshIn != null)
-            {
-                AuthenticationResultMetadata.RefreshOn = DateTimeHelpers.DateTimeOffsetFromDuration(tokenResponse.RefreshIn);
-            }
-        }
-
         //Default constructor for testing
         internal AuthenticationResult() { }
 
