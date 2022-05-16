@@ -4,23 +4,19 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using CoreGraphics;
-using Foundation;
 using System;
-using System.IO;
 using System.Linq;
-using UIKit;
-using Microsoft.Intune.MAM;
-using Microsoft.Identity.Client;
-using System.Collections.Generic;
-using Newtonsoft.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreGraphics;
+using Microsoft.Identity.Client;
+using Microsoft.Intune.MAM;
+using UIKit;
 
 namespace IntuneMAMSampleiOS
 {
-    public partial class MainViewController: UIViewController
-	{
+    public partial class MainViewController : UIViewController
+    {
         UIButton btnMSAL;
         UIButton btnSignOut;
 
@@ -41,7 +37,7 @@ namespace IntuneMAMSampleiOS
             this.btnMSAL = new UIButton(UIButtonType.System);
             this.btnMSAL.Frame = new CGRect(0, 400, 300, 30);
             this.btnMSAL.SetTitle("Acquire token", UIControlState.Normal);
-            
+
             this.btnMSAL.TouchUpInside += BtnMSAL_TouchUpInside;
 
             View.AddSubview(btnMSAL);
@@ -85,6 +81,7 @@ namespace IntuneMAMSampleiOS
                                                                         .WithClientCapabilities(clientCapabilities)
                                                                         .WithHttpClientFactory(new HttpSnifferClientFactory())
                                                                         .WithBroker(true);
+
                     PCA = pcaBuilder.Build();
                 }
 
@@ -170,7 +167,8 @@ namespace IntuneMAMSampleiOS
 
         public void ShowAlert(string title, string message)
         {
-            BeginInvokeOnMainThread(() => {
+            BeginInvokeOnMainThread(() =>
+            {
                 UIAlertController alertController = new UIAlertController
                 {
                     Title = title,

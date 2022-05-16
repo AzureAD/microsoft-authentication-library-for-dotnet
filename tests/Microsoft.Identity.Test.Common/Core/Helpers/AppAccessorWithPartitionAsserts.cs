@@ -20,20 +20,20 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         }
 
-        public override List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
+        public override List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
-            return base.GetAllAccessTokens(partitionKey);
+            return base.GetAllAccessTokens(partitionKey, requestlogger);
         }
 
-        public override List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
+        public override List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             Assert.Fail("App token cache - do not call GetAllAccounts");
             throw new InvalidOperationException();
         }
 
-        public override List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
+        public override List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
 
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             throw new InvalidOperationException();
         }
 
-        public override List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
+        public override List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
 

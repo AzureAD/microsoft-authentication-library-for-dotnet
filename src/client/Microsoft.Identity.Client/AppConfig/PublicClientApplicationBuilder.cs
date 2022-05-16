@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
         /// <remarks>If your app uses .NET classic or .NET Core 3.x, and you wish to use the Windows broker, 
-        /// please install the nuget package Microsoft.Identity.Client.Desktop and call .WithDesktopFeatures()</remarks>
+        /// please install the NuGet package Microsoft.Identity.Client.Desktop and call .WithDesktopFeatures()</remarks>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
 #pragma warning disable CS0162 // Unreachable code detected
@@ -163,11 +163,9 @@ namespace Microsoft.Identity.Client
             if (Config.BrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
-                    "The Windows broker is not directly available on MSAL for .NET Framework " +
-                    "To use it, please install the nuget package named Microsoft.Identity.Client.Desktop " +
-                    "and call the extension method .WithWindowsBroker() first. " +
-                    "If you want to try the new broker preview, please install the nuget package named Microsoft.Identity.Client.Broker " +
-                    "and call the extension method .WithBrokerPreview().");
+                    "The Windows broker is not directly available on MSAL for .NET Framework" +
+                    " To use it, please install the NuGet package named Microsoft.Identity.Client.Desktop " +
+                    "and call the extension method .WithWindowsBroker() first.");
             }
 #endif
 
@@ -179,7 +177,6 @@ namespace Microsoft.Identity.Client
 
                     "\n\r\n\rIf you have a NET5 cross-platform (Windows, Mac, Linux) application, please dual target net5 and net5-windows10.0.17763.0. Your installer should deploy the net5 version on Mac and Linux and the net5-window10.0.17763.0 on Windows." +
                     "\n\r\n\rIf you have a .NET Core 3.1 application, please install the nuget package named Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsBroker() first. " +
-                    "\n\r\n\rIf you want to try the new broker preview, please install the nuget package named Microsoft.Identity.Client.Broker and call the extension method .WithBrokerPreview(). " +
                     "\n\rFor details see https://aka.ms/msal-net-wam and https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md ");
             }
 #endif
@@ -330,20 +327,22 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Returns true if a broker can be used. 
+        /// Returns <c>true</c> if a broker can be used.
+        /// This method is only needed to be used in mobile scenarios which support Mobile Application Management. In other supported scenarios, use <c>WithBroker</c> by itself, which will fall back to use a browser if broker is unavailable.
         /// </summary>
         /// <remarks>
-        /// On Windows, the broker (WAM) can be used on Win10 and is always installed. See https://aka.ms/msal-net-wam
-        /// On Mac, Linux and older versions of Windows a broker is not available.
-        /// If your application is .NET5, please use the target .net5.0-windows10.0.17763.0 for all Windows versions and target net5.0 to target Linux and Mac.
-        /// If your application is .NET classic or .NET Core 3.1 and you wish to use the Windows Broker, please install Microsoft.Identity.Client.Desktop first and call WithDesktopFeatures().
-        /// 
-        /// On mobile, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers
+        /// <list type="bullet">
+        /// <item><description>On Windows, the broker (WAM) can be used on Windows 10 and is always installed. See https://aka.ms/msal-net-wam </description></item>
+        /// <item><description>On Mac, Linux, and older versions of Windows a broker is not available.</description></item>
+        /// <item><description>In .NET 5 apps, target <c>net5.0-windows10.0.17763.0</c> for all Windows versions and target <c>net5.0</c> for Linux and Mac.</description></item>
+        /// <item><description>In .NET classic or .NET Core 3.1 apps, install Microsoft.Identity.Client.Desktop first and call <c>WithDesktopFeatures()</c>.</description></item>
+        /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
+        /// </list>
         /// </remarks>
         public bool IsBrokerAvailable()
-        {            
+        {
             return PlatformProxyFactory.CreatePlatformProxy(null)
-                .CreateBroker(base.Config, null).IsBrokerInstalledAndInvokable(base.Config.Authority.AuthorityInfo.AuthorityType);
+                    .CreateBroker(Config, null).IsBrokerInstalledAndInvokable(Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
 
         /// <summary>

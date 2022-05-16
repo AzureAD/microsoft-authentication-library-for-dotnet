@@ -1,3 +1,16 @@
+4.43.2
+==========
+### Bug Fix
+
+**MSAL will now allow the use of different scopes when acquiring access tokens using a cached refresh token in long running On-Behalf-Of processes**. See [2817](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2817)
+
+4.43.1
+==========
+### Bug Fix
+
+**MSAL now uses WebView1 instead of WebView2 for `AcquireTokenInteractive` with AAD or ADFS authority because WebView2 doesn't support SSO**. See [3270](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3270)
+
+
 4.43.0
 ==========
 

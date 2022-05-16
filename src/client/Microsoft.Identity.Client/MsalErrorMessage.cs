@@ -150,6 +150,9 @@ namespace Microsoft.Identity.Client
         public const string B2cAuthorityUriInvalidPath =
           "B2C 'authority' Uri should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...). ";
 
+        public const string DstsAuthorityUriInvalidPath =
+          "DSTS authority URI should have at least 2 segments in the path (i.e. https://<host>/dstsv2/<tenant>/...). ";
+
         public const string UnsupportedAuthorityValidation =
             "Authority validation is not supported for this type of authority. See http://aka.ms/valid-authorities for details. ";
 
@@ -166,7 +169,7 @@ namespace Microsoft.Identity.Client
         public const string NonHttpsRedirectNotSupported = "Non-HTTPS URL redirect is not supported in webview. " +
             "This error happens when the authorization flow, which collects user credentials, gets redirected " +
             "to a page that is not supported, for example if the redirect occurs over http. " +
-            "This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects." + 
+            "This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects." +
             "Mitigation: This usually happens when using a federated directory which is not setup correctly. ";
 
         public const string IDTokenMustHaveTwoParts = "ID Token must have a valid JWT format. ";
@@ -237,7 +240,7 @@ namespace Microsoft.Identity.Client
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor. ";
 
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "ClientSecret, Certificate and ClientAssertion are mutually exclusive properties. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
-        public const string ClientCredentialAuthenticationTypeMustBeDefined = "One client credential type required either: ClientSecret, Certificate OR ClientAssertion must be defined when creating a Confidential Client. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
+        public const string ClientCredentialAuthenticationTypeMustBeDefined = "One client credential type required either: ClientSecret, Certificate, ClientAssertion or AppTokenProvider must be defined when creating a Confidential Client. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
         public const string ClientIdMustBeAGuid = "Error: ClientId is not a GUID. ";
 
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)
@@ -253,6 +256,8 @@ namespace Microsoft.Identity.Client
 
         public const string AuthorityDoesNotHaveTwoSegments =
             "Authority should be in the form <host>/<audience>, for example https://login.microsoftonline.com/common. ";
+        public const string DstsAuthorityDoesNotHaveThreeSegments =
+            "Authority should be in the form <host>/<audience>/<tenantID>, for example https://login.microsoftonline.com/dsts/<tenantid>. ";
         public const string AzureAdMyOrgRequiresSpecifyingATenant = "When specifying AadAuthorityAudience.AzureAdMyOrg, you must also specify a tenant domain or tenant GUID. ";
 
         public const string CustomWebUiReturnedInvalidUri = "ICustomWebUi returned an invalid URI - it is empty or has no query. ";
@@ -415,5 +420,13 @@ namespace Microsoft.Identity.Client
         public const string OboCacheKeyNotInCache = "The token cache does not contain a token with an OBO cache key that matches the longRunningProcessSessionKey passed into ILongRunningWebApi.AcquireTokenInLongRunningProcess method. Call ILongRunningWebApi.InitiateLongRunningProcessInWebApi method with this longRunningProcessSessionKey first or call ILongRunningWebApi.AcquireTokenInLongRunningProcess method with an already used longRunningProcessSessionKey. See https://aka.ms/msal-net-long-running-obo .";
 
         public const string MultiCloudSupportUnavailable = "Multi cloud support unavailable with broker.";
+
+        public static string InvalidTokenProviderResponseValue(string invalidValueName)
+            {
+            return string.Format(
+                                CultureInfo.InvariantCulture,
+                                "The following token provider result value is invalid: {0}.",
+                                invalidValueName);
+        }
     }
 }

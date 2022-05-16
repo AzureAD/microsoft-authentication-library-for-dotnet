@@ -292,6 +292,22 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Allows setting a callback which returns an access token, based on the passed-in parameters.
+        /// MSAL will pass in its authentication parameters to the callback and it is expected that the callback
+        /// will construct a <see cref="TokenProviderResult"/> and return it to MSAL.
+        /// MSAL will cache the token response the same way it does for other authentication results.
+        /// Note: This is only for client credential flows.
+        /// </summary>
+        /// <param name="appTokenProvider">Authentication callback which returns an access token.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<TokenProviderResult>> appTokenProvider)
+
+        {
+            Config.AppTokenProvider = appTokenProvider ?? throw new ArgumentNullException(nameof(appTokenProvider));
+            return this;
+        }
+
         internal ConfidentialClientApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {
             Config.AppTokenCacheInternalForTest = tokenCacheInternal;

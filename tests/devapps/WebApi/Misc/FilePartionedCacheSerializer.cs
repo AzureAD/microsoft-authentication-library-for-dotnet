@@ -90,7 +90,7 @@ namespace WebApi.Misc
             return true;
         }
 
-        private async Task<byte[]?> GetValueAsync(string key)
+        private async Task<byte[]> GetValueAsync(string key)
         {
             var cacheKey = _expandKey(key);
             string file = GetPath(cacheKey);

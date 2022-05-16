@@ -6,7 +6,7 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance.Validation
 {
-    internal class B2CAuthorityValidator : IAuthorityValidator
+    internal class NullAuthorityValidator : IAuthorityValidator
     {
         /// <inheritdoc />
         public Task ValidateAuthorityAsync(
