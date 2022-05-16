@@ -7,7 +7,9 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -219,7 +221,7 @@ namespace Microsoft.Identity.Client.Broker
                     Scope = authResult.GrantedScopes,
                     ExpiresIn = DateTimeHelpers.GetDurationFromWindowsTimestamp(expiresOn, logger),
                     ClientInfo = authResult.Account.ClientInfo.ToString(),
-                    TokenType = authResult.IsPopAuthorization ? "Pop" : "Bearer",
+                    TokenType = authResult.IsPopAuthorization ? Constants.PoPTokenType : "Bearer",
                     WamAccountId = authResult.Account.Id,
                     TokenSource = TokenSource.Broker
                 };

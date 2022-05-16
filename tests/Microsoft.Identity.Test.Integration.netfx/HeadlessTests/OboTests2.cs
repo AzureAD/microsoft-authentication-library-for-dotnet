@@ -181,6 +181,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
+            msalPublicClient.AcquireTokenSilent().
+
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(confidentialClientID)
                 .WithAuthority(new Uri(oboHost + authResult.TenantId), true)

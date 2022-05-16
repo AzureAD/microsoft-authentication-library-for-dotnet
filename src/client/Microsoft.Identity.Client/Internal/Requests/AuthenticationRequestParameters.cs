@@ -174,26 +174,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string LongRunningOboCacheKey { get; set; }
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
-
-        /// <summary>
-        /// Determines if the token response should be saved in the cached.
-        /// This may be ovveritten by the child types that perform additional checks.
-        /// Token responses recieved from brokers should not be cached for example.
-        /// </summary>
-        public bool ShouldCacheAccessTokens
-        {
-            get
-            {
-#if ANDROID || iOS
-                return true;
-#else
-                // Is not broker PoP request
-                return !(PopAuthenticationConfiguration != null &&
-                        AppConfig.IsBrokerEnabled);
-#endif
-            }
-        }
-
 #endregion
 
         public void LogParameters()

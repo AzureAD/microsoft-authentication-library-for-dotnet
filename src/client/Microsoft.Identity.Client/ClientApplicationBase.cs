@@ -15,7 +15,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
-
+ 
 namespace Microsoft.Identity.Client
 {
     /// <summary>

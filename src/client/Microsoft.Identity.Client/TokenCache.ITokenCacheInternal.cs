@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
                 await requestParams.AuthorityManager.GetInstanceDiscoveryEntryAsync().ConfigureAwait(false);
 
             #region Create Cache Objects
-            if (!string.IsNullOrEmpty(response.AccessToken) && !requestParams.ShouldNotCacheAccessTokens)
+            if (!string.IsNullOrEmpty(response.AccessToken))
             {
                 msalAccessTokenCacheItem =
                     new MsalAccessTokenCacheItem(
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
                     }
 
-                    if (msalAccessTokenCacheItem != null)
+                    if (msalAccessTokenCacheItem != null && !(response.TokenSource == TokenSource.Broker && response.TokenType == Constants.PoPAuthHeaderPrefix))
                     {
                         logger.Info("Saving AT in cache and removing overlapping ATs...");
 
