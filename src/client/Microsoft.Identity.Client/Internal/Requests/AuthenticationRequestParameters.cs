@@ -180,15 +180,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// This may be ovveritten by the child types that perform additional checks.
         /// Token responses recieved from brokers should not be cached for example.
         /// </summary>
-        public bool ShouldNotCacheAccessTokens
+        public bool ShouldCacheAccessTokens
         {
             get
             {
 #if ANDROID || iOS
-                return false;
+                return true;
 #else
-                return PopAuthenticationConfiguration != null &&
-                        AppConfig.IsBrokerEnabled;
+                // Is not broker PoP request
+                return !(PopAuthenticationConfiguration != null &&
+                        AppConfig.IsBrokerEnabled);
 #endif
             }
         }
