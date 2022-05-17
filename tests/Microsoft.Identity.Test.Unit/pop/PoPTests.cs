@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                                     .ExecuteAsync())
                                     .ConfigureAwait(false);
 
-                await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
                                     app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), "loginHint")
                                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                                     .WithProofOfPossession(HttpMethod.Get, new Uri(app.Authority), null)

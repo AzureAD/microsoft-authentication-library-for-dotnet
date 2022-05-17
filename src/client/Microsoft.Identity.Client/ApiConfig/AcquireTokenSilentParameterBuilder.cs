@@ -177,13 +177,21 @@ namespace Microsoft.Identity.Client
             ClientApplicationBase.GuardMobileFrameworks();
             var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
 
-            if (!ServiceBundle.Config.IsBrokerEnabled && !broker.IsPopSupported)
+            if (ServiceBundle.Config.IsBrokerEnabled)
             {
-                throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
+                if(string.IsNullOrEmpty(nonce))
+                {
+                    throw new ArgumentNullException(nameof(nonce));
+                }
+                if (!broker.IsPopSupported)
+                {
+                    throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
+                }
             }
 
             PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
             popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
+            popConfig.Nonce = nonce;
 
             PoPAuthenticationScheme popAuthenticationScheme = new PoPAuthenticationScheme(popConfig, ServiceBundle);
 
