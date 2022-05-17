@@ -22,18 +22,6 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Broker
 {
-    // TODO: wpf crashes on the second ATI
-    // TODO: need to map exceptions 
-    //   - WAM's retrayble exception?
-    //   - cancellation exception for when the user closes the browser
-
-    // TODO: bug around double interactive auth https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1858419 - block users from calling ATI twice with a semaphore (Undo the fix)
-    // TODO: call start-up only once (i.e. initialize core object only once) 
-    // TODO: pass in claims - try {"access_token":{"deviceid":{"essential":true}}} (Clarify)
-
-    // TODO: multi-cloud support (blocked by WAM bug)
-    // TODO: add logging (Blocked - a C++ API exists, no C# API yet as it's pretty complex, waiting for msalruntime to expose it)
-
     internal class RuntimeBroker : IBroker
     {
         private readonly ICoreLogger _logger;
@@ -65,13 +53,6 @@ namespace Microsoft.Identity.Client.Broker
             }
         }
 
-        /// <summary>
-        /// Acquire Token Interactively 
-        /// </summary>
-        /// <param name="authenticationRequestParameters"></param>
-        /// <param name="acquireTokenInteractiveParameters"></param>
-        /// <returns></returns>
-        /// <exception cref="MsalServiceException"></exception>
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
@@ -102,14 +83,7 @@ namespace Microsoft.Identity.Client.Broker
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
 
-                if (!string.IsNullOrEmpty(loginHint))
-                {
-                    _logger.Verbose("[WamBroker] AcquireTokenInteractive - account information provided. Trying to find a Windows account that matches.");
-                }
-                else
-                {
-                    _logger.Verbose("[WamBroker] Account information was not provided. Using an account picker.");
-                }
+                _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + string.IsNullOrEmpty(loginHint));
 
                 using (var result = await core.SignInInteractivelyAsync(
                     _parentHandle,
@@ -126,7 +100,7 @@ namespace Microsoft.Identity.Client.Broker
                     else
                     {
                         _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
-                        WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
+                        WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
                     }
                 }
             }
@@ -134,13 +108,6 @@ namespace Microsoft.Identity.Client.Broker
             return msalTokenResponse;
         }
 
-        /// <summary>
-        /// AcquireToken Interactively for the default user using WAM
-        /// </summary>
-        /// <param name="authenticationRequestParameters"></param>
-        /// <param name="acquireTokenInteractiveParameters"></param>
-        /// <returns></returns>
-        /// <exception cref="MsalServiceException"></exception>
         public async Task<MsalTokenResponse> AcquireTokenInteractiveDefaultUserAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
@@ -169,7 +136,7 @@ namespace Microsoft.Identity.Client.Broker
                     else
                     {
                         _logger.Error($"[WamBroker] Could not login interactively with the Default OS Account. {result.Error}");
-                        WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
+                        WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
                     }
                 }
             }
@@ -177,11 +144,6 @@ namespace Microsoft.Identity.Client.Broker
             return msalTokenResponse;
         }
 
-        /// <summary>
-        /// Gets the window handle
-        /// </summary>
-        /// <param name="uiParent"></param>
-        /// <returns></returns>
         private IntPtr GetParentWindow(CoreUIParent uiParent)
         {
             if (uiParent?.OwnerWindow is IntPtr ptr)
@@ -192,13 +154,6 @@ namespace Microsoft.Identity.Client.Broker
             return IntPtr.Zero;
         }
 
-        /// <summary>
-        /// AcquireTokenSilentAsync
-        /// </summary>
-        /// <param name="authenticationRequestParameters"></param>
-        /// <param name="acquireTokenSilentParameters"></param>
-        /// <returns></returns>
-        /// <exception cref="MsalUiRequiredException"></exception>
         public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
@@ -240,7 +195,7 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
+                            WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
                         }
                     }
                 }
@@ -249,13 +204,6 @@ namespace Microsoft.Identity.Client.Broker
             return msalTokenResponse;
         }
 
-        /// <summary>
-        /// Acquire Token Silent with Default User
-        /// </summary>ter
-        /// <param name="authenticationRequestParameters"></param>
-        /// <param name="acquireTokenSilentParameters"></param>
-        /// <returns></returns>
-        /// <exception cref="MsalUiRequiredException"></exception>
         public async Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
@@ -280,7 +228,7 @@ namespace Microsoft.Identity.Client.Broker
                     }
                     else
                     {
-                        WamAdapters.CreateWamErrorResponse(result, authenticationRequestParameters, _logger);
+                        WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
                     }
                 }
             }
@@ -288,13 +236,6 @@ namespace Microsoft.Identity.Client.Broker
             return msalTokenResponse;
         }
 
-        /// <summary>
-        /// RemoveAccountAsync
-        /// </summary>
-        /// <param name="appConfig"></param>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             string correlationId = Guid.NewGuid().ToString();
@@ -318,6 +259,8 @@ namespace Microsoft.Identity.Client.Broker
                         _logger.WarningPii(
                             $"Could not find a WAM account for the selected user {account.Username}",
                             "Could not find a WAM account for the selected user");
+
+                        throw new MsalException("wam_no_account_found", "Could not find a WAM account for the selected user");
                     }
                     
                     using (NativeInterop.SignOutResult result = await core.SignOutSilentlyAsync(
@@ -338,16 +281,6 @@ namespace Microsoft.Identity.Client.Broker
             }
         }
 
-        /// <summary>
-        /// GetAccountsAsync
-        /// </summary>
-        /// <param name="clientID"></param>
-        /// <param name="redirectUri"></param>
-        /// <param name="authorityInfo"></param>
-        /// <param name="cacheSessionManager"></param>
-        /// <param name="instanceDiscoveryManager"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientID,
             string redirectUri,
@@ -360,21 +293,11 @@ namespace Microsoft.Identity.Client.Broker
             return Task.FromResult<IReadOnlyList<IAccount>>(Array.Empty<IAccount>());
         }
 
-        /// <summary>
-        /// Auth Broker Installation URL
-        /// </summary>
-        /// <param name="appLink"></param>
-        /// <exception cref="NotImplementedException"></exception>
         public void HandleInstallUrl(string appLink)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Check to see if broker is installed and invokable
-        /// </summary>
-        /// <param name="authorityType"></param>
-        /// <returns></returns>
         public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
             if (!DesktopOsHelper.IsWin10OrServerEquivalent())

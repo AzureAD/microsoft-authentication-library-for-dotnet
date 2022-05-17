@@ -43,7 +43,5 @@ namespace Microsoft.Identity.Client.Desktop
                    };
             }
         }
-
-      
     }
 }
