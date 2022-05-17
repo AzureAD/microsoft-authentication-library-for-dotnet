@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client
 #elif DESKTOP || NET5_WIN
             if (parent is IWin32Window win32Window)
             {
-                Parameters.UiParent.OwnerWindow = win32Window;
+                Parameters.UiParent.OwnerWindow = win32Window.Handle;
                 return this;
             }
 #endif
@@ -304,7 +304,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(IntPtr window)
         {
-            return WithParentObject((object)window);
+            return WithParentObject(window);
         }
 #endif
 
