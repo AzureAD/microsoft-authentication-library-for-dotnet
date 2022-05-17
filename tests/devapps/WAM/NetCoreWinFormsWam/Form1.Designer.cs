@@ -60,21 +60,19 @@
             // 
             // resultTbx
             // 
-            this.resultTbx.Location = new System.Drawing.Point(12, 256);
-            this.resultTbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.resultTbx.Location = new System.Drawing.Point(10, 222);
             this.resultTbx.Multiline = true;
             this.resultTbx.Name = "resultTbx";
             this.resultTbx.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.resultTbx.Size = new System.Drawing.Size(709, 439);
+            this.resultTbx.Size = new System.Drawing.Size(608, 381);
             this.resultTbx.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(22, 52);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(19, 45);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(57, 15);
+            this.label1.Size = new System.Drawing.Size(48, 13);
             this.label1.TabIndex = 2;
             this.label1.Text = "Authority";
             // 
@@ -92,8 +90,7 @@
             "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47",
             "https://login.partner.microsoftonline.cn/organizations",
             "https://login.microsoftonline.us/organizations"});
-            this.authorityCbx.Location = new System.Drawing.Point(85, 48);
-            this.authorityCbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.authorityCbx.Location = new System.Drawing.Point(73, 42);
             this.authorityCbx.Name = "authorityCbx";
             this.authorityCbx.Size = new System.Drawing.Size(487, 23);
             this.authorityCbx.TabIndex = 3;
@@ -102,8 +99,7 @@
             // clientIdCbx
             // 
             this.clientIdCbx.FormattingEnabled = true;
-            this.clientIdCbx.Location = new System.Drawing.Point(85, 17);
-            this.clientIdCbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.clientIdCbx.Location = new System.Drawing.Point(73, 15);
             this.clientIdCbx.Name = "clientIdCbx";
             this.clientIdCbx.Size = new System.Drawing.Size(487, 23);
             this.clientIdCbx.TabIndex = 4;
@@ -113,29 +109,26 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(29, 21);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(25, 18);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(48, 15);
+            this.label2.Size = new System.Drawing.Size(42, 13);
             this.label2.TabIndex = 5;
             this.label2.Text = "ClientId";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 113);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(9, 98);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(66, 15);
+            this.label3.Size = new System.Drawing.Size(58, 13);
             this.label3.TabIndex = 7;
             this.label3.Text = "Login Hint ";
             // 
             // loginHintTxt
             // 
-            this.loginHintTxt.Location = new System.Drawing.Point(85, 111);
-            this.loginHintTxt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.loginHintTxt.Location = new System.Drawing.Point(73, 96);
             this.loginHintTxt.Name = "loginHintTxt";
-            this.loginHintTxt.Size = new System.Drawing.Size(256, 23);
+            this.loginHintTxt.Size = new System.Drawing.Size(220, 20);
             this.loginHintTxt.TabIndex = 8;
             // 
             // promptCbx
@@ -148,18 +141,16 @@
             "no_prompt",
             "consent",
             "never"});
-            this.promptCbx.Location = new System.Drawing.Point(580, 152);
-            this.promptCbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.promptCbx.Location = new System.Drawing.Point(497, 132);
             this.promptCbx.Name = "promptCbx";
-            this.promptCbx.Size = new System.Drawing.Size(140, 23);
+            this.promptCbx.Size = new System.Drawing.Size(121, 21);
             this.promptCbx.TabIndex = 10;
             // 
             // atsBtn
             // 
-            this.atsBtn.Location = new System.Drawing.Point(14, 205);
-            this.atsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.atsBtn.Location = new System.Drawing.Point(12, 178);
             this.atsBtn.Name = "atsBtn";
-            this.atsBtn.Size = new System.Drawing.Size(88, 27);
+            this.atsBtn.Size = new System.Drawing.Size(75, 23);
             this.atsBtn.TabIndex = 11;
             this.atsBtn.Text = "ATS";
             this.atsBtn.UseVisualStyleBackColor = true;
@@ -167,10 +158,9 @@
             // 
             // atiBtn
             // 
-            this.atiBtn.Location = new System.Drawing.Point(108, 205);
-            this.atiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.atiBtn.Location = new System.Drawing.Point(93, 178);
             this.atiBtn.Name = "atiBtn";
-            this.atiBtn.Size = new System.Drawing.Size(88, 27);
+            this.atiBtn.Size = new System.Drawing.Size(75, 23);
             this.atiBtn.TabIndex = 12;
             this.atiBtn.Text = "ATI";
             this.atiBtn.UseVisualStyleBackColor = true;
@@ -178,10 +168,9 @@
             // 
             // atsAtiBtn
             // 
-            this.atsAtiBtn.Location = new System.Drawing.Point(203, 205);
-            this.atsAtiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.atsAtiBtn.Location = new System.Drawing.Point(174, 178);
             this.atsAtiBtn.Name = "atsAtiBtn";
-            this.atsAtiBtn.Size = new System.Drawing.Size(88, 27);
+            this.atsAtiBtn.Size = new System.Drawing.Size(75, 23);
             this.atsAtiBtn.TabIndex = 13;
             this.atsAtiBtn.Text = "ATS + ATI";
             this.atsAtiBtn.UseVisualStyleBackColor = true;
@@ -189,10 +178,9 @@
             // 
             // accBtn
             // 
-            this.accBtn.Location = new System.Drawing.Point(368, 205);
-            this.accBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.accBtn.Location = new System.Drawing.Point(315, 178);
             this.accBtn.Name = "accBtn";
-            this.accBtn.Size = new System.Drawing.Size(93, 27);
+            this.accBtn.Size = new System.Drawing.Size(80, 23);
             this.accBtn.TabIndex = 15;
             this.accBtn.Text = "Get Accounts";
             this.accBtn.UseVisualStyleBackColor = true;
@@ -200,10 +188,9 @@
             // 
             // clearBtn
             // 
-            this.clearBtn.Location = new System.Drawing.Point(642, 703);
-            this.clearBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.clearBtn.Location = new System.Drawing.Point(550, 609);
             this.clearBtn.Name = "clearBtn";
-            this.clearBtn.Size = new System.Drawing.Size(79, 27);
+            this.clearBtn.Size = new System.Drawing.Size(68, 23);
             this.clearBtn.TabIndex = 16;
             this.clearBtn.Text = "Clear Log";
             this.clearBtn.UseVisualStyleBackColor = true;
@@ -211,10 +198,9 @@
             // 
             // btnClearCache
             // 
-            this.btnClearCache.Location = new System.Drawing.Point(595, 223);
-            this.btnClearCache.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnClearCache.Location = new System.Drawing.Point(510, 193);
             this.btnClearCache.Name = "btnClearCache";
-            this.btnClearCache.Size = new System.Drawing.Size(126, 27);
+            this.btnClearCache.Size = new System.Drawing.Size(108, 23);
             this.btnClearCache.TabIndex = 17;
             this.btnClearCache.Text = "Clear MSAL Cache";
             this.btnClearCache.UseVisualStyleBackColor = true;
@@ -232,69 +218,62 @@
             "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess",
             "https://management.core.chinacloudapi.cn//.default",
             "https://management.core.usgovcloudapi.net//.default"});
-            this.cbxScopes.Location = new System.Drawing.Point(85, 80);
-            this.cbxScopes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cbxScopes.Location = new System.Drawing.Point(73, 69);
             this.cbxScopes.Name = "cbxScopes";
-            this.cbxScopes.Size = new System.Drawing.Size(635, 23);
+            this.cbxScopes.Size = new System.Drawing.Size(545, 21);
             this.cbxScopes.TabIndex = 18;
             this.cbxScopes.Text = "User.Read";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(28, 83);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Location = new System.Drawing.Point(24, 72);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(44, 15);
+            this.label5.Size = new System.Drawing.Size(43, 13);
             this.label5.TabIndex = 19;
             this.label5.Text = "Scopes";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(526, 156);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Location = new System.Drawing.Point(451, 135);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(47, 15);
+            this.label4.Size = new System.Drawing.Size(40, 13);
             this.label4.TabIndex = 9;
             this.label4.Text = "Prompt";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(349, 113);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Location = new System.Drawing.Point(299, 98);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(68, 15);
+            this.label6.Size = new System.Drawing.Size(61, 13);
             this.label6.TabIndex = 21;
             this.label6.Text = "Or Account";
             // 
             // cbxAccount
             // 
             this.cbxAccount.FormattingEnabled = true;
-            this.cbxAccount.Location = new System.Drawing.Point(427, 110);
-            this.cbxAccount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cbxAccount.Location = new System.Drawing.Point(366, 95);
             this.cbxAccount.Name = "cbxAccount";
-            this.cbxAccount.Size = new System.Drawing.Size(293, 23);
+            this.cbxAccount.Size = new System.Drawing.Size(252, 21);
             this.cbxAccount.TabIndex = 22;
             // 
             // cbxMsaPt
             // 
             this.cbxMsaPt.AutoSize = true;
-            this.cbxMsaPt.Location = new System.Drawing.Point(212, 155);
-            this.cbxMsaPt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cbxMsaPt.Location = new System.Drawing.Point(182, 134);
             this.cbxMsaPt.Name = "cbxMsaPt";
-            this.cbxMsaPt.Size = new System.Drawing.Size(122, 19);
+            this.cbxMsaPt.Size = new System.Drawing.Size(111, 17);
             this.cbxMsaPt.TabIndex = 23;
             this.cbxMsaPt.Text = "MSA-Passthrough";
             this.cbxMsaPt.UseVisualStyleBackColor = true;
             // 
             // btnExpire
             // 
-            this.btnExpire.Location = new System.Drawing.Point(595, 189);
-            this.btnExpire.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnExpire.Location = new System.Drawing.Point(510, 164);
             this.btnExpire.Name = "btnExpire";
-            this.btnExpire.Size = new System.Drawing.Size(126, 27);
+            this.btnExpire.Size = new System.Drawing.Size(108, 23);
             this.btnExpire.TabIndex = 24;
             this.btnExpire.Text = "Expire ATs";
             this.btnExpire.UseVisualStyleBackColor = true;
@@ -302,10 +281,9 @@
             // 
             // btnRemoveAccount
             // 
-            this.btnRemoveAccount.Location = new System.Drawing.Point(469, 205);
-            this.btnRemoveAccount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnRemoveAccount.Location = new System.Drawing.Point(402, 178);
             this.btnRemoveAccount.Name = "btnRemoveAccount";
-            this.btnRemoveAccount.Size = new System.Drawing.Size(104, 27);
+            this.btnRemoveAccount.Size = new System.Drawing.Size(89, 23);
             this.btnRemoveAccount.TabIndex = 25;
             this.btnRemoveAccount.Text = "Remove Acc";
             this.btnRemoveAccount.UseVisualStyleBackColor = true;
@@ -314,10 +292,9 @@
             // cbxBackgroundThread
             // 
             this.cbxBackgroundThread.AutoSize = true;
-            this.cbxBackgroundThread.Location = new System.Drawing.Point(349, 155);
-            this.cbxBackgroundThread.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cbxBackgroundThread.Location = new System.Drawing.Point(299, 134);
             this.cbxBackgroundThread.Name = "cbxBackgroundThread";
-            this.cbxBackgroundThread.Size = new System.Drawing.Size(159, 19);
+            this.cbxBackgroundThread.Size = new System.Drawing.Size(146, 17);
             this.cbxBackgroundThread.TabIndex = 26;
             this.cbxBackgroundThread.Text = "Force background thread";
             this.cbxBackgroundThread.UseVisualStyleBackColor = true;
@@ -325,10 +302,9 @@
             // cbxListOsAccounts
             // 
             this.cbxListOsAccounts.AutoSize = true;
-            this.cbxListOsAccounts.Location = new System.Drawing.Point(212, 179);
-            this.cbxListOsAccounts.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cbxListOsAccounts.Location = new System.Drawing.Point(182, 155);
             this.cbxListOsAccounts.Name = "cbxListOsAccounts";
-            this.cbxListOsAccounts.Size = new System.Drawing.Size(113, 19);
+            this.cbxListOsAccounts.Size = new System.Drawing.Size(107, 17);
             this.cbxListOsAccounts.TabIndex = 27;
             this.cbxListOsAccounts.Text = "List OS accounts";
             this.cbxListOsAccounts.UseVisualStyleBackColor = true;
@@ -355,7 +331,7 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(740, 741);
             this.Controls.Add(this.cbxPOP);

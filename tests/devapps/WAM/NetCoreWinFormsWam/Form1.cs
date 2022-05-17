@@ -591,6 +591,7 @@ namespace NetDesktopWinForms
                 Log("Exception: " + ex);
             }
         }
+
     }
 
     public class ClientEntry

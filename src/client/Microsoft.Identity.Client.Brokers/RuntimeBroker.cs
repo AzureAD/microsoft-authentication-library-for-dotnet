@@ -116,7 +116,6 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-
                 using (NativeInterop.AuthResult result = await core.SignInAsync(
                         _parentHandle,
                         authParams,
@@ -160,7 +159,6 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-
                 using (var account = await core.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
                     authenticationRequestParameters.CorrelationId.ToString("D"),
@@ -210,7 +208,6 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-
                 using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
