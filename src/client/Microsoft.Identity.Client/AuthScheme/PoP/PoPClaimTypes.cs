@@ -63,9 +63,4 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         #endregion
     }
-
-    internal static class PoPRequestParameters
-    {
-
-    }
 }

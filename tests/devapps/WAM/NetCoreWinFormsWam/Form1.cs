@@ -198,10 +198,14 @@ namespace NetDesktopWinForms
                 }
 
                 Log($"ATS with login hint: " + loginHint);
-                return await pca.AcquireTokenSilent(GetScopes(), loginHint)
-                        .WithProofOfPossession(System.Net.Http.HttpMethod.Get, new Uri(pca.Authority), Guid.NewGuid().ToString())
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
+                var builder = pca.AcquireTokenSilent(GetScopes(), loginHint);
+
+                if (cbxPOP.Checked)
+                {
+                    builder = builder.WithProofOfPossession(System.Net.Http.HttpMethod.Get, new Uri(pca.Authority), _popNonce);
+                }
+
+                return await builder.ExecuteAsync().ConfigureAwait(false);
             }
 
             if (cbxAccount.SelectedItem != null &&
@@ -229,6 +233,11 @@ namespace NetDesktopWinForms
                 else
                 {
                     builder = builder.WithAuthority(reqAuthority);
+                }
+
+                if (cbxPOP.Checked)
+                {
+                    builder = builder.WithProofOfPossession(System.Net.Http.HttpMethod.Get, new Uri(pca.Authority), _popNonce);
                 }
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
@@ -582,7 +591,6 @@ namespace NetDesktopWinForms
                 Log("Exception: " + ex);
             }
         }
-
     }
 
     public class ClientEntry

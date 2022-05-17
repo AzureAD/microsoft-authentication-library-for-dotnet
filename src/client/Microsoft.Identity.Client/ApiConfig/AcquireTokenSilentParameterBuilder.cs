@@ -175,22 +175,20 @@ namespace Microsoft.Identity.Client
         public AcquireTokenSilentParameterBuilder WithProofOfPossession(HttpMethod httpMethod, Uri requestUri, string nonce)
         {
             ClientApplicationBase.GuardMobileFrameworks();
-            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
-            popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
-            popConfig.Nonce = nonce ?? throw new ArgumentNullException(nameof(nonce));
-
-            CommonParameters.PopAuthenticationConfiguration = popConfig;
             var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
 
-            if (!broker.IsPopSupported)
+            if (!ServiceBundle.Config.IsBrokerEnabled && !broker.IsPopSupported)
             {
                 throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
             }
 
-            if (!ServiceBundle.Config.IsBrokerEnabled)
-            {
-                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
-            }
+            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
+            popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
+
+            PoPAuthenticationScheme popAuthenticationScheme = new PoPAuthenticationScheme(popConfig, ServiceBundle);
+
+            CommonParameters.PopAuthenticationConfiguration = popConfig;
+            CommonParameters.AuthenticationScheme = popAuthenticationScheme;
 
             return this;
         }

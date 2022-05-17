@@ -350,7 +350,7 @@
             this.cbxPOP.Name = "cbxPOP";
             this.cbxPOP.Size = new System.Drawing.Size(156, 19);
             this.cbxPOP.TabIndex = 29;
-            this.cbxPOP.Text = "With Proof-of-Posession";
+            this.cbxPOP.Text = "With Proof-of-Possesion";
             this.cbxPOP.UseVisualStyleBackColor = true;
             // 
             // Form1

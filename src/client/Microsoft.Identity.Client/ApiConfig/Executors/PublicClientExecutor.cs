@@ -26,6 +26,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
+            ValidatePublicClientParameters(commonParameters);
+
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             AuthenticationRequestParameters requestParams = await _publicClientApplication.CreateRequestParametersAsync(
@@ -100,6 +102,23 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 usernamePasswordParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private void ValidatePublicClientParameters(AcquireTokenCommonParameters commonParameters)
+        {
+            //Validate that the pop configuration for public clients contains a nonce
+            if (commonParameters.PopAuthenticationConfiguration != null)
+            {
+                if (string.IsNullOrEmpty(commonParameters.PopAuthenticationConfiguration.Nonce))
+                {
+                    throw new MsalClientException(MsalError.NonceRequiredForPopOnPCA, MsalErrorMessage.NonceRequiredForPop);
+                }
+
+                if (!ServiceBundle.Config.IsBrokerEnabled)
+                {
+                    throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
+                }
+            }
         }
     }
 }

@@ -20,6 +20,7 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.Broker;
 
 namespace Microsoft.Identity.Test.Unit.Pop
 {
@@ -140,6 +141,40 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 Assert.AreEqual(CustomNonce, claims.FindAll("nonce").Single().Value);
                 AssertSingedHttpRequestClaims(provider, claims);
+            }
+        }
+
+        [TestMethod]
+        public async Task POP_WithMissingNonceForPCA_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app =
+                    PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithBroker2()
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+                var popConfig = new PoPAuthenticationConfiguration(request);
+                var provider = PoPProviderFactory.GetOrCreateProvider();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
+                                    app.AcquireTokenInteractive(TestConstants.s_scope.ToArray())
+                                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                                    .WithProofOfPossession(HttpMethod.Get, new Uri(app.Authority), null)
+                                    .ExecuteAsync())
+                                    .ConfigureAwait(false);
+
+                await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                                    app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), "loginHint")
+                                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                                    .WithProofOfPossession(HttpMethod.Get, new Uri(app.Authority), null)
+                                    .ExecuteAsync())
+                                    .ConfigureAwait(false);
             }
         }
 

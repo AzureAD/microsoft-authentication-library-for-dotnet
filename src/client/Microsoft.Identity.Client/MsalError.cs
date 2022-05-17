@@ -895,6 +895,12 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>Enable the broker when proof of possesion is configured.
         /// </summary>
         public const string BrokerRequiredForPop = "broker_required_for_pop";
+
+        /// <summary>
+        /// <para>What happens?</para>The request has proof of possesion configured but does not have a nonce configured. A nonce is required for proof of possesion on public clients
+        /// <para>Mitigation</para>Provide a nonce when proof of possesion is configured for public clients.
+        /// </summary>
+        public const string NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca";
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
