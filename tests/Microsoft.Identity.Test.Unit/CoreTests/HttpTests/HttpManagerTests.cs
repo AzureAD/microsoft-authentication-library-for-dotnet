@@ -106,8 +106,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             }
         }
 
+        // This is a regression test for the bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3283
         [TestMethod]
-        public void TestSendGetWithCanceledToken()
+        public async Task TestSendGetWithCanceledTokenAsync()
         {
             var queryParams = new Dictionary<string, string>
             {
@@ -122,21 +123,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 CancellationTokenSource cts = new CancellationTokenSource();
                 cts.Cancel();
 
-                try
-                {
-                    var response = httpManager.SendGetAsync(
+                await Assert.ThrowsExceptionAsync<TaskCanceledException>(() => httpManager.SendGetAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
                         queryParams,
                         Substitute.For<ICoreLogger>(),
-                        cancellationToken: cts.Token).Result;
-                    
-                    Assert.Fail("Request should have failed due to cancelled token.");
-                }
-                catch (AggregateException exc)
-                {
-                    Assert.IsNotNull(exc);
-                    Assert.IsTrue(exc.InnerException is MsalServiceException);
-                }
+                        cancellationToken: cts.Token)).ConfigureAwait(false);
             }
         }
 

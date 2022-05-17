@@ -142,6 +142,7 @@
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Compile Remove="ApiConfig\AbstractPublicClientAcquireTokenParameterBuilderExtensions.cs" />
     <Compile Remove="GlobalSuppressions3.cs" />
+    <Compile Include="AppConfig\AppTokenProviderParameters.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
 

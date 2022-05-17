@@ -3,9 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Security;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
@@ -15,10 +12,8 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Broker
 {
@@ -113,7 +108,6 @@ namespace Microsoft.Identity.Client.Broker
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             MsalTokenResponse msalTokenResponse = null;
-
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 

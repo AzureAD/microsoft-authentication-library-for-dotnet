@@ -50,22 +50,19 @@ namespace Microsoft.Identity.Test.Performance
         [Benchmark(Description = "SaveToken")]
         public async Task<string> SaveTokenResponseTestAsync()
         {
-            var result = await _cache.SaveTokenResponseAsync(_requestParams, _response).ConfigureAwait(true);
-            return result.Item1.ClientId;
+            return (await _cache.SaveTokenResponseAsync(_requestParams, _response).ConfigureAwait(true)).Item1.ClientId;
         }
 
         [Benchmark(Description = "FindToken")]
         public async Task<string> FindRefreshTokenTestAsync()
         {
-            var result = await _cache.FindRefreshTokenAsync(_requestParams).ConfigureAwait(true);
-            return result?.ClientId;
+            return (await _cache.FindRefreshTokenAsync(_requestParams).ConfigureAwait(true))?.ClientId;
         }
 
         [Benchmark(Description = "GetAllUsers")]
         public async Task GetAllAdalUsersTestAsync()
         {
-            var result = await _cache.GetAccountsAsync(_requestParams).ConfigureAwait(true);
-            result.Consume(_consumer);
+            (await _cache.GetAccountsAsync(_requestParams).ConfigureAwait(true)).Consume(_consumer);
         }
 
         [Benchmark(Description = "RemoveUser")]

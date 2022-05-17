@@ -176,7 +176,6 @@ namespace Microsoft.Identity.Client
                     if (msalAccessTokenCacheItem != null && !(response.TokenSource == TokenSource.Broker && response.TokenType == Constants.PoPAuthHeaderPrefix))
                     {
                         logger.Info("Saving AT in cache and removing overlapping ATs...");
-
                         DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
                             instanceDiscoveryMetadata.Aliases,
@@ -320,9 +319,10 @@ namespace Microsoft.Identity.Client
             string tenantId,
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata)
         {
-            if (IsLegacyAdalCacheEnabled(requestParams))
+            if (msalRefreshTokenCacheItem?.RawClientInfo != null && 
+                msalIdTokenCacheItem?.IdToken?.ObjectId != null &&
+                IsLegacyAdalCacheEnabled(requestParams) )
             {
-                requestParams.RequestContext.Logger.Info("Saving to ADAL legacy cache. ");
 
                 var tenatedAuthority = Authority.CreateAuthorityWithTenant(requestParams.AuthorityInfo, tenantId);
                 var authorityWithPreferredCache = Authority.CreateAuthorityWithEnvironment(
@@ -337,6 +337,10 @@ namespace Microsoft.Identity.Client
                     authorityWithPreferredCache.AuthorityInfo.CanonicalAuthority,
                     msalIdTokenCacheItem.IdToken.ObjectId,
                     response.Scope);
+            }
+            else
+            {
+                requestParams.RequestContext.Logger.Verbose("Not saving to ADAL legacy cache. ");
             }
         }
 
@@ -403,7 +407,7 @@ namespace Microsoft.Identity.Client
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
-            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
+            var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
 
             requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
 
@@ -412,12 +416,6 @@ namespace Microsoft.Identity.Client
 
                 logger.Verbose("No access tokens found in the cache. Skipping filtering. ");
                 requestParams.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
-
-                if (AcquireTokenInLongRunningOboWasCalled(requestParams))
-                {
-                    logger.Error("[FindAccessTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
-                    throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
-                }
 
                 return null;
             }
@@ -430,12 +428,6 @@ namespace Microsoft.Identity.Client
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
-            if (AcquireTokenInLongRunningOboWasCalled(requestParams) && accessTokens.Count == 0)
-            {
-                logger.Error("[FindAccessTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
-                throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
-            }
-
             // no match
             if (accessTokens.Count == 0)
             {
@@ -444,7 +436,7 @@ namespace Microsoft.Identity.Client
             }
 
             MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleToken(accessTokens, requestParams);
-            msalAccessTokenCacheItem = FilterTokensByKeyId(msalAccessTokenCacheItem, requestParams);
+            msalAccessTokenCacheItem = FilterTokensByPopKeyId(msalAccessTokenCacheItem, requestParams);
             msalAccessTokenCacheItem = FilterTokensByExpiry(msalAccessTokenCacheItem, requestParams);
 
             if (msalAccessTokenCacheItem == null)
@@ -666,7 +658,7 @@ namespace Microsoft.Identity.Client
                 $"Filtering AT by environment");
         }
 
-        private MsalAccessTokenCacheItem FilterTokensByKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
+        private MsalAccessTokenCacheItem FilterTokensByPopKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
         {
             if (item == null)
             {
@@ -772,12 +764,6 @@ namespace Microsoft.Identity.Client
             else
             {
                 requestParams.RequestContext.Logger.Verbose("No RTs found in the MSAL cache ");
-
-                if (AcquireTokenInLongRunningOboWasCalled(requestParams))
-                {
-                    requestParams.RequestContext.Logger.Error("[FindRefreshTokenAsync] AcquireTokenInLongRunningProcess was called and OBO token was not found in the cache.");
-                    throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
-                }
             }
 
             requestParams.RequestContext.Logger.Verbose("Checking ADAL cache for matching RT. ");
@@ -1262,14 +1248,6 @@ namespace Microsoft.Identity.Client
             {
                 Accessor.DeleteAccount(accountCacheItem);
             }
-        }
-
-        // Returns whether AcquireTokenInLongRunningProcess was called (user assertion is null in this case)
-        private bool AcquireTokenInLongRunningOboWasCalled(AuthenticationRequestParameters requestParameters)
-        {
-            return requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf &&
-                requestParameters.UserAssertion == null &&
-                !string.IsNullOrEmpty(requestParameters.LongRunningOboCacheKey);
         }
     }
 }

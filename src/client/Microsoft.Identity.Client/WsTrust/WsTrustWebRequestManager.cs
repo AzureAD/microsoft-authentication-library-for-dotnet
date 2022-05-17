@@ -83,7 +83,11 @@ namespace Microsoft.Identity.Client.WsTrust
                 wsTrustRequest,
                 Encoding.UTF8, "application/soap+xml");
 
-            HttpResponse resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, headers, body, requestContext.Logger).ConfigureAwait(false);
+            HttpResponse resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, 
+                headers, 
+                body, 
+                requestContext.Logger, 
+                cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -140,7 +144,8 @@ namespace Microsoft.Identity.Client.WsTrust
             var httpResponse = await _httpManager.SendGetAsync(
                 uri,
                 msalIdParams,
-                requestContext.Logger).ConfigureAwait(false);
+                requestContext.Logger,
+                cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
 
             if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK)
             {

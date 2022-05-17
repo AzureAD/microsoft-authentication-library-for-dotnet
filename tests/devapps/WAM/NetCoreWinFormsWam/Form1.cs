@@ -101,17 +101,17 @@ namespace NetDesktopWinForms
                     builder = ToggleOldBroker(builder, true);
                     break;
                 case AuthMethod.WAMRuntime:
-                    builder = builder.WithBroker2();
+                    builder = builder.WithBrokerPreview();
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = builder.WithBroker2(false);
+                    builder = builder.WithBrokerPreview(false);
                     builder = ToggleOldBroker(builder, false);
 
                     builder = builder.WithRedirectUri("http://localhost");
                     break;
                 case AuthMethod.EmbeddedBrowser:
                     builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
-                    builder = builder.WithBroker2(false);
+                    builder = builder.WithBrokerPreview(false);
                     builder = ToggleOldBroker(builder, false);
 
                     break;

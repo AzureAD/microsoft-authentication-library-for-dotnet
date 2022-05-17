@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithBroker2().Build();
+            IPublicClientApplication pca = pcaBuilder.WithBrokerPreview().Build();
 
             // Act
             try
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithBroker2().Build();
+            IPublicClientApplication pca = pcaBuilder.WithBrokerPreview().Build();
 
             // Act
             try
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithBroker2().Build();
+            IPublicClientApplication pca = pcaBuilder.WithBrokerPreview().Build();
 
             // Act
             try

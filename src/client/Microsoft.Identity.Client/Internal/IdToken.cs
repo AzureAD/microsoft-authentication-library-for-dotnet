@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal
             try
             {
                 string payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
-                var idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
+                var idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);                
 
                 IdToken parsedIdToken = new IdToken();
 
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Internal
             string issuer = null;
             if (idTokenClaims.TryGetValue(IdTokenClaim.Issuer, out object issuerObj))
             {
-                issuer = issuerObj as string;
+                issuer = issuerObj as string;                
             }
             issuer = issuer ?? DefaultIssuser;
 
@@ -164,18 +164,18 @@ namespace Microsoft.Identity.Client.Internal
                         if (obj is DateTime dateTimeValue)
                             claims.Add(
                                 new Claim(
-                                    keyValuePair.Key,
-                                    dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture),
-                                    ClaimValueTypes.DateTime,
-                                    issuer,
+                                    keyValuePair.Key, 
+                                    dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), 
+                                    ClaimValueTypes.DateTime, 
+                                    issuer, 
                                     issuer));
                         else
                             claims.Add(
                                 new Claim(
-                                    keyValuePair.Key,
+                                    keyValuePair.Key, 
                                     JsonConvert.SerializeObject(obj),
-                                    GetClaimValueType(obj),
-                                    issuer,
+                                    GetClaimValueType(obj), 
+                                    issuer, 
                                     issuer));
                     }
 
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.Internal
 
             return claims;
         }
-
+    
         private static void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
         {
             if (jtoken.Type == JTokenType.Object)
@@ -293,7 +293,7 @@ namespace Microsoft.Identity.Client.Internal
 
             return objType.ToString();
         }
-
+        
         #endregion
     }
 }

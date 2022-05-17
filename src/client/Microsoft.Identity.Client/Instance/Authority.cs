@@ -65,21 +65,19 @@ namespace Microsoft.Identity.Client.Instance
 
             await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
 
+            AuthorityInfo nonNullAuthInfo = requestAuthorityInfo ?? configAuthorityInfo;
+
             switch (configAuthorityInfo.AuthorityType)
             {
                 // ADFS is tenant-less, no need to consider tenant
                 case AuthorityType.Adfs:
-                    return requestAuthorityInfo == null ?
-                        new AdfsAuthority(configAuthorityInfo) :
-                        new AdfsAuthority(requestAuthorityInfo);
+                    return new AdfsAuthority(nonNullAuthInfo);
+
+                case AuthorityType.Dsts:
+                    return new DstsAuthority(nonNullAuthInfo);
 
                 case AuthorityType.B2C:
-
-                    if (requestAuthorityInfo != null)
-                    {
-                        return new B2CAuthority(requestAuthorityInfo);
-                    }
-                    return new B2CAuthority(configAuthorityInfo);
+                    return new B2CAuthority(nonNullAuthInfo);
 
                 case AuthorityType.Aad:
 
@@ -149,6 +147,9 @@ namespace Microsoft.Identity.Client.Instance
 
                 case AuthorityType.Aad:
                     return new AadAuthority(authorityInfo);
+
+                case AuthorityType.Dsts:
+                    return new DstsAuthority(authorityInfo);
 
                 default:
                     throw new MsalClientException(

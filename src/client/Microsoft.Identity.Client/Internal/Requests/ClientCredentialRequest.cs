@@ -117,8 +117,37 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
-            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+            MsalTokenResponse msalTokenResponse;
+            if (ServiceBundle.Config.AppTokenProvider != null)
+            {
+                msalTokenResponse = await SendTokenRequestToProviderAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+            }
+
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+        }
+
+
+        private async Task<MsalTokenResponse> SendTokenRequestToProviderAsync(CancellationToken cancellationToken)
+        {
+            AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters
+            {
+                Scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope),
+                CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId.ToString(),
+                Claims = AuthenticationRequestParameters.Claims,
+                TenantId = AuthenticationRequestParameters.Authority.TenantId,
+                CancellationToken = cancellationToken,
+            };
+
+            TokenProviderResult externalToken = await ServiceBundle.Config.AppTokenProvider(appTokenProviderParameters).ConfigureAwait(false);
+
+            var tokenResponse =  MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
+            tokenResponse.Scope = appTokenProviderParameters.Scopes.AsSingleString();
+            tokenResponse.CorrelationId = appTokenProviderParameters.CorrelationId;
+            return tokenResponse;
         }
 
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
