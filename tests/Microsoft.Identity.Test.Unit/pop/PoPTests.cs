@@ -151,16 +151,13 @@ namespace Microsoft.Identity.Test.Unit.Pop
             {
                 PublicClientApplication app =
                     PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithBroker2()
+                                                              .WithBrokerPreview()
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request);
                 var provider = PoPProviderFactory.GetOrCreateProvider();
-
-                httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
 
                 await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
                                     app.AcquireTokenInteractive(TestConstants.s_scope.ToArray())
