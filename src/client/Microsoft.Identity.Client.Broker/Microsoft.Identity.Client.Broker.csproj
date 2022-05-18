@@ -14,10 +14,9 @@
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
-    <BrokerPackageSemVer Condition="'$(BrokerPackageSemVer)' == ''">0.1.0</BrokerPackageSemVer>
-    <BrokerPackageSemVer>$(BrokerPackageSemVer)</BrokerPackageSemVer>
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.7.1-preview</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
-    <Version>$(BrokerPackageSemVer)</Version>
+    <Version>$(MsalClientSemVer)-preview</Version>
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Title>MSAL.NET extension for public client broker support</Title>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
