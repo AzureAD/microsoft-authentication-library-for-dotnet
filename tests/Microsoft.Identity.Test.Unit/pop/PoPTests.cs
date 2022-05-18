@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
                                     app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), "loginHint")
                                     .WithAuthority(TestConstants.AuthorityUtidTenant)
-                                    .WithProofOfPossession(HttpMethod.Get, new Uri(app.Authority), null)
+                                    .WithProofOfPossession(null, HttpMethod.Get, new Uri(app.Authority))
                                     .ExecuteAsync())
                                     .ConfigureAwait(false);
             }
@@ -343,6 +343,26 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
             Assert.AreEqual(MsalError.BrokerDoesNotSupportPop, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.BrokerDoesNotSupportPop, ex.Message);
+        }
+
+        [TestMethod]
+        public async Task PopWhenBrokerIsNotEnabledForATS_Async()
+        {
+            // Arrange
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .BuildConcrete();
+
+            // Act
+
+            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                    await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.LocalAccountId)
+                        .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                        .ExecuteAsync()
+                        .ConfigureAwait(false))
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.BrokerRequiredForPop, ex.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.BrokerRequiredForPop, ex.Message);
         }
 
         /// <summary>
