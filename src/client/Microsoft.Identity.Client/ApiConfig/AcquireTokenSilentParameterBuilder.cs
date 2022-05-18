@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Client
 #if iOS || ANDROID || WINDOWS_UWP
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
-        public AcquireTokenSilentParameterBuilder WithProofOfPossession(HttpMethod httpMethod, Uri requestUri, string nonce)
+        public AcquireTokenSilentParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
         {
             ClientApplicationBase.GuardMobileFrameworks();
             var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);

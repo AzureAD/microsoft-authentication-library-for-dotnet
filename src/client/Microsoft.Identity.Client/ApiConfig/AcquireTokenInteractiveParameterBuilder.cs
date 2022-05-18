@@ -372,7 +372,7 @@ namespace Microsoft.Identity.Client
 
             PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri);
 
-            if (!string.IsNullOrEmpty(nonce))
+            if (string.IsNullOrEmpty(nonce))
             {
                 throw new ArgumentNullException(nameof(nonce));
             }
