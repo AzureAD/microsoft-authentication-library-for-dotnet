@@ -55,13 +55,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
       
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-            if (certificate.PublicKey.Key.KeySize < CertificateClientCredential.MinKeySizeInBits)
-            {
-                throw new ArgumentOutOfRangeException(nameof(certificate),
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
-                        CertificateClientCredential.MinKeySizeInBits));
-            }
-
 #if NET45
             var rsaCryptoProvider = GetCryptoProviderForSha256_Net45(certificate);
             using (var sha = new SHA256Cng())

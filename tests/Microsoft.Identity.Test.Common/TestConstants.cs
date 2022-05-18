@@ -152,6 +152,12 @@ namespace Microsoft.Identity.Test.Unit
         public const string CodeVerifier = "someCodeVerifier";
 
         public const string Nonce = "someNonce";
+        
+        public const string TestErrCode = "TestErrCode";
+        public const string iOSBrokerSuberrCode = "TestSuberrCode";
+        public const string iOSBrokerErrDescr = "Test Error Description";
+        public const string iOSBrokerErrorMetadata = "error_metadata";
+        public const string iOSBrokerErrorMetadataValue = @"{""home_account_id"":""test_home"", ""username"" : """ + Username + @""" }";
 
         //This value is only for testing purposes. It is for a certificate that is not used for anything other than running tests
         public const string _defaultx5cValue = @"MIIDHzCCAgegAwIBAgIQM6NFYNBJ9rdOiK+C91ZzFDANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwHhcNMTIwNTIyMj
