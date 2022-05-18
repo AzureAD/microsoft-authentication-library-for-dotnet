@@ -346,7 +346,7 @@ namespace NetDesktopWinForms
 
             if (cbxPOP.Checked)
             {
-                builder = builder.WithProofOfPossession(System.Net.Http.HttpMethod.Get, new Uri(pca.Authority), _popNonce);
+                builder = builder.WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
             }
 
             Prompt? prompt = GetPrompt();

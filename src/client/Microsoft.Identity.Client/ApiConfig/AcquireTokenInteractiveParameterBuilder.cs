@@ -354,7 +354,7 @@ namespace Microsoft.Identity.Client
 #if iOS || ANDROID || WINDOWS_UWP
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
-        public AcquireTokenInteractiveParameterBuilder WithProofOfPossession(HttpMethod httpMethod, Uri requestUri, string nonce)
+        public AcquireTokenInteractiveParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
@@ -370,9 +370,15 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
             }
 
-            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
-            popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
-            popConfig.Nonce = nonce ?? throw new ArgumentNullException(nameof(nonce));
+            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri);
+
+            if (!string.IsNullOrEmpty(nonce))
+            {
+                throw new ArgumentNullException(nameof(nonce));
+            }
+
+            popConfig.Nonce = nonce;
+            popConfig.HttpMethod = httpMethod;
 
             CommonParameters.PopAuthenticationConfiguration = popConfig;
 

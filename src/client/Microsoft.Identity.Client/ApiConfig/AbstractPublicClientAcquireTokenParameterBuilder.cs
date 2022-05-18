@@ -2,14 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client

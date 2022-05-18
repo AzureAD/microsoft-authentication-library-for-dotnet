@@ -13,7 +13,7 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
-    internal class TokenResponseHelper
+    internal static class TokenResponseHelper
     {
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
 

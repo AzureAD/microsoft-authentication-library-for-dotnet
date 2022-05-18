@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -173,8 +174,8 @@ namespace Microsoft.Identity.Client.Broker
             // if PopAuthenticationConfiguration is set, proof of possesion will be performed via the runtime broker
             if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
             {
-                //_logger.Verbose("[WamBroker] Proof of posession configuration provided. Using proof of posession with broker request.");
-                authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod.Method;
+                authenticationRequestParameters.RequestContext.Logger.Info("[WamBroker] Proof-of-Posession is configured. Using Proof-of-Posession with broker request");
+                authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod?.Method;
                 authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
                 authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
                 authParams.PopParams.Nonce = authenticationRequestParameters.PopAuthenticationConfiguration.Nonce;
@@ -215,7 +216,7 @@ namespace Microsoft.Identity.Client.Broker
                     Scope = authResult.GrantedScopes,
                     ExpiresIn = DateTimeHelpers.GetDurationFromWindowsTimestamp(expiresOn, logger),
                     ClientInfo = authResult.Account.ClientInfo.ToString(),
-                    TokenType = authResult.IsPopAuthorization ? Constants.PoPTokenType : "Bearer",
+                    TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : BrokerResponseConst.Bearer,
                     WamAccountId = authResult.Account.Id,
                     TokenSource = TokenSource.Broker
                 };

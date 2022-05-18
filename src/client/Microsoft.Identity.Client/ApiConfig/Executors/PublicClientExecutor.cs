@@ -26,7 +26,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             AuthenticationRequestParameters requestParams = await _publicClientApplication.CreateRequestParametersAsync(
