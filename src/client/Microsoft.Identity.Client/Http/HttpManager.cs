@@ -145,19 +145,17 @@ namespace Microsoft.Identity.Client.Http
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    logger.Info("The HTTP request was cancelled. ");
+                    logger.Error("The HTTP request was cancelled. ");
                     throw;
                 }
 
                 logger.Error("The HTTP request failed. " + exception.Message);
                 isRetryable = true;
-
                 timeoutException = exception;
             }
 
             if (isRetryable && retry)
             {
-
                 logger.Info("Retrying one more time..");
                 await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
                 return await ExecuteWithRetryAsync(

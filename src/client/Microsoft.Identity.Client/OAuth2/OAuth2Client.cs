@@ -243,6 +243,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             if (shouldLogAsError)
             {
+                requestContext.Logger.ErrorPii(requestContext.errorMessageWithPii, requestContext.errorMessage);
                 requestContext.Logger.ErrorPii(exceptionToThrow);
             }
             else
