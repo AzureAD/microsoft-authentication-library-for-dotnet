@@ -101,17 +101,17 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
-                string original = responseDictionary.ContainsKey(MsalTokenResponse.iOSBrokerErrorMetadata) ? responseDictionary[MsalTokenResponse.iOSBrokerErrorMetadata] : null;
-                Dictionary<string, string> dictionary = null;
+                string metadataOriginal = responseDictionary.ContainsKey(MsalTokenResponse.iOSBrokerErrorMetadata) ? responseDictionary[MsalTokenResponse.iOSBrokerErrorMetadata] : null;
+                Dictionary<string, string> metadataDictionary = null;
                 
-                if (original != null)
+                if (metadataOriginal != null)
                 {
-                    string dataUnescaped = Uri.UnescapeDataString(original);
-                    dictionary = Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(dataUnescaped); 
+                    string brokerMetadataJson = Uri.UnescapeDataString(metadataOriginal);
+                    metadataDictionary = Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(brokerMetadataJson); 
                 }
 
                 string homeAcctId = null;
-                dictionary?.TryGetValue(MsalTokenResponse.iOSBrokerHomeAccountId, out homeAcctId);
+                metadataDictionary?.TryGetValue(MsalTokenResponse.iOSBrokerHomeAccountId, out homeAcctId);
                 return new MsalTokenResponse
                 {
                     Error = errorCode,
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     SubError = responseDictionary.ContainsKey(OAuth2ResponseBaseClaim.SubError) ? responseDictionary[OAuth2ResponseBaseClaim.SubError] : string.Empty,
                     AccountUserId = homeAcctId != null ? AccountId.ParseFromString(homeAcctId).ObjectId : null,
                     TenantId = homeAcctId != null ?  AccountId.ParseFromString(homeAcctId).TenantId : null,
-                    Upn = (dictionary?.ContainsKey(TokenResponseClaim.Upn) ?? false) ? dictionary[TokenResponseClaim.Upn] : null,
+                    Upn = (metadataDictionary?.ContainsKey(TokenResponseClaim.Upn) ?? false) ? metadataDictionary[TokenResponseClaim.Upn] : null,
                 };
             }
 

@@ -36,10 +36,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     [TestCategory("Broker")]
     public class BrokerTests : TestBase
     {
-        const string TestErrCode = "TestErrCode";
-        const string TestSuberrCode = "TestSuberrCode";
-        const string TestErrDescr = "TestErrDescr";
-
         private BrokerInteractiveRequestComponent _brokerInteractiveRequest;
         private BrokerSilentStrategy _brokerSilentAuthStrategy;
         private AuthenticationRequestParameters _parameters;
@@ -300,20 +296,20 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
-            responseDictionary["error_metadata"] = @"{""home_account_id"":""test_home"", ""username"" : ""Testacct@rreretr.com"" }";
-            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestErrCode;
-            responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestSuberrCode;
-            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestErrDescr;
+            responseDictionary[TestConstants.iOSBrokerErrorMetadata] = TestConstants.iOSBrokerErrorMetadataValue;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestConstants.iOSBrokerSuberrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
 
             // assert
-            Assert.AreEqual(TestErrCode, token.Error);
-            Assert.AreEqual(TestSuberrCode, token.SubError);
-            Assert.AreEqual(TestErrDescr, token.ErrorDescription);
+            Assert.AreEqual(TestConstants.TestErrCode, token.Error);
+            Assert.AreEqual(TestConstants.iOSBrokerSuberrCode, token.SubError);
+            Assert.AreEqual(TestConstants.iOSBrokerErrDescr, token.ErrorDescription);
             Assert.AreEqual("test_home", token.AccountUserId);
-            Assert.AreEqual("Testacct@rreretr.com", token.Upn);
+            Assert.AreEqual(TestConstants.Username, token.Upn);
         }
 
         [TestMethod]
@@ -321,19 +317,19 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
-            responseDictionary["error_metadata"] = @"{""home_account_id"":""test_home"", ""username"" : ""Testacct@rreretr.com"" }";
-            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestErrCode;
-            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestErrDescr;
+            responseDictionary[TestConstants.iOSBrokerErrorMetadata] = TestConstants.iOSBrokerErrorMetadataValue;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
 
             // assert
-            Assert.AreEqual(TestErrCode, token.Error);
+            Assert.AreEqual(TestConstants.TestErrCode, token.Error);
             Assert.AreEqual(string.Empty, token.SubError);
-            Assert.AreEqual(TestErrDescr, token.ErrorDescription);
+            Assert.AreEqual(TestConstants.iOSBrokerErrDescr, token.ErrorDescription);
             Assert.AreEqual("test_home", token.AccountUserId);
-            Assert.AreEqual("Testacct@rreretr.com", token.Upn);
+            Assert.AreEqual(TestConstants.Username, token.Upn);
         }
 
         [TestMethod]
@@ -341,19 +337,19 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
-            responseDictionary["error_metadata"] = @"{""home_account_id"":""test_home"", ""username"" : ""Testacct@rreretr.com"" }";
-            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestErrCode;
-            responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestSuberrCode;
+            responseDictionary[TestConstants.iOSBrokerErrorMetadata] = TestConstants.iOSBrokerErrorMetadataValue;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestConstants.iOSBrokerSuberrCode;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
 
             // assert
-            Assert.AreEqual(TestErrCode, token.Error);
-            Assert.AreEqual(TestSuberrCode, token.SubError);
+            Assert.AreEqual(TestConstants.TestErrCode, token.Error);
+            Assert.AreEqual(TestConstants.iOSBrokerSuberrCode, token.SubError);
             Assert.AreEqual(string.Empty, token.ErrorDescription);
             Assert.AreEqual("test_home", token.AccountUserId);
-            Assert.AreEqual("Testacct@rreretr.com", token.Upn);
+            Assert.AreEqual(TestConstants.Username, token.Upn);
         }
 
         [TestMethod]
@@ -361,17 +357,17 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
-            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestErrCode;
-            responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestSuberrCode;
-            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestErrDescr;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestConstants.iOSBrokerSuberrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
 
             // assert
-            Assert.AreEqual(TestErrCode, token.Error);
-            Assert.AreEqual(TestSuberrCode, token.SubError);
-            Assert.AreEqual(TestErrDescr, token.ErrorDescription);
+            Assert.AreEqual(TestConstants.TestErrCode, token.Error);
+            Assert.AreEqual(TestConstants.iOSBrokerSuberrCode, token.SubError);
+            Assert.AreEqual(TestConstants.iOSBrokerErrDescr, token.ErrorDescription);
             Assert.AreEqual(null, token.AccountUserId);
             Assert.AreEqual(null, token.TenantId);
             Assert.AreEqual(null, token.Upn);
@@ -382,19 +378,19 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
-            responseDictionary["error_metadata"] = @"{""username"" : ""Testacct@rreretr.com"" }";
-            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestErrCode;
-            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestErrDescr;
+            responseDictionary[TestConstants.iOSBrokerErrorMetadata] = @"{""username"" : """ + TestConstants.Username + @""" }";
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
 
             // assert
-            Assert.AreEqual(TestErrCode, token.Error);
+            Assert.AreEqual(TestConstants.TestErrCode, token.Error);
             Assert.AreEqual(string.Empty, token.SubError);
-            Assert.AreEqual(TestErrDescr, token.ErrorDescription);
+            Assert.AreEqual(TestConstants.iOSBrokerErrDescr, token.ErrorDescription);
             Assert.AreEqual(null, token.AccountUserId);
-            Assert.AreEqual("Testacct@rreretr.com", token.Upn);
+            Assert.AreEqual(TestConstants.Username, token.Upn);
         }
 
         [TestMethod]
@@ -403,16 +399,16 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
             responseDictionary["error_metadata"] = @"{""home_account_id"":""test_home"" }";
-            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestErrCode;
-            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestErrDescr;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
 
             // assert
-            Assert.AreEqual(TestErrCode, token.Error);
+            Assert.AreEqual(TestConstants.TestErrCode, token.Error);
             Assert.AreEqual(string.Empty, token.SubError);
-            Assert.AreEqual(TestErrDescr, token.ErrorDescription);
+            Assert.AreEqual(TestConstants.iOSBrokerErrDescr, token.ErrorDescription);
             Assert.AreEqual("test_home", token.AccountUserId);
             Assert.AreEqual(null, token.Upn);
         }
