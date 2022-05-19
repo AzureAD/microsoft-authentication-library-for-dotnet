@@ -898,7 +898,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>The request has proof of possession configured but does not have a nonce configured. A nonce is required for proof of possession on public clients
-        /// <para>Mitigation</para>Provide a nonce when proof of possesion is configured for public clients.
+        /// <para>Mitigation</para>Provide a nonce when proof of possession is configured for public clients.
         /// </summary>
         public const string NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca";
 #if iOS
