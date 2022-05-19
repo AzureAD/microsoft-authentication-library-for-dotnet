@@ -885,7 +885,7 @@ namespace Microsoft.Identity.Client
         public const string CryptoNet45 = "crypto_net45";
 
         /// <summary>
-        /// <para>What happens?</para>The request has broker enabled and proof of possesion configured but the boker does not support proof of possesion
+        /// <para>What happens?</para>The request has broker enabled and proof of possession configured but the broker does not support proof of possession
         /// <para>Mitigation</para>only configure proof of possesion for public clients on windows.
         /// </summary>
         public const string BrokerDoesNotSupportPop = "broker_does_not_support_pop";
