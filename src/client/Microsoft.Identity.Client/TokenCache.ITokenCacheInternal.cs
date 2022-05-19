@@ -173,6 +173,7 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
                     }
 
+                    // Don't cache PoP access tokens from broker
                     if (msalAccessTokenCacheItem != null && !(response.TokenSource == TokenSource.Broker && response.TokenType == Constants.PoPAuthHeaderPrefix))
                     {
                         logger.Info("Saving AT in cache and removing overlapping ATs...");
