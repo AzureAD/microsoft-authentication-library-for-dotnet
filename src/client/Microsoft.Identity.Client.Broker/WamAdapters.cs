@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
-        /// Configures the Msal Runtime authenticaion request to use proof of posession.
+        /// Configures the MSAL Runtime authentication request to use proof of possession .
         /// </summary>
         private static void AddPopParams(AuthenticationRequestParameters authenticationRequestParameters, NativeInterop.AuthParameters authParams)
         {
