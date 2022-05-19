@@ -1,3 +1,20 @@
+4.44.0
+==========
+### New Features
+**Added support in MSAL for dSTS authority** See [3198](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3198).
+**Enabled Azure.Identity to benefit from MSAL.NET token cache when used for Managed identity** See [3137](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3137).
+**Added PPE to known discovery endpoints** See [3265](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3265).
+**Refactored the performance tests and create YAML pipeline to run with CI Build** See [3297](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3297).
+
+### Experimental Features
+**MSAL.NET now have WAM integration via MSAL Runtime with AT POP support** See [3192](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3192).
+
+### Bug Fix
+**Improved exception handling in case of Operation Cancelled Exception** See [3283](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3283).
+**Fixed AcquireTokenSilent to not prompt for Operating System Account** See [3294](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3294).
+**Fixed NullReferenceException in IsBrokerAvailable()** See [3261](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3261).
+**Fixed Race Condition in Region Discovery** See [3277](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3277).
+
 4.43.2
 ==========
 ### Bug Fix
