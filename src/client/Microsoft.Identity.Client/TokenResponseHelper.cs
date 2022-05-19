@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client
         public static string GetPreferredUsernameFromIdToken(bool isAdfsAuthority, IdToken idToken)
         {
             // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
-            // It will be set to "preferred_username not in id token"
+            // It will be set to "Missing from the token response"
             if (idToken == null)
             {
                 return NullPreferredUsernameDisplayLabel;
