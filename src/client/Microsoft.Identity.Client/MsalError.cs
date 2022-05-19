@@ -884,9 +884,26 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string CryptoNet45 = "crypto_net45";
 
+        /// <summary>
+        /// <para>What happens?</para>The request has broker enabled and proof of possession configured but the broker does not support proof of possession
+        /// <para>Mitigation</para>only configure proof of possesion for public clients on windows.
+        /// </summary>
+        public const string BrokerDoesNotSupportPop = "broker_does_not_support_pop";
+
+        /// <summary>
+        /// <para>What happens?</para>The request has proof of possession configured but does not have broker enabled. Broker is required for proof of possession on public clients
+        /// <para>Mitigation</para>Enable the broker when proof of possession is configured.
+        /// </summary>
+        public const string BrokerRequiredForPop = "broker_required_for_pop";
+
+        /// <summary>
+        /// <para>What happens?</para>The request has proof of possession configured but does not have a nonce configured. A nonce is required for proof of possession on public clients
+        /// <para>Mitigation</para>Provide a nonce when proof of possession is configured for public clients.
+        /// </summary>
+        public const string NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca";
 #if iOS
         /// <summary>
-        /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
+        /// Xamarin.iOS specific. This error indicates that keychain access has not been enabled for the application.
         /// From MSAL 2.x and ADAL 4.x, the keychain for the publisher needs to be accessed in order to provide
         /// Single Sign On between applications of the same publisher.
         /// <para>Mitigation</para> In order to access the keychain on iOS, you will need to ensure the Entitlements.plist

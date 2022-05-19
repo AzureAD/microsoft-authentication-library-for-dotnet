@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         public static IConfidentialClientApplicationExecutor CreateConfidentialClientExecutor(
             ConfidentialClientApplication confidentialClientApplication)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
 
             IConfidentialClientApplicationExecutor executor = new ConfidentialClientExecutor(
                 confidentialClientApplication.ServiceBundle,

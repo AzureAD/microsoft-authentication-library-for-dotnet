@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Extensibility;
@@ -148,6 +149,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public bool IsClientCredentialRequest => ApiId == ApiEvent.ApiIds.AcquireTokenForClient;
 
+        public PoPAuthenticationConfiguration PopAuthenticationConfiguration => _commonParameters.PopAuthenticationConfiguration;
+
         public bool IsConfidentialClient
         {
             get
@@ -171,8 +174,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string LongRunningOboCacheKey { get; set; }
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
-
-        #endregion
+#endregion
 
         public void LogParameters()
         {

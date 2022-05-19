@@ -151,6 +151,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string UserAssertion = "fake_access_token";
         public const string CodeVerifier = "someCodeVerifier";
 
+        public const string Nonce = "someNonce";
+        
         public const string TestErrCode = "TestErrCode";
         public const string iOSBrokerSuberrCode = "TestSuberrCode";
         public const string iOSBrokerErrDescr = "Test Error Description";

@@ -7,7 +7,10 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -158,7 +161,25 @@ namespace Microsoft.Identity.Client.Broker
                 }
             }
 
+            AddPopParams(authenticationRequestParameters, authParams);
+
             return authParams;
+        }
+
+        /// <summary>
+        /// Configures the MSAL Runtime authentication request to use proof of possession .
+        /// </summary>
+        private static void AddPopParams(AuthenticationRequestParameters authenticationRequestParameters, NativeInterop.AuthParameters authParams)
+        {
+            // if PopAuthenticationConfiguration is set, proof of possession will be performed via the runtime broker
+            if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
+            {
+                authenticationRequestParameters.RequestContext.Logger.Info("[WamBroker] Proof-of-Possession is configured. Using Proof-of-Posession with broker request");
+                authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod?.Method;
+                authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
+                authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
+                authParams.PopParams.Nonce = authenticationRequestParameters.PopAuthenticationConfiguration.Nonce;
+            }
         }
 
         /// <summary>
@@ -183,16 +204,19 @@ namespace Microsoft.Identity.Client.Broker
                     logger.Warning("No correlation ID in response");
                     correlationId = null;
                 }
+                
+                //parsing Pop token from auth header if pop was performed. Otherwise use access token field.
+                var token = authResult.IsPopAuthorization ? authResult.AuthorizationHeader.Split(' ')[1] : authResult.AccessToken;
 
                 MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
                 {
-                    AccessToken = authResult.AccessToken,
+                    AccessToken = token,
                     IdToken = authResult.RawIdToken,
                     CorrelationId = correlationId,
                     Scope = authResult.GrantedScopes,
                     ExpiresIn = DateTimeHelpers.GetDurationFromWindowsTimestamp(expiresOn, logger),
                     ClientInfo = authResult.Account.ClientInfo.ToString(),
-                    TokenType = "Bearer",
+                    TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : BrokerResponseConst.Bearer,
                     WamAccountId = authResult.Account.Id,
                     TokenSource = TokenSource.Broker
                 };

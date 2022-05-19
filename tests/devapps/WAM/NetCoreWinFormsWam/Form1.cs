@@ -24,6 +24,7 @@ namespace NetDesktopWinForms
     public partial class Form1 : Form
     {
         private readonly SynchronizationContext _syncContext;
+        private readonly string _popNonce = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6bnVsbH0.eyJ0cyI6MTY1MjI4NTAzNH0.Nh-mAJwRphv57IdpdIrYzmYp6vP_BmmYy4UrNKj5A2x4XKLbp_H3aH4J5_s9hP5MzoiHE2SgVaDG8YUbP4xOjFYmpNG884pWqI-z9RjFNKJgBTXUhwv8HsUnxUHq1KTvpLmd1K1gJZORdeUI2LDr07EEH3-aT0PkRt-wT1YNNh5gU_RHV5KvlsyDWCvCJpEbZmGUf8JX9tHO2ux7XAKD77lVb5m6lFq_8Wr5nhJDyREHrXKWQq-X4rTxnBCZ4KBAufImSVHAeVi7ihlGbcobU2CuyJscTZkyELWMG8rBD6QK57AzrM77mua9-QClKIHArL8_d2fgyksLLS89wxy25A";
 
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
@@ -90,6 +91,7 @@ namespace NetDesktopWinForms
 
             var builder = PublicClientApplicationBuilder
                 .Create(clientId)
+                .WithExperimentalFeatures()
                 .WithAuthority(this.authorityCbx.Text);
 
             var authMethod = GetAuthMethod();
@@ -197,9 +199,14 @@ namespace NetDesktopWinForms
                 }
 
                 Log($"ATS with login hint: " + loginHint);
-                return await pca.AcquireTokenSilent(GetScopes(), loginHint)
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
+                var builder = pca.AcquireTokenSilent(GetScopes(), loginHint);
+
+                if (cbxPOP.Checked)
+                {
+                    builder = builder.WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
+                }
+
+                return await builder.ExecuteAsync().ConfigureAwait(false);
             }
 
             if (cbxAccount.SelectedItem != null &&
@@ -229,6 +236,11 @@ namespace NetDesktopWinForms
                     builder = builder.WithAuthority(reqAuthority);
                 }
 
+                if (cbxPOP.Checked)
+                {
+                    builder = builder.WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
+                }
+
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 return await builder
                     .ExecuteAsync()
@@ -237,6 +249,7 @@ namespace NetDesktopWinForms
 
             Log($"ATS with no account or login hint ... will fail with UiRequiredEx");
             return await pca.AcquireTokenSilent(GetScopes(), (IAccount)null)
+
                 .ExecuteAsync()
                 .ConfigureAwait(false);
         }
@@ -320,7 +333,7 @@ namespace NetDesktopWinForms
 
             AuthenticationResult result = null;
             var scopes = GetScopes();
-
+            var guid = Guid.NewGuid();
             var builder = pca.AcquireTokenInteractive(scopes)
                 .WithUseEmbeddedWebView(true)
                 //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
@@ -331,6 +344,11 @@ namespace NetDesktopWinForms
                     Title = "Hello world",
                 })
                 .WithParentActivityOrWindow(this.Handle);
+
+            if (cbxPOP.Checked)
+            {
+                builder = builder.WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
+            }
 
             Prompt? prompt = GetPrompt();
             if (prompt.HasValue)
