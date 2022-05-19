@@ -174,6 +174,8 @@ namespace Microsoft.Identity.Client
 #endif
         public AcquireTokenSilentParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
         {
+            ValidateUseOfExperimentalFeature();
+
             ClientApplicationBase.GuardMobileFrameworks();
             var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
 

@@ -91,6 +91,7 @@ namespace NetDesktopWinForms
 
             var builder = PublicClientApplicationBuilder
                 .Create(clientId)
+                .WithExperimentalFeatures()
                 .WithAuthority(this.authorityCbx.Text);
 
             var authMethod = GetAuthMethod();

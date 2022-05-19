@@ -156,6 +156,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 PublicClientApplication app =
                     PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithBrokerPreview()
+                                                              .WithExperimentalFeatures()
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
@@ -349,7 +350,9 @@ namespace Microsoft.Identity.Test.Unit.Pop
         public async Task PopWhenBrokerIsNotEnabledForATS_Async()
         {
             // Arrange
-            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
                 .BuildConcrete();
 
             // Act
