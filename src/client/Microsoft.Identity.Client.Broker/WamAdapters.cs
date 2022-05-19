@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.Broker
         /// </summary>
         private static void AddPopParams(AuthenticationRequestParameters authenticationRequestParameters, NativeInterop.AuthParameters authParams)
         {
-            // if PopAuthenticationConfiguration is set, proof of possesion will be performed via the runtime broker
+            // if PopAuthenticationConfiguration is set, proof of possession will be performed via the runtime broker
             if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
             {
                 authenticationRequestParameters.RequestContext.Logger.Info("[WamBroker] Proof-of-Posession is configured. Using Proof-of-Posession with broker request");
