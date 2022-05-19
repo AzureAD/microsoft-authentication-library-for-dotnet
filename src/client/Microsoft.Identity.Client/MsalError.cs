@@ -903,7 +903,7 @@ namespace Microsoft.Identity.Client
         public const string NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca";
 #if iOS
         /// <summary>
-        /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
+        /// Xamarin.iOS specific. This error indicates that keychain access has not been enabled for the application.
         /// From MSAL 2.x and ADAL 4.x, the keychain for the publisher needs to be accessed in order to provide
         /// Single Sign On between applications of the same publisher.
         /// <para>Mitigation</para> In order to access the keychain on iOS, you will need to ensure the Entitlements.plist
