@@ -891,7 +891,7 @@ namespace Microsoft.Identity.Client
         public const string BrokerDoesNotSupportPop = "broker_does_not_support_pop";
 
         /// <summary>
-        /// <para>What happens?</para>The request has proof of possesion configured but does not have broker enabled. Broker is required for proof of possesion on public clients
+        /// <para>What happens?</para>The request has proof of possession configured but does not have broker enabled. Broker is required for proof of possession on public clients
         /// <para>Mitigation</para>Enable the broker when proof of possesion is configured.
         /// </summary>
         public const string BrokerRequiredForPop = "broker_required_for_pop";
