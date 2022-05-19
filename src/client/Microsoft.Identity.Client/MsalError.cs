@@ -892,7 +892,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>The request has proof of possession configured but does not have broker enabled. Broker is required for proof of possession on public clients
-        /// <para>Mitigation</para>Enable the broker when proof of possesion is configured.
+        /// <para>Mitigation</para>Enable the broker when proof of possession is configured.
         /// </summary>
         public const string BrokerRequiredForPop = "broker_required_for_pop";
 
