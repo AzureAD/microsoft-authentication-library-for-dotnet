@@ -195,6 +195,12 @@ namespace Microsoft.Identity.Client
             popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
             popConfig.Nonce = nonce;
 
+            //POP Auth scheme should not wrap and sign token when broker is enabled for public clients
+            if (ServiceBundle.Config.IsBrokerEnabled)
+            {
+                popConfig.SignHttpRequest = false;
+            }
+
             PoPAuthenticationScheme popAuthenticationScheme = new PoPAuthenticationScheme(popConfig, ServiceBundle);
 
             CommonParameters.PopAuthenticationConfiguration = popConfig;
