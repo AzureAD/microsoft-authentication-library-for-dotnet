@@ -362,10 +362,14 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 .WithTestBroker(mockBroker)
                 .BuildConcrete();
 
+            TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
+            //Expire access tokens to force refresh
+            TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
+
             pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
 
             // Act
-            var result = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, "SomeUser")
+            var result = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.DisplayableId)
                 .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -373,6 +377,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             //Assert
             //Validate that access token from broker is not wrapped
             Assert.AreEqual(TestConstants.UserAccessToken, result.AccessToken);
+            Assert.AreEqual(Constants.PoPAuthHeaderPrefix, result.TokenType);
         }
 
         private MsalTokenResponse CreateMsalTokenResponse()
