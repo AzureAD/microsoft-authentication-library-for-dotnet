@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client
             popConfig.Nonce = nonce;
 
             //POP Auth scheme should not wrap and sign token when broker is enabled for public clients
-            if (!ServiceBundle.Config.IsBrokerEnabled)
+            if (ServiceBundle.Config.IsBrokerEnabled)
             {
                 popConfig.SignHttpRequest = false;
             }

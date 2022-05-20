@@ -25,6 +25,7 @@ using NSubstitute;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Test.Unit.BrokerTests;
 using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Test.Unit.Pop
 {
@@ -344,6 +345,50 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
             Assert.AreEqual(MsalError.BrokerDoesNotSupportPop, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.BrokerDoesNotSupportPop, ex.Message);
+        }
+
+        [TestMethod]
+        public async Task EnsurePopTokenIsNotDoubleWrapped_Async()
+        {
+            // Arrange
+            var mockBroker = Substitute.For<IBroker>();
+            mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+            mockBroker.IsPopSupported.Returns(true);
+            mockBroker.AcquireTokenSilentAsync(null, null).Returns(CreateMsalTokenResponse());
+
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithBrokerPreview()
+                .WithTestBroker(mockBroker)
+                .BuildConcrete();
+
+            pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+
+            // Act
+            var result = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, "SomeUser")
+                .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            //Assert
+            //Validate that access token from broker is not wrapped
+            Assert.AreEqual(TestConstants.UserAccessToken, result.AccessToken);
+        }
+
+        private MsalTokenResponse CreateMsalTokenResponse()
+        {
+            return new MsalTokenResponse()
+            {
+                AccessToken = TestConstants.UserAccessToken,
+                IdToken = TestConstants.IdToken,
+                CorrelationId = null,
+                Scope = TestConstants.ScopeStr,
+                ExpiresIn = 3600,
+                ClientInfo = null,
+                TokenType = Constants.PoPAuthHeaderPrefix,
+                WamAccountId = TestConstants.LocalAccountId,
+                TokenSource = TokenSource.Broker
+            };
         }
 
         [TestMethod]
