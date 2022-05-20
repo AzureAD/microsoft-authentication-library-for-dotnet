@@ -8,7 +8,7 @@
 **MSAL.NET now has a new WAM preview which is an abstraction layer based on MSAL C++ with support for Proof-of-Possession access tokens**. This fixes some issues with current WAM implementation. See [3192](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3192) and [wiki](http://aka.ms/msal-net-wam).
 
 ### Bug Fixes
-**Improved exception handling in case of Operation Cancelled Exception** See [3283](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3283).
+**Improved exception handling in case of an Operation Cancelled Exception** See [3283](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3283).
 **Fixed `AcquireTokenSilent` to not display a login prompt unnecessarily for operating system accounts in WAM**. See [3294](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3294).
 **Fixed NullReferenceException in IsBrokerAvailable()** See [3261](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3261).
 **Fixed a race condition to improve stability of region autodiscovery**. See [3277](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3277).
