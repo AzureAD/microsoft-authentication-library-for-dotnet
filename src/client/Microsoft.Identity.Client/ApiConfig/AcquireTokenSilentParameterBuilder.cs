@@ -195,13 +195,12 @@ namespace Microsoft.Identity.Client
             popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
             popConfig.Nonce = nonce;
 
-            PoPAuthenticationScheme popAuthenticationScheme = new PoPAuthenticationScheme(popConfig, ServiceBundle);
-
             CommonParameters.PopAuthenticationConfiguration = popConfig;
 
-            //Auth scheme is not used when broker is enabled for public clients
+            //POP Auth scheme is not used when broker is enabled for public clients
             if (!ServiceBundle.Config.IsBrokerEnabled)
             {
+                PoPAuthenticationScheme popAuthenticationScheme = new PoPAuthenticationScheme(popConfig, ServiceBundle);
                 CommonParameters.AuthenticationScheme = popAuthenticationScheme;
             }
 
