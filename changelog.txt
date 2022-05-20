@@ -5,7 +5,7 @@
 **Enabled Azure.Identity (Azure SDK) to benefit from MSAL.NET token cache when used for Managed Identity** See [3137](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3137).
 
 ### Experimental Features
-**MSAL.NET now has new WAM integration via MSAL Runtime with support for Proof-of-Possession access tokens** See [3192](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3192) and [wiki](http://aka.ms/msal-net-wam).
+**MSAL.NET now has new WAM preview which is an abstraction layer based on MSAL C++ with support for Proof-of-Possession access tokens**. This fixes some issues with current WAM implementation. See [3192](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3192) and [wiki](http://aka.ms/msal-net-wam).
 
 ### Bug Fixes
 **Improved exception handling in case of Operation Cancelled Exception** See [3283](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3283).
