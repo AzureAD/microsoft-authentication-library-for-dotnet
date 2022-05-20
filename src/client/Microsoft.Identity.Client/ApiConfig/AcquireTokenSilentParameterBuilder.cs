@@ -198,7 +198,12 @@ namespace Microsoft.Identity.Client
             PoPAuthenticationScheme popAuthenticationScheme = new PoPAuthenticationScheme(popConfig, ServiceBundle);
 
             CommonParameters.PopAuthenticationConfiguration = popConfig;
-            CommonParameters.AuthenticationScheme = popAuthenticationScheme;
+
+            //Auth scheme is not used when broker is enabled for public clients
+            if (!ServiceBundle.Config.IsBrokerEnabled)
+            {
+                CommonParameters.AuthenticationScheme = popAuthenticationScheme;
+            }
 
             return this;
         }
