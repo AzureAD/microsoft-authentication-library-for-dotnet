@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
@@ -195,16 +196,20 @@ namespace Microsoft.Identity.Client
             popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
             popConfig.Nonce = nonce;
 
+            IAuthenticationScheme authenticationScheme;
+
             //POP Auth scheme should not wrap and sign token when broker is enabled for public clients
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
                 popConfig.SignHttpRequest = false;
+                authenticationScheme = new PopBrokerAuthenticationScheme();
             }
-
-            PoPAuthenticationScheme popAuthenticationScheme = new PoPAuthenticationScheme(popConfig, ServiceBundle);
-
+            else
+            {
+                authenticationScheme = new PoPAuthenticationScheme(popConfig, ServiceBundle);
+            }
             CommonParameters.PopAuthenticationConfiguration = popConfig;
-            CommonParameters.AuthenticationScheme = popAuthenticationScheme;
+            CommonParameters.AuthenticationScheme = authenticationScheme;
 
             return this;
         }

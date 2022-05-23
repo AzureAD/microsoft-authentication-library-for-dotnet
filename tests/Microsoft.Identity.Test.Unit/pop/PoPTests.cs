@@ -361,7 +361,9 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
                 mockBroker.IsPopSupported.Returns(true);
-                mockBroker.AcquireTokenSilentAsync(Arg.Any<AuthenticationRequestParameters>(), Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalTokenResponse());
+                mockBroker.AcquireTokenSilentAsync(
+                    Arg.Any<AuthenticationRequestParameters>(), 
+                    Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(Constants.PoPAuthHeaderPrefix));
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
@@ -387,22 +389,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Assert.AreEqual(Constants.PoPAuthHeaderPrefix, result.TokenType);
                 Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
             }
-        }
-
-        private MsalTokenResponse CreateMsalTokenResponse()
-        {
-            return new MsalTokenResponse()
-            {
-                AccessToken = TestConstants.UserAccessToken,
-                IdToken = null,
-                CorrelationId = null,
-                Scope = TestConstants.ScopeStr,
-                ExpiresIn = 3600,
-                ClientInfo = null,
-                TokenType = Constants.PoPAuthHeaderPrefix,
-                WamAccountId = TestConstants.LocalAccountId,
-                TokenSource = TokenSource.Broker
-            };
         }
 
         [TestMethod]
