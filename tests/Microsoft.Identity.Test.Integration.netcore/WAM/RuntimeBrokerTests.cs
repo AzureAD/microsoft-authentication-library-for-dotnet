@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Client.OAuth2;
 using System.Runtime.InteropServices;
+using Microsoft.Identity.Client.NativeInterop;
 using System;
 using NSubstitute;
 
@@ -29,6 +30,15 @@ namespace Microsoft.Identity.Test.Integration.Broker
     {
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
+        public static IntPtr hWnd;
+        public static string CorrelationId = "b0435a5c-6d97-41d6-9372-812e7fac3c10";
+        public static string VSApplicationId = "04f0c124-f2bc-4f59-8241-bf6df9866bbd";
+        public const string MicrosoftCommonAuthority = "https://login.microsoftonline.com/common";
+        public const string Scopes = "user.read";
+        public const string RedirectUri = "http://localhost";
 
         /// <summary>
         /// Initialized by MSTest (do not make private or readonly)
@@ -46,6 +56,37 @@ namespace Microsoft.Identity.Test.Integration.Broker
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
             _logger = Substitute.For<ICoreLogger>();
             _wamBroker = new RuntimeBroker(_coreUIParent, applicationConfiguration, _logger);
+            hWnd = GetForegroundWindow();
+        }
+
+        private static async Task<AuthResult> GetDefaultAccountAsync()
+        {
+            try
+            {
+                using (var core = new Core())
+                using (var authParams = new AuthParameters(VSApplicationId, MicrosoftCommonAuthority))
+                {
+                    authParams.RequestedScopes = Scopes;
+                    authParams.RedirectUri = RedirectUri;
+
+                    using (AuthResult authResult = await core.SignInAsync(hWnd, authParams, CorrelationId).ConfigureAwait(false))
+                    {
+
+                        if (authResult.IsSuccess)
+                        {
+                            return authResult;
+                        }
+                        else
+                        {
+                            throw new Exception("Test failure - Unable to get default account to sign in.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
         }
 
         [TestMethod]
@@ -134,6 +175,75 @@ namespace Microsoft.Identity.Test.Integration.Broker
                     "Console applications can use GetConsoleWindow Windows API for this"));
             }
 
+        }
+
+        private static void ValidateAuthResult(AuthResult authResult)
+        {
+            if (authResult.IsSuccess)
+            {
+                Console.WriteLine($"Account Id: {authResult.Account.Id}");
+                Console.WriteLine($"Account Client Info: {authResult.Account.ClientInfo}");
+                Console.WriteLine($"Access Token: {authResult.AccessToken}");
+                Console.WriteLine($"Expires On: {authResult.ExpiresOn}");
+                Console.WriteLine($"Raw Id Token: {authResult.RawIdToken}");
+            }
+            else
+            {
+                Console.WriteLine($"Error: {authResult.Error}");
+                throw new MsalRuntimeException(authResult.Error);
+            }
+        }
+
+        [TestMethod]
+        public async Task ReadAccountAsync()
+        {
+            AuthResult defaultAccount = await GetDefaultAccountAsync().ConfigureAwait(false);
+
+            using (var core = new Core())
+            using (var authParams = new AuthParameters(VSApplicationId, MicrosoftCommonAuthority))
+            {
+                authParams.RequestedScopes = Scopes;
+                authParams.RedirectUri = RedirectUri;
+                using (Client.NativeInterop.Account accountId = await core.ReadAccountByIdAsync(defaultAccount.Account.Id, CorrelationId).ConfigureAwait(false))
+                {
+                    if (accountId == null)
+                    {
+                        Assert.Fail($"Account id: {accountId} is not found");
+                    }
+                    else
+                    {
+                        Assert.IsNotNull(accountId);
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenSilentlyAsync()
+        {
+            AuthResult defaultAccount = await GetDefaultAccountAsync().ConfigureAwait(false);
+
+            using (var core = new Core())
+            using (var authParams = new AuthParameters(VSApplicationId, MicrosoftCommonAuthority))
+            {
+                authParams.RequestedScopes = Scopes;
+                authParams.RedirectUri = RedirectUri;
+                using (AuthResult authResult = await core.AcquireTokenSilentlyAsync(authParams, CorrelationId, defaultAccount.Account).ConfigureAwait(false))
+                {
+                    if (authResult == null)
+                    {
+                        Assert.Fail($"Unable to get Auth Result.");
+                    }
+                    else
+                    {
+                        Assert.IsNotNull(authResult.Account.Id);
+                        Assert.IsNotNull(authResult.Account.ClientInfo);
+                        Assert.IsNotNull(authResult.AccessToken);
+                        Assert.IsNotNull(authResult.ExpiresOn);
+                        Assert.IsNotNull(authResult.RawIdToken);
+                    }
+                }
+            }
         }
     }
 }
