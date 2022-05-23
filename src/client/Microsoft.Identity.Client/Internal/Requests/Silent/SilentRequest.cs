@@ -51,7 +51,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             if (isBrokerConfigured && AuthenticationRequestParameters.PopAuthenticationConfiguration != null)
             {
                 _logger.Info("Attempting to use broker instead of searching local cache for proof-of-posession tokens. ");
-                return await TrySilentRequestWithBrokerAsync(cancellationToken).ConfigureAwait(false);
+
+                return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
             }
 
             try
@@ -77,23 +78,16 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
                 {
                     _logger.Info("Attempting to use broker instead. ");
-                    await TrySilentRequestWithBrokerAsync(cancellationToken).ConfigureAwait(false);
+                    var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                    if (brokerResult != null)
+                    {
+                        _logger.Verbose("Broker responded to silent request");
+                        return brokerResult;
+                    }
                 }
 
                 throw;
             }
-        }
-
-        private async Task<AuthenticationResult> TrySilentRequestWithBrokerAsync(CancellationToken cancellationToken)
-        {
-            var brokerAuthResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-
-            if (brokerAuthResult != null)
-            {
-                _logger.Verbose("Broker responded to silent request");
-            }
-
-            return brokerAuthResult;
         }
 
         private static HashSet<string> s_tryWithBrokerErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
