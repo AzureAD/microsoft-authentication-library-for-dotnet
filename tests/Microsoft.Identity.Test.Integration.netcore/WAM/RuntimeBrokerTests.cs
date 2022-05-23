@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         public static IntPtr hWnd;
         public static string CorrelationId = "b0435a5c-6d97-41d6-9372-812e7fac3c10";
-        public static string VSApplicationId = "04f0c124-f2bc-4f59-8241-bf6df9866bbd";
+        public static string VSApplicationId = "26a7ee05-5602-4d76-a7ba-eae8b7b67941";
         public const string MicrosoftCommonAuthority = "https://login.microsoftonline.com/common";
         public const string Scopes = "user.read";
         public const string RedirectUri = "http://localhost";
