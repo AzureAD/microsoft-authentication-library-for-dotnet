@@ -48,6 +48,12 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             bool isBrokerConfigured = AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
                                       ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
 
+            if (isBrokerConfigured && AuthenticationRequestParameters.PopAuthenticationConfiguration != null)
+            {
+                _logger.Info("Attempting to use broker instead of searching local cache for proof-of-posession tokens. ");
+                return await TrySilentRequestWithBrokerAsync(cancellationToken).ConfigureAwait(false);
+            }
+
             try
             {
                 if (AuthenticationRequestParameters.Account == null)
@@ -71,16 +77,23 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
                 {
                     _logger.Info("Attempting to use broker instead. ");
-                    var brokerAuthResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-                    if (brokerAuthResult != null)
-                    {
-                        _logger.Verbose("Broker responded to silent request");
-                        return brokerAuthResult;
-                    }
+                    await TrySilentRequestWithBrokerAsync(cancellationToken).ConfigureAwait(false);
                 }
 
                 throw;
             }
+        }
+
+        private async Task<AuthenticationResult> TrySilentRequestWithBrokerAsync(CancellationToken cancellationToken)
+        {
+            var brokerAuthResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+
+            if (brokerAuthResult != null)
+            {
+                _logger.Verbose("Broker responded to silent request");
+            }
+
+            return brokerAuthResult;
         }
 
         private static HashSet<string> s_tryWithBrokerErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -323,7 +324,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
         public async Task PopWhenBrokerDoesNotSupportPop_Async()
         {
             // Arrange
-
             var mockBroker = Substitute.For<IBroker>();
             mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
             mockBroker.IsPopSupported.Returns(false);
@@ -356,12 +356,11 @@ namespace Microsoft.Identity.Test.Unit.Pop
             using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                harness.HttpManager.AddFailureTokenEndpointResponse("invalid_grant", "https://login.microsoftonline.com/my-utid/");
                 
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
                 mockBroker.IsPopSupported.Returns(true);
-                mockBroker.AcquireTokenSilentAsync(Arg.Any<AuthenticationRequestParameters>(), Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalTokenResponse());
+                mockBroker.AcquireTokenSilentAsync(Arg.Any<AuthenticationRequestParameters>(), Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse());
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
@@ -389,11 +388,49 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
         }
 
-        private MsalTokenResponse CreateMsalTokenResponse()
+        [TestMethod]
+        public async Task EnsurePopTokenIsNotretrievedFromLocalCache_Async()
+        {
+            // Arrange
+            var brokerAccessToken = "TokenFromBroker";
+
+            var mockBroker = Substitute.For<IBroker>();
+            mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+            mockBroker.IsPopSupported.Returns(true);
+            mockBroker.AcquireTokenSilentAsync(
+                Arg.Any<AuthenticationRequestParameters>(),
+                Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse(brokerAccessToken));
+
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithBrokerPreview()
+                .WithTestBroker(mockBroker)
+                .BuildConcrete();
+
+            //Populate local cache with token
+            TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
+
+            pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+
+            // Act
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            var result = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, accounts.FirstOrDefault())
+                .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            //Assert
+            //Validate that access token from broker and not local cache
+            Assert.AreEqual(brokerAccessToken, result.AccessToken);
+            Assert.AreEqual(Constants.PoPAuthHeaderPrefix, result.TokenType);
+            Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        private MsalTokenResponse CreateMsalPopTokenResponse(string accessToken = null)
         {
             return new MsalTokenResponse()
             {
-                AccessToken = TestConstants.UserAccessToken,
+                AccessToken = accessToken ?? TestConstants.UserAccessToken,
                 IdToken = null,
                 CorrelationId = null,
                 Scope = TestConstants.ScopeStr,
