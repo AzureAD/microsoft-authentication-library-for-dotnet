@@ -12,6 +12,11 @@ steps:
   inputs:
     script: 'nuget locals all -clear'
 
+- task: CmdLine@2
+  displayName: 'Restore workload'
+  inputs:
+    script: 'dotnet workload restore ${{ parameters.Solution }}'
+
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
