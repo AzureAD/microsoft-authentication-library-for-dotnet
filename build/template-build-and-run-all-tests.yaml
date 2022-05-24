@@ -5,10 +5,10 @@ jobs: #Build and stage projects
 
 - job: 'PreBuildCheck'
   pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
       demands:
       - msbuild
-      - visualstudio -equals 2022
+      - visualstudio
   variables:
       runCodesignValidationInjection: false
 
@@ -20,10 +20,10 @@ jobs: #Build and stage projects
   dependsOn:
     - 'PreBuildCheck'
   pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
       demands:
       - msbuild
-      - visualstudio -equals 2022
+      - visualstudio
 
   steps:
   # Bootstrap the build
@@ -62,10 +62,10 @@ jobs: #Build and stage projects
   dependsOn:
     - 'PreBuildCheck'
   pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
       demands:
       - msbuild
-      - visualstudio -equals 2022
+      - visualstudio
   variables:
       runCodesignValidationInjection: false
 
