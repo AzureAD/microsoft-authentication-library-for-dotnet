@@ -15,7 +15,7 @@ steps:
 - task: CmdLine@2
   displayName: 'Restore workload'
   inputs:
-    script: 'dotnet workload restore ${{ parameters.Solution }}'
+    script: 'dotnet workload restore $(Build.SourcesDirectory)\${{ parameters.Solution }}'
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
