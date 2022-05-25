@@ -17,7 +17,8 @@ steps:
   displayName: 'dotnet workload restore'
   inputs:
     command: 'custom'
-    custom: 'workload restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+    custom: 'workload'
+    arguments: 'restore **/Microsoft.Identity.Client.csproj'
 
 # - task: VSBuild@1
 #   displayName: 'NuGet restore ${{ parameters.Solution }}'
