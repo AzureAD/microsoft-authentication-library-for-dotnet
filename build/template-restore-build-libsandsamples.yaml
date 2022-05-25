@@ -16,16 +16,15 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'dotnet restore workload'
   inputs:
-    command: 'restore'
-    arguments: 'workload'
+    command: 'restore ${{ parameters.Solution }}'
 
-- task: VSBuild@1
-  displayName: 'NuGet restore ${{ parameters.Solution }}'
-  inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '/t:restore'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
+# - task: VSBuild@1
+#   displayName: 'NuGet restore ${{ parameters.Solution }}'
+#   inputs:
+#     solution: ${{ parameters.Solution }}
+#     msbuildArgs: '/t:restore'
+#     platform: ${{ parameters.BuildPlatform }}
+#     configuration: ${{ parameters.BuildConfiguration }}
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
