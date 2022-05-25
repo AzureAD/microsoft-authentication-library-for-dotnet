@@ -22,7 +22,7 @@ steps:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
     MsalClientSemVer: $(MsalClientSemVer)
-    Solution: 'Libs.sln'
+    Solution: 'LibsAndSamples.sln'
 
 - task: DownloadSecureFile@1
   displayName: 'Download Xamarin Ui Test Tools'

@@ -12,8 +12,8 @@
   <PropertyGroup Condition="'$(MSAL_DESKTOP_ONLY_DEV)' == ''">
     
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
-    <!--<TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
-    <TargetFrameworkUap>uap10.0</TargetFrameworkUap>-->
+    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
+    <!--<TargetFrameworkUap>uap10.0</TargetFrameworkUap>-->
 
     <!-- Legacy Xamarin targets -->
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>

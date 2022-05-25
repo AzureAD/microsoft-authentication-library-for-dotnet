@@ -1,7 +1,7 @@
 parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
-  BuildSolution: 'Libs.sln'
+  BuildSolution: 'LibsAndSamples.sln'
 
 steps:
 
