@@ -16,7 +16,7 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore'
   inputs:
-    command: 'workload restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+    command: 'dotnet workload restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
 # - task: VSBuild@1
 #   displayName: 'NuGet restore ${{ parameters.Solution }}'
