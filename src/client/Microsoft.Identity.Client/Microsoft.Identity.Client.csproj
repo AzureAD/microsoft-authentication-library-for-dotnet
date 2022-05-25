@@ -3,7 +3,7 @@
 
   <PropertyGroup Label="Targets required for unit tests to run">
 
-    <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
+    <TargetFrameworkNetDesktop461>net462</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>   
   </PropertyGroup>
@@ -12,7 +12,7 @@
   <PropertyGroup Condition="'$(MSAL_DESKTOP_ONLY_DEV)' == ''">
     
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
-    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
+    <!-- <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45> -->
     <!--<TargetFrameworkUap>uap10.0</TargetFrameworkUap>-->
 
     <!-- Legacy Xamarin targets -->

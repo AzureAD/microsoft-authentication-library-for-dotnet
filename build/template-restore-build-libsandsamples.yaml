@@ -34,12 +34,6 @@ steps:
     version: 4.6.1
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
-- task: UseDotNet@2
-  displayName: 'Install .NET 4.5'
-  inputs:
-    packageType: sdk
-    version: 4.5
-    installationPath: $(Agent.ToolsDirectory)/dotnet
 
 # - task: VSBuild@1
 #   displayName: 'NuGet restore ${{ parameters.Solution }}'
