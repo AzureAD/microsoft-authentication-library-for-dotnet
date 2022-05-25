@@ -12,10 +12,12 @@ steps:
   inputs:
     script: 'nuget locals all -clear'
 
-- task: CmdLine@2
-  displayName: 'Restore workload'
+#Restore workload with the .NET Core CLI task
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore workload'
   inputs:
-    script: 'dotnet workload restore $(Build.SourcesDirectory)\${{ parameters.Solution }}'
+    command: 'restore'
+    arguments: 'workload'
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
