@@ -27,13 +27,13 @@ steps:
     custom: 'workload'
     arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
-# - task: VSBuild@1
-#   displayName: 'NuGet restore ${{ parameters.Solution }}'
-#   inputs:
-#     solution: ${{ parameters.Solution }}
-#     msbuildArgs: '/t:restore'
-#     platform: ${{ parameters.BuildPlatform }}
-#     configuration: ${{ parameters.BuildConfiguration }}
+- task: VSBuild@1
+  displayName: 'NuGet restore ${{ parameters.Solution }}'
+  inputs:
+    solution: ${{ parameters.Solution }}
+    msbuildArgs: '/t:restore'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
