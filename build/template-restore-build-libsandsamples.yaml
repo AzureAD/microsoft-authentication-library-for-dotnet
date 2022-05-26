@@ -27,14 +27,6 @@ steps:
     custom: 'workload'
     arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
-- task: UseDotNet@2
-  displayName: 'Install .NET 4.6.1'
-  inputs:
-    packageType: sdk
-    version: 4.6.1
-    installationPath: $(Agent.ToolsDirectory)/dotnet
-
-
 # - task: VSBuild@1
 #   displayName: 'NuGet restore ${{ parameters.Solution }}'
 #   inputs:
