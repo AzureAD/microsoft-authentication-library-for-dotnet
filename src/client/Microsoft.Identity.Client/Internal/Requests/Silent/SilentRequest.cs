@@ -50,7 +50,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
             if (isBrokerConfigured && AuthenticationRequestParameters.PopAuthenticationConfiguration != null)
             {
-                _logger.Info("Attempting to use broker instead of searching local cache for proof-of-posession tokens. ");
+                _logger.Info("[Silent Request] Attempting to use broker instead of searching local cache for Proof-of-Possession tokens. ");
+
 
                 return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
             }
