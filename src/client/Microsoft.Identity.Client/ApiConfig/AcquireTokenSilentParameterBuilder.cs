@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
+            CommonParameters.AuthenticationScheme = new PopAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
 
             return this;
         }
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                authenticationScheme = new PoPAuthenticationScheme(popConfig, ServiceBundle);
+                authenticationScheme = new PopAuthenticationScheme(popConfig, ServiceBundle);
             }
             CommonParameters.PopAuthenticationConfiguration = popConfig;
             CommonParameters.AuthenticationScheme = authenticationScheme;
