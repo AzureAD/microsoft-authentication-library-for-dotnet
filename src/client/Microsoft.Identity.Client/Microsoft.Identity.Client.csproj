@@ -10,9 +10,9 @@
 
   <!-- Mobile and legacy targets - comment these out or set env variable MSAL_DESKTOP_ONLY_DEV to speedup the build -->
   <PropertyGroup Condition="'$(MSAL_DESKTOP_ONLY_DEV)' == ''">
-    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
+    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
-    <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
+    <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
@@ -94,7 +94,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <!-- These are for MSAL json/* build infra -->
     <DefineConstants>$(DefineConstants);PORTABLE;DOTNET;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_OBSOLETE_FORMATTER_ASSEMBLY_STYLE;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;$(AdditionalConstants)</DefineConstants>
-    <TargetPlatformMinVersion>10.0.0.0</TargetPlatformMinVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
     <!-- These are for MSAL json/* build infra -->
@@ -294,53 +293,7 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions">
-      <Version>6.16.1-preview-30413213354</Version>
-    </PackageReference>
+  <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkUap)'">
+    <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.18.0" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions">
-      <Version>6.16.1-preview-30413213354</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions">
-      <Version>6.16.1-preview-30413213354</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions">
-      <Version>6.16.1-preview-30413213354</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid9.0'">
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions">
-      <Version>6.16.1-preview-30413213354</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid10.0'">
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions">
-      <Version>6.16.1-preview-30413213354</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'xamarinmac20'">
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions">
-      <Version>6.16.1-preview-30413213354</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0-windows10.0.17763.0'">
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions">
-      <Version>6.16.1-preview-30413213354</Version>
-    </PackageReference>
-  </ItemGroup>
-
-
 </Project>
