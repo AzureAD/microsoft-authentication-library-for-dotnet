@@ -420,5 +420,9 @@ namespace Microsoft.Identity.Client
         public const string OboCacheKeyNotInCache = "The token cache does not contain a token with an OBO cache key that matches the longRunningProcessSessionKey passed into ILongRunningWebApi.AcquireTokenInLongRunningProcess method. Call ILongRunningWebApi.InitiateLongRunningProcessInWebApi method with this longRunningProcessSessionKey first or call ILongRunningWebApi.AcquireTokenInLongRunningProcess method with an already used longRunningProcessSessionKey. See https://aka.ms/msal-net-long-running-obo .";
 
         public const string MultiCloudSupportUnavailable = "Multi cloud support unavailable with broker.";
+
+        public const string RequestFailureErrorMessage = "=== Token Acquisition ({0}) failed.";
+
+        public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}\n\t.";
     }
 }

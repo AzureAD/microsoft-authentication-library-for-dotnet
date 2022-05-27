@@ -84,7 +84,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     AuthenticationRequestParameters.LogParameters();
                     LogRequestStarted(AuthenticationRequestParameters);
-                    GenerateErrorLogMessage(AuthenticationRequestParameters);
 
                     AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     LogReturnedToken(authenticationResult);
@@ -317,23 +316,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string OidCcsHeader = CoreHelpers.GetCcsUpnHint(upnHeader);
 
             return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader) as KeyValuePair<string, string>?;
-        }
-
-        private void GenerateErrorLogMessage(AuthenticationRequestParameters authenticationRequestParameters)
-        {
-            string scopes = authenticationRequestParameters.Scope.AsSingleString();
-            authenticationRequestParameters.RequestContext.errorMessage = string.Format(
-                    CultureInfo.InvariantCulture,
-                    "=== Token Acquisition ({0}) failed:\n\t Scopes: {1}",
-                    GetType().Name,
-                    scopes);
-            authenticationRequestParameters.RequestContext.errorMessageWithPii = string.Format(
-                    CultureInfo.InvariantCulture,
-                    "=== Token Acquisition ({3}) failed:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t",
-                    authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
-                    scopes,
-                    authenticationRequestParameters.AppConfig.ClientId,
-                    GetType().Name);
         }
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)

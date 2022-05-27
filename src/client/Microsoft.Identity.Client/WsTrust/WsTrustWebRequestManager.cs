@@ -53,7 +53,13 @@ namespace Microsoft.Identity.Client.WsTrust
                         MsalErrorMessage.HttpRequestUnsuccessful + "See https://aka.ms/msal-net-ropc for more information. ",
                         (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
-                requestContext.Logger.ErrorPii(requestContext.errorMessageWithPii, requestContext.errorMessage);
+                requestContext.Logger.ErrorPii(
+                    string.Format(MsalErrorMessage.RequestFailureErrorMessagePii,
+                    requestContext.ApiEvent.ApiIdString,
+                    requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
+                    requestContext.ServiceBundle.Config.ClientId),
+                    string.Format(MsalErrorMessage.RequestFailureErrorMessage,
+                    requestContext.ApiEvent.ApiIdString));
                 throw MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.AccessingWsMetadataExchangeFailed,
                     message,
@@ -157,7 +163,13 @@ namespace Microsoft.Identity.Client.WsTrust
                     MsalErrorMessage.HttpRequestUnsuccessful,
                     (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
-            requestContext.Logger.ErrorPii(requestContext.errorMessageWithPii, requestContext.errorMessage);
+            requestContext.Logger.ErrorPii(
+                    string.Format(MsalErrorMessage.RequestFailureErrorMessagePii,
+                    requestContext.ApiEvent.ApiIdString,
+                    requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
+                    requestContext.ServiceBundle.Config.ClientId),
+                    string.Format(MsalErrorMessage.RequestFailureErrorMessage,
+                    requestContext.ApiEvent.ApiIdString));
             throw MsalServiceExceptionFactory.FromHttpResponse(
                 MsalError.UserRealmDiscoveryFailed,
                 message,
