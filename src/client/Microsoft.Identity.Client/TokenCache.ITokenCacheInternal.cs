@@ -320,9 +320,9 @@ namespace Microsoft.Identity.Client
             string tenantId,
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata)
         {
-            if (msalRefreshTokenCacheItem?.RawClientInfo != null && 
+            if (msalRefreshTokenCacheItem?.RawClientInfo != null &&
                 msalIdTokenCacheItem?.IdToken?.ObjectId != null &&
-                IsLegacyAdalCacheEnabled(requestParams) )
+                IsLegacyAdalCacheEnabled(requestParams))
             {
 
                 var tenatedAuthority = Authority.CreateAuthorityWithTenant(requestParams.AuthorityInfo, tenantId);
@@ -962,17 +962,24 @@ namespace Microsoft.Identity.Client
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
             if (requestParameters.AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
             {
-                foreach (MsalAccountCacheItem wamAccountCache in accountCacheItems.Where(
-                    acc => acc.WamAccountIds != null &&
-                    acc.WamAccountIds.ContainsKey(requestParameters.AppConfig.ClientId)))
+                foreach (MsalAccountCacheItem cachedAccount in accountCacheItems)
                 {
-                    var wamAccount = new Account(
-                        wamAccountCache.HomeAccountId,
-                        wamAccountCache.PreferredUsername,
-                        environment,
-                        wamAccountCache.WamAccountIds);
+                    if (!clientInfoToAccountMap.ContainsKey(cachedAccount.HomeAccountId) &&
+                        cachedAccount.TenantId.Equals(AccountId.ParseFromString(cachedAccount.HomeAccountId).TenantId, StringComparison.OrdinalIgnoreCase) &&
+                        cachedAccount.WamAccountIds != null &&
+                        cachedAccount.WamAccountIds.ContainsKey(requestParameters.AppConfig.ClientId))
+                    {
+                        var tenantProfiles = await GetTenantProfilesAsync(requestParameters, cachedAccount.HomeAccountId).ConfigureAwait(false);
 
-                    clientInfoToAccountMap[wamAccountCache.HomeAccountId] = wamAccount;
+                        var wamAccount = new Account(
+                            cachedAccount.HomeAccountId,
+                            cachedAccount.PreferredUsername,
+                            environment,
+                            cachedAccount.WamAccountIds,
+                            tenantProfiles?.Values);
+
+                        clientInfoToAccountMap[cachedAccount.HomeAccountId] = wamAccount;
+                    }
                 }
             }
 
