@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.Http
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    logger.Error("The HTTP request was cancelled. ");
+                    logger.Info("The HTTP request was cancelled. ");
                     throw;
                 }
 
