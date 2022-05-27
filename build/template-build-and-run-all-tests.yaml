@@ -30,32 +30,32 @@ jobs: #Build and stage projects
   - template: template-build-and-prep-automation.yaml
 
 #   # BUILD IOS APPCENTER APP PHASE
-# - job: 'BuildiOSAppCenterApp'
-#   dependsOn:
-#     - 'PreBuildCheck'
-#   pool:
-#       name: Azure Pipelines
-#       vmImage: macos-latest
-#   variables:
-#       runCodesignValidationInjection: false
+- job: 'BuildiOSAppCenterApp'
+  dependsOn:
+    - 'PreBuildCheck'
+  pool:
+      name: Azure Pipelines
+      vmImage: macos-latest
+  variables:
+      runCodesignValidationInjection: false
 
-  # steps:
-  # - template: template-build-ios-automation.yaml
+  steps:
+  - template: template-build-ios-automation.yaml
 
   # BUILD ANDROID APPCENTER APP PHASE
-# - job: 'BuildAndroidAppCenterApp'
-#   dependsOn:
-#     - 'PreBuildCheck'
-#   pool:
-#       vmImage: 'windows-2022'
-#       demands:
-#       - msbuild
-#       - visualstudio
-#   variables:
-#       runCodesignValidationInjection: false
+- job: 'BuildAndroidAppCenterApp'
+  dependsOn:
+    - 'PreBuildCheck'
+  pool:
+      vmImage: 'windows-2022'
+      demands:
+      - msbuild
+      - visualstudio
+  variables:
+      runCodesignValidationInjection: false
 
-#   steps:
-#   - template: template-build-android-automation.yaml
+  steps:
+  - template: template-build-android-automation.yaml
 
 # BUILD AND RUN CACHE COMPAT TESTS
 - job: 'BuildAndRunCacheCompatTests'
@@ -77,49 +77,49 @@ jobs: #Build and stage projects
       BuildSolution: 'LibsAndSamples.sln'
 
   #Desktop Unit + Integration Tests
-# - job: 'RunDesktopTests'
-#   dependsOn:
-#   - 'BuildAndStageProjects'
-#   pool:
-#       vmImage: 'windows-latest'
-#       demands:
-#       - msbuild
-#       - visualstudio
-#   variables:
-#       runCodesignValidationInjection: false
+- job: 'RunDesktopTests'
+  dependsOn:
+  - 'BuildAndStageProjects'
+  pool:
+      vmImage: 'windows-2022'
+      demands:
+      - msbuild
+      - visualstudio
+  variables:
+      runCodesignValidationInjection: false
 
-#   steps:
-#   - template: template-desktop-unit-and-automation.yaml
+  steps:
+  - template: template-desktop-unit-and-automation.yaml
 
 # APP CENTER ANDROID MSAL TESTS PHASE
-# - job: 'RunAppCenterAndroidMsalTests'
-#   dependsOn: 
-#   - 'BuildAndStageProjects'
-#   - 'BuildAndroidAppCenterApp'
-#   pool:
-#     vmImage: 'windows-latest'
-#   variables:
-#     runCodesignValidationInjection: false
+- job: 'RunAppCenterAndroidMsalTests'
+  dependsOn: 
+  - 'BuildAndStageProjects'
+  - 'BuildAndroidAppCenterApp'
+  pool:
+    vmImage: 'windows-2022'
+  variables:
+    runCodesignValidationInjection: false
 
-#   steps:
-#   - template: template-android-appcenter-tests.yaml
-#     parameters:
-#       DataFileDirectory: ${{ parameters.DataFileDirectory }}
+  steps:
+  - template: template-android-appcenter-tests.yaml
+    parameters:
+      DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
 # APP CENTER IOS MSAL TESTS PHASE
-# - job: 'RunAppCenterIosMsalTests'
-#   dependsOn:
-#   - 'BuildAndStageProjects'
-#   - 'BuildiOSAppCenterApp'
-#   pool:
-#     vmImage: 'windows-latest'
-#   variables:
-#     runCodesignValidationInjection: false
+- job: 'RunAppCenterIosMsalTests'
+  dependsOn:
+  - 'BuildAndStageProjects'
+  - 'BuildiOSAppCenterApp'
+  pool:
+    vmImage: 'windows-2022'
+  variables:
+    runCodesignValidationInjection: false
 
-#   steps:
-#   - template: template-ios-appcenter-tests.yaml
-#     parameters:
-#       DataFileDirectory: ${{ parameters.DataFileDirectory }}
+  steps:
+  - template: template-ios-appcenter-tests.yaml
+    parameters:
+      DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
 
 # Disabled as the build agent is not compliant. Tracking issue https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3066
