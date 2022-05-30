@@ -81,8 +81,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [TestMethod]
         [DataRow(Cloud.Public, RunOn.NetFx | RunOn.NetCore)]
-        //[DataRow(Cloud.Adfs, RunOn.NetFx)]
-        //[DataRow(Cloud.PPE, RunOn.NetCore)]
+        [DataRow(Cloud.Adfs, RunOn.NetFx)]
+        [DataRow(Cloud.PPE, RunOn.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, RunOn runOn)
         {
