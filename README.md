@@ -15,6 +15,8 @@ Quick links:
 **Microsoft.Identity.Client.Desktop**  
 [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Desktop.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Desktop/)  
 
+**Microsoft.Identity.Client.Broker**  
+[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Broker.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Broker/)  
 
 ## Build Status
  
