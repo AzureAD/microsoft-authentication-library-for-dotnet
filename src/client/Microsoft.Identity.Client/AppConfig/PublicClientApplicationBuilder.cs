@@ -163,11 +163,11 @@ namespace Microsoft.Identity.Client
             if (Config.BrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
-                    "The Windows broker is not directly available on MSAL for .NET Framework" +
-                    " To use it, please install the NuGet package named Microsoft.Identity.Client.Desktop " +
-                    "and call the extension method .WithWindowsBroker() first." +
+                    "The Windows broker is not directly available on MSAL for .NET Framework. " +
+                    "To use it, please install the NuGet package named Microsoft.Identity.Client.Desktop " +
+                    "and call the extension method .WithWindowsBroker() first. " +
                     "If you want to try the new broker preview, please install the NuGet package named Microsoft.Identity.Client.Broker " +
-                    "and call the extension method .WithBrokerPreview().");
+                    "and call the extension method .WithBrokerPreview(). For details see https://aka.ms/msal-net-wam ");
             }
 #endif
 
