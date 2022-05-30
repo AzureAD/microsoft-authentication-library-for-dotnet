@@ -196,7 +196,6 @@ namespace Microsoft.Identity.Client.Broker
         {
             try
             {
-                string expiresOn = authResult.ExpiresOn.ToString();
                 string correlationId = authenticationRequestParameters.CorrelationId.ToString("D");
 
                 if (string.IsNullOrWhiteSpace(correlationId))
@@ -214,7 +213,7 @@ namespace Microsoft.Identity.Client.Broker
                     IdToken = authResult.RawIdToken,
                     CorrelationId = correlationId,
                     Scope = authResult.GrantedScopes,
-                    ExpiresIn = DateTimeHelpers.GetDurationFromWindowsTimestamp(expiresOn, logger),
+                    ExpiresIn = GetExpiresInFromAuthResult(authResult.ExpiresOn),
                     ClientInfo = authResult.Account.ClientInfo.ToString(),
                     TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : BrokerResponseConst.Bearer,
                     WamAccountId = authResult.Account.Id,
@@ -239,6 +238,16 @@ namespace Microsoft.Identity.Client.Broker
         private static string GetExpectedRedirectUri(string clientId)
         {
             return $"ms-appx-web://microsoft.aad.brokerplugin/{clientId}";
+        }
+
+        /// <summary>
+        /// Get ExpiresIn from Auth Result
+        /// </summary>
+        /// <param name="expiresOn"></param>
+        private static long GetExpiresInFromAuthResult(DateTime expiresOn)
+        {
+            return DateTimeHelpers.GetDurationFromNowInSeconds
+                (DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.SpecifyKind(expiresOn, DateTimeKind.Utc)));
         }
     }
 }
