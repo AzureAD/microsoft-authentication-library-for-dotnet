@@ -17,6 +17,13 @@ steps:
     TargetFolder: '$(build.artifactstagingdirectory)'
     flattenFolders: true
 
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+
 #Build and restore test packages
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'

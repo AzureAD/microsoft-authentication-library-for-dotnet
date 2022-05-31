@@ -16,6 +16,13 @@ steps:
   inputs:
     secureFile: 'TestFile.mobileprovision'
 
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+
 - task: NuGetCommand@2
   displayName: 'NuGet restore'
   inputs:
