@@ -16,13 +16,6 @@ steps:
   inputs:
     secureFile: 'TestFile.mobileprovision'
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore'
-  inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'install maui'
-
 - task: NuGetCommand@2
   displayName: 'NuGet restore'
   inputs:
