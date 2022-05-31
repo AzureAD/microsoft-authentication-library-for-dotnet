@@ -12,9 +12,20 @@ steps:
     secureFile: AppCenteriOSBuildCert.p12
 
 - task: DownloadSecureFile@1
-  displayName: 'Download Provisioning Provile'
+  displayName: 'Download Provisioning Profile'
   inputs:
     secureFile: 'TestFile.mobileprovision'
+
+- task: UseDotNet@2
+  displayName: 'Install net 6'
+  inputs:
+    packageType: 'sdk'
+    version: '6.x'
+
+- task: CmdLine@2
+  displayName: 'Install maui'
+  inputs:
+    script: 'dotnet workload install maui'
 
 - task: NuGetCommand@2
   displayName: 'NuGet restore'
