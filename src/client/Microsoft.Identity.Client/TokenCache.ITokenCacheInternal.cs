@@ -965,7 +965,6 @@ namespace Microsoft.Identity.Client
                 foreach (MsalAccountCacheItem cachedAccount in accountCacheItems)
                 {
                     if (!clientInfoToAccountMap.ContainsKey(cachedAccount.HomeAccountId) &&
-                        cachedAccount.TenantId.Equals(AccountId.ParseFromString(cachedAccount.HomeAccountId).TenantId, StringComparison.OrdinalIgnoreCase) &&
                         cachedAccount.WamAccountIds != null &&
                         cachedAccount.WamAccountIds.ContainsKey(requestParameters.AppConfig.ClientId))
                     {
