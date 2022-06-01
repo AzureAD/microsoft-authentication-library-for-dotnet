@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .AcquireTokenForClient(settings.AppScopes)
                 .OnBeforeTokenRequest((data) =>
                 {
-                    ModifyRequest(data, settings.GetCertificate());
+                    ModifyRequest(data, settings.GetCertificate()); // Adding a certificate via handler instead of using WithCertificate
                     return Task.CompletedTask;
                 })
                 .ExecuteAsync(CancellationToken.None)
