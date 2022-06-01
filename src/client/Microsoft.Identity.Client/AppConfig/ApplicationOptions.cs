@@ -81,6 +81,12 @@ namespace Microsoft.Identity.Client
         public LogLevel LogLevel { get; set; }
 
         /// <summary>
+        /// Enables you to configure what happens to the log messages. Use this callback to direct MSAL's log messages to your own logging mechanism.
+        /// See https://aka.ms/msal-net-logging
+        /// </summary>
+        public LogCallback LogCallback { get; set; }
+
+        /// <summary>
         /// Flag to enable/disable logging of Personally Identifiable Information (PII).
         /// PII logs are never written to default outputs like Console, Logcat or NSLog
         /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR. You can set

@@ -168,6 +168,38 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        public void LoggingViaOptionsAndBuilderTest()
+        {
+            string log1 = null;
+            string log2 = null;
+
+            // Ensure that values in the options are not reset to defaults when not sent into WithLogging
+            var options = new ConfidentialClientApplicationOptions
+            {
+                ClientId = TestConstants.ClientId,
+                LogLevel = LogLevel.Verbose,
+                EnablePiiLogging = true,
+                IsDefaultPlatformLoggingEnabled = true,
+                LogCallback = (level, msg, pii) => { log1 += msg; }
+
+            };
+
+            var cca = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options)
+                .WithLogging((level, msg, pii) => { log2 += msg; }, LogLevel.Verbose)
+                .Build();
+
+            cca.GetAccountAsync("some_id"); // generates some logs
+
+            Assert.AreEqual(LogLevel.Verbose, cca.AppConfig.LogLevel);
+            Assert.IsTrue(cca.AppConfig.EnablePiiLogging);
+            Assert.IsTrue(cca.AppConfig.IsDefaultPlatformLoggingEnabled);
+            Assert.AreNotEqual(cca.AppConfig.LoggingCallback, options.LogCallback);
+            Assert.IsTrue(log2.Length > 0);
+            Assert.IsNull(log1);
+        }
+
+
+        [TestMethod]
         public void TestBuildWithNullInstance()
         {
             var options = CreateConfidentialClientApplicationOptions();

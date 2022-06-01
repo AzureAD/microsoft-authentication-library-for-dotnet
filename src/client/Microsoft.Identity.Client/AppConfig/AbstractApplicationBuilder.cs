@@ -261,11 +261,6 @@ namespace Microsoft.Identity.Client
             bool? enablePiiLogging = null,
             bool? enableDefaultPlatformLogging = null)
         {
-            if (Config.LoggingCallback != null)
-            {
-                throw new InvalidOperationException(MsalErrorMessage.LoggingCallbackAlreadySet);
-            }
-
             Config.LoggingCallback = loggingCallback;
             Config.LogLevel = logLevel ?? Config.LogLevel;
             Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
@@ -401,7 +396,7 @@ namespace Microsoft.Identity.Client
             WithLegacyCacheCompatibility(applicationOptions.LegacyCacheCompatibilityEnabled);
 
             WithLogging(
-                null,
+                applicationOptions.LogCallback,
                 applicationOptions.LogLevel,
                 applicationOptions.EnablePiiLogging,
                 applicationOptions.IsDefaultPlatformLoggingEnabled);

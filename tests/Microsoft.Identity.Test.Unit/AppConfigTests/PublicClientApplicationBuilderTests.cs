@@ -131,6 +131,64 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        public void LoggingViaOptionsTest()
+        {
+            string log = null;
+
+            // Ensure that values in the options are not reset to defaults when not sent into WithLogging
+            var options = new PublicClientApplicationOptions
+            {
+                ClientId = TestConstants.ClientId,
+                LogLevel = LogLevel.Verbose,
+                EnablePiiLogging = true,
+                IsDefaultPlatformLoggingEnabled = true,
+                LogCallback = (level, msg, pii) => { log += msg; }
+
+            };
+
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                .Build();
+            pca.GetAccountsAsync(); // generates some logs
+
+            Assert.AreEqual(LogLevel.Verbose, pca.AppConfig.LogLevel);
+            Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
+            Assert.IsTrue(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
+            Assert.AreEqual(pca.AppConfig.LoggingCallback, options.LogCallback);
+            Assert.IsTrue(log.Length > 0);
+        }
+
+        [TestMethod]
+        public void LoggingViaOptionsAndBuilderTest()
+        {
+            string log1 = null;
+            string log2 = null;
+
+            // Ensure that values in the options are not reset to defaults when not sent into WithLogging
+            var options = new PublicClientApplicationOptions
+            {
+                ClientId = TestConstants.ClientId,
+                LogLevel = LogLevel.Verbose,
+                EnablePiiLogging = true,
+                IsDefaultPlatformLoggingEnabled = true,
+                LogCallback = (level, msg, pii) => { log1 += msg; }
+
+            };
+
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                .WithLogging((level, msg, pii) => { log2 += msg; }, LogLevel.Verbose)
+                .Build();
+            
+            pca.GetAccountsAsync(); // generates some logs
+
+            Assert.AreEqual(LogLevel.Verbose, pca.AppConfig.LogLevel);
+            Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
+            Assert.IsTrue(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
+            Assert.AreNotEqual(pca.AppConfig.LoggingCallback, options.LogCallback);
+            Assert.IsTrue(log2.Length > 0);
+            Assert.IsNull(log1);
+        }
+
+        [TestMethod]
         public void TestConstructor_WithDebugLoggingCallbackAndAppConfigWithOverride()
         {
             // Ensure that values in the options are reset to new values when sent into WithLogging
