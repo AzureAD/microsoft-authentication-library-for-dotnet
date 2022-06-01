@@ -39,7 +39,7 @@ steps:
     configuration: Debug
     clean: true
     runNugetRestore: false
-    args: '/p:APPCENTER_BUILD=1 /p:RunCodeAnalysis=false -f:net6.0-ios'
+    args: '/p:APPCENTER_BUILD=1 /p:RunCodeAnalysis=false'
     buildToolOption: msbuild
     signingP12File: '$(Agent.TempDirectory)/AppCenteriOSBuildCert.p12'
     signingP12Password: '$(AppCenterDotNetiOSTestCertPassword)'
