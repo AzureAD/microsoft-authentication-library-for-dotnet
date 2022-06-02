@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace NetCoreWinFormsWAM
+namespace NetDesktopWinForms
 {
     public static class Ext
     {

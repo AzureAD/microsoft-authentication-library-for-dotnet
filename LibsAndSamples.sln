@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.1.32210.238
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32428.217
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9B0B5396-4D95-4C15-82ED-DC22B5A3123F}"
 EndProject
@@ -105,7 +105,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\pipeline-perf-tests-automation.yaml = build\pipeline-perf-tests-automation.yaml
 		build\pipeline-pullrequest.yaml = build\pipeline-pullrequest.yaml
 		build\pipeline-releasebuild.yaml = build\pipeline-releasebuild.yaml
-		build\pipeline-uiautomation.yaml = build\pipeline-uiautomation.yaml
 		build\template-android-appcenter-tests.yaml = build\template-android-appcenter-tests.yaml
 		build\template-bootstrap-build.yaml = build\template-bootstrap-build.yaml
 		build\template-build-and-prep-automation.yaml = build\template-build-and-prep-automation.yaml
@@ -183,6 +182,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "tests\devapps\WebApi\WebApi.csproj", "{DD23D8FF-86BA-4E9F-8AF1-0EBE0D86986A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Intune-xamarin-Android", "tests\devapps\Intune-xamarin-Android\Intune-xamarin-Android.csproj", "{C6CA2F00-E48A-478F-ABC3-1FE3FE20286B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Broker", "src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj", "{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1550,6 +1551,34 @@ Global
 		{C6CA2F00-E48A-478F-ABC3-1FE3FE20286B}.Release|x86.ActiveCfg = Release|Any CPU
 		{C6CA2F00-E48A-478F-ABC3-1FE3FE20286B}.Release|x86.Build.0 = Release|Any CPU
 		{C6CA2F00-E48A-478F-ABC3-1FE3FE20286B}.Release|x86.Deploy.0 = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|ARM.Build.0 = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|x64.Build.0 = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Debug|x86.Build.0 = Debug|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|ARM.ActiveCfg = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|ARM.Build.0 = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|ARM64.Build.0 = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|iPhone.Build.0 = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|x64.ActiveCfg = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|x64.Build.0 = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|x86.ActiveCfg = Release|Any CPU
+		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

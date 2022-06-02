@@ -1,3 +1,22 @@
+4.44.0
+==========
+### New Features
+**Added support in MSAL for dSTS authority** See [3198](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3198).
+**Enabled Azure.Identity (Azure SDK) to benefit from MSAL.NET token cache when used for Managed Identity** See [3137](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3137).
+
+### Experimental Features
+**MSAL.NET now has a new WAM preview which is an abstraction layer based on MSAL C++ with support for Proof-of-Possession access tokens**. This fixes some issues with current WAM implementation. See [3192](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3192) and [wiki](http://aka.ms/msal-net-wam).
+
+### Bug Fixes
+**Improved exception handling in case of an Operation Cancelled Exception** See [3283](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3283).
+**Fixed `AcquireTokenSilent` to not display a login prompt unnecessarily for operating system accounts in WAM**. See [3294](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3294).
+**Fixed NullReferenceException in IsBrokerAvailable()** See [3261](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3261).
+**Fixed a race condition to improve stability of region autodiscovery**. See [3277](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3277).
+**Fixed a bug in instance discovery by adding pre-production environment (PPE) domains to known endpoints**. See [3265](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3265).
+
+### Fundamentals
+**Improved automated performance microbenchmarks to better reflect common scenarios** See [3297](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3297) and [wiki](https://aka.ms/msal-net-performance-testing).
+
 4.43.2
 ==========
 ### Bug Fix

@@ -16,7 +16,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
-    internal class PoPAuthenticationScheme : IAuthenticationScheme
+    internal class PopAuthenticationScheme : IAuthenticationScheme
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public PoPAuthenticationScheme(PoPAuthenticationConfiguration popAuthenticationConfiguration, IServiceBundle serviceBundle)
+        public PopAuthenticationScheme(PoPAuthenticationConfiguration popAuthenticationConfiguration, IServiceBundle serviceBundle)
         {
             if (serviceBundle == null)
             {
@@ -44,9 +44,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
-        public string AuthorizationHeaderPrefix => PoPRequestParameters.PoPAuthHeaderPrefix;
+        public string AuthorizationHeaderPrefix => Constants.PoPAuthHeaderPrefix;
 
-        public string AccessTokenType => PoPRequestParameters.PoPTokenType;
+        public string AccessTokenType => Constants.PoPTokenType;
 
         /// <summary>
         /// For PoP, we chose to use the base64(jwk_thumbprint)
@@ -56,8 +56,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         public IDictionary<string, string> GetTokenRequestParams()
         {
             return new Dictionary<string, string>() {
-                { OAuth2Parameter.TokenType, PoPRequestParameters.PoPTokenType},
-                { PoPRequestParameters.RequestConfirmation, ComputeReqCnf()}
+                { OAuth2Parameter.TokenType, Constants.PoPTokenType},
+                { Constants.RequestConfirmation, ComputeReqCnf()}
             };
         }
 
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             {
                 { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, _popCryptoProvider.CryptographicAlgorithm },
                 { JsonWebTokenConstants.ReservedHeaderParameters.KeyId, KeyId },
-                { JsonWebTokenConstants.ReservedHeaderParameters.Type, PoPRequestParameters.PoPTokenType}
+                { JsonWebTokenConstants.ReservedHeaderParameters.Type, Constants.PoPTokenType}
             };
 
             JObject body = CreateBody(msalAccessTokenCacheItem);

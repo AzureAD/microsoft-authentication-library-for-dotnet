@@ -80,5 +80,18 @@ namespace Microsoft.Identity.Client.Utils
             long expiresOnUnixTimestamp = long.Parse(unixTimestampInFuture, CultureInfo.InvariantCulture);
             return expiresOnUnixTimestamp - CurrDateTimeInUnixTimestamp();
         }
+
+        public static DateTimeOffset? DateTimeOffsetFromDuration(long? duration)
+        {
+            if (duration.HasValue)
+                return DateTimeOffsetFromDuration(duration.Value);
+
+            return null;
+        }
+
+        public static DateTimeOffset DateTimeOffsetFromDuration(long duration)
+        {
+            return DateTime.UtcNow + TimeSpan.FromSeconds(duration);
+        }
     }
 }

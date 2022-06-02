@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Client
     public sealed partial class TokenCache : ITokenCacheInternal
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
-        internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         internal const int ExpirationTooLongInDays = 10 * 365;
 
         private readonly IFeatureFlags _featureFlags;

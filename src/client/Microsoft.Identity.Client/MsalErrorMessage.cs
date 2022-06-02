@@ -128,6 +128,13 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseError = "Broker response returned error: ";
         public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
             "Check logs for more details and see https://aka.ms/msal-brokers. ";
+        public const string CannotInvokeBrokerForPop = "MSAL cannot invoke the broker and it is required for Proof-of-Possesion. Wam (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
+            "Check logs for more details and see https://aka.ms/msal-net-pop. ";
+        public const string BrokerDoesNotSupportPop = "The broker does not support Proof-of-Possession on the current platform.";
+        public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required for Proof-of-Possession on public clients.";
+        public const string NonceRequiredForPop = "The request has Proof-of-Possession configured for public clients but does not have a nonce provided. A nonce is required for Proof-of-Possession on public clients.";
+
+
         public const string NullIntentReturnedFromBroker = "Broker returned a null intent. Check the Xamarin Android app settings and logs for more information. ";
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint. ";
         public const string MultipleAccountsForLoginHint = "You are trying to acquire a token silently using a login hint. Multiple accounts were found in the token cache having this login hint. Please choose an account manually an pass it in to AcquireTokenSilently. ";
@@ -169,7 +176,7 @@ namespace Microsoft.Identity.Client
         public const string NonHttpsRedirectNotSupported = "Non-HTTPS URL redirect is not supported in webview. " +
             "This error happens when the authorization flow, which collects user credentials, gets redirected " +
             "to a page that is not supported, for example if the redirect occurs over http. " +
-            "This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects." + 
+            "This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects." +
             "Mitigation: This usually happens when using a federated directory which is not setup correctly. ";
 
         public const string IDTokenMustHaveTwoParts = "ID Token must have a valid JWT format. ";
@@ -240,7 +247,7 @@ namespace Microsoft.Identity.Client
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor. ";
 
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "ClientSecret, Certificate and ClientAssertion are mutually exclusive properties. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
-        public const string ClientCredentialAuthenticationTypeMustBeDefined = "One client credential type required either: ClientSecret, Certificate OR ClientAssertion must be defined when creating a Confidential Client. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
+        public const string ClientCredentialAuthenticationTypeMustBeDefined = "One client credential type required either: ClientSecret, Certificate, ClientAssertion or AppTokenProvider must be defined when creating a Confidential Client. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
         public const string ClientIdMustBeAGuid = "Error: ClientId is not a GUID. ";
 
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)
@@ -424,5 +431,14 @@ namespace Microsoft.Identity.Client
         public const string RequestFailureErrorMessage = "=== Token Acquisition ({0}) failed.";
 
         public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}\n\t.";
+
+        public static string InvalidTokenProviderResponseValue(string invalidValueName)
+            {
+            return string.Format(
+                                CultureInfo.InvariantCulture,
+                                "The following token provider result value is invalid: {0}.",
+                                invalidValueName);
+        }
+
     }
 }
