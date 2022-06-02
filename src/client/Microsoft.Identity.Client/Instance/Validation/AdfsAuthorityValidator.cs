@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                         a => a.Rel.Equals(Constants.DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
                              a.Href.Equals(resource)) == null)
                 {
-                    _requestContext.Logger.Error($"Authority validation failed due to invalid authority. Authority: {authorityInfo.CanonicalAuthority}");
+                    _requestContext.Logger.Error($"Authority validation failed because the configured authority is invalid. Authority: {authorityInfo.CanonicalAuthority}");
                     throw new MsalClientException(
                         MsalError.InvalidAuthority,
                         MsalErrorMessage.InvalidAuthorityOpenId);
