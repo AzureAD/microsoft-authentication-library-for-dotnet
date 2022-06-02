@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
         {
-            if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(EventLevel.Informational))
+            if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
                 string logFormat = "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t";
                 string scopes = authenticationRequestParameters.Scope.AsSingleString();
@@ -363,7 +363,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private void LogReturnedToken(AuthenticationResult result)
         {
             if (result.AccessToken != null &&
-                AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(EventLevel.Informational))
+                AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
                 string scopes = string.Join(" ", result.Scopes);
                 

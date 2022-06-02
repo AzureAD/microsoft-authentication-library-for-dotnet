@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Internal
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, CancellationToken cancellationToken = default)
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
-            Logger = MsalLoggerExtensions.CreateLogger(correlationId, ServiceBundle.Config);
+            Logger = LoggerAdapterHelper.CreateLogger(correlationId, ServiceBundle.Config);
 
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;

@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _headers.Add(OAuth2Header.CorrelationId, requestContext.CorrelationId.ToString());
             _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
 
-            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName)) //TODO: Move client information out of logger
+            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName))
             {
                 _headers.Add(OAuth2Header.AppName, requestContext.Logger.ClientName);
             }

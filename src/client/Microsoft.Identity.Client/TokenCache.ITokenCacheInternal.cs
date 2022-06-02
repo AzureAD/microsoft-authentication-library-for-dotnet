@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
             MsalTokenResponse response)
         {
             var logger = requestParams.RequestContext.Logger;
-            response.Log(logger, EventLevel.Verbose);
+            response.Log(logger, LogLevel.Verbose);
 
             MsalAccessTokenCacheItem msalAccessTokenCacheItem = null;
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Client
         private void DumpCacheToLogs(AuthenticationRequestParameters requestParameters)
         {
 
-            if (requestParameters.RequestContext.Logger.IsLoggingEnabled(EventLevel.Verbose))
+            if (requestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Verbose))
             {
                 IReadOnlyList<MsalAccessTokenCacheItem> accessTokenCacheItems = GetAllAccessTokensWithNoLocks(filterByClientId: false);
                 IReadOnlyList<MsalRefreshTokenCacheItem> refreshTokenCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId: false);
@@ -536,7 +536,7 @@ namespace Microsoft.Identity.Client
                 {
                     bool accepted = ScopeHelper.ScopeContains(item.ScopeSet, requestScopes);
 
-                    if (logger.IsLoggingEnabled(EventLevel.Verbose))
+                    if (logger.IsLoggingEnabled(LogLevel.Verbose))
                     {
                         logger.Verbose($"Access token with scopes {string.Join(" ", item.ScopeSet)} " +
                             $"passes scope filter? {accepted} ");
@@ -635,7 +635,7 @@ namespace Microsoft.Identity.Client
                         return null;
                     }
 
-                    if (logger.IsLoggingEnabled(EventLevel.Informational))
+                    if (logger.IsLoggingEnabled(LogLevel.Info))
                     {
                         logger.Info(
                             "Access token is not expired. Returning the found cache entry. " +
@@ -648,7 +648,7 @@ namespace Microsoft.Identity.Client
                 if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled &&
                     msalAccessTokenCacheItem.ExtendedExpiresOn > DateTime.UtcNow + Constants.AccessTokenExpirationBuffer)
                 {
-                    if (logger.IsLoggingEnabled(EventLevel.Informational))
+                    if (logger.IsLoggingEnabled(LogLevel.Info))
                     {
                         logger.Info(
                             "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
@@ -659,7 +659,7 @@ namespace Microsoft.Identity.Client
                     return msalAccessTokenCacheItem;
                 }
 
-                if (logger.IsLoggingEnabled(EventLevel.Informational))
+                if (logger.IsLoggingEnabled(LogLevel.Info))
                 {
                     logger.Info(
                         "Access token has expired or about to expire. " +
@@ -715,7 +715,7 @@ namespace Microsoft.Identity.Client
 
             if (filteredByPreferredAlias.Count > 0)
             {
-                if (logger.IsLoggingEnabled(EventLevel.Verbose))
+                if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
                     logger.Verbose($"Filtered AT by preferred alias returning {filteredByPreferredAlias.Count} tokens");
                 }
@@ -962,7 +962,7 @@ namespace Microsoft.Identity.Client
             IReadOnlyList<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId, partitionKey);
             IReadOnlyList<MsalAccountCacheItem> accountCacheItems = Accessor.GetAllAccounts(partitionKey);
 
-            if (logger.IsLoggingEnabled(EventLevel.Verbose))
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
 
             // Multi-cloud support - must filter by environment.
@@ -995,7 +995,7 @@ namespace Microsoft.Identity.Client
                 accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment)).ToList();
             }
 
-            if (logger.IsLoggingEnabled(EventLevel.Verbose))
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 logger.Verbose($"GetAccounts found {rtCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
@@ -1063,7 +1063,7 @@ namespace Microsoft.Identity.Client
                     requestParameters.HomeAccountId,
                     StringComparison.OrdinalIgnoreCase)).ToList();
 
-                if (logger.IsLoggingEnabled(EventLevel.Verbose))
+                if (logger.IsLoggingEnabled(LogLevel.Verbose))
                     logger.Verbose($"Filtered by home account id. Remaining accounts {accounts.Count()} ");
             }
 

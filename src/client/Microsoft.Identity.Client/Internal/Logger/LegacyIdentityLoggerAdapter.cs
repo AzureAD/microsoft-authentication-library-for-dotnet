@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.Core;
-using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
@@ -13,16 +12,20 @@ namespace Microsoft.Identity.Client.Internal.Logger
     {
         LogLevel _minLogLevel = LogLevel.Always;
         LogCallback _logCallback;
-        private LoggerAdapterHelper _loggerAdapterHelper;
+        private string _clientInfo;
+        private string _correlationId;
 
         public bool PiiLoggingEnabled { get; }
         public bool IsDefaultPlatformLoggingEnabled { get; }
+#if !XAMARINMAC20
+        public MsalCacheLoggerWrapper CacheLogger { get; }
+#endif
+        public string ClientName { get; }
+        public string ClientVersion { get; }
 
-        public MsalCacheLoggerWrapper CacheLogger => throw new NotImplementedException();
-
-        public bool IsLoggingEnabled(EventLevel eventLevel)
+        public bool IsLoggingEnabled(LogLevel logLevel)
         {
-            return _loggerAdapterHelper.GetLegacyLogLevel(eventLevel) <= _minLogLevel;
+            return logLevel <= _minLogLevel;
         }
 
         internal LegacyIdentityLoggerAdapter(
@@ -34,11 +37,13 @@ namespace Microsoft.Identity.Client.Internal.Logger
             bool isDefaultPlatformLoggingEnabled,
             LogCallback loggingCallback)
         {
-            var _correlationId = correlationId.Equals(Guid.Empty)
+            ClientName = clientName;
+            ClientVersion = clientVersion;
+            _correlationId = correlationId.Equals(Guid.Empty)
                     ? string.Empty
                     : " - " + correlationId;
 
-            _loggerAdapterHelper = new LoggerAdapterHelper(_correlationId, clientName, clientVersion);
+            _clientInfo = LoggerAdapterHelper.GetClientInfo(clientName, clientVersion);
 
             PiiLoggingEnabled = enablePiiLogging;
             _logCallback = loggingCallback;
@@ -46,21 +51,43 @@ namespace Microsoft.Identity.Client.Internal.Logger
             IsDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
         }
 
-        public void Log(EventLevel logLevel, string messageWithPii, string messageScrubbed)
+        public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            LogEntry entry = _loggerAdapterHelper.Log(this, logLevel, messageWithPii, messageScrubbed);
+            //LogEntry entry = _loggerAdapterHelper.Log(this, logLevel, messageWithPii, messageScrubbed);
             //LogToDefaultPlatformLogger(logger, logLevel, log);
-            InvokeLogCallback(entry, string.IsNullOrEmpty(messageWithPii)? true: false);
+            //InvokeLogCallback(entry, string.IsNullOrEmpty(messageWithPii)? true: false);
+
+            string message = LoggerAdapterHelper.FormatLogMessage(messageWithPii, messageScrubbed, PiiLoggingEnabled, _correlationId, _clientInfo);
+
+            if (IsLoggingEnabled(logLevel))
+            {
+                _logCallback.Invoke(logLevel, message, string.IsNullOrEmpty(messageWithPii) ? true : false);
+            }
         }
 
-        private void InvokeLogCallback(LogEntry logEntry, bool containsPii = false)
-        {
-            _logCallback.Invoke(_loggerAdapterHelper.GetLegacyLogLevel(logEntry.EventLevel), logEntry.Message, containsPii);
-        }
-
-        //private static void LogToDefaultPlatformLogger(ILoggerAdapter logger, EventLevel logLevel, string log)
+        //public LogEntry Log(ILoggerAdapter logger, EventLevel logLevel, string messageWithPii, string messageScrubbed)
         //{
-        //    if (logger.IsDefaultPlatformLoggingEnabled)
+        //    LogEntry entry = null;
+
+        //    if (logger.IsLoggingEnabled(logLevel))
+        //    {
+        //        entry = new LogEntry();
+        //        entry.EventLevel = logLevel;
+        //        entry.CorrelationId = CorrelationId;
+        //        entry.Message = FormatLogMessage(messageWithPii, messageScrubbed, logger.PiiLoggingEnabled, CorrelationId, ClientInformation);
+        //    }
+
+        //    return entry;
+        //}
+
+        //private void InvokeLogCallback(LogEntry logEntry, bool containsPii = false)
+        //{
+        //    _logCallback.Invoke(_loggerAdapterHelper.GetLegacyLogLevel(logEntry.EventLogLevel), logEntry.Message, containsPii);
+        //}
+
+        //private void LogToDefaultPlatformLogger(ILoggerAdapter logger, EventLevel logLevel, string log)
+        //{
+        //    if (IsDefaultPlatformLoggingEnabled)
         //    {
         //        switch (logLevel)
         //        {
@@ -98,14 +125,14 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 config?.LoggingCallback);
         }
 
-        public DurationLogHelper LogBlockDuration(string measuredBlockName, EventLevel logLevel = EventLevel.Verbose)
+        public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
         {
-            return _loggerAdapterHelper.LogBlockDuration(this, measuredBlockName, logLevel);
+            return LoggerAdapterHelper.LogBlockDuration(this, measuredBlockName, logLevel);
         }
 
-        public DurationLogHelper LogMethodDuration(EventLevel logLevel = EventLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
+        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
         {
-            return _loggerAdapterHelper.LogMethodDuration(this, logLevel, methodName, filePath);
+            return LoggerAdapterHelper.LogMethodDuration(this, logLevel, methodName, filePath);
         }
     }
 }

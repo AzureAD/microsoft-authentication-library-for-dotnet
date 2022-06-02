@@ -22,7 +22,7 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.Diagnostics;
-#if !UAP10_0
+#if !UAP10_0_17763
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Utils.Windows;
 #endif

@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:GetTokenSilentlyAsync:webAccount"))
             {
-                if (_logger.IsLoggingEnabled(EventLevel.Verbose))
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
                     _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
                     _logger.VerbosePii(webAccount.ToLogString(true), webAccount.ToLogString(false));
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:GetTokenSilentlyAsync:"))
             {
-                if (_logger.IsLoggingEnabled(EventLevel.Verbose))
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
                     _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
                 }
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:RequestTokenForWindowAsync:"))
             {
-                if (_logger.IsLoggingEnabled(EventLevel.Verbose))
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
                     _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
                 }
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:RequestTokenForWindowAsync:"))
             {
-                if (_logger.IsLoggingEnabled(EventLevel.Verbose))
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
                     _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
                     _logger.VerbosePii(wamAccount.ToLogString(true), wamAccount.ToLogString(false));
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:FindAccountAsync:"))
             {
-                if (_logger.IsLoggingEnabled(EventLevel.Verbose))
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
                     _logger.VerbosePii(provider.ToLogString(true), provider.ToLogString(false));
                 }
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:FindAllWebAccountsAsync:"))
             {
-                if (_logger.IsLoggingEnabled(EventLevel.Verbose))
+                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
                     _logger.VerbosePii(provider.ToLogString(true), provider.ToLogString(false));
                 }

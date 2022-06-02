@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Kerberos;
 using System.Diagnostics;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.OAuth2
 {

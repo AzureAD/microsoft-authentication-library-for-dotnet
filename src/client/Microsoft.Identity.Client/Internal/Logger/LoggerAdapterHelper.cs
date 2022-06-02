@@ -23,25 +23,23 @@ namespace Microsoft.Identity.Client.Internal.Logger
         //private static IPlatformLogger _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
         private static readonly Lazy<ILoggerAdapter> s_nullLogger = new Lazy<ILoggerAdapter>(() => new NullLogger());
 
-        public string CorrelationId { get; }
-        public string ClientInformation { get; }
-
-        public LoggerAdapterHelper(string correlationId, string clientName, string clientVersion)
+        public static string GetClientInfo(string clientName, string clientVersion)
         {
-            CorrelationId = correlationId;
-
+            string clientInformation = string.Empty;
             if (!string.IsNullOrEmpty(clientName) && !ApplicationConfiguration.DefaultClientName.Equals(clientName))
             {
                 // space is intentional for formatting of the message
                 if (string.IsNullOrEmpty(clientVersion))
                 {
-                    ClientInformation = string.Format(CultureInfo.InvariantCulture, " ({0})", clientName);
+                    clientInformation = string.Format(CultureInfo.InvariantCulture, " ({0})", clientName);
                 }
                 else
                 {
-                    ClientInformation = string.Format(CultureInfo.InvariantCulture, " ({0}: {1})", clientName, clientVersion);
+                    clientInformation = string.Format(CultureInfo.InvariantCulture, " ({0}: {1})", clientName, clientVersion);
                 }
             }
+
+            return clientInformation;
         }
 
         public static ILoggerAdapter CreateLogger(
@@ -76,21 +74,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
             }
             return "Unknown SKU";
         });
-
-        public LogEntry Log(ILoggerAdapter logger, EventLevel logLevel, string messageWithPii, string messageScrubbed)
-        {
-            LogEntry entry = null;
-
-            if (logger.IsLoggingEnabled(logLevel))
-            {
-                entry = new LogEntry();
-                entry.EventLevel = logLevel;
-                entry.CorrelationId = CorrelationId;
-                entry.Message = FormatLogMessage(messageWithPii, messageScrubbed, logger.PiiLoggingEnabled, CorrelationId, ClientInformation);
-            }
-
-            return entry;
-        }
 
         public static string FormatLogMessage(string messageWithPii, string messageScrubbed, bool piiEnabled, string correlationId, string clientInformation)
         {
@@ -147,20 +130,15 @@ namespace Microsoft.Identity.Client.Internal.Logger
             return sb.ToString();
         }
 
-        public DurationLogHelper LogBlockDuration(ILoggerAdapter logger, string measuredBlockName, EventLevel logLevel = EventLevel.Verbose)
+        public static DurationLogHelper LogBlockDuration(ILoggerAdapter logger, string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
         {
             return new DurationLogHelper(logger, measuredBlockName, logLevel);
         }
 
-        public DurationLogHelper LogMethodDuration(ILoggerAdapter logger, EventLevel logLevel = EventLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
+        public static DurationLogHelper LogMethodDuration(ILoggerAdapter logger, LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
         {
             string fileName = !string.IsNullOrEmpty(filePath) ? Path.GetFileNameWithoutExtension(filePath) : "";
             return LogBlockDuration(logger, fileName + ":" + methodName, logLevel);
-        }
-
-        public LogLevel GetLegacyLogLevel(EventLevel eventLevel)
-        {
-            return (LogLevel)((int)eventLevel - 1);
         }
     }
 }

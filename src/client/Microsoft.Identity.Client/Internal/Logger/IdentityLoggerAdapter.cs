@@ -10,14 +10,18 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
+#if !XAMARINMAC20
     internal class IdentityLoggerAdapter : ILoggerAdapter
     {
         private readonly IIdentityLogger _identityLogger;
-        private LoggerAdapterHelper _loggerAdapterHelper;
+        private string _clientInfo;
+        private string _correlationId;
 
         public bool PiiLoggingEnabled { get; }
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;
         public MsalCacheLoggerWrapper CacheLogger { get; }
+        public string ClientName { get; }
+        public string ClientVersion { get; }
 
         internal IdentityLoggerAdapter(
             IIdentityLogger identityLogger,
@@ -26,14 +30,17 @@ namespace Microsoft.Identity.Client.Internal.Logger
             string clientVersion,
             bool enablePiiLogging)
         {
+            ClientName = clientName;
+            ClientVersion = clientVersion;
             _identityLogger = identityLogger;
-            var _correlationId = correlationId.Equals(Guid.Empty)
+            _correlationId = correlationId.Equals(Guid.Empty)
                     ? string.Empty
                     : " - " + correlationId;
-            _loggerAdapterHelper = new LoggerAdapterHelper(_correlationId, clientName, clientVersion);
+
+            _clientInfo = LoggerAdapterHelper.GetClientInfo(clientName, clientVersion);
             
             PiiLoggingEnabled = enablePiiLogging;
-            CacheLogger = new MsalCacheLoggerWrapper(identityLogger, _loggerAdapterHelper.CorrelationId, _loggerAdapterHelper.ClientInformation);
+            CacheLogger = new MsalCacheLoggerWrapper(identityLogger, _correlationId, _clientInfo);
         }
 
         public static ILoggerAdapter Create(
@@ -48,25 +55,46 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 config?.EnablePiiLogging ?? false); ;
         }
 
-        public void Log(EventLevel logLevel, string messageWithPii, string messageScrubbed)
+        public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            LogEntry entry = _loggerAdapterHelper.Log(this, logLevel, messageWithPii, messageScrubbed);
+            LogEntry entry = Log(this, logLevel, messageWithPii, messageScrubbed);
             _identityLogger.Log(entry);
         }
 
-        public bool IsLoggingEnabled(EventLevel eventLevel)
+        public LogEntry Log(ILoggerAdapter logger, LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            return _identityLogger.IsEnabled(eventLevel);
+            LogEntry entry = null;
+
+            if (logger.IsLoggingEnabled(logLevel))
+            {
+                entry = new LogEntry();
+                entry.EventLogLevel = GetEventLogLevel(logLevel);
+                entry.CorrelationId = _correlationId;
+                entry.Message = LoggerAdapterHelper.FormatLogMessage(messageWithPii, messageScrubbed, logger.PiiLoggingEnabled, _correlationId, _clientInfo);
+            }
+
+            return entry;
         }
 
-        public DurationLogHelper LogBlockDuration(string measuredBlockName, EventLevel logLevel = EventLevel.Verbose)
+        public bool IsLoggingEnabled(LogLevel logLevel)
         {
-            return _loggerAdapterHelper.LogBlockDuration(this, measuredBlockName, logLevel);
+            return _identityLogger.IsEnabled(GetEventLogLevel(logLevel));
         }
 
-        public DurationLogHelper LogMethodDuration(EventLevel logLevel = EventLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
+        public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
         {
-            return _loggerAdapterHelper.LogMethodDuration(this, logLevel, methodName, filePath);
+            return LoggerAdapterHelper.LogBlockDuration(this, measuredBlockName, logLevel);
+        }
+
+        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
+        {
+            return LoggerAdapterHelper.LogMethodDuration(this, logLevel, methodName, filePath);
+        }
+
+        public EventLogLevel GetEventLogLevel(LogLevel logLevel)
+        {
+            return (EventLogLevel)((int)logLevel + 1);
         }
     }
+#endif
 }

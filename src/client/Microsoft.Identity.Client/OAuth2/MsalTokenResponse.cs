@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client.OAuth2
             return msalTokenResponse;
         }
 
-        public void Log(ILoggerAdapter logger, EventLevel logLevel)
+        public void Log(ILoggerAdapter logger, LogLevel logLevel)
         {
             if (logger.IsLoggingEnabled(logLevel))
             {

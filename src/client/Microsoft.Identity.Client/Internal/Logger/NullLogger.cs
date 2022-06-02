@@ -15,29 +15,31 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public string ClientVersion { get; } = string.Empty;
 
         public Guid CorrelationId { get; } = Guid.Empty;
+
         public bool PiiLoggingEnabled { get; } = false;
 
-        string ILoggerAdapter.CorrelationId { get; } = string.Empty;
 
         public string ClientInformation { get; } = string.Empty;
 
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;
-
-        public bool IsLoggingEnabled(EventLevel logLevel)
+#if !XAMARINMAC20
+        public MsalCacheLoggerWrapper CacheLogger => null;
+#endif
+        public bool IsLoggingEnabled(LogLevel logLevel)
         {
             return false;
         }
 
-        public void Log(EventLevel logLevel, string messageWithPii, string messageScrubbed)
+        public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
         }
 
-        public DurationLogHelper LogBlockDuration(string measuredBlockName, EventLevel logLevel = EventLevel.Verbose)
+        public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
         {
             return null;
         }
 
-        public DurationLogHelper LogMethodDuration(EventLevel logLevel = EventLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
+        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
         {
             return null;
         }

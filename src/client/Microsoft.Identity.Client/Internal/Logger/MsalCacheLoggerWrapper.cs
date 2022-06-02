@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
+#if !XAMARINMAC20
     internal class MsalCacheLoggerWrapper : IIdentityLogger
     {
         private readonly IIdentityLogger _identityLogger;
@@ -25,7 +26,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _clientInformation = clientInformation;
         }
 
-        public bool IsEnabled(EventLevel eventLevel)
+        public bool IsEnabled(EventLogLevel eventLevel)
         {
             return _identityLogger.IsEnabled(eventLevel);
         }
@@ -37,4 +38,5 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _identityLogger.Log(entry);
         }
     }
+#endif
 }
