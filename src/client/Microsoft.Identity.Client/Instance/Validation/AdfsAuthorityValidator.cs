@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    _requestContext.Logger.Error($"Authority validation failed due to invalid authority. Authority: {authorityInfo.CanonicalAuthority}");
+                    _requestContext.Logger.Error($"Authority validation failed because the configured authority is invalid. Authority: {authorityInfo.CanonicalAuthority}");
                     throw MsalServiceExceptionFactory.FromHttpResponse(
                         MsalError.InvalidAuthority,
                         MsalErrorMessage.AuthorityValidationFailed,
