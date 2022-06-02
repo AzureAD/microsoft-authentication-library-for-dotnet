@@ -16,9 +16,9 @@ namespace Microsoft.Identity.Client.Instance
         public const string DstsCanonicalAuthorityTemplate = "https://{0}/{1}/";
 
         // updating token endpoints to include v2.0 so DSTS can troubleshoot the scopes issue
-        private const string TokenEndpointTemplate = "{0}dstsv2/token";
-        private const string AuthorizationEndpointTemplate = "{0}dstsv2/authorize";
-        private const string DeviceCodeEndpointTemplate = "{0}dstsv2/devicecode";
+        private const string TokenEndpointTemplate = "{0}oauth2/v2.0/token";
+        private const string AuthorizationEndpointTemplate = "{0}oauth2/v2.0/authorize";
+        private const string DeviceCodeEndpointTemplate = "{0}oauth2/v2.0/devicecode";
 
         public DstsAuthority(AuthorityInfo authorityInfo)
             : base(authorityInfo)

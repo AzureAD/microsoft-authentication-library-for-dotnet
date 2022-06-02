@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             return new MockHttpMessageHandler()
             {
-                ExpectedUrl = $"{authority}/dstsv2/token",
+                ExpectedUrl = $"{authority}/oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedPostData = expectedRequestBody,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
@@ -52,12 +52,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [DataTestMethod]
-        [DataRow("common")]
-        [DataRow("tenantid")]
-        public async Task DstsClientCredentialSuccessfulTestAsync(string tenantId)
+        [DataRow(CommonAuthority)]
+        [DataRow(TenantedAuthority)]
+        public async Task DstsClientCredentialSuccessfulTestAsync(string authority)
         {
-            string authority = $"https://foo.bar.test.core.azure-test.net/dstsv2/{tenantId}";
-
             using (var httpManager = new MockHttpManager())
             {
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
