@@ -19,16 +19,80 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
     {
         private const string TenantlessDstsAuthority = "https://foo.bar.test.core.azure-test.net/dstsv2/";
-        private const string TenantedDstsAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/tenantId";
+        private const string TenantedDstsAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/tenantid";
+        private const string CommonAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/common";
+
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            base.TestInitialize();
+        }
+
+        private static MockHttpMessageHandler CreateTokenResponseHttpHandler(string authority)
+        {
+            IDictionary<string, string> expectedRequestBody = new Dictionary<string, string>();
+            expectedRequestBody.Add("scope", TestConstants.ScopeStr);
+            expectedRequestBody.Add("grant_type", "client_credentials");
+            expectedRequestBody.Add("client_id", TestConstants.ClientId);
+            expectedRequestBody.Add("client_secret", TestConstants.ClientSecret);
+
+            return new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{authority}/oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = expectedRequestBody,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
+            };
+        }
+
+        [DataTestMethod]
+        [DataRow(CommonAuthority)]
+        [DataRow(TenantedDstsAuthority)]
+        public async Task DstsClientCredentialSuccessfulTestAsync(string authority)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithAuthority(authority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                Assert.AreEqual(authority + "/", app.Authority);
+                var confidentailClientApp = (ConfidentialClientApplication)app;
+                Assert.AreEqual(AuthorityType.Dsts, confidentailClientApp.AuthorityInfo.AuthorityType);
+
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(authority));
+
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
 
         [TestMethod]
         public void DstsEndpointsTest()
         {
             var instance = Authority.CreateAuthority(TenantedDstsAuthority);
 
-            Assert.AreEqual($"{TenantedDstsAuthority}/auth2/v2.0/token", instance.GetTokenEndpoint());
-            Assert.AreEqual($"{TenantedDstsAuthority}/auth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
-            Assert.AreEqual($"{TenantedDstsAuthority}/auth2/v2.0/devicecode", instance.GetDeviceCodeEndpoint());
+            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/token", instance.GetTokenEndpoint());
+            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
+            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpoint());
         }
 
         [TestMethod]
