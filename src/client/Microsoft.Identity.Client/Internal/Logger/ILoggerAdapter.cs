@@ -3,6 +3,7 @@
 
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Core
 {
@@ -10,9 +11,7 @@ namespace Microsoft.Identity.Client.Core
     {
         bool PiiLoggingEnabled { get; }
         bool IsDefaultPlatformLoggingEnabled { get; }
-#if !XAMARINMAC20
-        MsalCacheLoggerWrapper CacheLogger { get; }
-#endif
+        IIdentityLogger CacheLogger { get; }
         string ClientName { get; }
         string ClientVersion { get; }
 

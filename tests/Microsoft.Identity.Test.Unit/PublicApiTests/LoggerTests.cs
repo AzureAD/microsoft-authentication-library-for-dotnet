@@ -32,20 +32,20 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 return new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback);
             }
 
-            return new IdentityLoggerAdapter(Guid.Empty, null, null, enablePiiLogging, true);
+            return new IdentityLoggerAdapter(new TestIdentityLogger(), Guid.Empty, null, null, enablePiiLogging);
         }
 
         [TestMethod()]
         public void ConstructorComponentTest()
         {
-            IdentityLoggerAdapter logger = new IdentityLoggerAdapter(Guid.Empty, null, null, false, true);
+            ILoggerAdapter logger = new IdentityLoggerAdapter(null, Guid.Empty, null, null, false);
             Assert.AreEqual(string.Empty, logger.ClientName);
             Assert.AreEqual(string.Empty, logger.ClientVersion);
-            Assert.AreEqual(string.Empty, logger.ClientInformation);
-            logger = new IdentityLoggerAdapter(Guid.Empty, "comp1", null, false, true);
-            Assert.AreEqual(" (comp1)", logger.ClientInformation);
-            logger = new IdentityLoggerAdapter(Guid.Empty, "comp1", "version1", false, true);
-            Assert.AreEqual(" (comp1: version1)", logger.ClientInformation);
+            logger = new IdentityLoggerAdapter(null, Guid.Empty, "comp1", null, false);
+            Assert.AreEqual(" (comp1)", logger.ClientName);
+            logger = new IdentityLoggerAdapter(null, Guid.Empty, "comp1", "version1", false);
+            Assert.AreEqual(" (comp1)", logger.ClientName);
+            Assert.AreEqual("version1", logger.ClientVersion);
         }
 
         [TestMethod()]
@@ -157,18 +157,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void IsEnabled()
         {
             var infoLoggerWithCallback = new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, LogLevel.Info, true, true, _callback);
-            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(EventLevel.Informational));
-            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(EventLevel.LogAlways));
-            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(EventLevel.Error));
-            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(EventLevel.Warning));
-            Assert.IsFalse(infoLoggerWithCallback.IsLoggingEnabled(EventLevel.Verbose));
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Info));
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Always));
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Error));
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Warning));
+            Assert.IsFalse(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Verbose));
 
             var loggerNoCallback = new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, LogLevel.Warning, true, true, null);
-            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(EventLevel.Informational));
-            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(EventLevel.LogAlways));
-            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(EventLevel.Error));
-            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(EventLevel.Warning));
-            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(EventLevel.Verbose));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Info));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Always));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Error));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Warning));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Verbose));
 
         }
 

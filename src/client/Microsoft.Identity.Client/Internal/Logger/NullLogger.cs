@@ -18,13 +18,12 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public bool PiiLoggingEnabled { get; } = false;
 
-
         public string ClientInformation { get; } = string.Empty;
 
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;
-#if !XAMARINMAC20
-        public MsalCacheLoggerWrapper CacheLogger => null;
-#endif
+
+        public IIdentityLogger CacheLogger => null;
+
         public bool IsLoggingEnabled(LogLevel logLevel)
         {
             return false;
