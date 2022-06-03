@@ -143,7 +143,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
        private static Aes CreateSymmetricAlgorith(byte[] key)
         {
-            var aes = Aes.Create("System.Security.Cryptography.AesManaged");
+            // TBD - AesManaged is deprecated, Aes.Create returns null
+            //var aes = Aes.Create("System.Security.Cryptography.AesManaged");
+            var aes = new AesManaged();
             aes.Padding = PaddingMode.PKCS7;
             aes.Mode = CipherMode.CBC;
             aes.KeySize = 256;
