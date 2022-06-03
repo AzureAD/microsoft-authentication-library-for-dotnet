@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public bool PiiLoggingEnabled { get; }
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;
-        public MsalCacheLoggerWrapper CacheLogger { get; }
+        public IIdentityLogger CacheLogger { get; }
         public string ClientName { get; }
         public string ClientVersion { get; }
 
