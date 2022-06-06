@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
                    cancellationToken,
                    default,
                    msalIdentityLogger,
-                   PiiLoggingEnabled)
+                   piiLoggingEnabled)
             {
             }
 

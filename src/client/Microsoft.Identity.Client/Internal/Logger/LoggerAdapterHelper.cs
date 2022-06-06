@@ -20,7 +20,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
     {
         private static Lazy<string> s_msalVersionLazy = new Lazy<string>(() => MsalIdHelper.GetMsalVersion());
         private static Lazy<string> s_runtimeVersionLazy = new Lazy<string>(() => PlatformProxyFactory.CreatePlatformProxy(null).GetRuntimeVersion());
-        //private static IPlatformLogger _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
         private static readonly Lazy<ILoggerAdapter> s_nullLogger = new Lazy<ILoggerAdapter>(() => new NullLogger());
 
         public static string GetClientInfo(string clientName, string clientVersion)

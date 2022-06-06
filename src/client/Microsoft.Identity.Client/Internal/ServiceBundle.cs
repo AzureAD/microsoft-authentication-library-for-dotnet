@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             Config = config;
 
-            ApplicationLogger = LoggerAdapterHelper.CreateLogger(Guid.Empty, config, config.IsDefaultPlatformLoggingEnabled);
+            ApplicationLogger = LoggerAdapterHelper.CreateLogger(Guid.Empty, config);
 
             PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(ApplicationLogger);
             HttpManager = config.HttpManager ?? new HttpManager(
