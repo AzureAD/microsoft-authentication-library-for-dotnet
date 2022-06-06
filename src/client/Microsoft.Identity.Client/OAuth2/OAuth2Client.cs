@@ -105,30 +105,47 @@ namespace Microsoft.Identity.Client.OAuth2
 
             using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
             {
-                if (method == HttpMethod.Post)
+                try
                 {
-                    if (onBeforePostRequestData!=null)
+                    if (method == HttpMethod.Post)
                     {
-                        var requestData = new OnBeforeTokenRequestData(_bodyParameters, _headers, endpointUri, requestContext.UserCancellationToken);
-                        await onBeforePostRequestData(requestData).ConfigureAwait(false);
-                    }
+                        if (onBeforePostRequestData != null)
+                        {
+                            var requestData = new OnBeforeTokenRequestData(_bodyParameters, _headers, endpointUri, requestContext.UserCancellationToken);
+                            await onBeforePostRequestData(requestData).ConfigureAwait(false);
+                        }
 
-                    response = await _httpManager.SendPostAsync(
-                        endpointUri, 
-                        _headers, 
-                        _bodyParameters, 
-                        requestContext.Logger, 
-                        requestContext.UserCancellationToken)
-                             .ConfigureAwait(false);
+                        response = await _httpManager.SendPostAsync(
+                            endpointUri,
+                            _headers,
+                            _bodyParameters,
+                            requestContext.Logger,
+                            requestContext.UserCancellationToken)
+                                 .ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        response = await _httpManager.SendGetAsync(
+                            endpointUri,
+                            _headers,
+                            requestContext.Logger,
+                            cancellationToken: requestContext.UserCancellationToken)
+                                .ConfigureAwait(false);
+                    }
                 }
-                else
+                catch(Exception ex)
                 {
-                    response = await _httpManager.SendGetAsync(
-                        endpointUri,
-                        _headers,
-                        requestContext.Logger,
-                        cancellationToken: requestContext.UserCancellationToken)
-                            .ConfigureAwait(false);
+                    requestContext.Logger.ErrorPii(
+                    string.Format(MsalErrorMessage.RequestFailureErrorMessagePii,
+                        requestContext.ApiEvent?.ApiIdString,
+                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
+                        requestContext.ServiceBundle.Config.ClientId),
+                    string.Format(MsalErrorMessage.RequestFailureErrorMessage,
+                        requestContext.ApiEvent?.ApiIdString,
+                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host));
+                    requestContext.Logger.ErrorPii(ex);
+
+                    throw;
                 }
             }
 
@@ -249,7 +266,8 @@ namespace Microsoft.Identity.Client.OAuth2
                         requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
                         requestContext.ServiceBundle.Config.ClientId), 
                     string.Format(MsalErrorMessage.RequestFailureErrorMessage,
-                        requestContext.ApiEvent?.ApiIdString));
+                        requestContext.ApiEvent?.ApiIdString,
+                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host));
                 requestContext.Logger.ErrorPii(exceptionToThrow);
             }
             else

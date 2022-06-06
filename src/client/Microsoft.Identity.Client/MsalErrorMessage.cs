@@ -428,9 +428,9 @@ namespace Microsoft.Identity.Client
 
         public const string MultiCloudSupportUnavailable = "Multi cloud support unavailable with broker.";
 
-        public const string RequestFailureErrorMessage = "=== Token Acquisition ({0}) failed.";
+        public const string RequestFailureErrorMessage = "=== Token Acquisition ({0}) failed.\n\tHost: {1}.";
 
-        public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}\n\t.";
+        public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}.";
 
         public static string InvalidTokenProviderResponseValue(string invalidValueName)
             {

@@ -59,7 +59,8 @@ namespace Microsoft.Identity.Client.WsTrust
                         requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
                         requestContext.ServiceBundle.Config.ClientId),
                     string.Format(MsalErrorMessage.RequestFailureErrorMessage,
-                        requestContext.ApiEvent?.ApiIdString));
+                        requestContext.ApiEvent?.ApiIdString, 
+                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host));
                 throw MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.AccessingWsMetadataExchangeFailed,
                     message,
@@ -169,7 +170,8 @@ namespace Microsoft.Identity.Client.WsTrust
                         requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
                         requestContext.ServiceBundle.Config.ClientId),
                     string.Format(MsalErrorMessage.RequestFailureErrorMessage,
-                        requestContext.ApiEvent?.ApiIdString));
+                        requestContext.ApiEvent?.ApiIdString, 
+                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host));
             throw MsalServiceExceptionFactory.FromHttpResponse(
                 MsalError.UserRealmDiscoveryFailed,
                 message,
