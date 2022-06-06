@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
                 catch(Exception ex)
                 {
-                    if (ex.GetType() == typeof(TaskCanceledException) && requestContext.UserCancellationToken.IsCancellationRequested)
+                    if (ex is TaskCanceledException && requestContext.UserCancellationToken.IsCancellationRequested)
                     {
                         throw;
                     }
