@@ -213,7 +213,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task ExternalMsalLoggerTestAsync()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task ExternalMsalLoggerTestAsync(bool piiLogging)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -222,14 +224,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithClientSecret("secret")
-                    .WithLogging(testLogger, true)
+                    .WithLogging(testLogger, piiLogging)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
                 app.UserTokenCache.SetBeforeAccess(BeforeCacheAccessWithLogging);
                 app.UserTokenCache.SetAfterAccess(AfterCacheAccessWithLogging);
-
-                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddSuccessTokenResponseMockHandlerForPost();
@@ -240,29 +240,50 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.IsTrue(testLogger.StringBuilder.ToString().Contains("MsalExternalLogMessage: Deserializing Cache Pii"));
-                Assert.IsTrue(testLogger.StringBuilder.ToString().Contains("MsalExternalLogMessage: Serializing Cache Pii"));
+
+                if (piiLogging)
+                {
+                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.PiiSerializeLogMessage));
+                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.PiiDeserializeLogMessage));
+                }
+                else
+                {
+                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.SerializeLogMessage));
+                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.DeserializeLogMessage));
+                }
             }
         }
 
         private void BeforeCacheAccessWithLogging(TokenCacheNotificationArgs args)
         {
+            LogEntry entry = new LogEntry();
+
             if (args.PiiLoggingEnabled)
             {
-                LogEntry entry = new LogEntry();
-                entry.Message = "MsalExternalLogMessage: Deserializing Cache Pii";
-                args.MsalIdentityLogger.Log(entry);
+                entry.Message = TestConstants.PiiDeserializeLogMessage;
             }
+            else
+            {
+                entry.Message = TestConstants.PiiSerializeLogMessage;
+            }
+
+            args.MsalIdentityLogger.Log(entry);
         }
 
         private void AfterCacheAccessWithLogging(TokenCacheNotificationArgs args)
         {
+            LogEntry entry = new LogEntry();
+
             if (args.PiiLoggingEnabled)
             {
-                LogEntry entry = new LogEntry();
-                entry.Message = "MsalExternalLogMessage: Serializing Cache Pii";
-                args.MsalIdentityLogger.Log(entry);
+                entry.Message = TestConstants.DeserializeLogMessage;
             }
+            else
+            {
+                entry.Message = TestConstants.SerializeLogMessage;
+            }
+
+            args.MsalIdentityLogger.Log(entry);
         }
     }
 }

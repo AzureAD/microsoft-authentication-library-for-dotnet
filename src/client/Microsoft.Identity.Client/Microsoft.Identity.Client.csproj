@@ -140,7 +140,6 @@
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Compile Remove="GlobalSuppressions3.cs" />
-    <Compile Include="Internal\Logger\LegacyLogger.cs" />
     <Compile Include="Internal\Logger\MsalCacheLoggerWrapper.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>

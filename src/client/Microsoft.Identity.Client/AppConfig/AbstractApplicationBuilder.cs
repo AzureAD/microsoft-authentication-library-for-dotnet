@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public T WithLogging(
             IIdentityLogger identityLogger,
-            bool enablePiiLogging )
+            bool enablePiiLogging)
         {
             Config.IdentityLogger = identityLogger;
             Config.EnablePiiLogging = enablePiiLogging;
