@@ -142,8 +142,6 @@
     <Compile Remove="GlobalSuppressions3.cs" />
     <Compile Include="Internal\Logger\LegacyLogger.cs" />
     <Compile Include="Internal\Logger\MsalCacheLoggerWrapper.cs" />
-    <Compile Include="Internal\Logger\NullLogger.cs" />
-    <Compile Include="Internal\Logger\NullLoggerAdapter.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
 
