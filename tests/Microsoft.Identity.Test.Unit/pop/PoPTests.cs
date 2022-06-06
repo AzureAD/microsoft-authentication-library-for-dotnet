@@ -297,15 +297,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
 
                 pca.ServiceBundle.ConfigureMockWebUI();
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            "user.read",
-                            MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                            MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
-                    });
 
                 // Act
                 var exception = await AssertException.TaskThrowsAsync<MsalClientException>(async ()=> { await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
