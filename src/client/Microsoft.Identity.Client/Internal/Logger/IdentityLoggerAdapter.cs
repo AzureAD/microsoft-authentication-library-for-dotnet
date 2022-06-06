@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public bool PiiLoggingEnabled { get; }
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;
-        public IIdentityLogger CacheLogger { get; }
         public string ClientName { get; }
         public string ClientVersion { get; }
 
@@ -40,7 +39,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _clientInfo = LoggerAdapterHelper.GetClientInfo(clientName, clientVersion);
             
             PiiLoggingEnabled = enablePiiLogging;
-            CacheLogger = new MsalCacheLoggerWrapper(identityLogger, _correlationId, _clientInfo);
         }
 
         public static ILoggerAdapter Create(
@@ -52,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 correlationId,
                 config?.ClientName ?? string.Empty,
                 config?.ClientVersion ?? string.Empty,
-                config?.EnablePiiLogging ?? false); ;
+                config?.EnablePiiLogging ?? false);
         }
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)

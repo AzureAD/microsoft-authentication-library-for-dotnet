@@ -28,7 +28,8 @@ namespace Microsoft.Identity.Client
           bool hasTokens,
           DateTimeOffset? suggestedCacheExpiry,
           CancellationToken cancellationToken,
-          IIdentityLogger msalIdentityLogger)
+          IIdentityLogger msalIdentityLogger,
+          bool piiLoggingEnabled)
             : this(tokenCache,
                    clientId,
                    account,
@@ -39,7 +40,8 @@ namespace Microsoft.Identity.Client
                    suggestedCacheExpiry,
                    cancellationToken,
                    default,
-                   msalIdentityLogger)
+                   msalIdentityLogger,
+                   PiiLoggingEnabled)
             {
             }
 
@@ -57,7 +59,8 @@ namespace Microsoft.Identity.Client
             DateTimeOffset? suggestedCacheExpiry,
             CancellationToken cancellationToken,
             Guid correlationId,
-            IIdentityLogger msalIdentityLogger)
+            IIdentityLogger msalIdentityLogger,
+            bool piiLoggingEnabled)
         {
             TokenCache = tokenCache;
             ClientId = clientId;
@@ -70,6 +73,7 @@ namespace Microsoft.Identity.Client
             CorrelationId = correlationId;
             SuggestedCacheExpiry = suggestedCacheExpiry;
             MsalIdentityLogger = msalIdentityLogger;
+            PiiLoggingEnabled = piiLoggingEnabled;
         }
         
         /// <summary>
@@ -152,5 +156,10 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         public IIdentityLogger MsalIdentityLogger { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool PiiLoggingEnabled { get; private set; }
     }
 }

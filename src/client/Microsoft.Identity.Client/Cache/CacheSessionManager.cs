@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Cache
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
                                   correlationId: _requestParams.RequestContext.CorrelationId,
-                                  msalIdentityLogger: _requestParams.RequestContext.Logger.CacheLogger);
+                                  msalIdentityLogger: _requestParams.RequestContext.ExternalCacheLogger);
 
                                 stopwatch.Start();
                                 await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Cache
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
                                   correlationId: _requestParams.RequestContext.CorrelationId,
-                                  msalIdentityLogger: _requestParams.RequestContext.Logger.CacheLogger);
+                                  msalIdentityLogger: _requestParams.RequestContext.ExternalCacheLogger);
 
                                 await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;

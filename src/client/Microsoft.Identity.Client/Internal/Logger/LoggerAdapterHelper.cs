@@ -44,15 +44,33 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static ILoggerAdapter CreateLogger(
             Guid correlationId,
-            ApplicationConfiguration config,
-            bool isDefaultPlatformLoggingEnabled = false)
+            ApplicationConfiguration config)
         {
             if (config.IdentityLogger == null)
             {
-                return LegacyIdentityLoggerAdapter.Create(correlationId, config, isDefaultPlatformLoggingEnabled);
+                return LegacyIdentityLoggerAdapter.Create(correlationId, config);
+            }
+#if XAMARINMAC20
+            throw new NotImplementedException();
+#else
+            return IdentityLoggerAdapter.Create(correlationId, config);
+#endif
+        }
+
+        public static IIdentityLogger CreateExternalCacheLogger(
+            Guid correlationId,
+            ApplicationConfiguration config)
+        {
+#if XAMARINMAC20
+            throw new NotImplementedException();
+#else
+            if (config.IdentityLogger != null)
+            {
+                return MsalCacheLoggerWrapper.Create(correlationId, config);
             }
 
-            return IdentityLoggerAdapter.Create(correlationId, config);
+            return null;
+#endif
         }
 
         public static ILoggerAdapter NullLogger => s_nullLogger.Value;

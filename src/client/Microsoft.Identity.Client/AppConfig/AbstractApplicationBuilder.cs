@@ -275,20 +275,22 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
+        /// Sets the Identity Logger 
         /// </summary>
-        /// <param name="identityLogger"></param>
-        /// <param name="enablePiiLogging"></param>
-        /// <param name="enableDefaultPlatformLogging"></param>
+        /// <param name="identityLogger">IdentityLogger</param>
+        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
+        /// Personally Identifiable Information (PII).
+        /// PII logs are never written to default outputs like Console, Logcat or NSLog
+        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
+        /// You can set it to <c>true</c> for advanced debugging requiring PII
+        /// </param>
         /// <returns></returns>
         public T WithLogging(
             IIdentityLogger identityLogger,
-            bool? enablePiiLogging = null,
-            bool? enableDefaultPlatformLogging = null)
+            bool enablePiiLogging )
         {
             Config.IdentityLogger = identityLogger;
-            Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
-            Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
+            Config.EnablePiiLogging = enablePiiLogging;
             return (T)this;
         }
 

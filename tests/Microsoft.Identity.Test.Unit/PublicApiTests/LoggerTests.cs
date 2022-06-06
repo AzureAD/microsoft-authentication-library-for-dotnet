@@ -3,10 +3,14 @@
 
 using System;
 using System.Diagnostics.Tracing;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -36,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod()]
-        public void ConstructorComponentTest()
+        public void IdentityLoggerConstructorComponentTest()
         {
             ILoggerAdapter logger = new IdentityLoggerAdapter(null, Guid.Empty, null, null, false);
             Assert.AreEqual(string.Empty, logger.ClientName);
@@ -49,14 +53,32 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod()]
-        [DataRow(LogLevel.Always)]
-        [DataRow(LogLevel.Error)]
-        [DataRow(LogLevel.Warning)]
-        [DataRow(LogLevel.Info)]
-        [DataRow(LogLevel.Verbose)]
-        public void CallbackLoggerTest(LogLevel level)
+        public void LegacyLoggerConstructorComponentTest()
         {
-            ILoggerAdapter logger = CreateLogger(level, false, true);
+            ILoggerAdapter logger = new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, LogLevel.Always, false, false, null);
+            Assert.AreEqual(string.Empty, logger.ClientName);
+            Assert.AreEqual(string.Empty, logger.ClientVersion);
+            logger = new LegacyIdentityLoggerAdapter(Guid.Empty, "comp1", null, LogLevel.Always, false, false, null);
+            Assert.AreEqual("(comp1)", logger.ClientName);
+            logger = new LegacyIdentityLoggerAdapter(Guid.Empty, null, "version1", LogLevel.Always, false, false, null);
+            Assert.AreEqual("(comp1)", logger.ClientName);
+            Assert.AreEqual("version1", logger.ClientVersion);
+        }
+
+        [TestMethod()]
+        [DataRow(LogLevel.Always, false)]
+        [DataRow(LogLevel.Error, false)]
+        [DataRow(LogLevel.Warning, false)]
+        [DataRow(LogLevel.Info, false)]
+        [DataRow(LogLevel.Verbose, false)]
+        [DataRow(LogLevel.Always, true)]
+        [DataRow(LogLevel.Error, true)]
+        [DataRow(LogLevel.Warning, true)]
+        [DataRow(LogLevel.Info, true)]
+        [DataRow(LogLevel.Verbose, true)]
+        public void CallbackLoggerTest(LogLevel level, bool UseLegaccyLogger)
+        {
+            ILoggerAdapter logger = CreateLogger(level, false, UseLegaccyLogger);
             var counter = 0;
             var validationCounter = 1;
             var levelToValidate = LogLevel.Always;
@@ -103,14 +125,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod()]
-        [DataRow(LogLevel.Always)]
-        [DataRow(LogLevel.Error)]
-        [DataRow(LogLevel.Warning)]
-        [DataRow(LogLevel.Info)]
-        [DataRow(LogLevel.Verbose)]
-        public void CallbackTestLoggersPii(LogLevel level)
+        [DataRow(LogLevel.Always, false)]
+        [DataRow(LogLevel.Error, false)]
+        [DataRow(LogLevel.Warning, false)]
+        [DataRow(LogLevel.Info, false)]
+        [DataRow(LogLevel.Verbose, false)]
+        [DataRow(LogLevel.Always, true)]
+        [DataRow(LogLevel.Error, true)]
+        [DataRow(LogLevel.Warning, true)]
+        [DataRow(LogLevel.Info, true)]
+        [DataRow(LogLevel.Verbose, true)]
+        public void CallbackTestLoggersPii(LogLevel level, bool UseLegaccyLogger)
         {
-            ILoggerAdapter logger = CreateLogger(level, true);
+            ILoggerAdapter logger = CreateLogger(level, true, UseLegaccyLogger);
             var counter = 0;
             var validationCounter = 1;
             var levelToValidate = LogLevel.Always;
@@ -169,7 +196,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Error));
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Warning));
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Verbose));
-
         }
 
         [TestMethod]
@@ -184,6 +210,59 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsTrue(isPii is bool);
 #pragma warning restore CS0183 //
             };
+        }
+
+        [TestMethod]
+        public async Task ExternalMsalLoggerTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                TestIdentityLogger testLogger = CreateLogger(LogLevel.Always, true) as TestIdentityLogger;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret("secret")
+                    .WithLogging(testLogger, true)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                app.UserTokenCache.SetBeforeAccess(BeforeCacheAccessWithLogging);
+                app.UserTokenCache.SetAfterAccess(AfterCacheAccessWithLogging);
+
+                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var result = await app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "some-code")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsTrue(testLogger.StringBuilder.ToString().Contains("MsalExternalLogMessage: Deserializing Cache Pii"));
+                Assert.IsTrue(testLogger.StringBuilder.ToString().Contains("MsalExternalLogMessage: Serializing Cache Pii"));
+            }
+        }
+
+        private void BeforeCacheAccessWithLogging(TokenCacheNotificationArgs args)
+        {
+            if (args.PiiLoggingEnabled)
+            {
+                LogEntry entry = new LogEntry();
+                entry.Message = "MsalExternalLogMessage: Deserializing Cache Pii";
+                args.MsalIdentityLogger.Log(entry);
+            }
+        }
+
+        private void AfterCacheAccessWithLogging(TokenCacheNotificationArgs args)
+        {
+            if (args.PiiLoggingEnabled)
+            {
+                LogEntry entry = new LogEntry();
+                entry.Message = "MsalExternalLogMessage: Serializing Cache Pii";
+                args.MsalIdentityLogger.Log(entry);
+            }
         }
     }
 }

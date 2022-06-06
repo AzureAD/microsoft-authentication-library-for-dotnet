@@ -11,7 +11,6 @@ namespace Microsoft.Identity.Client.Core
     {
         bool PiiLoggingEnabled { get; }
         bool IsDefaultPlatformLoggingEnabled { get; }
-        IIdentityLogger CacheLogger { get; }
         string ClientName { get; }
         string ClientVersion { get; }
 
