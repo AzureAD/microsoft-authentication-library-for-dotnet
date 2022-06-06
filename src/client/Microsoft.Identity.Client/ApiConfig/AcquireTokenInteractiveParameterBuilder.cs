@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.AppConfig;
 using System.Net.Http;
 using System.ComponentModel;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 
 #if iOS
 using UIKit;
@@ -382,6 +383,7 @@ namespace Microsoft.Identity.Client
             popConfig.HttpMethod = httpMethod;
 
             CommonParameters.PopAuthenticationConfiguration = popConfig;
+            CommonParameters.AuthenticationScheme = new PopBrokerAuthenticationScheme();
 
             return this;
         }
