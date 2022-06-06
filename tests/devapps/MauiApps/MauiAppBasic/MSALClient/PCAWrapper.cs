@@ -7,14 +7,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 
-namespace MauiAppWithBroker.MSALClient
+namespace MauiAppBasic.MSALClient
 {
     /// <summary>
     /// This is a wrapper for PCA. It is singleton and can be utilized by both application and the MAM callback
     /// </summary>
     public class PCAWrapper
     {
-
         /// <summary>
         /// This is the singleton used by consumers
         /// </summary>
@@ -45,7 +44,6 @@ namespace MauiAppWithBroker.MSALClient
             // ClientCapabilities - must have ProtApp
             PCA = PublicClientApplicationBuilder
                                         .Create(ClientId)
-                                        .WithBroker()
                                         .WithRedirectUri(PlatformConfigImpl.Instance.RedirectUri)
                                         .WithIosKeychainSecurityGroup("com.microsoft.adalcache")
                                         .Build();
