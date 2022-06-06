@@ -143,11 +143,11 @@ namespace Microsoft.Identity.Client.OAuth2
                     requestContext.Logger.ErrorPii(
                     string.Format(MsalErrorMessage.RequestFailureErrorMessagePii,
                         requestContext.ApiEvent?.ApiIdString,
-                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
+                        $"{endpointUri.Scheme}://{endpointUri.Host}{endpointUri.AbsolutePath}",
                         requestContext.ServiceBundle.Config.ClientId),
                     string.Format(MsalErrorMessage.RequestFailureErrorMessage,
                         requestContext.ApiEvent?.ApiIdString,
-                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host));
+                        $"{endpointUri.Scheme}://{endpointUri.Host}"));
                     requestContext.Logger.ErrorPii(ex);
 
                     throw;
