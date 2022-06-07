@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Client.Region
                             else
                             {
                                 s_regionDiscoveryDetails = $"Call to local IMDS failed with status code {response.StatusCode} or an empty response. {DateTime.UtcNow}";
-                                logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}");
+                                logger.Error($"[Region discovery] {s_regionDiscoveryDetails}");
                             }
                         }
 
@@ -232,12 +232,12 @@ namespace Microsoft.Identity.Client.Region
                         if (e is MsalServiceException msalEx && MsalError.RequestTimeout.Equals(msalEx?.ErrorCode))
                         {
                             s_regionDiscoveryDetails = $"Call to local IMDS timed out after {_imdsCallTimeoutMs}.";
-                            logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}.");
+                            logger.Error($"[Region discovery] {s_regionDiscoveryDetails}.");
                         }
                         else
                         {
                             s_regionDiscoveryDetails = $"IMDS call failed with exception {e}. {DateTime.UtcNow}";
-                            logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}");
+                            logger.Error($"[Region discovery] {s_regionDiscoveryDetails}");
                         }
                     }
                 }

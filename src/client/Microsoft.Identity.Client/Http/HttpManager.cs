@@ -151,13 +151,11 @@ namespace Microsoft.Identity.Client.Http
 
                 logger.Error("The HTTP request failed. " + exception.Message);
                 isRetryable = true;
-
                 timeoutException = exception;
             }
 
             if (isRetryable && retry)
             {
-
                 logger.Info("Retrying one more time..");
                 await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
                 return await ExecuteWithRetryAsync(
