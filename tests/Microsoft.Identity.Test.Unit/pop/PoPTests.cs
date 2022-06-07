@@ -354,8 +354,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
             // Arrange
             using (var harness = CreateTestHarness())
             {
-                //harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
                 mockBroker.IsPopSupported.Returns(true);
@@ -369,7 +367,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-                TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
+                TokenCacheHelper.PopulateCache(accessor: pca.UserTokenCacheInternal.Accessor,
+                                               environment: "fs.msidlab8.com");
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
 
                 pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
