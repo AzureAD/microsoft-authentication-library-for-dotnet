@@ -196,7 +196,6 @@ namespace Microsoft.Identity.Client.Broker
         {
             try
             {
-                string expiresOn = authResult.ExpiresOn.ToString();
                 string correlationId = authenticationRequestParameters.CorrelationId.ToString("D");
 
                 if (string.IsNullOrWhiteSpace(correlationId))
@@ -214,7 +213,7 @@ namespace Microsoft.Identity.Client.Broker
                     IdToken = authResult.RawIdToken,
                     CorrelationId = correlationId,
                     Scope = authResult.GrantedScopes,
-                    ExpiresIn = DateTimeHelpers.GetDurationFromWindowsTimestamp(expiresOn, logger),
+                    ExpiresIn = (long)(DateTime.SpecifyKind(authResult.ExpiresOn, DateTimeKind.Utc) - DateTimeOffset.UtcNow).TotalSeconds,
                     ClientInfo = authResult.Account.ClientInfo.ToString(),
                     TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : BrokerResponseConst.Bearer,
                     WamAccountId = authResult.Account.Id,

@@ -3,30 +3,24 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.PublicApiTests
+namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
     [TestClass]
-    public class DstsTests : TestBase
+    public class DstsAuthorityTests : TestBase
+
     {
+        private const string TenantlessDstsAuthority = "https://foo.bar.test.core.azure-test.net/dstsv2/";
+        private const string TenantedDstsAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/tenantid";
         private const string CommonAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/common";
-        private const string TenantedAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/tenantId";
 
         [TestInitialize]
         public override void TestInitialize()
@@ -44,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             return new MockHttpMessageHandler()
             {
-                ExpectedUrl = $"{authority}/dstsv2/token",
+                ExpectedUrl = $"{authority}/oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedPostData = expectedRequestBody,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
@@ -52,12 +46,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [DataTestMethod]
-        [DataRow("common")]
-        [DataRow("tenantid")]
-        public async Task DstsClientCredentialSuccessfulTestAsync(string tenantId)
+        [DataRow(CommonAuthority)]
+        [DataRow(TenantedDstsAuthority)]
+        public async Task DstsClientCredentialSuccessfulTestAsync(string authority)
         {
-            string authority = $"https://foo.bar.test.core.azure-test.net/dstsv2/{tenantId}";
-
             using (var httpManager = new MockHttpManager())
             {
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
@@ -89,8 +81,57 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);    
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
+        }
+
+        [TestMethod]
+        public void DstsEndpointsTest()
+        {
+            var instance = Authority.CreateAuthority(TenantedDstsAuthority);
+
+            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/token", instance.GetTokenEndpoint());
+            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
+            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpoint());
+        }
+
+        [TestMethod]
+        public void Validate_MinNumberOfSegments()
+        {
+            try
+            {
+                var instance = Authority.CreateAuthority(TenantlessDstsAuthority);
+
+                Assert.Fail("test should have failed");
+            }
+            catch (Exception exc)
+            {
+                Assert.IsInstanceOfType(exc, typeof(ArgumentException));
+                Assert.AreEqual(MsalErrorMessage.DstsAuthorityUriInvalidPath, exc.Message);
+            }
+        }
+
+        [TestMethod]
+        public void CreateAuthorityFromTenantedWithTenantTest()
+        {
+            string tenantedAuth = TenantlessDstsAuthority + Guid.NewGuid().ToString() + "/";
+            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(tenantedAuth);
+
+            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
+            Assert.AreEqual(tenantedAuth, updatedAuthority, "Not changed, original authority already has tenant id");
+
+            string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
+            Assert.AreEqual("https://foo.bar.test.core.azure-test.net/other_tenant_id/", updatedAuthority2, "Not changed with forced flag");
+        }
+
+        [TestMethod]
+        public void TenantlessAuthorityChanges()
+        {
+            string commonAuth = TenantlessDstsAuthority + "common/";
+            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(
+                commonAuth);
+
+            Assert.AreEqual("common", authority.TenantId);
         }
     }
 }

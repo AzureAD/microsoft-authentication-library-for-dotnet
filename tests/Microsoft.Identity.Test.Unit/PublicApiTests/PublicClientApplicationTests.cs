@@ -12,6 +12,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Advanced;
+#if !NET5_0_OR_GREATER
+using Microsoft.Identity.Client.Desktop;
+#endif
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
@@ -843,8 +846,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         ///
         /// 2 users have acquired tokens
         /// 1 of them is a guest in another tenant => 1 request for each tenant
-        ///
-        /// The 2 accounts have wam ids in account in the response
+        /// No refresh tokens since this was a response from WAM
+        /// The 2 accounts have WAM IDs in account in the response
         /// </summary>
         /// <returns></returns>
         [TestMethod]
@@ -859,7 +862,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 // Arrange
-                PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager, tokenCacheFile: "TokenCacheWithWamId.json");
+                PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager, tokenCacheFile: "TokenCacheWithWamId.json", enableBroker: true);
 
                 // Act
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -1078,7 +1081,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private static PublicClientApplication CreatePcaFromFileWithAuthority(
             MockHttpManager httpManager,
             string tokenCacheFile = "MultiTenantTokenCache.json",
-            string authority = null)
+            string authority = null,
+            bool enableBroker = false)
         {
             const string clientIdInFile = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
 
@@ -1092,9 +1096,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 pcaBuilder = pcaBuilder.WithAuthority(authority);
             }
 
+            if (enableBroker)
+            {
+#if NET5_0_OR_GREATER
+                pcaBuilder.WithBroker();
+#else
+                pcaBuilder.WithWindowsBroker();
+#endif
+            }
+
             var pca = pcaBuilder.BuildConcrete();
             pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile), true);
-            pca.UserTokenCacheInternal.Accessor.AssertItemCount(3, 2, 3, 3, 1);
+            var expectedRTs = enableBroker ? 0 : 2;
+            pca.UserTokenCacheInternal.Accessor.AssertItemCount(3, expectedRTs, 3, 3, 1);
             return pca;
         }
 

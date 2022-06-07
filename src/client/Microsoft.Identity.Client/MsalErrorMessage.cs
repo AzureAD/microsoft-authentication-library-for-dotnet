@@ -128,6 +128,8 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseError = "Broker response returned error: ";
         public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
             "Check logs for more details and see https://aka.ms/msal-brokers. ";
+        public const string CannotInvokeBrokerForPop = "MSAL cannot invoke the broker and it is required for Proof-of-Possesion. Wam (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
+            "Check logs for more details and see https://aka.ms/msal-net-pop. ";
         public const string BrokerDoesNotSupportPop = "The broker does not support Proof-of-Possession on the current platform.";
         public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required for Proof-of-Possession on public clients.";
         public const string NonceRequiredForPop = "The request has Proof-of-Possession configured for public clients but does not have a nonce provided. A nonce is required for Proof-of-Possession on public clients.";
@@ -426,6 +428,10 @@ namespace Microsoft.Identity.Client
 
         public const string MultiCloudSupportUnavailable = "Multi cloud support unavailable with broker.";
 
+        public const string RequestFailureErrorMessage = "=== Token Acquisition ({0}) failed.\n\tHost: {1}.";
+
+        public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}.";
+
         public static string InvalidTokenProviderResponseValue(string invalidValueName)
             {
             return string.Format(
@@ -433,5 +439,6 @@ namespace Microsoft.Identity.Client
                                 "The following token provider result value is invalid: {0}.",
                                 invalidValueName);
         }
+
     }
 }
