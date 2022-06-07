@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Client.Region
 
         // returns cached region if any.
         // if nothing is cached, returns null.
-        private RegionInfo GetCachedRegion(ICoreLogger logger)
+        private RegionInfo GetCachedRegion(ILoggerAdapter logger)
         {
             if (s_failedAutoDiscovery)
             {

@@ -544,9 +544,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var platformProxy = Substitute.For<IPlatformProxy>();
                 platformProxy.CanBrokerSupportSilentAuth().Returns(false);
                 platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), true)
-                    .Returns(new InMemoryPartitionedAppTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
+                    .Returns(new InMemoryPartitionedAppTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null));
                 platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), false)
-                    .Returns(new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
+                    .Returns(new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null));
 
                 harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
 
@@ -582,9 +582,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
             platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), true)
-                .Returns(new InMemoryPartitionedAppTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
+                .Returns(new InMemoryPartitionedAppTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null));
             platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), false)
-                .Returns(new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ICoreLogger>(), null));
+                .Returns(new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null));
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
