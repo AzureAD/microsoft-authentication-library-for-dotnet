@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
-                mockBroker.IsPopSupported.Returns(true);
+                mockBroker.IsPopSupported.Returns(true);            
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
@@ -321,6 +321,41 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
 
         [TestMethod]
+        public async Task PopWhithAdfsUserAndBroker_Async()
+        {
+            //MSAL should fall back to using the browser if the broker is not available
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddAdfs2019MockHandler();
+
+                var mockBroker = Substitute.For<IBroker>();
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
+                mockBroker.IsPopSupported.Returns(true);
+
+                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithAdfsAuthority("https://fs.contoso.com/adfs/")
+                    .WithBrokerPreview()
+                    .WithTestBroker(mockBroker)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+                pca.ServiceBundle.ConfigureMockWebUI();
+
+                // Act
+                AuthenticationResult result = await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
+                            .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
         public async Task PopWhenBrokerDoesNotSupportPop_Async()
         {
             // Arrange
@@ -337,7 +372,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
             pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
 
             // Act
-
             MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
                     await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
                         .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
