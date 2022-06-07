@@ -51,7 +51,6 @@ namespace Microsoft.Identity.Client
             return idToken.PreferredUsername;
         }
 
-
         public static string GetHomeAccountId(AuthenticationRequestParameters requestParams, MsalTokenResponse response, IdToken idToken)
         {
             ClientInfo clientInfo = response.ClientInfo != null ? ClientInfo.CreateFromJson(response.ClientInfo) : null;
