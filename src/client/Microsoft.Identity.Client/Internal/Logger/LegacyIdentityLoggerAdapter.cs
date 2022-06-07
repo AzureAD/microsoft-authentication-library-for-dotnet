@@ -52,10 +52,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            //LogEntry entry = _loggerAdapterHelper.Log(this, logLevel, messageWithPii, messageScrubbed);
-            //LogToDefaultPlatformLogger(logger, logLevel, log);
-            //InvokeLogCallback(entry, string.IsNullOrEmpty(messageWithPii)? true: false);
-
             string message = LoggerAdapterHelper.FormatLogMessage(messageWithPii, messageScrubbed, PiiLoggingEnabled, _correlationId, _clientInfo);
 
             if (IsLoggingEnabled(logLevel))
@@ -63,51 +59,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 _logCallback.Invoke(logLevel, message, string.IsNullOrEmpty(messageWithPii) ? true : false);
             }
         }
-
-        //public LogEntry Log(ILoggerAdapter logger, EventLevel logLevel, string messageWithPii, string messageScrubbed)
-        //{
-        //    LogEntry entry = null;
-
-        //    if (logger.IsLoggingEnabled(logLevel))
-        //    {
-        //        entry = new LogEntry();
-        //        entry.EventLevel = logLevel;
-        //        entry.CorrelationId = CorrelationId;
-        //        entry.Message = FormatLogMessage(messageWithPii, messageScrubbed, logger.PiiLoggingEnabled, CorrelationId, ClientInformation);
-        //    }
-
-        //    return entry;
-        //}
-
-        //private void InvokeLogCallback(LogEntry logEntry, bool containsPii = false)
-        //{
-        //    _logCallback.Invoke(_loggerAdapterHelper.GetLegacyLogLevel(logEntry.EventLogLevel), logEntry.Message, containsPii);
-        //}
-
-        //private void LogToDefaultPlatformLogger(ILoggerAdapter logger, EventLevel logLevel, string log)
-        //{
-        //    if (IsDefaultPlatformLoggingEnabled)
-        //    {
-        //        switch (logLevel)
-        //        {
-        //            case EventLevel.LogAlways:
-        //                _platformLogger.Always(log);
-        //                break;
-        //            case EventLevel.Error:
-        //                _platformLogger.Error(log);
-        //                break;
-        //            case EventLevel.Warning:
-        //                _platformLogger.Warning(log);
-        //                break;
-        //            case EventLevel.Informational:
-        //                _platformLogger.Information(log);
-        //                break;
-        //            case EventLevel.Verbose:
-        //                _platformLogger.Verbose(log);
-        //                break;
-        //        }
-        //    }
-        //}
 
         public static ILoggerAdapter Create(
             Guid correlationId,
