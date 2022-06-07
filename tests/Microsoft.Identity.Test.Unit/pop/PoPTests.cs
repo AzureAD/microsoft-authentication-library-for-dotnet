@@ -321,41 +321,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
 
         [TestMethod]
-        public async Task PopWhithAdfsUserAndBroker_Async()
-        {
-            //MSAL should fall back to using the browser if the broker is not available
-            // Arrange
-            using (var harness = CreateTestHarness())
-            {
-                harness.HttpManager.AddAdfs2019MockHandler();
-
-                var mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
-                mockBroker.IsPopSupported.Returns(true);
-
-                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
-                    .WithAdfsAuthority("https://fs.contoso.com/adfs/")
-                    .WithBrokerPreview()
-                    .WithTestBroker(mockBroker)
-                    .WithHttpManager(harness.HttpManager)
-                    .BuildConcrete();
-
-                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
-                pca.ServiceBundle.ConfigureMockWebUI();
-
-                // Act
-                AuthenticationResult result = await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
-                            .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
-                            .ExecuteAsync()
-                            .ConfigureAwait(false);
-
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-            }
-        }
-
-        [TestMethod]
         public async Task PopWhenBrokerDoesNotSupportPop_Async()
         {
             // Arrange
@@ -384,13 +349,52 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
 
         [TestMethod]
+        public async Task PopWhithAdfsUserAndBroker_Async()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                //harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                
+                var mockBroker = Substitute.For<IBroker>();
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockBroker.IsPopSupported.Returns(true);
+                mockBroker.AcquireTokenSilentAsync(Arg.Any<AuthenticationRequestParameters>(), Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse());
+
+                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithAdfsAuthority(TestConstants.ADFSAuthority, false)
+                    .WithBrokerPreview()
+                    .WithTestBroker(mockBroker)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
+                TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
+
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+
+                // Act
+                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.DisplayableId)
+                    .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                    .ExecuteAsync()
+                    .ConfigureAwait(false)).ConfigureAwait(false);
+
+                //Assert
+                Assert.AreEqual(MsalError.AdfsNotSupportedWithBroker, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.AdfsNotSupportedWithBroker, ex.Message);
+            }
+        }
+
+        [TestMethod]
         public async Task EnsurePopTokenIsNotDoubleWrapped_Async()
         {
             // Arrange
             using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                
+
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
                 mockBroker.IsPopSupported.Returns(true);
