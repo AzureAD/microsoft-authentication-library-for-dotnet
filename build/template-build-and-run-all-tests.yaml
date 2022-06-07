@@ -5,7 +5,7 @@ jobs: #Build and stage projects
 
 - job: 'PreBuildCheck'
   pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
       demands:
       - msbuild
       - visualstudio
@@ -20,7 +20,7 @@ jobs: #Build and stage projects
   dependsOn:
     - 'PreBuildCheck'
   pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
       demands:
       - msbuild
       - visualstudio
@@ -47,7 +47,7 @@ jobs: #Build and stage projects
   dependsOn:
     - 'PreBuildCheck'
   pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
       demands:
       - msbuild
       - visualstudio
@@ -62,7 +62,7 @@ jobs: #Build and stage projects
   dependsOn:
     - 'PreBuildCheck'
   pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
       demands:
       - msbuild
       - visualstudio
@@ -81,7 +81,7 @@ jobs: #Build and stage projects
   dependsOn:
   - 'BuildAndStageProjects'
   pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
       demands:
       - msbuild
       - visualstudio
@@ -97,7 +97,7 @@ jobs: #Build and stage projects
   - 'BuildAndStageProjects'
   - 'BuildAndroidAppCenterApp'
   pool:
-    vmImage: 'windows-latest'
+    vmImage: 'windows-2022'
   variables:
     runCodesignValidationInjection: false
 
@@ -112,7 +112,7 @@ jobs: #Build and stage projects
   - 'BuildAndStageProjects'
   - 'BuildiOSAppCenterApp'
   pool:
-    vmImage: 'windows-latest'
+    vmImage: 'windows-2022'
   variables:
     runCodesignValidationInjection: false
 
