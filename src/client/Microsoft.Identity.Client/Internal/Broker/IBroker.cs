@@ -44,5 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account);
         #endregion Silent Flow Methods
+
+        bool IsPopSupported { get; }
     }
 }

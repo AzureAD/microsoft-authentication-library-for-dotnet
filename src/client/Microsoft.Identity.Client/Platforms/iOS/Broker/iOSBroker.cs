@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private readonly CoreUIParent _uIParent;
         private string _brokerRequestNonce;
         private bool _brokerV3Installed = false;
+        public bool IsPopSupported => false;
 
         public iOSBroker(ILoggerAdapter logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
         {

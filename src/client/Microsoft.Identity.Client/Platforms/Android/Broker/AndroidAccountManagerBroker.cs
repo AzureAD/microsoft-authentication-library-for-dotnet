@@ -35,7 +35,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private readonly ILoggerAdapter _logger;
         private readonly Activity _parentActivity;
 
-        public AndroidAccountManagerBroker(CoreUIParent uiParent, ILoggerAdapter logger)
+        public bool IsPopSupported => false;
+
+        public AndroidAccountManagerBroker(CoreUIParent uiParent, ICoreLogger logger)
         {
             _parentActivity = uiParent?.Activity;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

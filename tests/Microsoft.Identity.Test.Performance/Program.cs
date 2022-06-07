@@ -9,19 +9,48 @@ using BenchmarkDotNet.Running;
 
 namespace Microsoft.Identity.Test.Performance
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            BenchmarkRunner.Run<TokenCacheTests>(
-                DefaultConfig.Instance
-                    .WithOptions(ConfigOptions.DontOverwriteResults)
-                    .AddDiagnoser(MemoryDiagnoser.Default)
-                    .AddJob(
-                        Job.Default
-                            .WithId("Job-PerfTests")));
+            Logger.Log("Started running performance tests.");
 
-            Console.ReadKey();
+            try
+            {
+                BenchmarkSwitcher.FromTypes(new[] {
+                    typeof(AcquireTokenForClientCacheTests),
+                    typeof(AcquireTokenForOboCacheTests),
+                    typeof(TokenCacheTests),
+                    typeof(AcquireTokenNoCacheTests),
+            }).RunAll(
+#if DEBUG
+                    new DebugInProcessConfig()
+#else
+                    DefaultConfig.Instance
+#endif
+                .WithOptions(ConfigOptions.DisableLogFile)
+                .WithOptions(ConfigOptions.JoinSummary)
+                //.WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually
+                .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
+                                                       //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
+                .AddJob(
+                    Job.Default
+                        .WithId("Job-PerfTests")));
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error running performance tests.");
+                Logger.Log(ex.ToString());
+                throw;
+            }
+
+            Logger.Log("Completed running performance tests.");
         }
+    }
+
+    public static class Logger
+    {
+        private const string LogPrefix = "[Test.Performance]";
+        public static void Log(string message) => Console.WriteLine($"{LogPrefix} {message}");
     }
 }

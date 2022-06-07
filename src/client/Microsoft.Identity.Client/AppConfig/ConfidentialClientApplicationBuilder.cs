@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
         internal ConfidentialClientApplicationBuilder(ApplicationConfiguration configuration)
             : base(configuration)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
         public static ConfidentialClientApplicationBuilder CreateWithApplicationOptions(
             ConfidentialClientApplicationOptions options)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
 
             var config = new ApplicationConfiguration();
             var builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
 #endif
         public static ConfidentialClientApplicationBuilder Create(string clientId)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
 
             var config = new ApplicationConfiguration();
             return new ConfidentialClientApplicationBuilder(config)
@@ -289,6 +289,22 @@ namespace Microsoft.Identity.Client
         public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
         {
             Config.CacheSynchronizationEnabled = enableCacheSynchronization;
+            return this;
+        }
+
+        /// <summary>
+        /// Allows setting a callback which returns an access token, based on the passed-in parameters.
+        /// MSAL will pass in its authentication parameters to the callback and it is expected that the callback
+        /// will construct a <see cref="TokenProviderResult"/> and return it to MSAL.
+        /// MSAL will cache the token response the same way it does for other authentication results.
+        /// Note: This is only for client credential flows.
+        /// </summary>
+        /// <param name="appTokenProvider">Authentication callback which returns an access token.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<TokenProviderResult>> appTokenProvider)
+
+        {
+            Config.AppTokenProvider = appTokenProvider ?? throw new ArgumentNullException(nameof(appTokenProvider));
             return this;
         }
 

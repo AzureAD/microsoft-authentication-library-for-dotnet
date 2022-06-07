@@ -173,9 +173,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// WARNING: if partitonKey = null, this API is slow as it loads all tokens, not just from 1 partition. 
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         /// </summary>
-        public virtual IReadOnlyList<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null)
+        public virtual List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
-            _logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
+            ICoreLogger logger = requestlogger ?? _logger;
+            logger.Always($"[GetAllAccessTokens] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
             if (string.IsNullOrEmpty(partitionKey))
             {
                 return AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
@@ -183,26 +184,28 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             else
             {
                 AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyReadOnlyList<MsalAccessTokenCacheItem>();
+                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalAccessTokenCacheItem>();
             }
         }
 
-        public virtual IReadOnlyList<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null)
+        public virtual List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ICoreLogger requestlogger = null)
         {
-            return CollectionHelpers.GetEmptyReadOnlyList<MsalRefreshTokenCacheItem>();
+            return CollectionHelpers.GetEmptyList<MsalRefreshTokenCacheItem>();
         }
 
-        public virtual IReadOnlyList<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null)
+        public virtual List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, ICoreLogger requestlogger = null)
+
         {
-            return CollectionHelpers.GetEmptyReadOnlyList<MsalIdTokenCacheItem>();
+            return CollectionHelpers.GetEmptyList<MsalIdTokenCacheItem>();
         }
 
-        public virtual IReadOnlyList<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null)
+        public virtual List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ICoreLogger requestlogger = null)
+
         {
-            return CollectionHelpers.GetEmptyReadOnlyList<MsalAccountCacheItem>();
+            return CollectionHelpers.GetEmptyList<MsalAccountCacheItem>();
         }
 
-        public IReadOnlyList<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        public List<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
             return AppMetadataDictionary.Select(kv => kv.Value).ToList();
         }
@@ -213,10 +216,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             throw new NotImplementedException();
         }
 
-        public virtual void Clear()
+        public virtual void Clear(ICoreLogger requestlogger = null)
         {
+            var logger = requestlogger ?? _logger;
             AccessTokenCacheDictionary.Clear();
-            _logger.Always("[Clear] Clearing access token cache data.");
+            logger.Always("[Clear] Clearing access token cache data.");
             // app metadata isn't removable
         }
 

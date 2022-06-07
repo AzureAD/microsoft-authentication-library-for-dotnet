@@ -88,25 +88,19 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         {
             string environment = authorityInfo.Host;
 
-            switch (authorityInfo.AuthorityType)
+            if (authorityInfo.IsInstanceDiscoverySupported)
             {
-                case AuthorityType.Aad:
-
-                    return
-                        _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                        await _regionDiscoveryProvider.GetMetadataAsync(new Uri(authorityInfo.CanonicalAuthority), requestContext).ConfigureAwait(false) ??
-                        _networkCacheMetadataProvider.GetMetadata(environment, requestContext.Logger) ??
-                        _knownMetadataProvider.GetMetadata(environment, existingEnvironmentsInCache, requestContext.Logger) ??
-                        await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
-
-                case AuthorityType.Adfs:
-                case AuthorityType.B2C:
-
-                    requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority. ");
-                    return await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
-
-                default:
-                    throw new InvalidOperationException("Unexpected authority type " + authorityInfo.AuthorityType);
+                return
+                    _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
+                    await _regionDiscoveryProvider.GetMetadataAsync(new Uri(authorityInfo.CanonicalAuthority), requestContext).ConfigureAwait(false) ??
+                    _networkCacheMetadataProvider.GetMetadata(environment, requestContext.Logger) ??
+                    _knownMetadataProvider.GetMetadata(environment, existingEnvironmentsInCache, requestContext.Logger) ??
+                    await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
+            }
+            else
+            {
+                requestContext.Logger.Info($"Skipping Instance discovery for {authorityInfo.AuthorityType} authority");
+                return await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
             }
         }
 
@@ -119,41 +113,35 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             Uri authorityUri = new Uri(authorityInfo.CanonicalAuthority);
             string environment = authorityInfo.Host;
 
-            switch (authorityInfo.AuthorityType)
+            if (authorityInfo.IsInstanceDiscoverySupported)
             {
-                case AuthorityType.Aad:
+                var entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger);
 
-                    var entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger);
-                    
-                    if (entry == null && forceValidation)
-                    {
-                        // only the network provider does validation
-                        await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
-                    }
-                    
-                    entry = entry ??
-                        await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
-                        await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
-                                     
-                    if (entry == null)
-                    {
-                        string message = "[Instance Discovery] Instance metadata for this authority could neither be fetched nor found. MSAL will continue regardless. SSO might be broken if authority aliases exist. ";
-                        requestContext.Logger.WarningPii(message + "Authority: " + authorityInfo.CanonicalAuthority, message);
+                if (entry == null && forceValidation)
+                {
+                    // only the network provider does validation
+                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
+                }
 
-                        entry = CreateEntryForSingleAuthority(authorityUri);
-                        _networkCacheMetadataProvider.AddMetadata(environment, entry);
-                    }
+                entry = entry ??
+                    await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
+                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
 
-                    return entry;
+                if (entry == null)
+                {
+                    string message = "[Instance Discovery] Instance metadata for this authority could neither be fetched nor found. MSAL will continue regardless. SSO might be broken if authority aliases exist. ";
+                    requestContext.Logger.WarningPii(message + "Authority: " + authorityInfo.CanonicalAuthority, message);
 
-                // ADFS and B2C do not support instance discovery 
-                case AuthorityType.Adfs:
-                case AuthorityType.B2C:
-                    requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority. ");
-                    return CreateEntryForSingleAuthority(authorityUri);
+                    entry = CreateEntryForSingleAuthority(authorityUri);
+                    _networkCacheMetadataProvider.AddMetadata(environment, entry);
+                }
 
-                default:
-                    throw new InvalidOperationException("Unexpected authority type " + authorityInfo.AuthorityType);
+                return entry;
+            }
+            else
+            {
+                requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority. ");
+                return CreateEntryForSingleAuthority(authorityUri);
             }
         }
 

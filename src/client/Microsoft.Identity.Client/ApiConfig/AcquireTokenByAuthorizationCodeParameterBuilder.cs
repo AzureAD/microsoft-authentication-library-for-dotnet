@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client
         internal AcquireTokenByAuthorizationCodeParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
         }
 
         internal static AcquireTokenByAuthorizationCodeParameterBuilder Create(
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string authorizationCode)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
 
             return new AcquireTokenByAuthorizationCodeParameterBuilder(confidentialClientApplicationExecutor)
                    .WithScopes(scopes).WithAuthorizationCode(authorizationCode);

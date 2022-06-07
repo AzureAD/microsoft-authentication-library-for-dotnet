@@ -86,12 +86,18 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <returns>Returns <c>true</c> if the Windows Version has WAM support</returns>
         private static bool IsWamSuportedOSInternal()
         {
+#if WINDOWS_APP
+            return true;
+#elif SUPPORTS_WIN32
             if (IsWindows() && Win32VersionApi.IsWamSupportedOs())
             {
                 return true;
             }
 
             return false;
+#else
+            return false;
+#endif
         }
 
         private static string GetWindowsVersionStringInternal()

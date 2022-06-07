@@ -116,11 +116,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <summary>
         /// If this test fails, please update the <see cref="KnownMetadataProvider"/> to
         /// use whatever Evo uses (i.e. the aliases, preferred network / metadata from the url below).
+        /// login.windows-ppe.net discovery metadata is not part of the standard login.microsoftonline.com discovery response and
+        /// need to be appended after making a seperate discovery for login.windows-ppe.net
         /// </summary>
         [TestMethod]
         public async Task KnownInstanceMetadataIsUpToDateAsync()
         {
             const string validDiscoveryUri = @"https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.microsoftonline.com%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize";
+            const string validPpeDiscoveryUri = @"https://login.windows-ppe.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.microsoftonline.com%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize";
             HttpClient httpClient = new HttpClient();
             HttpResponseMessage discoveryResponse = await httpClient.SendAsync(
                 new HttpRequestMessage(
@@ -128,9 +131,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     validDiscoveryUri)).ConfigureAwait(false);
             string discoveryJson = await discoveryResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
+            HttpResponseMessage ppeDiscoveryResponse = await httpClient.SendAsync(
+                new HttpRequestMessage(
+                    HttpMethod.Get,
+                    validPpeDiscoveryUri)).ConfigureAwait(false);
+            string ppeDiscoveryJson = await ppeDiscoveryResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+
             InstanceDiscoveryMetadataEntry[] actualMetadata = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(discoveryJson).Metadata;
+            InstanceDiscoveryMetadataEntry[] actualPpeMetadata = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(ppeDiscoveryJson).Metadata;
+
             var processedMetadata = new Dictionary<string, InstanceDiscoveryMetadataEntry>();
-            foreach (InstanceDiscoveryMetadataEntry entry in actualMetadata)
+            foreach (InstanceDiscoveryMetadataEntry entry in actualMetadata.Concat(actualPpeMetadata))
             {
                 foreach (var alias in entry.Aliases)
                 {

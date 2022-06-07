@@ -223,14 +223,5 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams = await base.CreateRequestParametersAsync(commonParameters, requestContext, cache).ConfigureAwait(false);
             return requestParams;
         }
-
-        internal static void GuardMobileFrameworks()
-        {
-#if ANDROID || iOS || WINDOWS_APP || MAC
-            throw new PlatformNotSupportedException(
-                "Confidential Client flows are not available on mobile platforms or on Mac." +
-                "See https://aka.ms/msal-net-confidential-availability for details.");
-#endif
-        }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.AuthorityInfo;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -79,7 +80,7 @@ namespace Microsoft.Identity.Client.Instance
             if (!s_validatedEnvironments.Contains(authority.AuthorityInfo.Host))
             {
                 // validate the original authority, as the resolved authority might be regionalized and we cannot validate regionalized authorities.
-                var validator = AuthorityValidatorFactory.Create(authority.AuthorityInfo, _requestContext);
+                var validator = AuthorityInfoHelper.CreateAuthorityValidator(authority.AuthorityInfo, _requestContext);
                 await validator.ValidateAuthorityAsync(authority.AuthorityInfo).ConfigureAwait(false);
 
                 s_validatedEnvironments.Add(authority.AuthorityInfo.Host);

@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
         internal AbstractConfidentialClientAcquireTokenParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor.ServiceBundle)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
             ConfidentialClientApplicationExecutor = confidentialClientApplicationExecutor;
         }
 
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
             ValidateAndCalculateApiId();
             return ExecuteInternalAsync(cancellationToken);
         }
@@ -47,7 +47,9 @@ namespace Microsoft.Identity.Client
         {            
             // Confidential client must have a credential
             if (ServiceBundle?.Config.ClientCredential == null &&
-                CommonParameters.OnBeforeTokenRequestHandler == null) 
+                CommonParameters.OnBeforeTokenRequestHandler == null &&
+                ServiceBundle?.Config.AppTokenProvider == null
+                ) 
             {
                 throw new MsalClientException(
                     MsalError.ClientCredentialAuthenticationTypeMustBeDefined,
@@ -80,7 +82,7 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
+            CommonParameters.AuthenticationScheme = new PopAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
 
             return this as T;
         }

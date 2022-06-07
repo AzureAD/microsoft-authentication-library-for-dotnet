@@ -57,6 +57,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private const string InfrastructureTenant = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
         private readonly WindowsBrokerOptions _wamOptions;
 
+        public bool IsPopSupported => false;
+
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
         /// </summary>
@@ -711,6 +713,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenSilentDefaultAccountAsync(authenticationRequestParameters, defaultAccountProvider).ConfigureAwait(false);
 
+            if (string.IsNullOrEmpty(transferToken))
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.InteractionRequired,
+                    "Cannot get a token silently (internal error: found an MSA account, but could not retrieve a transfer token for it when calling WAM)");
+            }
+
             var aadAccountProvider = await _webAccountProviderFactory.GetAccountProviderAsync("organizations").ConfigureAwait(false);
             var webTokenRequest = await _aadPlugin.CreateWebTokenRequestAsync(
               aadAccountProvider,
@@ -868,9 +877,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string homeTenantId = account?.HomeAccountId?.TenantId;
             if (!string.IsNullOrEmpty(homeTenantId))
             {
+                // If it's an AAD account, only the AAD plugin should remove it
+                // If it's an MSA account - MSA plugin should remove it, but in MSA-PT scenarios it's still the AAD plugin
                 bool isMsaRequest = await IsMsaRequestAsync(
                    appConfig.Authority,
-                   appConfig.TenantId,
+                   homeTenantId,
                    _wamOptions.MsaPassthrough).ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsaRequest ? _msaPlugin : _aadPlugin;

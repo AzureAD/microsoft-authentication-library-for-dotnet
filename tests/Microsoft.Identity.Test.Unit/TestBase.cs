@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -69,6 +70,22 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Trace.Listeners.Add(new TextWriterTraceListener(traceFile, "testListener"));
             }
+        }
+
+        internal MsalTokenResponse CreateMsalRunTimeBrokerTokenResponse(string accessToken = null, string tokenType = null)
+        {
+            return new MsalTokenResponse()
+            {
+                AccessToken = accessToken ?? TestConstants.UserAccessToken,
+                IdToken = null,
+                CorrelationId = null,
+                Scope = TestConstants.ScopeStr,
+                ExpiresIn = 3600,
+                ClientInfo = null,
+                TokenType = tokenType ?? "Bearer",
+                WamAccountId = TestConstants.LocalAccountId,
+                TokenSource = TokenSource.Broker
+            };
         }
     }
 }

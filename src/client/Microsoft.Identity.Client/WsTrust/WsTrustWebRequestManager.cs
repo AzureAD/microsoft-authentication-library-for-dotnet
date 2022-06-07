@@ -54,6 +54,14 @@ namespace Microsoft.Identity.Client.WsTrust
                         MsalErrorMessage.HttpRequestUnsuccessful + "See https://aka.ms/msal-net-ropc for more information. ",
                         (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
+                requestContext.Logger.ErrorPii(
+                    string.Format(MsalErrorMessage.RequestFailureErrorMessagePii,
+                        requestContext.ApiEvent?.ApiIdString,
+                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
+                        requestContext.ServiceBundle.Config.ClientId),
+                    string.Format(MsalErrorMessage.RequestFailureErrorMessage,
+                        requestContext.ApiEvent?.ApiIdString, 
+                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host));
                 throw MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.AccessingWsMetadataExchangeFailed,
                     message,
@@ -84,7 +92,11 @@ namespace Microsoft.Identity.Client.WsTrust
                 wsTrustRequest,
                 Encoding.UTF8, "application/soap+xml");
 
-            HttpResponse resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, headers, body, requestContext.Logger).ConfigureAwait(false);
+            HttpResponse resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, 
+                headers, 
+                body, 
+                requestContext.Logger, 
+                cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -141,7 +153,8 @@ namespace Microsoft.Identity.Client.WsTrust
             var httpResponse = await _httpManager.SendGetAsync(
                 uri,
                 msalIdParams,
-                requestContext.Logger).ConfigureAwait(false);
+                requestContext.Logger,
+                cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
 
             if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -152,6 +165,14 @@ namespace Microsoft.Identity.Client.WsTrust
                     MsalErrorMessage.HttpRequestUnsuccessful,
                     (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
+            requestContext.Logger.ErrorPii(
+                    string.Format(MsalErrorMessage.RequestFailureErrorMessagePii,
+                        requestContext.ApiEvent?.ApiIdString,
+                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
+                        requestContext.ServiceBundle.Config.ClientId),
+                    string.Format(MsalErrorMessage.RequestFailureErrorMessage,
+                        requestContext.ApiEvent?.ApiIdString, 
+                        requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host));
             throw MsalServiceExceptionFactory.FromHttpResponse(
                 MsalError.UserRealmDiscoveryFailed,
                 message,

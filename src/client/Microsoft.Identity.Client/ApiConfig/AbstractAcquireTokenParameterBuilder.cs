@@ -281,7 +281,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(tenantId));
             }
 
-            if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+            if (!ServiceBundle.Config.Authority.AuthorityInfo.IsTenantOverrideSupported)
             {
                 throw new MsalClientException(
                     MsalError.TenantOverrideNonAad,

@@ -541,10 +541,10 @@ namespace Microsoft.Identity.Client
         {
             if (Config.Authority?.AuthorityInfo != null)
             {
+                AadAuthority aadAuthority = Config.Authority as AadAuthority;
                 if (!string.IsNullOrEmpty(Config.TenantId) &&
-                    Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad)
+                    aadAuthority != null)
                 {
-                    AadAuthority aadAuthority = Config.Authority as AadAuthority;
                     if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() &&
                         !string.Equals(aadAuthority.TenantId, Config.TenantId))
                     {

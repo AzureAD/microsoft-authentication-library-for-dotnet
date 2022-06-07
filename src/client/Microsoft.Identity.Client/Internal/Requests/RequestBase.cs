@@ -309,7 +309,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected KeyValuePair<string, string>? GetCcsUpnHeader(string upnHeader)
         {
-            if (AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
+            if (AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C) 
             {
                 return null;
             }

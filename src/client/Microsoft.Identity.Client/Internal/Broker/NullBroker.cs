@@ -23,6 +23,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
     {
         private readonly ILoggerAdapter _logger;
 
+        public bool IsPopSupported => false;
+
         public NullBroker(ILoggerAdapter logger)
         {
             _logger = logger ?? new NullLogger();

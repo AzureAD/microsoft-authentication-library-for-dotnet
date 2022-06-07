@@ -38,6 +38,9 @@ namespace Microsoft.Identity.Client.Region
         private readonly IHttpManager _httpManager;
         private readonly int _imdsCallTimeoutMs;
 
+        // lock for discovery. So it is done only once
+        private static readonly SemaphoreSlim _lockDiscover = new SemaphoreSlim(1);
+
         private static string s_autoDiscoveredRegion;
         private static bool s_failedAutoDiscovery = false;
         private static string s_regionDiscoveryDetails;
@@ -74,7 +77,7 @@ namespace Microsoft.Identity.Client.Region
 
             // MSAL always performs region auto-discovery, even if the user configured an actual region
             // in order to detect inconsistencies and report via telemetry
-            var discoveredRegion = await DiscoverAndCacheAsync(azureRegionConfig, logger, requestContext.UserCancellationToken).ConfigureAwait(false);
+            var discoveredRegion = await DiscoverAndCacheAsync(logger, requestContext.UserCancellationToken).ConfigureAwait(false);
 
             RecordTelemetry(requestContext.ApiEvent, azureRegionConfig, discoveredRegion);
 
@@ -149,9 +152,115 @@ namespace Microsoft.Identity.Client.Region
                  apiEvent.RegionOutcome == default(RegionOutcome));
         }
 
-        private async Task<RegionInfo> DiscoverAndCacheAsync(string azureRegionConfig, ILoggerAdapter logger, CancellationToken requestCancellationToken)
+        private async Task<RegionInfo> DiscoverAndCacheAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
         {
-            if (s_failedAutoDiscovery == true)
+            var regionInfo = GetCachedRegion(logger);
+            if (regionInfo != null)
+            {
+                return regionInfo;
+            }
+
+            var result = await DiscoverAsync(logger, requestCancellationToken).ConfigureAwait(false);
+
+            return result;
+        }
+
+        private async Task<RegionInfo> DiscoverAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
+        {
+            RegionInfo result = null;
+            try
+            {
+                await _lockDiscover.WaitAsync().ConfigureAwait(false);
+
+                var regionInfo = GetCachedRegion(logger);
+                if (regionInfo != null)
+                {
+                    result = regionInfo;
+                }
+                else
+                {
+                    try
+                    {
+                        string region = Environment.GetEnvironmentVariable("REGION_NAME")?.Replace(" ", string.Empty).ToLowerInvariant();
+
+                        if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
+                        {
+                            logger.Info($"[Region discovery] Region found in environment variable: {region}.");
+                            result = new RegionInfo(region, RegionAutodetectionSource.EnvVariable, null);
+                        }
+                        else
+                        {
+                            var headers = new Dictionary<string, string>
+                                                                        {
+                                                                            { "Metadata", "true" }
+                                                                        };
+
+                            Uri imdsUri = BuildImdsUri(DefaultApiVersion);
+
+                            HttpResponse response = await _httpManager.SendGetAsync(imdsUri, headers, logger, retry: false, GetCancellationToken(requestCancellationToken))
+                                .ConfigureAwait(false);
+
+                            // A bad request occurs when the version in the IMDS call is no longer supported.
+                            if (response.StatusCode == HttpStatusCode.BadRequest)
+                            {
+                                string apiVersion = await GetImdsUriApiVersionAsync(logger, headers, requestCancellationToken).ConfigureAwait(false); // Get the latest version
+                                imdsUri = BuildImdsUri(apiVersion);
+                                response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger, retry: false, GetCancellationToken(requestCancellationToken))
+                                    .ConfigureAwait(false); // Call again with updated version
+                            }
+
+                            if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
+                            {
+                                region = response.Body;
+
+                                if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
+                                {
+                                    logger.Info($"[Region discovery] Call to local IMDS succeeded. Region: {region}. {DateTime.UtcNow}");
+                                    result = new RegionInfo(region, RegionAutodetectionSource.Imds, null);
+                                }
+                            }
+                            else
+                            {
+                                s_regionDiscoveryDetails = $"Call to local IMDS failed with status code {response.StatusCode} or an empty response. {DateTime.UtcNow}";
+                                logger.Error($"[Region discovery] {s_regionDiscoveryDetails}");
+                            }
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        if (e is MsalServiceException msalEx && MsalError.RequestTimeout.Equals(msalEx?.ErrorCode))
+                        {
+                            s_regionDiscoveryDetails = $"Call to local IMDS timed out after {_imdsCallTimeoutMs}.";
+                            logger.Error($"[Region discovery] {s_regionDiscoveryDetails}.");
+                        }
+                        else
+                        {
+                            s_regionDiscoveryDetails = $"IMDS call failed with exception {e}. {DateTime.UtcNow}";
+                            logger.Error($"[Region discovery] {s_regionDiscoveryDetails}");
+                        }
+                    }
+                }
+
+                result = result ?? new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, s_regionDiscoveryDetails);
+            }
+            finally
+            {
+                s_failedAutoDiscovery = result.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery;
+                s_autoDiscoveredRegion = result.Region;
+                s_regionDiscoveryDetails = result.RegionDetails;
+
+                _lockDiscover.Release();
+            }
+
+            return result;
+        }
+
+        // returns cached region if any.
+        // if nothing is cached, returns null.
+        private RegionInfo GetCachedRegion(ICoreLogger logger)
+        {
+            if (s_failedAutoDiscovery)
             {
                 var autoDiscoveryError = $"[Region discovery] Auto-discovery failed in the past. Not trying again. {s_regionDiscoveryDetails}. {DateTime.UtcNow}";
                 logger.Verbose(autoDiscoveryError);
@@ -165,78 +274,8 @@ namespace Microsoft.Identity.Client.Region
                 return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache, null);
             }
 
-            var result = await DiscoverAsync(logger, requestCancellationToken).ConfigureAwait(false);
-
-            s_failedAutoDiscovery = result.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery;
-            s_autoDiscoveredRegion = result.Region;
-            s_regionDiscoveryDetails = result.RegionDetails;
-
-            return result;
-        }
-
-        private async Task<RegionInfo> DiscoverAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
-        {
-            string region = Environment.GetEnvironmentVariable("REGION_NAME")?.Replace(" ", string.Empty).ToLowerInvariant();
-
-            if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
-            {
-                logger.Info($"[Region discovery] Region found in environment variable: {region}.");
-                return new RegionInfo(region, RegionAutodetectionSource.EnvVariable, null);
-            }
-
-            try
-            {
-                var headers = new Dictionary<string, string>
-                {
-                    { "Metadata", "true" }
-                };
-
-                Uri imdsUri = BuildImdsUri(DefaultApiVersion);
-
-                HttpResponse response = await _httpManager.SendGetAsync(imdsUri, headers, logger, retry: false, GetCancellationToken(requestCancellationToken))
-                    .ConfigureAwait(false);
-
-                // A bad request occurs when the version in the IMDS call is no longer supported.
-                if (response.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    string apiVersion = await GetImdsUriApiVersionAsync(logger, headers, requestCancellationToken).ConfigureAwait(false); // Get the latest version
-                    imdsUri = BuildImdsUri(apiVersion);
-                    response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger, retry: false, GetCancellationToken(requestCancellationToken))
-                        .ConfigureAwait(false); // Call again with updated version
-                }
-
-                if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
-                {
-                    region = response.Body;
-
-                    if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
-                    {
-                        logger.Info($"[Region discovery] Call to local IMDS succeeded. Region: {region}. {DateTime.UtcNow}");
-                        return new RegionInfo(region, RegionAutodetectionSource.Imds, null);
-                    }
-                }
-                else
-                {
-                    s_regionDiscoveryDetails = $"Call to local IMDS failed with status code {response.StatusCode} or an empty response. {DateTime.UtcNow}";
-                    logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}");
-                }
-
-            }
-            catch (Exception e)
-            {
-                if (e is MsalServiceException msalEx && MsalError.RequestTimeout.Equals(msalEx?.ErrorCode))
-                {
-                    s_regionDiscoveryDetails = $"Call to local IMDS timed out after {_imdsCallTimeoutMs}.";
-                    logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}.");
-                }
-                else
-                {
-                    s_regionDiscoveryDetails = $"IMDS call failed with exception {e}. {DateTime.UtcNow}";
-                    logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}");
-                }
-            }
-
-            return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, s_regionDiscoveryDetails);
+            logger.Info($"[Region discovery] Auto-discovery successful but found null or empty region.");
+            return null;
         }
 
         private static bool ValidateRegion(string region, string source, ILoggerAdapter logger)

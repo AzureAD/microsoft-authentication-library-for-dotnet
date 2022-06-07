@@ -170,26 +170,31 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 string sudoUser = Environment.GetEnvironmentVariable("SUDO_USER");
                 if (!string.IsNullOrWhiteSpace(sudoUser))
                 {
-                    throw new MsalClientException(MsalError.LinuxXdgOpen, MsalErrorMessage.LinuxOpenAsSudoNotSupported);
+                    throw new MsalClientException(
+                        MsalError.LinuxXdgOpen, 
+                        MsalErrorMessage.LinuxOpenAsSudoNotSupported);
                 }
 
                 try
                 {
-                    ProcessStartInfo psi = null;
+                    bool opened = false;
 
                     foreach (string openTool in GetOpenToolsLinux(isBrokerConfigured))
                     {
                         if (TryGetExecutablePath(openTool, out string openToolPath))
                         {
-                            psi = OpenLinuxBrowser(openToolPath, url);
-
+                            OpenLinuxBrowser(openToolPath, url);
+                            opened = true;
                             break;
                         }
                     }
                     
-                    if (psi == null)
+                    if (!opened)
+
                     {
-                        throw new Exception("Failed to locate a utility to launch the default web browser.");
+                        throw new MsalClientException(
+                            MsalError.LinuxXdgOpen,
+                            MsalErrorMessage.LinuxOpenToolFailed);
                     }
                 }
                 catch (Exception ex)
@@ -212,7 +217,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         }
 
-        private ProcessStartInfo OpenLinuxBrowser(string openToolPath, string url)
+        private void OpenLinuxBrowser(string openToolPath, string url)
         {
             ProcessStartInfo psi = new ProcessStartInfo(openToolPath, url)
             {
@@ -222,17 +227,16 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
             Process.Start(psi);
 
-            return psi;
         }
 
         private string[] GetOpenToolsLinux(bool isBrokerConfigured)
         {
             if (isBrokerConfigured)
             {
-                return new[] { "microsoft-edge", "xdg-open", "gnome-open", "kfmclient" };
+                return new[] { "microsoft-edge", "xdg-open", "gnome-open", "kfmclient", "wslview" };
             }
 
-            return new[] { "xdg-open", "gnome-open", "kfmclient" };
+            return new[] { "xdg-open", "gnome-open", "kfmclient", "microsoft-edge", "wslview" };
         }
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
