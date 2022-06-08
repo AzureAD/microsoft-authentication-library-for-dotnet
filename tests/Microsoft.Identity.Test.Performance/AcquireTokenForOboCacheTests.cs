@@ -145,7 +145,9 @@ namespace Microsoft.Identity.Test.Performance
                          suggestedCacheKey: userAssertionHash,
                          hasTokens: true,
                          suggestedCacheExpiry: null,
-                         cancellationToken: CancellationToken.None);
+                         cancellationToken: CancellationToken.None,
+                         msalIdentityLogger: null,
+                         piiLoggingEnabled: false);
                     await _cca.UserTokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     _cca.UserTokenCacheInternal.Accessor.Clear();
                 }

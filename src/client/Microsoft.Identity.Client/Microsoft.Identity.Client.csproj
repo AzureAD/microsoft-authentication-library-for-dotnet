@@ -1,5 +1,8 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
 
+  <ItemGroup>
+    <Reference Include="netstandard" />
+  </ItemGroup>
   
   <PropertyGroup Label="Targets required for unit tests to run">
     
