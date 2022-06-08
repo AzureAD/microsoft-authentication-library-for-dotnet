@@ -210,6 +210,8 @@ namespace Microsoft.Identity.Client
         /// This is a delegate that computes a Base-64 encoded JWT for each authentication call.</param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.Obsolete("Will be removed in favor of WithClientAssertion(AssertionRequestOptions)")]
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<string> clientAssertionDelegate)
         {
             if (clientAssertionDelegate == null)
@@ -256,6 +258,8 @@ namespace Microsoft.Identity.Client
         /// This is a delegate that computes a Base-64 encoded JWT for each authentication call.</param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.Obsolete("Will be removed in favor of WithClientAssertion(AssertionRequestOptions)")]
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate)
         {
             if (clientAssertionAsyncDelegate == null)

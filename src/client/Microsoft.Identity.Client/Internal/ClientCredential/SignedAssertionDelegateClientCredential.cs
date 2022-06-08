@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         internal Func<CancellationToken, Task<string>> _signedAssertionDelegate { get; }
         internal Func<Microsoft.Identity.Client.AssertionRequestOptions, Task<string>> _signedAssertionWithInfoDelegate { get; }
 
+        [Obsolete("Will be removed in favor of new constructor")]
         public SignedAssertionDelegateClientCredential(Func<CancellationToken, Task<string>> signedAssertionDelegate)
         {
             _signedAssertionDelegate = signedAssertionDelegate;
