@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
 
-    <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
-    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
 
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>
-    <TargetFramework Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetCore)</TargetFramework>
-    <TargetFramework Condition="$([MSBuild]::IsOsPlatform('Linux')) ">$(TargetFrameworkNetCore)</TargetFramework>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetStandard)</TargetFrameworks>
+    <TargetFramework Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard)</TargetFramework>
+    <TargetFramework Condition="$([MSBuild]::IsOsPlatform('Linux')) ">$(TargetFrameworkNetStandard)</TargetFramework>
 
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
   </PropertyGroup>
