@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         {
             if (_uiException == null)
             {
-                _uiException = e.TransferedException;
+                _uiException = e.TransferredException;
             }
 
 #pragma warning disable 618 // SilentWindowsFormsAuthenticationDialog is marked obsolete

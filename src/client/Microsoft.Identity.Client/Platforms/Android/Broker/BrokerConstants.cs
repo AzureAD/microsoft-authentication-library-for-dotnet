@@ -96,17 +96,17 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public const string ClientTlsNotSupported = " PKeyAuth/1.0";
 
-        public const string ChallangeRequestHeader = "WWW-Authenticate";
+        public const string ChallengeRequestHeader = "WWW-Authenticate";
 
-        public const string ChallangeResponseHeader = "Authorization";
+        public const string ChallengeResponseHeader = "Authorization";
 
-        public const string ChallangeResponseType = "PKeyAuth";
+        public const string ChallengeResponseType = "PKeyAuth";
 
-        public const string ChallangeResponseToken = "AuthToken";
+        public const string ChallengeResponseToken = "AuthToken";
 
-        public const string ChallangeResponseContext = "Context";
+        public const string ChallengeResponseContext = "Context";
 
-        public const string ChallangeResponseVersion = "Version";
+        public const string ChallengeResponseVersion = "Version";
 
         public const string ResponseErrorCode = "com.microsoft.aad.adal:BrowserErrorCode";
 
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public const string ClientTlsRedirect = "urn:http-auth:PKeyAuth";
 
-        public const string ChallangeTlsIncapable = "x-ms-PKeyAuth";
+        public const string ChallengeTlsIncapable = "x-ms-PKeyAuth";
 
         public const string ChallangeTlsIncapableVersion = "1.0";
 
@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public const string GetIntentForInteractiveRequest = "GET_INTENT_FOR_INTERACTIVE_REQUEST";
         public const string AcquireTokenSilent = "ACQUIRE_TOKEN_SILENT";
         public const string ClientAdvertisedMaximumBPVersionKey = "broker.protocol.version.name";
-        public const string BrokerProtocalVersionCode = "3.0";
+        public const string BrokerProtocolVersionCode = "3.0";
         public const string ClientConfiguredMinimumBPVersionKey = "required.broker.protocol.version.name";
         public const string NegotiatedBPVersionKey = "common.broker.protocol.version.name";
         public const string BrokerResultV2 = "broker_result_v2";

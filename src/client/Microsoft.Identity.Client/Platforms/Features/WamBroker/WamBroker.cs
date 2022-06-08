@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         /// In WAM, AcquireTokenInteractive is always associated to an account. WAM also allows for an "account picker" to be displayed,
         /// which is similar to the EVO browser experience, allowing the user to add an account or use an existing one.
         ///
-        /// MSAL does not have a concept of account picker so MSAL.AccquireTokenInteractive will:
+        /// MSAL does not have a concept of account picker so MSAL.AcquireTokenInteractive will:
         ///
         /// 1. Call WAM.AccountPicker if an IAccount (or possibly login_hint) is not configured
         /// 2. Figure out the WAM.AccountID associated to the MSAL.Account
@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         /// <summary>
         /// Some WAM operations fail for work and school accounts when the authority is env/organizations
-        /// Chaing the authority to env/common in this case works around this problem.
+        /// Changing the authority to env/common in this case works around this problem.
         /// 
         /// https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3217
         /// </summary>
@@ -555,7 +555,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     .ConfigureAwait(false);
 
                 // For MSA-PT scenario, MSAL's authority is wrong. MSAL will use Account.HomeTenantId
-                // which will essentialyl be /consumers. This is wrong, we are not trying to obtain
+                // which will essentialy be /consumers. This is wrong, we are not trying to obtain
                 // an MSA token, we are trying to obtain an ADD *guest* token.
                 string differentAuthority = null;
                 if (_wamOptions.MsaPassthrough &&

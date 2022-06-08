@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client
         /// can rely on for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        /// <param name="statusCode">Status code of the resposne received from the service.</param>
+        /// <param name="statusCode">Status code of the response received from the service.</param>
         public MsalServiceException(string errorCode, string errorMessage, int statusCode)
             : this(errorCode, errorMessage)
         {
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client
         /// can rely on for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        /// <param name="statusCode">HTTP status code of the resposne received from the service.</param>
+        /// <param name="statusCode">HTTP status code of the response received from the service.</param>
         /// <param name="innerException">
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified.

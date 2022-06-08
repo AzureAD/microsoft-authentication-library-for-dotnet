@@ -677,7 +677,7 @@ namespace Microsoft.Identity.Json.Utilities
                         {
                             resolvedMembers.Add(memberInfo);
                         }
-                        else if (!IsOverridenGenericMember(memberInfo, bindingAttr) || memberInfo.Name == "Item")
+                        else if (!IsOverriddenGenericMember(memberInfo, bindingAttr) || memberInfo.Name == "Item")
                         {
                             // two members with the same name were declared on a type
                             // this can be done via IL emit, e.g. Moq
@@ -697,7 +697,7 @@ namespace Microsoft.Identity.Json.Utilities
             return distinctMembers;
         }
 
-        private static bool IsOverridenGenericMember(MemberInfo memberInfo, BindingFlags bindingAttr)
+        private static bool IsOverriddenGenericMember(MemberInfo memberInfo, BindingFlags bindingAttr)
         {
             if (memberInfo.MemberType() != MemberTypes.Property)
             {
@@ -1042,7 +1042,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         public static bool IsMethodOverridden(Type currentType, Type methodDeclaringType, string method)
         {
-            bool isMethodOverriden = currentType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            bool isMethodOverridden = currentType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 .Any(info =>
                     info.Name == method &&
                     // check that the method overrides the original on DynamicObjectProxy
@@ -1050,7 +1050,7 @@ namespace Microsoft.Identity.Json.Utilities
                     && info.GetBaseDefinition().DeclaringType == methodDeclaringType
                 );
 
-            return isMethodOverriden;
+            return isMethodOverridden;
         }
 
         public static object GetDefaultValue(Type type)

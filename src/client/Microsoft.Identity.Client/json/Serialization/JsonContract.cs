@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Json.Serialization
     internal abstract class JsonContract
     {
         internal bool IsNullable;
-        internal bool IsConvertable;
+        internal bool IsConvertible;
         internal bool IsEnum;
         internal Type NonNullableUnderlyingType;
         internal ReadType InternalReadType;
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Json.Serialization
         /// <value>The converter.</value>
         public JsonConverter Converter { get; set; }
 
-        // internally specified JsonConverter's to override default behavour
+        // internally specified JsonConverter's to override default behavior
         // checked for after passed in converters and attribute specified converters
         internal JsonConverter InternalConverter { get; set; }
 
@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Json.Serialization
 
             CreatedType = NonNullableUnderlyingType;
 
-            IsConvertable = ConvertUtils.IsConvertible(NonNullableUnderlyingType);
+            IsConvertible = ConvertUtils.IsConvertible(NonNullableUnderlyingType);
             IsEnum = NonNullableUnderlyingType.IsEnum();
 
             InternalReadType = ReadType.Read;

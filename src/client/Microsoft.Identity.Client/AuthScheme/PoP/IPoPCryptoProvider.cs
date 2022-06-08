@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// The canonical representation of the JWK.         
         /// See https://tools.ietf.org/html/rfc7638#section-3
         /// </summary>
-        string CannonicalPublicKeyJwk { get; }
+        string CanonicalPublicKeyJwk { get; }
 
         /// <summary>
         /// Algorithm used to sign proof of possession request. 

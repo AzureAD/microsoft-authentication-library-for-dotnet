@@ -1088,9 +1088,9 @@ namespace Microsoft.Identity.Json.Linq
                 return TypeCode.Empty;
             }
 
-            if (_value is IConvertible convertable)
+            if (_value is IConvertible convertible)
             {
-                return convertable.GetTypeCode();
+                return convertible.GetTypeCode();
             }
 
             return TypeCode.Object;

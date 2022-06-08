@@ -948,9 +948,9 @@ namespace Microsoft.Identity.Json
 
             if (!schema.AllowAdditionalProperties)
             {
-                bool propertyDefinied = IsPropertyDefinied(schema, propertyName);
+                bool propertyDefined = IsPropertyDefined(schema, propertyName);
 
-                if (!propertyDefinied)
+                if (!propertyDefined)
                 {
                     RaiseError("Property '{0}' has not been defined and the schema does not allow additional properties.".FormatWith(CultureInfo.InvariantCulture, propertyName), schema);
                 }
@@ -959,7 +959,7 @@ namespace Microsoft.Identity.Json
             _currentScope.CurrentPropertyName = propertyName;
         }
 
-        private bool IsPropertyDefinied(JsonSchemaModel schema, string propertyName)
+        private bool IsPropertyDefined(JsonSchemaModel schema, string propertyName)
         {
             if (schema.Properties != null && schema.Properties.ContainsKey(propertyName))
             {

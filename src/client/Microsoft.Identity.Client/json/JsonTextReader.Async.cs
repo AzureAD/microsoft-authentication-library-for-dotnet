@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Json
     internal partial class JsonTextReader
     {
         // It's not safe to perform the async methods here in a derived class as if the synchronous equivalent
-        // has been overriden then the asychronous method will no longer be doing the same operation
+        // has been overridden then the asynchronous method will no longer be doing the same operation
 #if HAVE_ASYNC // Double-check this isn't included inappropriately.
         private readonly bool _safeAsync;
 #endif
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Json
                         return ParseObjectAsync(cancellationToken);
                     case State.PostValue:
                         Task<bool> task = ParsePostValueAsync(false, cancellationToken);
-                        if (task.IsCompletedSucessfully())
+                        if (task.IsCompletedSuccessfully())
                         {
                             if (task.Result)
                             {
@@ -531,7 +531,7 @@ namespace Microsoft.Identity.Json
             _charPos++;
 
             Task<bool> task = EnsureCharsAsync(1, append, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 SetNewLine(task.Result);
                 return AsyncUtils.CompletedTask;

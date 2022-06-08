@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Json.Serialization
 
                 if (converter != null && converter.CanRead)
                 {
-                    deserializedValue = DeserializeConvertable(converter, reader, objectType, null);
+                    deserializedValue = DeserializeConvertible(converter, reader, objectType, null);
                 }
                 else
                 {
@@ -947,7 +947,7 @@ namespace Microsoft.Identity.Json.Serialization
 
                 try
                 {
-                    if (contract.IsConvertable)
+                    if (contract.IsConvertible)
                     {
                         JsonPrimitiveContract primitiveContract = (JsonPrimitiveContract)contract;
 
@@ -1029,7 +1029,7 @@ namespace Microsoft.Identity.Json.Serialization
                     currentValue = property.ValueProvider.GetValue(target);
                 }
 
-                value = DeserializeConvertable(propertyConverter, reader, property.PropertyType, currentValue);
+                value = DeserializeConvertible(propertyConverter, reader, property.PropertyType, currentValue);
             }
             else
             {
@@ -1415,7 +1415,7 @@ namespace Microsoft.Identity.Json.Serialization
                             object itemValue;
                             if (dictionaryValueConverter != null && dictionaryValueConverter.CanRead)
                             {
-                                itemValue = DeserializeConvertable(dictionaryValueConverter, reader, contract.DictionaryValueType, null);
+                                itemValue = DeserializeConvertible(dictionaryValueConverter, reader, contract.DictionaryValueType, null);
                             }
                             else
                             {
@@ -1499,7 +1499,7 @@ namespace Microsoft.Identity.Json.Serialization
 
                                     if (collectionItemConverter != null && collectionItemConverter.CanRead)
                                     {
-                                        value = DeserializeConvertable(collectionItemConverter, reader, contract.CollectionItemType, null);
+                                        value = DeserializeConvertible(collectionItemConverter, reader, contract.CollectionItemType, null);
                                     }
                                     else
                                     {
@@ -1653,7 +1653,7 @@ namespace Microsoft.Identity.Json.Serialization
 
                                 if (collectionItemConverter != null && collectionItemConverter.CanRead)
                                 {
-                                    value = DeserializeConvertable(collectionItemConverter, reader, contract.CollectionItemType, null);
+                                    value = DeserializeConvertible(collectionItemConverter, reader, contract.CollectionItemType, null);
                                 }
                                 else
                                 {
@@ -1788,7 +1788,7 @@ namespace Microsoft.Identity.Json.Serialization
             object result;
             if (itemConverter != null && itemConverter.CanRead)
             {
-                result = DeserializeConvertable(itemConverter, tokenReader, type, null);
+                result = DeserializeConvertible(itemConverter, tokenReader, type, null);
             }
             else
             {
@@ -1870,7 +1870,7 @@ namespace Microsoft.Identity.Json.Serialization
                                 object value;
                                 if (dynamicMemberConverter != null && dynamicMemberConverter.CanRead)
                                 {
-                                    value = DeserializeConvertable(dynamicMemberConverter, reader, t, null);
+                                    value = DeserializeConvertible(dynamicMemberConverter, reader, t, null);
                                 }
                                 else
                                 {
@@ -2149,7 +2149,7 @@ namespace Microsoft.Identity.Json.Serialization
             return createdObject;
         }
 
-        private object DeserializeConvertable(JsonConverter converter, JsonReader reader, Type objectType, object existingValue)
+        private object DeserializeConvertible(JsonConverter converter, JsonReader reader, Type objectType, object existingValue)
         {
             if (TraceWriter != null && TraceWriter.LevelFilter >= TraceLevel.Info)
             {
@@ -2202,7 +2202,7 @@ namespace Microsoft.Identity.Json.Serialization
 
                             if (propertyConverter != null && propertyConverter.CanRead)
                             {
-                                creatorPropertyContext.Value = DeserializeConvertable(propertyConverter, reader, property.PropertyType, null);
+                                creatorPropertyContext.Value = DeserializeConvertible(propertyConverter, reader, property.PropertyType, null);
                             }
                             else
                             {

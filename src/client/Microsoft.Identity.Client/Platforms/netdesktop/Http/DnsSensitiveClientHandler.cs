@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Http
 {
     internal class DnsSensitiveClientHandler : DelegatingHandler
     {
-        private readonly ConcurrentDictionary<EndpointCacheKey, bool> _endpoinsWithTcp =
+        private readonly ConcurrentDictionary<EndpointCacheKey, bool> _endpointsWithTcp =
             new ConcurrentDictionary<EndpointCacheKey, bool>();
 
         public DnsSensitiveClientHandler()
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Http
             }
 
             var key = new EndpointCacheKey(endpoint);
-            if (!_endpoinsWithTcp.TryGetValue(key, out var _))
+            if (!_endpointsWithTcp.TryGetValue(key, out var _))
             {
                 // ServicePointManager is responsible for managing different properties of a TCP connection 
                 // and one of such properties is the ConnectionLeaseTimeout. 
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Http
                 {
                     // Unity doesn't implement see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2537
                 }
-                _endpoinsWithTcp[key] = true;
+                _endpointsWithTcp[key] = true;
             }
         }
     }

@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Json
     internal partial class JsonTextWriter
     {
         // It's not safe to perform the async methods here in a derived class as if the synchronous equivalent
-        // has been overriden then the asychronous method will no longer be doing the same operation.
+        // has been overridden then the asynchronous method will no longer be doing the same operation.
 #if HAVE_ASYNC // Double-check this isn't included inappropriately.
         private readonly bool _safeAsync;
 #endif
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Json
         private Task WriteValueInternalAsync(JsonToken token, string value, CancellationToken cancellationToken)
         {
             Task task = InternalWriteValueAsync(token, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 return _writer.WriteAsync(value, cancellationToken);
             }
@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Json
         private Task WriteIntegerValueAsync(ulong uvalue, bool negative, CancellationToken cancellationToken)
         {
             Task task = InternalWriteValueAsync(JsonToken.Integer, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 return WriteDigitsAsync(uvalue, negative, cancellationToken);
             }
@@ -317,13 +317,13 @@ namespace Microsoft.Identity.Json
         internal Task DoWritePropertyNameAsync(string name, CancellationToken cancellationToken)
         {
             Task task = InternalWritePropertyNameAsync(name, cancellationToken);
-            if (!task.IsCompletedSucessfully())
+            if (!task.IsCompletedSuccessfully())
             {
                 return DoWritePropertyNameAsync(task, name, cancellationToken);
             }
 
             task = WriteEscapedStringAsync(name, _quoteName, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 return _writer.WriteAsync(':', cancellationToken);
             }
@@ -395,7 +395,7 @@ namespace Microsoft.Identity.Json
         internal Task DoWriteStartArrayAsync(CancellationToken cancellationToken)
         {
             Task task = InternalWriteStartAsync(JsonToken.StartArray, JsonContainerType.Array, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 return _writer.WriteAsync('[', cancellationToken);
             }
@@ -425,7 +425,7 @@ namespace Microsoft.Identity.Json
         internal Task DoWriteStartObjectAsync(CancellationToken cancellationToken)
         {
             Task task = InternalWriteStartAsync(JsonToken.StartObject, JsonContainerType.Object, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 return _writer.WriteAsync('{', cancellationToken);
             }
@@ -477,7 +477,7 @@ namespace Microsoft.Identity.Json
         internal Task DoWriteUndefinedAsync(CancellationToken cancellationToken)
         {
             Task task = InternalWriteValueAsync(JsonToken.Undefined, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 return _writer.WriteAsync(JsonConvert.Undefined, cancellationToken);
             }
@@ -1056,7 +1056,7 @@ namespace Microsoft.Identity.Json
         internal Task DoWriteValueAsync(string value, CancellationToken cancellationToken)
         {
             Task task = InternalWriteValueAsync(JsonToken.String, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 return value == null ? _writer.WriteAsync(JsonConvert.Null, cancellationToken) : WriteEscapedStringAsync(value, true, cancellationToken);
             }
@@ -1191,7 +1191,7 @@ namespace Microsoft.Identity.Json
         internal Task WriteValueNotNullAsync(Uri value, CancellationToken cancellationToken)
         {
             Task task = InternalWriteValueAsync(JsonToken.String, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 return WriteEscapedStringAsync(value.OriginalString, true, cancellationToken);
             }
@@ -1312,7 +1312,7 @@ namespace Microsoft.Identity.Json
         {
             UpdateScopeWithFinishedValue();
             Task task = AutoCompleteAsync(JsonToken.Undefined, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 return WriteRawAsync(json, cancellationToken);
             }

@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Json.Serialization
                 throw new ArgumentNullException(nameof(type));
             }
 
-            // for backwards compadibility the CamelCasePropertyNamesContractResolver shares contracts between instances
+            // for backwards compatibility the CamelCasePropertyNamesContractResolver shares contracts between instances
             StructMultiKey<Type, Type> key = new StructMultiKey<Type, Type>(GetType(), type);
             Dictionary<StructMultiKey<Type, Type>, JsonContract> cache = _contractCache;
             if (cache == null || !cache.TryGetValue(key, out JsonContract contract))

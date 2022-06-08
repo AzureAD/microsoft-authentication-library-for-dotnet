@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Cache
             _accessor = accessor;
         }
 
-        public byte[] Serialize(IDictionary<string, JToken> unkownNodes)
+        public byte[] Serialize(IDictionary<string, JToken> unknownNodes)
         {
             var accessTokensAsString = new List<string>();
             var refreshTokensAsString = new List<string>();

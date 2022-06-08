@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         public bool IsEmpty => _buffer == null;
 
-        public StringBuffer(IArrayPool<char> bufferPool, int initalSize) : this(BufferUtils.RentBuffer(bufferPool, initalSize))
+        public StringBuffer(IArrayPool<char> bufferPool, int initialSize) : this(BufferUtils.RentBuffer(bufferPool, initialSize))
         {
         }
 
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Json.Utilities
                 EnsureSize(bufferPool, 1);
             }
 
-            // set value and increment poisition
+            // set value and increment position
             _buffer[_position++] = value;
         }
 

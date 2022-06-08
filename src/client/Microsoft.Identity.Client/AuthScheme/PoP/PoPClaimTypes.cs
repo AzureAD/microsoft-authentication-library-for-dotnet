@@ -45,8 +45,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         /// <summary>
         /// Confirmation claim. By including this in a JWT, the issuer states that the presenter 
-        /// possesses a particular key (i.e. the private key) and that the recepient can confirm this 
-        /// cryptographycally.
+        /// possesses a particular key (i.e. the private key) and that the recipient can confirm this 
+        /// cryptographically.
         /// https://tools.ietf.org/html/rfc7800
         /// </summary>
         public const string Cnf = "cnf";
