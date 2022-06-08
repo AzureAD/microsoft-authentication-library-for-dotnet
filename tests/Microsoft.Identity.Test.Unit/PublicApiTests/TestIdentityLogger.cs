@@ -12,11 +12,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     class TestIdentityLogger : IIdentityLogger
     {
+        public EventLogLevel MinLogLevel { get; }
+
         public StringBuilder StringBuilder { get; } = new StringBuilder();
+
+        public TestIdentityLogger(EventLogLevel logLevel = EventLogLevel.Verbose)
+        {
+            MinLogLevel = logLevel;
+        }
 
         public bool IsEnabled(EventLogLevel eventLogLevel)
         {
-            return true;
+            return eventLogLevel <= MinLogLevel;
         }
 
         public void Log(LogEntry entry)

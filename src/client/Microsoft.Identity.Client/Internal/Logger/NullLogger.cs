@@ -29,6 +29,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
+            //No op
         }
 
         public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)

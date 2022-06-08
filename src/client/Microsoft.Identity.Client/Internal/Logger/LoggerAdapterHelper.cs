@@ -163,5 +163,16 @@ namespace Microsoft.Identity.Client.Internal.Logger
             string fileName = !string.IsNullOrEmpty(filePath) ? Path.GetFileNameWithoutExtension(filePath) : "";
             return new DurationLogHelper(logger, fileName + ":" + methodName, logLevel);
         }
+
+        public static EventLogLevel GetEventLogLevel(LogLevel logLevel)
+        {
+            //MSAL does not have a critical log level so it is combined with the error level
+            if (logLevel == LogLevel.Always)
+            {
+                return (EventLogLevel)((int)logLevel + 1);
+            }
+
+            return (EventLogLevel)((int)logLevel + 2);
+        }
     }
 }

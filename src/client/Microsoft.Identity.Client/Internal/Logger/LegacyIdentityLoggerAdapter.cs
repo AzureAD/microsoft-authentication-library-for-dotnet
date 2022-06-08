@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public bool IsLoggingEnabled(LogLevel logLevel)
         {
-            return logLevel <= _minLogLevel;
+            return _logCallback != null && logLevel <= _minLogLevel;
         }
 
         internal LegacyIdentityLoggerAdapter(
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
             if (IsLoggingEnabled(logLevel))
             {
-                _logCallback.Invoke(logLevel, message, string.IsNullOrEmpty(messageWithPii) ? true : false);
+                _logCallback.Invoke(logLevel, message, !string.IsNullOrEmpty(messageWithPii) ? true : false);
             }
         }
 

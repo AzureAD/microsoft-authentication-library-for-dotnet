@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             if (logger.IsLoggingEnabled(logLevel))
             {
                 entry = new LogEntry();
-                entry.EventLogLevel = GetEventLogLevel(logLevel);
+                entry.EventLogLevel = LoggerAdapterHelper.GetEventLogLevel(logLevel);
                 entry.CorrelationId = _correlationId;
                 entry.Message = LoggerAdapterHelper.FormatLogMessage(messageWithPii, messageScrubbed, logger.PiiLoggingEnabled, _correlationId, _clientInfo);
             }
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public bool IsLoggingEnabled(LogLevel logLevel)
         {
-            return _identityLogger.IsEnabled(GetEventLogLevel(logLevel));
+            return _identityLogger.IsEnabled(LoggerAdapterHelper.GetEventLogLevel(logLevel));
         }
 
         public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
@@ -87,11 +87,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
         {
             return LoggerAdapterHelper.LogMethodDuration(this, logLevel, methodName, filePath);
-        }
-
-        public EventLogLevel GetEventLogLevel(LogLevel logLevel)
-        {
-            return (EventLogLevel)((int)logLevel + 1);
         }
     }
 #endif

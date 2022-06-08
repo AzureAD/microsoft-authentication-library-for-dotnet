@@ -36,41 +36,36 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 return new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback);
             }
 
-            return new IdentityLoggerAdapter(new TestIdentityLogger(), Guid.Empty, null, null, enablePiiLogging);
+            return new IdentityLoggerAdapter(new TestIdentityLogger(LoggerAdapterHelper.GetEventLogLevel(logLevel)), Guid.Empty, null, null, enablePiiLogging);
         }
 
         [TestMethod()]
         public void IdentityLoggerConstructorComponentTest()
         {
-            ILoggerAdapter logger = new IdentityLoggerAdapter(null, Guid.Empty, null, null, false);
+            ILoggerAdapter logger = new IdentityLoggerAdapter(null, Guid.Empty, "", "", false);
             Assert.AreEqual(string.Empty, logger.ClientName);
             Assert.AreEqual(string.Empty, logger.ClientVersion);
-            logger = new IdentityLoggerAdapter(null, Guid.Empty, "comp1", null, false);
-            Assert.AreEqual(" (comp1)", logger.ClientName);
+            logger = new IdentityLoggerAdapter(null, Guid.Empty, "comp1", "", false);
+            Assert.AreEqual("comp1", logger.ClientName);
             logger = new IdentityLoggerAdapter(null, Guid.Empty, "comp1", "version1", false);
-            Assert.AreEqual(" (comp1)", logger.ClientName);
+            Assert.AreEqual("comp1", logger.ClientName);
             Assert.AreEqual("version1", logger.ClientVersion);
         }
 
         [TestMethod()]
         public void LegacyLoggerConstructorComponentTest()
         {
-            ILoggerAdapter logger = new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, LogLevel.Always, false, false, null);
+            ILoggerAdapter logger = new LegacyIdentityLoggerAdapter(Guid.Empty, "", "", LogLevel.Always, false, false, null);
             Assert.AreEqual(string.Empty, logger.ClientName);
             Assert.AreEqual(string.Empty, logger.ClientVersion);
             logger = new LegacyIdentityLoggerAdapter(Guid.Empty, "comp1", null, LogLevel.Always, false, false, null);
-            Assert.AreEqual("(comp1)", logger.ClientName);
-            logger = new LegacyIdentityLoggerAdapter(Guid.Empty, null, "version1", LogLevel.Always, false, false, null);
-            Assert.AreEqual("(comp1)", logger.ClientName);
+            Assert.AreEqual("comp1", logger.ClientName);
+            logger = new LegacyIdentityLoggerAdapter(Guid.Empty, "comp1", "version1", LogLevel.Always, false, false, null);
+            Assert.AreEqual("comp1", logger.ClientName);
             Assert.AreEqual("version1", logger.ClientVersion);
         }
 
         [TestMethod()]
-        [DataRow(LogLevel.Always, false)]
-        [DataRow(LogLevel.Error, false)]
-        [DataRow(LogLevel.Warning, false)]
-        [DataRow(LogLevel.Info, false)]
-        [DataRow(LogLevel.Verbose, false)]
         [DataRow(LogLevel.Always, true)]
         [DataRow(LogLevel.Error, true)]
         [DataRow(LogLevel.Warning, true)]
@@ -125,11 +120,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod()]
-        [DataRow(LogLevel.Always, false)]
-        [DataRow(LogLevel.Error, false)]
-        [DataRow(LogLevel.Warning, false)]
-        [DataRow(LogLevel.Info, false)]
-        [DataRow(LogLevel.Verbose, false)]
         [DataRow(LogLevel.Always, true)]
         [DataRow(LogLevel.Error, true)]
         [DataRow(LogLevel.Warning, true)]
@@ -196,6 +186,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Error));
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Warning));
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Verbose));
+
+            var IdentityLogger = CreateLogger(LogLevel.Warning);
+            Assert.IsFalse(IdentityLogger.IsLoggingEnabled(LogLevel.Info));
+            Assert.IsTrue(IdentityLogger.IsLoggingEnabled(LogLevel.Always));
+            Assert.IsTrue(IdentityLogger.IsLoggingEnabled(LogLevel.Error));
+            Assert.IsTrue(IdentityLogger.IsLoggingEnabled(LogLevel.Warning));
+            Assert.IsFalse(IdentityLogger.IsLoggingEnabled(LogLevel.Verbose));
         }
 
         [TestMethod]
