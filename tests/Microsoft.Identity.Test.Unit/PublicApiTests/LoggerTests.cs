@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                TestIdentityLogger testLogger = CreateLogger(LogLevel.Always, true) as TestIdentityLogger;
+                TestIdentityLogger testLogger = new TestIdentityLogger();
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             else
             {
-                entry.Message = TestConstants.PiiSerializeLogMessage;
+                entry.Message = TestConstants.DeserializeLogMessage;
             }
 
             args.MsalIdentityLogger.Log(entry);
@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             if (args.PiiLoggingEnabled)
             {
-                entry.Message = TestConstants.DeserializeLogMessage;
+                entry.Message = TestConstants.PiiSerializeLogMessage;
             }
             else
             {

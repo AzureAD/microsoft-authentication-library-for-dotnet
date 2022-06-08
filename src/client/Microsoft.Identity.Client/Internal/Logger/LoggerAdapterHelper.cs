@@ -47,8 +47,14 @@ namespace Microsoft.Identity.Client.Internal.Logger
         {
             if (config.IdentityLogger == null)
             {
+                if(config.LoggingCallback == null)
+                {
+                    return s_nullLogger.Value;
+                }
+
                 return LegacyIdentityLoggerAdapter.Create(correlationId, config);
             }
+
 #if XAMARINMAC20
             throw new NotImplementedException();
 #else
@@ -155,7 +161,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public static DurationLogHelper LogMethodDuration(ILoggerAdapter logger, LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
         {
             string fileName = !string.IsNullOrEmpty(filePath) ? Path.GetFileNameWithoutExtension(filePath) : "";
-            return LogBlockDuration(logger, fileName + ":" + methodName, logLevel);
+            return new DurationLogHelper(logger, fileName + ":" + methodName, logLevel);
         }
     }
 }
