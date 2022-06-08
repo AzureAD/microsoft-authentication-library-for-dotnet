@@ -49,7 +49,7 @@
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' ">
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
   </ItemGroup>
