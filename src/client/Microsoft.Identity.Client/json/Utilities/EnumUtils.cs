@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Json.Utilities
             ulong saveResult = result;
 
             // We will not optimize this code further to keep it maintainable. There are some boundary checks that can be applied
-            // to minimize the comparisons required. This code works the same for the best/worst case. In general the number of
+            // to minimize the comparsions required. This code works the same for the best/worst case. In general the number of
             // items in an enum are sufficiently small and not worth the optimization.
             while (index >= 0)
             {

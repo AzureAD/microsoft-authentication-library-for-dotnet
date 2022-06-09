@@ -1700,7 +1700,7 @@ namespace Microsoft.Identity.Json.Serialization
         public string GetResolvedPropertyName(string propertyName)
         {
             // this is a new method rather than changing the visibility of ResolvePropertyName to avoid
-            // a breaking change for anyone who has overridden the method
+            // a breaking change for anyone who has overidden the method
             return ResolvePropertyName(propertyName);
         }
     }

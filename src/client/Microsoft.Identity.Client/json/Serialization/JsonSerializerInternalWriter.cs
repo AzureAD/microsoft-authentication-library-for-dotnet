@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Json.Serialization
 
             if (converter != null && converter.CanWrite)
             {
-                SerializeConvertible(writer, converter, value, valueContract, containerContract, containerProperty);
+                SerializeConvertable(writer, converter, value, valueContract, containerContract, containerProperty);
                 return;
             }
 
@@ -627,7 +627,7 @@ namespace Microsoft.Identity.Json.Serialization
             return (value & flag) == flag;
         }
 
-        private void SerializeConvertible(JsonWriter writer, JsonConverter converter, object value, JsonContract contract, JsonContainerContract collectionContract, JsonProperty containerProperty)
+        private void SerializeConvertable(JsonWriter writer, JsonConverter converter, object value, JsonContract contract, JsonContainerContract collectionContract, JsonProperty containerProperty)
         {
             if (ShouldWriteReference(value, null, contract, collectionContract, containerProperty))
             {

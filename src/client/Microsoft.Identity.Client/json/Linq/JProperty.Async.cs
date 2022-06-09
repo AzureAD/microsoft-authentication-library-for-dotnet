@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Json.Linq
         public override Task WriteToAsync(JsonWriter writer, CancellationToken cancellationToken, params JsonConverter[] converters)
         {
             Task task = writer.WritePropertyNameAsync(_name, cancellationToken);
-            if (task.IsCompletedSuccessfully())
+            if (task.IsCompletedSucessfully())
             {
                 return WriteValueAsync(writer, cancellationToken, converters);
             }

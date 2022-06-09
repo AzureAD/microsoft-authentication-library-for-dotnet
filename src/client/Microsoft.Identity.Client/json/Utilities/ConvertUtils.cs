@@ -221,9 +221,9 @@ namespace Microsoft.Identity.Json.Utilities
         }
 
 #if HAVE_ICONVERTIBLE
-        public static TypeInformation GetTypeInformation(IConvertible convertible)
+        public static TypeInformation GetTypeInformation(IConvertible convertable)
         {
-            TypeInformation typeInformation = PrimitiveTypeCodes[(int)convertible.GetTypeCode()];
+            TypeInformation typeInformation = PrimitiveTypeCodes[(int)convertable.GetTypeCode()];
             return typeInformation;
         }
 #endif

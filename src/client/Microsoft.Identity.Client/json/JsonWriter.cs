@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Json
         // array that gives a new state based on the current state an the token being written
         private static readonly State[][] StateArray;
 
-        internal static readonly State[][] StateArrayTemplate = new[]
+        internal static readonly State[][] StateArrayTempate = new[]
         {
             //                                      Start                    PropertyName            ObjectStart         Object            ArrayStart              Array                   ConstructorStart        Constructor             Closed       Error
             //
@@ -78,9 +78,9 @@ namespace Microsoft.Identity.Json
 
         internal static State[][] BuildStateArray()
         {
-            List<State[]> allStates = StateArrayTemplate.ToList();
-            State[] errorStates = StateArrayTemplate[0];
-            State[] valueStates = StateArrayTemplate[7];
+            List<State[]> allStates = StateArrayTempate.ToList();
+            State[] errorStates = StateArrayTempate[0];
+            State[] valueStates = StateArrayTempate[7];
 
             EnumInfo enumValuesAndNames = EnumUtils.GetEnumValuesAndNames(typeof(JsonToken));
 

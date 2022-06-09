@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Json
                 if (_currentState == State.Property)
                 {
                     t = WriteNullAsync(cancellationToken);
-                    if (!t.IsCompletedSuccessfully())
+                    if (!t.IsCompletedSucessfully())
                     {
                         return AwaitProperty(t, levelsToComplete, token, cancellationToken);
                     }
@@ -302,7 +302,7 @@ namespace Microsoft.Identity.Json
                     if (_currentState != State.ObjectStart && _currentState != State.ArrayStart)
                     {
                         t = WriteIndentAsync(cancellationToken);
-                        if (!t.IsCompletedSuccessfully())
+                        if (!t.IsCompletedSucessfully())
                         {
                             return AwaitIndent(t, levelsToComplete, token, cancellationToken);
                         }
@@ -310,7 +310,7 @@ namespace Microsoft.Identity.Json
                 }
 
                 t = WriteEndAsync(token, cancellationToken);
-                if (!t.IsCompletedSuccessfully())
+                if (!t.IsCompletedSucessfully())
                 {
                     return AwaitEnd(t, levelsToComplete, cancellationToken);
                 }
