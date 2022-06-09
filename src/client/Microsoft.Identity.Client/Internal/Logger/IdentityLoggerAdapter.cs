@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if !XAMARINMAC20 && !ANDROID && !iOS
 using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
@@ -10,7 +11,7 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-#if !XAMARINMAC20 && !ANDROID && !iOS
+
     internal class IdentityLoggerAdapter : ILoggerAdapter
     {
         private readonly IIdentityLogger _identityLogger;
@@ -89,5 +90,5 @@ namespace Microsoft.Identity.Client.Internal.Logger
             return LoggerAdapterHelper.LogMethodDuration(this, logLevel, methodName, filePath);
         }
     }
-#endif
 }
+#endif

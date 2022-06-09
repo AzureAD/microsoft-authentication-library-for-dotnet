@@ -3,7 +3,6 @@
 
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Core
 {

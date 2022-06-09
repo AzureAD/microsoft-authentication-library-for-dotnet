@@ -18,7 +18,9 @@ using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
+#if !ANDROID && !iOS
 using Microsoft.IdentityModel.Abstractions;
+#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -101,7 +103,7 @@ namespace Microsoft.Identity.Client
 
         public Func<AppTokenProviderParameters, Task<TokenProviderResult>> AppTokenProvider;
 
-        #region ClientCredentials
+#region ClientCredentials
 
         public IClientCredential ClientCredential { get; internal set; }
 
@@ -137,13 +139,13 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        #endregion
+#endregion
 
-        #region Region
+#region Region
         public string AzureRegion { get; set; }
-        #endregion
+#endregion
 
-        #region Authority
+#region Authority
         // These are all used to create the Authority when the app is built.
 
         public string TenantId { get; internal set; }
@@ -171,16 +173,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-        #endregion
+#endregion
 
-        #region Test Hooks
+#region Test Hooks
         public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
-        #endregion
+#endregion
 
     }
 }

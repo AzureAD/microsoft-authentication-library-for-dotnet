@@ -7,7 +7,9 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+#if !ANDROID && !iOS
 using Microsoft.IdentityModel.Abstractions;
+#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -15,7 +17,9 @@ namespace Microsoft.Identity.Client.Internal
     {
         public Guid CorrelationId { get; }
         public ILoggerAdapter Logger { get; }
+#if !ANDROID && !iOS
         public IIdentityLogger ExternalCacheLogger { get; }
+#endif
         public IServiceBundle ServiceBundle { get; }
 
         /// <summary>
@@ -29,7 +33,9 @@ namespace Microsoft.Identity.Client.Internal
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
             Logger = LoggerAdapterHelper.CreateLogger(correlationId, ServiceBundle.Config);
+#if !ANDROID && !iOS
             ExternalCacheLogger = LoggerAdapterHelper.CreateExternalCacheLogger(correlationId, ServiceBundle.Config);
+#endif
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
         }

@@ -12,7 +12,9 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
+#if !ANDROID && !iOS
 using Microsoft.IdentityModel.Abstractions;
+#endif
 
 namespace Microsoft.Identity.Client
 {
