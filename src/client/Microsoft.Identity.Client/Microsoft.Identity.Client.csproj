@@ -1,6 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
 
-  <ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != '$(TargetFrameworkIos)' And '$(TargetFramework)' != '$(TargetFrameworkAndroid9)' And '$(TargetFramework)' != '$(TargetFrameworkAndroid10)' ">
     <Reference Include="netstandard" />
   </ItemGroup>
   
