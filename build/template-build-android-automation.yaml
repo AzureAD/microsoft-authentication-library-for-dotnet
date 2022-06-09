@@ -24,7 +24,7 @@ steps:
     solution: 'LibsAndSamples.sln'
     msbuildArgs: '/t:restore'
     platform: 'any cpu'
-    configuration: 'release'
+    configuration: 'debug'
 
 - task: MSBuild@1
   displayName: 'Build and Sign MSAL Android apk'
