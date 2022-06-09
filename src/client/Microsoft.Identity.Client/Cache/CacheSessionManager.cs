@@ -125,9 +125,12 @@ namespace Microsoft.Identity.Client.Cache
                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
-                                  correlationId: _requestParams.RequestContext.CorrelationId,
-                                  msalIdentityLogger: _requestParams.RequestContext.ExternalCacheLogger,
-                                  piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled);
+                                  correlationId: _requestParams.RequestContext.CorrelationId
+#if !ANDROID && !iOS
+                                  ,msalIdentityLogger: _requestParams.RequestContext.ExternalCacheLogger,
+                                  piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled
+#endif
+                                  );
 
                                 stopwatch.Start();
                                 await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -149,9 +152,12 @@ namespace Microsoft.Identity.Client.Cache
                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
-                                  correlationId: _requestParams.RequestContext.CorrelationId,
-                                  msalIdentityLogger: _requestParams.RequestContext.ExternalCacheLogger,
-                                  piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled);
+                                  correlationId: _requestParams.RequestContext.CorrelationId
+#if !ANDROID && !iOS
+                                  ,msalIdentityLogger: _requestParams.RequestContext.ExternalCacheLogger,
+                                  piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled
+#endif
+                                  );
 
                                 await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
