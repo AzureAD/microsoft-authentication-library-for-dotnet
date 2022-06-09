@@ -296,7 +296,7 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != '$(TargetFrameworkIos)' And '$(TargetFramework)' != '$(TargetFrameworkAndroid9)' And '$(TargetFramework)' != '$(TargetFrameworkAndroid10)' ">
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.18.0" />
   </ItemGroup>
 </Project>

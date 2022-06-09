@@ -84,7 +84,9 @@ namespace Microsoft.Identity.Client
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
         public LogCallback LoggingCallback { get; internal set; }
+#if !ANDROID && !iOS
         public IIdentityLogger IdentityLogger { get; internal set; }
+#endif
         public string Component { get; internal set; }
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
         public bool UseRecommendedDefaultRedirectUri { get; internal set; }

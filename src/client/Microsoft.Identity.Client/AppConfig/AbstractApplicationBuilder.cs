@@ -274,6 +274,7 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+#if !ANDROID && !iOS
         /// <summary>
         /// Sets the Identity Logger 
         /// </summary>
@@ -293,6 +294,7 @@ namespace Microsoft.Identity.Client
             Config.EnablePiiLogging = enablePiiLogging;
             return (T)this;
         }
+#endif
 
         /// <summary>
         /// Sets the Debug logging callback to a default debug method which displays
@@ -536,7 +538,7 @@ namespace Microsoft.Identity.Client
             return Config;
         }
 
-        #region Authority
+#region Authority
         private void ResolveAuthority()
         {
             if (Config.Authority?.AuthorityInfo != null)
@@ -837,7 +839,7 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-        #endregion
+#endregion
 
         private static string GetValueIfNotEmpty(string original, string value)
         {
