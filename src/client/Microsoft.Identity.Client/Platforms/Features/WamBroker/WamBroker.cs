@@ -555,7 +555,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     .ConfigureAwait(false);
 
                 // For MSA-PT scenario, MSAL's authority is wrong. MSAL will use Account.HomeTenantId
-                // which will essentialy be /consumers. This is wrong, we are not trying to obtain
+                // which will essentially be /consumers. This is wrong, we are not trying to obtain
                 // an MSA token, we are trying to obtain an ADD *guest* token.
                 string differentAuthority = null;
                 if (_wamOptions.MsaPassthrough &&
