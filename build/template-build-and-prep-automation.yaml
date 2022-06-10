@@ -25,15 +25,20 @@ steps:
 - task: DownloadSecureFile@1
   displayName: 'Download Xamarin Ui Test Tools'
   inputs:
-    secureFile: '8967c7eb-9f99-4122-ac28-84ae962a71bd'
+    secureFile: 'test-cloud.exe2'
 
 - task: CopyFiles@2
   displayName: 'Stage Xamarin Ui Test Tools'
   inputs:
     SourceFolder: '$(Agent.TempDirectory)'
-    Contents: 'test-cloud.exe'
+    Contents: 'test-cloud.exe2'
     TargetFolder: '$(build.artifactstagingdirectory)'
     flattenFolders: true
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: 'Rename-Item -Path$(build.artifactstagingdirectory)\test-cloud.exe2 -NewName "test-cloud.exe"'
 
 - task: CopyFiles@2
   displayName: 'Stage MSAL src'
