@@ -38,7 +38,7 @@ steps:
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
-    script: 'Rename-Item -Path $(build.artifactstagingdirectory)\test-cloud.exe2 -NewName "test-cloud.exe"
+    script: 'Rename-Item -Path $(build.artifactstagingdirectory)\test-cloud.exe2 -NewName "test-cloud.exe"'
 
 - task: CopyFiles@2
   displayName: 'Stage MSAL src'
