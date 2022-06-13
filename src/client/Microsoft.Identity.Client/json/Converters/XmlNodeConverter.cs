@@ -1779,7 +1779,7 @@ namespace Microsoft.Identity.Json.Converters
 
 #endif
                     DateTime d = Convert.ToDateTime(reader.Value, CultureInfo.InvariantCulture);
-#if !PORTABLE || NETSTANDARD1_3
+#if !PORTABLE || NETSTANDARD2_0
                     return XmlConvert.ToString(d, DateTimeUtils.ToSerializationMode(d.Kind));
 #else
                     return d.ToString(DateTimeUtils.ToDateTimeFormat(d.Kind), CultureInfo.InvariantCulture);
