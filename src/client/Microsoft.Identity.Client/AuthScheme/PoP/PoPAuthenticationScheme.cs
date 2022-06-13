@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
             _popCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
 
-            var keyThumbprint = ComputeThumbprint(_popCryptoProvider.CanonicalPublicKeyJwk);
+            var keyThumbprint = ComputeThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         private JObject CreateBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            JToken publicKeyJWK = JToken.Parse(_popCryptoProvider.CanonicalPublicKeyJwk);
+            JToken publicKeyJWK = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
             List<JProperty> properties = new List<JProperty>(8);
             
             // Mandatory parameters

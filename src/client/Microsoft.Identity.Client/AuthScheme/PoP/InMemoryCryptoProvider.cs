@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             InitializeSigningKey();
         }
 
-        public string CanonicalPublicKeyJwk { get; private set; }
+        public string CannonicalPublicKeyJwk { get; private set; }
 
         public string CryptographicAlgorithm { get => "RS256"; }
 
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 #endif
             RSAParameters publicKeyInfo = _signingKey.ExportParameters(false);
 
-            CanonicalPublicKeyJwk = ComputeCanonicalJwk(publicKeyInfo);
+            CannonicalPublicKeyJwk = ComputeCanonicalJwk(publicKeyInfo);
         }
 
         public byte[] Sign(byte[] payload)
