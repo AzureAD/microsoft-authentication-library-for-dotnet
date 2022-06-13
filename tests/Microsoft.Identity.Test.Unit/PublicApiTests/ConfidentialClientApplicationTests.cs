@@ -407,7 +407,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             SignedAssertion,
             SignedAssertionDelegate,
             SignedAssertionAsyncDelegate,
-            SignedAssertionWithAssertionRequestOptionsDelegate,
             SignedAssertionWithAssertionRequestOptionsAsyncDelegate,
 
         }
@@ -441,17 +440,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNull(app.Certificate);
                     break;
                 case CredentialType.SignedAssertionAsyncDelegate:
-                    builder = builder.WithClientAssertion(
-                        async ct => await Task.FromResult(TestConstants.DefaultClientAssertion).ConfigureAwait(false));
-                    app = builder.BuildConcrete();
-                    Assert.IsNull(app.Certificate);
-                    break;
-                case CredentialType.SignedAssertionWithAssertionRequestOptionsDelegate:
-                    builder = builder.WithClientAssertion((options) => {
-                        Assert.IsNotNull(options.ClientID);
-                        Assert.IsNotNull(options.TokenEndpoint);
-                        return TestConstants.DefaultClientAssertion;
-                    });
+                    builder = builder.WithClientAssertion(async (CancellationToken ct) => await Task.FromResult(TestConstants.DefaultClientAssertion).ConfigureAwait(false));
                     app = builder.BuildConcrete();
                     Assert.IsNull(app.Certificate);
                     break;
@@ -689,42 +678,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup =
                     CreateConfidentialClient(httpManager, null, CredentialType.SignedAssertionDelegate);
-
-                var app = setup.App;
-
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                Assert.IsNotNull(result);
-                Assert.IsNotNull("header.payload.signature", result.AccessToken);
-                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
-
-                // make sure user token cache is empty
-                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
-
-                // check app token cache count to be 1
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no RTs are returned
-
-                // assert client credential
-                Assert.AreEqual(
-                                    TestConstants.DefaultClientAssertion,
-                                    setup.Handler.ActualRequestPostData["client_assertion"]);
-
-                Assert.AreEqual(
-                    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-                    setup.Handler.ActualRequestPostData["client_assertion_type"]);
-            }
-        }
-
-        [TestMethod]
-        public async Task ConfidentialClientUsingSignedClientAssertion_SyncDelegateWithRequestOptionsTestAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup =
-                    CreateConfidentialClient(httpManager, null, CredentialType.SignedAssertionWithAssertionRequestOptionsDelegate);
 
                 var app = setup.App;
 
