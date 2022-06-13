@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
@@ -118,6 +119,13 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 sb.Append(crypto.CreateSha256Hash(rt) + ThrottleCommon.KeyDelimiter);
             }
 
+            // check mam enrollment id
+            if (bodyParams.TryGetValue(SilentRequestHelper.MamEnrollmentIdKey, out string mamEnrollmentId) &&
+                !string.IsNullOrEmpty(rt))
+            {
+                sb.Append(crypto.CreateSha256Hash(mamEnrollmentId) + ThrottleCommon.KeyDelimiter);
+            }
+            
             return sb.ToString();
         }
     }

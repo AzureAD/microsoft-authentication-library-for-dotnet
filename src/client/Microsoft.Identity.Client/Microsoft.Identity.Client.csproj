@@ -285,12 +285,4 @@
     <PackageReference Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.0.0" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Platforms\Features\WamBroker\win32\Splash.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Splash.resx</DependentUpon>
-    </None>
-  </ItemGroup>
-
 </Project>
