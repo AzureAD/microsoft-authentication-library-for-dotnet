@@ -349,7 +349,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             throw new NotSupportedException();
         }
    
-        #region AppMetatada - not implemented on iOS
+        #region AppMetadata - not implemented on iOS
         public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
         {
             //return MsalAppMetadataCacheItem.FromJsonString(GetPayload(appMetadataKey));

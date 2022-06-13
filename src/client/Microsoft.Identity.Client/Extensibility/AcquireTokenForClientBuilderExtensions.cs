@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="builder"></param>
         /// <param name="keyId">A key id to which the access token is associated. The token will not be retrieved from the cache unless the same key id is presented. Can be null.</param>
         /// <returns>the builder</returns>
-        public static AcquireTokenForClientParameterBuilder WithProofOfPosessionKeyId(
+        public static AcquireTokenForClientParameterBuilder WithProofOfPossessionKeyId(
             this AcquireTokenForClientParameterBuilder builder,
             string keyId)
         {

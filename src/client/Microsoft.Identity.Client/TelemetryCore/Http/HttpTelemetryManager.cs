@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 errors.Append(
                     // error codes come from the server / broker and can sometimes be full blown sentences,
                     // with punctuation that is illegal in an HTTP Header 
-                    HttpHeaderSantizer.SantizeHeader(ev.ApiErrorCode));
+                    HttpHeaderSanitizer.SanitizeHeader(ev.ApiErrorCode));
 
                 if (!firstFailure)
                     failedRequests.Append(",");

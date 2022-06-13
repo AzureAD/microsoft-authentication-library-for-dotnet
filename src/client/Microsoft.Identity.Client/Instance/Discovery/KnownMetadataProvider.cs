@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 PreferredCache = "login.partner.microsoftonline.cn"
             };
 
-            InstanceDiscoveryMetadataEntry cloudEntryGermanay = new InstanceDiscoveryMetadataEntry()
+            InstanceDiscoveryMetadataEntry cloudEntryGermany = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { "login.microsoftonline.de" },
                 PreferredNetwork = "login.microsoftonline.de",
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             AddToKnownCache(publicCloudEntry);
             AddToKnownCache(cloudEntryChina);
-            AddToKnownCache(cloudEntryGermanay);
+            AddToKnownCache(cloudEntryGermany);
             AddToKnownCache(usGovCloudEntry);
             AddToKnownCache(usCloudEntry);
             AddToKnownCache(ppeCloudEntry);

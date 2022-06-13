@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
             _popCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
 
-            var keyThumbprint = ComputeThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
+            var keyThumbprint = ComputeThumbprint(_popCryptoProvider.CanonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         private JObject CreateBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            JToken publicKeyJWK = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
+            JToken publicKeyJWK = JToken.Parse(_popCryptoProvider.CanonicalPublicKeyJwk);
             List<JProperty> properties = new List<JProperty>(8);
             
             // Mandatory parameters
@@ -134,12 +134,12 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// strict, AAD support for PoP requires that we use the base64 encoded JWK thumbprint, as described by 
         /// https://tools.ietf.org/html/rfc7638
         /// </summary>
-        private static byte[] ComputeThumbprint(string cannonicalJwk)
+        private static byte[] ComputeThumbprint(string canonicalJwk)
         {
             // Cannot be easily generalized in UAP and NetStandard 1.3
             using (SHA256 hash = SHA256.Create())
             {
-                return hash.ComputeHash(Encoding.UTF8.GetBytes(cannonicalJwk));
+                return hash.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
             }
         }
 

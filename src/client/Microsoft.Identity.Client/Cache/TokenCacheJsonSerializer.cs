@@ -18,9 +18,9 @@ namespace Microsoft.Identity.Client.Cache
             _accessor = accessor;
         }
 
-        public byte[] Serialize(IDictionary<string, JToken> unkownNodes)
+        public byte[] Serialize(IDictionary<string, JToken> unknownNodes)
         {
-            var cache = new CacheSerializationContract(unkownNodes);
+            var cache = new CacheSerializationContract(unknownNodes);
             foreach (var token in _accessor.GetAllAccessTokens())
             {
                 cache.AccessTokens[token.GetKey()

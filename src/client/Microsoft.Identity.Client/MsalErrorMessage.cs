@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseError = "Broker response returned error: ";
         public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
             "Check logs for more details and see https://aka.ms/msal-brokers. ";
-        public const string CannotInvokeBrokerForPop = "MSAL cannot invoke the broker and it is required for Proof-of-Possesion. Wam (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
+        public const string CannotInvokeBrokerForPop = "MSAL cannot invoke the broker and it is required for Proof-of-Possession. Wam (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
             "Check logs for more details and see https://aka.ms/msal-net-pop. ";
         public const string BrokerDoesNotSupportPop = "The broker does not support Proof-of-Possession on the current platform.";
         public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required for Proof-of-Possession on public clients.";
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client
 
         public const string InvalidAuthorityOpenId = "invalid authority while getting the open id config endpoint. ";
         public const string UpnRequiredForAuthroityValidation = "UPN is required for ADFS authority validation. ";
-        public const string CannotFindTheAuthEndpont = "Cannot find the auth endpoint. ";
+        public const string CannotFindTheAuthEndpoint = "Cannot find the auth endpoint. ";
 
         public const string UapCannotFindUpn =
            "Cannot find the user logged into Windows, but found a domain the name. Possible cause: the UWP application does not request the Enterprise Authentication capability. ";
@@ -411,7 +411,7 @@ namespace Microsoft.Identity.Client
                 "Failure setting process security to enable WAM Account Picker in an elevated process ({0}). For troubleshooting details, see https://aka.ms/msal-net-wam .",
                 errorCode);
 
-        public const string CcsRoutingHintMissing = "Either the userObjectIdentifier or tenantIdenifier are missing. Both are needed to create the CCS routing hint. See https://aka.ms/msal-net/ccsRouting. ";
+        public const string CcsRoutingHintMissing = "Either the userObjectIdentifier or tenantIdentifier are missing. Both are needed to create the CCS routing hint. See https://aka.ms/msal-net/ccsRouting. ";
 
         public const string StaticCacheWithExternalSerialization =
             "You configured MSAL cache serialization at the same time with internal caching options. These are mutually exclusive. " +
