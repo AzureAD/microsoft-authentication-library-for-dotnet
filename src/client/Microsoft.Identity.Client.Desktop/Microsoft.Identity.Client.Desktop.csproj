@@ -68,10 +68,6 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkUap)'">
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.18.0" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>

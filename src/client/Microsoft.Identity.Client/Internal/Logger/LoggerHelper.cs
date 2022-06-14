@@ -2,21 +2,17 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-    internal class LoggerAdapterHelper
+    internal class LoggerHelper
     {
         private static Lazy<string> s_msalVersionLazy = new Lazy<string>(() => MsalIdHelper.GetMsalVersion());
         private static Lazy<string> s_runtimeVersionLazy = new Lazy<string>(() => PlatformProxyFactory.CreatePlatformProxy(null).GetRuntimeVersion());
@@ -169,7 +165,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             //MSAL does not have a critical log level so it is combined with the error level
             if (logLevel == LogLevel.Always)
             {
-                return (EventLogLevel)((int)logLevel + 1);
+                return EventLogLevel.LogAlways;
             }
 
             return (EventLogLevel)((int)logLevel + 2);

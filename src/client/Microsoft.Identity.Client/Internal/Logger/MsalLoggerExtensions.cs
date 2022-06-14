@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Core
 
         public static void ErrorPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
         {
-            logger.Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            logger.Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void ErrorPii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Core
 
         public static void ErrorPii(this ILoggerAdapter logger, Exception exWithPii)
         {
-            logger.Log(LogLevel.Error, exWithPii.ToString(), LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            logger.Log(LogLevel.Error, exWithPii.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void Warning(this ILoggerAdapter logger, string message)
@@ -54,12 +54,12 @@ namespace Microsoft.Identity.Client.Core
 
         public static void WarningPii(this ILoggerAdapter logger, Exception exWithPii)
         {
-            logger.Log(LogLevel.Warning, exWithPii.ToString(), LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            logger.Log(LogLevel.Warning, exWithPii.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void WarningPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
         {
-            logger.Log(LogLevel.Warning, prefix + exWithPii.ToString(), prefix + LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            logger.Log(LogLevel.Warning, prefix + exWithPii.ToString(), prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void Info(this ILoggerAdapter logger, string message)
@@ -74,12 +74,12 @@ namespace Microsoft.Identity.Client.Core
 
         public static void InfoPii(this ILoggerAdapter logger, Exception exWithPii)
         {
-            logger.Log(LogLevel.Info, exWithPii.ToString(), LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            logger.Log(LogLevel.Info, exWithPii.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void InfoPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
         {
-            logger.Log(LogLevel.Info, prefix + exWithPii.ToString(), prefix + LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            logger.Log(LogLevel.Info, prefix + exWithPii.ToString(), prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void Verbose(this ILoggerAdapter logger, string message)

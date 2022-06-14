@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 return new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback);
             }
 
-            return new IdentityLoggerAdapter(new TestIdentityLogger(LoggerAdapterHelper.GetEventLogLevel(logLevel)), Guid.Empty, null, null, enablePiiLogging);
+            return new IdentityLoggerAdapter(new TestIdentityLogger(LoggerHelper.GetEventLogLevel(logLevel)), Guid.Empty, null, null, enablePiiLogging);
         }
 
         [TestMethod()]
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 entry.Message = TestConstants.DeserializeLogMessage;
             }
 
-            args.MsalIdentityLogger.Log(entry);
+            args.IdentityLogger.Log(entry);
         }
 
         private void AfterCacheAccessWithLogging(TokenCacheNotificationArgs args)
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 entry.Message = TestConstants.SerializeLogMessage;
             }
 
-            args.MsalIdentityLogger.Log(entry);
+            args.IdentityLogger.Log(entry);
         }
     }
 }

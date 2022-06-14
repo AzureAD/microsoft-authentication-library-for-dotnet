@@ -16,10 +16,12 @@ namespace DesktopTestApp
         public PublicClientHandler(string clientId, LogCallback logCallback)
         {
             ApplicationId = clientId;
+#pragma warning disable CS0618 // Type or member is obsolete
             PublicClientApplication = PublicClientApplicationBuilder.Create(ApplicationId)
                 .WithClientName(_clientName)
                 .WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
                 .WithLogging(logCallback, LogLevel.Verbose, true)
+#pragma warning restore CS0618 // Type or member is obsolete
                 .BuildConcrete();
 
             CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);

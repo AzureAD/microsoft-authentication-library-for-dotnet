@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     ? string.Empty
                     : " - " + correlationId;
 
-            _clientInfo = LoggerAdapterHelper.GetClientInfo(clientName, clientVersion);
+            _clientInfo = LoggerHelper.GetClientInfo(clientName, clientVersion);
             
             PiiLoggingEnabled = enablePiiLogging;
         }
@@ -55,28 +55,21 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            LogEntry entry = Log(this, logLevel, messageWithPii, messageScrubbed);
-            _identityLogger.Log(entry);
-        }
-
-        public LogEntry Log(ILoggerAdapter logger, LogLevel logLevel, string messageWithPii, string messageScrubbed)
-        {
             LogEntry entry = null;
 
-            if (logger.IsLoggingEnabled(logLevel))
+            if (IsLoggingEnabled(logLevel))
             {
                 entry = new LogEntry();
-                entry.EventLogLevel = LoggerAdapterHelper.GetEventLogLevel(logLevel);
+                entry.EventLogLevel = LoggerHelper.GetEventLogLevel(logLevel);
                 entry.CorrelationId = _correlationId;
-                entry.Message = LoggerAdapterHelper.FormatLogMessage(messageWithPii, messageScrubbed, logger.PiiLoggingEnabled, _correlationId, _clientInfo);
+                entry.Message = LoggerHelper.FormatLogMessage(messageWithPii, messageScrubbed, PiiLoggingEnabled, _correlationId, _clientInfo);
+                _identityLogger.Log(entry);
             }
-
-            return entry;
         }
 
         public bool IsLoggingEnabled(LogLevel logLevel)
         {
-            return _identityLogger.IsEnabled(LoggerAdapterHelper.GetEventLogLevel(logLevel));
+            return _identityLogger.IsEnabled(LoggerHelper.GetEventLogLevel(logLevel));
         }
 
         public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
@@ -86,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
         {
-            return LoggerAdapterHelper.LogMethodDuration(this, logLevel, methodName, filePath);
+            return LoggerHelper.LogMethodDuration(this, logLevel, methodName, filePath);
         }
     }
 }

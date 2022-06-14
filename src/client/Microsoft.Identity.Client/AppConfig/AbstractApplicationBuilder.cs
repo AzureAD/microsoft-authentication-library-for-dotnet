@@ -248,6 +248,7 @@ namespace Microsoft.Identity.Client
         /// PII logs are never written to default outputs like Console, Logcat or NSLog
         /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
         /// You can set it to <c>true</c> for advanced debugging requiring PII
+        /// If both WithLogging apis are set, the other one will overide the this one
         /// </param>
         /// <param name="enableDefaultPlatformLogging">Flag to enable/disable logging to platform defaults.
         /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
@@ -256,6 +257,10 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
         /// was already set on the application builder
+#if !XAMARINMAC2_0
+        [Obsolete("This is now the leggacy logging method. See For details see https://aka.ms/msal-net-logging", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
         public T WithLogging(
             LogCallback loggingCallback,
             LogLevel? logLevel = null,
@@ -274,8 +279,9 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+#if !XAMARINMAC2_0
         /// <summary>
-        /// Sets the Identity Logger 
+        /// Sets the Identity Logger. For details see https://aka.ms/msal-net-logging
         /// </summary>
         /// <param name="identityLogger">IdentityLogger</param>
         /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
@@ -283,6 +289,7 @@ namespace Microsoft.Identity.Client
         /// PII logs are never written to default outputs like Console, Logcat or NSLog
         /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
         /// You can set it to <c>true</c> for advanced debugging requiring PII
+        /// If both WithLogging apis are set, this one will override the other
         /// </param>
         /// <returns></returns>
         public T WithLogging(
@@ -293,6 +300,7 @@ namespace Microsoft.Identity.Client
             Config.EnablePiiLogging = enablePiiLogging;
             return (T)this;
         }
+#endif
 
         /// <summary>
         /// Sets the Debug logging callback to a default debug method which displays
@@ -318,11 +326,13 @@ namespace Microsoft.Identity.Client
             bool enablePiiLogging = false,
             bool withDefaultPlatformLoggingEnabled = false)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             WithLogging(
                 (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); },
                 logLevel,
                 enablePiiLogging,
                 withDefaultPlatformLoggingEnabled);
+#pragma warning restore CS0618 // Type or member is obsolete
             return (T)this;
         }
 
@@ -421,11 +431,13 @@ namespace Microsoft.Identity.Client
             WithClientCapabilities(applicationOptions.ClientCapabilities);
             WithLegacyCacheCompatibility(applicationOptions.LegacyCacheCompatibilityEnabled);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             WithLogging(
                 null,
                 applicationOptions.LogLevel,
                 applicationOptions.EnablePiiLogging,
                 applicationOptions.IsDefaultPlatformLoggingEnabled);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;

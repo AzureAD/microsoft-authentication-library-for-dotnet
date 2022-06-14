@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     ? string.Empty
                     : " - " + correlationId;
 
-            _clientInfo = LoggerAdapterHelper.GetClientInfo(clientName, clientVersion);
+            _clientInfo = LoggerHelper.GetClientInfo(clientName, clientVersion);
 
             PiiLoggingEnabled = enablePiiLogging;
             _logCallback = loggingCallback;
@@ -51,10 +51,9 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            string message = LoggerAdapterHelper.FormatLogMessage(messageWithPii, messageScrubbed, PiiLoggingEnabled, _correlationId, _clientInfo);
-
             if (IsLoggingEnabled(logLevel))
             {
+                string message = LoggerHelper.FormatLogMessage(messageWithPii, messageScrubbed, PiiLoggingEnabled, _correlationId, _clientInfo);
                 _logCallback.Invoke(logLevel, message, !string.IsNullOrEmpty(messageWithPii) ? true : false);
             }
         }
@@ -81,7 +80,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
         {
-            return LoggerAdapterHelper.LogMethodDuration(this, logLevel, methodName, filePath);
+            return LoggerHelper.LogMethodDuration(this, logLevel, methodName, filePath);
         }
     }
 }

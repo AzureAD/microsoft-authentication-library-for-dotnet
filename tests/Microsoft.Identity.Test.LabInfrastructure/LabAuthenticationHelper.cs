@@ -84,7 +84,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientIdForCertAuth)
                         .WithAuthority(new Uri(authority), true)
-                        .WithLogging(Logging)
                         .WithCertificate(cert)
                         .Build();
 
@@ -101,7 +100,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
                     confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientIdForSecretAuth)
-                        .WithLogging(Logging)
                         .WithAuthority(new Uri(authority), true)
                         .WithClientSecret(clientSecretForLab)
                         .Build();
@@ -116,7 +114,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     var clientIdForPublicClientAuth = String.IsNullOrEmpty(clientId) ? LabAccessPublicClientId : clientId;
                     var publicApp = PublicClientApplicationBuilder
                         .Create(clientIdForPublicClientAuth)
-                        .WithLogging(Logging)
                         .WithAuthority(new Uri(authority), true)
                         .Build();
                     s_staticCache.Bind(publicApp.UserTokenCache);
@@ -132,11 +129,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
 
             return authResult?.AccessToken;
-        }
-
-        static void Logging(LogLevel level, string message, bool containsPii)
-        {
-            Console.WriteLine($"MSAL {containsPii} {message}");
         }
     }
 

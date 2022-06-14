@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
         /// </summary>
         public static IPlatformProxy CreatePlatformProxy(ILoggerAdapter logger)
         {
-            var finalLogger = logger ?? LoggerAdapterHelper.NullLogger;
+            var finalLogger = logger ?? LoggerHelper.NullLogger;
 
 #if NET_CORE
             return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(finalLogger);

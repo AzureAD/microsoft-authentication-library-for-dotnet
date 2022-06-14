@@ -1086,9 +1086,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             const string clientIdInFile = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var pcaBuilder = PublicClientApplicationBuilder
                 .Create(clientIdInFile)
                 .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[{lvl}] {msg}"))
+#pragma warning restore CS0618 // Type or member is obsolete
                 .WithHttpManager(httpManager);
 
             if (authority != null)

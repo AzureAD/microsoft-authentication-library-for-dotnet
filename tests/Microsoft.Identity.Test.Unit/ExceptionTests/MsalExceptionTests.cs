@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.IsNull(msalClientException.InnerException);
 
             // Act
-            string piiMessage = LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(msalException);
+            string piiMessage = LoggerHelper.GetPiiScrubbedExceptionDetails(msalException);
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             ValidateExceptionProductInformation(msalException);
 
             // Act
-            string piiMessage = LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(msalException);
+            string piiMessage = LoggerHelper.GetPiiScrubbedExceptionDetails(msalException);
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
@@ -265,7 +265,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             ValidateExceptionProductInformation(msalException);
 
             // Act
-            string piiMessage = LoggerAdapterHelper.GetPiiScrubbedExceptionDetails(msalException);
+            string piiMessage = LoggerHelper.GetPiiScrubbedExceptionDetails(msalException);
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));

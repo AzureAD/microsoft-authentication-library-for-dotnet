@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _correlationId = correlationId.Equals(Guid.Empty)
                 ? string.Empty
                 : " - " + correlationId;
-            _clientInformation = LoggerAdapterHelper.GetClientInfo(clientName, clientVersion);
+            _clientInformation = LoggerHelper.GetClientInfo(clientName, clientVersion);
         }
 
         public static IIdentityLogger Create(
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogEntry entry)
         {
-            entry.Message = LoggerAdapterHelper.FormatLogMessage(string.Empty, entry.Message, false, _correlationId, _clientInformation);
+            entry.Message = LoggerHelper.FormatLogMessage(string.Empty, entry.Message, false, _correlationId, _clientInformation);
 
             _identityLogger.Log(entry);
         }
