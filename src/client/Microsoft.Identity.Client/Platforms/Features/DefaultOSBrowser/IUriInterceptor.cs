@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
     /// <summary>
     /// An abstraction over objects that are able to listen to localhost url (e.g. http://localhost:1234)
-    /// and to retrieve the whole url, includiong query params (e.g. http://localhost:1234?code=auth_code_from_aad)
+    /// and to retrieve the whole url, including query params (e.g. http://localhost:1234?code=auth_code_from_aad)
     /// </summary>
     internal interface IUriInterceptor
     {

@@ -54,12 +54,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
         public const string UserdataCallerCachekeys = "userdata.caller.cachekeys";
         public const string CallerCachekeyPrefix = "|";
         public const string ClientTlsNotSupported = " PKeyAuth/1.0";
-        public const string ChallangeRequestHeader = "WWW-Authenticate";
-        public const string ChallangeResponseHeader = "Authorization";
-        public const string ChallangeResponseType = "PKeyAuth";
-        public const string ChallangeResponseToken = "AuthToken";
-        public const string ChallangeResponseContext = "Context";
-        public const string ChallangeResponseVersion = "Version";
+        public const string ChallengeRequestHeader = "WWW-Authenticate";
+        public const string ChallengeResponseHeader = "Authorization";
+        public const string ChallengeResponseType = "PKeyAuth";
+        public const string ChallengeResponseToken = "AuthToken";
+        public const string ChallengeResponseContext = "Context";
+        public const string ChallengeResponseVersion = "Version";
         public const string ResponseErrorCode = "com.microsoft.aad.adal:BrowserErrorCode";
         public const string ResponseErrorMessage = "com.microsoft.aad.adal:BrowserErrorMessage";
 

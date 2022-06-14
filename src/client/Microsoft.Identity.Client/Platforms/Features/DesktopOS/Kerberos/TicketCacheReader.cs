@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
         /// <summary>
         /// Read out a Kerberos Ticket.
         /// </summary>
-        /// <returns>Byte stream of Kereros Ticket if exists. Null otherwise.</returns>
+        /// <returns>Byte stream of Kerberos Ticket if exists. Null otherwise.</returns>
         /// <remarks>
         /// Can throws <see cref="Win32Exception"/> if any error occurs while interfacing with Ticket Cache.
         /// </remarks>

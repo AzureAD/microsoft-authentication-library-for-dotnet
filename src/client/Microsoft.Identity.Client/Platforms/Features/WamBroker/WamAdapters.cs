@@ -24,10 +24,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
           AuthenticationRequestParameters authenticationRequestParameters,
           WebTokenRequest webTokenRequest,
           ICoreLogger logger,
-          string overridenAuthority = null)
+          string overriddenAuthority = null)
         {
             AddExtraParamsToRequest(webTokenRequest, authenticationRequestParameters.ExtraQueryParameters);
-            string authority = overridenAuthority ??
+            string authority = overriddenAuthority ??
                  authenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority;
             bool validate = authenticationRequestParameters.AuthorityInfo.ValidateAuthority;
             AddAuthorityParamToRequest(authority, validate, webTokenRequest);

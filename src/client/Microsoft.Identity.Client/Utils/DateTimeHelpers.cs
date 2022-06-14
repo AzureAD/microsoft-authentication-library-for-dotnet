@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             // Windows uses in most functions the FILETIME structure, which represents the actual time as the number of 100-nanosecond intervals since January 1, 1601 (UTC).
-            // To convert to unix timestamp (Jan 1, 1970), you have to substract 11644473600 seconds.
+            // To convert to unix timestamp (Jan 1, 1970), you have to subtract 11644473600 seconds.
 
             if (!ulong.TryParse(windowsTimestampInFuture, out ulong winTimestamp) ||
                 winTimestamp <= 11644473600 ||
