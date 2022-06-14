@@ -14,7 +14,6 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-#pragma warning disable CS0618 // Type or member is obsolete
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
     [TestClass]

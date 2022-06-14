@@ -1613,13 +1613,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 string log = string.Empty;
 
-#pragma warning disable CS0618 // Type or member is obsolete
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
                     .WithLogging((LogLevel level, string message, bool containsPii) => log = log + message)
-#pragma warning restore CS0618 // Type or member is obsolete
                     .BuildConcrete();
 
                 var result = await app

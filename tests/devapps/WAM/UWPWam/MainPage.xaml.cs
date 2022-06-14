@@ -12,7 +12,6 @@ using System.Globalization;
 using System.Text;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
-#pragma warning disable CS0618 // Type or member is obsolete
 namespace UWP_standalone
 {
     /// <summary>

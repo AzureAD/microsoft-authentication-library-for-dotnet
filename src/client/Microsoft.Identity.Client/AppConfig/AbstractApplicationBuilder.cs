@@ -257,10 +257,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
         /// was already set on the application builder
-#if !XAMARINMAC2_0
-        [Obsolete("This is now the leggacy logging method. See For details see https://aka.ms/msal-net-logging", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-#endif
         public T WithLogging(
             LogCallback loggingCallback,
             LogLevel? logLevel = null,
@@ -326,13 +322,11 @@ namespace Microsoft.Identity.Client
             bool enablePiiLogging = false,
             bool withDefaultPlatformLoggingEnabled = false)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
             WithLogging(
                 (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); },
                 logLevel,
                 enablePiiLogging,
                 withDefaultPlatformLoggingEnabled);
-#pragma warning restore CS0618 // Type or member is obsolete
             return (T)this;
         }
 
@@ -431,13 +425,11 @@ namespace Microsoft.Identity.Client
             WithClientCapabilities(applicationOptions.ClientCapabilities);
             WithLegacyCacheCompatibility(applicationOptions.LegacyCacheCompatibilityEnabled);
 
-#pragma warning disable CS0618 // Type or member is obsolete
             WithLogging(
                 null,
                 applicationOptions.LogLevel,
                 applicationOptions.EnablePiiLogging,
                 applicationOptions.IsDefaultPlatformLoggingEnabled);
-#pragma warning restore CS0618 // Type or member is obsolete
 
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
