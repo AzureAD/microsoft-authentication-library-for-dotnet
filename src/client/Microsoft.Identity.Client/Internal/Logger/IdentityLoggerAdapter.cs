@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-#if !XAMARINMAC20 && !ANDROID && !iOS
+#if !XAMARINMAC20
     internal class IdentityLoggerAdapter : ILoggerAdapter
     {
         private readonly IIdentityLogger _identityLogger;

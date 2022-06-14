@@ -45,29 +45,19 @@ namespace Microsoft.Identity.Client.Internal.Logger
             Guid correlationId,
             ApplicationConfiguration config)
         {
-#if !ANDROID && !iOS
             if (config.IdentityLogger == null)
             {
-                if(config.LoggingCallback == null)
+                if (config.LoggingCallback == null)
                 {
                     return s_nullLogger.Value;
                 }
 
                 return LegacyIdentityLoggerAdapter.Create(correlationId, config);
             }
-#else
-            if (config.LoggingCallback == null)
-            {
-                return s_nullLogger.Value;
-            }
-
-            return LegacyIdentityLoggerAdapter.Create(correlationId, config);
-#endif
-
 
 #if XAMARINMAC20
             throw new NotImplementedException();
-#elif !ANDROID && !iOS
+#else
             return IdentityLoggerAdapter.Create(correlationId, config);
 #endif
         }
@@ -78,13 +68,14 @@ namespace Microsoft.Identity.Client.Internal.Logger
         {
 #if XAMARINMAC20
             throw new NotImplementedException();
-#elif !ANDROID && !iOS
+#else
             if (config.IdentityLogger != null)
             {
                 return MsalCacheLoggerWrapper.Create(correlationId, config);
             }
-#endif
+
             return null;
+#endif
         }
 
         public static ILoggerAdapter NullLogger => s_nullLogger.Value;

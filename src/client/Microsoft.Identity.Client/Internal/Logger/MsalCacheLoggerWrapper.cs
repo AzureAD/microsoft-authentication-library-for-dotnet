@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-#if !XAMARINMAC20 && !ANDROID && !iOS
+#if !XAMARINMAC20
     //This class is used to wrap the functionality of the configured IIdentityLogger to add additional MSAL cleint information when logging messages.
     internal class MsalCacheLoggerWrapper : IIdentityLogger
     {

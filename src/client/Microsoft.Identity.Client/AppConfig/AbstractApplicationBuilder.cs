@@ -274,7 +274,6 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-#if !ANDROID && !iOS
         /// <summary>
         /// Sets the Identity Logger 
         /// </summary>
@@ -294,7 +293,6 @@ namespace Microsoft.Identity.Client
             Config.EnablePiiLogging = enablePiiLogging;
             return (T)this;
         }
-#endif
 
         /// <summary>
         /// Sets the Debug logging callback to a default debug method which displays
