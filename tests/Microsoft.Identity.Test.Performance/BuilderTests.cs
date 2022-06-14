@@ -33,6 +33,7 @@ namespace Microsoft.Identity.Test.Performance
         [Benchmark(Description = "ConfidentialClientAppBuilder")]
         public IConfidentialClientApplication ConfidentialClientAppBuilder_Test()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             return ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithAuthority(TestConstants.AuthorityCommonTenant)
@@ -40,6 +41,7 @@ namespace Microsoft.Identity.Test.Performance
                 .WithCertificate(_certificate)
                 .WithLegacyCacheCompatibility(false)
                 .WithLogging(_logger, logLevel: LogLevel.Always, enablePiiLogging: true)
+#pragma warning restore CS0618 // Type or member is obsolete
                 .Build();
         }
 

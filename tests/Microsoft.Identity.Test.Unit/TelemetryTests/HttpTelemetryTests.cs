@@ -28,6 +28,7 @@ using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     [TestClass]
     public class HttpTelemetryTests : TestBase
     {

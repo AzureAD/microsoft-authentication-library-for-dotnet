@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace KerberosConsole
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     /// <summary>
     /// It is a sample console program to show the primary usage of the Azure AD Kerberos Feature.
     /// Usages:

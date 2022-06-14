@@ -245,10 +245,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithLogging()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             var cca = ConfidentialClientApplicationBuilder
                       .Create(TestConstants.ClientId)
                             .WithClientSecret("cats")
                             .WithLogging((level, message, pii) => { }).Build();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.IsNotNull(cca.AppConfig.LoggingCallback);
         }

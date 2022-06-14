@@ -13,6 +13,7 @@ using Microsoft.Identity.Client;
 
 namespace MultiCloudTestApp
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     /// <summary>
     /// This test app simulates the VS user scenario which supports
     /// logging in from multiple accounts across multiple clouds.

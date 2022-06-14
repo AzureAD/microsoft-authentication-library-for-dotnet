@@ -13,6 +13,7 @@ using Microsoft.Identity.Client;
 
 namespace FociTestApp
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     public class Program
     {
         private const string FAMILY_MEMBER_1 = "7660e4d6-d3f3-4385-9851-bc9027ef4a03";

@@ -29,6 +29,7 @@ namespace XForms
         public void InitPublicClient()
         {
             Console.WriteLine("[TESTLOG] - Creating the PCA - mandatory params and logging");
+#pragma warning disable CS0618 // Type or member is obsolete
             var builder = PublicClientApplicationBuilder
                 .Create(App.s_clientId)
                 .WithAuthority(new Uri(App.s_authority), App.s_validateAuthority)                
@@ -39,6 +40,7 @@ namespace XForms
                 },
                 LogLevel.Verbose,
                 true);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             Console.WriteLine("[TESTLOG] - Creating the PCA - setting the redirect uri");
 

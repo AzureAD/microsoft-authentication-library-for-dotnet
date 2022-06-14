@@ -72,6 +72,7 @@ namespace XamarinDev
 
         public static void InitPublicClient()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             var builder = PublicClientApplicationBuilder
                 .Create(ClientId)
                 .WithAuthority(new Uri(Authority), ValidateAuthority)
@@ -82,6 +83,7 @@ namespace XamarinDev
                 },
                 LogLevel.Verbose,
                 true);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             if (UseBroker)
             {

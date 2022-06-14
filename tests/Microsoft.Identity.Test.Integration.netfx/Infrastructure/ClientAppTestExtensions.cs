@@ -7,6 +7,7 @@ using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     public static class ClientAppTestExtensions
     {
         internal static PublicClientApplicationBuilder WithTestLogging(this PublicClientApplicationBuilder builder)

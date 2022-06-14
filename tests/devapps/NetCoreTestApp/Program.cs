@@ -68,10 +68,12 @@ namespace NetCoreTestApp
 
         private static IPublicClientApplication CreatePca()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             var pcaBuilder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
+#pragma warning restore CS0618 // Type or member is obsolete
                             .WithExperimentalFeatures()
                             .WithDesktopFeatures();
 

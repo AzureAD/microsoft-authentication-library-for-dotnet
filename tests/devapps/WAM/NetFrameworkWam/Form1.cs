@@ -113,6 +113,7 @@ namespace NetDesktopWinForms
                     throw new NotImplementedException();
             }
 
+#pragma warning disable CS0618 // Type or member is obsolete
             builder = builder.WithWindowsBrokerOptions(new WindowsBrokerOptions()
             {
                 ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
@@ -120,6 +121,7 @@ namespace NetDesktopWinForms
                 HeaderText = "MSAL Dev App .NET FX"
             })
             .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             var pca = builder.Build();
 
