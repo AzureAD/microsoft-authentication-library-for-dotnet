@@ -21,7 +21,6 @@ using Microsoft.Identity.Client.Desktop;
 
 namespace NetDesktopWpf
 {
-#pragma warning disable CS0618 // Type or member is obsolete
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

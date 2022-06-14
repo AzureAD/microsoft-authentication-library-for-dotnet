@@ -176,12 +176,10 @@ namespace TestApp
                 ["allowestsrnonmsi"] = "true"
             };
 
-#pragma warning disable CS0618 // Type or member is obsolete
             var builder = ConfidentialClientApplicationBuilder.Create(s_appSettings.ClientId)
                 .WithAuthority(s_appSettings.Authority, false)
                 .WithCertificate(s_appSettings.GetCertificate())
                 .WithLogging(Log, LogLevel.Verbose, true);
-#pragma warning restore CS0618 // Type or member is obsolete
 
             // Regional if region specified, global otherwise
             if (!string.IsNullOrEmpty(region))

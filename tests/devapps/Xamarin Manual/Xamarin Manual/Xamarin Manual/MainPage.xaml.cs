@@ -101,13 +101,11 @@ namespace Xamarin_Manual
 
         private void CreatePca()
         {
-#pragma warning disable CS0618 // Type or member is obsolete
             _pca = PublicClientApplicationBuilder.Create(AuthConfig.ClientID)
               .WithRedirectUri(AuthConfig.RedirectUri) 
               .WithIosKeychainSecurityGroup("com.microsoft.adalcache")
               .WithLogging(
                     (lvl, msg, pii) => Trace.WriteLine($"[{lvl}] {msg}"), LogLevel.Verbose, true)
-#pragma warning restore CS0618 // Type or member is obsolete
               .WithBroker(swBroker.IsToggled)
               .Build();
         }

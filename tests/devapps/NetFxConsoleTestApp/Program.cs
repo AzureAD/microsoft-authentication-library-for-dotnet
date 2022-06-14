@@ -119,7 +119,6 @@ namespace NetFx
 
         private static IPublicClientApplication CreatePca()
         {
-#pragma warning disable CS0618 // Type or member is obsolete
             var builder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
@@ -127,7 +126,6 @@ namespace NetFx
                     .WithDesktopFeatures()
 #endif
                             .WithLogging(Log, LogLevel.Verbose, true);
-#pragma warning restore CS0618 // Type or member is obsolete
 
             Console.WriteLine($"IsBrokerAvailable: {builder.IsBrokerAvailable()}");
 

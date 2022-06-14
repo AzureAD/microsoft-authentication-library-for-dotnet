@@ -20,7 +20,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
-#pragma warning disable CS0618 // Type or member is obsolete
     [TestClass]
     public class RefreshInTests : TestBase
     {
