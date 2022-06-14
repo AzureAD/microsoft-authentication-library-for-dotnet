@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     internal class SignedAssertionDelegateClientCredential : IClientCredential
     {
         internal Func<CancellationToken, Task<string>> _signedAssertionDelegate { get; }
-        internal Func<Microsoft.Identity.Client.AssertionRequestOptions, Task<string>> _signedAssertionWithInfoDelegate { get; }
+        internal Func<AssertionRequestOptions, Task<string>> _signedAssertionWithInfoDelegate { get; }
 
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public SignedAssertionDelegateClientCredential(Func<CancellationToken, Task<string>> signedAssertionDelegate)
@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _signedAssertionDelegate = signedAssertionDelegate;
         }
 
-        public SignedAssertionDelegateClientCredential(Func<Microsoft.Identity.Client.AssertionRequestOptions, Task<string>> signedAssertionDelegate)
+        public SignedAssertionDelegateClientCredential(Func<AssertionRequestOptions, Task<string>> signedAssertionDelegate)
         {
             _signedAssertionWithInfoDelegate = signedAssertionDelegate;
         }
