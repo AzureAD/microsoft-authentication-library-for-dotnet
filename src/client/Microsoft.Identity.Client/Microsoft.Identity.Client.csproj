@@ -18,7 +18,7 @@
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
   </PropertyGroup>
   
-  <ItemGroup Condition=" '$(TargetFramework)' != '$(TargetFrameworkIos)' And '$(TargetFramework)' != '$(TargetFrameworkAndroid9)' And '$(TargetFramework)' != '$(TargetFrameworkAndroid10)' ">
+  <ItemGroup>
     <Reference Include="netstandard" />
   </ItemGroup>
 
@@ -296,7 +296,7 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' != '$(TargetFrameworkIos)' And '$(TargetFramework)' != '$(TargetFrameworkAndroid9)' And '$(TargetFramework)' != '$(TargetFrameworkAndroid10)' ">
+  <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.18.0" />
   </ItemGroup>
 </Project>
