@@ -34,6 +34,7 @@ namespace CommonCache.Test.MsalV2
 
                 foreach (var labUserData in testInputData.LabUserDatas)
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     var app = PublicClientApplicationBuilder
                        .Create(labUserData.ClientId)
                        .WithAuthority(new Uri(labUserData.Authority), true)
@@ -41,6 +42,7 @@ namespace CommonCache.Test.MsalV2
                        {
                            Console.WriteLine("{0}: {1}", level, message);
                        })
+#pragma warning restore CS0618 // Type or member is obsolete
                        .Build();
 
                     FileBasedTokenCacheHelper.ConfigureUserCache(
