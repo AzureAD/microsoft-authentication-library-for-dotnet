@@ -120,8 +120,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             }
 
             // check mam enrollment id
-            if (bodyParams.TryGetValue(SilentRequestHelper.MamEnrollmentIdKey, out string mamEnrollmentId) &&
-                !string.IsNullOrEmpty(rt))
+            if (bodyParams.TryGetValue(SilentRequestHelper.MamEnrollmentIdKey, out string mamEnrollmentId))
             {
                 sb.Append(crypto.CreateSha256Hash(mamEnrollmentId) + ThrottleCommon.KeyDelimiter);
             }
