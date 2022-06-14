@@ -12,9 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
-#if !ANDROID && !iOS
 using Microsoft.IdentityModel.Abstractions;
-#endif
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
@@ -74,22 +72,20 @@ namespace Microsoft.Identity.Client.Internal.Logger
 #endif
         }
 
-#if !ANDROID && !iOS
         public static IIdentityLogger CreateExternalCacheLogger(
             Guid correlationId,
             ApplicationConfiguration config)
         {
 #if XAMARINMAC20
             throw new NotImplementedException();
-#endif
+#elif !ANDROID && !iOS
             if (config.IdentityLogger != null)
             {
                 return MsalCacheLoggerWrapper.Create(correlationId, config);
             }
-
+#endif
             return null;
         }
-#endif
 
         public static ILoggerAdapter NullLogger => s_nullLogger.Value;
 
@@ -177,7 +173,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
             return new DurationLogHelper(logger, fileName + ":" + methodName, logLevel);
         }
 
-#if !ANDROID && !iOS
         public static EventLogLevel GetEventLogLevel(LogLevel logLevel)
         {
             //MSAL does not have a critical log level so it is combined with the error level
@@ -188,6 +183,5 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
             return (EventLogLevel)((int)logLevel + 2);
         }
-#endif
     }
 }

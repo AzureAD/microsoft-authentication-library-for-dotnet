@@ -18,9 +18,7 @@ using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
-#if !ANDROID && !iOS
 using Microsoft.IdentityModel.Abstractions;
-#endif
 
 namespace Microsoft.Identity.Client
 {

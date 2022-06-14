@@ -3,9 +3,7 @@
 
 using System;
 using System.Threading;
-#if !ANDROID && !iOS
 using Microsoft.IdentityModel.Abstractions;
-#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -29,15 +27,10 @@ namespace Microsoft.Identity.Client
           string suggestedCacheKey,
           bool hasTokens,
           DateTimeOffset? suggestedCacheExpiry,
-#if !ANDROID && !iOS
           CancellationToken cancellationToken,
           IIdentityLogger msalIdentityLogger,
           bool piiLoggingEnabled)
-#else
-          CancellationToken cancellationToken)
-#endif
-          
-            : this (tokenCache,
+            : this(tokenCache,
                    clientId,
                    account,
                    hasStateChanged,
@@ -46,14 +39,10 @@ namespace Microsoft.Identity.Client
                    hasTokens,
                    suggestedCacheExpiry,
                    cancellationToken,
-#if !ANDROID && !iOS
                    default,
                    msalIdentityLogger,
                    piiLoggingEnabled)
-#else
-                   default)
-#endif
-        {
+            {
             }
 
         /// <summary>
@@ -69,13 +58,9 @@ namespace Microsoft.Identity.Client
             bool hasTokens,
             DateTimeOffset? suggestedCacheExpiry,
             CancellationToken cancellationToken,
-#if !ANDROID && !iOS
             Guid correlationId,
             IIdentityLogger msalIdentityLogger,
             bool piiLoggingEnabled)
-#else
-            Guid correlationId)
-#endif
         {
             TokenCache = tokenCache;
             ClientId = clientId;
@@ -87,10 +72,8 @@ namespace Microsoft.Identity.Client
             CancellationToken = cancellationToken;
             CorrelationId = correlationId;
             SuggestedCacheExpiry = suggestedCacheExpiry;
-#if !ANDROID && !iOS
             MsalIdentityLogger = msalIdentityLogger;
             PiiLoggingEnabled = piiLoggingEnabled;
-#endif
         }
 
         /// <summary>
@@ -169,12 +152,10 @@ namespace Microsoft.Identity.Client
         /// </summary> 
         public DateTimeOffset? SuggestedCacheExpiry { get; private set; }
 
-#if !ANDROID && !iOS
         /// <summary>
         /// 
         /// </summary>
         public IIdentityLogger MsalIdentityLogger { get; private set; }
-#endif
 
         /// <summary>
         /// 
