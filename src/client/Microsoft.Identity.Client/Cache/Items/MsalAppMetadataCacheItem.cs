@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Cache.Items
     /// Other apps that don't support app metadata should never remove existing app metadata.
     /// App metadata is a non-removable entity.It means there's no need for a public API to remove app metadata, and it shouldn't be removed when removeAccount is called.
     /// App metadata is a non-secret entity. It means that it cannot store any secret information, like tokens, nor PII, like username etc.
-    /// App metadata can be extended by adding additional fields when required.Absense of any non-required field should translate to default values for those field.
+    /// App metadata can be extended by adding additional fields when required.Absence of any non-required field should translate to default values for those field.
     /// </summary>
     internal class MsalAppMetadataCacheItem : MsalItemWithAdditionalFields, IEquatable<MsalAppMetadataCacheItem>
     {

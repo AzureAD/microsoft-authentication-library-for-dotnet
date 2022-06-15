@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
                                     out contextFlags,
                                     IntPtr.Zero);
 
-                    if (result == SecStatus.SEC_E_INSUFFICENT_MEMORY)
+                    if (result == SecStatus.SEC_E_INSUFFICIENT_MEMORY)
                     {
                         if (tokenSize > _maxTokenSize)
                         {
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
                         tokenSize += 1000;
                     }
                 }
-                while (result == SecStatus.SEC_I_INCOMPLETE_CREDENTIALS || result == SecStatus.SEC_E_INSUFFICENT_MEMORY);
+                while (result == SecStatus.SEC_I_INCOMPLETE_CREDENTIALS || result == SecStatus.SEC_E_INSUFFICIENT_MEMORY);
 
                 if (result > SecStatus.SEC_E_ERROR)
                 {

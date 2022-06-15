@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Native
         //
 
         [StructLayout(LayoutKind.Sequential)]
-        [SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable", Justification = "The resouces lifetime is owned by the containing type - as a value type, the pointers will be copied and are not owned by the value type itself.")]
+        [SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable", Justification = "The resources lifetime is owned by the containing type - as a value type, the pointers will be copied and are not owned by the value type itself.")]
         internal struct BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO
         {
             internal int cbSize;

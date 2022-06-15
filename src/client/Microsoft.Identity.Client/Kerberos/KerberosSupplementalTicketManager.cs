@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// Gets the KRB-CRED Kerberos Ticket information as byte stream.
         /// </summary>
         /// <param name="ticket">Kerberos ticket object to save.</param>
-        /// <returns>Byte stream representaion of KRB-CRED Kerberos Ticket if it contains valid ticket information.
+        /// <returns>Byte stream representation of KRB-CRED Kerberos Ticket if it contains valid ticket information.
         /// Null, otherwise.</returns>
         public static byte[] GetKrbCred(KerberosSupplementalTicket ticket)
         {

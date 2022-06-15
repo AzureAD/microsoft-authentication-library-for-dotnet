@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Core
         void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed);
 
         /// <summary>
-        /// For expensive logging messsages (e.g. when the log message evaluates a variable), 
+        /// For expensive logging messages (e.g. when the log message evaluates a variable), 
         /// it is better to check the log level ahead of time so as not to evaluate the expensive message and then discard it.
         /// </summary>
         bool IsLoggingEnabled(LogLevel logLevel);
