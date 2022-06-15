@@ -94,6 +94,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
             SemaphoreSlim semaphore = new SemaphoreSlim(0);
             int threadCount = MaxThreadCount;
+#pragma warning disable VSTHRD101 // Avoid unsupported async delegates - acceptable risk (crash the test proj)
             var result = Parallel.For(0, MaxThreadCount, async (i) =>
             {
                 try
@@ -116,6 +117,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                     Interlocked.Decrement(ref threadCount);
                 }
             });
+#pragma warning restore VSTHRD101 // Avoid unsupported async delegates
 
             while (threadCount != 0)
             {

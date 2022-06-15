@@ -156,12 +156,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 splash.DialogResult = System.Windows.Forms.DialogResult.OK;
                 splash.TopMost = true;
 
+#pragma warning disable VSTHRD101 // Avoid unsupported async delegates - Windows API mandates this
                 splash.Shown += async (s, e) =>
                 {
                     var windowHandle = splash.Handle;
                     await ShowPickerForWin32WindowAsync(windowHandle).ConfigureAwait(true);
                     splash.Close();
                 };
+#pragma warning restore VSTHRD101 // Avoid unsupported async delegates
 
                 try
                 {
