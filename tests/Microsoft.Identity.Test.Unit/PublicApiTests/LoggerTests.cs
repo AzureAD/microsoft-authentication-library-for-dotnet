@@ -251,6 +251,34 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        public async Task IdentityLoggerOverridesLegacyLoggerTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                TestIdentityLogger testLogger = new TestIdentityLogger();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret("secret")
+                    .WithLogging(testLogger, false)
+                    .WithLogging((level, message, containsPii) => { Assert.Fail("MSAL should not use the logging callback"); })
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var result = await app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "some-code")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsTrue(testLogger.StringBuilder.ToString().Contains("AcquireTokenByAuthorizationCode"));
+            }
+        }
+
         private void BeforeCacheAccessWithLogging(TokenCacheNotificationArgs args)
         {
             LogEntry entry = new LogEntry();
