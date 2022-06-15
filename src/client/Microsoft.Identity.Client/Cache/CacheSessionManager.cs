@@ -117,14 +117,16 @@ namespace Microsoft.Identity.Client.Cache
                                 var args = new TokenCacheNotificationArgs(
                                   TokenCacheInternal,
                                   _requestParams.AppConfig.ClientId,
-                                  _requestParams.Account,
+                                  _requestParams.Account,                                  
                                   hasStateChanged: false,
                                   isApplicationCache: TokenCacheInternal.IsApplicationCache,
                                   suggestedCacheKey: key,
                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
-                                  correlationId: _requestParams.RequestContext.CorrelationId);
+                                  correlationId: _requestParams.RequestContext.CorrelationId, 
+                                  requestScopes: _requestParams.Scope, 
+                                  requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId);
 
                                 stopwatch.Start();
                                 await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -146,7 +148,9 @@ namespace Microsoft.Identity.Client.Cache
                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
-                                  correlationId: _requestParams.RequestContext.CorrelationId);
+                                  correlationId: _requestParams.RequestContext.CorrelationId,
+                                  requestScopes: _requestParams.Scope,
+                                  requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId);
 
                                 await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;

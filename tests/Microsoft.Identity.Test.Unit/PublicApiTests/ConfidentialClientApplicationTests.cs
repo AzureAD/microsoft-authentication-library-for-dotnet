@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -12,8 +11,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
@@ -27,7 +24,6 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
-#if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
@@ -1717,7 +1713,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               {
                                                                   Assert.IsNotNull(parameters.Claims);
                                                               }
-                                                              return Task.Run(() => GetAppTokenProviderResult(differentScopesForAt)).Result;
+                                                              return await Task.Run(() => GetAppTokenProviderResult(differentScopesForAt)).ConfigureAwait(false);
                                                           })
                                                           .BuildConcrete();
 
@@ -1790,5 +1786,3 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
     }
 }
-
-#endif
