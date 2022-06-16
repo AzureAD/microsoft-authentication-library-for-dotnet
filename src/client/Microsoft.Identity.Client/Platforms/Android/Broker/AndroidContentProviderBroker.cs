@@ -389,5 +389,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                        null,
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
         }
+
+        public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

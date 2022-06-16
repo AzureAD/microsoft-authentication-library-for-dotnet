@@ -64,6 +64,12 @@ namespace Microsoft.Identity.Client.Internal.Broker
             return Task.FromResult<MsalTokenResponse>(null);
         }
 
+        public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
+        {
+            _logger.Info("NullBroker - returning null on silent request.");
+            return Task.FromResult<MsalTokenResponse>(null);
+        }
+
         public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientID, 
             string redirectUri,             
@@ -73,6 +79,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
         {
             _logger.Info("NullBroker - returning empty list on GetAccounts request.");
             return Task.FromResult(CollectionHelpers.GetEmptyReadOnlyList<IAccount>()); // nop
+        }
+
+        public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
+        {
+            throw new NotImplementedException();
         }
     }
 }

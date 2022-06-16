@@ -135,5 +135,22 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
 
         }
+
+        [TestMethod]
+        public async Task WamUsernamePasswordRequestAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBrokerPreview().Build();
+
+            // Act
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+        }
     }
 }

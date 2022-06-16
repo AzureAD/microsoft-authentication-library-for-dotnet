@@ -8,6 +8,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -508,6 +509,67 @@ namespace NetDesktopWinForms
             {
                 Log("Exception: " + ex2);
             }
+        }
+
+        private async void atUsernamePwdBtn_Click(object sender, EventArgs e)
+        {
+
+            var pca = CreatePca();
+
+            try
+            {
+                var result = await RunAtUsernamePwdAsync(pca).ConfigureAwait(false);
+
+                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+
+            }
+            catch (Exception ex2)
+            {
+                Log("Exception: " + ex2);
+            }
+        }
+
+        private async Task<AuthenticationResult> RunAtUsernamePwdAsync(IPublicClientApplication pca)
+        {
+            Tuple<string, string> credentials = GetUsernamePassword();
+            string username = credentials.Item1;
+            string password = credentials.Item2;
+
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                throw new InvalidOperationException("[TEST APP FAILURE] Username or password is missing.");
+            }
+
+            AuthenticationResult result = null;
+            var scopes = GetScopes();
+            var guid = Guid.NewGuid();
+            var builder = pca.AcquireTokenByUsernamePassword(scopes, username, new NetworkCredential("", password).SecurePassword);
+
+            if (cbxBackgroundThread.Checked)
+            {
+                await Task.Delay(500).ConfigureAwait(false);
+            }
+            result = await builder.ExecuteAsync().ConfigureAwait(false);
+
+            return result;
+        }
+
+        private Tuple<string, string> GetUsernamePassword()
+        {
+            string username = null;
+            string password = null;
+
+            UsernameTxt.Invoke((MethodInvoker)delegate
+            {
+                username = UsernameTxt.Text;
+            });
+
+            PasswordTxt.Invoke((MethodInvoker)delegate
+            {
+                password = PasswordTxt.Text;
+            });
+
+            return Tuple.Create(username, password);
         }
 
         private void clearBtn_Click(object sender, EventArgs e)

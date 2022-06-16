@@ -978,5 +978,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _logger.Info("[WAM Broker] Tenant is not consumers and ATS will try WAM-AAD");
             return false;
         }
+
+        public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

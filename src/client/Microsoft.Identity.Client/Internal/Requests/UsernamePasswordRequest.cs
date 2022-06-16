@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
@@ -21,6 +22,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
         private readonly AcquireTokenByUsernamePasswordParameters _usernamePasswordParameters;
+        private readonly AuthenticationRequestParameters _requestParameters;
 
         public UsernamePasswordRequest(
             IServiceBundle serviceBundle,
@@ -29,6 +31,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(serviceBundle, authenticationRequestParameters, usernamePasswordParameters)
         {
             _usernamePasswordParameters = usernamePasswordParameters;
+            _requestParameters = authenticationRequestParameters;
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
                 serviceBundle);
@@ -38,10 +41,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
-            var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-            var msalTokenResponse =
-                await SendTokenRequestAsync(GetAdditionalBodyParameters(userAssertion), cancellationToken).ConfigureAwait(false);
+
+            MsalTokenResponse msalTokenResponse = await GetTokenResponseAsync(cancellationToken).ConfigureAwait(false);
+            
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+        }
+
+        private async Task<MsalTokenResponse> GetTokenResponseAsync(CancellationToken cancellationToken)
+        {
+            if (_requestParameters.AppConfig.IsBrokerEnabled)
+            {
+                IBroker broker = _requestParameters.RequestContext.ServiceBundle.PlatformProxy.CreateBroker(_requestParameters.RequestContext.ServiceBundle.Config, null);
+                ITokenRequestComponent brokerUsernamePasswordRequestComponent =
+                new BrokerUsernamePasswordRequestComponent(
+                    _requestParameters,
+                    _usernamePasswordParameters,
+                    broker);
+
+                return await brokerUsernamePasswordRequestComponent.FetchTokensAsync(cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
+            return await SendTokenRequestAsync(GetAdditionalBodyParameters(userAssertion), cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()

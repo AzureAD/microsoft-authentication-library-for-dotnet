@@ -56,16 +56,21 @@
             this.cbxListOsAccounts = new System.Windows.Forms.CheckBox();
             this.cbxUseWam = new System.Windows.Forms.ComboBox();
             this.cbxPOP = new System.Windows.Forms.CheckBox();
+            this.UsernameTxt = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.PasswordTxt = new System.Windows.Forms.TextBox();
+            this.atUsernamePwdBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // resultTbx
             // 
-            this.resultTbx.Location = new System.Drawing.Point(12, 256);
+            this.resultTbx.Location = new System.Drawing.Point(12, 288);
             this.resultTbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.resultTbx.Multiline = true;
             this.resultTbx.Name = "resultTbx";
             this.resultTbx.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.resultTbx.Size = new System.Drawing.Size(709, 439);
+            this.resultTbx.Size = new System.Drawing.Size(709, 407);
             this.resultTbx.TabIndex = 0;
             // 
             // label1
@@ -157,10 +162,10 @@
             // 
             // atsBtn
             // 
-            this.atsBtn.Location = new System.Drawing.Point(14, 205);
+            this.atsBtn.Location = new System.Drawing.Point(13, 255);
             this.atsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atsBtn.Name = "atsBtn";
-            this.atsBtn.Size = new System.Drawing.Size(88, 27);
+            this.atsBtn.Size = new System.Drawing.Size(76, 27);
             this.atsBtn.TabIndex = 11;
             this.atsBtn.Text = "ATS";
             this.atsBtn.UseVisualStyleBackColor = true;
@@ -168,10 +173,10 @@
             // 
             // atiBtn
             // 
-            this.atiBtn.Location = new System.Drawing.Point(108, 205);
+            this.atiBtn.Location = new System.Drawing.Point(97, 255);
             this.atiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atiBtn.Name = "atiBtn";
-            this.atiBtn.Size = new System.Drawing.Size(88, 27);
+            this.atiBtn.Size = new System.Drawing.Size(80, 27);
             this.atiBtn.TabIndex = 12;
             this.atiBtn.Text = "ATI";
             this.atiBtn.UseVisualStyleBackColor = true;
@@ -179,10 +184,10 @@
             // 
             // atsAtiBtn
             // 
-            this.atsAtiBtn.Location = new System.Drawing.Point(203, 205);
+            this.atsAtiBtn.Location = new System.Drawing.Point(185, 255);
             this.atsAtiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atsAtiBtn.Name = "atsAtiBtn";
-            this.atsAtiBtn.Size = new System.Drawing.Size(88, 27);
+            this.atsAtiBtn.Size = new System.Drawing.Size(78, 27);
             this.atsAtiBtn.TabIndex = 13;
             this.atsAtiBtn.Text = "ATS + ATI";
             this.atsAtiBtn.UseVisualStyleBackColor = true;
@@ -190,7 +195,7 @@
             // 
             // accBtn
             // 
-            this.accBtn.Location = new System.Drawing.Point(368, 205);
+            this.accBtn.Location = new System.Drawing.Point(381, 255);
             this.accBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.accBtn.Name = "accBtn";
             this.accBtn.Size = new System.Drawing.Size(93, 27);
@@ -212,7 +217,7 @@
             // 
             // btnClearCache
             // 
-            this.btnClearCache.Location = new System.Drawing.Point(595, 223);
+            this.btnClearCache.Location = new System.Drawing.Point(594, 255);
             this.btnClearCache.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnClearCache.Name = "btnClearCache";
             this.btnClearCache.Size = new System.Drawing.Size(126, 27);
@@ -282,7 +287,7 @@
             // cbxMsaPt
             // 
             this.cbxMsaPt.AutoSize = true;
-            this.cbxMsaPt.Location = new System.Drawing.Point(212, 155);
+            this.cbxMsaPt.Location = new System.Drawing.Point(212, 197);
             this.cbxMsaPt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cbxMsaPt.Name = "cbxMsaPt";
             this.cbxMsaPt.Size = new System.Drawing.Size(122, 19);
@@ -292,7 +297,7 @@
             // 
             // btnExpire
             // 
-            this.btnExpire.Location = new System.Drawing.Point(595, 189);
+            this.btnExpire.Location = new System.Drawing.Point(596, 222);
             this.btnExpire.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnExpire.Name = "btnExpire";
             this.btnExpire.Size = new System.Drawing.Size(126, 27);
@@ -303,7 +308,7 @@
             // 
             // btnRemoveAccount
             // 
-            this.btnRemoveAccount.Location = new System.Drawing.Point(469, 205);
+            this.btnRemoveAccount.Location = new System.Drawing.Point(482, 255);
             this.btnRemoveAccount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnRemoveAccount.Name = "btnRemoveAccount";
             this.btnRemoveAccount.Size = new System.Drawing.Size(104, 27);
@@ -315,7 +320,7 @@
             // cbxBackgroundThread
             // 
             this.cbxBackgroundThread.AutoSize = true;
-            this.cbxBackgroundThread.Location = new System.Drawing.Point(349, 155);
+            this.cbxBackgroundThread.Location = new System.Drawing.Point(349, 197);
             this.cbxBackgroundThread.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cbxBackgroundThread.Name = "cbxBackgroundThread";
             this.cbxBackgroundThread.Size = new System.Drawing.Size(159, 19);
@@ -326,7 +331,7 @@
             // cbxListOsAccounts
             // 
             this.cbxListOsAccounts.AutoSize = true;
-            this.cbxListOsAccounts.Location = new System.Drawing.Point(212, 179);
+            this.cbxListOsAccounts.Location = new System.Drawing.Point(212, 222);
             this.cbxListOsAccounts.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cbxListOsAccounts.Name = "cbxListOsAccounts";
             this.cbxListOsAccounts.Size = new System.Drawing.Size(113, 19);
@@ -337,7 +342,7 @@
             // cbxUseWam
             // 
             this.cbxUseWam.FormattingEnabled = true;
-            this.cbxUseWam.Location = new System.Drawing.Point(12, 156);
+            this.cbxUseWam.Location = new System.Drawing.Point(12, 202);
             this.cbxUseWam.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.cbxUseWam.Name = "cbxUseWam";
             this.cbxUseWam.Size = new System.Drawing.Size(188, 23);
@@ -346,7 +351,7 @@
             // cbxPOP
             // 
             this.cbxPOP.AutoSize = true;
-            this.cbxPOP.Location = new System.Drawing.Point(349, 179);
+            this.cbxPOP.Location = new System.Drawing.Point(349, 222);
             this.cbxPOP.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.cbxPOP.Name = "cbxPOP";
             this.cbxPOP.Size = new System.Drawing.Size(156, 19);
@@ -354,11 +359,64 @@
             this.cbxPOP.Text = "With Proof-of-Possesion";
             this.cbxPOP.UseVisualStyleBackColor = true;
             // 
+            // UsernameTxt
+            // 
+            this.UsernameTxt.Location = new System.Drawing.Point(85, 148);
+            this.UsernameTxt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.UsernameTxt.Name = "UsernameTxt";
+            this.UsernameTxt.Size = new System.Drawing.Size(154, 23);
+            this.UsernameTxt.TabIndex = 30;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(10, 152);
+            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(60, 15);
+            this.label7.TabIndex = 31;
+            this.label7.Text = "Username";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(247, 151);
+            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(57, 15);
+            this.label8.TabIndex = 32;
+            this.label8.Text = "Password";
+            // 
+            // PasswordTxt
+            // 
+            this.PasswordTxt.Location = new System.Drawing.Point(321, 149);
+            this.PasswordTxt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.PasswordTxt.Name = "PasswordTxt";
+            this.PasswordTxt.Size = new System.Drawing.Size(154, 23);
+            this.PasswordTxt.TabIndex = 33;
+            this.PasswordTxt.UseSystemPasswordChar = true;
+            // 
+            // atUsernamePwdBtn
+            // 
+            this.atUsernamePwdBtn.Location = new System.Drawing.Point(271, 255);
+            this.atUsernamePwdBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.atUsernamePwdBtn.Name = "atUsernamePwdBtn";
+            this.atUsernamePwdBtn.Size = new System.Drawing.Size(76, 27);
+            this.atUsernamePwdBtn.TabIndex = 34;
+            this.atUsernamePwdBtn.Text = "AT U/P";
+            this.atUsernamePwdBtn.UseVisualStyleBackColor = true;
+            this.atUsernamePwdBtn.Click += new System.EventHandler(this.atUsernamePwdBtn_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(735, 740);
+            this.Controls.Add(this.atUsernamePwdBtn);
+            this.Controls.Add(this.PasswordTxt);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.UsernameTxt);
             this.Controls.Add(this.cbxPOP);
             this.Controls.Add(this.cbxUseWam);
             this.Controls.Add(this.cbxListOsAccounts);
@@ -422,6 +480,11 @@
         private System.Windows.Forms.CheckBox cbxListOsAccounts;
         private System.Windows.Forms.ComboBox cbxUseWam;
         private System.Windows.Forms.CheckBox cbxPOP;
+        private System.Windows.Forms.TextBox UsernameTxt;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox PasswordTxt;
+        private System.Windows.Forms.Button atUsernamePwdBtn;
     }
 }
 
