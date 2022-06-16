@@ -273,7 +273,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         //The AAD backup authentication system header is used by the AAD backup authentication system service
         //to help route requests to resources in Azure during requests to speed up authentication.
-        //It consists of either the ObjectId.TenantId or the upn of the account signign in.
+        //It consists of either the ObjectId.TenantId or the upn of the account signing in.
         //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
         protected virtual KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {

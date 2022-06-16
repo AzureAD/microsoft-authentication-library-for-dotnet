@@ -25,8 +25,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 {
                     var enrollmentIDs = JsonConvert.DeserializeObject<EnrollmentIDs>(keychainData);
 
-                    return enrollmentIDs.EnrollmentIds[0].EnrollmentId;
-
+                    if (enrollmentIDs.EnrollmentIds.Count > 0)
+                    {
+                        return enrollmentIDs.EnrollmentIds[0].EnrollmentId;
+                    }
                 }
                 catch (JsonException jEx)
                 {

@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public Bundle CreateHandShakeOperationBundle()
         {
             Bundle handshakeOperationBundle = new Bundle();
-            handshakeOperationBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
+            handshakeOperationBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocolVersionCode);
             handshakeOperationBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
             handshakeOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
 

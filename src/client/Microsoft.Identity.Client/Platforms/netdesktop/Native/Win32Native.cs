@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Native
     ///     Safe handle base class for safe handles which are associated with an additional data buffer that
     ///     must be kept alive for the same amount of time as the handle itself.
     ///     
-    ///     This is required rather than having a seperate safe handle own the key data buffer blob so
+    ///     This is required rather than having a separate safe handle own the key data buffer blob so
     ///     that we can ensure that the key handle is disposed of before the key data buffer is freed.
     /// </summary>
     internal abstract class SafeHandleWithBuffer : SafeHandleZeroOrMinusOneIsInvalid
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Native
 
         /// <summary>
         ///     Buffer that holds onto the key data object. This data must be allocated with CoAllocTaskMem, 
-        ///     or the ReleaseBuffer method must be overriden to match the deallocation function with the
+        ///     or the ReleaseBuffer method must be overridden to match the deallocation function with the
         ///     allocation function.  Once the buffer is assigned into the DataBuffer property, the safe
         ///     handle owns the buffer and users of this property should not attempt to free the memory.
         ///     

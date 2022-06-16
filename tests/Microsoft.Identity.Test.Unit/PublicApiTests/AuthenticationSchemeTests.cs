@@ -101,7 +101,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                harness.HttpManager.AddFailureTokenEndpointResponse("invalid_grant", "https://login.microsoftonline.com/my-utid/");
 
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);

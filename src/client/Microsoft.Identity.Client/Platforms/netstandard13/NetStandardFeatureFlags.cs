@@ -6,7 +6,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 namespace Microsoft.Identity.Client.Platforms.netstandard13
 {
     /// <summary>
-    /// These control the behaviour of platforms targetting directly NetStandard (e.g. WinRT)
+    /// These control the behaviour of platforms targeting directly NetStandard (e.g. WinRT)
     /// </summary>
     internal class NetStandardFeatureFlags : IFeatureFlags
     {

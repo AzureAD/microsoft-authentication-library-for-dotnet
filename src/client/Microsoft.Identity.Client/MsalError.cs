@@ -886,7 +886,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>The request has broker enabled and proof of possession configured but the broker does not support proof of possession
-        /// <para>Mitigation</para>only configure proof of possesion for public clients on windows.
+        /// <para>Mitigation</para>only configure proof of possession for public clients on windows.
         /// </summary>
         public const string BrokerDoesNotSupportPop = "broker_does_not_support_pop";
 
@@ -895,6 +895,12 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>Enable the broker when proof of possession is configured.
         /// </summary>
         public const string BrokerRequiredForPop = "broker_required_for_pop";
+
+        /// <summary>
+        /// <para>What happens?</para>Broker is configured with an ADFS authority, however, it does not support ADFS environments.
+        /// <para>Mitigation</para>Broker does not support ADFS environments.
+        /// </summary>
+        public const string AdfsNotSupportedWithBroker = "adfs_not_supported_with_broker";
 
         /// <summary>
         /// <para>What happens?</para>The request has proof of possession configured but does not have a nonce configured. A nonce is required for proof of possession on public clients

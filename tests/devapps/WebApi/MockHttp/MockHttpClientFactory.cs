@@ -2,12 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,11 +23,12 @@ namespace WebApi.MockHttp
 
         public static string LastHttpContentData { get; set; }
 
-        public MockHttpClientFactory()
+        public MockHttpClientFactory(int? _delayInMs = null)
         {
             RequestsAndResponses = new List<(HttpRequestMessage, HttpResponseMessage)>();
 
-            var recordingHandler = new SelfRespondingHandler((req, res) => {
+            var recordingHandler = new SelfRespondingHandler((req, res) =>
+            {
                 if (req.Content != null)
                 {
                     req.Content.LoadIntoBufferAsync().GetAwaiter().GetResult();
@@ -40,7 +37,7 @@ namespace WebApi.MockHttp
                 RequestsAndResponses.Add((req, res));
                 //Trace.WriteLine($"[MSAL][HTTP Request]: {req}");
                 //Trace.WriteLine($"[MSAL][HTTP Response]: {res}");
-            });
+            }, _delayInMs);
             recordingHandler.InnerHandler = new HttpClientHandler();
             _httpClient = new HttpClient(recordingHandler);
         }
@@ -54,14 +51,21 @@ namespace WebApi.MockHttp
     public class SelfRespondingHandler : DelegatingHandler
     {
         private readonly Action<HttpRequestMessage, HttpResponseMessage> _recordingAction;
+        private int? _delayInMs = null;
 
-        public SelfRespondingHandler(Action<HttpRequestMessage, HttpResponseMessage> recordingAction)
+        public SelfRespondingHandler(Action<HttpRequestMessage, HttpResponseMessage> recordingAction, int? delayInMs)
         {
             _recordingAction = recordingAction;
+            _delayInMs = delayInMs;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            if (_delayInMs.HasValue)
+            {
+                await Task.Delay(_delayInMs.Value).ConfigureAwait(false);
+            }
+
             HttpResponseMessage response = null;
             //HttpResponseMessage response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (request.Method == HttpMethod.Get)
@@ -106,11 +110,11 @@ namespace WebApi.MockHttp
                     }
 
                     response = MockHttpCreator.CreateUserTokenResponse(
-                        tid, 
+                        tid,
                         parsedData["scope"],
-                        fakeSecret, 
-                        uid: m2.Groups["user"].Value, 
-                        utid: tid ); // guests not implemented
+                        fakeSecret,
+                        uid: m2.Groups["user"].Value,
+                        utid: tid); // guests not implemented
                 }
                 else
                 {

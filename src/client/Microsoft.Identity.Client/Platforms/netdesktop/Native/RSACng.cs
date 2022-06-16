@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Native
         /// <summary>
         ///     Gets the key that will be used by the RSA object for any cryptographic operation that it uses.
         ///     This key object will be disposed if the key is reset, for instance by changing the KeySize
-        ///     property, using ImportParamers to create a new key, or by Disposing of the parent RSA object.
+        ///     property, using ImportParameters to create a new key, or by Disposing of the parent RSA object.
         ///     Therefore, you should make sure that the key object is no longer used in these scenarios. This
         ///     object will not be the same object as the CngKey passed to the RSACng constructor if that
         ///     constructor was used, however it will point at the same CNG key.

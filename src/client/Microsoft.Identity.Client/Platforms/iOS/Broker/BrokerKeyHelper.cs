@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             byte[] brokerKey;
             byte[] rawBytes;
-            using (AesManaged algo = CreateSymmetricAlgorith(null))
+            using (AesManaged algo = CreateSymmetricAlgorithm(null))
             {
                 algo.GenerateKey();
                 rawBytes = algo.Key;
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 try
                 {
                     memoryStream = new MemoryStream(outputBytes);
-                    algo = CreateSymmetricAlgorith(key);
+                    algo = CreateSymmetricAlgorithm(key);
                     cryptoStream = new CryptoStream(
                         memoryStream,
                         algo.CreateDecryptor(),
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 MsalErrorMessage.iOSBrokerKeyFetchFailed);
         }
 
-       private static AesManaged CreateSymmetricAlgorith(byte[] key)
+       private static AesManaged CreateSymmetricAlgorithm(byte[] key)
         {
             AesManaged algorithm = new AesManaged
             {

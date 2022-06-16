@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         protected void OnMoveToBackground(NSNotification notification)
         {
-            // After iOS 11.3, it is neccesary to keep a background task running while moving an app to the background
+            // After iOS 11.3, it is necessary to keep a background task running while moving an app to the background
             // in order to prevent the system from reclaiming network resources from the app.
             // This will prevent authentication from failing while the application is moved to the background while waiting for MFA to finish.
             taskId = UIApplication.SharedApplication.BeginBackgroundTask(() =>
