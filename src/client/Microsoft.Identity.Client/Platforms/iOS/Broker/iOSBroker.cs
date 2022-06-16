@@ -129,6 +129,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             brokerRequest.Add(BrokerParameter.ClientId, authenticationRequestParameters.AppConfig.ClientId);
             brokerRequest.Add(BrokerParameter.CorrelationId, authenticationRequestParameters.RequestContext.CorrelationId.ToString());
             brokerRequest.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
+            var realEnrollmentId = IntuneEnrollmentIdHelper.GetRawEnrollmentId();
+            if (!string.IsNullOrEmpty(realEnrollmentId))
+            {
+                brokerRequest.Add(BrokerParameter.IntuneEnrollmentIds, realEnrollmentId);
+            }
 
             // this needs to be case sensitive because the AppBundle is case sensitive
             brokerRequest.Add(
