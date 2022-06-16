@@ -16,7 +16,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
-    internal class PoPAuthenticationScheme : IAuthenticationScheme
+    internal class PopAuthenticationScheme : IAuthenticationScheme
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public PoPAuthenticationScheme(PoPAuthenticationConfiguration popAuthenticationConfiguration, IServiceBundle serviceBundle)
+        public PopAuthenticationScheme(PoPAuthenticationConfiguration popAuthenticationConfiguration, IServiceBundle serviceBundle)
         {
             if (serviceBundle == null)
             {
@@ -134,12 +134,12 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// strict, AAD support for PoP requires that we use the base64 encoded JWK thumbprint, as described by 
         /// https://tools.ietf.org/html/rfc7638
         /// </summary>
-        private static byte[] ComputeThumbprint(string cannonicalJwk)
+        private static byte[] ComputeThumbprint(string canonicalJwk)
         {
             // Cannot be easily generalized in UAP and NetStandard 1.3
             using (SHA256 hash = SHA256.Create())
             {
-                return hash.ComputeHash(Encoding.UTF8.GetBytes(cannonicalJwk));
+                return hash.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
             }
         }
 

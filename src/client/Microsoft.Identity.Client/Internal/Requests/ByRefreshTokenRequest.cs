@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (msalTokenResponse.RefreshToken == null)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(MsalErrorMessage.NoRefreshTokenInResponse);
+                AuthenticationRequestParameters.RequestContext.Logger.Error(MsalErrorMessage.NoRefreshTokenInResponse);
                 throw new MsalServiceException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription, null);
             }
 

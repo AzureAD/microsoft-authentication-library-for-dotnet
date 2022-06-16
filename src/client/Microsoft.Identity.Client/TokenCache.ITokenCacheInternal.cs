@@ -24,7 +24,7 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performace.
+    /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
     /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
     /// </summary>
     public sealed partial class TokenCache : ITokenCacheInternal
@@ -320,14 +320,14 @@ namespace Microsoft.Identity.Client
             string tenantId,
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata)
         {
-            if (msalRefreshTokenCacheItem?.RawClientInfo != null && 
+            if (msalRefreshTokenCacheItem?.RawClientInfo != null &&
                 msalIdTokenCacheItem?.IdToken?.ObjectId != null &&
-                IsLegacyAdalCacheEnabled(requestParams) )
+                IsLegacyAdalCacheEnabled(requestParams))
             {
 
-                var tenatedAuthority = Authority.CreateAuthorityWithTenant(requestParams.AuthorityInfo, tenantId);
+                var tenantedAuthority = Authority.CreateAuthorityWithTenant(requestParams.AuthorityInfo, tenantId);
                 var authorityWithPreferredCache = Authority.CreateAuthorityWithEnvironment(
-                        tenatedAuthority.AuthorityInfo,
+                        tenantedAuthority.AuthorityInfo,
                         instanceDiscoveryMetadata.PreferredCache);
 
                 CacheFallbackOperations.WriteAdalRefreshToken(
@@ -386,7 +386,7 @@ namespace Microsoft.Identity.Client
 
         #region FindAccessToken
         /// <summary>
-        /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performace.
+        /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
         /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
         /// 
         /// Scenario: client_creds with default in-memory cache can get to ~500k tokens
@@ -908,7 +908,7 @@ namespace Microsoft.Identity.Client
                     logger,
                     LegacyCachePersistence,
                     ClientId);
-                allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnviroments());
+                allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnvironments());
             }
 
             InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
@@ -962,17 +962,23 @@ namespace Microsoft.Identity.Client
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
             if (requestParameters.AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
             {
-                foreach (MsalAccountCacheItem wamAccountCache in accountCacheItems.Where(
-                    acc => acc.WamAccountIds != null &&
-                    acc.WamAccountIds.ContainsKey(requestParameters.AppConfig.ClientId)))
+                foreach (MsalAccountCacheItem cachedAccount in accountCacheItems)
                 {
-                    var wamAccount = new Account(
-                        wamAccountCache.HomeAccountId,
-                        wamAccountCache.PreferredUsername,
-                        environment,
-                        wamAccountCache.WamAccountIds);
+                    if (!clientInfoToAccountMap.ContainsKey(cachedAccount.HomeAccountId) &&
+                        cachedAccount.WamAccountIds != null &&
+                        cachedAccount.WamAccountIds.ContainsKey(requestParameters.AppConfig.ClientId))
+                    {
+                        var tenantProfiles = await GetTenantProfilesAsync(requestParameters, cachedAccount.HomeAccountId).ConfigureAwait(false);
 
-                    clientInfoToAccountMap[wamAccountCache.HomeAccountId] = wamAccount;
+                        var wamAccount = new Account(
+                            cachedAccount.HomeAccountId,
+                            cachedAccount.PreferredUsername,
+                            environment,
+                            cachedAccount.WamAccountIds,
+                            tenantProfiles?.Values);
+
+                        clientInfoToAccountMap[cachedAccount.HomeAccountId] = wamAccount;
+                    }
                 }
             }
 

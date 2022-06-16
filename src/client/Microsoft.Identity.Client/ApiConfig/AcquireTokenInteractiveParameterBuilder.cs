@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.AppConfig;
 using System.Net.Http;
 using System.ComponentModel;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 
 #if iOS
 using UIKit;
@@ -190,7 +191,7 @@ namespace Microsoft.Identity.Client
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
         /// </summary>
-        /// <remarks>Mandatory only on Android. Can also be set via the PublicClientApplcation builder.</remarks>
+        /// <remarks>Mandatory only on Android. Can also be set via the PublicClientApplication builder.</remarks>
         /// <param name="parent">The parent as an object, so that it can be used from shared NetStandard assemblies</param>
         /// <returns>The builder to chain the .With methods</returns>
 
@@ -382,6 +383,7 @@ namespace Microsoft.Identity.Client
             popConfig.HttpMethod = httpMethod;
 
             CommonParameters.PopAuthenticationConfiguration = popConfig;
+            CommonParameters.AuthenticationScheme = new PopBrokerAuthenticationScheme();
 
             return this;
         }

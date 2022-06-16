@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string LongRunningOboCacheKey { get; set; }
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
-#endregion
+        #endregion
 
         public void LogParameters()
         {
@@ -199,6 +199,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("CorrelationId - " + CorrelationId);
             builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
             builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
+            builder.AppendLine("Region configured: " + AppConfig.AzureRegion);
 
             string messageWithPii = builder.ToString();
 
@@ -218,6 +219,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("CorrelationId - " + CorrelationId);
             builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
             builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
+            builder.AppendLine("Region configured: " + AppConfig.AzureRegion);
 
             logger.InfoPii(messageWithPii, builder.ToString());
         }

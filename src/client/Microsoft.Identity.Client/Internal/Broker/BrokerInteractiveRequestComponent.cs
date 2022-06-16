@@ -77,14 +77,14 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
             if (msalTokenResponse.Error != null)
             {
-                _logger.Info(
+                _logger.Error(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
 
                 throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse,
                                                                      MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
             }
 
-            _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
+            _logger.Error(LogMessages.UnknownErrorReturnedInBrokerResponse);
             throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
 
         }

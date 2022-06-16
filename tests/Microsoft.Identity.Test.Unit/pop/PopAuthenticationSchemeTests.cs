@@ -39,12 +39,12 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
                 PoPAuthenticationConfiguration config = null;
 
-                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config, harness.ServiceBundle));
+                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationScheme(config, harness.ServiceBundle));
 
                 config = new PoPAuthenticationConfiguration(uri);
                 config.PopCryptoProvider = new InMemoryCryptoProvider();
 
-                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config, null));
+                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationScheme(config, null));
                 AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration((HttpRequestMessage)null));
                 AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration((Uri)null));
             }
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 msalAccessTokenCacheItem.Secret = AtSecret;
 
                 // Act
-                PoPAuthenticationScheme authenticationScheme = new PoPAuthenticationScheme(popConfig, harness.ServiceBundle);
+                PopAuthenticationScheme authenticationScheme = new PopAuthenticationScheme(popConfig, harness.ServiceBundle);
                 var tokenParams = authenticationScheme.GetTokenRequestParams();
                 var popTokenString = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
                 JwtSecurityToken decodedPopToken = new JwtSecurityToken(popTokenString);

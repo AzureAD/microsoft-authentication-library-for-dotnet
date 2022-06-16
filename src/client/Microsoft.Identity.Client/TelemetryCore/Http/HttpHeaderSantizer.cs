@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Http
 {
-    internal class HttpHeaderSantizer
+    internal class HttpHeaderSanitizer
     {
           private static readonly string[] s_headerEncodingTable = new string[] {
             "%00", "%01", "%02", "%03", "%04", "%05", "%06", "%07",
@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
         };
 
         // Based on https://referencesource.microsoft.com/#System.Web/Util/HttpEncoder.cs,e5d896b254faf84e
-        public static string SantizeHeader(string value)
+        public static string SanitizeHeader(string value)
         {
             string sanitizedHeader = value;
             if (HeaderValueNeedsEncoding(value))

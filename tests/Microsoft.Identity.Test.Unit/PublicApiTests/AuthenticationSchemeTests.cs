@@ -4,15 +4,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Test.Unit.BrokerTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -84,6 +91,65 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     scheme: null,
                     expectRtRefresh: true).ConfigureAwait(false);
                 ValidateBearerToken(httpManager, silentResult);
+            }
+        }
+
+        [TestMethod]
+        public async Task PopBrokerAuthSchemeTestAsync_Async()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var mockBroker = Substitute.For<IBroker>();
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockBroker.IsPopSupported.Returns(true);
+                mockBroker.AcquireTokenInteractiveAsync(
+                    Arg.Any<AuthenticationRequestParameters>(),
+                    Arg.Any<AcquireTokenInteractiveParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
+                mockBroker.AcquireTokenSilentAsync(
+                    Arg.Any<AuthenticationRequestParameters>(), 
+                    Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
+
+                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithBrokerPreview()
+                    .WithTestBroker(mockBroker)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
+                TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
+
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+
+                var resultForATI = await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
+                    .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Act
+                var resultForATS = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.DisplayableId)
+                    .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                //Assert
+
+                //Validate that access token from broker is not wrapped
+                Assert.AreEqual(TestConstants.UserAccessToken, resultForATI.AccessToken);
+                Assert.AreEqual(Constants.PoPAuthHeaderPrefix, resultForATI.TokenType);
+                Assert.AreEqual(TokenSource.Broker, resultForATI.AuthenticationResultMetadata.TokenSource);
+                //Validate that the pop broker auth scheme returns the correct token type for ATI
+                Assert.AreEqual(Constants.PoPAuthHeaderPrefix + " " + TestConstants.UserAccessToken, resultForATI.CreateAuthorizationHeader());
+
+                //Validate that access token from broker is not wrapped
+                Assert.AreEqual(TestConstants.UserAccessToken, resultForATS.AccessToken);
+                Assert.AreEqual(Constants.PoPAuthHeaderPrefix, resultForATS.TokenType);
+                Assert.AreEqual(TokenSource.Broker, resultForATS.AuthenticationResultMetadata.TokenSource);
+                //Validate that the pop broker auth scheme returns the correct token type for ATS
+                Assert.AreEqual(Constants.PoPAuthHeaderPrefix + " " + TestConstants.UserAccessToken, resultForATS.CreateAuthorizationHeader());
             }
         }
 

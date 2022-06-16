@@ -128,10 +128,12 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseError = "Broker response returned error: ";
         public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
             "Check logs for more details and see https://aka.ms/msal-brokers. ";
+        public const string CannotInvokeBrokerForPop = "MSAL cannot invoke the broker and it is required for Proof-of-Possession. Wam (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
+            "Check logs for more details and see https://aka.ms/msal-net-pop. ";
         public const string BrokerDoesNotSupportPop = "The broker does not support Proof-of-Possession on the current platform.";
         public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required for Proof-of-Possession on public clients.";
         public const string NonceRequiredForPop = "The request has Proof-of-Possession configured for public clients but does not have a nonce provided. A nonce is required for Proof-of-Possession on public clients.";
-
+        public const string AdfsNotSupportedWithBroker = "Broker does not support ADFS environments.";
 
         public const string NullIntentReturnedFromBroker = "Broker returned a null intent. Check the Xamarin Android app settings and logs for more information. ";
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint. ";
@@ -182,7 +184,7 @@ namespace Microsoft.Identity.Client
 
         public const string InvalidAuthorityOpenId = "invalid authority while getting the open id config endpoint. ";
         public const string UpnRequiredForAuthroityValidation = "UPN is required for ADFS authority validation. ";
-        public const string CannotFindTheAuthEndpont = "Cannot find the auth endpoint. ";
+        public const string CannotFindTheAuthEndpoint = "Cannot find the auth endpoint. ";
 
         public const string UapCannotFindUpn =
            "Cannot find the user logged into Windows, but found a domain the name. Possible cause: the UWP application does not request the Enterprise Authentication capability. ";
@@ -409,7 +411,7 @@ namespace Microsoft.Identity.Client
                 "Failure setting process security to enable WAM Account Picker in an elevated process ({0}). For troubleshooting details, see https://aka.ms/msal-net-wam .",
                 errorCode);
 
-        public const string CcsRoutingHintMissing = "Either the userObjectIdentifier or tenantIdenifier are missing. Both are needed to create the CCS routing hint. See https://aka.ms/msal-net/ccsRouting. ";
+        public const string CcsRoutingHintMissing = "Either the userObjectIdentifier or tenantIdentifier are missing. Both are needed to create the CCS routing hint. See https://aka.ms/msal-net/ccsRouting. ";
 
         public const string StaticCacheWithExternalSerialization =
             "You configured MSAL cache serialization at the same time with internal caching options. These are mutually exclusive. " +
@@ -426,6 +428,10 @@ namespace Microsoft.Identity.Client
 
         public const string MultiCloudSupportUnavailable = "Multi cloud support unavailable with broker.";
 
+        public const string RequestFailureErrorMessage = "=== Token Acquisition ({0}) failed.\n\tHost: {1}.";
+
+        public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}.";
+
         public static string InvalidTokenProviderResponseValue(string invalidValueName)
             {
             return string.Format(
@@ -433,5 +439,6 @@ namespace Microsoft.Identity.Client
                                 "The following token provider result value is invalid: {0}.",
                                 invalidValueName);
         }
+
     }
 }
