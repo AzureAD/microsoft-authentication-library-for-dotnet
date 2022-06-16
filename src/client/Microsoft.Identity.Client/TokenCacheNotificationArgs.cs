@@ -68,34 +68,6 @@ namespace Microsoft.Identity.Client
             SuggestedCacheExpiry = suggestedCacheExpiry;
         }
 
-        internal TokenCacheNotificationArgs(
-            ITokenCacheSerializer tokenCache,
-            string clientId,
-            IAccount account,
-            bool hasStateChanged,
-            bool isApplicationCache,
-            string suggestedCacheKey,
-            bool hasTokens,
-            DateTimeOffset? suggestedCacheExpiry,
-            CancellationToken cancellationToken,
-            Guid correlationId,
-            IIdentityLogger msalIdentityLogger,
-            bool piiLoggingEnabled)
-        {
-            TokenCache = tokenCache;
-            ClientId = clientId;
-            Account = account;
-            HasStateChanged = hasStateChanged;
-            IsApplicationCache = isApplicationCache;
-            SuggestedCacheKey = suggestedCacheKey;
-            HasTokens = hasTokens;
-            CancellationToken = cancellationToken;
-            CorrelationId = correlationId;
-            SuggestedCacheExpiry = suggestedCacheExpiry;
-            IdentityLogger = msalIdentityLogger;
-            PiiLoggingEnabled = piiLoggingEnabled;
-        }
-
         /// <summary>
         /// Gets the <see cref="ITokenCacheSerializer"/> involved in the transaction
         /// </summary>
@@ -171,16 +143,5 @@ namespace Microsoft.Identity.Client
         /// access tokens are refreshable.
         /// </summary> 
         public DateTimeOffset? SuggestedCacheExpiry { get; private set; }
-
-        /// <summary>
-        /// Identity Logger provided at the time of application creation Via WithLogging(IIdentityLogger, bool)/>
-        /// Calling the log function will automatically add MSAL formatting to the message. For details see https://aka.ms/msal-net-logging
-        /// </summary>
-        public IIdentityLogger IdentityLogger { get; private set; }
-
-        /// <summary>
-        /// Boolean used to determine if Personally Identifiable Information (PII) logging is enabled.
-        /// </summary>
-        public bool PiiLoggingEnabled { get; private set; }
     }
 }

@@ -165,9 +165,7 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: requestParams.RequestContext.UserCancellationToken,
-                            correlationId: requestParams.RequestContext.CorrelationId,
-                            msalIdentityLogger: requestParams.RequestContext.ExternalCacheLogger,
-                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
+                            correlationId: requestParams.RequestContext.CorrelationId);
 
                         Stopwatch sw = Stopwatch.StartNew();
 
@@ -235,9 +233,7 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: cacheExpiry,
                             cancellationToken: requestParams.RequestContext.UserCancellationToken,
-                            correlationId: requestParams.RequestContext.CorrelationId,
-                            msalIdentityLogger: requestParams.RequestContext.ExternalCacheLogger,
-                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
+                            correlationId: requestParams.RequestContext.CorrelationId);
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -725,9 +721,7 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: default,
-                            correlationId: default,
-                            msalIdentityLogger: null,
-                            piiLoggingEnabled: false);
+                            correlationId: default);
 
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
@@ -1144,9 +1138,7 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: requestParameters.RequestContext.UserCancellationToken,
-                            correlationId: requestParameters.RequestContext.CorrelationId,
-                            msalIdentityLogger: requestParameters.RequestContext.ExternalCacheLogger,
-                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
+                            correlationId: requestParameters.RequestContext.CorrelationId);
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
@@ -1177,9 +1169,7 @@ namespace Microsoft.Identity.Client
                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                            suggestedCacheExpiry: null,
                            cancellationToken: requestParameters.RequestContext.UserCancellationToken,
-                           correlationId: requestParameters.RequestContext.CorrelationId,
-                           msalIdentityLogger: requestParameters.RequestContext.ExternalCacheLogger,
-                           piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
+                           correlationId: requestParameters.RequestContext.CorrelationId);
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     }
