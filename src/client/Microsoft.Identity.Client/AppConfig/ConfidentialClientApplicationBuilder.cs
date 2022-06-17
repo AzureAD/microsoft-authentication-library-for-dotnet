@@ -210,6 +210,7 @@ namespace Microsoft.Identity.Client
         /// This is a delegate that computes a Base-64 encoded JWT for each authentication call.</param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<string> clientAssertionDelegate)
         {
             if (clientAssertionDelegate == null)
@@ -233,7 +234,26 @@ namespace Microsoft.Identity.Client
         /// This is a delegate that computes a Base-64 encoded JWT for each authentication call.</param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate)
+        {
+            if (clientAssertionAsyncDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
+            }
+
+            Config.ClientCredential = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
+            return this;
+        }
+
+        /// <summary>
+        /// Configures an async delegate that creates a client assertion. See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="clientAssertionAsyncDelegate">An async delegate computing the client assertion used to prove the identity of the application to Azure AD.
+        /// This is a delegate that computes a Base-64 encoded JWT for each authentication call.</param>
+        /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
+        /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
+        public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions, Task<string>> clientAssertionAsyncDelegate)
         {
             if (clientAssertionAsyncDelegate == null)
             {

@@ -18,14 +18,14 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         internal static string GetEnrollmentId(ILoggerAdapter logger)
         {
 #if iOS
-            var keychainData = NSUserDefaults.StandardUserDefaults.StringForKey(EnrollmentIdKey);
+            var keychainData = GetRawEnrollmentId();
             if(!string.IsNullOrEmpty(keychainData))
             {
                 try
                 {
                     var enrollmentIDs = JsonConvert.DeserializeObject<EnrollmentIDs>(keychainData);
 
-                    if (enrollmentIDs.EnrollmentIds.Count > 0)
+                    if ((enrollmentIDs?.EnrollmentIds?.Count ?? 0) > 0)
                     {
                         return enrollmentIDs.EnrollmentIds[0].EnrollmentId;
                     }
@@ -40,6 +40,16 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
 #endif
             return string.Empty;
+        }
+
+        internal static string GetRawEnrollmentId()
+        {
+#if iOS
+            var keychainData = NSUserDefaults.StandardUserDefaults.StringForKey(EnrollmentIdKey);
+            return keychainData;
+#else
+            return string.Empty;
+#endif
         }
 
         /// <summary>
