@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>
         /// Note that if "common" or "organizations" is specified, Azure Active Directory discovers the host tenant for the user, and the tokens 
-        /// are associated it. This property is not impacted.</remarks>
+        /// are associated with it. This property is not impacted.</remarks>
         public string RequestTenantId { get; }
 
         /// <summary>
