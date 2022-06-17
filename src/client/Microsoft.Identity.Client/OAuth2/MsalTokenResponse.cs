@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Core;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
+using System.Diagnostics.Tracing;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -241,7 +242,7 @@ namespace Microsoft.Identity.Client.OAuth2
             return msalTokenResponse;
         }
 
-        public void Log(ICoreLogger logger, LogLevel logLevel)
+        public void Log(ILoggerAdapter logger, LogLevel logLevel)
         {
             if (logger.IsLoggingEnabled(logLevel))
             {

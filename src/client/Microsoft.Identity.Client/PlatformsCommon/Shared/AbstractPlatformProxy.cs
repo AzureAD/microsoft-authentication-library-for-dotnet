@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private readonly Lazy<string> _productName;
         private readonly Lazy<string> _runtimeVersion;
 
-        protected AbstractPlatformProxy(ICoreLogger logger)
+        protected AbstractPlatformProxy(ILoggerAdapter logger)
         {
             Logger = logger;
             _deviceModel = new Lazy<string>(InternalGetDeviceModel);
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         protected IFeatureFlags OverloadFeatureFlags { get; set; }
 
-        protected ICoreLogger Logger { get; }
+        protected ILoggerAdapter Logger { get; }
 
         /// <inheritdoc />
         public IWebUIFactory GetWebUiFactory(ApplicationConfiguration appConfig)

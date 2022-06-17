@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     {
         internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
 
-        public iOSPlatformProxy(ICoreLogger logger)
+        public iOSPlatformProxy(ILoggerAdapter logger)
             : base(logger)
         {
         }

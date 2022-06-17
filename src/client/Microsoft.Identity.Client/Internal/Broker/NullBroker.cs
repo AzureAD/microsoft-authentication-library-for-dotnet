@@ -21,11 +21,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
     /// </summary>
     internal class NullBroker : IBroker
     {
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
         public bool IsPopSupported => false;
 
-        public NullBroker(ICoreLogger logger)
+        public NullBroker(ILoggerAdapter logger)
         {
             _logger = logger ?? new NullLogger();
         }

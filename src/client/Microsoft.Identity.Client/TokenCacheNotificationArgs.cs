@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
@@ -37,8 +38,8 @@ namespace Microsoft.Identity.Client
                    suggestedCacheExpiry,
                    cancellationToken,
                    default)
-        {
-        }
+            {
+            }
 
         /// <summary>
         /// This constructor is for test purposes only. It allows apps to unit test their MSAL token cache implementation code.

@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     [TestClass]
     public class WamAadPluginTests : TestBase
     {
-        private ICoreLogger _logger;
+        private ILoggerAdapter _logger;
         private IWamPlugin _aadPlugin;
         private IWamProxy _wamProxy;
         private IWebAccountProviderFactory _webAccountProviderFactory;
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestInitialize]
         public void Init()
         {
-            _logger = Substitute.For<ICoreLogger>();
+            _logger = Substitute.For<ILoggerAdapter>();
             _wamProxy = Substitute.For<IWamProxy>();
             _webAccountProviderFactory = Substitute.For<IWebAccountProviderFactory>();
             _accountPickerFactory = Substitute.For<IAccountPickerFactory>();

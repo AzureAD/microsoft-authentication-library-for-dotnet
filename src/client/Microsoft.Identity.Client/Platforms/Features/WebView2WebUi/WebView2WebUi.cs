@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
 {

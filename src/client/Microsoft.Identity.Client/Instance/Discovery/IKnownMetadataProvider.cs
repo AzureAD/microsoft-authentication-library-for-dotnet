@@ -11,6 +11,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         InstanceDiscoveryMetadataEntry GetMetadata(
             string environment, 
             IEnumerable<string> existingEnvironmentsInCache, 
-            ICoreLogger logger);
+            ILoggerAdapter logger);
     }
 }

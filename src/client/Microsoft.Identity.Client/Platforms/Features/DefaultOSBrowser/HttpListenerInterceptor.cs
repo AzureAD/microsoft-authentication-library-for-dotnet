@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 {
     internal class HttpListenerInterceptor : IUriInterceptor
     {
-        private ICoreLogger _logger;
+        private ILoggerAdapter _logger;
 
         #region Test Hooks 
         public Action TestBeforeTopLevelCall { get; set; }
@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
         public Action TestBeforeGetContext { get; set; }
         #endregion
 
-        public HttpListenerInterceptor(ICoreLogger logger)
+        public HttpListenerInterceptor(ILoggerAdapter logger)
         {
             _logger = logger;
         }

@@ -7,10 +7,11 @@ using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
-    internal class TraceLogger : ICoreLogger
+    internal class TraceLogger : ILoggerAdapter
     {
         private readonly string _prefix;
 
@@ -26,6 +27,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         public string ClientVersion => "0";
 
         public bool PiiLoggingEnabled => true;
+
+        public bool IsDefaultPlatformLoggingEnabled => false;
+
+        public IIdentityLogger CacheLogger => null;
 
         public void Always(string messageScrubbed)
         {

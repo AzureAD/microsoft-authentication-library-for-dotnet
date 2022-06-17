@@ -16,9 +16,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
         /// <summary>
         ///     Gets the platform proxy, which can be used to perform platform specific operations
         /// </summary>
-        public static IPlatformProxy CreatePlatformProxy(ICoreLogger logger)
+        public static IPlatformProxy CreatePlatformProxy(ILoggerAdapter logger)
         {
-            var finalLogger = logger ?? MsalLogger.NullLogger;
+            var finalLogger = logger ?? LoggerHelper.NullLogger;
 
 #if NET_CORE
             return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(finalLogger);
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
             return new Platforms.Mac.MacPlatformProxy(finalLogger);
 #elif WINDOWS_APP
             return new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy(finalLogger);
-#elif NETSTANDARD1_3
+#elif NETSTANDARD2_0
             return new Microsoft.Identity.Client.Platforms.netstandard13.Netstandard13PlatformProxy(finalLogger);
 #elif DESKTOP
             return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy(finalLogger);

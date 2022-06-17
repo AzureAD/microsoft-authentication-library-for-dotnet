@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
@@ -51,7 +52,7 @@ namespace Microsoft.Identity.Client
 
         public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
 
-        public Func<CoreUIParent, ApplicationConfiguration, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
+        public Func<CoreUIParent, ApplicationConfiguration, ILoggerAdapter, IBroker> BrokerCreatorFunc { get; set; }
         public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }
 
         /// <summary>
@@ -83,6 +84,7 @@ namespace Microsoft.Identity.Client
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
         public LogCallback LoggingCallback { get; internal set; }
+        public IIdentityLogger IdentityLogger { get; internal set; }
         public string Component { get; internal set; }
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
         public bool UseRecommendedDefaultRedirectUri { get; internal set; }
@@ -97,7 +99,7 @@ namespace Microsoft.Identity.Client
 
         public Func<AppTokenProviderParameters, Task<TokenProviderResult>> AppTokenProvider;
 
-        #region ClientCredentials
+#region ClientCredentials
 
         public IClientCredential ClientCredential { get; internal set; }
 
@@ -133,13 +135,13 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        #endregion
+#endregion
 
-        #region Region
+#region Region
         public string AzureRegion { get; set; }
-        #endregion
+#endregion
 
-        #region Authority
+#region Authority
         // These are all used to create the Authority when the app is built.
 
         public string TenantId { get; internal set; }
@@ -167,16 +169,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-        #endregion
+#endregion
 
-        #region Test Hooks
+#region Test Hooks
         public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
-        #endregion
+#endregion
 
     }
 }

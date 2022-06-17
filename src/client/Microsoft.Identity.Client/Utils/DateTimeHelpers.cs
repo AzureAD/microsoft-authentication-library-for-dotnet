@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Utils
             return unixTimestamp;
         }
 
-        public static long GetDurationFromWindowsTimestamp(string windowsTimestampInFuture, ICoreLogger logger)
+        public static long GetDurationFromWindowsTimestamp(string windowsTimestampInFuture, ILoggerAdapter logger)
         {
             if (string.IsNullOrEmpty(windowsTimestampInFuture))
             {

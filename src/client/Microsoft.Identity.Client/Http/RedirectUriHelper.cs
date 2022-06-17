@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Http
             }
         }
 
-        public static void ValidateIosBrokerRedirectUri(Uri redirectUri, string bundleId, ICoreLogger logger)
+        public static void ValidateIosBrokerRedirectUri(Uri redirectUri, string bundleId, ILoggerAdapter logger)
         {
             string expectedRedirectUri = $"msauth.{bundleId}://auth";
 

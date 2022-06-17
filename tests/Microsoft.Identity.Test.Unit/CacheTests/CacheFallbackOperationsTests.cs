@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     public class CacheFallbackOperationsTests
     {
         private InMemoryLegacyCachePersistence _legacyCachePersistence;
-        private ICoreLogger _logger;
+        private ILoggerAdapter _logger;
 
         [TestInitialize]
         public void TestInitialize()
@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // Methods in CacheFallbackOperations silently catch all exceptions and log them;
             // By setting this to null, logging will fail, making the test fail.
-            _logger = Substitute.For<ICoreLogger>();
+            _logger = Substitute.For<ILoggerAdapter>();
 
             // Use the net45 accessor for tests
             _legacyCachePersistence = new InMemoryLegacyCachePersistence();

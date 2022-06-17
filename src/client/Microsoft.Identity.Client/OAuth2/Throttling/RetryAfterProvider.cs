@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling

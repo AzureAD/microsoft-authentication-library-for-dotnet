@@ -30,9 +30,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
         private const int MaxCompositeValueLength = 1024;
 
         private readonly ICryptographyManager _cryptographyManager;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
-        public UapLegacyCachePersistence(ICoreLogger logger, ICryptographyManager cryptographyManager)
+        public UapLegacyCachePersistence(ILoggerAdapter logger, ICryptographyManager cryptographyManager)
         {
             _logger = logger;
             _cryptographyManager = cryptographyManager;

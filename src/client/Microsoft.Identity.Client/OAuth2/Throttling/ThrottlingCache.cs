@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 TimeSpan.FromMilliseconds(DefaultCleanupIntervalMs);
         }
 
-        public void AddAndCleanup(string key, ThrottlingCacheEntry entry, ICoreLogger logger)
+        public void AddAndCleanup(string key, ThrottlingCacheEntry entry, ILoggerAdapter logger)
         {
             // in a high concurrency scenario, pick the most fresh entry
             _cache.AddOrUpdate(
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             CleanCache(logger);
         }
 
-        public bool TryGetOrRemoveExpired(string key, ICoreLogger logger, out MsalServiceException ex)
+        public bool TryGetOrRemoveExpired(string key, ILoggerAdapter logger, out MsalServiceException ex)
         {
             ex = null;
             if (_cache.TryGetValue(key, out var entry))
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         internal ConcurrentDictionary<string, ThrottlingCacheEntry> CacheForTest => _cache; 
 
-        private void CleanCache(ICoreLogger logger)
+        private void CleanCache(ILoggerAdapter logger)
         {
             if (_lastCleanupTime + s_cleanupCacheInterval < DateTimeOffset.UtcNow &&
                 !_cleanupInProgress)
