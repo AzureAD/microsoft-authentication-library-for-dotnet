@@ -11,11 +11,10 @@ using Android.Content.PM;
 using Android.OS;
 #if __ANDROID_29__
 using AndroidX.Browser.CustomTabs;
-using Microsoft.Identity.Client.Core;
 #else
 using Android.Support.CustomTabs;
-using Microsoft.Identity.Client.Core;
 #endif
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Uri = Android.Net.Uri;
