@@ -19,4 +19,3 @@ steps:
   displayName: 'Run a multi-line script'
 
 - task: VSTSToolsListVariables@1
-  inputs:
