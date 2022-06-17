@@ -516,7 +516,7 @@ namespace Microsoft.Identity.Json.Serialization
             get
             {
                 // UNITY flag based on https://github.com/jilleJr/Newtonsoft.Json-for-Unity
-#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS || MAC || UNITY)
+#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS || MAC || UNITY || UAP10_0_17763)
                 if (DynamicCodeGeneration)
                 {
                     return DynamicReflectionDelegateFactory.Instance;

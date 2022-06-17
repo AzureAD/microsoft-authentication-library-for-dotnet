@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal class LegacyTokenCacheHelper
     {
-        internal static void PopulateLegacyCache(ICoreLogger logger, ILegacyCachePersistence legacyCachePersistence, int tokenQuantity = 1)
+        internal static void PopulateLegacyCache(ILoggerAdapter logger, ILegacyCachePersistence legacyCachePersistence, int tokenQuantity = 1)
         {
             for (int i = 1; i <= tokenQuantity; i++)
             {
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
         }
 
-        internal static void PopulateLegacyCache(ICoreLogger logger, ILegacyCachePersistence legacyCachePersistence)
+        internal static void PopulateLegacyCache(ILoggerAdapter logger, ILegacyCachePersistence legacyCachePersistence)
         {
             PopulateLegacyWithRtAndId(
                 logger,
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         internal static void PopulateLegacyWithRtAndId(
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             ILegacyCachePersistence legacyCachePersistence,
             string clientId,
             string env,
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         internal static void PopulateLegacyWithRtAndId(
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             ILegacyCachePersistence legacyCachePersistence,
             string clientId,
             string env,

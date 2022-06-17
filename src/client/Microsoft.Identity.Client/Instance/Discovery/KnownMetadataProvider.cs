@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         public InstanceDiscoveryMetadataEntry GetMetadata(
             string environment,
             IEnumerable<string> existingEnvironmentsInCache,
-            ICoreLogger logger)
+            ILoggerAdapter logger)
         {
             if (existingEnvironmentsInCache == null)
             {

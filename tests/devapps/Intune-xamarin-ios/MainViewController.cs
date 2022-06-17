@@ -15,6 +15,7 @@ using UIKit;
 
 namespace IntuneMAMSampleiOS
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     public partial class MainViewController : UIViewController
     {
         UIButton btnMSAL;

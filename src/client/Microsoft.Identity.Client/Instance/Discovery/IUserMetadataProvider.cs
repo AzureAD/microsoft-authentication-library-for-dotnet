@@ -7,6 +7,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 {
     internal interface IUserMetadataProvider
     {
-        InstanceDiscoveryMetadataEntry GetMetadataOrThrow(string environment, ICoreLogger logger);
+        InstanceDiscoveryMetadataEntry GetMetadataOrThrow(string environment, ILoggerAdapter logger);
     }
 }

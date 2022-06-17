@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly ISilentAuthRequestStrategy _clientStrategy;
         private readonly Lazy<ISilentAuthRequestStrategy> _brokerStrategyLazy;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
         public SilentRequest(
             IServiceBundle serviceBundle,

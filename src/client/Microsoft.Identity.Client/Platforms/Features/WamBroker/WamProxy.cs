@@ -9,6 +9,7 @@ using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using System.Threading;
+using System.Diagnostics.Tracing;
 
 #if NET5_WIN
 using Microsoft.Identity.Client.Platforms.net5win;
@@ -24,10 +25,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 #endif
     internal class WamProxy : IWamProxy
     {
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly SynchronizationContext _synchronizationContext;
 
-        public WamProxy(ICoreLogger logger, System.Threading.SynchronizationContext synchronizationContext)
+        public WamProxy(ILoggerAdapter logger, System.Threading.SynchronizationContext synchronizationContext)
         {
             _logger = logger;
             _synchronizationContext = synchronizationContext;

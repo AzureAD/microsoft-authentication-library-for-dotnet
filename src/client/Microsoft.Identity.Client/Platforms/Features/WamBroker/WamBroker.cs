@@ -22,7 +22,7 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.Diagnostics;
-#if !UAP10_0
+#if !UAP10_0_17763
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Utils.Windows;
 #endif
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
         private readonly IAccountPickerFactory _accountPickerFactory;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly IntPtr _parentHandle;
         private readonly SynchronizationContext _synchronizationContext;
         private readonly IMsaPassthroughHandler _msaPassthroughHandler;
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         public WamBroker(
             CoreUIParent uiParent,
             ApplicationConfiguration appConfig,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             IWamPlugin testAadPlugin = null,
             IWamPlugin testmsaPlugin = null,
             IWamProxy wamProxy = null,

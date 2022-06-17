@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
             }
 
             string msg = JsonConvert.SerializeObject(j, Formatting.None);
-#if WINDOWS_APP || NETSTANDARD1_3
+#if WINDOWS_APP || NETSTANDARD2_0
             Debug.WriteLine(msg);
 #else
             Trace.TraceInformation(msg);

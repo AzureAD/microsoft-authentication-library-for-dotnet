@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
 
             HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
-                Substitute.For<ICoreLogger>());
+                Substitute.For<ILoggerAdapter>());
 
             int port = FindFreeLocalhostPort();
 
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
 
             HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
-                Substitute.For<ICoreLogger>());
+                Substitute.For<ILoggerAdapter>());
             CancellationTokenSource cts = new CancellationTokenSource();
             listenerInterceptor.TestBeforeTopLevelCall = () => cts.Cancel();
 
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
 
             HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
-                Substitute.For<ICoreLogger>());
+                Substitute.For<ILoggerAdapter>());
             CancellationTokenSource cts = new CancellationTokenSource();
             int port = FindFreeLocalhostPort();
 
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public async Task ValidateHttpListenerRedirectUriAsync()
         {
             HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
-                Substitute.For<ICoreLogger>());
+                Substitute.For<ILoggerAdapter>());
 
             int port = FindFreeLocalhostPort();
 
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
 
             HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
-                Substitute.For<ICoreLogger>());
+                Substitute.For<ILoggerAdapter>());
             CancellationTokenSource cts = new CancellationTokenSource();
             int port = FindFreeLocalhostPort();
 

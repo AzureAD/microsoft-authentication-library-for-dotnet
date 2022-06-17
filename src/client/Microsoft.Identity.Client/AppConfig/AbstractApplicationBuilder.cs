@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
@@ -247,6 +248,7 @@ namespace Microsoft.Identity.Client
         /// PII logs are never written to default outputs like Console, Logcat or NSLog
         /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
         /// You can set it to <c>true</c> for advanced debugging requiring PII
+        /// If both WithLogging apis are set, the other one will overide the this one
         /// </param>
         /// <param name="enableDefaultPlatformLogging">Flag to enable/disable logging to platform defaults.
         /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
@@ -272,6 +274,29 @@ namespace Microsoft.Identity.Client
             Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
             return (T)this;
         }
+
+#if !XAMARINMAC2_0
+        /// <summary>
+        /// Sets the Identity Logger. For details see https://aka.ms/msal-net-logging
+        /// </summary>
+        /// <param name="identityLogger">IdentityLogger</param>
+        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
+        /// Personally Identifiable Information (PII).
+        /// PII logs are never written to default outputs like Console, Logcat or NSLog
+        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
+        /// You can set it to <c>true</c> for advanced debugging requiring PII
+        /// If both WithLogging apis are set, this one will override the other
+        /// </param>
+        /// <returns></returns>
+        public T WithLogging(
+            IIdentityLogger identityLogger,
+            bool enablePiiLogging)
+        {
+            Config.IdentityLogger = identityLogger;
+            Config.EnablePiiLogging = enablePiiLogging;
+            return (T)this;
+        }
+#endif
 
         /// <summary>
         /// Sets the Debug logging callback to a default debug method which displays
@@ -515,7 +540,7 @@ namespace Microsoft.Identity.Client
             return Config;
         }
 
-        #region Authority
+#region Authority
         private void ResolveAuthority()
         {
             if (Config.Authority?.AuthorityInfo != null)
@@ -816,7 +841,7 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-        #endregion
+#endregion
 
         private static string GetValueIfNotEmpty(string original, string value)
         {

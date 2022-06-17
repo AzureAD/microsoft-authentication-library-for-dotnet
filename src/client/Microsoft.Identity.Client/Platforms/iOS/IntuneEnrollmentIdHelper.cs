@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     {
         const string EnrollmentIdKey = "intune_app_protection_enrollment_id_V1";
 
-        internal static string GetEnrollmentId(ICoreLogger logger)
+        internal static string GetEnrollmentId(ILoggerAdapter logger)
         {
 #if iOS
             var keychainData = GetRawEnrollmentId();

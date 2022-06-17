@@ -281,7 +281,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        private void CreateAdalCache(ICoreLogger logger, ILegacyCachePersistence legacyCachePersistence, string scopes)
+        private void CreateAdalCache(ILoggerAdapter logger, ILegacyCachePersistence legacyCachePersistence, string scopes)
         {
             var key = new AdalTokenCacheKey(
                 TestConstants.AuthorityHomeTenant,

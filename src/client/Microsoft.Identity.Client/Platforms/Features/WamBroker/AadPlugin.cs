@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     {
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private const int FACILITY_ADAL_HTTP = 0xAA3;
         private const int FACILITY_ADAL_URLMON = 0xAA7;
         private const int FACILITY_ADAL_INTERNET = 0xAA8;
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private const uint ERROR_ADAL_SERVER_ERROR_TEMPORARILY_UNAVAILABLE = 0xcaa20005;
         private const uint ERROR_ADAL_SERVER_ERROR_RECEIVED = 0xcaa20008;
 
-        public AadPlugin(IWamProxy wamProxy, IWebAccountProviderFactory webAccountProviderFactory, ICoreLogger logger)
+        public AadPlugin(IWamProxy wamProxy, IWebAccountProviderFactory webAccountProviderFactory, ILoggerAdapter logger)
         {
             _wamProxy = wamProxy;
             _webAccountProviderFactory = webAccountProviderFactory;

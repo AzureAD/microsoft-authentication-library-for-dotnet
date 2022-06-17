@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -355,7 +356,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal /* for testing */ static DateTimeOffset? CalculateSuggestedCacheExpiry(
             ITokenCacheAccessor accessor,
-            ICoreLogger logger)
+            ILoggerAdapter logger)
         {
             // If we have refresh tokens in the cache, we cannot suggest expiration
             // because refresh token expiration is not disclosed to SDKs and RTs are long lived anyway (3 months by default)
@@ -387,9 +388,9 @@ namespace Microsoft.Identity.Client
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
         }
-        #endregion
+#endregion
 
-        #region FindAccessToken
+#region FindAccessToken
         /// <summary>
         /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
         /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
@@ -692,7 +693,7 @@ namespace Microsoft.Identity.Client
                         requestKid));
             return null;
         }
-        #endregion
+#endregion
 
         private void FilterTokensByClientId<T>(List<T> tokenCacheItems) where T : MsalCredentialCacheItemBase
         {

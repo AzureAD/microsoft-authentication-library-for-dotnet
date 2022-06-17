@@ -9,13 +9,13 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal sealed class DurationLogHelper : IDisposable
     {
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly string _measuredBlockName;
         private readonly LogLevel _logLevel;
         private readonly Stopwatch _stopwatch;
 
         public DurationLogHelper(
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             string measuredBlockName,
             LogLevel logLevel = LogLevel.Verbose)
         {
@@ -24,12 +24,12 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _logLevel = logLevel;
             _stopwatch = Stopwatch.StartNew();
 
-            logger.Log(logLevel, null, $"Starting {measuredBlockName}");
+            _logger.Log(LogLevel.Verbose, string.Empty, $"Starting {measuredBlockName}");
         }
 
         public void Dispose()
         {
-            _logger.Log(_logLevel, null, $"Finished {_measuredBlockName} in {_stopwatch.ElapsedMilliseconds} ms");
+            _logger.Log(LogLevel.Verbose, string.Empty, $"Finished {_measuredBlockName} in {_stopwatch.ElapsedMilliseconds} ms");
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly SilentRequest _silentRequest;
         internal IBroker Broker { get; }
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
         public BrokerSilentStrategy(
             SilentRequest request,

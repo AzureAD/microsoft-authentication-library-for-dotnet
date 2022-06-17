@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             }
         }
 
-        private void TryThrowException(string thumbprint, ICoreLogger logger)
+        private void TryThrowException(string thumbprint, ILoggerAdapter logger)
         {
             if (ThrottlingCache.TryGetOrRemoveExpired(thumbprint, logger, out MsalServiceException ex) &&
                 ex is MsalUiRequiredException uiException)

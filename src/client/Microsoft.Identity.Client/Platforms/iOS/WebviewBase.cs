@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AuthenticationServices;
 using Foundation;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using SafariServices;
@@ -40,7 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             RequestContext requestContext,
             CancellationToken cancellationToken);
 
-        public static bool ContinueAuthentication(string url, Core.ICoreLogger logger)
+        public static bool ContinueAuthentication(string url, Core.ILoggerAdapter logger)
         {
             if (s_returnedUriReady == null)
             {

@@ -7,13 +7,14 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal
 {
     internal class RequestContext
     {
         public Guid CorrelationId { get; }
-        public ICoreLogger Logger { get; }
+        public ILoggerAdapter Logger { get; }
         public IServiceBundle ServiceBundle { get; }
 
         /// <summary>
@@ -26,7 +27,7 @@ namespace Microsoft.Identity.Client.Internal
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, CancellationToken cancellationToken = default)
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
-            Logger = MsalLogger.Create(correlationId, ServiceBundle.Config);
+            Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
         }

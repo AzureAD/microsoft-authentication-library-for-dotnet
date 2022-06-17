@@ -36,13 +36,13 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 </html>";
 
         private readonly IUriInterceptor _uriInterceptor;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly SystemWebViewOptions _webViewOptions;
         private readonly IPlatformProxy _platformProxy;
 
         public DefaultOsBrowserWebUi(
             IPlatformProxy proxy,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             SystemWebViewOptions webViewOptions,
             /* for test */ IUriInterceptor uriInterceptor = null)
         {

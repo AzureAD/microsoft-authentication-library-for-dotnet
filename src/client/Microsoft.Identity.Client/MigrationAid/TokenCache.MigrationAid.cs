@@ -4,6 +4,7 @@
 using System;
 using System.ComponentModel;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client
 {

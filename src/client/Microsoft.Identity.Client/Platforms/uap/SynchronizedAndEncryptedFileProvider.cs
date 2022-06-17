@@ -20,9 +20,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         private const string ProtectionDescriptor = "LOCAL=user";
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
-        public SynchronizedAndEncryptedFileProvider(ICoreLogger logger)
+        public SynchronizedAndEncryptedFileProvider(ILoggerAdapter logger)
         {
             _logger = logger;
         }
