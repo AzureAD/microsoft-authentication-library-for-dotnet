@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Client
                 return this;
             }
 #endif
-#if DESKTOP || NET5_WIN || NET_CORE
+#if DESKTOP || NET5_WIN || NET_CORE || NETSTANDARD
 
             if (parent is IntPtr intPtrWindow)
             {
@@ -295,7 +295,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET5_WIN || NET_CORE
+#if DESKTOP || NET5_WIN || NET_CORE || NETSTANDARD
 
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
