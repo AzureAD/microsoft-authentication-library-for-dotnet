@@ -514,7 +514,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache = notificationArgs.TokenCache.SerializeMsalV3();
             });
 
-            var notification = new TokenCacheNotificationArgs(tokenCache, null, null, false, false, null, false, null, default);
+            var notification = new TokenCacheNotificationArgs(tokenCache, null, null, false, false, null, false, null, default, default, default, default, null, default);
+
             await (tokenCache as ITokenCacheInternal).OnBeforeAccessAsync(notification).ConfigureAwait(false);
             await (tokenCache as ITokenCacheInternal).OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);

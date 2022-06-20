@@ -118,14 +118,16 @@ namespace Microsoft.Identity.Client.Cache
                                 var args = new TokenCacheNotificationArgs(
                                   TokenCacheInternal,
                                   _requestParams.AppConfig.ClientId,
-                                  _requestParams.Account,
+                                  _requestParams.Account,                                  
                                   hasStateChanged: false,
                                   isApplicationCache: TokenCacheInternal.IsApplicationCache,
                                   suggestedCacheKey: key,
                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
-                                  correlationId: _requestParams.RequestContext.CorrelationId,
+                                  correlationId: _requestParams.RequestContext.CorrelationId, 
+                                  requestScopes: _requestParams.Scope, 
+                                  requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
                                   msalIdentityLogger: _requestParams.RequestContext.ExternalCacheLogger,
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
@@ -150,6 +152,8 @@ namespace Microsoft.Identity.Client.Cache
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
                                   correlationId: _requestParams.RequestContext.CorrelationId,
+                                  requestScopes: _requestParams.Scope,
+                                  requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
                                   msalIdentityLogger: _requestParams.RequestContext.ExternalCacheLogger,
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled);
 

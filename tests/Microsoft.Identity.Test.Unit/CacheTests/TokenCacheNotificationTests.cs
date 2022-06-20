@@ -452,5 +452,86 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.IsTrue((cca.UserTokenCache as ITokenCacheInternal).IsAppSubscribedToSerializationEvents());
 
         }
+
+        [TestMethod]
+        public async Task TokenCacheSerializationArgs_AppCache_TenantIdScopes_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+
+                // Arrange
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)     
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+                CancellationTokenSource cts = new CancellationTokenSource();
+                var cancellationToken = cts.Token;
+
+                var appTokenCacheRecoder = cca.AppTokenCache.RecordAccess((args) =>
+                {
+                    Assert.AreEqual(TestConstants.TenantId2, args.RequestTenantId);
+                    Assert.AreEqual(TestConstants.ClientId, args.ClientId);
+                    Assert.IsNull(args.Account);
+                    Assert.IsTrue(args.IsApplicationCache);
+                    Assert.AreEqual(cancellationToken, args.CancellationToken);
+
+                    CollectionAssert.AreEquivalent(TestConstants.s_scope.ToArray(), args.RequestScopes.ToArray());
+                });
+
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
+
+                // Act - Client Credentials with authority override
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithTenantId(TestConstants.TenantId2)
+                    .ExecuteAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                appTokenCacheRecoder.AssertAccessCounts(1, 1);
+
+            }
+        }
+
+        [TestMethod]
+        public async Task TokenCacheSerializationArgs_UserCache_TenantIdScopes_Async()
+        {
+            string[] inputScope = new[] { "input_scope_different_than_aad_scope" };
+            using (var harness = CreateTestHarness())
+            {
+
+                // Arrange
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+                CancellationTokenSource cts = new CancellationTokenSource();
+                var cancellationToken = cts.Token;
+
+                var userCacheRecorder = cca.UserTokenCache.RecordAccess((args) =>
+                {
+                    Assert.AreEqual(TestConstants.TenantId2, args.RequestTenantId);
+                    Assert.AreEqual(TestConstants.ClientId, args.ClientId);
+                    Assert.IsNotNull(args.Account);
+                    Assert.IsFalse(args.IsApplicationCache);
+                    Assert.AreEqual(cancellationToken, args.CancellationToken);
+
+                    CollectionAssert.AreEquivalent(inputScope, args.RequestScopes.ToArray());
+                });
+
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_UserFlows);
+
+                // Act - Client Credentials with authority override
+                var result = await cca.AcquireTokenByAuthorizationCode(inputScope, "code")
+                    .WithTenantId(TestConstants.TenantId2)
+                    .ExecuteAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                userCacheRecorder.AssertAccessCounts(0, 1);
+
+                CollectionAssert.AreEquivalent(TestConstants.s_scope.ToArray(), result.Scopes.ToArray());
+
+            }
+        }
     }
 }
