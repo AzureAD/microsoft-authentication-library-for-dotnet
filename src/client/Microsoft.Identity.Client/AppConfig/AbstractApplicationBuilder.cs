@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
@@ -287,11 +288,14 @@ namespace Microsoft.Identity.Client
         /// You can set it to <c>true</c> for advanced debugging requiring PII
         /// If both WithLogging apis are set, this one will override the other
         /// </param>
-        /// <returns></returns>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
         public T WithLogging(
             IIdentityLogger identityLogger,
-            bool enablePiiLogging)
+            bool enablePiiLogging = false)
         {
+            ValidateUseOfExperimentalFeature("IIdentityLogger");
+
             Config.IdentityLogger = identityLogger;
             Config.EnablePiiLogging = enablePiiLogging;
             return (T)this;
@@ -540,7 +544,18 @@ namespace Microsoft.Identity.Client
             return Config;
         }
 
-#region Authority
+        internal void ValidateUseOfExperimentalFeature([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
+        {
+            if (!Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(memberName));
+            }
+        }
+
+
+        #region Authority
         private void ResolveAuthority()
         {
             if (Config.Authority?.AuthorityInfo != null)
