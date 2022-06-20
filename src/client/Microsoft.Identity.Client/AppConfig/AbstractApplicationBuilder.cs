@@ -289,7 +289,7 @@ namespace Microsoft.Identity.Client
         /// If both WithLogging apis are set, this one will override the other
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
-        /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
+        /// <remarks>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</remarks>
         public T WithLogging(
             IIdentityLogger identityLogger,
             bool enablePiiLogging = false)
