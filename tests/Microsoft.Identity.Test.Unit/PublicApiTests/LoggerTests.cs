@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void IdentityLoggeExperimental()
+        public void IdentityLoggerExperimental()
         {
             using (var httpManager = new MockHttpManager())
             {
