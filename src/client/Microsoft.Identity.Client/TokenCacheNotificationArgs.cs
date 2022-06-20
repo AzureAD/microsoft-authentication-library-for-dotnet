@@ -41,6 +41,8 @@ namespace Microsoft.Identity.Client
                    cancellationToken,
                    default, 
                    default, 
+                   default,
+                   null,
                    default)
             {
             }
@@ -70,6 +72,8 @@ namespace Microsoft.Identity.Client
                    cancellationToken,
                    correlationId,
                    default,
+                   default,
+                   null,
                    default)
         { 
         }
@@ -89,7 +93,9 @@ namespace Microsoft.Identity.Client
             CancellationToken cancellationToken,
             Guid correlationId, 
             IEnumerable<string> requestScopes,
-            string requestTenantId)
+            string requestTenantId,
+            IIdentityLogger msalIdentityLogger,
+            bool piiLoggingEnabled)
             
         {
             TokenCache = tokenCache;
@@ -103,32 +109,6 @@ namespace Microsoft.Identity.Client
             CorrelationId = correlationId;
             RequestScopes = requestScopes;
             RequestTenantId = requestTenantId;
-            SuggestedCacheExpiry = suggestedCacheExpiry;
-        }
-
-        internal TokenCacheNotificationArgs(
-            ITokenCacheSerializer tokenCache,
-            string clientId,
-            IAccount account,
-            bool hasStateChanged,
-            bool isApplicationCache,
-            string suggestedCacheKey,
-            bool hasTokens,
-            DateTimeOffset? suggestedCacheExpiry,
-            CancellationToken cancellationToken,
-            Guid correlationId,
-            IIdentityLogger msalIdentityLogger,
-            bool piiLoggingEnabled)
-        {
-            TokenCache = tokenCache;
-            ClientId = clientId;
-            Account = account;
-            HasStateChanged = hasStateChanged;
-            IsApplicationCache = isApplicationCache;
-            SuggestedCacheKey = suggestedCacheKey;
-            HasTokens = hasTokens;
-            CancellationToken = cancellationToken;
-            CorrelationId = correlationId;
             SuggestedCacheExpiry = suggestedCacheExpiry;
             IdentityLogger = msalIdentityLogger;
             PiiLoggingEnabled = piiLoggingEnabled;
