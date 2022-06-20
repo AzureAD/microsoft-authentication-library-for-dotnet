@@ -58,6 +58,22 @@ namespace Microsoft.Identity.Client.Internal.Logger
 #endif
         }
 
+        public static IIdentityLogger CreateExternalCacheLogger(
+            Guid correlationId,
+            ApplicationConfiguration config)
+        {
+#if XAMARINMAC20
+            throw new NotImplementedException();
+#else
+            if (config.IdentityLogger != null)
+            {
+                return MsalCacheLoggerWrapper.Create(correlationId, config);
+            }
+
+            return null;
+#endif
+        }
+
         public static ILoggerAdapter NullLogger => s_nullLogger.Value;
 
         private static Lazy<string> s_osLazy = new Lazy<string>(() =>

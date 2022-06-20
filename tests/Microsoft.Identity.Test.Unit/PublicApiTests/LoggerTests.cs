@@ -210,6 +210,48 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task ExternalMsalLoggerTestAsync(bool piiLogging)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                TestIdentityLogger testLogger = new TestIdentityLogger();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret("secret")
+                    .WithLogging(testLogger, piiLogging)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                app.UserTokenCache.SetBeforeAccess(BeforeCacheAccessWithLogging);
+                app.UserTokenCache.SetAfterAccess(AfterCacheAccessWithLogging);
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var result = await app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "some-code")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                if (piiLogging)
+                {
+                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.PiiSerializeLogMessage));
+                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.PiiDeserializeLogMessage));
+                }
+                else
+                {
+                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.SerializeLogMessage));
+                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.DeserializeLogMessage));
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task IdentityLoggerOverridesLegacyLoggerTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -235,6 +277,38 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.IsTrue(testLogger.StringBuilder.ToString().Contains("AcquireTokenByAuthorizationCode"));
             }
+        }
+
+        private void BeforeCacheAccessWithLogging(TokenCacheNotificationArgs args)
+        {
+            LogEntry entry = new LogEntry();
+
+            if (args.PiiLoggingEnabled)
+            {
+                entry.Message = TestConstants.PiiDeserializeLogMessage;
+            }
+            else
+            {
+                entry.Message = TestConstants.DeserializeLogMessage;
+            }
+
+            args.IdentityLogger.Log(entry);
+        }
+
+        private void AfterCacheAccessWithLogging(TokenCacheNotificationArgs args)
+        {
+            LogEntry entry = new LogEntry();
+
+            if (args.PiiLoggingEnabled)
+            {
+                entry.Message = TestConstants.PiiSerializeLogMessage;
+            }
+            else
+            {
+                entry.Message = TestConstants.SerializeLogMessage;
+            }
+
+            args.IdentityLogger.Log(entry);
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Client.Internal
     {
         public Guid CorrelationId { get; }
         public ILoggerAdapter Logger { get; }
+        public IIdentityLogger ExternalCacheLogger { get; }
         public IServiceBundle ServiceBundle { get; }
 
         /// <summary>
@@ -28,6 +29,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
             Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config);
+            ExternalCacheLogger = LoggerHelper.CreateExternalCacheLogger(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
         }
