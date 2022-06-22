@@ -23,7 +23,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
                 "Possible cause: If you are using an XForms app, or generally a .NET Standard assembly, " +
                 "make sure you add a reference to Microsoft.Identity.Client.dll from each platform assembly " +
                 "(e.g. UWP, Android, iOS), not just from the common .NET Standard assembly. " +
-                "A browser is not available in the box on .NET Standard 1.3.");
+                "A browser is not available in the box on .NET Standard 2.0." +
+                "If you are on UWP, you may need to update to a later target framework");
         }
     }
 }
