@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
                 "make sure you add a reference to Microsoft.Identity.Client.dll from each platform assembly " +
                 "(e.g. UWP, Android, iOS), not just from the common .NET Standard assembly. " +
                 "A browser is not available in the box on .NET Standard 2.0." +
-                "If you are on UWP, you may need to update to a later target framework");
+                "If you are on UWP, you may need to update to version 1809 (Build 17763) in order to use a browser.");
         }
     }
 }
