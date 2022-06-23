@@ -20,6 +20,7 @@ using Microsoft.Identity.Client.OAuth2;
 using System.Runtime.InteropServices;
 using System;
 using NSubstitute;
+using System.Linq;
 
 namespace Microsoft.Identity.Test.Integration.Broker
 {
@@ -147,10 +148,88 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithBrokerPreview().Build();
 
-            // Act
+            // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword).ExecuteAsync().ConfigureAwait(false);
 
+            AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
+
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            var account = accounts.FirstOrDefault();
+            Assert.IsNotNull(account);
+
+            // Acquire token silently
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+
+            AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId);
+
+            // Remove Account
+            await pca.RemoveAsync(account).ConfigureAwait(false);
+
+            // Assert the account is removed
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(accounts);
+            Assert.AreEqual(0, accounts.Count());
+        }
+
+        [TestMethod]
+        public async Task WamUsernamePasswordRequestMsaPassthroughAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithWindowsBrokerOptions(new WindowsBrokerOptions()
+               {
+                   MsaPassthrough = true
+               })
+               .WithBrokerPreview().Build();
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword).ExecuteAsync().ConfigureAwait(false);
+
+            AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
+
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            var account = accounts.FirstOrDefault();
+            Assert.IsNotNull(account);
+
+            // Acquire token silently
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+
+            AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId);
+
+            // Remove Account
+            await pca.RemoveAsync(account).ConfigureAwait(false);
+
+            // Assert the account is removed
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(accounts);
+            Assert.AreEqual(0, accounts.Count());
+        }
+
+        private void AssertAuthResult(AuthenticationResult result, TokenSource tokenSource, string tenantId)
+        {
             Assert.IsNotNull(result);
+            Assert.IsNotNull(result.AccessToken);
+            Assert.IsNotNull(result.IdToken);
+            Assert.IsNotNull(result.Account);
+            Assert.IsNotNull(result.Account.Username);
+
+            Assert.AreEqual(tokenSource, result.AuthenticationResultMetadata.TokenSource);
+
+            Assert.IsTrue(result.ExpiresOn > DateTimeOffset.UtcNow + TimeSpan.FromHours(1));
+
+            Assert.AreEqual(tenantId, result.TenantId);
         }
     }
 }
