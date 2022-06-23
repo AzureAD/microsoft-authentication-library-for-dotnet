@@ -451,7 +451,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
     }
 }

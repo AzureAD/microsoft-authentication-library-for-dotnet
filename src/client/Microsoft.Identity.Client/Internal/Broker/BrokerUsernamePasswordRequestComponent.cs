@@ -43,8 +43,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
             }
             else
             {
-                // Since this is only implemented for the runtime broker
-                throw new NotImplementedException();                
+                // Since this is only implemented for the runtime broker other platforms are not supported for this flow.
+                throw new PlatformNotSupportedException();                
             }
 
             var tokenResponse = await Broker.AcquireTokenByUsernamePasswordAsync(

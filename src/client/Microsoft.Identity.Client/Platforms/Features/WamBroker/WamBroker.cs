@@ -981,7 +981,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
     }
 }

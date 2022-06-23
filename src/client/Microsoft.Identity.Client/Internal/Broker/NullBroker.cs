@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
     }
 }
