@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
@@ -199,7 +200,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         {
             if (_uiException == null)
             {
-                _uiException = e.TransferedException;
+                _uiException = e.TransferredException;
             }
 
 #pragma warning disable 618 // SilentWindowsFormsAuthenticationDialog is marked obsolete

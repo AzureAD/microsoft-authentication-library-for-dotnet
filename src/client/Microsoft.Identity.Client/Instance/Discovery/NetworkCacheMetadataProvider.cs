@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> s_cache =
              new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
-        public InstanceDiscoveryMetadataEntry GetMetadata(string environment, ICoreLogger logger)
+        public InstanceDiscoveryMetadataEntry GetMetadata(string environment, ILoggerAdapter logger)
         {
             s_cache.TryGetValue(environment, out InstanceDiscoveryMetadataEntry entry);
             logger.Verbose($"[Instance Discovery] Tried to use network cache provider for {environment}. Success? {entry != null}. ");

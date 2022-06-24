@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Utils
         internal static List<T> FilterWithLogging<T>(
             this List<T> list,
             Func<T, bool> predicate,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             string logPrefix,
             bool updateOriginalCollection = true)
         {

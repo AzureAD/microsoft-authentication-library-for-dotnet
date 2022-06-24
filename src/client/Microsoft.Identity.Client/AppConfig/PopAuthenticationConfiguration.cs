@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Creates a configuration using the default key management, and which binds all the details of the HttpRequestMessage.
         /// </summary>
         /// <remarks>
-        /// Currently only the HtppMethod (m), UrlHost (u) and UrlPath (p) are used to create the signed HTTP request - see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#page-3
+        /// Currently only the HttpMethod (m), UrlHost (u) and UrlPath (p) are used to create the signed HTTP request - see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#page-3
         /// </remarks>
         public PoPAuthenticationConfiguration(HttpRequestMessage httpRequestMessage)
         {

@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Kerberos;
 using System.Diagnostics;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -197,7 +198,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client.AddHeader(name, value);
         }
 
-        private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, Core.ICoreLogger logger)
+        private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, Core.ILoggerAdapter logger)
         {
             UriBuilder builder = new UriBuilder(tokenEndpoint);
             builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);

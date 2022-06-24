@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     /// </summary>
     internal static class LegacyOsWamProxy
     {
-        public static async Task<IReadOnlyList<WebAccount>> FindAllAccountsAsync(WebAccountProvider provider, string clientID, ICoreLogger logger)
+        public static async Task<IReadOnlyList<WebAccount>> FindAllAccountsAsync(WebAccountProvider provider, string clientID, ILoggerAdapter logger)
         {
             FindAllAccountsResult findResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider, clientID);
 

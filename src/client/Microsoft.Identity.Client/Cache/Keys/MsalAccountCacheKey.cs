@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
         public string iOSService => (_tenantId ?? "").ToLowerInvariant();
 
         // This is a known issue.
-        // Normally AuthorityType should be passed here but sice while building the MsalAccountCacheItem it is defaulted to "MSSTS",
+        // Normally AuthorityType should be passed here but since while building the MsalAccountCacheItem it is defaulted to "MSSTS",
         // keeping the default value here.
         public int iOSType => MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()];
 

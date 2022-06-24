@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Broker
         internal static void ThrowExceptionFromWamError(
             NativeInterop.AuthResult authResult,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ICoreLogger logger)
+            ILoggerAdapter logger)
         {
             MsalServiceException serviceException = null;
             string internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Client.Broker
         public static MsalTokenResponse ParseRuntimeResponse(
                 NativeInterop.AuthResult authResult, 
                 AuthenticationRequestParameters authenticationRequestParameters,
-                ICoreLogger logger)
+                ILoggerAdapter logger)
         {
             try
             {

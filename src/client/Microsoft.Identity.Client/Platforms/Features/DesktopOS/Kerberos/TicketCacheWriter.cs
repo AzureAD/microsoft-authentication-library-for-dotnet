@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 
         /*
          * Windows creates a new ticket cache for primary NT tokens. This allows callers to create a dedicated cache for whatever they're doing
-         * that way the cache operations like purge or import don't polute the current users cache.
+         * that way the cache operations like purge or import don't pollute the current users cache.
          *
          * To make this work we need to create a new NT token, which is only done during logon. We don't actually want Windows to validate the credentials
          * so we tell it to treat the logon as `NewCredentials` which means Windows will just use those credentials as SSO credentials only.

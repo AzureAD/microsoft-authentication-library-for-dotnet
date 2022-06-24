@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client
         /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
         /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
-        /// <param name="beforeAccess">Delegate set in order to handle the cache deserialiation</param>
+        /// <param name="beforeAccess">Delegate set in order to handle the cache deserialization</param>
         /// <remarks>In the case where the delegate is used to deserialize the cache, it might
         /// want to call <see cref="Deserialize(byte[])"/></remarks>
 #if !SUPPORTS_CUSTOM_CACHE
@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client
         }
 
         // In some cases MSAL brings its own serializer (UWP, Confidential Client App cache)
-        // so reset them all if the user customizes the serialzer
+        // so reset them all if the user customizes the serializer
         private void ResetDefaultDelegates()
         {
             if (UsesDefaultSerialization)

@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         protected static SemaphoreSlim returnedUriReady;
         protected static AuthorizationResult authorizationResult;
 
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, ICoreLogger logger)
+        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, ILoggerAdapter logger)
         {
             if (returnedUriReady != null)
             {

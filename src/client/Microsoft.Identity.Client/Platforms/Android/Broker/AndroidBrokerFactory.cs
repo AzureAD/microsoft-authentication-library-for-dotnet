@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             ContentProvider
         }
 
-        private static async Task<IBroker> GetInstalledBrokerAsync(CoreUIParent uIParent, ICoreLogger logger)
+        private static async Task<IBroker> GetInstalledBrokerAsync(CoreUIParent uIParent, ILoggerAdapter logger)
         {
             AndroidBrokerHelper brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
 
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return new AndroidContentProviderBroker(uIParent, logger);
         }
 
-        public static IBroker CreateBroker(CoreUIParent uIParent, ICoreLogger logger)
+        public static IBroker CreateBroker(CoreUIParent uIParent, ILoggerAdapter logger)
         {
             if (s_installedBroker == BrokerType.NoneOrUnknown)
             {

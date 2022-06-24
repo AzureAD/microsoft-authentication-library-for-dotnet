@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         /// </summary>
         //public TestContext TestContext { get; set; }
         private CoreUIParent _coreUIParent;
-        private ICoreLogger _logger;
+        private ILoggerAdapter _logger;
         private RuntimeBroker _wamBroker;
         IntPtr _parentHandle = GetForegroundWindow();
 
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         {
             _coreUIParent = new CoreUIParent() { OwnerWindow = _parentHandle };
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
-            _logger = Substitute.For<ICoreLogger>();
+            _logger = Substitute.For<ILoggerAdapter>();
             _wamBroker = new RuntimeBroker(_coreUIParent, applicationConfiguration, _logger);
         }
 

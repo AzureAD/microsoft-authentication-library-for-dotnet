@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         }
 
         /// <inheritdoc />
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters(ILoggerAdapter logger)
         {
         }
     }

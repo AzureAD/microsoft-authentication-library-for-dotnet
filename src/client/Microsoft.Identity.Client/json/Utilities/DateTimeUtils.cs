@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Json.Utilities
 #endif
         }
 
-#if !(PORTABLE40 || PORTABLE) || NETSTANDARD1_3
+#if !(PORTABLE40 || PORTABLE) || NETSTANDARD2_0
         public static XmlDateTimeSerializationMode ToSerializationMode(DateTimeKind kind)
         {
             switch (kind)

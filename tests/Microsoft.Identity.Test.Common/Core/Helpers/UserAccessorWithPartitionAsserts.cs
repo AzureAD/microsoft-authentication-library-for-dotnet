@@ -13,30 +13,30 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     internal class UserAccessorWithPartitionAsserts : InMemoryPartitionedUserTokenCacheAccessor
     {
-        public UserAccessorWithPartitionAsserts(ICoreLogger logger, CacheOptions tokenCacheAccessorOptions) : base(logger, tokenCacheAccessorOptions)
+        public UserAccessorWithPartitionAsserts(ILoggerAdapter logger, CacheOptions tokenCacheAccessorOptions) : base(logger, tokenCacheAccessorOptions)
         {
 
         }
 
-        public override List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ICoreLogger requestlogger = null)
+        public override List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             return base.GetAllAccessTokens(partitionKey);
         }
 
-        public override List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ICoreLogger requestlogger = null)
+        public override List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             return base.GetAllAccounts(partitionKey);
         }
 
-        public override List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, ICoreLogger requestlogger = null)
+        public override List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             return base.GetAllIdTokens(partitionKey);
         }
 
-        public override List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ICoreLogger requestlogger = null)
+        public override List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
             return base.GetAllRefreshTokens(partitionKey);

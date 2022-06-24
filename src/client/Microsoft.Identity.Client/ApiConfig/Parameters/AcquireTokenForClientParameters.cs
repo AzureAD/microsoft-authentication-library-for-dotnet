@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool ForceRefresh { get; set; }
 
         /// <inheritdoc />
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters(ILoggerAdapter logger)
         {
             var builder = new StringBuilder();
             builder.AppendLine("=== AcquireTokenForClientParameters ===");

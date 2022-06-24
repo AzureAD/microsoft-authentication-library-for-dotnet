@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     /// </summary>
     internal static class BrokerKeyHelper
     {
-        internal static byte[] GetOrCreateBrokerKey(ICoreLogger logger)
+        internal static byte[] GetOrCreateBrokerKey(ILoggerAdapter logger)
         {
             if (TryGetBrokerKey(out byte[] brokerKey))
             {
@@ -31,13 +31,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return brokerKey;
         }
 
-        private static byte[] CreateAndStoreBrokerKey(ICoreLogger logger)
+        private static byte[] CreateAndStoreBrokerKey(ILoggerAdapter logger)
         {
             logger.Info("CreateAndStoreBrokerKey - creating a new key");
 
             byte[] brokerKey;
             byte[] rawBytes;
-            using (AesManaged algo = CreateSymmetricAlgorith(null))
+            using (AesManaged algo = CreateSymmetricAlgorithm(null))
             {
                 algo.GenerateKey();
                 rawBytes = algo.Key;
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return false;
         }
 
-        internal static string DecryptBrokerResponse(string encryptedBrokerResponse, ICoreLogger logger)
+        internal static string DecryptBrokerResponse(string encryptedBrokerResponse, ILoggerAdapter logger)
         {
             byte[] outputBytes = Base64UrlHelpers.DecodeBytes(encryptedBrokerResponse);
 
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 try
                 {
                     memoryStream = new MemoryStream(outputBytes);
-                    algo = CreateSymmetricAlgorith(key);
+                    algo = CreateSymmetricAlgorithm(key);
                     cryptoStream = new CryptoStream(
                         memoryStream,
                         algo.CreateDecryptor(),
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 MsalErrorMessage.iOSBrokerKeyFetchFailed);
         }
 
-       private static AesManaged CreateSymmetricAlgorith(byte[] key)
+       private static AesManaged CreateSymmetricAlgorithm(byte[] key)
         {
             AesManaged algorithm = new AesManaged
             {

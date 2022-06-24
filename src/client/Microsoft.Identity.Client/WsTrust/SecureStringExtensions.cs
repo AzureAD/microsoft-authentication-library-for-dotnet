@@ -2,15 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-
-#if DESKTOP || ANDROID || iOS || MAC || NET_CORE || NET5_WIN
 using System.Security;
 using static System.Runtime.InteropServices.Marshal;
-#else
-using System.Security;
-using static System.Security.SecureStringMarshal;
-using static System.Runtime.InteropServices.Marshal;
-#endif
 
 namespace Microsoft.Identity.Client.WsTrust
 {

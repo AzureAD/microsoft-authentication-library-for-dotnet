@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
         /// </summary>
-        /// <remarks>Mandatory only on Android. Can also be set via the PublicClientApplcation builder.</remarks>
+        /// <remarks>Mandatory only on Android. Can also be set via the PublicClientApplication builder.</remarks>
         /// <param name="parent">The parent as an object, so that it can be used from shared NetStandard assemblies</param>
         /// <returns>The builder to chain the .With methods</returns>
 
@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Client
                 return this;
             }
 #endif
-#if DESKTOP || NET5_WIN || NET_CORE
+#if DESKTOP || NET5_WIN || NET_CORE || NETSTANDARD
 
             if (parent is IntPtr intPtrWindow)
             {
@@ -295,7 +295,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET5_WIN || NET_CORE
+#if DESKTOP || NET5_WIN || NET_CORE || NETSTANDARD
 
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.

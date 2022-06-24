@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
         public long ExpiresInSeconds { get; set; } 
 
         /// <summary>
-        /// When the token should be refreshed proactivly. (Optional)
+        /// When the token should be refreshed proactively. (Optional)
         /// </summary>
         public long? RefreshInSeconds { get; set; } 
     }

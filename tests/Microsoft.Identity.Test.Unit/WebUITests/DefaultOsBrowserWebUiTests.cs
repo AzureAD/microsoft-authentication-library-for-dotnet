@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         private const int TestPort = 50997;
         private IUriInterceptor _tcpInterceptor;
         private IPlatformProxy _platformProxy;
-        private ICoreLogger _logger;
+        private ILoggerAdapter _logger;
 
         [TestInitialize]
         public override void TestInitialize()
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             base.TestInitialize();
             _tcpInterceptor = Substitute.For<IUriInterceptor>();
             _platformProxy = Substitute.For<IPlatformProxy>();
-            _logger = Substitute.For<ICoreLogger>();
+            _logger = Substitute.For<ILoggerAdapter>();
 
         }
 

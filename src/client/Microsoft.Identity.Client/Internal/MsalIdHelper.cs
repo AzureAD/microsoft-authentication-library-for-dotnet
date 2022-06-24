@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal
                 return version[1];
             });
 
-        public static IDictionary<string, string> GetMsalIdParameters(ICoreLogger logger)
+        public static IDictionary<string, string> GetMsalIdParameters(ILoggerAdapter logger)
         {
             var platformProxy = PlatformProxyFactory.CreatePlatformProxy(logger);
             if (platformProxy == null)
