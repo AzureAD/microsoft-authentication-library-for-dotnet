@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client.Broker
                     authenticationRequestParameters.CorrelationId.ToString("D"),
                     cancellationToken).ConfigureAwait(false))
                 {
-                    if (readAccountResult == null)
+                    if (!readAccountResult.IsSuccess)
                     {
                         _logger.WarningPii(
                             $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Client.Broker
                     account.HomeAccountId.ObjectId,
                     correlationId).ConfigureAwait(false))
                 {
-                    if (readAccountResult == null)
+                    if (!readAccountResult.IsSuccess)
                     {
                         _logger.WarningPii(
                             $"Could not find a WAM account for the selected user {account.Username}",
