@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             MsalServiceException serviceException = null;
             string internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
-            int errorCode = authResult.Error.ErrorCode;
+            long errorCode = authResult.Error.ErrorCode;
             string errorMessage;
 
             switch ((ResponseStatus)authResult.Error.Status)

@@ -159,26 +159,26 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-                using (var account = await core.ReadAccountByIdAsync(
+                using (var readAccountResult = await core.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
                     authenticationRequestParameters.CorrelationId.ToString("D"),
                     cancellationToken).ConfigureAwait(false))
                 {
-                    if (account == null)
+                    if (readAccountResult == null)
                     {
                         _logger.WarningPii(
                             $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
-                            "Could not find a WAM account for the selected user");
+                            $"Could not find a WAM account for the selected user {readAccountResult.Error}");
 
                         throw new MsalUiRequiredException(
                             "wam_no_account_for_id",
-                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}");
+                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}. {readAccountResult.Error}");
                     }
 
                     using (NativeInterop.AuthResult result = await core.AcquireTokenSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
-                        account,
+                        readAccountResult.Account,
                         cancellationToken).ConfigureAwait(false))
                     {
                         if (result.IsSuccess)
@@ -241,23 +241,23 @@ namespace Microsoft.Identity.Client.Broker
 
             using (var core = new NativeInterop.Core())
             {
-                using (var wamAccount = await core.ReadAccountByIdAsync(
+                using (var readAccountResult = await core.ReadAccountByIdAsync(
                     account.HomeAccountId.ObjectId,
                     correlationId).ConfigureAwait(false))
                 {
-                    if (wamAccount == null)
+                    if (readAccountResult == null)
                     {
                         _logger.WarningPii(
                             $"Could not find a WAM account for the selected user {account.Username}",
-                            "Could not find a WAM account for the selected user");
+                            $"Could not find a WAM account for the selected user {readAccountResult.Error}");
 
-                        throw new MsalException("wam_no_account_found", "Could not find a WAM account for the selected user");
+                        throw new MsalException("wam_no_account_found", $"Could not find a WAM account for the selected user {readAccountResult.Error}");
                     }
                     
                     using (NativeInterop.SignOutResult result = await core.SignOutSilentlyAsync(
                         appConfig.ClientId,
                         correlationId,
-                        wamAccount).ConfigureAwait(false))
+                        readAccountResult.Account).ConfigureAwait(false))
                     {
                         if (result.IsSuccess)
                         {
