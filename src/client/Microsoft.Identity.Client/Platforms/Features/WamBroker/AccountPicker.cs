@@ -11,7 +11,7 @@ using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 using System.Runtime.InteropServices;
 
-#if !UAP10_0
+#if !UAP10_0_17763
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 #endif
 
@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     internal class AccountPicker : IAccountPicker
     {
         private readonly IntPtr _parentHandle;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly SynchronizationContext _synchronizationContext;
         private readonly Authority _authority;
         private readonly bool _isMsaPassthrough;
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public AccountPicker(
             IntPtr parentHandle,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             SynchronizationContext synchronizationContext,
             Authority authority,
             bool isMsaPassthrough, 
@@ -156,12 +156,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 splash.DialogResult = System.Windows.Forms.DialogResult.OK;
                 splash.TopMost = true;
 
+#pragma warning disable VSTHRD101 // Avoid unsupported async delegates - Windows API mandates this
                 splash.Shown += async (s, e) =>
                 {
                     var windowHandle = splash.Handle;
                     await ShowPickerForWin32WindowAsync(windowHandle).ConfigureAwait(true);
                     splash.Close();
                 };
+#pragma warning restore VSTHRD101 // Avoid unsupported async delegates
 
                 try
                 {

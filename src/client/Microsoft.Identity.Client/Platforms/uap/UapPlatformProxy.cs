@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
     /// </summary>
     internal class UapPlatformProxy : AbstractPlatformProxy
     {
-        public UapPlatformProxy(ICoreLogger logger)
+        public UapPlatformProxy(ILoggerAdapter logger)
             : base(logger)
         {
         }

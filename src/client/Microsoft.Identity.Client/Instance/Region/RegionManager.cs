@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client.Region
                  apiEvent.RegionOutcome == default(RegionOutcome));
         }
 
-        private async Task<RegionInfo> DiscoverAndCacheAsync(ICoreLogger logger, CancellationToken requestCancellationToken)
+        private async Task<RegionInfo> DiscoverAndCacheAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
         {
             var regionInfo = GetCachedRegion(logger);
             if (regionInfo != null)
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client.Region
             return result;
         }
 
-        private async Task<RegionInfo> DiscoverAsync(ICoreLogger logger, CancellationToken requestCancellationToken)
+        private async Task<RegionInfo> DiscoverAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
         {
             RegionInfo result = null;
             try
@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Client.Region
 
         // returns cached region if any.
         // if nothing is cached, returns null.
-        private RegionInfo GetCachedRegion(ICoreLogger logger)
+        private RegionInfo GetCachedRegion(ILoggerAdapter logger)
         {
             if (s_failedAutoDiscovery)
             {
@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Client.Region
             return null;
         }
 
-        private static bool ValidateRegion(string region, string source, ICoreLogger logger)
+        private static bool ValidateRegion(string region, string source, ILoggerAdapter logger)
         {
             if (string.IsNullOrEmpty(region))
             {
@@ -295,7 +295,7 @@ namespace Microsoft.Identity.Client.Region
             return true;
         }
 
-        private async Task<string> GetImdsUriApiVersionAsync(ICoreLogger logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
+        private async Task<string> GetImdsUriApiVersionAsync(ILoggerAdapter logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
         {
             Uri imdsErrorUri = new Uri(ImdsEndpoint);
 

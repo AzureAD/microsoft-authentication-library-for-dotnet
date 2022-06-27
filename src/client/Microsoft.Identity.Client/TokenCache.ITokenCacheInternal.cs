@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,7 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performace.
+    /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
     /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
     /// </summary>
     public sealed partial class TokenCache : ITokenCacheInternal
@@ -164,7 +165,9 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: requestParams.RequestContext.UserCancellationToken,
-                            correlationId: requestParams.RequestContext.CorrelationId);
+                            correlationId: requestParams.RequestContext.CorrelationId, 
+                            requestScopes: requestParams.Scope,
+                            requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId);
 
                         Stopwatch sw = Stopwatch.StartNew();
 
@@ -232,7 +235,10 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: cacheExpiry,
                             cancellationToken: requestParams.RequestContext.UserCancellationToken,
-                            correlationId: requestParams.RequestContext.CorrelationId);
+                            correlationId: requestParams.RequestContext.CorrelationId, 
+                            requestScopes: requestParams.Scope,
+                            requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId);
+
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -325,9 +331,9 @@ namespace Microsoft.Identity.Client
                 IsLegacyAdalCacheEnabled(requestParams))
             {
 
-                var tenatedAuthority = Authority.CreateAuthorityWithTenant(requestParams.AuthorityInfo, tenantId);
+                var tenantedAuthority = Authority.CreateAuthorityWithTenant(requestParams.AuthorityInfo, tenantId);
                 var authorityWithPreferredCache = Authority.CreateAuthorityWithEnvironment(
-                        tenatedAuthority.AuthorityInfo,
+                        tenantedAuthority.AuthorityInfo,
                         instanceDiscoveryMetadata.PreferredCache);
 
                 CacheFallbackOperations.WriteAdalRefreshToken(
@@ -350,7 +356,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal /* for testing */ static DateTimeOffset? CalculateSuggestedCacheExpiry(
             ITokenCacheAccessor accessor,
-            ICoreLogger logger)
+            ILoggerAdapter logger)
         {
             // If we have refresh tokens in the cache, we cannot suggest expiration
             // because refresh token expiration is not disclosed to SDKs and RTs are long lived anyway (3 months by default)
@@ -382,11 +388,11 @@ namespace Microsoft.Identity.Client
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
         }
-        #endregion
+#endregion
 
-        #region FindAccessToken
+#region FindAccessToken
         /// <summary>
-        /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performace.
+        /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
         /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
         /// 
         /// Scenario: client_creds with default in-memory cache can get to ~500k tokens
@@ -687,7 +693,7 @@ namespace Microsoft.Identity.Client
                         requestKid));
             return null;
         }
-        #endregion
+#endregion
 
         private void FilterTokensByClientId<T>(List<T> tokenCacheItems) where T : MsalCredentialCacheItemBase
         {
@@ -720,7 +726,9 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: default,
-                            correlationId: default);
+                            correlationId: default,
+                            requestScopes: null,
+                            requestTenantId: null);
 
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
@@ -908,7 +916,7 @@ namespace Microsoft.Identity.Client
                     logger,
                     LegacyCachePersistence,
                     ClientId);
-                allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnviroments());
+                allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnvironments());
             }
 
             InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
@@ -1137,7 +1145,10 @@ namespace Microsoft.Identity.Client
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: requestParameters.RequestContext.UserCancellationToken,
-                            correlationId: requestParameters.RequestContext.CorrelationId);
+                            correlationId: requestParameters.RequestContext.CorrelationId,
+                            requestScopes: requestParameters.Scope,
+                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId);
+                            
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
@@ -1168,7 +1179,10 @@ namespace Microsoft.Identity.Client
                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                            suggestedCacheExpiry: null,
                            cancellationToken: requestParameters.RequestContext.UserCancellationToken,
-                           correlationId: requestParameters.RequestContext.CorrelationId);
+                           correlationId: requestParameters.RequestContext.CorrelationId,
+                           requestScopes: requestParameters.Scope,
+                           requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId);
+
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     }

@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Cache
         private const int SchemaVersion = 3;
         private const string Delimiter = ":::";
 
-        public static byte[] Serialize(ICoreLogger logger, IDictionary<AdalTokenCacheKey, AdalResultWrapper> tokenCacheDictionary)
+        public static byte[] Serialize(ILoggerAdapter logger, IDictionary<AdalTokenCacheKey, AdalResultWrapper> tokenCacheDictionary)
         {
             using (Stream stream = new MemoryStream())
             {
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Cache
             }
         }
 
-        public static IDictionary<AdalTokenCacheKey, AdalResultWrapper> Deserialize(ICoreLogger logger, byte[] state)
+        public static IDictionary<AdalTokenCacheKey, AdalResultWrapper> Deserialize(ILoggerAdapter logger, byte[] state)
         {
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                 new Dictionary<AdalTokenCacheKey, AdalResultWrapper>();

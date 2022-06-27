@@ -15,9 +15,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private const string SharedPreferencesName = "ActiveDirectoryAuthenticationLibrary";
         private const string SharedPreferencesKey = "cache";
 
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
-        public AndroidLegacyCachePersistence(ICoreLogger logger)
+        public AndroidLegacyCachePersistence(ILoggerAdapter logger)
         {
             _logger = logger;
         }

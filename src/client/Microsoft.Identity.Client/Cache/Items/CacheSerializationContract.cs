@@ -35,17 +35,17 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         public IDictionary<string, JToken> UnknownNodes { get; }
 
-        public CacheSerializationContract(IDictionary<string, JToken> unkownNodes)
+        public CacheSerializationContract(IDictionary<string, JToken> unknownNodes)
         {
-            UnknownNodes = unkownNodes ?? new Dictionary<string, JToken>();
+            UnknownNodes = unknownNodes ?? new Dictionary<string, JToken>();
         }
 
         internal static CacheSerializationContract FromJsonString(string json)
         {
             JObject root = JObject.Parse(json);
-            var unkownNodes = ExtractUnknownNodes(root);
+            var unknownNodes = ExtractUnknownNodes(root);
 
-            var contract = new CacheSerializationContract(unkownNodes);
+            var contract = new CacheSerializationContract(unknownNodes);
 
             // Access Tokens
             if (root.ContainsKey(StorageJsonValues.CredentialTypeAccessToken))

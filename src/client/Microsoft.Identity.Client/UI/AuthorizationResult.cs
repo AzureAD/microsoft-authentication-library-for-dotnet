@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.UI
                    MsalError.AuthenticationFailed,
                    MsalErrorMessage.AuthorizationServerInvalidResponse);
             }
-#if !UAP10_0 && !NETSTANDARD1_3
+#if !UAP10_0 && !NETSTANDARD2_0
             var post = System.Text.Encoding.Default.GetString(postData).TrimEnd('\0');
 #else
             var post = System.Text.Encoding.UTF8.GetString(postData).TrimEnd('\0');

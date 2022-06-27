@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     public class RuntimeBrokerTests : TestBase
     {
         private CoreUIParent _coreUIParent;
-        private ICoreLogger _logger;
+        private ILoggerAdapter _logger;
         private RuntimeBroker _wamBroker;
         private SynchronizationContext _synchronizationContext;
 
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
-            _logger = Substitute.For<ICoreLogger>();
+            _logger = Substitute.For<ILoggerAdapter>();
 
             _wamBroker = new RuntimeBroker(_coreUIParent, applicationConfiguration, _logger);
 

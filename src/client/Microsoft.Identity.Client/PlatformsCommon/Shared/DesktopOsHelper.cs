@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal static class DesktopOsHelper
     {
         private static Lazy<bool> s_wamSupportedOSLazy = new Lazy<bool>(
-           () => IsWamSuportedOSInternal());
+           () => IsWamSupportedOSInternal());
         private static Lazy<string> s_winVersionLazy = new Lazy<string>(
             () => GetWindowsVersionStringInternal());
 
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// WAM Supported OS's are Windows 10 and above for Client, Windows 2019 and above for Server
         /// </summary>
         /// <returns>Returns <c>true</c> if the Windows Version has WAM support</returns>
-        private static bool IsWamSuportedOSInternal()
+        private static bool IsWamSupportedOSInternal()
         {
 #if WINDOWS_APP
             return true;

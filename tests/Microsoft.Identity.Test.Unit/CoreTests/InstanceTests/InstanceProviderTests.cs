@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     public class InstanceProviderTests : TestBase
     {
         private const string LoginMicrosoftOnlineCom = "login.microsoftonline.com";
-        private readonly ICoreLogger _logger = new NullLogger();
+        private readonly ILoggerAdapter _logger = new NullLogger();
 
         [TestMethod]
         public void StaticProviderPreservesStateAcrossInstances()

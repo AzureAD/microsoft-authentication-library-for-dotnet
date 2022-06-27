@@ -18,20 +18,20 @@ namespace Microsoft.Identity.Client.Http
             Uri endpoint,
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             CancellationToken cancellationToken = default);
 
         Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             CancellationToken cancellationToken = default);
 
         Task<HttpResponse> SendGetAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             bool retry = true,
             CancellationToken cancellationToken = default);
 
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Http
             Uri uri,
             Dictionary<string, string> headers,
             StringContent body,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             CancellationToken cancellationToken = default);
     }
 }

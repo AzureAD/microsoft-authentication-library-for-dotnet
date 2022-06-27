@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("In case when WebView2 is not available, MSAL.NET will fallback to legacy WebView.", true)]
         public string WebView2BrowserExecutableFolder { get; set; }
 
-        internal void LogParameters(ICoreLogger logger)
+        internal void LogParameters(ILoggerAdapter logger)
         {
             logger.Info("WebView2Options configured");
 

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -106,7 +107,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ICoreLogger logger)
+        private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
         {
             var sb = new StringBuilder(250);
             sb.AppendLine();
@@ -272,7 +273,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         //The AAD backup authentication system header is used by the AAD backup authentication system service
         //to help route requests to resources in Azure during requests to speed up authentication.
-        //It consists of either the ObjectId.TenantId or the upn of the account signign in.
+        //It consists of either the ObjectId.TenantId or the upn of the account signing in.
         //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2525
         protected virtual KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
@@ -322,10 +323,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
+                string logFormat = "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t";
                 string scopes = authenticationRequestParameters.Scope.AsSingleString();
                 string messageWithPii = string.Format(
                     CultureInfo.InvariantCulture,
-                    "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t",
+                    logFormat,
                     authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
                     scopes,
                     authenticationRequestParameters.AppConfig.ClientId,

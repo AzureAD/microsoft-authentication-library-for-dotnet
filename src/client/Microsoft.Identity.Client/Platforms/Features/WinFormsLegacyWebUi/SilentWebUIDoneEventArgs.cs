@@ -9,9 +9,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
     {
         public SilentWebUIDoneEventArgs(Exception e)
         {
-            TransferedException = e;
+            TransferredException = e;
         }
 
-        public Exception TransferedException { get; private set; }
+        public Exception TransferredException { get; private set; }
     }
 }

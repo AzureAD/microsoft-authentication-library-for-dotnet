@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             return sb.ToString();
         }
 
-        public static void TryThrowServiceException(string thumbprint, ThrottlingCache cache, ICoreLogger logger, string providerName)
+        public static void TryThrowServiceException(string thumbprint, ThrottlingCache cache, ILoggerAdapter logger, string providerName)
         {
             if (cache.TryGetOrRemoveExpired(thumbprint, logger, out var ex))
             {

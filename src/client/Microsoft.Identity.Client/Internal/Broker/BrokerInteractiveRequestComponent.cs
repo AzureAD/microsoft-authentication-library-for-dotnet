@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         private readonly string _optionalBrokerInstallUrl; // can be null
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
         public BrokerInteractiveRequestComponent(
             AuthenticationRequestParameters authenticationRequestParameters,

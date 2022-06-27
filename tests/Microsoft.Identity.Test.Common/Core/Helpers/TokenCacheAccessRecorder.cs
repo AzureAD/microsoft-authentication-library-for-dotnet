@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         public TokenCacheNotificationArgs LastBeforeWriteNotificationArgs { get; private set; }
         public TokenCacheNotificationArgs LastAfterAccessNotificationArgs { get; private set; }
 
-        public TokenCacheAccessRecorder(TokenCache tokenCache)
+        public TokenCacheAccessRecorder(TokenCache tokenCache, Action<TokenCacheNotificationArgs> assertLogic = null)
         {
             _tokenCache = tokenCache;
 
@@ -38,6 +38,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             var existingBeforeAccessCallback = _tokenCache.BeforeAccess;
             _tokenCache.BeforeAccess = (args) =>
             {
+                assertLogic?.Invoke(args);
                 BeforeAccessCount++;
                 LastBeforeAccessNotificationArgs = args;
                 existingBeforeAccessCallback?.Invoke(args);
@@ -46,6 +47,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             var existingBeforeWriteCallback = _tokenCache.BeforeWrite;
             _tokenCache.BeforeWrite = (args) =>
             {
+                assertLogic?.Invoke(args);
                 BeforeWriteCount++;
                 LastBeforeWriteNotificationArgs = args;
 
@@ -55,6 +57,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             var existingAfterAccessCallback = _tokenCache.AfterAccess;
             _tokenCache.AfterAccess = (args) =>
             {
+                assertLogic?.Invoke(args);
                 AfterAccessTotalCount++;
                 LastAfterAccessNotificationArgs = args;
 
@@ -65,7 +68,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
                 existingAfterAccessCallback?.Invoke(args);
             };
-
         }
 
         public void AssertAccessCounts(int expectedReads, int expectedWrites)

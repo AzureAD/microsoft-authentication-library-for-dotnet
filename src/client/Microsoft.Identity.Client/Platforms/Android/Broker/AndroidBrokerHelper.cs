@@ -41,9 +41,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         // Important: this object MUST be accessed on a background thread. Android will check this and throw otherwise.
         public AccountManager AndroidAccountManager { get; }
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
-        public AndroidBrokerHelper(Context androidContext, ICoreLogger logger)
+        public AndroidBrokerHelper(Context androidContext, ILoggerAdapter logger)
         {
             _androidContext = androidContext ?? throw new ArgumentNullException(nameof(androidContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public Bundle CreateHandShakeOperationBundle()
         {
             Bundle handshakeOperationBundle = new Bundle();
-            handshakeOperationBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
+            handshakeOperationBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocolVersionCode);
             handshakeOperationBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
             handshakeOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
 

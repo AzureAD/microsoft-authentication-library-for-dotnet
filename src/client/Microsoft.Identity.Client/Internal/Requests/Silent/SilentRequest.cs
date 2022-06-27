@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly ISilentAuthRequestStrategy _clientStrategy;
         private readonly Lazy<ISilentAuthRequestStrategy> _brokerStrategyLazy;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
         public SilentRequest(
             IServiceBundle serviceBundle,
@@ -48,6 +48,13 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             bool isBrokerConfigured = AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
                                       ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
 
+            if (isBrokerConfigured && AuthenticationRequestParameters.PopAuthenticationConfiguration != null)
+            {
+                _logger.Info("[Silent Request] Attempting to use broker instead of searching local cache for Proof-of-Possession tokens. ");
+
+                return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+            }
+
             try
             {
                 if (AuthenticationRequestParameters.Account == null)
@@ -71,11 +78,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
                 {
                     _logger.Info("Attempting to use broker instead. ");
-                    var brokerAuthResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-                    if (brokerAuthResult != null)
+                    var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                    if (brokerResult != null)
                     {
                         _logger.Verbose("Broker responded to silent request");
-                        return brokerAuthResult;
+                        return brokerResult;
                     }
                 }
 

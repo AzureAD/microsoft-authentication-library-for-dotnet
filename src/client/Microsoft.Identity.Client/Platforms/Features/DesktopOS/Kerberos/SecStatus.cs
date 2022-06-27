@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
     {
         SEC_E_OK = 0x0,
         SEC_E_ERROR = 0x80000000,
-        SEC_E_INSUFFICENT_MEMORY = 0x80090300,
+        SEC_E_INSUFFICIENT_MEMORY = 0x80090300,
         SEC_E_INVALID_HANDLE = 0x80090301,
         SEC_E_TARGET_UNKNOWN = 0x80090303,
         SEC_E_UNSUPPORTED_FUNCTION = 0x80090302,

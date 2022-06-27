@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     public class WamTests : TestBase
     {
         private CoreUIParent _coreUIParent;
-        private ICoreLogger _logger;
+        private ILoggerAdapter _logger;
         private IWamPlugin _aadPlugin;
         private IWamPlugin _msaPlugin;
         private IWamProxy _wamProxy;
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
-            _logger = Substitute.For<ICoreLogger>();
+            _logger = Substitute.For<ILoggerAdapter>();
             _aadPlugin = Substitute.For<IWamPlugin>();
             _msaPlugin = Substitute.For<IWamPlugin>();
             _wamProxy = Substitute.For<IWamProxy>();

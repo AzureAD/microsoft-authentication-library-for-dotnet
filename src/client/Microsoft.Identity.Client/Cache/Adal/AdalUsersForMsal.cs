@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Cache
                 .Select(u => u.UserInfo);
         }
 
-        public ISet<string> GetAdalUserEnviroments()
+        public ISet<string> GetAdalUserEnvironments()
         {
             var envList = _userEntries
                 .Where(u => !string.IsNullOrEmpty(u.Authority))
