@@ -6,7 +6,7 @@ pr:
   autoCancel: false
   branches:
     include:
-    - master
+    - main
 
 variables:
   BuildPlatform: 'any cpu'
