@@ -6,7 +6,7 @@
 **Add a reference to Microsoft.IdentityModel.Abstractions, if you are still using package.json**
 
 ### New Features
-**Logging improvements** [3028](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3028).
+**Logs are now consistent when you use several .NET authentication libraires from Microsoft** [3028](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3028).
 **Expose resource (scopes) in TokenCacheNotificationArgs** [3389](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3389).
 **New `WithClientAssertion` API** that exposes the token endpoint. (3352)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3352].
 **Add more information to error logs** (3278)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3278].
