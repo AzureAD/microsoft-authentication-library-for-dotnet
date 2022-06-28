@@ -17,7 +17,7 @@
 **Auth result from runtime broker** is not parsed correctly (3354)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3354].
 **DSTS - Fixed the endpoints**
 **Privacy and TOU links not visible** in embedded picker UI for smaller screen (3153)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3153]
-**Broker POP token appears as "Bearer"** when calling GetAuthorizationHeader() (3353)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3353]
+**Broker POP token appears as "Bearer"** when calling `GetAuthorizationHeader()` (3353)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3353]
 **Ensure MSAL does not check local cache for tokens** when using POP with the runtime broker (3363)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3363]
 
 ### Fundamentals
