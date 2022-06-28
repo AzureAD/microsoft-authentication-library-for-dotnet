@@ -10,12 +10,13 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
-
+ 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -423,6 +424,15 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
                 scopes,
                 loginHint);
+        }
+
+        internal static void GuardMobileFrameworks()
+        {
+#if ANDROID || iOS || WINDOWS_APP || MAC
+            throw new PlatformNotSupportedException(
+                "Confidential Client flows are not available on mobile platforms or on Mac." +
+                "See https://aka.ms/msal-net-confidential-availability for details.");
+#endif
         }
     }
 }

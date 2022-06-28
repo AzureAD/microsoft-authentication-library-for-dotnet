@@ -29,14 +29,14 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </remarks>
         public PoPAuthenticationConfiguration()
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
         }
 
         /// <summary>
         /// Creates a configuration using the default key management, and which binds all the details of the HttpRequestMessage.
         /// </summary>
         /// <remarks>
-        /// Currently only the HtppMethod (m), UrlHost (u) and UrlPath (p) are used to create the signed HTTP request - see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#page-3
+        /// Currently only the HttpMethod (m), UrlHost (u) and UrlPath (p) are used to create the signed HTTP request - see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#page-3
         /// </remarks>
         public PoPAuthenticationConfiguration(HttpRequestMessage httpRequestMessage)
         {
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public string Nonce { get; set; }
 
         /// <summary>
-        /// Allows app developers to bypass the creation of the SignedHttpRequest envelope by setting this property to true.
+        /// Allows app developers to bypass the creation of the SignedHttpRequest envelope by setting this property to false.
         /// App developers can use a package like Microsoft.IdentityModel.Protocols.SignedHttpRequest to later create and sign the envelope. 
         /// </summary>
         /// <remarks>

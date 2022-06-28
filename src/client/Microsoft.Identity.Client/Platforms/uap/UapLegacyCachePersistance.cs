@@ -30,9 +30,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
         private const int MaxCompositeValueLength = 1024;
 
         private readonly ICryptographyManager _cryptographyManager;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
-        public UapLegacyCachePersistence(ICoreLogger logger, ICryptographyManager cryptographyManager)
+        public UapLegacyCachePersistence(ILoggerAdapter logger, ICryptographyManager cryptographyManager)
         {
             _logger = logger;
             _cryptographyManager = cryptographyManager;
@@ -104,10 +104,10 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 return null;
             }
 
-            int encyptedValueLength = (int)containerValues[CacheValueLength];
+            int encryptedValueLength = (int)containerValues[CacheValueLength];
             int segmentCount = (int)containerValues[CacheValueSegmentCount];
 
-            byte[] encryptedValue = new byte[encyptedValueLength];
+            byte[] encryptedValue = new byte[encryptedValueLength];
             if (segmentCount == 1)
             {
                 encryptedValue = (byte[])containerValues[CacheValue + 0];
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 }
             }
 
-            Array.Copy((byte[])containerValues[CacheValue + (segmentCount - 1)], 0, encryptedValue, (segmentCount - 1) * MaxCompositeValueLength, encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
+            Array.Copy((byte[])containerValues[CacheValue + (segmentCount - 1)], 0, encryptedValue, (segmentCount - 1) * MaxCompositeValueLength, encryptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
             return Decrypt(encryptedValue);
         }
 

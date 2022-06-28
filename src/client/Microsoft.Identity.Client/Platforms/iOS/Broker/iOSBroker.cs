@@ -35,13 +35,14 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private static SemaphoreSlim s_brokerResponseReady = null;
         private static NSUrl s_brokerResponse = null;
 
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly ICryptographyManager _cryptoManager;
         private readonly CoreUIParent _uIParent;
         private string _brokerRequestNonce;
         private bool _brokerV3Installed = false;
+        public bool IsPopSupported => false;
 
-        public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
+        public iOSBroker(ILoggerAdapter logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
         {
             _logger = logger;
             _cryptoManager = cryptoManager;
@@ -128,6 +129,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             brokerRequest.Add(BrokerParameter.ClientId, authenticationRequestParameters.AppConfig.ClientId);
             brokerRequest.Add(BrokerParameter.CorrelationId, authenticationRequestParameters.RequestContext.CorrelationId.ToString());
             brokerRequest.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
+            var realEnrollmentId = IntuneEnrollmentIdHelper.GetRawEnrollmentId();
+            if (!string.IsNullOrEmpty(realEnrollmentId))
+            {
+                brokerRequest.Add(BrokerParameter.IntuneEnrollmentIds, realEnrollmentId);
+            }
 
             // this needs to be case sensitive because the AppBundle is case sensitive
             brokerRequest.Add(

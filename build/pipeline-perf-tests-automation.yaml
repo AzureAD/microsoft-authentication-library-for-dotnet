@@ -1,0 +1,48 @@
+# Build for performance tests
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - src/client/Microsoft.Identity.Client/*
+
+pr: none
+
+pool:
+  name: MsalNetPerfTest1ESPool
+  demands: msbuild
+
+variables:
+  BuildPlatform: 'any cpu'
+  BuildConfiguration: 'release'
+  MSAL_DESKTOP_ONLY_DEV: 'false' # skips building mobile and legacy targets
+
+jobs:
+  - job: 'BuildJob'
+    displayName: 'Build and run tests'
+    steps:
+    - task: NuGetToolInstaller@1
+      displayName: 'Use NuGet 5.x'
+      inputs:
+        versionSpec: 5.x
+
+    - task: NuGetCommand@2
+      displayName: 'NuGet restore'
+      inputs:
+        restoreSolution: PerformanceTests.sln
+
+    - task: MSBuild@1
+      displayName: Build PerformanceTests.sln
+      inputs:
+        solution: PerformanceTests.sln
+        msbuildArchitecture: x64
+        platform: '$(BuildPlatform)'
+        configuration: '$(BuildConfiguration)'
+        msbuildArguments: '/p:RunCodeAnalysis=false /p:MSAL_DESKTOP_ONLY_DEV=$(MSAL_DESKTOP_ONLY_DEV)'
+        clean: true
+
+    # The parameters currently are not used, but can be uploaded into the reporting system in the future.
+    # Currently the build runs automatically but the results have to be compared manually.
+    - script: '$(Build.SourcesDirectory)\tests\Microsoft.Identity.Test.Performance\bin\$(BuildConfiguration)\$(BuildRuntime)\Microsoft.Identity.Test.Performance.exe -BranchName $(Build.SourceBranch) -BranchCommit $(Build.SourceVersion)'
+      displayName: 'Run performance tests'

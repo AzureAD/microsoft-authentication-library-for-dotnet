@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -36,6 +37,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
+                    _requestContext.Logger.Error($"Authority validation failed because the configured authority is invalid. Authority: {authorityInfo.CanonicalAuthority}");
                     throw MsalServiceExceptionFactory.FromHttpResponse(
                         MsalError.InvalidAuthority,
                         MsalErrorMessage.AuthorityValidationFailed,
@@ -47,6 +49,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                         a => a.Rel.Equals(Constants.DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
                              a.Href.Equals(resource)) == null)
                 {
+                    _requestContext.Logger.Error($"Authority validation failed because the configured authority is invalid. Authority: {authorityInfo.CanonicalAuthority}");
                     throw new MsalClientException(
                         MsalError.InvalidAuthority,
                         MsalErrorMessage.InvalidAuthorityOpenId);

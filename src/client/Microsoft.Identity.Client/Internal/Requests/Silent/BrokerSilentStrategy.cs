@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly SilentRequest _silentRequest;
         internal IBroker Broker { get; }
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
         public BrokerSilentStrategy(
             SilentRequest request,
@@ -41,7 +41,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (!Broker.IsBrokerInstalledAndInvokable(_authenticationRequestParameters.AuthorityInfo.AuthorityType))
             {
-                _logger.Warning("Broker is not installed. Cannot respond to silent request.");
+                if(_authenticationRequestParameters.PopAuthenticationConfiguration != null)
+                {
+                    throw new MsalClientException(MsalError.AdfsNotSupportedWithBroker, MsalErrorMessage.AdfsNotSupportedWithBroker);
+                }
+
+                _logger.Warning("Broker is not installed or authority type is incorrecr. Cannot respond to silent request.");
                 return null;
             }
 

@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     /// </summary>
     internal class NetCorePlatformProxy : AbstractPlatformProxy
     {
-        public NetCorePlatformProxy(ICoreLogger logger)
+        public NetCorePlatformProxy(ILoggerAdapter logger)
             : base(logger)
         {
         }

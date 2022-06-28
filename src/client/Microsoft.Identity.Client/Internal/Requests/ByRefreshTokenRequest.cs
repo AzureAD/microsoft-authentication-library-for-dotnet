@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -32,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (msalTokenResponse.RefreshToken == null)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(MsalErrorMessage.NoRefreshTokenInResponse);
+                AuthenticationRequestParameters.RequestContext.Logger.Error(MsalErrorMessage.NoRefreshTokenInResponse);
                 throw new MsalServiceException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription, null);
             }
 

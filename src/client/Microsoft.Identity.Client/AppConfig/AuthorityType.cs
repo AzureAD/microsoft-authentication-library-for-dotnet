@@ -4,19 +4,16 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
+    /// Enumeration for the AuthorityTypes
     /// </summary>
     internal enum AuthorityType
     {
-        /// <summary>
-        /// </summary>
         Aad,
 
-        /// <summary>
-        /// </summary>
         Adfs,
 
-        /// <summary>
-        /// </summary>
-        B2C
+        B2C, 
+
+        Dsts,
     }
 }

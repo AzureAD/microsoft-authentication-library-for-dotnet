@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool? SendX5C { get; set; } 
 
         /// <inheritdoc />
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters(ILoggerAdapter logger)
         {
             logger.Info("=== AcquireTokenSilent Parameters ===");
             logger.Info("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));

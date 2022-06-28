@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
@@ -27,7 +28,21 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            //Since the AcquireTokenSilentParameterBuilder api is shared between public and confidential clients,
+            //We need some way to validate that MSAL is not performing AcquireTokenSilent with POP on public clients without Broker
+            if (commonParameters.PopAuthenticationConfiguration != null &&
+                ServiceBundle?.Config.IsBrokerEnabled == false &&
+                //Validates that we are not on CCA
+                //TODO: Find a better way to determine this
+                ServiceBundle?.Config.ClientCredential == null &&
+                commonParameters.OnBeforeTokenRequestHandler == null &&
+                ServiceBundle?.Config.AppTokenProvider == null
+                )
+            {
+                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
+            }
+
+                var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             var requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
                 commonParameters,

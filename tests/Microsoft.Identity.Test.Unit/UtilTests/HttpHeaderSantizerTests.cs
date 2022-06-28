@@ -2,11 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using Microsoft.Identity.Client.TelemetryCore.Http;
-using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.UtilTests
@@ -33,8 +30,8 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
 
             // newline chars must be followed by spaces
             Assert.ThrowsException<FormatException>(() => httpRequest.Headers.Add("x-client-last-telemetry", strangeErrorCode));
-            
-            string santized = HttpHeaderSantizer.SantizeHeader(strangeErrorCode);
+
+            string santized = HttpHeaderSanitizer.SanitizeHeader(strangeErrorCode);
             httpRequest.Headers.Add("x-client-last-telemetry", santized);
         }
     }

@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public Func<Uri, Task> OpenBrowserAsync { get; set; }
 
-        internal void LogParameters(ICoreLogger logger)
+        internal void LogParameters(ILoggerAdapter logger)
         {
             logger.Info("DefaultBrowserOptions configured");
 

@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Utils
             return unixTimestamp;
         }
 
-        public static long GetDurationFromWindowsTimestamp(string windowsTimestampInFuture, ICoreLogger logger)
+        public static long GetDurationFromWindowsTimestamp(string windowsTimestampInFuture, ILoggerAdapter logger)
         {
             if (string.IsNullOrEmpty(windowsTimestampInFuture))
             {
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             // Windows uses in most functions the FILETIME structure, which represents the actual time as the number of 100-nanosecond intervals since January 1, 1601 (UTC).
-            // To convert to unix timestamp (Jan 1, 1970), you have to substract 11644473600 seconds.
+            // To convert to unix timestamp (Jan 1, 1970), you have to subtract 11644473600 seconds.
 
             if (!ulong.TryParse(windowsTimestampInFuture, out ulong winTimestamp) ||
                 winTimestamp <= 11644473600 ||
@@ -79,6 +79,19 @@ namespace Microsoft.Identity.Client.Utils
 
             long expiresOnUnixTimestamp = long.Parse(unixTimestampInFuture, CultureInfo.InvariantCulture);
             return expiresOnUnixTimestamp - CurrDateTimeInUnixTimestamp();
+        }
+
+        public static DateTimeOffset? DateTimeOffsetFromDuration(long? duration)
+        {
+            if (duration.HasValue)
+                return DateTimeOffsetFromDuration(duration.Value);
+
+            return null;
+        }
+
+        public static DateTimeOffset DateTimeOffsetFromDuration(long duration)
+        {
+            return DateTime.UtcNow + TimeSpan.FromSeconds(duration);
         }
     }
 }

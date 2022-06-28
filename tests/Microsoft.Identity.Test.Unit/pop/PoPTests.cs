@@ -2,14 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -20,6 +18,14 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.Broker;
+using NSubstitute;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Test.Unit.BrokerTests;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Test.Unit.Pop
 {
@@ -144,6 +150,38 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
 
         [TestMethod]
+        public async Task POP_WithMissingNonceForPCA_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app =
+                    PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithBrokerPreview()
+                                                              .WithExperimentalFeatures()
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+                var popConfig = new PoPAuthenticationConfiguration(request);
+                var provider = PoPProviderFactory.GetOrCreateProvider();
+
+                await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
+                                    app.AcquireTokenInteractive(TestConstants.s_scope.ToArray())
+                                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                                    .WithProofOfPossession(null, HttpMethod.Get, new Uri(app.Authority))
+                                    .ExecuteAsync())
+                                    .ConfigureAwait(false);
+
+                await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
+                                    app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), "loginHint")
+                                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                                    .WithProofOfPossession(null, HttpMethod.Get, new Uri(app.Authority))
+                                    .ExecuteAsync())
+                                    .ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
         public void PopConfig()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -232,6 +270,225 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 Assert.AreNotEqual(actualCacheKey, actualCacheKey2);
             }
+        }
+
+        [TestMethod]
+        public async Task PopWhenBrokerIsNotAvailableTest_Async()
+        {
+            //MSAL should not fall back to using the browser if the broker is not available when using POP
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var mockBroker = Substitute.For<IBroker>();
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
+                mockBroker.IsPopSupported.Returns(true);            
+
+                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithBrokerPreview()
+                    .WithTestBroker(mockBroker)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+
+                pca.ServiceBundle.ConfigureMockWebUI();
+
+                // Act
+                var exception = await AssertException.TaskThrowsAsync<MsalClientException>(async ()=> { await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
+                             .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                             .ExecuteAsync()
+                             .ConfigureAwait(false);
+                            }).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.BrokerApplicationRequired, exception.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.CannotInvokeBrokerForPop, exception.Message);
+            }
+        }
+
+        [TestMethod]
+        public async Task PopWhenBrokerDoesNotSupportPop_Async()
+        {
+            // Arrange
+            var mockBroker = Substitute.For<IBroker>();
+            mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+            mockBroker.IsPopSupported.Returns(false);
+
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithBrokerPreview()
+                .WithTestBroker(mockBroker)
+                .BuildConcrete();
+
+            pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+
+            // Act
+            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                    await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
+                        .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                        .ExecuteAsync()
+                        .ConfigureAwait(false))
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.BrokerDoesNotSupportPop, ex.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.BrokerDoesNotSupportPop, ex.Message);
+        }
+
+        [TestMethod]
+        public async Task PopWhithAdfsUserAndBroker_Async()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var mockBroker = Substitute.For<IBroker>();
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockBroker.IsPopSupported.Returns(true);
+                mockBroker.AcquireTokenSilentAsync(Arg.Any<AuthenticationRequestParameters>(), Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse());
+
+                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithAdfsAuthority(TestConstants.ADFSAuthority, false)
+                    .WithBrokerPreview()
+                    .WithTestBroker(mockBroker)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                TokenCacheHelper.PopulateCache(accessor: pca.UserTokenCacheInternal.Accessor,
+                                               environment: "fs.msidlab8.com");
+                TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
+
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+
+                // Act
+                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.DisplayableId)
+                    .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                    .ExecuteAsync()
+                    .ConfigureAwait(false)).ConfigureAwait(false);
+
+                //Assert
+                Assert.AreEqual(MsalError.AdfsNotSupportedWithBroker, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.AdfsNotSupportedWithBroker, ex.Message);
+            }
+        }
+
+        [TestMethod]
+        public async Task EnsurePopTokenIsNotDoubleWrapped_Async()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var mockBroker = Substitute.For<IBroker>();
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockBroker.IsPopSupported.Returns(true);
+                mockBroker.AcquireTokenSilentAsync(
+                    Arg.Any<AuthenticationRequestParameters>(), 
+                    Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
+
+                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithBrokerPreview()
+                    .WithTestBroker(mockBroker)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
+                TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
+
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+
+                // Act
+                var result = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.DisplayableId)
+                    .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                //Assert
+                //Validate that access token from broker is not wrapped
+                Assert.AreEqual(TestConstants.UserAccessToken, result.AccessToken);
+                Assert.AreEqual(Constants.PoPAuthHeaderPrefix, result.TokenType);
+                Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+        
+        [TestMethod]
+        public async Task EnsurePopTokenIsNotretrievedFromLocalCache_Async()
+        {
+            // Arrange
+            var brokerAccessToken = "TokenFromBroker";
+
+            var mockBroker = Substitute.For<IBroker>();
+            mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+            mockBroker.IsPopSupported.Returns(true);
+            mockBroker.AcquireTokenSilentAsync(
+                Arg.Any<AuthenticationRequestParameters>(),
+                Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse(brokerAccessToken));
+
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithBrokerPreview()
+                .WithTestBroker(mockBroker)
+                .BuildConcrete();
+
+            //Populate local cache with token
+            TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
+
+            pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+
+            // Act
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            var result = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, accounts.FirstOrDefault())
+                .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            //Assert
+            //Validate that access token from broker and not local cache
+            Assert.AreEqual(brokerAccessToken, result.AccessToken);
+            Assert.AreEqual(Constants.PoPAuthHeaderPrefix, result.TokenType);
+            Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        private MsalTokenResponse CreateMsalPopTokenResponse(string accessToken = null)
+        {
+            return new MsalTokenResponse()
+            {
+                AccessToken = accessToken ?? TestConstants.UserAccessToken,
+                IdToken = null,
+                CorrelationId = null,
+                Scope = TestConstants.ScopeStr,
+                ExpiresIn = 3600,
+                ClientInfo = null,
+                TokenType = Constants.PoPAuthHeaderPrefix,
+                WamAccountId = TestConstants.LocalAccountId,
+                TokenSource = TokenSource.Broker
+            };
+        }
+
+        [TestMethod]
+        public async Task PopWhenBrokerIsNotEnabledForATS_Async()
+        {
+            // Arrange
+            var pca = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .BuildConcrete();
+
+            // Act
+
+            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                    await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.LocalAccountId)
+                        .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                        .ExecuteAsync()
+                        .ConfigureAwait(false))
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.BrokerRequiredForPop, ex.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.BrokerRequiredForPop, ex.Message);
         }
 
         /// <summary>

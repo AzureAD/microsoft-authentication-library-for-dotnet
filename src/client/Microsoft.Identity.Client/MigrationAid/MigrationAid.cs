@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
         /// <returns>An <see cref="AuthenticationResult"/> containing the requested token</returns>
         /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
-        /// for instance so that the user consents, or re-signs-in (for instance if the password expirred), or performs two factor authentication</exception>
+        /// for instance so that the user consents, or re-signs-in (for instance if the password expired), or performs two factor authentication</exception>
         /// <remarks>
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes.
         /// This means that an access token with more scopes than requested could be returned as well. If the access token is expired or
@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client
         /// sure that conditional access policies are applies immediately, rather than after the expiration of the access token</param>
         /// <returns>An <see cref="AuthenticationResult"/> containing the requested token</returns>
         /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
-        /// for instance, if no refresh token was in the cache, or the user needs to consents, or re-sign-in (for instance if the password expirred),
+        /// for instance, if no refresh token was in the cache, or the user needs to consents, or re-sign-in (for instance if the password expired),
         /// or performs two factor authentication</exception>
         /// <remarks>
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
@@ -441,7 +441,7 @@ namespace Microsoft.Identity.Client
             IAccount account);
 
         /// <summary>
-        /// Interactive request to acquire token for a login with control of the UI behavior and possiblity of passing extra query parameters like additional claims
+        /// Interactive request to acquire token for a login with control of the UI behavior and possibility of passing extra query parameters like additional claims
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
@@ -459,7 +459,7 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters);
 
         /// <summary>
-        /// Interactive request to acquire token for an account with control of the UI behavior and possiblity of passing extra query parameters like additional claims
+        /// Interactive request to acquire token for an account with control of the UI behavior and possibility of passing extra query parameters like additional claims
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
@@ -566,7 +566,7 @@ namespace Microsoft.Identity.Client
             IAccount account, UIParent parent);
 
         /// <summary>
-        /// Interactive request to acquire token for a login with control of the UI behavior and possiblity of passing extra query parameters like additional claims
+        /// Interactive request to acquire token for a login with control of the UI behavior and possibility of passing extra query parameters like additional claims
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
@@ -585,7 +585,7 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters, UIParent parent);
 
         /// <summary>
-        /// Interactive request to acquire token for an account with control of the UI behavior and possiblity of passing extra query parameters like additional claims
+        /// Interactive request to acquire token for an account with control of the UI behavior and possibility of passing extra query parameters like additional claims
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
@@ -1092,7 +1092,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Interactive request to acquire token for a login with control of the UI prompt and possiblity of passing extra query parameters like additional claims
+        /// Interactive request to acquire token for a login with control of the UI prompt and possibility of passing extra query parameters like additional claims
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
@@ -1115,7 +1115,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Interactive request to acquire token for an account with control of the UI prompt and possiblity of passing extra query parameters like additional claims
+        /// Interactive request to acquire token for an account with control of the UI prompt and possibility of passing extra query parameters like additional claims
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>

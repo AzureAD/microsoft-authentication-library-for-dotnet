@@ -23,7 +23,7 @@
     <Authors>Microsoft</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
-    <PackageReleaseNotes>The changelog is available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/changelog.txt and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap </PackageReleaseNotes>
+    <PackageReleaseNotes>The changelog is available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/changelog.txt and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap </PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>
       This package contains binaries needed to use the Windows broker and other features with MSAL on older platforms such as .NET Framework and .NET Core 3.x

@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AuthenticationRequestParameters _requestParams;
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private readonly IServiceBundle _serviceBundle;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private const string InstanceAwareParam = "instance_aware";
 
         #region For Test
@@ -109,7 +109,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return brokerTokenResponse;
                 }
 
+                if (string.Equals(_requestParams.AuthenticationScheme.AccessTokenType, Constants.PoPTokenType))
+                {
+                    _logger.Error("A broker application is required for Proof-of-Possesion, but one could not be found or communicated with. See https://aka.ms/msal-net-pop");
+                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.CannotInvokeBrokerForPop);
+                }
+
                 _logger.Info("Broker attempt did not complete, most likely because the broker is not installed. Attempting to use a browser / web UI. ");
+
                 cancellationToken.ThrowIfCancellationRequested();
             }
 

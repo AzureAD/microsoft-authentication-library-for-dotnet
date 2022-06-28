@@ -22,7 +22,7 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.Diagnostics;
-#if !UAP10_0 && !MAUI
+#if !UAP10_0_17763
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Utils.Windows;
 #endif
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
         private readonly IAccountPickerFactory _accountPickerFactory;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
         private readonly IntPtr _parentHandle;
         private readonly SynchronizationContext _synchronizationContext;
         private readonly IMsaPassthroughHandler _msaPassthroughHandler;
@@ -57,13 +57,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private const string InfrastructureTenant = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
         private readonly WindowsBrokerOptions _wamOptions;
 
+        public bool IsPopSupported => false;
+
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
         /// </summary>
         public WamBroker(
             CoreUIParent uiParent,
             ApplicationConfiguration appConfig,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             IWamPlugin testAadPlugin = null,
             IWamPlugin testmsaPlugin = null,
             IWamProxy wamProxy = null,
@@ -93,7 +95,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         /// In WAM, AcquireTokenInteractive is always associated to an account. WAM also allows for an "account picker" to be displayed,
         /// which is similar to the EVO browser experience, allowing the user to add an account or use an existing one.
         ///
-        /// MSAL does not have a concept of account picker so MSAL.AccquireTokenInteractive will:
+        /// MSAL does not have a concept of account picker so MSAL.AcquireTokenInteractive will:
         ///
         /// 1. Call WAM.AccountPicker if an IAccount (or possibly login_hint) is not configured
         /// 2. Figure out the WAM.AccountID associated to the MSAL.Account
@@ -314,7 +316,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         /// <summary>
         /// Some WAM operations fail for work and school accounts when the authority is env/organizations
-        /// Chaing the authority to env/common in this case works around this problem.
+        /// Changing the authority to env/common in this case works around this problem.
         /// 
         /// https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3217
         /// </summary>
@@ -553,7 +555,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     .ConfigureAwait(false);
 
                 // For MSA-PT scenario, MSAL's authority is wrong. MSAL will use Account.HomeTenantId
-                // which will essentialyl be /consumers. This is wrong, we are not trying to obtain
+                // which will essentially be /consumers. This is wrong, we are not trying to obtain
                 // an MSA token, we are trying to obtain an ADD *guest* token.
                 string differentAuthority = null;
                 if (_wamOptions.MsaPassthrough &&
@@ -710,6 +712,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private async Task<MsalTokenResponse> AcquireTokenSilentDefaultUserPassthroughAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider defaultAccountProvider)
         {
             var transferToken = await _msaPassthroughHandler.TryFetchTransferTokenSilentDefaultAccountAsync(authenticationRequestParameters, defaultAccountProvider).ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(transferToken))
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.InteractionRequired,
+                    "Cannot get a token silently (internal error: found an MSA account, but could not retrieve a transfer token for it when calling WAM)");
+            }
 
             var aadAccountProvider = await _webAccountProviderFactory.GetAccountProviderAsync("organizations").ConfigureAwait(false);
             var webTokenRequest = await _aadPlugin.CreateWebTokenRequestAsync(

@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     {
         IAccountPicker Create(
             IntPtr parentHandle,
-            ICoreLogger logger,
+            ILoggerAdapter logger,
             SynchronizationContext synchronizationContext,
             Authority authority,
             bool isMsaPassthrough, 
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     {
         public IAccountPicker Create(
             IntPtr parentHandle, 
-            ICoreLogger logger, 
+            ILoggerAdapter logger, 
             SynchronizationContext synchronizationContext, 
             Authority authority, 
             bool isMsaPassthrough, 

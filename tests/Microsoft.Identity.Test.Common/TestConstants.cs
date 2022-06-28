@@ -59,6 +59,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.r.login.microsoftonline.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
         public const string PpeEnvironment = "login.windows-ppe.net";
+        public const string PpeOrgEnvironment = "login.windows-ppe.org"; //This environment is not known to MSAL or AAD
 
         public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
         public const string AuthorityNotKnownTenanted = "https://sts.access.edu/" + Utid + "/";
@@ -149,6 +150,14 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string UserAssertion = "fake_access_token";
         public const string CodeVerifier = "someCodeVerifier";
+
+        public const string Nonce = "someNonce";
+        
+        public const string TestErrCode = "TestErrCode";
+        public const string iOSBrokerSuberrCode = "TestSuberrCode";
+        public const string iOSBrokerErrDescr = "Test Error Description";
+        public const string iOSBrokerErrorMetadata = "error_metadata";
+        public const string iOSBrokerErrorMetadataValue = @"{""home_account_id"":""test_home"", ""username"" : """ + Username + @""" }";
 
         //This value is only for testing purposes. It is for a certificate that is not used for anything other than running tests
         public const string _defaultx5cValue = @"MIIDHzCCAgegAwIBAgIQM6NFYNBJ9rdOiK+C91ZzFDANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwHhcNMTIwNTIyMj
@@ -361,6 +370,11 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string RegionAutoDetectNotFoundFailureMessage = "Call to local IMDS failed with status code NotFound or an empty response.";
         public const string RegionDiscoveryNotSupportedErrorMessage = "Region discovery can only be made if the service resides in Azure function or Azure VM";
         public const string RegionDiscoveryIMDSCallFailedMessage = "IMDS call failed";
+
+        public const string PiiSerializeLogMessage = "MsalExternalLogMessage: Serializing Cache Pii";
+        public const string PiiDeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache Pii";
+        public const string SerializeLogMessage = "MsalExternalLogMessage: Serializing Cache without Pii";
+        public const string DeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache without Pii";
 
         public static MsalTokenResponse CreateAadTestTokenResponse()
         {

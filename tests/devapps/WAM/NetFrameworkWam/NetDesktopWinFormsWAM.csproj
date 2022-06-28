@@ -83,6 +83,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj">
+      <Project>{6839f934-45f0-4026-8af3-c3aefb7d48a9}</Project>
+      <Name>Microsoft.Identity.Client.Broker</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj">
       <Project>{a7679ff0-19e8-41e3-9f7c-f54235124cc4}</Project>
       <Name>Microsoft.Identity.Client.Desktop</Name>

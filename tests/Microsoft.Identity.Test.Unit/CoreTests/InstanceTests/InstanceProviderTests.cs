@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     public class InstanceProviderTests : TestBase
     {
         private const string LoginMicrosoftOnlineCom = "login.microsoftonline.com";
-        private readonly ICoreLogger _logger = new NullLogger();
+        private readonly ILoggerAdapter _logger = new NullLogger();
 
         [TestMethod]
         public void StaticProviderPreservesStateAcrossInstances()
@@ -64,6 +64,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             result = knownMetadataProvider.GetMetadata(
                 "login.partner.microsoftonline.cn", new[] { "login.windows.net", "login.microsoft.com", "login.partner.microsoftonline.cn" }, _logger);
+            Assert.IsNotNull(result);
+
+            result = knownMetadataProvider.GetMetadata(
+                "login.windows-ppe.net", new[] { "login.windows-ppe.net", "sts.windows-ppe.net", "login.microsoft-ppe.com" }, _logger);
             Assert.IsNotNull(result);
 
             result = knownMetadataProvider.GetMetadata(

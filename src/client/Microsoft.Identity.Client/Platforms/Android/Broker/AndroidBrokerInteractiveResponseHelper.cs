@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and re-injected into the response at the end.
         public static string InteractiveRequestCorrelationId { get; set; }
 
-        internal static void SetBrokerResult(Intent data, int resultCode, ICoreLogger unreliableLogger)
+        internal static void SetBrokerResult(Intent data, int resultCode, ILoggerAdapter unreliableLogger)
         {
             try
             {

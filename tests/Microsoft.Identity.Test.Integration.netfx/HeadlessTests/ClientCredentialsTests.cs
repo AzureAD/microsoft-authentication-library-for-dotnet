@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -138,6 +139,56 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims, sendX5C: true).ConfigureAwait(false);
         }
 
+        [TestMethod]
+        [DataRow(Cloud.Public, RunOn.NetCore)]                
+        public async Task WithOnBeforeTokenRequest_TestAsync(Cloud cloud, RunOn runOn)
+        {
+            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
+
+            AuthenticationResult authResult;
+
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithAuthority(settings.Authority, true)
+                .WithExperimentalFeatures(true)
+                .WithTestLogging()
+                .Build();
+            
+            authResult = await confidentialApp
+                .AcquireTokenForClient(settings.AppScopes)
+                .OnBeforeTokenRequest((data) =>
+                {
+                    ModifyRequest(data, settings.GetCertificate()); // Adding a certificate via handler instead of using WithCertificate
+                    return Task.CompletedTask;
+                })
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+
+            // Call again to ensure token cache is hit
+            authResult = await confidentialApp
+               .AcquireTokenForClient(settings.AppScopes)
+                .OnBeforeTokenRequest((data) =>
+                {
+                    throw new InvalidOperationException("Should not be invoking this callback when the token is fetched from the cache");
+                })
+               .ExecuteAsync()
+               .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);            
+        }
+
+        private static void ModifyRequest(OnBeforeTokenRequestData data, X509Certificate2 certificate)
+        {
+            string clientId = data.BodyParameters["client_id"];
+            string tokenEndpoint = data.RequestUri.AbsoluteUri;
+
+            string assertion = GetSignedClientAssertionManual(issuer: clientId, audience: tokenEndpoint, certificate: certificate);
+            data.BodyParameters.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+            data.BodyParameters.Add("client_assertion", assertion);
+        }
+
         private async Task RunClientCredsAsync(Cloud cloud, CredentialType credentialType, bool UseAppIdUri = false, bool sendX5C = false)
         {
             Trace.WriteLine($"Running test with settings for cloud {cloud}, credential type {credentialType}");
@@ -163,6 +214,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(correlationId, appCacheRecorder.LastAfterAccessNotificationArgs.CorrelationId);
             Assert.AreEqual(correlationId, appCacheRecorder.LastBeforeAccessNotificationArgs.CorrelationId);
+            CollectionAssert.AreEquivalent(settings.AppScopes.ToArray(), appCacheRecorder.LastBeforeAccessNotificationArgs.RequestScopes.ToArray());
+            CollectionAssert.AreEquivalent(settings.AppScopes.ToArray(), appCacheRecorder.LastAfterAccessNotificationArgs.RequestScopes.ToArray());
+            Assert.AreEqual(settings.TenantId, appCacheRecorder.LastBeforeAccessNotificationArgs.RequestTenantId ?? "");
+            Assert.AreEqual(settings.TenantId, appCacheRecorder.LastAfterAccessNotificationArgs.RequestTenantId ?? "");
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
             Assert.AreEqual(

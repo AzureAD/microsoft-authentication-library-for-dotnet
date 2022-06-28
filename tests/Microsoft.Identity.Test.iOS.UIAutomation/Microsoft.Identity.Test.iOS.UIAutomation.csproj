@@ -35,12 +35,12 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>12.0.1</Version>
+      <Version>13.0.1</Version>
     </PackageReference>
     <PackageReference Include="StrongNamer">
       <Version>0.2.5</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.UITest" Version="2.2.7">
+    <PackageReference Include="Xamarin.UITest" Version="3.2.8">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.3" />

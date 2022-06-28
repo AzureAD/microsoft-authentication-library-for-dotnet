@@ -14,6 +14,7 @@ using AndroidX.Browser.CustomTabs;
 #else
 using Android.Support.CustomTabs;
 #endif
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Uri = Android.Net.Uri;

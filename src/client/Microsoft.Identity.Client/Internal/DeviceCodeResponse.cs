@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Internal
         public string VerificationUrl { get; internal set; }
 
         // This is the OAuth2 standards compliant value.
-        // It should be used if it's present, if it's not then fallback to VerificiationUrl
+        // It should be used if it's present, if it's not then fallback to VerificationUrl
         [JsonProperty(PropertyName = "verification_uri")]
         public string VerificationUri { get; internal set; }
 

@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit
             using var harness = base.CreateTestHarness();
 
             PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                        .WithAuthority(new Uri(TestConstants.AuthorityCommonPpeAuthority), true)
+                                                                        .WithAuthority(new Uri("https://" + TestConstants.PpeOrgEnvironment + "/common"), true) //login.windows-ppe.org is not known to MSAL
                                                                         .WithHttpManager(harness.HttpManager)
                                                                         .BuildConcrete();
             app.ServiceBundle.ConfigureMockWebUI();
@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit
             //Adding one instance discovery response to ensure the cache is hit for the subsiquent requests.
             //If MSAL tries to do an additional request this test will fail.
             harness.HttpManager.AddInstanceDiscoveryMockHandler();
-            harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonPpeAuthority);
+            harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost("https://" + TestConstants.PpeOrgEnvironment + "/common/");//login.windows-ppe.org is not known to MSAL
 
             AuthenticationResult result = app
                 .AcquireTokenInteractive(TestConstants.s_scope)
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit
 
         private static void ValidateCacheEntitiesEnvironment(ITokenCacheInternal cache, string expectedEnvironment)
         {
-            ICoreLogger logger = Substitute.For<ICoreLogger>();
+            ILoggerAdapter logger = Substitute.For<ILoggerAdapter>();
             IEnumerable<Client.Cache.Items.MsalAccessTokenCacheItem> accessTokens = cache.Accessor.GetAllAccessTokens();
             foreach (Client.Cache.Items.MsalAccessTokenCacheItem at in accessTokens)
             {

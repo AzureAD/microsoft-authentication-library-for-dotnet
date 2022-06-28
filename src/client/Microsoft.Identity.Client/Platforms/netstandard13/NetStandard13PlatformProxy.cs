@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
     /// </summary>
     internal class Netstandard13PlatformProxy : AbstractPlatformProxy
     {
-        public Netstandard13PlatformProxy(ICoreLogger logger)
+        public Netstandard13PlatformProxy(ILoggerAdapter logger)
             : base(logger)
         {
         }

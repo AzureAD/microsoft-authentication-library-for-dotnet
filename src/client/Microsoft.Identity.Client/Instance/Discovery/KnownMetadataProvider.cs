@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 PreferredCache = "login.partner.microsoftonline.cn"
             };
 
-            InstanceDiscoveryMetadataEntry cloudEntryGermanay = new InstanceDiscoveryMetadataEntry()
+            InstanceDiscoveryMetadataEntry cloudEntryGermany = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { "login.microsoftonline.de" },
                 PreferredNetwork = "login.microsoftonline.de",
@@ -72,11 +72,19 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 PreferredCache = "login-us.microsoftonline.com"
             };
 
+            InstanceDiscoveryMetadataEntry ppeCloudEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "login.windows-ppe.net", "sts.windows-ppe.net", "login.microsoft-ppe.com" },
+                PreferredNetwork = "login.windows-ppe.net",
+                PreferredCache = "login.windows-ppe.net"
+            };
+
             AddToKnownCache(publicCloudEntry);
             AddToKnownCache(cloudEntryChina);
-            AddToKnownCache(cloudEntryGermanay);
+            AddToKnownCache(cloudEntryGermany);
             AddToKnownCache(usGovCloudEntry);
             AddToKnownCache(usCloudEntry);
+            AddToKnownCache(ppeCloudEntry);
             AddToPublicEnvironment(publicCloudEntry);
         }
 
@@ -88,7 +96,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         public InstanceDiscoveryMetadataEntry GetMetadata(
             string environment,
             IEnumerable<string> existingEnvironmentsInCache,
-            ICoreLogger logger)
+            ILoggerAdapter logger)
         {
             if (existingEnvironmentsInCache == null)
             {

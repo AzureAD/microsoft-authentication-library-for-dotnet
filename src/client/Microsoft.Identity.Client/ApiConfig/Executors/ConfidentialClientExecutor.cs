@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         public ConfidentialClientExecutor(IServiceBundle serviceBundle, ConfidentialClientApplication confidentialClientApplication)
             : base(serviceBundle)
         {
-            ConfidentialClientApplication.GuardMobileFrameworks();
+            ClientApplicationBase.GuardMobileFrameworks();
 
             _confidentialClientApplication = confidentialClientApplication;
         }

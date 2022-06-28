@@ -40,7 +40,6 @@
             this.atsBtn = new System.Windows.Forms.Button();
             this.atiBtn = new System.Windows.Forms.Button();
             this.atsAtiBtn = new System.Windows.Forms.Button();
-            this.useBrokerChk = new System.Windows.Forms.CheckBox();
             this.accBtn = new System.Windows.Forms.Button();
             this.clearBtn = new System.Windows.Forms.Button();
             this.btnClearCache = new System.Windows.Forms.Button();
@@ -55,6 +54,7 @@
             this.btnRemoveAccount = new System.Windows.Forms.Button();
             this.cbxBackgroundThread = new System.Windows.Forms.CheckBox();
             this.cbxListOsAccounts = new System.Windows.Forms.CheckBox();
+            this.cbxUseWam = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // resultTbx
@@ -83,6 +83,7 @@
             "https://login.microsoftonline.com/organizations",
             "https://login.microsoftonline.com/consumers",
             "https://login.microsoftonline.com/49f548d0-12b7-4169-a390-bb5304d24462",
+            "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca",
             "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
             "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a",
             "https://login.windows-ppe.net/organizations",
@@ -175,18 +176,6 @@
             this.atsAtiBtn.UseVisualStyleBackColor = true;
             this.atsAtiBtn.Click += new System.EventHandler(this.atsAtiBtn_Click);
             // 
-            // useBrokerChk
-            // 
-            this.useBrokerChk.AutoSize = true;
-            this.useBrokerChk.Checked = true;
-            this.useBrokerChk.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.useBrokerChk.Location = new System.Drawing.Point(12, 134);
-            this.useBrokerChk.Name = "useBrokerChk";
-            this.useBrokerChk.Size = new System.Drawing.Size(75, 17);
-            this.useBrokerChk.TabIndex = 14;
-            this.useBrokerChk.Text = "Use WAM";
-            this.useBrokerChk.UseVisualStyleBackColor = true;
-            // 
             // accBtn
             // 
             this.accBtn.Location = new System.Drawing.Point(315, 178);
@@ -273,7 +262,7 @@
             // cbxMsaPt
             // 
             this.cbxMsaPt.AutoSize = true;
-            this.cbxMsaPt.Location = new System.Drawing.Point(92, 134);
+            this.cbxMsaPt.Location = new System.Drawing.Point(182, 134);
             this.cbxMsaPt.Name = "cbxMsaPt";
             this.cbxMsaPt.Size = new System.Drawing.Size(111, 17);
             this.cbxMsaPt.TabIndex = 23;
@@ -303,7 +292,7 @@
             // cbxBackgroundThread
             // 
             this.cbxBackgroundThread.AutoSize = true;
-            this.cbxBackgroundThread.Location = new System.Drawing.Point(214, 134);
+            this.cbxBackgroundThread.Location = new System.Drawing.Point(299, 134);
             this.cbxBackgroundThread.Name = "cbxBackgroundThread";
             this.cbxBackgroundThread.Size = new System.Drawing.Size(146, 17);
             this.cbxBackgroundThread.TabIndex = 26;
@@ -313,18 +302,27 @@
             // cbxListOsAccounts
             // 
             this.cbxListOsAccounts.AutoSize = true;
-            this.cbxListOsAccounts.Location = new System.Drawing.Point(92, 155);
+            this.cbxListOsAccounts.Location = new System.Drawing.Point(182, 155);
             this.cbxListOsAccounts.Name = "cbxListOsAccounts";
             this.cbxListOsAccounts.Size = new System.Drawing.Size(107, 17);
             this.cbxListOsAccounts.TabIndex = 27;
             this.cbxListOsAccounts.Text = "List OS accounts";
             this.cbxListOsAccounts.UseVisualStyleBackColor = true;
             // 
+            // cbxUseWam
+            // 
+            this.cbxUseWam.FormattingEnabled = true;            
+            this.cbxUseWam.Location = new System.Drawing.Point(12, 130);
+            this.cbxUseWam.Name = "cbxUseWam";
+            this.cbxUseWam.Size = new System.Drawing.Size(156, 21);
+            this.cbxUseWam.TabIndex = 28;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(634, 642);
+            this.Controls.Add(this.cbxUseWam);
             this.Controls.Add(this.cbxListOsAccounts);
             this.Controls.Add(this.cbxBackgroundThread);
             this.Controls.Add(this.btnRemoveAccount);
@@ -337,7 +335,6 @@
             this.Controls.Add(this.btnClearCache);
             this.Controls.Add(this.clearBtn);
             this.Controls.Add(this.accBtn);
-            this.Controls.Add(this.useBrokerChk);
             this.Controls.Add(this.atsAtiBtn);
             this.Controls.Add(this.atiBtn);
             this.Controls.Add(this.atsBtn);
@@ -371,7 +368,6 @@
         private System.Windows.Forms.Button atsBtn;
         private System.Windows.Forms.Button atiBtn;
         private System.Windows.Forms.Button atsAtiBtn;
-        private System.Windows.Forms.CheckBox useBrokerChk;
         private System.Windows.Forms.Button accBtn;
         private System.Windows.Forms.Button clearBtn;
         private System.Windows.Forms.Button btnClearCache;
@@ -386,6 +382,7 @@
         private System.Windows.Forms.Button btnRemoveAccount;
         private System.Windows.Forms.CheckBox cbxBackgroundThread;
         private System.Windows.Forms.CheckBox cbxListOsAccounts;
+        private System.Windows.Forms.ComboBox cbxUseWam;
     }
 }
 

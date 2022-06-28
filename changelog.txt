@@ -1,3 +1,53 @@
+4.45.0
+==========
+### Important Changes that developer should make in their UWP apps.
+**Upgrade the minimum target platform version to 10.0.17763.0**
+**Upgrade Microsoft.NETCore.UniversalWindowsPlatform version to minimum 6.1.9**
+**Add a reference to Microsoft.IdentityModel.Abstractions, if you are still using package.json**
+
+### New Features
+**Logs are now consistent when you use several .NET authentication libraires from Microsoft** [3028](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3028).
+**Expose resource (scopes) in TokenCacheNotificationArgs** [3389](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3389).
+**New `WithClientAssertion` API** that exposes the token endpoint. (3352)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3352].
+**Add more information to error logs** (3278)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3278].
+
+
+### Bug Fixes
+**Tenant profiles was not returned in `GetAccounts`** for broker tokens (3349)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3349].
+**Auth result from runtime broker** was not parsed correctly (3354)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3354].
+**DSTS - Fixed the endpoints**
+**Privacy and TOU links weren't visible** in embedded picker UI for smaller screen (3153)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3153]
+**Broker POP token appeared as "Bearer"** when calling `GetAuthorizationHeader()` (3353)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3353]
+**Ensure MSAL didn't check local cache for tokens** when using POP with the runtime broker (3363)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3363]
+
+### Fundamentals
+**Upgraded to .net standard 2.0**
+
+4.44.0
+==========
+### New Features
+**Added support in MSAL for dSTS authority** See [3198](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3198).
+**Enabled Azure.Identity (Azure SDK) to benefit from MSAL.NET token cache when used for Managed Identity** See [3137](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3137).
+
+### Experimental Features
+**MSAL.NET now has a new WAM preview which is an abstraction layer based on MSAL C++ with support for Proof-of-Possession access tokens**. This fixes some issues with current WAM implementation. See [3192](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3192) and [wiki](http://aka.ms/msal-net-wam).
+
+### Bug Fixes
+**Improved exception handling in case of an Operation Cancelled Exception** See [3283](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3283).
+**Fixed `AcquireTokenSilent` to not display a login prompt unnecessarily for operating system accounts in WAM**. See [3294](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3294).
+**Fixed NullReferenceException in IsBrokerAvailable()** See [3261](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3261).
+**Fixed a race condition to improve stability of region autodiscovery**. See [3277](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3277).
+**Fixed a bug in instance discovery by adding pre-production environment (PPE) domains to known endpoints**. See [3265](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3265).
+
+### Fundamentals
+**Improved automated performance microbenchmarks to better reflect common scenarios** See [3297](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3297) and [wiki](https://aka.ms/msal-net-performance-testing).
+
+4.43.2
+==========
+### Bug Fix
+
+**MSAL will now allow the use of different scopes when acquiring access tokens using a cached refresh token in long running On-Behalf-Of processes**. See [2817](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2817)
+
 4.43.1
 ==========
 ### Bug Fix

@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 
@@ -221,15 +222,6 @@ namespace Microsoft.Identity.Client
         {
             AuthenticationRequestParameters requestParams = await base.CreateRequestParametersAsync(commonParameters, requestContext, cache).ConfigureAwait(false);
             return requestParams;
-        }
-
-        internal static void GuardMobileFrameworks()
-        {
-#if ANDROID || iOS || WINDOWS_APP || MAC
-            throw new PlatformNotSupportedException(
-                "Confidential Client flows are not available on mobile platforms or on Mac." +
-                "See https://aka.ms/msal-net-confidential-availability for details.");
-#endif
         }
     }
 }

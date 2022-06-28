@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
                     string responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(keyPair);
                     Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>();
-                    pkeyAuthEmptyResponse[BrokerConstants.ChallangeResponseHeader] = responseHeader;
+                    pkeyAuthEmptyResponse[BrokerConstants.ChallengeResponseHeader] = responseHeader;
 
                     view.LoadUrl(keyPair["SubmitUrl"], pkeyAuthEmptyResponse);
 

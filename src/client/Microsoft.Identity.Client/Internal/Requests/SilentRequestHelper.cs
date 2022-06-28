@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal static class SilentRequestHelper
     {
-        const string MamEnrollmentIdKey = "microsoft_enrollment_id";
+        internal const string MamEnrollmentIdKey = "microsoft_enrollment_id";
 
         internal static async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, RequestBase request, AuthenticationRequestParameters authenticationRequestParameters, CancellationToken cancellationToken)
         {
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal
         internal static void ProcessFetchInBackground(
             MsalAccessTokenCacheItem oldAccessToken,
             Func<Task<AuthenticationResult>> fetchAction,
-            ICoreLogger logger)
+            ILoggerAdapter logger)
         {
             _ = Task.Run(async () =>
             {

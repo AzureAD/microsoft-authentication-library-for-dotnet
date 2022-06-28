@@ -10,6 +10,7 @@ using System.Linq;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -31,7 +32,6 @@ namespace Microsoft.Identity.Client
     public sealed partial class TokenCache : ITokenCacheInternal
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
-        internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         internal const int ExpirationTooLongInDays = 10 * 365;
 
         private readonly IFeatureFlags _featureFlags;

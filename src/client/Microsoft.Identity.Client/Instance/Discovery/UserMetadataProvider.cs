@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
         }
 
-        public InstanceDiscoveryMetadataEntry GetMetadataOrThrow(string environment, ICoreLogger logger)
+        public InstanceDiscoveryMetadataEntry GetMetadataOrThrow(string environment, ILoggerAdapter logger)
         {
             _entries.TryGetValue(environment ?? "", out InstanceDiscoveryMetadataEntry entry);
 

@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
     internal class AndroidPlatformProxy : AbstractPlatformProxy
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
-        public AndroidPlatformProxy(ICoreLogger logger) : base(logger)
+        public AndroidPlatformProxy(ILoggerAdapter logger) : base(logger)
         {
         }
 

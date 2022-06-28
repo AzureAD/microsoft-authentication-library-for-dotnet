@@ -10,11 +10,13 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Desktop;
 
 namespace NetDesktopWpf
@@ -39,6 +41,19 @@ namespace NetDesktopWpf
             var pca = PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
                 .WithWindowsBroker(true)
+                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+                .Build();
+
+            BindCache(pca.UserTokenCache, UserCacheFile);
+
+            return pca;
+        }
+
+        private IPublicClientApplication CreatePublicClientForRuntime()
+        {
+            var pca = PublicClientApplicationBuilder.Create(s_clientID)
+                .WithAuthority(s_authority)
+                .WithBrokerPreview(true)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
@@ -96,6 +111,52 @@ namespace NetDesktopWpf
 
                     result = await task.ConfigureAwait(false);
                                      
+                }
+                catch (Exception ex3)
+                {
+                    DisplayMessage(ex3.ToString());
+                }
+
+            }
+            catch (Exception ex2)
+            {
+                DisplayMessage(ex2.ToString());
+            }
+
+            DisplayMessage($"Success! We have a token for {result.Account.Username} valid until {result.ExpiresOn}");
+        }
+
+        private async void AtsAti_Runtime_Click(object sender, RoutedEventArgs e)
+        {
+            var pca = CreatePublicClientForRuntime();
+            var upnPrefix = UpnTbx.Text;
+
+            IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
+            var acc = accounts.SingleOrDefault(
+                a => !String.IsNullOrEmpty(upnPrefix) &&
+                a.Username.StartsWith(upnPrefix));
+
+            AuthenticationResult result = null;
+            try
+            {
+                result = await pca
+                    .AcquireTokenSilent(s_scopes, acc)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+            }
+            catch (MsalUiRequiredException ex)
+            {
+                try
+                {
+                    IntPtr handle = new WindowInteropHelper(this).Handle;
+                    var task = await Dispatcher.InvokeAsync(() =>
+                        pca.AcquireTokenInteractive(s_scopes)
+                                     .WithParentActivityOrWindow(handle)
+                                     .WithAccount(acc)
+                                     .ExecuteAsync());
+
+                    result = await task.ConfigureAwait(false);
+
                 }
                 catch (Exception ex3)
                 {

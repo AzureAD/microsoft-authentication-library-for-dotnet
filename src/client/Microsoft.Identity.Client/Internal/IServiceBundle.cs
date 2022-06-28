@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Internal
         /// When outside of a request, the normal logger (requestContext.Logger) is not available. 
         /// This logger is at the app level - it is just not tied to a correlation ID.
         /// </summary>
-        ICoreLogger ApplicationLogger { get; }
+        ILoggerAdapter ApplicationLogger { get; }
         IHttpManager HttpManager { get; }
         IInstanceDiscoveryManager InstanceDiscoveryManager { get; }
         IPlatformProxy PlatformProxy { get; }

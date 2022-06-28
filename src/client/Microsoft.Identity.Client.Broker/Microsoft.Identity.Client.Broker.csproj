@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+
+    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
+
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <TargetFramework>$(TargetFrameworkNetStandard)</TargetFramework>
+
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet and AssemblyInfo metadata">
+    <!--This should be passed from the VSTS build-->
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.7.1-preview</MsalClientSemVer>
+    <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
+    <Version>$(MsalClientSemVer)-preview</Version>
+    <!-- Copyright needs to be in the form of © not (c) to be compliant -->
+    <Title>MSAL.NET extension for public client broker support</Title>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+    <Authors>Microsoft</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
+    <PackageReleaseNotes>This package superseeds Microsoft.Identity.Client.Desktop </PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Description>
+      This package contains binaries needed to use brokers in public client desktop applications.
+      The release notes are available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases.
+    </Description>
+    <PackageTags>Microsoft Authentication Library Desktop MSAL WAM broker Windows Authentication Manager</PackageTags>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+    <Product>Microsoft Authentication Library Broker</Product>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
+    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.8.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

@@ -60,7 +60,7 @@ namespace WebApi.Misc
             
         }
 
-        ICoreLogger _logger = new NullLogger();
+        ILoggerAdapter _logger = new NullLogger();
 
         private void OnStart()
         {

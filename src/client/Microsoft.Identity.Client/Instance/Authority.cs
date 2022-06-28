@@ -54,107 +54,17 @@ namespace Microsoft.Identity.Client.Instance
             AuthorityInfo requestAuthorityInfo,
             IAccount account = null)
         {
-            var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
-
-            if (configAuthorityInfo == null)
-            {
-                throw new ArgumentNullException(nameof(configAuthorityInfo));
-            }
-
-            ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
-
-            await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
-
-            switch (configAuthorityInfo.AuthorityType)
-            {
-                // ADFS is tenant-less, no need to consider tenant
-                case AuthorityType.Adfs:
-                    return requestAuthorityInfo == null ?
-                        new AdfsAuthority(configAuthorityInfo) :
-                        new AdfsAuthority(requestAuthorityInfo);
-
-                case AuthorityType.B2C:
-
-                    if (requestAuthorityInfo != null)
-                    {
-                        return new B2CAuthority(requestAuthorityInfo);
-                    }
-                    return new B2CAuthority(configAuthorityInfo);
-
-                case AuthorityType.Aad:
-
-                    bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null;
-
-                    if (requestAuthorityInfo == null)
-                    {
-                        return updateEnvironment ?
-                            CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
-                            CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
-                    }
-
-                    // In case the authority is defined only at the request level
-                    if (configAuthorityInfo.IsDefaultAuthority &&
-                        requestAuthorityInfo.AuthorityType != AuthorityType.Aad)
-                    {
-                        return CreateAuthority(requestAuthorityInfo);
-                    }
-
-                    var requestAuthority = updateEnvironment ? 
-                        new AadAuthority(CreateAuthorityWithEnvironment(requestAuthorityInfo, account?.Environment).AuthorityInfo) :
-                        new AadAuthority(requestAuthorityInfo);
-                    if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant())
-                    {
-                        return requestAuthority;
-                    }
-
-                    return updateEnvironment ?
-                            CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
-                            CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
-
-                default:
-                    throw new MsalClientException(
-                        MsalError.InvalidAuthorityType,
-                        "Unsupported authority type");
-            }
-        }
-
-        private static void ValidateTypeMismatch(AuthorityInfo configAuthorityInfo, AuthorityInfo requestAuthorityInfo)
-        {
-            if (!configAuthorityInfo.IsDefaultAuthority &&
-                            requestAuthorityInfo != null &&
-                            configAuthorityInfo.AuthorityType != requestAuthorityInfo.AuthorityType)
-            {
-                throw new MsalClientException(
-                    MsalError.AuthorityTypeMismatch,
-                    MsalErrorMessage.AuthorityTypeMismatch(
-                        configAuthorityInfo.AuthorityType,
-                        requestAuthorityInfo.AuthorityType));
-            }
+            return await AuthorityInfo.AuthorityInfoHelper.CreateAuthorityForRequestAsync(requestContext, requestAuthorityInfo, account).ConfigureAwait(false);
         }
 
         public static Authority CreateAuthority(string authority, bool validateAuthority = false)
         {
-            return CreateAuthority(AuthorityInfo.FromAuthorityUri(authority, validateAuthority));
+            return AuthorityInfo.FromAuthorityUri(authority, validateAuthority).CreateAuthority();
         }
 
         public static Authority CreateAuthority(AuthorityInfo authorityInfo)
         {
-            switch (authorityInfo.AuthorityType)
-            {
-                case AuthorityType.Adfs:
-                    return new AdfsAuthority(authorityInfo);
-
-                case AuthorityType.B2C:
-                    return new B2CAuthority(authorityInfo);
-
-                case AuthorityType.Aad:
-                    return new AadAuthority(authorityInfo);
-
-                default:
-                    throw new MsalClientException(
-                        MsalError.InvalidAuthorityType,
-                        $"Unsupported authority type {authorityInfo.AuthorityType}");
-            }
+            return authorityInfo.CreateAuthority();
         }
 
         internal static Authority CreateAuthorityWithTenant(AuthorityInfo authorityInfo, string tenantId)
@@ -198,58 +108,6 @@ namespace Microsoft.Identity.Client.Instance
 
         internal abstract string GetDeviceCodeEndpoint();
         #endregion
-
-        private static async Task ValidateSameHostAsync(AuthorityInfo requestAuthorityInfo, RequestContext requestContext)
-        {
-            var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
-
-            if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && 
-                requestAuthorityInfo != null &&
-                !string.Equals(requestAuthorityInfo.Host, configAuthorityInfo.Host, StringComparison.OrdinalIgnoreCase))
-            {
-                if (requestAuthorityInfo.AuthorityType == AuthorityType.B2C)
-                {
-                    throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
-                }
-
-                // This check should be done when validating the request parameters, however we've allowed
-                // this configuration to run for a while, so this is the better place for it.
-                bool usesRegional = !string.IsNullOrEmpty(requestContext.ServiceBundle.Config.AzureRegion);
-                if (usesRegional)
-                {
-                    throw new MsalClientException(MsalError.RegionalAndAuthorityOverride, MsalErrorMessage.RegionalAndAuthorityOverride);
-                }
-
-                var authorityAliased = await IsAuthorityAliasedAsync(requestContext, requestAuthorityInfo).ConfigureAwait(false);
-                if (authorityAliased)
-                {
-                    return;
-                }
-
-                if (configAuthorityInfo.IsDefaultAuthority)
-                {
-                    throw new MsalClientException(
-                        MsalError.AuthorityHostMismatch,
-                        $"You did not define an authority at the application level, so it defaults to the https://login.microsoftonline.com/common. " +
-                        $"\n\rHowever, the request is for a different cloud {requestAuthorityInfo.Host}. This is not supported - the app and the request must target the same cloud. " +
-                        $"\n\r\n\r Add .WithAuthority(\"https://{requestAuthorityInfo.Host}/common\") in the app builder. " +
-                        $"\n\rSee https://aka.ms/msal-net-authority-override for details");
-                }
-
-                throw new MsalClientException(
-                    MsalError.AuthorityHostMismatch,
-                    $"\n\r The application is configured for cloud {configAuthorityInfo.Host} and the request for a different cloud - {requestAuthorityInfo.Host}. This is not supported - the app and the request must target the same cloud. " +
-                    $"\n\rSee https://aka.ms/msal-net-authority-override for details");
-            }
-        }
-
-        private static async Task<bool> IsAuthorityAliasedAsync(RequestContext requestContext, AuthorityInfo requestAuthorityInfo)
-        {
-            var instanceDiscoveryManager = requestContext.ServiceBundle.InstanceDiscoveryManager;
-            var result = await instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.Authority.AuthorityInfo, requestContext).ConfigureAwait(false);
-
-            return result.Aliases.Any(alias => alias.Equals(requestAuthorityInfo.Host));
-        }
 
         internal static string GetEnvironment(string authority)
         {

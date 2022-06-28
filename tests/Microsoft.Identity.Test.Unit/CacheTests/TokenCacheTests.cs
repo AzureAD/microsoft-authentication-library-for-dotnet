@@ -488,7 +488,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Arrange
                 ITokenCacheInternal appTokenCache = new TokenCache(harness.ServiceBundle, true);
                 ITokenCacheInternal userTokenCache = new TokenCache(harness.ServiceBundle, false);
-                var logger = Substitute.For<ICoreLogger>();
+                var logger = Substitute.For<ILoggerAdapter>();
 
                 // Act
                 var appAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(appTokenCache.Accessor, logger);
@@ -511,7 +511,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Arrange
                 ITokenCacheInternal appTokenCache = new TokenCache(harness.ServiceBundle, true);
                 ITokenCacheInternal userTokenCache = new TokenCache(harness.ServiceBundle, false);
-                var logger = Substitute.For<ICoreLogger>();
+                var logger = Substitute.For<ILoggerAdapter>();
 
                 var t1 = TokenCacheHelper.CreateAccessTokenItem(isExpired: true);
                 var t2 = TokenCacheHelper.CreateAccessTokenItem(isExpired: true);

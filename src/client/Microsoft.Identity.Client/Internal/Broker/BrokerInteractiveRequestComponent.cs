@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         private readonly string _optionalBrokerInstallUrl; // can be null
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
-        private readonly ICoreLogger _logger;
+        private readonly ILoggerAdapter _logger;
 
         public BrokerInteractiveRequestComponent(
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             {
                 if (string.IsNullOrEmpty(_optionalBrokerInstallUrl))
                 {
-                    _logger.Info("Broker is required but not installed. An app URI has not been provided. MSAL will fallback to use a browser.");
+                    _logger.Info("Broker is required but is not installed or not available on the current platform. An app URI has not been provided. MSAL will fallback to use a browser.");
                     return null;
                 }
 
@@ -77,14 +77,14 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
             if (msalTokenResponse.Error != null)
             {
-                _logger.Info(
+                _logger.Error(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
 
                 throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse,
                                                                      MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
             }
 
-            _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
+            _logger.Error(LogMessages.UnknownErrorReturnedInBrokerResponse);
             throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
 
         }

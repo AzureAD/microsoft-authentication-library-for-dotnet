@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     internal class AcquireTokenByIntegratedWindowsAuthParameters : AbstractAcquireTokenByUsernameParameters, IAcquireTokenParameters
     {
         /// <inheritdoc />
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters(ILoggerAdapter logger)
         {
         }
     }
