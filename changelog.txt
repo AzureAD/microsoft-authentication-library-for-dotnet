@@ -13,7 +13,7 @@
 
 
 ### Bug Fixes
-**Tenant profiles are not returned in GetAccounts** for broker tokens (3349)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3349].
+**Tenant profiles are not returned in `GetAccounts`** for broker tokens (3349)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3349].
 **Auth result from runtime broker** is not parsed correctly (3354)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3354].
 **DSTS - Fixed the endpoints**
 **Privacy and TOU links not visible** in embedded picker UI for smaller screen (3153)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3153]
