@@ -26,6 +26,13 @@ namespace Microsoft.Identity.Client.Utils
     [JsonSerializable(typeof(UserRealmDiscoveryResponse))]
     [JsonSerializable(typeof(DeviceCodeResponse))]
     [JsonSerializable(typeof(AdfsWebFingerResponse))]
+    [JsonSerializable(typeof(JsonWebToken.JWTHeaderWithCertificate))]
+    [JsonSerializable(typeof(JsonWebToken.JWTPayload))]
+    [JsonSerializable(typeof(DeviceAuthHeader))]
+    [JsonSerializable(typeof(DeviceAuthPayload))]
+#if ANDROID
+    [JsonSerializable(typeof(Microsoft.Identity.Client.Platforms.Android.Broker.BrokerRequest))]
+#endif
 #if iOS
     [JsonSerializable(typeof(Platforms.iOS.IntuneEnrollmentIdHelper.EnrollmentIDs))]
 #endif

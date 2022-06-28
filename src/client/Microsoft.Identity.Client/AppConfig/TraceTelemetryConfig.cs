@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
                 j[kvp.Key] = kvp.Value;
             }
 
-            string msg = JsonSerializer.Serialize(j);
+            string msg = j.ToJsonString();
 #if WINDOWS_APP || NETSTANDARD2_0
             Debug.WriteLine(msg);
 #else

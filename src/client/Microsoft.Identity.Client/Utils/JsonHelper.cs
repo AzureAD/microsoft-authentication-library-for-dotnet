@@ -29,7 +29,11 @@ namespace Microsoft.Identity.Client.Utils
 #endif
         internal static string SerializeToJson<T>(T toEncode)
         {
+#if NET461
             return JsonSerializer.Serialize(toEncode);
+#else
+            return JsonSerializer.Serialize(toEncode, typeof(T), MsalJsonSerializerContext.Custom);
+#endif
         }
 
         internal static T DeserializeFromJson<T>(string json)

@@ -180,8 +180,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 root[kvp.Key] = kvp.Value != null ? JsonNode.Parse(kvp.Value.ToJsonString()) : null;
             }
 
-            return JsonSerializer.Serialize(
-                root,
+            return root.ToJsonString(
                 new JsonSerializerOptions
                 {
                     DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never

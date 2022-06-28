@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Internal;
@@ -179,6 +180,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="json"></param>
         /// <returns></returns>
+#if NET5_0
+        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(MsalException))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(MsalClientException))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(MsalServiceException))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(MsalUiRequiredException))]
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2062",
+            Justification = "DynamicDependency declared.")]
+#endif
         public static MsalException FromJsonString(string json)
         {
             var jobj = JsonNode.Parse(json).AsObject();

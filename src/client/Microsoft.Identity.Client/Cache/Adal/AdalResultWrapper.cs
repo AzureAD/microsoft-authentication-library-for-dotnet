@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
@@ -44,8 +43,6 @@ namespace Microsoft.Identity.Client.Cache
         {
             return JsonHelper.SerializeToJson(this);
         }
-
-        internal Exception Exception { get; set; }
 
         public string UserAssertionHash { get; set; }
 

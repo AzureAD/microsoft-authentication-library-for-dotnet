@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.Internal
                             claims.Add(
                                     new Claim(
                                         jsonProperty.Name,
-                                        JsonSerializer.Serialize(jtoken),
+                                        jtoken.ToString(),
                                         GetClaimValueType(jtoken),
                                         issuer,
                                         issuer));
@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Client.Internal
                 if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
                 {
                     foreach (var item in jsonProperty.Value.EnumerateObject())
-                        claims.Add(new Claim(jsonProperty.Name, "{" + item.Name + ":" + JsonSerializer.Serialize(item.Value) + "}", GetClaimValueType(item.Value), issuer, issuer));
+                        claims.Add(new Claim(jsonProperty.Name, "{" + item.Name + ":" + item.Value.ToString() + "}", GetClaimValueType(item.Value), issuer, issuer));
 
                     continue;
                 }
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Client.Internal
                 if (jsonProperty.Value.ValueKind == JsonValueKind.String && jsonProperty.Value.TryGetDateTime(out DateTime dateTime))
                     claims.Add(new Claim(jsonProperty.Name, dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
                 else
-                    claims.Add(new Claim(jsonProperty.Name, JsonSerializer.Serialize(jsonProperty.Value), GetClaimValueType(jsonProperty.Value), issuer, issuer));
+                    claims.Add(new Claim(jsonProperty.Name, jsonProperty.Value.ToString(), GetClaimValueType(jsonProperty.Value), issuer, issuer));
             }
 
             return claims;
