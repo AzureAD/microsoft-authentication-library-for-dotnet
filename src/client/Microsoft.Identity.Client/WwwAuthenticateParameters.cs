@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 
@@ -51,6 +52,21 @@ namespace Microsoft.Identity.Client
         public string Error { get; set; }
 
         /// <summary>
+        /// True if bearer tokens are supported.
+        /// </summary>
+        public bool IsBearerSupported { get; set; }
+
+        /// <summary>
+        /// True if Pop tokens are supported.
+        /// </summary>
+        public bool IsPopSupported { get; set; }
+
+        /// <summary>
+        /// Server nonce used to creat signed Http requests for Proof-of-Possesion.
+        /// </summary>
+        public string ServerNonce { get; set; }
+
+        /// <summary>
         /// Return the <see cref="RawParameters"/> of key <paramref name="key"/>.
         /// </summary>
         /// <param name="key">Name of the raw parameter to retrieve.</param>
@@ -85,17 +101,38 @@ namespace Microsoft.Identity.Client
         /// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
         /// <param name="scheme">Authentication scheme. Default is "Bearer".</param>
         /// <returns>The parameters requested by the web API.</returns>
-        /// <remarks>Currently it only supports the Bearer scheme</remarks>
+        /// <remarks>This will also check for the Proof-of-Possesion scheme</remarks>
         public static WwwAuthenticateParameters CreateFromResponseHeaders(
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
         {
             if (httpResponseHeaders.WwwAuthenticate.Any())
             {
-                // TODO: add POP support
-                AuthenticationHeaderValue bearer = httpResponseHeaders.WwwAuthenticate.First(v => string.Equals(v.Scheme, scheme, StringComparison.OrdinalIgnoreCase));
-                string wwwAuthenticateValue = bearer.Parameter;
-                return CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
+                WwwAuthenticateParameters parameters;
+                if (!scheme.Equals(Constants.PoPAuthHeaderPrefix))
+                {
+                    AuthenticationHeaderValue bearer = httpResponseHeaders.WwwAuthenticate.First(v => string.Equals(v.Scheme, scheme, StringComparison.OrdinalIgnoreCase));
+                    string wwwAuthenticateValue = bearer.Parameter;
+                    parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
+
+                    if (scheme.Equals("Bearer"))
+                    {
+                        parameters.IsBearerSupported = true;
+                    }
+                }
+                else
+                {
+                    parameters = CreateWwwAuthenticateParameters(new Dictionary<string, string>());
+                }
+
+                var popHeader = httpResponseHeaders.WwwAuthenticate.Where(h => h.Scheme == Constants.PoPAuthHeaderPrefix).FirstOrDefault();
+                if (popHeader != null)
+                {
+                    parameters.ServerNonce = popHeader.Parameter;
+                    parameters.IsPopSupported = true;
+                }
+
+                return parameters;
             }
 
             return CreateWwwAuthenticateParameters(new Dictionary<string, string>());

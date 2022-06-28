@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,7 +55,7 @@ namespace NetCoreTestApp
             var ccaSettings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             s_clientIdForConfidentialApp = ccaSettings.ClientId;
             s_ccaAuthority = ccaSettings.Authority;
-            s_confidentialClientSecret = ccaSettings.GetSecret();
+            //s_confidentialClientSecret = ccaSettings.GetSecret();
 
             var pca = CreatePca();
             RunConsoleAppLogicAsync(pca).Wait();
@@ -125,6 +126,7 @@ namespace NetCoreTestApp
                         9. Rotate Tenant ID
                        10. Acquire Token Interactive with Chrome
                        11. AcquireTokenForClient with multiple threads
+                       12. Acquire Token for Downstream Api
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -274,6 +276,19 @@ namespace NetCoreTestApp
                                 thread.Join();
                             }
 
+                            break;
+
+                        case 12:
+                            PublicClientDownstreamApi restApi = new PublicClientDownstreamApi("graph", new DownstreamRestApiOptions()
+                            {
+                                ClientId = "123",
+                                Authority = "https://login.microsoft.com/common",
+                                Scopes = new[] { "User.Read" }
+                            });
+
+                            //string endpoint = "https://testingsts.azurewebsites.net/servernonce/authinfo";
+                            string endpoint = "https://graph.microsoft.com/beta/me";
+                            HttpResponseMessage result = await restApi.CallGetApiAsync(new Uri(endpoint)).ConfigureAwait(false);
                             break;
                         case 0:
                             return;

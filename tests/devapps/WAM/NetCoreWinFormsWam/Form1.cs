@@ -8,6 +8,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -383,6 +384,19 @@ namespace NetDesktopWinForms
                 await Task.Delay(500).ConfigureAwait(false);
             }
             result = await builder.ExecuteAsync().ConfigureAwait(false);
+
+
+            HttpClient client = new HttpClient();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://testingsts.azurewebsites.net/servernonce/validateshr");
+            var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("shr", result.AccessToken)
+            });
+
+            HttpResponseMessage response;
+
+            response = await client.PostAsync("https://testingsts.azurewebsites.net/servernonce/validateshr", content).ConfigureAwait(false);
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             return result;
         }
