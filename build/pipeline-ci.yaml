@@ -1,8 +1,8 @@
-# CI builds should be triggered on the master branch only
+# CI builds should be triggered on the main branch only
 trigger:
   branches:
     include:
-    - 'master'
+    - 'main'
 
 pr: none
 

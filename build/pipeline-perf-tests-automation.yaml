@@ -2,7 +2,7 @@
 trigger:
   branches:
     include:
-    - master
+    - main
   paths:
     include:
     - src/client/Microsoft.Identity.Client/*
