@@ -22,9 +22,6 @@ namespace MauiAppWithBroker.MSALClient
 
         internal IPublicClientApplication PCA { get; }
 
-        // This event coordinates between different callbacks
-        public static ManualResetEvent MAMRegsiteredEvent { get; } = new ManualResetEvent(false);
-
         /// <summary>
         /// The authority for the MSAL PublicClientApplication. Sign in will use this URL.
         /// </summary>
@@ -60,7 +57,6 @@ namespace MauiAppWithBroker.MSALClient
         {
             return await PCA.AcquireTokenInteractive(scopes)
                                     .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
-                                    .WithUseEmbeddedWebView(true)
                                     .ExecuteAsync()
                                     .ConfigureAwait(false);
         }

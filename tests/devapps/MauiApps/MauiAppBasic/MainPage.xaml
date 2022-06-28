@@ -28,6 +28,11 @@
                 FontSize="18"
                 HorizontalOptions="Center" />
 
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
+                <CheckBox x:Name="useEmbedded" VerticalOptions="Center"/>
+                <Label Text="Use Embedded" VerticalOptions="Center"/>
+            </StackLayout>
+
             <Button 
                 x:Name="SignInButton"
                 Text="Sign in"

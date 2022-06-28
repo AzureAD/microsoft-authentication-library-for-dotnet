@@ -46,11 +46,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 Service = "",
                 Account = TeamIdKey,
-#if MAUI
-                Accessible = SecAccessible.AfterFirstUnlock
-#else
-                Accessible = SecAccessible.Always                
-#endif
+                Accessible = SecAccessible.Always
             };
 
             SecRecord match = SecKeyChain.QueryAsRecord(queryRecord, out SecStatusCode resultCode);

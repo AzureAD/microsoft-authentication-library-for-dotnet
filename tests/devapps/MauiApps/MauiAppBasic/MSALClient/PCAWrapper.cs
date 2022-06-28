@@ -21,19 +21,15 @@ namespace MauiAppBasic.MSALClient
 
         internal IPublicClientApplication PCA { get; }
 
-        // This event coordinates between different callbacks
-        public static ManualResetEvent MAMRegsiteredEvent { get; } = new ManualResetEvent(false);
+        internal bool UseEmbedded { get; set; } = false;
 
         /// <summary>
         /// The authority for the MSAL PublicClientApplication. Sign in will use this URL.
         /// </summary>
         private const string _authority = "https://login.microsoftonline.com/common";
 
-        // ClientID of the application in (ms sample testing)
-        private const string ClientId = "bff27aee-5b7f-4588-821a-ed4ce373d8e2"; // TODO - Replace with your client Id. And also replace in the AndroidManifest.xml
-
-        //// TenantID of the organization (msidlab4.com)
-        //private const string TenantId = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca"; // TODO - Replace with your TenantID. And also replace in the AndroidManifest.xml
+        // ClientID of the application in (msidlab20.com)
+        internal const string ClientId = "15968a65-46b5-4cb2-886e-94e7589cc3b1"; // TODO - Replace with your client Id. And also replace in the AndroidManifest.xml
 
         public static string[] Scopes = { "User.Read" };
 
@@ -41,7 +37,6 @@ namespace MauiAppBasic.MSALClient
         private PCAWrapper()
         {
             // Create PCA once. Make sure that all the config parameters below are passed
-            // ClientCapabilities - must have ProtApp
             PCA = PublicClientApplicationBuilder
                                         .Create(ClientId)
                                         .WithRedirectUri(PlatformConfigImpl.Instance.RedirectUri)
@@ -56,9 +51,27 @@ namespace MauiAppBasic.MSALClient
         /// <returns></returns>
         internal async Task<AuthenticationResult> AcquireTokenInteractiveAsync(string[] scopes)
         {
+#if IOS
+            // embedded view is not supported on Android
+            if (UseEmbedded)
+            {
+
+                return await PCA.AcquireTokenInteractive(scopes)
+                                        .WithUseEmbeddedWebView(true)
+                                        .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
+                                        .ExecuteAsync()
+                                        .ConfigureAwait(false);
+            }
+#endif
+            // Hide the privacy prompt
+            SystemWebViewOptions systemWebViewOptions = new SystemWebViewOptions()
+            {
+                iOSHidePrivacyPrompt = true,
+            };
+
             return await PCA.AcquireTokenInteractive(scopes)
+                                    .WithSystemWebViewOptions(systemWebViewOptions)
                                     .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
-                                    .WithUseEmbeddedWebView(true)
                                     .ExecuteAsync()
                                     .ConfigureAwait(false);
         }

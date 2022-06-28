@@ -11,12 +11,6 @@ namespace MauiAppWithBroker
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate
     {
-        /*
-         let kClientID = "bff27aee-5b7f-4588-821a-ed4ce373d8e2"
-        let kRedirectUri = "msauth.com.companyname.mauiappwithbroker://auth"
-        let kAuthority = "https://login.microsoftonline.com/common"
-        let kGraphEndpoint = "https://graph.microsoft.com/"
-         */
         private const string iOSRedirectURI = "msauth.com.companyname.mauiappwithbroker://auth"; // TODO - Replace with your redirectURI
 
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
@@ -32,8 +26,7 @@ namespace MauiAppWithBroker
 
         public override bool OpenUrl(UIApplication application, NSUrl url, NSDictionary options)
         {
-            // TBD - change the hardcoded
-            if (AuthenticationContinuationHelper.IsBrokerResponse("com.microsoft.azureauthenticator"))
+            if (AuthenticationContinuationHelper.IsBrokerResponse(null))
             {
                 // Done on different thread to allow return in no time.
                 _ = Task.Factory.StartNew(() => AuthenticationContinuationHelper.SetBrokerContinuationEventArgs(url));

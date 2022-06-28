@@ -19,6 +19,7 @@ namespace MauiAppBasic
 
             try
             {
+                PCAWrapper.Instance.UseEmbedded = this.useEmbedded.IsChecked;
                 // attempt silent login.
                 // If this is very first time and the device is not enrolled, it will throw MsalUiRequiredException
                 // If the device is enrolled, this will succeed.
@@ -50,7 +51,10 @@ namespace MauiAppBasic
 
         private async void SignOutButton_Clicked(object sender, EventArgs e)
         {
-            await PCAWrapper.Instance.SignOut().ConfigureAwait(false);
+            _= await PCAWrapper.Instance.SignOut().ContinueWith(async (t) =>
+                     {
+                        await ShowMessage("Signed Out", "Sign out complete").ConfigureAwait(false);
+                     }).ConfigureAwait(false);
         }
     }
 }

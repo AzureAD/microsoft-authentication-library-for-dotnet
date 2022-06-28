@@ -39,6 +39,14 @@ namespace MauiAppWithBroker
             }
         }
 
+        private async void SignOutButton_Clicked(object sender, EventArgs e)
+        {
+            await PCAWrapper.Instance.SignOut().ContinueWith(async (t) =>
+            {
+                await ShowMessage("Signed Out", "Sign out complete").ConfigureAwait(false);
+            }).ConfigureAwait(false);
+        }
+
         // display the message
         private async Task ShowMessage(string title, string message)
         {

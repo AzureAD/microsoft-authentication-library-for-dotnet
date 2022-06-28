@@ -35,6 +35,12 @@
                 Clicked="OnSignInClicked"
                 HorizontalOptions="Center" />
 
+            <Button
+                x:Name="SignOutButton"
+                Text="Sign Out"
+                HorizontalOptions="Center"
+                Clicked="SignOutButton_Clicked"/>
+
         </VerticalStackLayout>
     </ScrollView>
  

@@ -10,7 +10,7 @@ namespace MauiAppBasic
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate
     {
-        private const string iOSRedirectURI = "msauth.com.companyname.mauiappwithbroker://auth"; // TODO - Replace with your redirectURI
+        private const string iOSRedirectURI = "msauth.com.companyname.mauiappbasic://auth"; // TODO - Replace with your redirectURI
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 
         public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
