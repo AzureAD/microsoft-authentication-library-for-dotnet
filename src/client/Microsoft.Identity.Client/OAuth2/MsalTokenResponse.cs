@@ -108,7 +108,11 @@ namespace Microsoft.Identity.Client.OAuth2
                 if (metadataOriginal != null)
                 {
                     string brokerMetadataJson = Uri.UnescapeDataString(metadataOriginal);
-                    metadataDictionary = JsonSerializer.Deserialize<Dictionary<string, string>>(brokerMetadataJson);
+                    metadataDictionary = new Dictionary<string, string>();
+                    foreach (var item in JsonDocument.Parse(brokerMetadataJson).RootElement.EnumerateObject())
+                    {
+                        metadataDictionary.Add(item.Name, item.Value.GetString());
+                    }
                 }
 
                 string homeAcctId = null;

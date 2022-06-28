@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -161,6 +162,7 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// For more details see https://aka.ms/msal-net-claim-challenge
         /// </summary>
+        [JsonInclude]
         public string Claims { get; internal set; }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 

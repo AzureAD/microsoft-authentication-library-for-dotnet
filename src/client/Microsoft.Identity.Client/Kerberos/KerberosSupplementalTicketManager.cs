@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Kerberos
             // Kerberos Ticket claim found.
             // Parse the json and construct the KerberosSupplementalTicket object.
             string kerberosAsRep = claimValue.GetValue<string>();
-            return (KerberosSupplementalTicket)JsonSerializer.Deserialize(kerberosAsRep, typeof(KerberosSupplementalTicket));
+            return JsonHelper.DeserializeFromJson<KerberosSupplementalTicket>(kerberosAsRep);
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.Core;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 #if iOS
+using Microsoft.Identity.Client.Utils;
 using Foundation;
 #endif
 
@@ -24,7 +25,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 try
                 {
-                    var enrollmentIDs = JsonSerializer.Deserialize<EnrollmentIDs>(keychainData);
+                    var enrollmentIDs = JsonHelper.DeserializeFromJson<EnrollmentIDs>(keychainData);
 
                     if ((enrollmentIDs?.EnrollmentIds?.Count ?? 0) > 0)
                     {

@@ -5,12 +5,16 @@ using System.IO;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using System.Text.Json;
+#if NET461
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+#endif
 
 namespace Microsoft.Identity.Client.Utils
 {
     internal static class JsonHelper
     {
+#if NET461
         internal static JsonSerializerOptions s_jsonSerializerOptions;
             
         static JsonHelper()
@@ -22,7 +26,7 @@ namespace Microsoft.Identity.Client.Utils
             };
             s_jsonSerializerOptions.Converters.Add(new JsonStringConverter());
         }
-
+#endif
         internal static string SerializeToJson<T>(T toEncode)
         {
             return JsonSerializer.Serialize(toEncode);
@@ -35,7 +39,11 @@ namespace Microsoft.Identity.Client.Utils
                 return default;
             }
 
+#if NET461
             return JsonSerializer.Deserialize<T>(json, s_jsonSerializerOptions);
+#else
+            return (T)JsonSerializer.Deserialize(json, typeof(T), MsalJsonSerializerContext.Custom);
+#endif
         }
 
         internal static T TryToDeserializeFromJson<T>(string json, RequestContext requestContext = null)
@@ -66,7 +74,11 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             using (var stream = new MemoryStream(jsonByteArray))
-                return (T)JsonSerializer.Deserialize(stream, typeof(T), s_jsonSerializerOptions);
+#if NET461
+                return JsonSerializer.Deserialize<T>(stream, s_jsonSerializerOptions);
+#else
+                return (T)JsonSerializer.Deserialize(stream, typeof(T), MsalJsonSerializerContext.Custom);
+#endif
         }
     }
 }
