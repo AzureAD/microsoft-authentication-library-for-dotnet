@@ -6,13 +6,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
@@ -68,46 +67,47 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                 return msalAccessTokenCacheItem.Secret;
             }
 
-            JObject header = new JObject
+            JsonObject header = new JsonObject
             {
                 { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, _popCryptoProvider.CryptographicAlgorithm },
                 { JsonWebTokenConstants.ReservedHeaderParameters.KeyId, KeyId },
                 { JsonWebTokenConstants.ReservedHeaderParameters.Type, Constants.PoPTokenType}
             };
 
-            JObject body = CreateBody(msalAccessTokenCacheItem);
+            JsonObject body = CreateBody(msalAccessTokenCacheItem);
 
-            string popToken = CreateJWS(body.ToString(Formatting.None), header.ToString(Formatting.None));
+            string popToken = CreateJWS(body.ToJsonString(), header.ToJsonString());
             return popToken;
         }
 
-        private JObject CreateBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        private JsonObject CreateBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            JToken publicKeyJWK = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
-            List<JProperty> properties = new List<JProperty>(8);
-            
+            var publicKeyJWK = JsonNode.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
+            var payload = new JsonObject();
+
             // Mandatory parameters
-            properties.Add(new JProperty(PoPClaimTypes.Cnf, new JObject(new JProperty(PoPClaimTypes.JWK, publicKeyJWK))));
-            properties.Add(new JProperty(PoPClaimTypes.Ts, DateTimeHelpers.CurrDateTimeInUnixTimestamp()));
-            properties.Add(new JProperty(PoPClaimTypes.At, msalAccessTokenCacheItem.Secret));
-            properties.Add(new JProperty(PoPClaimTypes.Nonce, _popAuthenticationConfiguration.Nonce ?? CreateSimpleNonce()));
+            payload[PoPClaimTypes.Cnf] = new JsonObject
+            {
+                [PoPClaimTypes.JWK] = publicKeyJWK
+            };
+            payload[PoPClaimTypes.Ts] = DateTimeHelpers.CurrDateTimeInUnixTimestamp();
+            payload[PoPClaimTypes.At] = msalAccessTokenCacheItem.Secret;
+            payload[PoPClaimTypes.Nonce] = _popAuthenticationConfiguration.Nonce ?? CreateSimpleNonce();
 
             if (_popAuthenticationConfiguration.HttpMethod != null)
             {
-                properties.Add(new JProperty(PoPClaimTypes.HttpMethod, _popAuthenticationConfiguration.HttpMethod?.ToString()));
+                payload[PoPClaimTypes.HttpMethod] = _popAuthenticationConfiguration.HttpMethod?.ToString();
             }
 
             if (!string.IsNullOrEmpty(_popAuthenticationConfiguration.HttpHost))
             {
-                properties.Add(new JProperty(PoPClaimTypes.Host, _popAuthenticationConfiguration.HttpHost));
+                payload[PoPClaimTypes.Host] = _popAuthenticationConfiguration.HttpHost;
             }
 
             if (!string.IsNullOrEmpty(_popAuthenticationConfiguration.HttpPath))
             {
-                properties.Add(new JProperty(PoPClaimTypes.Path, _popAuthenticationConfiguration.HttpPath));
+                payload[PoPClaimTypes.Path] = _popAuthenticationConfiguration.HttpPath;
             }
-
-            var payload = new JObject(properties);
 
             return payload;
         }

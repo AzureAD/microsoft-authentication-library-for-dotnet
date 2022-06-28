@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -50,10 +50,10 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            return FromJObject(JObject.Parse(json));
+            return FromJObject(JsonNode.Parse(json).AsObject());
         }
 
-        internal static MsalAppMetadataCacheItem FromJObject(JObject j)
+        internal static MsalAppMetadataCacheItem FromJObject(JsonObject j)
         {
             string clientId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientId);
             string environment = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 .ToString();
         }
 
-        internal override JObject ToJObject()
+        internal override JsonObject ToJObject()
         {
             var json = base.ToJObject();
 

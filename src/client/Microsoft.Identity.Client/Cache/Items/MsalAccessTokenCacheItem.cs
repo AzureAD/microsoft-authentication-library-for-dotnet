@@ -4,11 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -155,10 +155,10 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            return FromJObject(JObject.Parse(json));
+            return FromJObject(JsonNode.Parse(json).AsObject());
         }
 
-        internal static MsalAccessTokenCacheItem FromJObject(JObject j)
+        internal static MsalAccessTokenCacheItem FromJObject(JsonObject j)
         {
             long cachedAtUnixTimestamp = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.CachedAt);
             long expiresOnUnixTimestamp = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.ExpiresOn);
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             return item;
         }
 
-        internal override JObject ToJObject()
+        internal override JsonObject ToJObject()
         {
             var json = base.ToJObject();
 

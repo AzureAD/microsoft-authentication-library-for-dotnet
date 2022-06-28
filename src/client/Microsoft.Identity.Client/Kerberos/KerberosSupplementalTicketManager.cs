@@ -6,14 +6,14 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
 
 using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Client.Kerberos
 {
@@ -57,17 +57,18 @@ namespace Microsoft.Identity.Client.Kerberos
             }
 
             // parse the JSON data and find the included Kerberos Ticket claim.
-            JObject payloadJson = JObject.Parse(payload);
-            JToken claimValue;
-            if (!payloadJson.TryGetValue(KerberosClaimType, out claimValue))
+            var payloadJson = JsonNode.Parse(payload).AsObject();
+            
+            JsonNode claimValue;
+            if (!payloadJson.TryGetPropertyValue(KerberosClaimType, out claimValue))
             {
                 return null;
             }
 
             // Kerberos Ticket claim found.
             // Parse the json and construct the KerberosSupplementalTicket object.
-            string kerberosAsRep = claimValue.Value<string>();
-            return (KerberosSupplementalTicket)JsonConvert.DeserializeObject(kerberosAsRep, typeof(KerberosSupplementalTicket));
+            string kerberosAsRep = claimValue.GetValue<string>();
+            return (KerberosSupplementalTicket)JsonSerializer.Deserialize(kerberosAsRep, typeof(KerberosSupplementalTicket));
         }
 
         /// <summary>
@@ -197,11 +198,11 @@ namespace Microsoft.Identity.Client.Kerberos
             }
             else
             {
-                JObject existingClaims = JObject.Parse(requestParams.ClaimsAndClientCapabilities);
-                JObject mergedClaims
+                var existingClaims = JsonNode.Parse(requestParams.ClaimsAndClientCapabilities).AsObject();
+                JsonObject mergedClaims
                     = ClaimsHelper.MergeClaimsIntoCapabilityJson(kerberosClaim, existingClaims);
 
-                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, mergedClaims.ToString(Formatting.None));
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, mergedClaims.ToJsonString());
             }
         }
 

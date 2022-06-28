@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string Environment { get; set; }
         internal string RawClientInfo { get; set; }
 
-        internal override void PopulateFieldsFromJObject(JObject j)
+        internal override void PopulateFieldsFromJObject(JsonObject j)
         {
             HomeAccountId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.HomeAccountId);
             Environment = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             base.PopulateFieldsFromJObject(j);
         }
 
-        internal override JObject ToJObject()
+        internal override JsonObject ToJObject()
         {
             var json = base.ToJObject();
             SetItemIfValueNotNull(json, StorageJsonKeys.HomeAccountId, HomeAccountId);

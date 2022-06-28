@@ -5,10 +5,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
@@ -40,12 +40,12 @@ namespace Microsoft.Identity.Test.Unit
         {
             if (updateATExpiry)
             {
-                var cacheJson = JObject.Parse(content);
+                var cacheJson = JsonNode.Parse(content).AsObject();
 
-                JEnumerable<JToken> tokens = cacheJson["AccessToken"].Children();
-                foreach (JToken token in tokens)
+                var tokens = cacheJson["AccessToken"].AsObject().AsEnumerable();
+                foreach (var token in tokens)
                 {
-                    var obj = token.Children().Single() as JObject;
+                    var obj = token.Value.AsObject();
 
                     obj["expires_on"] = DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
                     obj["extended_expires_on"] = DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));

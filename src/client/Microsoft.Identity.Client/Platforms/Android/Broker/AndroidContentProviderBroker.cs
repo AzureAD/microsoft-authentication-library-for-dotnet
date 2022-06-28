@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
@@ -17,7 +18,6 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using AndroidNative = Android;
 using AndroidUri = Android.Net.Uri;
 
@@ -73,11 +73,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 return negotiatedBrokerProtocalKey;
             }
 
-            dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
+            var errorResult = JsonNode.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
             string errorCode = null;
             string errorDescription = null;
 
-            if (!string.IsNullOrEmpty(errorResult))
+            if (!string.IsNullOrEmpty(errorResult.ToJsonString()))
             {
                 errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
                 string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();

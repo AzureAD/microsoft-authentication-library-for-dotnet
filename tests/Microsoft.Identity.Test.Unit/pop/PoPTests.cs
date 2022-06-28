@@ -14,7 +14,6 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -26,6 +25,7 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Test.Unit.Pop
 {
@@ -521,11 +521,14 @@ namespace Microsoft.Identity.Test.Unit.Pop
             CoreAssert.IsWithinRange(DateTimeOffset.UtcNow, DateTimeHelpers.UnixTimestampToDateTime(ts), TimeSpan.FromSeconds(5));
 
             string jwkClaim = claims.FindAll("cnf").Single().Value;
-            JToken publicKey = JToken.Parse(popCryptoProvider.CannonicalPublicKeyJwk);
-            JObject jwkInConfig = new JObject(new JProperty(PoPClaimTypes.JWK, publicKey));
-            var jwkInToken = JObject.Parse(jwkClaim);
+            var publicKey = JsonNode.Parse(popCryptoProvider.CannonicalPublicKeyJwk).AsObject();
+            JsonObject jwkInConfig = new JsonObject
+            {
+                [PoPClaimTypes.JWK] = publicKey
+            };
+            var jwkInToken = JsonNode.Parse(jwkClaim).AsObject();
 
-            Assert.IsTrue(JObject.DeepEquals(jwkInConfig, jwkInToken));
+            Assert.IsTrue(JsonTestUtils.DeepEquals(jwkInConfig, jwkInToken));
         }
     }
 }

@@ -2,15 +2,15 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client
 {
     public sealed partial class TokenCache : ITokenCacheInternal
     {
         // Unknown token cache data support for forwards compatibility.
-        private IDictionary<string, JToken> _unknownNodes;
+        private IDictionary<string, JsonNode> _unknownNodes;
 
         byte[] ITokenCacheSerializer.SerializeAdalV3()
         {

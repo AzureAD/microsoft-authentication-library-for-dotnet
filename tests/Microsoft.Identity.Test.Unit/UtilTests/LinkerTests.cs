@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Json;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -17,8 +16,10 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
     public class LinkerTests
     {
         [TestMethod]
+        [Ignore("No longer needed since we are using source generators, which guarantees references.")]
         public void JsonObjectsArePreserved()
         {
+            /*
             const string Message = "Please add a [Preserve(AllMembers=true)] attribute to each serializable object to avoid the Xamarin Linker removing this type. Type missing this: ";
             var serializableTypes = typeof(PublicClientApplication).Assembly.GetTypes()
                 .Where(
@@ -30,6 +31,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
                 Assert.IsNotNull(preserveAttribute, Message + serializableType);
                 Assert.IsTrue(preserveAttribute.AllMembers, Message + serializableType);
             }
+            */
         }
     }
 }

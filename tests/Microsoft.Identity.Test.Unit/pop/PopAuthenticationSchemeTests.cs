@@ -5,6 +5,7 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -13,7 +14,6 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -96,10 +96,10 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 string nonce = AssertSimpleClaim(decodedPopToken, "nonce");
                 Assert.IsFalse(string.IsNullOrEmpty(nonce));
                 string jwk = AssertSimpleClaim(decodedPopToken, "cnf");
-                var jwkFromPopAssertion = JToken.Parse(jwk);
+                var jwkFromPopAssertion = JsonNode.Parse(jwk).AsObject();
 
-                var initialJwk = JToken.Parse(JWK);
-                Assert.IsTrue(jwkFromPopAssertion["jwk"].DeepEquals(initialJwk));
+                var initialJwk = JsonNode.Parse(JWK).AsObject();
+                Assert.IsTrue(JsonTestUtils.DeepEquals(jwkFromPopAssertion["jwk"], initialJwk));
             }
         }
 
@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             var jsonToken = handler.ReadJwtToken(popToken);
 
             var jwtDecoded = Base64UrlHelpers.Decode(jsonToken.EncodedPayload);
-            var jObj = JObject.Parse(jsonToken.Payload.First().Value.ToString());
+            var jObj = JsonNode.Parse(jsonToken.Payload.First().Value.ToString()).AsObject();
             return jObj["jwk"]["n"].ToString();
         }
 

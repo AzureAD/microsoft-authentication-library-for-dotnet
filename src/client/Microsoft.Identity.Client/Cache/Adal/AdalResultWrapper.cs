@@ -3,24 +3,19 @@
 
 using System;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class AdalResultWrapper
     {
-        [JsonProperty]
         public AdalResult Result { get; set; }
 
-        [JsonProperty]
         public string RawClientInfo { get; set; }
 
         /// <summary>
         /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh Token.
         /// </summary>
-        [JsonProperty]
         public string RefreshToken { get; set; }
 
         /// <summary>
@@ -30,7 +25,6 @@ namespace Microsoft.Identity.Client.Cache
 
         // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
         // to get it from the STS response.
-        [JsonProperty]
         internal string ResourceInResponse { get; set; }
 
         /// <summary>
@@ -53,7 +47,6 @@ namespace Microsoft.Identity.Client.Cache
 
         internal Exception Exception { get; set; }
 
-        [JsonProperty]
         public string UserAssertionHash { get; set; }
 
         internal AdalResultWrapper Clone()

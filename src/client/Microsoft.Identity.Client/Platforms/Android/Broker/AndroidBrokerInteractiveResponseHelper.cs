@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
@@ -12,7 +13,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     case (int)BrokerResponseCode.BrowserCodeError:
                         unreliableLogger?.Info("[Android broker] Response received - error. ");
 
-                        dynamic errorResult = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                        var errorResult = JsonNode.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
 
                         string error;
                         string errorDescription;
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         {
                             Error = error,
                             ErrorDescription = errorDescription,
-                            SubError = errorResult[BrokerResponseConst.BrokerSubError],
+                            SubError = errorResult[BrokerResponseConst.BrokerSubError].GetValue<string>(),
                             HttpResponse = httpResponse,
                             CorrelationId = InteractiveRequestCorrelationId,
                             TenantId = errorResult[BrokerResponseConst.TenantId]?.ToString(),

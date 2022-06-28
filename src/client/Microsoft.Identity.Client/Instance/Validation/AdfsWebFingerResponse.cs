@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Instance.Validation
 {
@@ -15,25 +15,23 @@ namespace Microsoft.Identity.Client.Instance.Validation
         public const string Href = "href";
     }
 
-    [JsonObject(Title = AdfsWebFingerResponseClaim.Links)]
     [Preserve(AllMembers = true)]
     internal class LinksList
     {
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Rel)]
+        [JsonPropertyName(AdfsWebFingerResponseClaim.Rel)]
         public string Rel { get; set; }
 
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Href)]
+        [JsonPropertyName(AdfsWebFingerResponseClaim.Href)]
         public string Href { get; set; }
     }
 
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class AdfsWebFingerResponse : OAuth2ResponseBase
     {
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Subject)]
+        [JsonPropertyName(AdfsWebFingerResponseClaim.Subject)]
         public string Subject { get; set; }
 
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Links)]
+        [JsonPropertyName(AdfsWebFingerResponseClaim.Links)]
         public List<LinksList> Links { get; set; }
     }
 }

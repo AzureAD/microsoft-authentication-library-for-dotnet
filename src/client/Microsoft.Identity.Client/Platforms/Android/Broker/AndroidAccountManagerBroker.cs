@@ -12,7 +12,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
@@ -24,6 +23,7 @@ using Java.Util.Concurrent;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -346,11 +346,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             return;
                         }
 
-                        dynamic errorResult = JObject.Parse(helloRequestResult.GetString(BrokerConstants.BrokerResultV2));
+                        var errorResult = JsonNode.Parse(helloRequestResult.GetString(BrokerConstants.BrokerResultV2));
                         string errorCode = null;
                         string errorDescription = null;
 
-                        if (!string.IsNullOrEmpty(errorResult))
+                        if (!string.IsNullOrEmpty(errorResult.ToJsonString()))
                         {
                             errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
                             string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();

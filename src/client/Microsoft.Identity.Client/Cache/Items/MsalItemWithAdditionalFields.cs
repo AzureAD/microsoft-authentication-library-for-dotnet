@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Json.Linq;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -14,35 +14,35 @@ namespace Microsoft.Identity.Client.Cache.Items
         ///Important: order matters.  This MUST be the last one called since it will extract the
         /// remaining fields out.
         /// </remarks>
-        internal virtual void PopulateFieldsFromJObject(JObject j)
+        internal virtual void PopulateFieldsFromJObject(JsonObject j)
         {
             AdditionalFieldsJson = j.ToString();
         }
 
         
-        internal virtual JObject ToJObject()
+        internal virtual JsonObject ToJObject()
         {
-            var json = string.IsNullOrWhiteSpace(AdditionalFieldsJson) ? new JObject() : JObject.Parse(AdditionalFieldsJson);
+            var json = string.IsNullOrWhiteSpace(AdditionalFieldsJson) ? new JsonObject() : JsonNode.Parse(AdditionalFieldsJson).AsObject();
 
             return json;
         }
 
-        internal void SetItemIfValueNotNull(JObject json, string key, JToken value)
+        internal void SetItemIfValueNotNull(JsonObject json, string key, JsonNode value)
         {
             SetValueIfFilterMatches(json, key, value, strVal => !string.IsNullOrEmpty(strVal));
         }
 
-        internal void SetItemIfValueNotNullOrDefault(JObject json, string key, JToken value, string defaultValue)
+        internal void SetItemIfValueNotNullOrDefault(JsonObject json, string key, JsonNode value, string defaultValue)
         {
             SetValueIfFilterMatches(json, key, value, strVal => !string.IsNullOrEmpty(strVal) &&
                         !strVal.Equals(defaultValue, StringComparison.OrdinalIgnoreCase));
         }
 
-        private static void SetValueIfFilterMatches(JObject json, string key, JToken value, Func<string, bool> filter)
+        private static void SetValueIfFilterMatches(JsonObject json, string key, JsonNode value, Func<string, bool> filter)
         {
             bool shouldSetValue = true;
 
-            object asObj = value.ToObject<object>();
+            var asObj = value as JsonValue;
 
             if (asObj == null)
             {
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
             else
             {
-                string asString = asObj as string;
+                string asString = asObj.GetValue<string>();
                 if (asString != null)
                 {
                     shouldSetValue = filter(asString);

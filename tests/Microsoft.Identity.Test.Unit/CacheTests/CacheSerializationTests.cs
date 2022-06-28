@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -15,7 +17,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -38,6 +39,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             StorageJsonKeys.ClientId ,
             StorageJsonKeys.Environment,
             StorageJsonKeys.FamilyId
+        };
+        
+        private static readonly JsonDocumentOptions _documentOptions = new JsonDocumentOptions
+        {
+            AllowTrailingCommas = true
         };
 
         private MsalAccessTokenCacheItem CreateAccessTokenItem(
@@ -526,10 +532,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await (tokenCache as ITokenCacheInternal).OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
-            var finalJson = JObject.Parse(Encoding.UTF8.GetString(cache));
+            var finalJson = JsonNode.Parse(Encoding.UTF8.GetString(cache), documentOptions: _documentOptions).AsObject();
             
-            var originalJson = JObject.Parse(jsonContent);
-            Assert.IsTrue(JToken.DeepEquals(originalJson, finalJson));
+            var originalJson = JsonNode.Parse(jsonContent, documentOptions: _documentOptions).AsObject();
+            Assert.IsTrue(JsonTestUtils.DeepEquals(originalJson, finalJson));
         }
 
         [TestMethod]
@@ -543,7 +549,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize(null);
             string actualJson = new UTF8Encoding().GetString(bytes);
 
-            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson), JObject.Parse(expectedJson)));
+            Assert.IsTrue(JsonTestUtils.DeepEquals(JsonNode.Parse(actualJson, documentOptions: _documentOptions).AsObject(), JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
 
             var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null);
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
@@ -554,7 +560,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // serialize again to detect errors that come from deserialization
             byte[] bytes2 = s2.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
-            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
+            Assert.IsTrue(JsonTestUtils.DeepEquals(JsonNode.Parse(actualJson2, documentOptions: _documentOptions).AsObject(), JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
         }
 
         [TestMethod]
@@ -606,7 +612,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // serialize again to detect errors that come from deserialization
             byte[] bytes2 = s1.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
-            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
+            
+            Assert.IsTrue(JsonTestUtils.DeepEquals(JsonNode.Parse(actualJson2, documentOptions: _documentOptions).AsObject(), JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
         }
 
         [TestMethod]
@@ -726,12 +733,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(expected.GetAllAccounts().Count(), actual.GetAllAccounts().Count());
         }
 
-        private void AssertContainsKey(JObject j, string key)
+        private void AssertContainsKey(JsonObject j, string key)
         {
             Assert.IsTrue(j.ContainsKey(key), $"JObject should contain key: {key}");
         }
 
-        private void AssertContainsKeys(JObject j, IEnumerable<string> keys)
+        private void AssertContainsKeys(JsonObject j, IEnumerable<string> keys)
         {
             if (keys != null)
             {
@@ -753,7 +760,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             fields.AddRange(new List<string> { "client_id", "secret", "credential_type" });
         }
 
-        private void AssertAccessTokenHasJObjectFields(JObject j, IEnumerable<string> additionalKeys = null)
+        private void AssertAccessTokenHasJObjectFields(JsonObject j, IEnumerable<string> additionalKeys = null)
         {
             var keys = new List<string>
             {
@@ -771,7 +778,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertContainsKeys(j, additionalKeys);
         }
 
-        private void AssertRefreshTokenHasJObjectFields(JObject j, IEnumerable<string> additionalKeys = null)
+        private void AssertRefreshTokenHasJObjectFields(JsonObject j, IEnumerable<string> additionalKeys = null)
         {
             var keys = new List<string>
             {
@@ -783,7 +790,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertContainsKeys(j, additionalKeys);
         }
 
-        private void AssertIdTokenHasJObjectFields(JObject j, IEnumerable<string> additionalKeys = null)
+        private void AssertIdTokenHasJObjectFields(JsonObject j, IEnumerable<string> additionalKeys = null)
         {
             var keys = new List<string>
             {
@@ -796,7 +803,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertContainsKeys(j, additionalKeys);
         }
 
-        private void AssertAccountHasJObjectFields(JObject j, IEnumerable<string> additionalKeys = null)
+        private void AssertAccountHasJObjectFields(JsonObject j, IEnumerable<string> additionalKeys = null)
         {
             var keys = new List<string>
             {

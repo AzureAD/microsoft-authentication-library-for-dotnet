@@ -2,33 +2,32 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.Identity.Client.WsTrust
 {
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal sealed class UserRealmDiscoveryResponse
     {
-        [JsonProperty(PropertyName = "ver")]
+        [JsonPropertyName("ver")]
         public string Version { get; set; }
 
-        [JsonProperty(PropertyName = "account_type")]
+        [JsonPropertyName("account_type")]
         public string AccountType { get; set; }
 
-        [JsonProperty(PropertyName = "federation_protocol")]
+        [JsonPropertyName("federation_protocol")]
         public string FederationProtocol { get; set; }
 
-        [JsonProperty(PropertyName = "federation_metadata_url")]
+        [JsonPropertyName("federation_metadata_url")]
         public string FederationMetadataUrl { get; set; }
 
-        [JsonProperty(PropertyName = "federation_active_auth_url")]
+        [JsonPropertyName("federation_active_auth_url")]
         public string FederationActiveAuthUrl { get; set; }
 
-        [JsonProperty(PropertyName = "cloud_audience_urn")]
+        [JsonPropertyName("cloud_audience_urn")]
         public string CloudAudienceUrn { get; set; }
 
-        [JsonProperty(PropertyName = "domain_name")]
+        [JsonPropertyName("domain_name")]
         public string DomainName { get; set; }
 
         public bool IsFederated => string.Equals(AccountType, "federated", StringComparison.OrdinalIgnoreCase);

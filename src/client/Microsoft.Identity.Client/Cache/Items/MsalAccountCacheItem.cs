@@ -4,11 +4,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -138,10 +137,10 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            return FromJObject(JObject.Parse(json));
+            return FromJObject(JsonNode.Parse(json).AsObject());
         }
 
-        internal static MsalAccountCacheItem FromJObject(JObject j)
+        internal static MsalAccountCacheItem FromJObject(JsonObject j)
         {
             var item = new MsalAccountCacheItem
             {
@@ -160,7 +159,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             return item;
         }
 
-        internal override JObject ToJObject()
+        internal override JsonObject ToJObject()
         {
             var json = base.ToJObject();
 
@@ -173,7 +172,14 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
             if (WamAccountIds != null && WamAccountIds.Any())
             {
-                json[StorageJsonKeys.WamAccountIds] = JObject.FromObject(WamAccountIds);                
+                var obj = new JsonObject();
+
+                foreach (KeyValuePair<string, string> accId in WamAccountIds)
+                {
+                    obj[accId.Key] = accId.Value;
+                }
+
+                json[StorageJsonKeys.WamAccountIds] = obj;
             }
 
             return json;

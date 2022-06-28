@@ -4,11 +4,11 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Integration.Win8
                  new[] { "user.read" },
                  labResponse.User.Upn,
                  new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
-             .WithClaims(JObject.Parse(_claims).ToString())
+             .WithClaims(JsonNode.Parse(_claims).ToJsonString())
              .ExecuteAsync(CancellationToken.None).Result;
 
             //Assert

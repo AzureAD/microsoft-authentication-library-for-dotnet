@@ -4,7 +4,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 #if iOS
 using Foundation;
 #endif
@@ -23,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 try
                 {
-                    var enrollmentIDs = JsonConvert.DeserializeObject<EnrollmentIDs>(keychainData);
+                    var enrollmentIDs = JsonSerializer.Deserialize<EnrollmentIDs>(keychainData);
 
                     if ((enrollmentIDs?.EnrollmentIds?.Count ?? 0) > 0)
                     {
@@ -71,23 +72,23 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             internal class EnrollmentIdProps
             {
-                [JsonProperty(PropertyName = HomeAccountIdKey)]
+                [JsonPropertyName(HomeAccountIdKey)]
                 public string HomeAccountId { get; set; }
 
-                [JsonProperty(PropertyName = TidsKey)]
+                [JsonPropertyName(TidsKey)]
                 public string Tid { get; set; }
 
-                [JsonProperty(PropertyName = UserIdKey)]
+                [JsonPropertyName(UserIdKey)]
                 public string UserId { get; set; }
 
-                [JsonProperty(PropertyName = OidKey)]
+                [JsonPropertyName(OidKey)]
                 public string Oid { get; set; }
 
-                [JsonProperty(PropertyName = EnrollmentIdKey)]
+                [JsonPropertyName(EnrollmentIdKey)]
                 public string EnrollmentId { get; set; }
             }
 
-            [JsonProperty(PropertyName = EnrollmentIdsKey)]
+            [JsonPropertyName(EnrollmentIdsKey)]
             public List<EnrollmentIdProps> EnrollmentIds { get; set; }
         }
     }

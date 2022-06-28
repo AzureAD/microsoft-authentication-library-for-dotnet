@@ -6,13 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Core;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
 using System.Diagnostics.Tracing;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -41,49 +42,48 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string LocalAccountId = "local_account_id";
     }
 
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase
     {
         private const string iOSBrokerErrorMetadata = "error_metadata";
         private const string iOSBrokerHomeAccountId = "home_account_id";
-        [JsonProperty(PropertyName = TokenResponseClaim.TokenType)]
+        [JsonPropertyName(TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.AccessToken)]
+        [JsonPropertyName(TokenResponseClaim.AccessToken)]
         public string AccessToken { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.RefreshToken)]
+        [JsonPropertyName(TokenResponseClaim.RefreshToken)]
         public string RefreshToken { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.Scope)]
+        [JsonPropertyName(TokenResponseClaim.Scope)]
         public string Scope { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.ClientInfo)]
+        [JsonPropertyName(TokenResponseClaim.ClientInfo)]
         public string ClientInfo { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.IdToken)]
+        [JsonPropertyName(TokenResponseClaim.IdToken)]
         public string IdToken { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.ExpiresIn)]
+        [JsonPropertyName(TokenResponseClaim.ExpiresIn)]
         public long ExpiresIn { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.ExtendedExpiresIn)]
+        [JsonPropertyName(TokenResponseClaim.ExtendedExpiresIn)]
         public long ExtendedExpiresIn { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.RefreshIn)]
+        [JsonPropertyName(TokenResponseClaim.RefreshIn)]
         public long? RefreshIn { get; set; }
 
         /// <summary>
         /// Optional field, FOCI support.
         /// </summary>
-        [JsonProperty(PropertyName = TokenResponseClaim.FamilyId)]
+        [JsonPropertyName(TokenResponseClaim.FamilyId)]
         public string FamilyId { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.SpaCode)]
+        [JsonPropertyName(TokenResponseClaim.SpaCode)]
         public string SpaAuthCode { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.Authority)]
+        [JsonPropertyName(TokenResponseClaim.Authority)]
         public string AuthorityUrl { get; set; }
 
         public string TenantId { get; set; }
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 if (metadataOriginal != null)
                 {
                     string brokerMetadataJson = Uri.UnescapeDataString(metadataOriginal);
-                    metadataDictionary = Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(brokerMetadataJson); 
+                    metadataDictionary = JsonSerializer.Deserialize<Dictionary<string, string>>(brokerMetadataJson);
                 }
 
                 string homeAcctId = null;
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client.OAuth2
         /// </remarks>
         internal static MsalTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
         {
-            JObject authResult = JObject.Parse(jsonResponse);
+            var authResult = JsonNode.Parse(jsonResponse);
             var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
 
             if (!string.IsNullOrEmpty(errorCode))

@@ -7,10 +7,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
-using Microsoft.Identity.Json;
 
 namespace CommonCache.Test.Unit.Utils
 {
@@ -36,7 +36,7 @@ namespace CommonCache.Test.Unit.Utils
                 LabUserDatas = labUserData.ToList()
             };
 
-            var inputDataJson = JsonConvert.SerializeObject(testInputData);
+            var inputDataJson = JsonSerializer.Serialize(testInputData);
             string inputFilePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             File.WriteAllText(inputFilePath, inputDataJson);
 

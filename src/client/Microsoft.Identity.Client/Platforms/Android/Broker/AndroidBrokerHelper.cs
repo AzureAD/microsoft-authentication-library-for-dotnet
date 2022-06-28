@@ -17,17 +17,16 @@ using Signature = Android.Content.PM.Signature;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using System.Threading.Tasks;
 using OperationCanceledException = Android.Accounts.OperationCanceledException;
 using AndroidUri = Android.Net.Uri;
 using Android.Database;
-using Microsoft.Identity.Json.Utilities;
 using System.Threading;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Http;
 using AndroidNative = Android;
 using System.Linq;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -120,9 +119,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             string homeAccountId = brokerRequest.HomeAccountId;
             string localAccountId = brokerRequest.LocalAccountId;
 
-                dynamic AccountDataList = JArray.Parse(accountData);
-
-                foreach (JObject account in AccountDataList)
+                var AccountDataList = JsonNode.Parse(accountData).AsArray();
+            
+                foreach (var account in AccountDataList)
                 {
                     var accountInfo = account[BrokerResponseConst.Account];
                     var accountInfoHomeAccountID = accountInfo[BrokerResponseConst.HomeAccountId]?.ToString();
@@ -158,17 +157,30 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (!string.IsNullOrEmpty(accountData))
             {
-                dynamic authResult = JArray.Parse(accountData);
+                var authResult = JsonNode.Parse(accountData).AsArray();
 
-                foreach (JObject account in authResult)
+                foreach (var account in authResult)
                 {
-                    if (account.ContainsKey(BrokerResponseConst.Account))
+                    if (account.AsObject().TryGetPropertyValue(BrokerResponseConst.Account, out JsonNode accountInfoNode))
                     {
-                        var accountInfo = account[BrokerResponseConst.Account];
-                        IAccount iAccount = new Account(
-                            accountInfo.Value<string>(BrokerResponseConst.HomeAccountId) ?? string.Empty,
-                            accountInfo.Value<string>(BrokerResponseConst.UserName) ?? string.Empty,
-                            accountInfo.Value<string>(BrokerResponseConst.Environment) ?? string.Empty);
+                        var accountInfo = accountInfoNode.AsObject();
+                        string homeAccountId = string.Empty;
+                        string username = string.Empty;
+                        string environment = string.Empty;
+                        if (accountInfo.TryGetPropertyValue(BrokerResponseConst.HomeAccountId, out var homeAccountIdNode))
+                        {
+                            homeAccountId = homeAccountIdNode.GetValue<string>();
+                        }
+                        if (accountInfo.TryGetPropertyValue(BrokerResponseConst.UserName, out var usernameNode))
+                        {
+                            username = usernameNode.GetValue<string>();
+                        }
+                        if (accountInfo.TryGetPropertyValue(BrokerResponseConst.Environment, out var environmentNode))
+                        {
+                            environment = environmentNode.GetValue<string>();
+                        }
+
+                        IAccount iAccount = new Account(homeAccountId, username, environment);
                         brokerAccounts.Add(iAccount);
                     }
                 }

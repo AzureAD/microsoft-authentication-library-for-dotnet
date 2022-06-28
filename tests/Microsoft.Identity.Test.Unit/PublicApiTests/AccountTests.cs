@@ -5,13 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -115,12 +115,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange - modify an existing account to have an unknown environment
             string tokenCacheAsString = File.ReadAllText(
                 ResourceHelper.GetTestResourceRelativePath("MultiCloudTokenCache.json"));
-            var cacheJson = JObject.Parse(tokenCacheAsString);
+            var cacheJson = JsonNode.Parse(tokenCacheAsString).AsObject();
 
-            JEnumerable<JToken> tokens = cacheJson["Account"].Children();
-            foreach (JToken token in tokens)
+            var tokens = cacheJson["Account"].AsObject().AsEnumerable();
+            foreach (var token in tokens)
             {
-                var obj = token.Children().Single() as JObject;
+                var obj = token.Value.AsObject();
 
                 if (string.Equals(
                     obj["environment"].ToString(),
@@ -143,12 +143,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange - modify an existing account to have an unknown environment
             string tokenCacheAsString = File.ReadAllText(
                 ResourceHelper.GetTestResourceRelativePath("MultiCloudTokenCache.json"));
-            var cacheJson = JObject.Parse(tokenCacheAsString);
+            var cacheJson = JsonNode.Parse(tokenCacheAsString).AsObject();
 
-            JEnumerable<JToken> tokens = cacheJson["RefreshToken"].Children();
-            foreach (JToken token in tokens)
+            var tokens = cacheJson["RefreshToken"].AsObject().AsEnumerable();
+            foreach (var token in tokens)
             {
-                var obj = token.Children().Single() as JObject;
+                var obj = token.Value.AsObject();
 
                 if (string.Equals(
                     obj["environment"].ToString(),

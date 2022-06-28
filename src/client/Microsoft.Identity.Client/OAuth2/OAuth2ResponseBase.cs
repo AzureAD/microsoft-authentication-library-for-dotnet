@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -15,30 +15,29 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string CorrelationId = "correlation_id";
     }
 
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class OAuth2ResponseBase
     {
-        [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.Error)]
+        [JsonPropertyName(OAuth2ResponseBaseClaim.Error)]
         public string Error { get; set; }
 
-        [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.SubError)]
+        [JsonPropertyName(OAuth2ResponseBaseClaim.SubError)]
         public string SubError { get; set; }
 
-        [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.ErrorDescription)]
+        [JsonPropertyName(OAuth2ResponseBaseClaim.ErrorDescription)]
         public string ErrorDescription { get; set; }
 
         /// <summary>
         /// Do not expose these in the MsalException because Evo does not guarantee that the error
         /// codes remain the same.
         /// </summary>
-        [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.ErrorCodes)]
+        [JsonPropertyName(OAuth2ResponseBaseClaim.ErrorCodes)]
         public string[] ErrorCodes { get; set; }
 
-        [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.CorrelationId)]
+        [JsonPropertyName(OAuth2ResponseBaseClaim.CorrelationId)]
         public string CorrelationId { get; set; }
 
-        [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.Claims)]
+        [JsonPropertyName(OAuth2ResponseBaseClaim.Claims)]
         public string Claims { get; set; }
     }
 }

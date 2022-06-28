@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Cache
             _accessor = accessor;
         }
 
-        public byte[] Serialize(IDictionary<string, JToken> unknownNodes)
+        public byte[] Serialize(IDictionary<string, JsonNode> unknownNodes)
         {
             var accessTokensAsString = new List<string>();
             var refreshTokensAsString = new List<string>();
@@ -67,13 +67,13 @@ namespace Microsoft.Identity.Client.Cache
                              .ToByteArray();
         }
 
-        public IDictionary<string, JToken> Deserialize(byte[] bytes, bool clearExistingCacheData)
+        public IDictionary<string, JsonNode> Deserialize(byte[] bytes, bool clearExistingCacheData)
         {
             List<KeyValuePair<string, IEnumerable<string>>> cacheKvpList;
 
             try
             {
-                cacheKvpList = JsonHelper.DeserializeFromJson< List<KeyValuePair<string, IEnumerable<string>>>>(bytes);
+                cacheKvpList = JsonHelper.DeserializeFromJson<List<KeyValuePair<string, IEnumerable<string>>>>(bytes);
             }
             catch (Exception ex)
             {

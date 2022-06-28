@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Client
 {
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>This API is experimental and it may change in future versions of the library without an major version increment</remarks>
         public Action<ITelemetryEventPayload> DispatchAction => payload =>
         {
-            var j = new JObject();
+            var j = new JsonObject();
             foreach (var kvp in payload.BoolValues)
             {
                 j[kvp.Key] = kvp.Value;
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
                 j[kvp.Key] = kvp.Value;
             }
 
-            string msg = JsonConvert.SerializeObject(j, Formatting.None);
+            string msg = JsonSerializer.Serialize(j);
 #if WINDOWS_APP || NETSTANDARD2_0
             Debug.WriteLine(msg);
 #else

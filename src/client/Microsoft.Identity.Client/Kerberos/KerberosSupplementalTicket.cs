@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.Identity.Client.Kerberos
 {
@@ -16,43 +16,43 @@ namespace Microsoft.Identity.Client.Kerberos
         /// This is optional. This will be null if KeyType is null.
         /// This MUST be protected in the protocol response.
         /// </summary>
-        [JsonProperty("clientKey")]
+        [JsonPropertyName("clientKey")]
         public string ClientKey { get; set; }
 
         /// <summary>
         /// Get or Sets the client key type.This is optional.This will be null if ClientKey is null.
         /// </summary>
-        [JsonProperty("keyType")]
+        [JsonPropertyName("keyType")]
         public KerberosKeyTypes KeyType { get; set; }
 
         /// <summary>
         /// Get or Sets the Base64 encoded KERB_MESSAGE_BUFFER
         /// </summary>
-        [JsonProperty("messageBuffer", Required = Required.Always)]
+        [JsonPropertyName("messageBuffer")]
         public string KerberosMessageBuffer { get; set; }
 
         /// <summary>
         /// Get or Sets the error message that server encountered when creating a ticket granting ticket.
         /// </summary>
-        [JsonProperty("error")]
+        [JsonPropertyName("error")]
         public string ErrorMessage { get; set; }
 
         /// <summary>
         /// Get or Sets the Kerberos realm/domain name.
         /// </summary>
-        [JsonProperty("realm")]
+        [JsonPropertyName("realm")]
         public string Realm { get; set; }
 
         /// <summary>
         /// Get or Sets the target service principal name (SPN).
         /// </summary>
-        [JsonProperty("sn", Required = Required.Always)]
+        [JsonPropertyName("sn")]
         public string ServicePrincipalName { get; set; }
 
         /// <summary>
         /// Get or Sets the client name. Depending on the ticket, this can be either a UserPrincipalName or SamAccountName.
         /// </summary>
-        [JsonProperty("cn")]
+        [JsonPropertyName("cn")]
         public string ClientName { get; set; }
 
         /// <summary>

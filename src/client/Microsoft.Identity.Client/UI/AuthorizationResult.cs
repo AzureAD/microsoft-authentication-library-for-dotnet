@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.UI
 {
@@ -18,7 +17,6 @@ namespace Microsoft.Identity.Client.UI
         UnknownError
     }
 
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class AuthorizationResult
     {
@@ -166,16 +164,12 @@ namespace Microsoft.Identity.Client.UI
 
         public AuthorizationStatus Status { get; private set; }
 
-        [JsonProperty]
         public string Code { get; set; }
 
-        [JsonProperty]
         public string Error { get; set; }
 
-        [JsonProperty]
         public string ErrorDescription { get; set; }
 
-        [JsonProperty]
         public string CloudInstanceHost { get; set; }
 
         public string ClientInfo { get; set; }

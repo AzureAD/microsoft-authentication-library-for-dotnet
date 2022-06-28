@@ -4,12 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.Json.Serialization;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class DeviceAuthHeader
     {
@@ -21,17 +20,16 @@ namespace Microsoft.Identity.Client.OAuth2
             X5c.Add(base64EncodedCertificate);
         }
 
-        [JsonProperty("x5c")]
+        [JsonPropertyName("x5c")]
         public IList<string> X5c { get; set; }
 
-        [JsonProperty("typ")]
+        [JsonPropertyName("typ")]
         public string Type { get; set; }
 
-        [JsonProperty("alg")]
+        [JsonPropertyName("alg")]
         public string Alg { get; private set; }
     }
 
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class DeviceAuthPayload
     {
@@ -44,13 +42,13 @@ namespace Microsoft.Identity.Client.OAuth2
             Iat = _defaultDeviceAuthJWTTimeSpan.Value;
         }
 
-        [JsonProperty("iat")]
+        [JsonPropertyName("iat")]
         public long Iat { get; set; }
 
-        [JsonProperty("aud")]
+        [JsonPropertyName("aud")]
         public string Audience { get; set; }
 
-        [JsonProperty("nonce")]
+        [JsonPropertyName("nonce")]
         public string Nonce { get; private set; }
     }
 

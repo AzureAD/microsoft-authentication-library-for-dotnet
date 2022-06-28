@@ -4,8 +4,8 @@
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client
 {
@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Client
 
         // DEPRECATE / OBSOLETE - this functionality is not used and should be removed in a next major version
 
-        internal override void PopulateJson(JObject jobj)
+        internal override void PopulateJson(JsonObject jobj)
         {
             base.PopulateJson(jobj);
 
@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Client
             jobj[SubErrorKey] = SubError;
         }
 
-        internal override void PopulateObjectFromJson(JObject jobj)
+        internal override void PopulateObjectFromJson(JsonObject jobj)
         {
             base.PopulateObjectFromJson(jobj);
 

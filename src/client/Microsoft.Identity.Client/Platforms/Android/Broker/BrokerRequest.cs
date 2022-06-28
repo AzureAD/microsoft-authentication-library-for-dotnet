@@ -3,55 +3,54 @@
 
 using System;
 using System.Linq;
+using System.Text.Json.Serialization;
 using Android.App;
 using Android.Content.PM;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class BrokerRequest
     {
-        [JsonProperty("authority")]
+        [JsonPropertyName("authority")]
         public string Authority { get; set; }
-        [JsonProperty("scopes")]
+        [JsonPropertyName("scopes")]
         public string Scopes { get; set; }
-        [JsonProperty("redirect_uri")]
+        [JsonPropertyName("redirect_uri")]
         public string UrlEncodedRedirectUri
         {
             get { return GetEncodedRedirectUri(RedirectUri); }
         }
 
-        [JsonProperty("client_id")]
+        [JsonPropertyName("client_id")]
         public string ClientId { get; set; }
-        [JsonProperty("home_account_id")]
+        [JsonPropertyName("home_account_id")]
         public string HomeAccountId { get; set; }
-        [JsonProperty("local_account_id")]
+        [JsonPropertyName("local_account_id")]
         public string LocalAccountId { get; set; }
-        [JsonProperty("username")]
+        [JsonPropertyName("username")]
         public string UserName { get; set; }
-        [JsonProperty("extra_query_param")]
+        [JsonPropertyName("extra_query_param")]
         public string ExtraQueryParameters { get; set; }
-        [JsonProperty("correlation_id")]
+        [JsonPropertyName("correlation_id")]
         public string CorrelationId { get; set; }
-        [JsonProperty("prompt")]
+        [JsonPropertyName("prompt")]
         public string Prompt { get; set; }
-        [JsonProperty("claims")]
+        [JsonPropertyName("claims")]
         public string Claims { get; set; }
-        [JsonProperty("force_refresh")]
+        [JsonPropertyName("force_refresh")]
         public string ForceRefresh { get; set; }
-        [JsonProperty("client_app_name")]
+        [JsonPropertyName("client_app_name")]
         public string ClientAppName { get; set; }
-        [JsonProperty("client_app_version")]
+        [JsonPropertyName("client_app_version")]
         public string ClientAppVersion { get; set; }
-        [JsonProperty("client_version")]
+        [JsonPropertyName("client_version")]
         public string ClientVersion { get; set; }
-        [JsonProperty("environment")]
+        [JsonPropertyName("environment")]
         public string Environment { get; set; }
 
         [JsonIgnore]

@@ -6,8 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
+using System.Text.Json;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -79,7 +78,7 @@ namespace Microsoft.Identity.Client.Internal
             try
             {
                 string payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
-                var idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);                
+                var idTokenClaims = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(payload);
 
                 IdToken parsedIdToken = new IdToken();
 
@@ -108,124 +107,117 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         #region IdToken to Claims parsing - logic copied from Wilson!
-        private static List<Claim> GetClaimsFromRawToken(Dictionary<string, object> idTokenClaims)
+        private static List<Claim> GetClaimsFromRawToken(Dictionary<string, JsonElement> idTokenClaims)
         {
             List<Claim> claims = new List<Claim>();
 
             string issuer = null;
-            if (idTokenClaims.TryGetValue(IdTokenClaim.Issuer, out object issuerObj))
+            if (idTokenClaims.TryGetValue(IdTokenClaim.Issuer, out JsonElement issuerObj))
             {
-                issuer = issuerObj as string;                
+                issuer = issuerObj.ValueKind == JsonValueKind.String ? issuerObj.GetString() : null;
             }
             issuer = issuer ?? DefaultIssuser;
 
-            foreach (KeyValuePair<string, object> keyValuePair in idTokenClaims)
+            foreach (KeyValuePair<string, JsonElement> keyValuePair in idTokenClaims)
             {
-                if (keyValuePair.Value == null)
+                if (keyValuePair.Value.ValueKind == JsonValueKind.Null)
                 {
                     claims.Add(new Claim(keyValuePair.Key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer));
                     continue;
                 }
 
-                var claimValue = keyValuePair.Value as string;
+                var claimValue = keyValuePair.Value.ValueKind == JsonValueKind.String ? keyValuePair.Value.GetString() : null;
                 if (claimValue != null)
                 {
                     claims.Add(new Claim(keyValuePair.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
                     continue;
                 }
 
-                var jtoken = keyValuePair.Value as JToken;
-                if (jtoken != null)
+                if (keyValuePair.Value.ValueKind == JsonValueKind.Object)
                 {
-                    AddClaimsFromJToken(claims, keyValuePair.Key, jtoken, issuer);
+                    AddClaimsFromJToken(claims, keyValuePair.Key, keyValuePair.Value, issuer);
                     continue;
                 }
 
-                var objects = keyValuePair.Value as IEnumerable<object>;
-                if (objects != null)
+                if (keyValuePair.Value.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (var obj in objects)
+                    foreach (var jtoken in keyValuePair.Value.EnumerateArray())
                     {
-                        claimValue = obj as string;
+                        claimValue = jtoken.ValueKind == JsonValueKind.String ? jtoken.GetString() : null;
                         if (claimValue != null)
                         {
                             claims.Add(new Claim(keyValuePair.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
                             continue;
                         }
 
-                        jtoken = obj as JToken;
-                        if (jtoken != null)
+                        if (jtoken.ValueKind == JsonValueKind.Object)
                         {
                             AddDefaultClaimFromJToken(claims, keyValuePair.Key, jtoken, issuer);
                             continue;
                         }
 
-                        // DateTime claims require special processing. JsonConvert.SerializeObject(obj) will result in "\"dateTimeValue\"". The quotes will be added.
-                        if (obj is DateTime dateTimeValue)
+                        // DateTime claims require special processing. JsonConvert.SerializeObject(obj) will result in "\"dateTimeValue\"". The quotes will be added.                        
+                        if (jtoken.ValueKind == JsonValueKind.String && jtoken.TryGetDateTime(out DateTime dateTimeValue))
                             claims.Add(
                                 new Claim(
-                                    keyValuePair.Key, 
-                                    dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), 
-                                    ClaimValueTypes.DateTime, 
-                                    issuer, 
+                                    keyValuePair.Key,
+                                    dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture),
+                                    ClaimValueTypes.DateTime,
+                                    issuer,
                                     issuer));
                         else
                             claims.Add(
-                                new Claim(
-                                    keyValuePair.Key, 
-                                    JsonConvert.SerializeObject(obj),
-                                    GetClaimValueType(obj), 
-                                    issuer, 
-                                    issuer));
+                                    new Claim(
+                                        keyValuePair.Key,
+                                        JsonSerializer.Serialize(jtoken),
+                                        GetClaimValueType(jtoken),
+                                        issuer,
+                                        issuer));
                     }
 
                     continue;
                 }
 
-                IDictionary<string, object> dictionary = keyValuePair.Value as IDictionary<string, object>;
-                if (dictionary != null)
+                if (keyValuePair.Value.ValueKind == JsonValueKind.Object)
                 {
-                    foreach (var item in dictionary)
-                        claims.Add(new Claim(keyValuePair.Key, "{" + item.Key + ":" + JsonConvert.SerializeObject(item.Value) + "}", GetClaimValueType(item.Value), issuer, issuer));
+                    foreach (var item in keyValuePair.Value.EnumerateObject())
+                        claims.Add(new Claim(keyValuePair.Key, "{" + item.Name + ":" + JsonSerializer.Serialize(item.Value) + "}", GetClaimValueType(item.Value), issuer, issuer));
 
                     continue;
                 }
 
                 // DateTime claims require special processing. JsonConvert.SerializeObject(keyValuePair.Value) will result in "\"dateTimeValue\"". The quotes will be added.
-                if (keyValuePair.Value is DateTime dateTime)
+                if (keyValuePair.Value.ValueKind == JsonValueKind.String && keyValuePair.Value.TryGetDateTime(out DateTime dateTime))
                     claims.Add(new Claim(keyValuePair.Key, dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
                 else
-                    claims.Add(new Claim(keyValuePair.Key, JsonConvert.SerializeObject(keyValuePair.Value), GetClaimValueType(keyValuePair.Value), issuer, issuer));
+                    claims.Add(new Claim(keyValuePair.Key, JsonSerializer.Serialize(keyValuePair.Value), GetClaimValueType(keyValuePair.Value), issuer, issuer));
             }
 
             return claims;
         }
-    
-        private static void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
+
+        private static void AddClaimsFromJToken(List<Claim> claims, string claimType, JsonElement jtoken, string issuer)
         {
-            if (jtoken.Type == JTokenType.Object)
+            if (jtoken.ValueKind == JsonValueKind.Object)
             {
-                claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), JsonClaimValueTypes.Json));
+                claims.Add(new Claim(claimType, jtoken.ToString(), JsonClaimValueTypes.Json));
             }
-            else if (jtoken.Type == JTokenType.Array)
+            else if (jtoken.ValueKind == JsonValueKind.Array)
             {
-                var jarray = jtoken as JArray;
-                foreach (var item in jarray)
+                foreach (var item in jtoken.EnumerateArray())
                 {
-                    switch (item.Type)
+                    if (item.ValueKind == JsonValueKind.Object)
                     {
-                        case JTokenType.Object:
-                            claims.Add(new Claim(claimType, item.ToString(Formatting.None), JsonClaimValueTypes.Json, issuer, issuer));
-                            break;
-
+                        claims.Add(new Claim(claimType, item.ToString(), JsonClaimValueTypes.Json, issuer, issuer));
+                    }
+                    else if (item.ValueKind == JsonValueKind.Array)
+                    {
                         // only go one level deep on arrays.
-                        case JTokenType.Array:
-                            claims.Add(new Claim(claimType, item.ToString(Formatting.None), JsonClaimValueTypes.JsonArray, issuer, issuer));
-                            break;
-
-                        default:
-                            AddDefaultClaimFromJToken(claims, claimType, item, issuer);
-                            break;
+                        claims.Add(new Claim(claimType, item.ToString(), JsonClaimValueTypes.JsonArray, issuer, issuer));
+                    }
+                    else
+                    {
+                        AddDefaultClaimFromJToken(claims, claimType, item, issuer);
                     }
                 }
             }
@@ -235,65 +227,68 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        private static void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
+        private static void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JsonElement jtoken, string issuer)
         {
-            JValue jvalue = jtoken as JValue;
-            if (jvalue != null)
+            if (jtoken.ValueKind == JsonValueKind.String)
             {
-                // String is special because item.ToString(Formatting.None) will result in "/"string/"". The quotes will be added.
-                // Boolean needs item.ToString otherwise 'true' => 'True'
-                if (jvalue.Type == JTokenType.String)
-                    claims.Add(new Claim(claimType, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer));
                 // DateTime claims require special processing. jtoken.ToString(Formatting.None) will result in "\"dateTimeValue\"". The quotes will be added.
-                else if (jvalue.Value is DateTime dateTimeValue)
+                if (jtoken.TryGetDateTime(out DateTime dateTimeValue))
                     claims.Add(new Claim(claimType, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
                 else
-                    claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer));
+                {
+                    var stringValue = jtoken.GetString();
+                    if (stringValue != null)
+                        // String is special because item.ToString(Formatting.None) will result in "/"string/"". The quotes will be added.
+                        // Boolean needs item.ToString otherwise 'true' => 'True'
+                        claims.Add(new Claim(claimType, stringValue, ClaimValueTypes.String, issuer, issuer));
+                    else
+                        claims.Add(new Claim(claimType, jtoken.ToString(), GetClaimValueType(jtoken), issuer, issuer));
+                }
             }
             else
-                claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), GetClaimValueType(jtoken), issuer, issuer));
+                claims.Add(new Claim(claimType, jtoken.ToString(), GetClaimValueType(jtoken), issuer, issuer));
         }
 
-        private static string GetClaimValueType(object obj)
+        private static string GetClaimValueType(JsonElement obj)
         {
-            if (obj == null)
+            if (obj.ValueKind == JsonValueKind.Null)
                 return JsonClaimValueTypes.JsonNull;
 
-            var objType = obj.GetType();
+            var valueKind = obj.ValueKind;
 
-            if (objType == typeof(string))
+            if (valueKind == JsonValueKind.String)
                 return ClaimValueTypes.String;
 
-            if (objType == typeof(int))
+            if (obj.TryGetInt32(out _))
                 return ClaimValueTypes.Integer;
 
-            if (objType == typeof(bool))
+            if (valueKind == JsonValueKind.True || valueKind == JsonValueKind.False)
                 return ClaimValueTypes.Boolean;
 
-            if (objType == typeof(double))
+            if (obj.TryGetDouble(out _))
                 return ClaimValueTypes.Double;
 
-            if (objType == typeof(long))
+            if (valueKind == JsonValueKind.Number)
             {
-                long l = (long)obj;
+                long l = obj.GetInt64();
                 if (l >= int.MinValue && l <= int.MaxValue)
                     return ClaimValueTypes.Integer;
 
                 return ClaimValueTypes.Integer64;
             }
 
-            if (objType == typeof(DateTime))
+            if (obj.TryGetDateTime(out _))
                 return ClaimValueTypes.DateTime;
 
-            if (objType == typeof(JObject))
+            if (valueKind == JsonValueKind.Object)
                 return JsonClaimValueTypes.Json;
 
-            if (objType == typeof(JArray))
+            if (valueKind == JsonValueKind.Array)
                 return JsonClaimValueTypes.JsonArray;
 
-            return objType.ToString();
+            return valueKind.ToString();
         }
-        
+
         #endregion
     }
 }

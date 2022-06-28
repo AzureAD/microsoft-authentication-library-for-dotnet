@@ -4,10 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client
 {
@@ -141,14 +141,14 @@ namespace Microsoft.Identity.Client
         private const string ErrorCodeKey = "error_code";
         private const string ErrorDescriptionKey = "error_description";
 
-        internal virtual void PopulateJson(JObject jobj)
+        internal virtual void PopulateJson(JsonObject jobj)
         {
             jobj[ExceptionTypeKey] = GetType().Name;
             jobj[ErrorCodeKey] = ErrorCode;
             jobj[ErrorDescriptionKey] = Message;
         }
 
-        internal virtual void PopulateObjectFromJson(JObject jobj)
+        internal virtual void PopulateObjectFromJson(JsonObject jobj)
         {
         }
 
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public string ToJsonString()
         {
-            JObject jobj = new JObject();
+            JsonObject jobj = new JsonObject();
             PopulateJson(jobj);
             return jobj.ToString();
         }
@@ -181,8 +181,8 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public static MsalException FromJsonString(string json)
         {
-            JObject jobj = JObject.Parse(json);
-            string type = jobj.Value<string>(ExceptionTypeKey);
+            var jobj = JsonNode.Parse(json).AsObject();
+            string type = jobj[ExceptionTypeKey].GetValue<string>();
 
             if (s_typeNameToType.Value.TryGetValue(type, out Type exceptionType))
             {

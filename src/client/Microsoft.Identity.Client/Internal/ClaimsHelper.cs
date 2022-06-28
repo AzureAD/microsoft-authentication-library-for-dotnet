@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -19,25 +19,25 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (clientCapabilities != null && clientCapabilities.Any())
             {
-                JObject capabilitiesJson = CreateClientCapabilitiesRequestJson(clientCapabilities);
-                JObject mergedClaimsAndCapabilities = MergeClaimsIntoCapabilityJson(claims, capabilitiesJson);
+                var capabilitiesJson = CreateClientCapabilitiesRequestJson(clientCapabilities);
+                var mergedClaimsAndCapabilities = MergeClaimsIntoCapabilityJson(claims, capabilitiesJson);
 
-                return mergedClaimsAndCapabilities.ToString(Formatting.None);
+                return mergedClaimsAndCapabilities.ToJsonString();
             }
 
             return claims;
         }
 
-        internal static JObject MergeClaimsIntoCapabilityJson(string claims, JObject capabilitiesJson)
+        internal static JsonObject MergeClaimsIntoCapabilityJson(string claims, JsonObject capabilitiesJson)
         {
             if (!string.IsNullOrEmpty(claims))
             {
-                JObject claimsJson;
+                JsonObject claimsJson;
                 try
                 {
-                    claimsJson = JObject.Parse(claims);
+                    claimsJson = JsonNode.Parse(claims).AsObject();
                 }
-                catch (JsonReaderException ex)
+                catch (JsonException ex)
                 {
                     throw new MsalClientException(
                         MsalError.InvalidJsonClaimsFormat,
@@ -45,29 +45,32 @@ namespace Microsoft.Identity.Client.Internal
                         ex);
                 }
 
-                capabilitiesJson.Merge(claimsJson, new JsonMergeSettings
+                foreach (var claim in claimsJson)
                 {
-                    // union array values together to avoid duplicates
-                    MergeArrayHandling = MergeArrayHandling.Union
-                });
+                    capabilitiesJson[claim.Key] = claim.Value != null ? JsonNode.Parse(claim.Value.ToJsonString()) : null;
+                }
             }
 
             return capabilitiesJson;
         }
 
-        private static JObject CreateClientCapabilitiesRequestJson(IEnumerable<string> clientCapabilities)
+        private static JsonObject CreateClientCapabilitiesRequestJson(IEnumerable<string> clientCapabilities)
         {
             // "access_token": {
             //     "xms_cc": { 
             //         values: ["cp1", "cp2"]
             //     }
             //  }
-            return new JObject
+            return new JsonObject
             {
-                new JProperty(AccessTokenClaim, new JObject(
-                    new JObject(new JProperty(XmsClientCapability,
-                            new JObject(new JProperty("values",
-                                new JArray(clientCapabilities)))))))            };
+                [AccessTokenClaim] = new JsonObject
+                {
+                    [XmsClientCapability] = new JsonObject
+                    {
+                        ["values"] = new JsonArray(clientCapabilities.Select(c => JsonValue.Create(c)).ToArray())
+                    }
+                }
+            };
         }
     }
 }

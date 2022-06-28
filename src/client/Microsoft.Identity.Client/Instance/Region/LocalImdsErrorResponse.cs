@@ -5,19 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Region
 {
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal sealed class LocalImdsErrorResponse
     {
-        [JsonProperty(PropertyName = "error")]
+        [JsonPropertyName("error")]
         public string Error { get; set; }
 
-        [JsonProperty(PropertyName = "newest-versions")]
+        [JsonPropertyName("newest-versions")]
         public List<string> NewestVersions { get; set; }
     }
 }
