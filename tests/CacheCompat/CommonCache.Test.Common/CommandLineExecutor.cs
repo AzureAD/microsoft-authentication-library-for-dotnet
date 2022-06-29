@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CommandLine;
-using Newtonsoft.Json;
 
 namespace CommonCache.Test.Common
 {
@@ -18,7 +18,7 @@ namespace CommonCache.Test.Common
             void SyncRunAction(CommandLineOptions options)
             {
                 string inputOptionsJson = File.ReadAllText(options.InputFilePath);
-                var inputOptions = JsonConvert.DeserializeObject<TestInputData>(inputOptionsJson);
+                var inputOptions = JsonSerializer.Deserialize<TestInputData>(inputOptionsJson);
 
                 Console.WriteLine(Assembly.GetEntryAssembly().Location);
                 try
@@ -27,7 +27,7 @@ namespace CommonCache.Test.Common
                 }
                 catch (Exception ex)
                 {
-                    File.WriteAllText(inputOptions.ResultsFilePath, JsonConvert.SerializeObject(ExecutionContent.CreateFromException(ex)));
+                    File.WriteAllText(inputOptions.ResultsFilePath, JsonSerializer.Serialize(ExecutionContent.CreateFromException(ex)));
                 }
             }
 

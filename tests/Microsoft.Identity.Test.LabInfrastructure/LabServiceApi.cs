@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -48,15 +48,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         internal async Task<LabResponse> CreateLabResponseFromResultStringAsync(string result)
         {
-            LabUser[] userResponses = JsonConvert.DeserializeObject<LabUser[]>(result);
+            LabUser[] userResponses = JsonSerializer.Deserialize<LabUser[]>(result);
 
             var user = userResponses[0];
 
             var appResponse = await GetLabResponseAsync(LabApiConstants.LabAppEndpoint + user.AppId).ConfigureAwait(false);
-            LabApp[] labApps = JsonConvert.DeserializeObject<LabApp[]>(appResponse);
+            LabApp[] labApps = JsonSerializer.Deserialize<LabApp[]>(appResponse);
 
             var labInfoResponse = await GetLabResponseAsync(LabApiConstants.LabInfoEndpoint + user.LabName).ConfigureAwait(false);
-            Lab[] labs = JsonConvert.DeserializeObject<Lab[]>(labInfoResponse);
+            Lab[] labs = JsonSerializer.Deserialize<Lab[]>(labInfoResponse);
 
             user.TenantId = labs[0].TenantId;
             user.FederationProvider = labs[0].FederationProvider;
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             };
 
             string result = await SendLabRequestAsync(LabApiConstants.LabUserCredentialEndpoint, queryDict).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<LabCredentialResponse>(result).Secret;
+            return JsonSerializer.Deserialize<LabCredentialResponse>(result).Secret;
         }
     }
 }

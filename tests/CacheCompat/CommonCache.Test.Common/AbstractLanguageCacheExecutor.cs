@@ -3,8 +3,8 @@
 
 using System;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace CommonCache.Test.Common
 {
@@ -28,7 +28,7 @@ namespace CommonCache.Test.Common
             }
             catch (Exception ex)
             {
-                File.WriteAllText(testInputData.ResultsFilePath, JsonConvert.SerializeObject(ExecutionContent.CreateFromException(ex)));
+                File.WriteAllText(testInputData.ResultsFilePath, JsonSerializer.Serialize(ExecutionContent.CreateFromException(ex)));
             }
         }
     }

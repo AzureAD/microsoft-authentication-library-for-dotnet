@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -17,8 +18,6 @@ using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 {
@@ -124,7 +123,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
            RsaSecurityKey popKey,
            bool includeX5cClaim)
         {
-            var header = new JObject
+            var header = new JsonObject
             {
                 { JwtClaimTypes.Typ, "JWT" },
                 { JwtClaimTypes.Alg, signingCredentials.Algorithm },
@@ -136,11 +135,14 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
                 header[JwtClaimTypes.Kid] = Base64UrlEncoder.Encode(x509SecurityKey.Certificate.GetCertHash());
 
                 if (includeX5cClaim)
-                    header[JwtClaimTypes.X5c] = JArray.FromObject(new List<string>() { Convert.ToBase64String(x509SecurityKey.Certificate.GetRawCertData()) });
+                    header[JwtClaimTypes.X5c] = new JsonArray(
+                        new List<string>() {
+                            Convert.ToBase64String(x509SecurityKey.Certificate.GetRawCertData())
+                        }.Select(i => JsonValue.Create(i)).ToArray());
             }
 
             long nbf = EpochTime.GetIntDate(DateTime.UtcNow);
-            var payload = new JObject
+            var payload = new JsonObject
             {
                 {JwtClaimTypes.Iss, clientId},
                 {JwtClaimTypes.Aud, audience},
@@ -151,12 +153,12 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
                 {"pop_jwk", CreateJwkClaim(popKey, signingCredentials.Algorithm)}
             };
 
-            return CreateJWS(payload.ToString(Formatting.None), header.ToString(Formatting.None), signingCredentials);
+            return CreateJWS(payload.ToJsonString(), header.ToJsonString(), signingCredentials);
         }
 
         private static string CreateJWS(string payload, string header, SigningCredentials signingCredentials)
         {
-            var actualHeader = header != null ? JObject.Parse(header) : new JObject
+            var actualHeader = header != null ? JsonNode.Parse(header).AsObject() : new JsonObject
             {
                 { JwtClaimTypes.Alg, signingCredentials.Algorithm },
                 { JwtClaimTypes.Kid, signingCredentials.Key.KeyId },
@@ -171,7 +173,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             try
             {
-                var message = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(actualHeader.ToString(Formatting.None))) + "." + Base64UrlEncoder.Encode(payload);
+                var message = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(actualHeader.ToJsonString())) + "." + Base64UrlEncoder.Encode(payload);
                 return message + "." + Base64UrlEncoder.Encode(signatureProvider.Sign(Encoding.UTF8.GetBytes(message)));
             }
             finally

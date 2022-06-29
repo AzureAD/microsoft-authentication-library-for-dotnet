@@ -3,40 +3,40 @@
 
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public class LabUser
     {
-        [JsonProperty("objectId")]
+        [JsonPropertyName("objectId")]
         public Guid ObjectId { get; set; }
 
-        [JsonProperty("userType")]
+        [JsonPropertyName("userType")]
         public UserType UserType { get; set; }
 
-        [JsonProperty("upn")]
+        [JsonPropertyName("upn")]
         public string Upn { get; set; }
 
-        [JsonProperty("displayname")]
+        [JsonPropertyName("displayname")]
         public string DisplayName { get; set; }
 
-        [JsonProperty("mfa")]
+        [JsonPropertyName("mfa")]
         public MFA Mfa { get; set; }
 
-        [JsonProperty("protectionpolicy")]
+        [JsonPropertyName("protectionpolicy")]
         public ProtectionPolicy ProtectionPolicy { get; set; }
 
-        [JsonProperty("homedomain")]
+        [JsonPropertyName("homedomain")]
         public HomeDomain HomeDomain { get; set; }
 
-        [JsonProperty("homeupn")]
+        [JsonPropertyName("homeupn")]
         public string HomeUPN { get; set; }
 
-        [JsonProperty("b2cprovider")]
+        [JsonPropertyName("b2cprovider")]
         public B2CIdentityProvider B2cProvider { get; set; }
 
-        [JsonProperty("labname")]
+        [JsonPropertyName("labname")]
         public string LabName { get; set; }
 
         public FederationProvider FederationProvider { get; set; }
@@ -47,10 +47,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private string _password = null;
 
-        [JsonProperty("appid")]
+        [JsonPropertyName("appid")]
         public string AppId { get; set; }
 
-        [JsonProperty("azureenvironment")]
+        [JsonPropertyName("azureenvironment")]
         public AzureEnvironment AzureEnvironment { get; set; }
 
         public string GetOrFetchPassword()

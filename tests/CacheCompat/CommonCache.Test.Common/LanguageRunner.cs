@@ -4,13 +4,12 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace CommonCache.Test.Common
 {
-
     public static class LanguageRunner
     {
         public static async Task ExecuteAsync(
@@ -29,7 +28,7 @@ namespace CommonCache.Test.Common
                     scope, 
                     CommonCacheTestUtils.MsalV3CacheFilePath);
 
-                var inputDataJson = JsonConvert.SerializeObject(languageTestInputData);
+                var inputDataJson = JsonSerializer.Serialize(languageTestInputData);
                 string inputFilePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
                 File.WriteAllText(inputFilePath, inputDataJson);
 
