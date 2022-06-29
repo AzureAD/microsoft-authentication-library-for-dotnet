@@ -36,6 +36,8 @@ jobs: #Build and stage projects
   pool:
       name: Azure Pipelines
       vmImage: 'macOS-12'
+      demands:
+      - MSBuild
   variables:
       runCodesignValidationInjection: false
 

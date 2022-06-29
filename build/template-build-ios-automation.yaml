@@ -22,15 +22,27 @@ steps:
     packageType: 'sdk'
     version: '6.x'
 
-- task: CmdLine@2
-  displayName: 'Install maui'
+- task: Bash@3
+  displayName: Install MAUI
   inputs:
-    script: 'dotnet workload install maui'
+    targetType: 'inline'
+    script: |
+      dotnet nuget locals all --clear 
+      dotnet workload install maui --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
+      dotnet workload install android ios maccatalyst tvos macos maui wasm-tools --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
 
 - task: NuGetCommand@2
   displayName: 'NuGet restore'
   inputs:
     restoreSolution: LibsMacOS.sln
+
+- task: Bash@3
+  displayName: List SDKs
+  inputs:
+    targetType: 'inline'
+    script: |
+      dotnet --list-sdks 
+
 
 - task: XamariniOS@1
   displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
