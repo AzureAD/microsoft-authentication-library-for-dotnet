@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.IO;
-using System.Text.Json;
 using CommonCache.Test.Common;
 
 namespace CommonCache.Test.Unit.Utils
@@ -29,7 +28,7 @@ namespace CommonCache.Test.Unit.Utils
             ExecutionContent executionResults;
             if (File.Exists(resultsFilePath))
             {
-                executionResults = JsonSerializer.Deserialize<ExecutionContent>(File.ReadAllText(resultsFilePath));
+                executionResults = JsonHelper.Deserialize<ExecutionContent>(File.ReadAllText(resultsFilePath));
             }
             else
             {

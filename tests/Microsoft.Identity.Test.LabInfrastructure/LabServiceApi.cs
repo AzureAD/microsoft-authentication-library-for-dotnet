@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
@@ -46,17 +47,30 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return CreateLabResponseFromResultStringAsync(result).Result;
         }
 
+        private static readonly JsonSerializerOptions s_jsonSerializerOptions = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+            PropertyNameCaseInsensitive = true,
+            IgnoreReadOnlyFields = false,
+            IgnoreReadOnlyProperties = false,
+            IncludeFields = false,            
+            Converters =
+            {
+                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+            }
+        };
+
         internal async Task<LabResponse> CreateLabResponseFromResultStringAsync(string result)
         {
-            LabUser[] userResponses = JsonSerializer.Deserialize<LabUser[]>(result);
+            LabUser[] userResponses = JsonSerializer.Deserialize<LabUser[]>(result, s_jsonSerializerOptions);
 
             var user = userResponses[0];
 
             var appResponse = await GetLabResponseAsync(LabApiConstants.LabAppEndpoint + user.AppId).ConfigureAwait(false);
-            LabApp[] labApps = JsonSerializer.Deserialize<LabApp[]>(appResponse);
+            LabApp[] labApps = JsonSerializer.Deserialize<LabApp[]>(appResponse, s_jsonSerializerOptions);
 
             var labInfoResponse = await GetLabResponseAsync(LabApiConstants.LabInfoEndpoint + user.LabName).ConfigureAwait(false);
-            Lab[] labs = JsonSerializer.Deserialize<Lab[]>(labInfoResponse);
+            Lab[] labs = JsonSerializer.Deserialize<Lab[]>(labInfoResponse, s_jsonSerializerOptions);
 
             user.TenantId = labs[0].TenantId;
             user.FederationProvider = labs[0].FederationProvider;
@@ -158,7 +172,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             };
 
             string result = await SendLabRequestAsync(LabApiConstants.LabUserCredentialEndpoint, queryDict).ConfigureAwait(false);
-            return JsonSerializer.Deserialize<LabCredentialResponse>(result).Secret;
+            return JsonSerializer.Deserialize<LabCredentialResponse>(result, s_jsonSerializerOptions).Secret;
         }
     }
 }

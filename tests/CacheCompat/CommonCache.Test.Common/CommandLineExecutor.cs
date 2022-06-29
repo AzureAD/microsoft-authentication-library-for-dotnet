@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text.Json;
 using System.Threading.Tasks;
 using CommandLine;
 
@@ -18,7 +17,7 @@ namespace CommonCache.Test.Common
             void SyncRunAction(CommandLineOptions options)
             {
                 string inputOptionsJson = File.ReadAllText(options.InputFilePath);
-                var inputOptions = JsonSerializer.Deserialize<TestInputData>(inputOptionsJson);
+                var inputOptions = JsonHelper.Deserialize<TestInputData>(inputOptionsJson);
 
                 Console.WriteLine(Assembly.GetEntryAssembly().Location);
                 try
@@ -27,7 +26,7 @@ namespace CommonCache.Test.Common
                 }
                 catch (Exception ex)
                 {
-                    File.WriteAllText(inputOptions.ResultsFilePath, JsonSerializer.Serialize(ExecutionContent.CreateFromException(ex)));
+                    File.WriteAllText(inputOptions.ResultsFilePath, JsonHelper.Serialize(ExecutionContent.CreateFromException(ex)));
                 }
             }
 
