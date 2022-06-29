@@ -258,20 +258,17 @@ namespace Microsoft.Identity.Client.Internal
 
             var valueKind = obj.ValueKind;
 
-            if (valueKind == JsonValueKind.String)
-                return ClaimValueTypes.String;
-
-            if (obj.TryGetInt32(out _))
-                return ClaimValueTypes.Integer;
-
             if (valueKind == JsonValueKind.True || valueKind == JsonValueKind.False)
                 return ClaimValueTypes.Boolean;
 
-            if (obj.TryGetDouble(out _))
-                return ClaimValueTypes.Double;
-
             if (valueKind == JsonValueKind.Number)
             {
+                if (obj.TryGetInt32(out _))
+                    return ClaimValueTypes.Integer;
+
+                if (obj.TryGetDouble(out _))
+                    return ClaimValueTypes.Double;
+
                 long l = obj.GetInt64();
                 if (l >= int.MinValue && l <= int.MaxValue)
                     return ClaimValueTypes.Integer;
@@ -279,8 +276,13 @@ namespace Microsoft.Identity.Client.Internal
                 return ClaimValueTypes.Integer64;
             }
 
-            if (obj.TryGetDateTime(out _))
-                return ClaimValueTypes.DateTime;
+            if (valueKind == JsonValueKind.String)
+            {
+                if (obj.TryGetDateTime(out _))
+                    return ClaimValueTypes.DateTime;
+
+                return ClaimValueTypes.String;
+            }
 
             if (valueKind == JsonValueKind.Object)
                 return JsonClaimValueTypes.Json;
