@@ -1,5 +1,6 @@
 # Maui Status
-This file tracks the progress of MAUI. This branch has MSAL.NET code that is ported to MAUI. It has two dev apps used to for testing. **It currently supports only iOS and Android platforms.**
+This file tracks the progress of MAUI. This branch has MSAL.NET code that is ported to MAUI. It has two dev apps used to for testing. **It currently supports only iOS and Android platforms.**  
+Work is in progress to build a package using CI/CD pipeline. In the meantime, you can build and run the source code locally.
 
 ## Prerequisites
 To build and run the branch, it will require:
