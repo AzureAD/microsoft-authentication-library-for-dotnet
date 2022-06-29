@@ -279,15 +279,15 @@ namespace NetCoreTestApp
                             break;
 
                         case 12:
-                            PublicClientDownstreamApi restApi = new PublicClientDownstreamApi("graph", new DownstreamRestApiOptions()
-                            {
-                                ClientId = "123",
-                                Authority = "https://login.microsoft.com/common",
-                                Scopes = new[] { "User.Read" }
-                            });
+                            PublicClientDownstreamApi restApi = new PublicClientDownstreamApi("graph", new DownstreamRestApiOptions
+                            (
+                                clientId: s_clientIdForPublicApp,
+                                authority: "https://login.microsoft.com/common",
+                                scopes: new[] { "User.Read" }
+                            ));
 
-                            //string endpoint = "https://testingsts.azurewebsites.net/servernonce/authinfo";
-                            string endpoint = "https://graph.microsoft.com/beta/me";
+                            string endpoint = "https://testingsts.azurewebsites.net/servernonce/authinfo";
+                            //string endpoint = "https://graph.microsoft.com/beta/me";
                             HttpResponseMessage result = await restApi.CallGetApiAsync(new Uri(endpoint)).ConfigureAwait(false);
                             break;
                         case 0:
