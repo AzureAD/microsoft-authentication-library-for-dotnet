@@ -39,19 +39,22 @@ namespace Microsoft.Identity.Client.Utils
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {
+        private static MsalJsonSerializerContext s_customContext;
+        
         public static MsalJsonSerializerContext Custom
         {
             get
             {
-                return new MsalJsonSerializerContext(new JsonSerializerOptions
-                {
-                    NumberHandling = JsonNumberHandling.AllowReadingFromString,
-                    AllowTrailingCommas = true,
-                    Converters =
+                return s_customContext ??=
+                    new MsalJsonSerializerContext(new JsonSerializerOptions
                     {
-                        new JsonStringConverter(),
-                    }
-                });
+                        NumberHandling = JsonNumberHandling.AllowReadingFromString,
+                        AllowTrailingCommas = true,
+                        Converters =
+                        {
+                            new JsonStringConverter(),
+                        }
+                    });
             }
         }
     }
