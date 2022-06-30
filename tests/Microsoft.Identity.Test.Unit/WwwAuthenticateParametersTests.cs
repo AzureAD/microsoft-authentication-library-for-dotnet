@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -253,6 +254,30 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNull(WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(httpResponse.Headers));
         }
 
+        [TestMethod]
+        public async Task ExtractNonceFromHeaderAsync()
+        {
+            //Arrange & Act
+            WwwAuthenticateParameters parameters = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(
+                                                         "https://testingsts.azurewebsites.net/servernonce/expired",
+                                                         default,
+                                                         Constants.PoPAuthHeaderPrefix).ConfigureAwait(false);
+
+            //Assert
+            Assert.IsTrue(parameters.Scheme == Constants.PoPAuthHeaderPrefix);
+            Assert.IsNotNull(parameters.ServerNonce);
+        }
+
+        //[TestMethod]
+        //public void ExtractAllParametersFromResponse()
+        //{
+        //    // Arrange
+        //    HttpResponseMessage httpResponse = CreateBearerAndPopHttpResponse();
+
+        //    // Act & Assert
+        //    Assert.IsNull(WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(httpResponse.Headers));
+        //}
+
         private static HttpResponseMessage CreateClaimsHttpResponse(string claims)
         {
             HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
@@ -292,5 +317,17 @@ namespace Microsoft.Identity.Test.Unit
                 }
             };
         }
+
+        //private static HttpResponseMessage CreateBearerAndPopHttpResponse()
+        //{
+        //    return new HttpResponseMessage(HttpStatusCode.Unauthorized)
+        //    {
+        //        Headers =
+        //        {
+        //            { WwwAuthenticateHeaderName, $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"some_error\", claims=\"{DecodedClaimsHeader}\"" },
+        //            { WwwAuthenticateHeaderName, $"WWWAuthenticate: PoP nonce=\"\", someNonce"}
+        //        }
+        //    };
+        //}
     }
 }

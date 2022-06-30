@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 
@@ -21,6 +22,14 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class WwwAuthenticateParameters
     {
+        private static readonly ISet<string> s_knownAuthenticationSchemes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        static WwwAuthenticateParameters()
+        {
+            s_knownAuthenticationSchemes.Add(Constants.BearerAuthHeaderPrefix);
+            s_knownAuthenticationSchemes.Add(Constants.PoPAuthHeaderPrefix);
+        }
+
         /// <summary>
         /// Resource for which to request scopes.
         /// This is the App ID URI of the API that returned the WWW-Authenticate header.
@@ -49,6 +58,16 @@ namespace Microsoft.Identity.Client
         /// Error.
         /// </summary>
         public string Error { get; set; }
+
+        /// <summary>
+        /// Scheme.
+        /// </summary>
+        public string Scheme { get; set; } 
+
+        /// <summary>
+        /// Server Nonce.
+        /// </summary>
+        public string ServerNonce { get; set; }
 
         /// <summary>
         /// Return the <see cref="RawParameters"/> of key <paramref name="key"/>.
@@ -90,15 +109,46 @@ namespace Microsoft.Identity.Client
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
         {
-            if (httpResponseHeaders.WwwAuthenticate.Any())
+            if (scheme == Constants.BearerAuthHeaderPrefix)
             {
-                // TODO: add POP support
-                AuthenticationHeaderValue bearer = httpResponseHeaders.WwwAuthenticate.First(v => string.Equals(v.Scheme, scheme, StringComparison.OrdinalIgnoreCase));
-                string wwwAuthenticateValue = bearer.Parameter;
-                return CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
+                return ParseBearerParameters(httpResponseHeaders);
+            }
+
+            if (scheme == Constants.PoPAuthHeaderPrefix)
+            {
+                return ParsePopParameters(httpResponseHeaders);
             }
 
             return CreateWwwAuthenticateParameters(new Dictionary<string, string>());
+        }
+
+        private static WwwAuthenticateParameters ParseBearerParameters(HttpResponseHeaders httpResponseHeaders)
+        {
+            if (httpResponseHeaders.WwwAuthenticate.Any())
+            {
+                AuthenticationHeaderValue bearer = httpResponseHeaders.WwwAuthenticate.First(v => string.Equals(v.Scheme, Constants.BearerAuthHeaderPrefix, StringComparison.OrdinalIgnoreCase));
+                string wwwAuthenticateValue = bearer.Parameter;
+                var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
+                parameters.Scheme = Constants.BearerAuthHeaderPrefix;
+                return parameters;
+            }
+
+            return null;
+        }
+
+        private static WwwAuthenticateParameters ParsePopParameters(HttpResponseHeaders httpResponseHeaders)
+        {
+            if (httpResponseHeaders.WwwAuthenticate != null)
+            {
+                string wwwAuthenticateValue = httpResponseHeaders.WwwAuthenticate.ToString();
+                var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
+
+                parameters.Scheme = Constants.PoPAuthHeaderPrefix;
+
+                return parameters;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -131,16 +181,38 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Create a list of the known authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
+        /// </summary>
+        /// <param name="resourceUri">URI of the resource.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>a list of WWW-Authenticate Parameters extracted from a response to the unauthenticated call.</returns>
+        public static async Task<IEnumerable<WwwAuthenticateParameters>> CreateKnownParametersFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
+        {
+            List<WwwAuthenticateParameters> parameterList = new List<WwwAuthenticateParameters>();
+
+            foreach (string scheme in s_knownAuthenticationSchemes)
+            {
+                var parameter = await CreateFromResourceResponseAsync(resourceUri, cancellationToken, scheme).ConfigureAwait(false);
+
+                if (parameter != null && string.IsNullOrEmpty(parameter.Scheme))
+                parameterList.Add(parameter);
+            }
+
+            return parameterList;
+        }
+
+        /// <summary>
         /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
+        public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default, string scheme = "Bearer")
         {
             var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
             var httpClient = httpClientFactory.GetHttpClient();
-            return CreateFromResourceResponseAsync(httpClient, resourceUri, cancellationToken);
+            return CreateFromResourceResponseAsync(httpClient, resourceUri, cancellationToken, scheme);
         }
 
         /// <summary>
@@ -149,8 +221,9 @@ namespace Microsoft.Identity.Client
         /// <param name="httpClient">Instance of <see cref="HttpClient"/> to make the request with.</param>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
+        public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default, string scheme = "Bearer")
         {
             if (httpClient is null)
             {
@@ -163,7 +236,7 @@ namespace Microsoft.Identity.Client
 
             // call this endpoint and see what the header says and return that
             HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);
-            var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers);
+            var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers, scheme);
             return wwwAuthParam;
         }
 
@@ -229,6 +302,11 @@ namespace Microsoft.Identity.Client
             if (values.TryGetValue("error", out value))
             {
                 wwwAuthenticateParameters.Error = value;
+            }
+
+            if (values.TryGetValue("WWWAuthenticate: PoP nonce", out value))
+            {
+                wwwAuthenticateParameters.ServerNonce = value.Replace("\"", string.Empty);
             }
 
             return wwwAuthenticateParameters;
