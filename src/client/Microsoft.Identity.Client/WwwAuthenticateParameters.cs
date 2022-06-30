@@ -195,7 +195,9 @@ namespace Microsoft.Identity.Client
                 var parameter = await CreateFromResourceResponseAsync(resourceUri, cancellationToken, scheme).ConfigureAwait(false);
 
                 if (parameter != null && string.IsNullOrEmpty(parameter.Scheme))
-                parameterList.Add(parameter);
+                {
+                    parameterList.Add(parameter);
+                }
             }
 
             return parameterList;
