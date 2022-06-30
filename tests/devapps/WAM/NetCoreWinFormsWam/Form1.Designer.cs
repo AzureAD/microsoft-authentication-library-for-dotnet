@@ -56,11 +56,12 @@
             this.cbxListOsAccounts = new System.Windows.Forms.CheckBox();
             this.cbxUseWam = new System.Windows.Forms.ComboBox();
             this.cbxPOP = new System.Windows.Forms.CheckBox();
+            this.btnATSperf = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // resultTbx
             // 
-            this.resultTbx.Location = new System.Drawing.Point(12, 256);
+            this.resultTbx.Location = new System.Drawing.Point(12, 299);
             this.resultTbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.resultTbx.Multiline = true;
             this.resultTbx.Name = "resultTbx";
@@ -160,7 +161,7 @@
             this.atsBtn.Location = new System.Drawing.Point(14, 205);
             this.atsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atsBtn.Name = "atsBtn";
-            this.atsBtn.Size = new System.Drawing.Size(88, 27);
+            this.atsBtn.Size = new System.Drawing.Size(126, 27);
             this.atsBtn.TabIndex = 11;
             this.atsBtn.Text = "ATS";
             this.atsBtn.UseVisualStyleBackColor = true;
@@ -168,10 +169,10 @@
             // 
             // atiBtn
             // 
-            this.atiBtn.Location = new System.Drawing.Point(108, 205);
+            this.atiBtn.Location = new System.Drawing.Point(155, 205);
             this.atiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atiBtn.Name = "atiBtn";
-            this.atiBtn.Size = new System.Drawing.Size(88, 27);
+            this.atiBtn.Size = new System.Drawing.Size(126, 27);
             this.atiBtn.TabIndex = 12;
             this.atiBtn.Text = "ATI";
             this.atiBtn.UseVisualStyleBackColor = true;
@@ -179,10 +180,10 @@
             // 
             // atsAtiBtn
             // 
-            this.atsAtiBtn.Location = new System.Drawing.Point(203, 205);
+            this.atsAtiBtn.Location = new System.Drawing.Point(296, 205);
             this.atsAtiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atsAtiBtn.Name = "atsAtiBtn";
-            this.atsAtiBtn.Size = new System.Drawing.Size(88, 27);
+            this.atsAtiBtn.Size = new System.Drawing.Size(126, 27);
             this.atsAtiBtn.TabIndex = 13;
             this.atsAtiBtn.Text = "ATS + ATI";
             this.atsAtiBtn.UseVisualStyleBackColor = true;
@@ -190,10 +191,10 @@
             // 
             // accBtn
             // 
-            this.accBtn.Location = new System.Drawing.Point(368, 205);
+            this.accBtn.Location = new System.Drawing.Point(297, 250);
             this.accBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.accBtn.Name = "accBtn";
-            this.accBtn.Size = new System.Drawing.Size(93, 27);
+            this.accBtn.Size = new System.Drawing.Size(126, 27);
             this.accBtn.TabIndex = 15;
             this.accBtn.Text = "Get Accounts";
             this.accBtn.UseVisualStyleBackColor = true;
@@ -201,7 +202,7 @@
             // 
             // clearBtn
             // 
-            this.clearBtn.Location = new System.Drawing.Point(642, 703);
+            this.clearBtn.Location = new System.Drawing.Point(642, 754);
             this.clearBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.clearBtn.Name = "clearBtn";
             this.clearBtn.Size = new System.Drawing.Size(79, 27);
@@ -212,7 +213,7 @@
             // 
             // btnClearCache
             // 
-            this.btnClearCache.Location = new System.Drawing.Point(595, 223);
+            this.btnClearCache.Location = new System.Drawing.Point(594, 250);
             this.btnClearCache.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnClearCache.Name = "btnClearCache";
             this.btnClearCache.Size = new System.Drawing.Size(126, 27);
@@ -292,7 +293,7 @@
             // 
             // btnExpire
             // 
-            this.btnExpire.Location = new System.Drawing.Point(595, 189);
+            this.btnExpire.Location = new System.Drawing.Point(595, 205);
             this.btnExpire.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnExpire.Name = "btnExpire";
             this.btnExpire.Size = new System.Drawing.Size(126, 27);
@@ -303,10 +304,10 @@
             // 
             // btnRemoveAccount
             // 
-            this.btnRemoveAccount.Location = new System.Drawing.Point(469, 205);
+            this.btnRemoveAccount.Location = new System.Drawing.Point(447, 250);
             this.btnRemoveAccount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnRemoveAccount.Name = "btnRemoveAccount";
-            this.btnRemoveAccount.Size = new System.Drawing.Size(104, 27);
+            this.btnRemoveAccount.Size = new System.Drawing.Size(126, 27);
             this.btnRemoveAccount.TabIndex = 25;
             this.btnRemoveAccount.Text = "Remove Acc";
             this.btnRemoveAccount.UseVisualStyleBackColor = true;
@@ -354,11 +355,23 @@
             this.cbxPOP.Text = "With Proof-of-Possesion";
             this.cbxPOP.UseVisualStyleBackColor = true;
             // 
+            // btnATSperf
+            // 
+            this.btnATSperf.Location = new System.Drawing.Point(14, 250);
+            this.btnATSperf.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnATSperf.Name = "btnATSperf";
+            this.btnATSperf.Size = new System.Drawing.Size(126, 27);
+            this.btnATSperf.TabIndex = 30;
+            this.btnATSperf.Text = "ATS Perf";
+            this.btnATSperf.UseVisualStyleBackColor = true;
+            this.btnATSperf.Click += new System.EventHandler(this.btnATSperf_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(735, 740);
+            this.ClientSize = new System.Drawing.Size(735, 794);
+            this.Controls.Add(this.btnATSperf);
             this.Controls.Add(this.cbxPOP);
             this.Controls.Add(this.cbxUseWam);
             this.Controls.Add(this.cbxListOsAccounts);
@@ -422,6 +435,7 @@
         private System.Windows.Forms.CheckBox cbxListOsAccounts;
         private System.Windows.Forms.ComboBox cbxUseWam;
         private System.Windows.Forms.CheckBox cbxPOP;
+        private System.Windows.Forms.Button btnATSperf;
     }
 }
 
