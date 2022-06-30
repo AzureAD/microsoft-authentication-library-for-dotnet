@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         null,
                         broker,
                         "install_url");
-#if NET5_WIN
+#if NET6_WIN
                 Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         _acquireTokenSilentParameters,
                         broker);
 
-#if NET5_WIN
+#if NET6_WIN
                 Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
@@ -573,7 +573,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-#if NET5_WIN
+#if NET6_WIN
         [TestMethod]
         public async Task BrokerGetAccountsWithBrokerInstalledTestAsync()
         {

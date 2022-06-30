@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
     <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
     <!-- https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype -->
     <!--<DebugType>pdbonly</DebugType>

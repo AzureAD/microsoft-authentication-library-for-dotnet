@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if DESKTOP || NET_CORE || NET5_WIN
+#if DESKTOP || NET_CORE || NET6_WIN
 
 using System;
 using Microsoft.Identity.Client.ApiConfig.Parameters;

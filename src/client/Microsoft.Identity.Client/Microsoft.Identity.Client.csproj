@@ -3,7 +3,7 @@
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
-    <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>
+    <TargetFrameworkNet6Win>net6.0-windows10.0.17763.0</TargetFrameworkNet6Win>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
   </PropertyGroup>
 
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNet5Win)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNet6Win)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -86,7 +86,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <DefineConstants>$(DefineConstants);HAVE_METHOD_IMPL_ATTRIBUTE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet5Win)' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)' ">
     <DefineConstants>$(DefineConstants);HAVE_METHOD_IMPL_ATTRIBUTE;$(AdditionalConstants)</DefineConstants>
     <UseWindowsForms>true</UseWindowsForms>
     <!-- 
@@ -166,13 +166,13 @@
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
-    
+
     <PackageReference Include="System.Text.Json" Version="6.0.5" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet5Win)' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Win)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(PathToMsalSources)\Platforms\net5win\**\*.cs" LinkBase="Platforms\net5win" />
+    <Compile Include="$(PathToMsalSources)\Platforms\net6win\**\*.cs" LinkBase="Platforms\net6win" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" />
@@ -203,7 +203,6 @@
     <Reference Include="System.Xml" />
 
     <PackageReference Include="System.Text.Json" Version="6.0.5" />
-
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />

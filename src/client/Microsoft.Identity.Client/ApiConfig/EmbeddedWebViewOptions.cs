@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
         {
 #if !SUPPORTS_WIN32
             throw new PlatformNotSupportedException(
-                "EmbeddedWebViewOptions API is only supported on .NET Fx, .NET Core and .NET5 ");
+                "EmbeddedWebViewOptions API is only supported on .NET Fx, .NET Core and .NET6");
 #endif
         }
     }

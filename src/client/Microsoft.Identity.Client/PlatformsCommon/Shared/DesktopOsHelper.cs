@@ -158,9 +158,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
 
             // Environment.UserInteractive is hard-coded to return true for POSIX and Windows platforms on .NET Core 2.x and 3.x.
-            // In .NET 5 the implementation on Windows has been 'fixed', but still POSIX versions always return true.
+            // In .NET 6 the implementation on Windows has been 'fixed', but still POSIX versions always return true.
             //
-            // This code is lifted from the .NET 5 targeting dotnet/runtime implementation for Windows:
+            // This code is lifted from the .NET 6 targeting dotnet/runtime implementation for Windows:
             // https://github.com/dotnet/runtime/blob/cf654f08fb0078a96a4e414a0d2eab5e6c069387/src/libraries/System.Private.CoreLib/src/System/Environment.Windows.cs#L125-L145
 
             // Per documentation of GetProcessWindowStation, this handle should not be closed

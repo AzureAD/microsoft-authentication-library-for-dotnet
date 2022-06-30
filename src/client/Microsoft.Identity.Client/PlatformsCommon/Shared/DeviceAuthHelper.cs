@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         //This corresponds to windows 7, 8, 8.1 and their server equivalents.       
         public static bool CanOSPerformPKeyAuth()
         {
-#if NET_CORE || NET5_WIN || DESKTOP || NETSTANDARD
+#if NET_CORE || NET6_WIN || DESKTOP || NETSTANDARD
             try
             {
                 return !DesktopOsHelper.IsWin10OrServerEquivalent();

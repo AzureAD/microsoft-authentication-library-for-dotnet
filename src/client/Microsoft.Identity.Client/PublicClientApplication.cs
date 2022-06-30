@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client
         /// <list type="bullet">
         /// <item><description>On Windows, the broker (WAM) can be used on Windows 10 and is always installed. See https://aka.ms/msal-net-wam </description></item>
         /// <item><description>On Mac, Linux, and older versions of Windows a broker is not available.</description></item>
-        /// <item><description>In .NET 5 apps, target <c>net5.0-windows10.0.17763.0</c> for all Windows versions and target <c>net5.0</c> for Linux and Mac.</description></item>
+        /// <item><description>In .NET 6 apps, target <c>net6.0-windows10.0.17763.0</c> for all Windows versions and target <c>net6.0</c> for Linux and Mac.</description></item>
         /// <item><description>In .NET classic or .NET Core 3.1 apps, install Microsoft.Identity.Client.Desktop first and call <c>WithDesktopFeatures()</c>.</description></item>
         /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
         /// </list>

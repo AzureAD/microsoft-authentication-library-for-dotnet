@@ -15,16 +15,16 @@ using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 #endif
 
-#if NET5_WIN
-using Microsoft.Identity.Client.Platforms.net5win;
-using AccountsSettingsPaneInterop = Microsoft.Identity.Client.Platforms.net5win.AccountsSettingsPaneInterop;
+#if NET6_WIN
+using Microsoft.Identity.Client.Platforms.net6win;
+using AccountsSettingsPaneInterop = Microsoft.Identity.Client.Platforms.net6win.AccountsSettingsPaneInterop;
 #elif DESKTOP || NET_CORE
 using Microsoft.Identity.Client.Platforms;
 #endif
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
-#if NET5_WIN
+#if NET6_WIN
     [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
     internal class AccountPicker : IAccountPicker
