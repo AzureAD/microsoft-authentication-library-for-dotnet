@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Client.Broker
             //if OperatingSystemAccount is passed then we use the user signed-in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(account))
             {
-                throw new MsalException("wam_remove_account_failed", "Could not remove the default os account");
+                throw new MsalServiceException("wam_remove_account_failed", "Could not remove the default os account");
             }
 
             _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Client.Broker
                             $"Could not find a WAM account for the selected user {account.Username}",
                             $"Could not find a WAM account for the selected user {readAccountResult.Error}");
 
-                        throw new MsalException("wam_no_account_found", $"Could not find a WAM account for the selected user {readAccountResult.Error}");
+                        throw new MsalServiceException("wam_no_account_found", $"Could not find a WAM account for the selected user {readAccountResult.Error}");
                     }
                     
                     using (NativeInterop.SignOutResult result = await core.SignOutSilentlyAsync(
