@@ -21,7 +21,21 @@ steps:
   inputs:
     restoreSolution: LibsMacOS.sln
 
-- task: XamariniOS@1
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 5.x'
+  inputs:
+    version: 5.x
+
+- task: InstallAppleCertificate@2
+  inputs:
+    certSecureFile: '$(Agent.TempDirectory)/AppCenteriOSBuildCert.p12'
+    certPwd: '$(AppCenterDotNetiOSTestCertPassword)'
+    
+- task: InstallAppleProvisioningProfile@1
+  inputs:
+    provProfileSecureFile: '$(Agent.TempDirectory)/TestFile.mobileprovision'
+
+- task: XamariniOS@2
   displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
   inputs:
     solutionFile: LibsMacOS.sln
@@ -29,10 +43,9 @@ steps:
     clean: true
     runNugetRestore: false
     args: '/p:APPCENTER_BUILD=1 /p:RunCodeAnalysis=false'
-    buildToolOption: msbuild
-    signingP12File: '$(Agent.TempDirectory)/AppCenteriOSBuildCert.p12'
-    signingP12Password: '$(AppCenterDotNetiOSTestCertPassword)'
-    signingProvisioningProfileFile: '$(Agent.TempDirectory)/TestFile.mobileprovision'
+    buildToolLocation: $(Agent.ToolsDirectory)/dotnet
+    signingIdentity: '$(APPLE_CERTIFICATE_SIGNING_IDENTITY)'
+    signingProvisioningProfileID: '$(APPLE_PROV_PROFILE_UUID)'
 
 - task: CopyFiles@2
   displayName: 'Copy ipa to staging directory'
