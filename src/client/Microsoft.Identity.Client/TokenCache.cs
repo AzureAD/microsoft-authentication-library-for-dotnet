@@ -10,6 +10,7 @@ using System.Linq;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache.Prototype;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -38,6 +39,9 @@ namespace Microsoft.Identity.Client
         private volatile bool _hasStateChanged;
 
         internal ITokenCacheAccessor Accessor { get; set; }
+
+
+        internal IdentityCacheWrapper IdentityCacheWrapper { get; set; }
 
         internal IServiceBundle ServiceBundle { get; }
         internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
@@ -69,7 +73,11 @@ namespace Microsoft.Identity.Client
         {
         }
 
-        internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache, ICacheSerializationProvider optionalDefaultSerializer = null)
+        internal TokenCache(
+            IServiceBundle serviceBundle,
+            bool isApplicationTokenCache,
+            ICacheSerializationProvider optionalDefaultSerializer = null,
+            IdentityCacheWrapper identityCacheWrapper = null)
         {
             if (serviceBundle == null)
                 throw new ArgumentNullException(nameof(serviceBundle));
@@ -94,6 +102,8 @@ namespace Microsoft.Identity.Client
 
             // Must happen last, this code can access things like _accessor and such above.
             ServiceBundle = serviceBundle;
+
+            IdentityCacheWrapper = identityCacheWrapper;
         }
 
         /// <summary>
@@ -103,8 +113,9 @@ namespace Microsoft.Identity.Client
             IServiceBundle serviceBundle,
             ILegacyCachePersistence legacyCachePersistenceForTest,
             bool isApplicationTokenCache,
-            ICacheSerializationProvider optionalDefaultCacheSerializer = null)
-            : this(serviceBundle, isApplicationTokenCache, optionalDefaultCacheSerializer)
+            ICacheSerializationProvider optionalDefaultCacheSerializer = null,
+            IdentityCacheWrapper identityCacheWrapper = null)
+            : this(serviceBundle, isApplicationTokenCache, optionalDefaultCacheSerializer, identityCacheWrapper)
         {
             LegacyCachePersistence = legacyCachePersistenceForTest;
         }
@@ -118,12 +129,12 @@ namespace Microsoft.Identity.Client
 #endif
         }
 
-        private void UpdateAppMetadata(string clientId, string environment, string familyId)
+        private void UpdateAppMetadata(string clientId, string environment, string familyId, ITokenCacheAccessor accessor)
         {
             if (_featureFlags.IsFociEnabled)
             {
                 var metadataCacheItem = new MsalAppMetadataCacheItem(clientId, environment, familyId);
-                Accessor.SaveAppMetadata(metadataCacheItem);
+                accessor.SaveAppMetadata(metadataCacheItem);
             }
         }
 
@@ -138,7 +149,8 @@ namespace Microsoft.Identity.Client
             string tenantId,
             HashSet<string> scopeSet,
             string homeAccountId,
-            string tokenType)
+            string tokenType,
+            ITokenCacheAccessor accessor = null)
         {
             if (requestParams.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
@@ -151,7 +163,7 @@ namespace Microsoft.Identity.Client
             var partitionKeyFromResponse = CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId);
             Debug.Assert(partitionKeyFromResponse != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
-            foreach (var accessToken in Accessor.GetAllAccessTokens(partitionKeyFromResponse))
+            foreach (var accessToken in (accessor ?? Accessor).GetAllAccessTokens(partitionKeyFromResponse))
             {
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&

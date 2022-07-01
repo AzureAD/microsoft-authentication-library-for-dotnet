@@ -10,13 +10,14 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
+using Microsoft.Identity.Client.Cache.Prototype;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
- 
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -62,18 +63,26 @@ namespace Microsoft.Identity.Client
 
         internal ITokenCacheInternal UserTokenCacheInternal { get; }
 
+        /// <summary>
+        /// TokenCache instance for implementation of IIdentityCache
+        /// </summary>
+        internal IdentityCacheWrapper IdentityCacheWrapper { get; }
+
         internal ClientApplicationBase(ApplicationConfiguration config)
         {
             ServiceBundle = Internal.ServiceBundle.Create(config);
             ICacheSerializationProvider defaultCacheSerialization = ServiceBundle.PlatformProxy.CreateTokenCacheBlobStorage();
 
+            // For this prototype, legacy cache serialization is disregarded, use user-provided or default IIdentityCacheImplementation.
+            IdentityCacheWrapper = new IdentityCacheWrapper(config.AccessorOptions);
+
             if (config.UserTokenLegacyCachePersistenceForTest != null)
             {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest, false, defaultCacheSerialization);
+                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest, false, defaultCacheSerialization, identityCacheWrapper: IdentityCacheWrapper);
             }
             else
             {
-                UserTokenCacheInternal = config.UserTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, false, defaultCacheSerialization);
+                UserTokenCacheInternal = config.UserTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, false, defaultCacheSerialization, identityCacheWrapper: IdentityCacheWrapper);
             }
         }
 

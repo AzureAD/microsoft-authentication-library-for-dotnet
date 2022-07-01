@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Identity.ServiceEssentials;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -40,6 +42,24 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="identityCache"></param>
+        public CacheOptions(IIdentityCache identityCache)
+        {
+            IdentityCache = identityCache;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="identityCache"></param>
+        public CacheOptions(int sizeLimit)
+        {
+            SizeLimit = sizeLimit;
+        }
+
+        /// <summary>
         /// Share the cache between all ClientApplication objects. The cache becomes static. Defaults to false.
         /// </summary>
         /// <remarks>
@@ -50,5 +70,14 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool UseSharedCache { get; set; }
 
+        /// <summary>
+        /// User-provided instance of <c>IIdentityCache</c>
+        /// </summary>
+        public IIdentityCache IdentityCache { get; }
+
+        /// <summary>
+        /// Max count of items in the default in-memory cache with eviction
+        /// </summary>
+        public int SizeLimit { get; }
     }
 }

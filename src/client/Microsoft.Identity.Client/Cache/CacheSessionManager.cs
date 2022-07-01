@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Cache
         public async Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
             await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
-            return TokenCacheInternal.GetIdTokenCacheItem(accessTokenCacheItem);
+            return await TokenCacheInternal.GetIdTokenCacheItemAsync(accessTokenCacheItem).ConfigureAwait(false);
         }
 
         public async Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)
@@ -118,15 +118,15 @@ namespace Microsoft.Identity.Client.Cache
                                 var args = new TokenCacheNotificationArgs(
                                   TokenCacheInternal,
                                   _requestParams.AppConfig.ClientId,
-                                  _requestParams.Account,                                  
+                                  _requestParams.Account,
                                   hasStateChanged: false,
                                   isApplicationCache: TokenCacheInternal.IsApplicationCache,
                                   suggestedCacheKey: key,
                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
-                                  correlationId: _requestParams.RequestContext.CorrelationId, 
-                                  requestScopes: _requestParams.Scope, 
+                                  correlationId: _requestParams.RequestContext.CorrelationId,
+                                  requestScopes: _requestParams.Scope,
                                   requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId);
 
                                 stopwatch.Start();

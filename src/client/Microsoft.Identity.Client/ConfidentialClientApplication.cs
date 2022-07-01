@@ -44,9 +44,9 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
+            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true, identityCacheWrapper: IdentityCacheWrapper);
             Certificate = configuration.ClientCredentialCertificate;
-            
+
             this.ServiceBundle.ApplicationLogger.Verbose($"ConfidentialClientApplication {configuration.GetHashCode()} created");
         }
 

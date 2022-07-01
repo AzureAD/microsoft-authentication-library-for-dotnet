@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var accounts = app.UserTokenCacheInternal.GetAccountsAsync(reqParams).Result;
                 foreach (IAccount account in accounts)
                 {
-                    (app.UserTokenCacheInternal as TokenCache).RemoveAccountInternal(account, requestContext);
+                    (app.UserTokenCacheInternal as TokenCache).RemoveAccountInternalAsync(account, requestContext);
                 }
 
                 Assert.AreEqual(0, httpManager.QueueSize);
