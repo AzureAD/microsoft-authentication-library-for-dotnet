@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.2.32616.157
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32428.217
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9B0B5396-4D95-4C15-82ED-DC22B5A3123F}"
 EndProject
@@ -175,7 +175,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.MsalNode",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KerberosConsole", "tests\devapps\KerberosConsole\KerberosConsole.csproj", "{94F35780-220A-4C08-83B9-41168F7017CD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Net6TestApp", "tests\devapps\Net6TestApp\Net6TestApp.csproj", "{998D38B3-344C-4F19-833E-6181B0834AF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Net5TestApp", "tests\devapps\Net5TestApp\Net5TestApp.csproj", "{998D38B3-344C-4F19-833E-6181B0834AF6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApi", "WebApi", "{CC07F293-91B9-45A3-AA3A-77885BBCB624}"
 EndProject

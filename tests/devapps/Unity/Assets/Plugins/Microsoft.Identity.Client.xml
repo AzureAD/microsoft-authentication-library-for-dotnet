@@ -1923,7 +1923,7 @@
             <remarks>
             On Windows, the broker (WAM) can be used on Win10 and is always installed. See https://aka.ms/msal-net-wam
             On Mac, Linux and older versions of Windows a broker is not available.
-            If your application is .NET6, please use the target .net6.0-windows10.0.17763.0 for all Windows versions and target net6.0 to target Linux and Mac.
+            If your application is .NET5, please use the target .net5.0-windows10.0.17763.0 for all Windows versions and target net5.0 to target Linux and Mac.
             If your application is .NET classic or .NET Core 3.1 and you wish to use the Windows Broker, please install Microsoft.Identity.Client.Desktop first and call WithDesktopFeatures().
             
             On mobile, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers

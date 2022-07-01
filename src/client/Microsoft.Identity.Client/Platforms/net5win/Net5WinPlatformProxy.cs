@@ -9,20 +9,20 @@ using Microsoft.Identity.Client.Platforms.netcore;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Platforms.net6win
+namespace Microsoft.Identity.Client.Platforms.net5win
 {
     /// <summary>
     ///     Platform / OS specific logic.
     /// </summary>
-    internal class Net6WinPlatformProxy : NetCorePlatformProxy
+    internal class Net5WinPlatformProxy : NetCorePlatformProxy
     {
         /// <inheritdoc />
-        public Net6WinPlatformProxy(ILoggerAdapter logger)
+        public Net5WinPlatformProxy(ILoggerAdapter logger)
             : base(logger)
         {
         }
 
-#if NET6_WIN
+#if NET5_WIN
         [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)

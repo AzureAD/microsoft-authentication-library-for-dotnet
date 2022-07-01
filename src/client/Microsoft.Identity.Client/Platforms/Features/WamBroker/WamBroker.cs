@@ -27,7 +27,7 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Utils.Windows;
 #endif
 
-#if DESKTOP || NET6_WIN
+#if DESKTOP || NET5_WIN
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Runtime.Versioning;
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     /// Important: all the WAM code has Win10 specific types and MUST be guarded against
     /// usage on older Windows, Mac and Linux, otherwise TypeLoadExceptions occur
     /// </summary>
-#if NET6_WIN
+#if NET5_WIN
     [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
     internal class WamBroker : IBroker
@@ -470,7 +470,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return IntPtr.Zero;
 #endif
 
-#if DESKTOP || NET6_WIN // net core doesn't reference WinForms
+#if DESKTOP || NET5_WIN // net core doesn't reference WinForms
 
             if (uiParent?.OwnerWindow is IWin32Window window)
             {
@@ -479,7 +479,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
 #endif
 
-#if DESKTOP || NET6_WIN || NET_CORE
+#if DESKTOP || NET5_WIN || NET_CORE
 
             if (uiParent?.OwnerWindow is IntPtr ptr)
             {

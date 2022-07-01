@@ -15,7 +15,7 @@ using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
 {
-#if NET6_WIN
+#if NET5_WIN
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
     internal class WebView2WebUi : IWebUI

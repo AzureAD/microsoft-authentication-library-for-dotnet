@@ -11,16 +11,16 @@ using Windows.Security.Credentials;
 using System.Threading;
 using System.Diagnostics.Tracing;
 
-#if NET6_WIN
-using Microsoft.Identity.Client.Platforms.net6win;
-using WebAuthenticationCoreManagerInterop = Microsoft.Identity.Client.Platforms.net6win.WebAuthenticationCoreManagerInterop;
+#if NET5_WIN
+using Microsoft.Identity.Client.Platforms.net5win;
+using WebAuthenticationCoreManagerInterop = Microsoft.Identity.Client.Platforms.net5win.WebAuthenticationCoreManagerInterop;
 #elif DESKTOP || NET_CORE
 using Microsoft.Identity.Client.Platforms;
 #endif
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
-#if NET6_WIN
+#if NET5_WIN
     [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
     internal class WamProxy : IWamProxy

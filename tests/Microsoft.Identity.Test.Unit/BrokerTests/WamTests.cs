@@ -22,7 +22,7 @@ using Windows.Security.Credentials;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
-#if !NET6_WIN
+#if !NET5_WIN
 using Microsoft.Identity.Client.Desktop;
 #endif
 
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAuthority(TestConstants.AuthorityTenant);
 
-#if !NET6_WIN
+#if !NET5_WIN
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var pcaBuilder = PublicClientApplicationBuilder
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAdfsAuthority(TestConstants.ADFSAuthority);
-#if !NET6_WIN
+#if !NET5_WIN
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 

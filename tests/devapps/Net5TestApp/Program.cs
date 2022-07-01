@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 
-namespace Net6TestApp
+namespace Net5TestApp
 {
     class Program
     {

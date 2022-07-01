@@ -16,7 +16,7 @@ using UIKit;
 using Android.App;
 #endif
 
-#if DESKTOP || NET6_WIN
+#if DESKTOP || NET5_WIN
 using System.Windows.Forms;
 #endif
 
@@ -175,9 +175,9 @@ namespace Microsoft.Identity.Client
             if (Config.BrokerCreatorFunc == null && DesktopOsHelper.IsWindows())
             {
                 throw new PlatformNotSupportedException(
-                    "If you have a Windows application which targets net6 or net6-windows, please change the target to net6-windows10.0.17763.0. \nYour app can still run on earlier versions of Windows such as Win7 if you add <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion> in the csproj.\n The broker (WAM) is available only on Win10 and this library will fallback to a browser on older systems. " +
+                    "If you have a Windows application which targets net5 or net5-windows, please change the target to net5-windows10.0.17763.0. \nYour app can still run on earlier versions of Windows such as Win7 if you add <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion> in the csproj.\n The broker (WAM) is available only on Win10 and this library will fallback to a browser on older systems. " +
 
-                    "\n\r\n\rIf you have a NET6 cross-platform (Windows, Mac, Linux) application, please dual target net6 and net6-windows10.0.17763.0. Your installer should deploy the net6 version on Mac and Linux and the net6-window10.0.17763.0 on Windows." +
+                    "\n\r\n\rIf you have a NET5 cross-platform (Windows, Mac, Linux) application, please dual target net5 and net5-windows10.0.17763.0. Your installer should deploy the net5 version on Mac and Linux and the net5-window10.0.17763.0 on Windows." +
                     "\n\r\n\rIf you have a .NET Core 3.1 application, please install the NuGet package named Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsBroker() first. " +
                     "\n\r\n\rIf you want to try the new broker preview, please install the NuGet package named Microsoft.Identity.Client.Broker and call the extension method .WithBrokerPreview(). " +
                     "\n\rFor details see https://aka.ms/msal-net-wam and https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md ");
@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET6_WIN
+#if DESKTOP || NET5_WIN
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET6_WIN || NET_CORE
+#if DESKTOP || NET5_WIN || NET_CORE
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
@@ -337,7 +337,7 @@ namespace Microsoft.Identity.Client
         /// <list type="bullet">
         /// <item><description>On Windows, the broker (WAM) can be used on Windows 10 and is always installed. See https://aka.ms/msal-net-wam </description></item>
         /// <item><description>On Mac, Linux, and older versions of Windows a broker is not available.</description></item>
-        /// <item><description>In .NET 6 apps, target <c>net6.0-windows10.0.17763.0</c> for all Windows versions and target <c>net6.0</c> for Linux and Mac.</description></item>
+        /// <item><description>In .NET 5 apps, target <c>net5.0-windows10.0.17763.0</c> for all Windows versions and target <c>net5.0</c> for Linux and Mac.</description></item>
         /// <item><description>In .NET classic or .NET Core 3.1 apps, install Microsoft.Identity.Client.Desktop first and call <c>WithDesktopFeatures()</c>.</description></item>
         /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
         /// </list>

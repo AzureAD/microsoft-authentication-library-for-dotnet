@@ -12,7 +12,7 @@ using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 using WinRT;
 
-namespace Microsoft.Identity.Client.Platforms.net6win
+namespace Microsoft.Identity.Client.Platforms.net5win
 {
     [SupportedOSPlatform("windows10.0.17763.0")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "Uses a non-traditional method of async")]

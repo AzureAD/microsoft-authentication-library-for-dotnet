@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
-#if !NET6_WIN
+#if !NET5_WIN
 using Microsoft.Identity.Client.Desktop;
 #endif
 using Microsoft.Identity.Client.Internal;
@@ -623,9 +623,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
         }
 
-#if NET6_WIN
+#if NET5_WIN
         [TestMethod]
-        public void IsBrokerAvailable_net6()
+        public void IsBrokerAvailable_net5()
         {
             var appBuilder = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
