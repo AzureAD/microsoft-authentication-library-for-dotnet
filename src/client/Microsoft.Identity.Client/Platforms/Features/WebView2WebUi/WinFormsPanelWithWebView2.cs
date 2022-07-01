@@ -84,32 +84,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         {
             DialogResult uiResult = DialogResult.None;
 
-            // Setup a Task to listen for cancellation
-            // On Cancellation we need to Close the Dialog if it's open
-            // We also need to Stop the Task when the Dialog is finished.
-            var cts = new CancellationTokenSource();
-            
-            Task.Run(() =>
+            using (cancellationToken.Register(CloseIfOpen))
             {
-                while (true)
-                {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        if (Application.OpenForms.OfType<WinFormsPanelWithWebView2>().Any())
-                        {
-                            InvokeOnly(Close);
-                            cts.Cancel();
-                            return;
-                        }
-                    }
-
-                    Thread.Sleep(100);
-                }
-            }, cts.Token);
-
-            InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(_ownerWindow));
-            cancellationToken.ThrowIfCancellationRequested();
-            
+                InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(_ownerWindow));
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+             
             switch (uiResult)
             {
                 case DialogResult.OK:
@@ -121,6 +101,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                     throw new MsalClientException(
                         "webview2_unexpectedResult",
                         "WebView2 returned an unexpected result: " + uiResult);
+            }
+        }
+
+        private void CloseIfOpen()
+        {
+            if (Application.OpenForms.OfType<WinFormsPanelWithWebView2>().Any())
+            {
+                InvokeOnly(Close);
             }
         }
 

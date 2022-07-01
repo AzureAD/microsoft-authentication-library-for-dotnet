@@ -63,33 +63,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         public void ShowBrowser(CancellationToken cancellationToken)
         {
             DialogResult uiResult = DialogResult.None;
-            
-            // Setup a Task to listen for cancellation
-            // On Cancellation we need to Close the Dialog if it's open
-            // We also need to Stop the Task when the Dialog is finished.
-            var cts = new CancellationTokenSource();
-            
-            Task.Run(() =>
+
+            using (cancellationToken.Register(CloseIfOpen))
             {
-                while (true)
-                {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        if (Application.OpenForms.OfType<WindowsFormsWebAuthenticationDialog>().Any())
-                        {
-                            InvokeOnly(Close);
-                            cts.Cancel();
-                            return;
-                        }
-                    }
-
-                    Thread.Sleep(100);
-                }
-            }, cts.Token);
-
-            InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(ownerWindow));
-            cancellationToken.ThrowIfCancellationRequested();
-
+                InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(ownerWindow));
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+            
             switch (uiResult)
             {
                 case DialogResult.OK:
@@ -99,6 +79,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                     break;
                 default:
                     throw CreateExceptionForAuthenticationUiFailed(_statusCode);
+            }
+        }
+
+        private void CloseIfOpen()
+        {
+            if (Application.OpenForms.OfType<WindowsFormsWebAuthenticationDialog>().Any())
+            {
+                InvokeOnly(Close);
             }
         }
 
