@@ -96,6 +96,15 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Please use AcquireTokenSilent(scopes, account) on the ConfidentialClientApplication object
+        /// </summary>
+        [Obsolete("Use AcquireTokenSilent(scopes, account)", true)]
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
+        {
+            return base.AcquireTokenSilent(scopes, loginHint);
+        }
+
+        /// <summary>
         /// Acquires an access token for this application (usually a Web API) from the authority configured in the application,
         /// in order to access another downstream protected web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
         /// See https://aka.ms/msal-net-on-behalf-of.
