@@ -176,11 +176,6 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
                     }
 
-                    if (requestParams.IsClientCredentialRequest)
-                    {
-                        suggestedWebCacheKey = msalAccessTokenCacheItem.GetKey().ToString();
-                    }
-
                     var accessor = await GetOrCreateAccessorAsync(suggestedWebCacheKey).ConfigureAwait(false);
 
                     // Don't cache PoP access tokens from broker
@@ -196,7 +191,15 @@ namespace Microsoft.Identity.Client
                             msalAccessTokenCacheItem.TokenType,
                             accessor);
 
-                        accessor.SaveAccessToken(msalAccessTokenCacheItem);
+                        if (requestParams.IsClientCredentialRequest)
+                        {
+                            DateTimeOffset? cacheExpiry = CalculateSuggestedCacheExpiry(accessor, logger);
+                            await IdentityCacheWrapper.SetAsync(msalAccessTokenCacheItem.GetKey().ToString(), msalAccessTokenCacheItem, cacheExpiry).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            accessor.SaveAccessToken(msalAccessTokenCacheItem);
+                        }
                     }
 
                     if (idToken != null)
@@ -220,7 +223,7 @@ namespace Microsoft.Identity.Client
                         response.FamilyId,
                         accessor);
 
-                    if (!((ITokenCacheInternal)this).IsAppSubscribedToSerializationEvents())
+                    if (!((ITokenCacheInternal)this).IsAppSubscribedToSerializationEvents() && !requestParams.IsClientCredentialRequest)
                     {
                         DateTimeOffset? cacheExpiry = CalculateSuggestedCacheExpiry(accessor, logger);
                         await IdentityCacheWrapper.SetAsync(suggestedWebCacheKey, accessor, cacheExpiry).ConfigureAwait(false);
@@ -428,6 +431,7 @@ namespace Microsoft.Identity.Client
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
+            var accessTokens = new List<MsalAccessTokenCacheItem>();
             // for client credential requests use cache item key as cache key.
             if (requestParams.IsClientCredentialRequest)
             {
@@ -437,7 +441,7 @@ namespace Microsoft.Identity.Client
                          requestParams.RequestContext)
                 .ConfigureAwait(false);
 
-                partitionKey = new MsalAccessTokenCacheKey(
+                var cacheItemKey = new MsalAccessTokenCacheKey(
                     instanceMetadata.PreferredCache,
                     requestParams.Authority.TenantId,
                     string.Empty,
@@ -445,9 +449,17 @@ namespace Microsoft.Identity.Client
                     string.Join(" ", requestParams.Scope.Where(s => !OAuth2Value.ReservedScopes.Contains(s))),
                     "Bearer"
                     ).ToString();
-            }
 
-            var accessTokens = (await GetOrCreateAccessorAsync(partitionKey).ConfigureAwait(false)).GetAllAccessTokens(optionalPartitionKey: null, logger);
+                var cachedEntry = await IdentityCacheWrapper.GetAsync<MsalAccessTokenCacheItem>(cacheItemKey).ConfigureAwait(false);
+                if (cachedEntry != null)
+                {
+                    accessTokens.Add(cachedEntry);
+                }
+            }
+            else
+            {
+                accessTokens = (await GetOrCreateAccessorAsync(partitionKey).ConfigureAwait(false)).GetAllAccessTokens(partitionKey, logger);
+            }
 
             requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
 
