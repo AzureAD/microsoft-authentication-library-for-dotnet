@@ -358,7 +358,7 @@ namespace NetDesktopWinForms
             var guid = Guid.NewGuid();
             var builder = pca.AcquireTokenInteractive(scopes)
                 .WithUseEmbeddedWebView(true)
-                //.WithExtraQueryParameters("dc=ESTS-PUB-WEULR1-AZ1-FD000-TEST1") //-- will force AAD login with browser
+                //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
                 //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
                 .WithEmbeddedWebViewOptions(
                 new EmbeddedWebViewOptions()
