@@ -63,7 +63,8 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      cd ../../../tests/devapps/MauiApps/MauiAppBasic
+      pwd
+      cd tests/devapps/MauiApps/MauiAppBasic
       dotnet build -f net6.0-maccatalyst -c Release -o ./artifacts
 
 # - task: XamariniOS@1
