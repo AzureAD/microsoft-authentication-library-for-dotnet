@@ -66,6 +66,7 @@ steps:
       pwd
       cd tests/devapps/MauiApps/MauiAppBasic
       dotnet build -f net6.0-maccatalyst -c Release -o ./artifacts
+      dotnet publish -f net6.0-maccatalyst -c Release -p:BuildIpa=True -o ./artifacts
 
 # - task: XamariniOS@1
 #   displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
@@ -80,16 +81,16 @@ steps:
 #     signingP12Password: '$(AppCenterDotNetiOSTestCertPassword)'
 #     signingProvisioningProfileFile: '$(Agent.TempDirectory)/TestFile.mobileprovision'
 
-# - task: CopyFiles@2
-#   displayName: 'Copy ipa to staging directory'
-#   inputs:
-#     SourceFolder: tests/devapps/XForms/XForms.iOS/bin/iPhone/Debug
-#     Contents: '**/*.ipa'
-#     TargetFolder: '$(Build.ArtifactStagingDirectory)'
-#     CleanTargetFolder: true
-#     OverWrite: true
+- task: CopyFiles@2
+  displayName: 'Copy artifacts to staging directory'
+  inputs:
+    SourceFolder: tests/devapps/MauiApps/MauiAppBasic/artifacts
+    Contents: '**/*.*'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    CleanTargetFolder: true
+    OverWrite: true
 
-# - task: PublishBuildArtifacts@1
-#   displayName: 'Publish Artifact: Xamarin.iOS'
-#   inputs:
-#     ArtifactName: Xamarin.iOS
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Xamarin.iOS'
+  inputs:
+    ArtifactName: Xamarin.iOS

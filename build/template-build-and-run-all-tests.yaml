@@ -109,19 +109,19 @@ jobs: #Build and stage projects
       DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
 # APP CENTER IOS MSAL TESTS PHASE
-- job: 'RunAppCenterIosMsalTests'
-  dependsOn:
-  - 'BuildAndStageProjects'
-  - 'BuildiOSAppCenterApp'
-  pool:
-    vmImage: 'windows-2022'
-  variables:
-    runCodesignValidationInjection: false
+# - job: 'RunAppCenterIosMsalTests'
+#   dependsOn:
+#   - 'BuildAndStageProjects'
+#   - 'BuildiOSAppCenterApp'
+#   pool:
+#     vmImage: 'windows-2022'
+#   variables:
+#     runCodesignValidationInjection: false
 
-  steps:
-  - template: template-ios-appcenter-tests.yaml
-    parameters:
-      DataFileDirectory: ${{ parameters.DataFileDirectory }}
+#   steps:
+#   - template: template-ios-appcenter-tests.yaml
+#     parameters:
+#       DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
 
 # Disabled as the build agent is not compliant. Tracking issue https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3066

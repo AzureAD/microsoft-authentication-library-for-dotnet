@@ -1240,16 +1240,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
 #if DESKTOP
         [TestMethod]
-        public void NetFwkPlatformAvailable()
+        public void NetFwkPlatformNotAvailable()
         {
-            // with Desktop upgraded to 4.6.2, this should not throw exception
-            _ = PublicClientApplicationBuilder
+            AssertException.Throws<PlatformNotSupportedException>(() =>
+                PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
                 .WithBroker()
-                .Build();
-
-            Assert.IsTrue(true, "Desktop runs 4.6.2 and above");
+                .Build());
         }
 #endif
 
