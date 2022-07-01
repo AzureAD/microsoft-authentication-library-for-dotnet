@@ -176,6 +176,11 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
                     }
 
+                    if (requestParams.IsClientCredentialRequest)
+                    {
+                        suggestedWebCacheKey = msalAccessTokenCacheItem.GetKey().ToString();
+                    }
+
                     var accessor = await GetOrCreateAccessorAsync(suggestedWebCacheKey).ConfigureAwait(false);
 
                     // Don't cache PoP access tokens from broker
@@ -423,7 +428,26 @@ namespace Microsoft.Identity.Client
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
-            var accessTokens = (await GetOrCreateAccessorAsync(partitionKey).ConfigureAwait(false)).GetAllAccessTokens(partitionKey, logger);
+            // for client credential requests use cache item key as cache key.
+            if (requestParams.IsClientCredentialRequest)
+            {
+                var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                         requestParams.AuthorityInfo,
+                         new[] { requestParams.Authority.AuthorityInfo.Host },  // if all environments are known, a network call can be avoided
+                         requestParams.RequestContext)
+                .ConfigureAwait(false);
+
+                partitionKey = new MsalAccessTokenCacheKey(
+                    instanceMetadata.PreferredCache,
+                    requestParams.Authority.TenantId,
+                    string.Empty,
+                    ClientId,
+                    string.Join(" ", requestParams.Scope.Where(s => !OAuth2Value.ReservedScopes.Contains(s))),
+                    "Bearer"
+                    ).ToString();
+            }
+
+            var accessTokens = (await GetOrCreateAccessorAsync(partitionKey).ConfigureAwait(false)).GetAllAccessTokens(optionalPartitionKey: null, logger);
 
             requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
 
