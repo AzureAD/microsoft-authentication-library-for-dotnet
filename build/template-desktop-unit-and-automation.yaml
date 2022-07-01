@@ -6,9 +6,9 @@ steps:
     version: 3.x
 
 - task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 6.x'
+  displayName: 'Use .Net Core SDK 5.x'
   inputs:
-    version: 6.x
+    version: 5.x
     includePreviewVersions: true
 
 - task: DownloadBuildArtifacts@0
