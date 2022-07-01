@@ -18,7 +18,7 @@ steps:
     flattenFolders: true
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore'
+  displayName: 'dotnet workload restore for Identity.Client'
   inputs:
     command: 'custom'
     custom: 'workload'

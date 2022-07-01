@@ -10,7 +10,7 @@ steps:
     
 # Use the latest .NET SDK
 - task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 5.x'
+  displayName: 'Use .Net Core sdk 6.x'
   inputs:
     version: 6.x
     includePreviewVersions: true

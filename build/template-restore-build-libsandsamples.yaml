@@ -14,7 +14,7 @@ steps:
 
 #Restore workload with the .NET Core CLI task
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore'
+  displayName: 'dotnet workload restore for Desktop project'
   inputs:
     command: 'custom'
     custom: 'workload'
