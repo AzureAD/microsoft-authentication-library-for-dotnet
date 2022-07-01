@@ -97,7 +97,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                     {
                         if (Application.OpenForms.OfType<WinFormsPanelWithWebView2>().Any())
                         {
-                            InvokeHandlingOwnerWindow(Close);
+                            InvokeOnly(Close);
+                            cts.Cancel();
+                            return;
                         }
                     }
 
@@ -106,7 +108,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             }, cts.Token);
 
             InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(_ownerWindow));
-            cts.Cancel();
             cancellationToken.ThrowIfCancellationRequested();
             
             switch (uiResult)
@@ -144,6 +145,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             if (_ownerWindow != null && _ownerWindow is Control winFormsControl)
             {
                 winFormsControl.Invoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+
+        /// <summary>
+        /// Some calls need to be made on the UI thread and this is the central place to do so and if so, ensure we invoke on that proper thread.
+        /// </summary>
+        /// <param name="action"></param>
+        private void InvokeOnly(Action action)
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(action);
             }
             else
             {

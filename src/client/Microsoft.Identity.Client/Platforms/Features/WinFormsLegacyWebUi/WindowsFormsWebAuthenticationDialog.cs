@@ -3,7 +3,10 @@
 
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
@@ -46,21 +49,46 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
         /// <summary>
         /// </summary>
-        protected override void OnAuthenticate()
+        protected override void OnAuthenticate(CancellationToken cancellationToken)
         {
             _zoomed = false;
             _statusCode = 0;
-            ShowBrowser();
+            ShowBrowser(cancellationToken);
 
-            base.OnAuthenticate();
+            base.OnAuthenticate(cancellationToken);
         }
 
         /// <summary>
         /// </summary>
-        public void ShowBrowser()
+        public void ShowBrowser(CancellationToken cancellationToken)
         {
             DialogResult uiResult = DialogResult.None;
+            
+            // Setup a Task to listen for cancellation
+            // On Cancellation we need to Close the Dialog if it's open
+            // We also need to Stop the Task when the Dialog is finished.
+            var cts = new CancellationTokenSource();
+            
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        if (Application.OpenForms.OfType<WindowsFormsWebAuthenticationDialog>().Any())
+                        {
+                            InvokeOnly(Close);
+                            cts.Cancel();
+                            return;
+                        }
+                    }
+
+                    Thread.Sleep(100);
+                }
+            }, cts.Token);
+
             InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(ownerWindow));
+            cancellationToken.ThrowIfCancellationRequested();
 
             switch (uiResult)
             {
