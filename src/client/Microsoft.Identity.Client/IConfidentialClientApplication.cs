@@ -76,6 +76,12 @@ namespace Microsoft.Identity.Client
         AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(IEnumerable<string> scopes, UserAssertion userAssertion);
 
         /// <summary>
+        /// Please use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
+        /// </summary>
+        [Obsolete("Use AcquireTokenSilent(scopes, account)", true)]
+        AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint);
+
+        /// <summary>
         /// [V3 API] Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
         /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
         /// This override enables you to specify a login hint and extra query parameter.

@@ -1517,12 +1517,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                oboCacheKey);
             PublicClientApplicationTests.CheckBuilderCommonMethods(longRunningOboBuilder);
 
-            var silentBuilder = app.AcquireTokenSilent(TestConstants.s_scope, "user@contoso.com")
-                .WithForceRefresh(false);
-
-            PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
-
-            silentBuilder = app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user)
+            var silentBuilder = app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user)
                .WithForceRefresh(true);
             PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
 

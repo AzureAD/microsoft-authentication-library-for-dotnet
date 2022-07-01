@@ -90,17 +90,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = CreateCCA();
 
             // Asserts
-            // Silent calls should throw
-            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
-                cca.AcquireTokenSilent(s_scopes, user1.Upn)
-                    .ExecuteAsync(CancellationToken.None)
-            ).ConfigureAwait(false);
-
-            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
-                cca.AcquireTokenSilent(s_scopes, user2.Upn)
-                    .ExecuteAsync(CancellationToken.None)
-            ).ConfigureAwait(false);
-
             // User1 - no AT, RT in cache - retrieves from IdP
             var authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(user1AuthResult.AccessToken))
                 .ExecuteAsync(CancellationToken.None)
@@ -136,15 +125,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(2, oboTokens.Count);
 
             // Silent calls should throw
-            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
-                cca.AcquireTokenSilent(s_scopes, user1.Upn)
-                    .ExecuteAsync(CancellationToken.None)
-            ).ConfigureAwait(false);
-
-            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
-                cca.AcquireTokenSilent(s_scopes, user2.Upn)
-                    .ExecuteAsync(CancellationToken.None)
-            ).ConfigureAwait(false);
 
             IConfidentialClientApplication CreateCCA()
             {

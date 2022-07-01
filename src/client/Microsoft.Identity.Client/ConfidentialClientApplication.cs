@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Please use AcquireTokenSilent(scopes, account) on the ConfidentialClientApplication object
+        /// Please use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
         /// </summary>
         [Obsolete("Use AcquireTokenSilent(scopes, account)", true)]
         public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
