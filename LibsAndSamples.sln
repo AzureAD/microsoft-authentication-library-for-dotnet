@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32428.217
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9B0B5396-4D95-4C15-82ED-DC22B5A3123F}"
 EndProject
@@ -184,6 +184,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Intune-xamarin-Android", "tests\devapps\Intune-xamarin-Android\Intune-xamarin-Android.csproj", "{C6CA2F00-E48A-478F-ABC3-1FE3FE20286B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Broker", "src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj", "{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AriaTelemetryProvider", "tests\devapps\AriaTelemetryProvider\AriaTelemetryProvider.csproj", "{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1584,6 +1586,34 @@ Global
 		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|x64.Build.0 = Release|Any CPU
 		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|x86.ActiveCfg = Release|Any CPU
 		{6839F934-45F0-4026-8AF3-C3AEFB7D48A9}.Release|x86.Build.0 = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|ARM.Build.0 = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|x64.Build.0 = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Debug|x86.Build.0 = Debug|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|ARM.ActiveCfg = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|ARM.Build.0 = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|ARM64.Build.0 = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|iPhone.Build.0 = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|x64.ActiveCfg = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|x64.Build.0 = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|x86.ActiveCfg = Release|Any CPU
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1645,6 +1675,7 @@ Global
 		{CC07F293-91B9-45A3-AA3A-77885BBCB624} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{DD23D8FF-86BA-4E9F-8AF1-0EBE0D86986A} = {CC07F293-91B9-45A3-AA3A-77885BBCB624}
 		{C6CA2F00-E48A-478F-ABC3-1FE3FE20286B} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
+		{A4A15A55-1106-45CB-8F4B-A15A8E8DCA50} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020399A9-DC27-4B82-9CAA-EF488665AC27}

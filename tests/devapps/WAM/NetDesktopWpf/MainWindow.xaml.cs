@@ -100,7 +100,7 @@ namespace NetDesktopWpf
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
-            catch (MsalUiRequiredException ex)
+            catch (MsalUiRequiredException)
             {
                 try
                 {
@@ -144,7 +144,7 @@ namespace NetDesktopWpf
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
-            catch (MsalUiRequiredException ex)
+            catch (MsalUiRequiredException)
             {
                 try
                 {
