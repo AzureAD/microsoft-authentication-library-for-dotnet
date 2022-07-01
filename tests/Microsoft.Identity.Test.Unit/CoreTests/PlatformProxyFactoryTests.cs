@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             // Assert
             Assert.IsTrue(factory is 
-                Client.Platforms.net45.Http.NetDesktopHttpClientFactory);
+                Client.Platforms.net461.Http.NetDesktopHttpClientFactory);
         }
 #endif
 

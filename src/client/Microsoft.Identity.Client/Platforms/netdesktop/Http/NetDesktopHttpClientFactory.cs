@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Http;
 using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Client.Platforms.net45.Http
+namespace Microsoft.Identity.Client.Platforms.net461.Http
 {
     internal class NetDesktopHttpClientFactory : IMsalHttpClientFactory
     {

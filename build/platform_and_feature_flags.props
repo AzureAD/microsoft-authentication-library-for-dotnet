@@ -11,11 +11,8 @@
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
     <DefineConstants>$(DefineConstants);ANDROID;SUPPORTS_BROKER;IS_XAMARIN_OR_UWP</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
-    <DefineConstants>$(DefineConstants);DESKTOP;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)'">
-    <DefineConstants>$(DefineConstants);SUPPORTS_BROKER</DefineConstants>
+    <DefineConstants>$(DefineConstants);DESKTOP;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;SUPPORTS_BROKER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)'">
     <DefineConstants>$(DefineConstants);iOS;SUPPORTS_BROKER;IS_XAMARIN_OR_UWP</DefineConstants>

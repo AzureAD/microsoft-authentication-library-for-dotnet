@@ -158,11 +158,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             try
             {
-#if NET45
-                var OsVersionInfo = new OSVERSIONINFOEXW { dwOSVersionInfoSize = Marshal.SizeOf(typeof(OSVERSIONINFOEXW)) };
-#else
                 var OsVersionInfo = new OSVERSIONINFOEXW { dwOSVersionInfoSize = Marshal.SizeOf<OSVERSIONINFOEXW>() };
-#endif
                 if (RtlGetVersion(ref OsVersionInfo) == NT_STATUS_SUCCESS)
                 {
                     switch (OsVersionInfo.wProductType)

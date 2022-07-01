@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.net461
 {
     internal class NetDesktopDeviceAuthManager : DeviceAuthManager
     {

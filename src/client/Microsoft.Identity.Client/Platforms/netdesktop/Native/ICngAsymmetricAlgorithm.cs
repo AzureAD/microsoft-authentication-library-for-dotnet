@@ -10,7 +10,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Platforms.net45.Native
+namespace Microsoft.Identity.Client.Platforms.net461.Native
 {
     /// <summary>
     ///     Interface for asymmetric algorithms implemented over the CNG layer of Windows to provide CNG

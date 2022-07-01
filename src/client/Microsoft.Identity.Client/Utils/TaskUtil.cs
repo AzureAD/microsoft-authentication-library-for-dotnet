@@ -11,11 +11,7 @@ namespace Microsoft.Identity.Client.Utils
         {
             get
             {
-#if !NET45
-                    return Task.CompletedTask; 
-#else
-                return Task.WhenAll();
-#endif
+                return Task.CompletedTask; 
             }
         }
     }

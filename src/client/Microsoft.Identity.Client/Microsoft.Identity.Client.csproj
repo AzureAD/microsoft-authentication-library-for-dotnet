@@ -84,10 +84,10 @@
   <Import Project="../../../build/platform_and_feature_flags.props" />
 
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
-    <DefineConstants>$(DefineConstants);HAVE_METHOD_IMPL_ATTRIBUTE;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>$(DefineConstants);$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet5Win)' ">
-    <DefineConstants>$(DefineConstants);HAVE_METHOD_IMPL_ATTRIBUTE;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>$(DefineConstants);$(AdditionalConstants)</DefineConstants>
     <UseWindowsForms>true</UseWindowsForms>
     <!-- 
     MSAL will run on Windows 7 and 8 but requires to be built against Win10 to use WinRT APIs for WAM 
@@ -97,10 +97,10 @@
     <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
-    <DefineConstants>$(DefineConstants);HAVE_METHOD_IMPL_ATTRIBUTE;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>$(DefineConstants);$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-    <DefineConstants>$(DefineConstants);HAVE_METHOD_IMPL_ATTRIBUTE;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>$(DefineConstants);$(AdditionalConstants)</DefineConstants>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <AndroidResgenClass>Resource</AndroidResgenClass>
@@ -114,17 +114,17 @@
     <TargetFrameworkVersion>v10.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
-    <DefineConstants>$(DefineConstants);HAVE_METHOD_IMPL_ATTRIBUTE;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>$(DefineConstants);$(AdditionalConstants)</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)'">
-    <DefineConstants>$(DefineConstants);HAVE_METHOD_IMPL_ATTRIBUTE;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>$(DefineConstants);$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkMac)'">
-    <DefineConstants>$(DefineConstants);HAVE_METHOD_IMPL_ATTRIBUTE;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>$(DefineConstants);$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
-    <DefineConstants>$(DefineConstants);NETSTANDARD2_0;HAVE_METHOD_IMPL_ATTRIBUTE;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETSTANDARD2_0;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(APPCENTER_BUILD)' != ''">
     <DefineConstants>$(DefineConstants);IS_APPCENTER_BUILD</DefineConstants>

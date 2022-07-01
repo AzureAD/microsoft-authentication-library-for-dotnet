@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Identity.Client.Platforms.net45.Native
+namespace Microsoft.Identity.Client.Platforms.net461.Native
 {
     /// <summary>
     ///     Safe handle base class for safe handles which are associated with an additional data buffer that

@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 #elif NETSTANDARD2_0
             return new Microsoft.Identity.Client.Platforms.netstandard13.Netstandard13PlatformProxy(finalLogger);
 #elif DESKTOP
-            return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy(finalLogger);
+            return new Microsoft.Identity.Client.Platforms.net461.NetDesktopPlatformProxy(finalLogger);
 #else
             throw new PlatformNotSupportedException();
 #endif

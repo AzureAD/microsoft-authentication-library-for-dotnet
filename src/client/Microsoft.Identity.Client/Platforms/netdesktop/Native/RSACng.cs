@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Identity.Client.Platforms.net45.Native
+namespace Microsoft.Identity.Client.Platforms.net461.Native
 {
 
     /// <summary>

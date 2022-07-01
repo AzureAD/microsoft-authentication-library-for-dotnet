@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // By setting this to null, logging will fail, making the test fail.
             _logger = Substitute.For<ILoggerAdapter>();
 
-            // Use the net45 accessor for tests
+            // Use the net461 accessor for tests
             _legacyCachePersistence = new InMemoryLegacyCachePersistence();
         }
 

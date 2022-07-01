@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Client.Platforms.net45.Http
+namespace Microsoft.Identity.Client.Platforms.net461.Http
 {
     internal class DnsSensitiveClientHandler : DelegatingHandler
     {

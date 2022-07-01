@@ -11,19 +11,16 @@ using System.Security.Permissions;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
-using Microsoft.Identity.Client.Platforms.net45.Native;
+using Microsoft.Identity.Client.Platforms.net461.Native;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.net461
 {
     internal class NetDesktopCryptographyManager : ICryptographyManager
     {
-        private static readonly ConcurrentDictionary<string, RSACryptoServiceProvider> s_certificateToRsaCspMap = new ConcurrentDictionary<string, RSACryptoServiceProvider>();
-        private static readonly int s_maximumMapSize = 1000;
-
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             return string.IsNullOrEmpty(input) ? null : Base64UrlHelpers.Encode(CreateSha256HashBytes(input));
@@ -55,80 +52,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
       
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-#if NET45
-            var rsaCryptoProvider = GetCryptoProviderForSha256_Net45(certificate);
-            using (var sha = new SHA256Cng())
-            {
-                var signedData = rsaCryptoProvider.SignData(Encoding.UTF8.GetBytes(message), sha);
-                // Cache only valid RSA crypto providers, which are able to sign data successfully
-                s_certificateToRsaCspMap[certificate.Thumbprint] = rsaCryptoProvider;
-                return signedData;
-            }
-#else
             return CryptographyManager.SignWithCertificate(message, certificate);
-#endif
-        }
-
-        /// <summary>
-        /// Create a <see cref="RSACryptoServiceProvider"/> using the private key from the given <see cref="X509Certificate2"/>.
-        /// </summary>
-        /// <param name="certificate">Certificate including private key with which to initialize the <see cref="RSACryptoServiceProvider"/> with</param>
-        /// <returns><see cref="RSACryptoServiceProvider"/> initialized with private key from <paramref name="certificate"/></returns>
-        private static RSACryptoServiceProvider GetCryptoProviderForSha256_Net45(X509Certificate2 certificate)
-        {
-            RSACryptoServiceProvider rsaProvider;
-            try
-            {
-                if (!s_certificateToRsaCspMap.TryGetValue(certificate.Thumbprint, out rsaProvider))
-                    rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
-            }
-            catch (CryptographicException e)
-            {
-                throw new MsalClientException(
-                    MsalError.CryptoNet45,
-                    MsalErrorMessage.CryptoNet45,
-                    e);
-            }
-
-            if (rsaProvider == null)
-            {
-                throw new MsalClientException("The provided certificate has a key that is not accessible.");
-            }
-
-            const int PROV_RSA_AES = 24;    // CryptoApi provider type for an RSA provider supporting SHA-256 digital signatures
-
-            // ProviderType == 1(PROV_RSA_FULL) and providerType == 12(PROV_RSA_SCHANNEL) are provider types that only support SHA1.
-            // Change them to PROV_RSA_AES=24 that supports SHA2 also. Only levels up if the associated key is not a hardware key.
-            // Another provider type related to RSA, PROV_RSA_SIG == 2 that only supports Sha1 is no longer supported
-            if ((rsaProvider.CspKeyContainerInfo.ProviderType == 1 || rsaProvider.CspKeyContainerInfo.ProviderType == 12) && !rsaProvider.CspKeyContainerInfo.HardwareDevice)
-            {
-                if (s_certificateToRsaCspMap.TryGetValue(certificate.Thumbprint, out RSACryptoServiceProvider rsacsp))
-                    return rsacsp;
-
-                CspParameters csp = new CspParameters
-                {
-                    ProviderType = PROV_RSA_AES,
-                    KeyContainerName = rsaProvider.CspKeyContainerInfo.KeyContainerName,
-                    KeyNumber = (int)rsaProvider.CspKeyContainerInfo.KeyNumber
-                };
-
-                if (rsaProvider.CspKeyContainerInfo.MachineKeyStore)
-                {
-                    csp.Flags = CspProviderFlags.UseMachineKeyStore;
-                }
-
-                //
-                // If UseExistingKey is not specified, the CLR will generate a key for a non-existent group.
-                // With this flag, a CryptographicException is thrown instead.
-                //
-                csp.Flags |= CspProviderFlags.UseExistingKey;
-                if (s_certificateToRsaCspMap.Count >= s_maximumMapSize)
-                    s_certificateToRsaCspMap.Clear();
-
-                return new RSACryptoServiceProvider(csp);
-            }
-
-            return rsaProvider;
         }
 
         /// <summary>

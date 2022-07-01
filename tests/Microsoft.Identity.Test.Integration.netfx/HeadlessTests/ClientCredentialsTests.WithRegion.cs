@@ -15,7 +15,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.Integration.net461.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #if NET_CORE
             var manager = new Client.Platforms.netcore.NetCoreCryptographyManager();
 #else
-                    var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
+            var manager = new Client.Platforms.net461.NetDesktopCryptographyManager();
 #endif
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var cert = ConfidentialAppSettings.GetSettings(Cloud.Public).GetCertificate();

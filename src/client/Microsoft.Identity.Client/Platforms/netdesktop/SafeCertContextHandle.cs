@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.net461
 {
     [SecurityCritical]
     internal sealed class SafeCertContextHandle : SafeHandleZeroOrMinusOneIsInvalid

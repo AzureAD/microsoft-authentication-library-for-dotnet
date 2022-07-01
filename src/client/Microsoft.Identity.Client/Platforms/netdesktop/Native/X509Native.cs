@@ -10,7 +10,7 @@ using System.Security;
 using System.Security.Cryptography;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Identity.Client.Platforms.net45.Native
+namespace Microsoft.Identity.Client.Platforms.net461.Native
 {
     internal static class X509Native
     {

@@ -878,13 +878,6 @@ namespace Microsoft.Identity.Client
         public const string RegionDiscoveryNotEnabled = "region_discovery_unavailable";
 
         /// <summary>
-        /// <para>What happens?</para>MSAL cannot use the certificate for signing.
-        /// <para>Mitigation</para>Possible cause: use of CNG certificates with .Net classic 4.6 or lower. Either target a higher version of .NET desktop - 4.6.1 and above, or use a different certificate type (non-CNG) 
-        /// or sign your own assertion as described at https://aka.ms/msal-net-signed-assertion
-        /// </summary>
-        public const string CryptoNet45 = "crypto_net45";
-
-        /// <summary>
         /// <para>What happens?</para>The request has broker enabled and proof of possession configured but the broker does not support proof of possession
         /// <para>Mitigation</para>only configure proof of possession for public clients on windows.
         /// </summary>

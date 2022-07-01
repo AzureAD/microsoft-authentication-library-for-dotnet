@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Identity.Client.Platforms.net45.Http
+namespace Microsoft.Identity.Client.Platforms.net461.Http
 {
     /// <summary>
     /// Based on https://github.com/NimaAra/Easy.Common/blob/master/Easy.Common/RestClient.cs

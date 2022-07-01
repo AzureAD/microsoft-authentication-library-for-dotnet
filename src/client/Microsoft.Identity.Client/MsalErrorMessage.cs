@@ -339,13 +339,6 @@ namespace Microsoft.Identity.Client
         public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow. ";
         public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Deleting invalid ADAL cache. ";
 
-        public const string CryptoNet45 =
-            "Could not use the certificate for signing. See inner exception for details. " +
-            "Possible cause: this may be a known issue with apps build against .NET Desktop 4.6 or lower. " +
-            "Either target a higher version of .NET desktop - 4.6.1 and above, " +
-            "or use a different certificate type (non-CNG) or sign your own assertion " +
-            "as described at https://aka.ms/msal-net-signed-assertion. ";
-
         public static string ExperimentalFeature(string methodName)
         {
             return string.Format(
