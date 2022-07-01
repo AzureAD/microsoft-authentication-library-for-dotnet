@@ -3,6 +3,9 @@
 
 using System;
 using System.Drawing;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
@@ -65,23 +68,47 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             };
         }
 
-        public AuthorizationResult DisplayDialogAndInterceptUri()
+        public AuthorizationResult DisplayDialogAndInterceptUri(CancellationToken cancellationToken)
         {
             _webView2.CoreWebView2InitializationCompleted += WebView2Control_CoreWebView2InitializationCompleted;
             _webView2.NavigationStarting += WebView2Control_NavigationStarting;
 
             // Starts the navigation
             _webView2.Source = _startUri;
-            DisplayDialog();
+            DisplayDialog(cancellationToken);
 
             return _result;
         }
 
-        private void DisplayDialog()
+        private void DisplayDialog(CancellationToken cancellationToken)
         {
             DialogResult uiResult = DialogResult.None;
-            InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(_ownerWindow));
 
+            // Setup a Task to listen for cancellation
+            // On Cancellation we need to Close the Dialog if it's open
+            // We also need to Stop the Task when the Dialog is finished.
+            var cts = new CancellationTokenSource();
+            
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        if (Application.OpenForms.OfType<WinFormsPanelWithWebView2>().Any())
+                        {
+                            InvokeHandlingOwnerWindow(Close);
+                        }
+                    }
+
+                    Thread.Sleep(100);
+                }
+            }, cts.Token);
+
+            InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(_ownerWindow));
+            cts.Cancel();
+            cancellationToken.ThrowIfCancellationRequested();
+            
             switch (uiResult)
             {
                 case DialogResult.OK:

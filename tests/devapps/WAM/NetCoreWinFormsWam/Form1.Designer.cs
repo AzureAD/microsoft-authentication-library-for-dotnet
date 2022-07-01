@@ -56,6 +56,9 @@
             this.cbxListOsAccounts = new System.Windows.Forms.CheckBox();
             this.cbxUseWam = new System.Windows.Forms.ComboBox();
             this.cbxPOP = new System.Windows.Forms.CheckBox();
+            this.nudAutocancelSeconds = new System.Windows.Forms.NumericUpDown();
+            this.label7 = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.nudAutocancelSeconds)).BeginInit();
             this.SuspendLayout();
             // 
             // resultTbx
@@ -157,7 +160,7 @@
             // 
             // atsBtn
             // 
-            this.atsBtn.Location = new System.Drawing.Point(14, 205);
+            this.atsBtn.Location = new System.Drawing.Point(14, 222);
             this.atsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atsBtn.Name = "atsBtn";
             this.atsBtn.Size = new System.Drawing.Size(88, 27);
@@ -168,7 +171,7 @@
             // 
             // atiBtn
             // 
-            this.atiBtn.Location = new System.Drawing.Point(108, 205);
+            this.atiBtn.Location = new System.Drawing.Point(108, 222);
             this.atiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atiBtn.Name = "atiBtn";
             this.atiBtn.Size = new System.Drawing.Size(88, 27);
@@ -179,7 +182,7 @@
             // 
             // atsAtiBtn
             // 
-            this.atsAtiBtn.Location = new System.Drawing.Point(203, 205);
+            this.atsAtiBtn.Location = new System.Drawing.Point(203, 222);
             this.atsAtiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atsAtiBtn.Name = "atsAtiBtn";
             this.atsAtiBtn.Size = new System.Drawing.Size(88, 27);
@@ -190,7 +193,7 @@
             // 
             // accBtn
             // 
-            this.accBtn.Location = new System.Drawing.Point(368, 205);
+            this.accBtn.Location = new System.Drawing.Point(368, 222);
             this.accBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.accBtn.Name = "accBtn";
             this.accBtn.Size = new System.Drawing.Size(93, 27);
@@ -303,7 +306,7 @@
             // 
             // btnRemoveAccount
             // 
-            this.btnRemoveAccount.Location = new System.Drawing.Point(469, 205);
+            this.btnRemoveAccount.Location = new System.Drawing.Point(469, 222);
             this.btnRemoveAccount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnRemoveAccount.Name = "btnRemoveAccount";
             this.btnRemoveAccount.Size = new System.Drawing.Size(104, 27);
@@ -354,11 +357,34 @@
             this.cbxPOP.Text = "With Proof-of-Possesion";
             this.cbxPOP.UseVisualStyleBackColor = true;
             // 
+            // nudAutocancelSeconds
+            // 
+            this.nudAutocancelSeconds.Location = new System.Drawing.Point(132, 193);
+            this.nudAutocancelSeconds.Maximum = new decimal(new int[] {
+            120,
+            0,
+            0,
+            0});
+            this.nudAutocancelSeconds.Name = "nudAutocancelSeconds";
+            this.nudAutocancelSeconds.Size = new System.Drawing.Size(68, 23);
+            this.nudAutocancelSeconds.TabIndex = 30;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(12, 195);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(114, 15);
+            this.label7.TabIndex = 31;
+            this.label7.Text = "Autocancel Seconds";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(735, 740);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.nudAutocancelSeconds);
             this.Controls.Add(this.cbxPOP);
             this.Controls.Add(this.cbxUseWam);
             this.Controls.Add(this.cbxListOsAccounts);
@@ -388,6 +414,7 @@
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Form1";
+            ((System.ComponentModel.ISupportInitialize)(this.nudAutocancelSeconds)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -422,6 +449,8 @@
         private System.Windows.Forms.CheckBox cbxListOsAccounts;
         private System.Windows.Forms.ComboBox cbxUseWam;
         private System.Windows.Forms.CheckBox cbxPOP;
+        private System.Windows.Forms.NumericUpDown nudAutocancelSeconds;
+        private System.Windows.Forms.Label label7;
     }
 }
 
