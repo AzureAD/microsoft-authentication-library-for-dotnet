@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Security;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 
@@ -38,7 +36,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
         }
 
-        public static async Task<string> GetAccessTokenForLabAPIAsync(string labAccessClientId, string labAccessSecret)
+        public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId, string labAccessSecret)
         {
             string[] scopes = new string[] { "https://msidlab.com/.default" };
 
@@ -51,7 +49,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 labAccessSecret).ConfigureAwait(false);
         }
 
-        public static async Task<string> GetLabAccessTokenAsync(string authority, string[] scopes)
+        public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes)
         {
             return await GetLabAccessTokenAsync(
                 authority,
@@ -62,7 +60,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 String.Empty).ConfigureAwait(false);
         }
 
-        public static async Task<string> GetLabAccessTokenAsync(string authority, string[] scopes, LabAccessAuthenticationType authType, string clientId, string certThumbprint, string clientSecret)
+        public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes, LabAccessAuthenticationType authType, string clientId, string certThumbprint, string clientSecret)
         {
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
@@ -128,7 +126,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     throw new ArgumentOutOfRangeException();
             }
 
-            return authResult?.AccessToken;
+            return new AccessToken(authResult.AccessToken, authResult.ExpiresOn);
         }
     }
 
