@@ -217,6 +217,27 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(0, accounts.Count());
         }
 
+        [TestMethod]
+        public async Task WamUsernamePasswordRequestOldBrokerAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBroker()
+               .Build();
+
+            // Acquire token using username password
+            await Assert.ThrowsExceptionAsync<PlatformNotSupportedException> (
+                async() => await pca.AcquireTokenByUsernamePassword(
+                    scopes, 
+                    labResponse.User.Upn, 
+                    new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+        }
+
         private void AssertAuthResult(AuthenticationResult result, TokenSource tokenSource, string tenantId)
         {
             Assert.IsNotNull(result);

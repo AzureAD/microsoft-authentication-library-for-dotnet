@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -23,6 +24,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
         private readonly AcquireTokenByUsernamePasswordParameters _usernamePasswordParameters;
         private readonly AuthenticationRequestParameters _requestParameters;
+        private readonly ILoggerAdapter _logger;
 
         public UsernamePasswordRequest(
             IServiceBundle serviceBundle,
@@ -35,6 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
                 serviceBundle);
+            _logger = _requestParameters.RequestContext.Logger;
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -51,6 +54,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (_requestParameters.AppConfig.IsBrokerEnabled)
             {
+                _logger.Info("Broker is configured. Starting broker flow. ");
+
                 IBroker broker = _requestParameters.RequestContext.ServiceBundle.PlatformProxy.CreateBroker(_requestParameters.RequestContext.ServiceBundle.Config, null);
                 ITokenRequestComponent brokerUsernamePasswordRequestComponent =
                 new BrokerUsernamePasswordRequestComponent(
@@ -58,8 +63,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     _usernamePasswordParameters,
                     broker);
 
-                return await brokerUsernamePasswordRequestComponent.FetchTokensAsync(cancellationToken)
+                MsalTokenResponse brokerTokenResponse = await brokerUsernamePasswordRequestComponent.FetchTokensAsync(cancellationToken)
                     .ConfigureAwait(false);
+
+                if (brokerTokenResponse != null)
+                {
+                    _logger.Info("Broker attempt completed successfully. ");
+                    Metrics.IncrementTotalAccessTokensFromBroker();
+                    return brokerTokenResponse;
+                }
+
+                _logger.Info("Broker attempt did not complete.");
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // If no response is received from the broker, return null since this flow is only enabled for msal runtime.
+                return null;
             }
 
             var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
