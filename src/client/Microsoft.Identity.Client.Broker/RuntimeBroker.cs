@@ -231,10 +231,11 @@ namespace Microsoft.Identity.Client.Broker
         {
             string correlationId = Guid.NewGuid().ToString();
 
-            //if OperatingSystemAccount is passed then we use the user signed-in on the machine
+            //if OperatingSystemAccount is passed then we use the user signed -in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(account))
             {
-                throw new MsalServiceException("wam_remove_account_failed", "Could not remove the default os account");
+                _logger.Verbose("[WamBroker] Default OS Account cannot be removed. ");
+                throw new MsalClientException("wam_remove_account_failed", "Default os account cannot be removed.");
             }
 
             _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
