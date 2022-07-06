@@ -57,28 +57,27 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _logger.Info("Broker is configured. Starting broker flow. ");
 
                 IBroker broker = _requestParameters.RequestContext.ServiceBundle.PlatformProxy.CreateBroker(_requestParameters.RequestContext.ServiceBundle.Config, null);
-                ITokenRequestComponent brokerUsernamePasswordRequestComponent =
-                new BrokerUsernamePasswordRequestComponent(
-                    _requestParameters,
-                    _usernamePasswordParameters,
-                    broker);
 
-                MsalTokenResponse brokerTokenResponse = await brokerUsernamePasswordRequestComponent.FetchTokensAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                if (brokerTokenResponse != null)
+                if (broker.IsBrokerInstalledAndInvokable(_requestParameters.AuthorityInfo.AuthorityType))
                 {
-                    _logger.Info("Broker attempt completed successfully. ");
-                    Metrics.IncrementTotalAccessTokensFromBroker();
-                    return brokerTokenResponse;
+                    _logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
+
+                    MsalTokenResponse brokerTokenResponse = await broker.AcquireTokenByUsernamePasswordAsync(
+                        _requestParameters,
+                        _usernamePasswordParameters)
+                        .ConfigureAwait(false);
+
+                    if (brokerTokenResponse != null)
+                    {
+                        _logger.Info("Broker attempt completed successfully. ");
+                        Metrics.IncrementTotalAccessTokensFromBroker();
+                        return brokerTokenResponse;
+                    }
                 }
 
                 _logger.Info("Broker attempt did not complete.");
 
                 cancellationToken.ThrowIfCancellationRequested();
-
-                // If no response is received from the broker, return null since this flow is only enabled for msal runtime.
-                return null;
             }
 
             var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
