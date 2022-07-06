@@ -246,13 +246,19 @@ namespace Microsoft.Identity.Client.Broker
                     account.HomeAccountId.ObjectId,
                     correlationId).ConfigureAwait(false))
                 {
-                    if (!readAccountResult.IsSuccess)
+                    if (readAccountResult.IsSuccess)
+                    {
+                        _logger.Verbose("[WamBroker] WAM Account exist and can be removed.");
+
+                    }
+                    else
                     {
                         _logger.WarningPii(
                             $"Could not find a WAM account for the selected user {account.Username}",
                             $"Could not find a WAM account for the selected user {readAccountResult.Error}");
 
-                        throw new MsalServiceException("wam_no_account_found", $"Could not find a WAM account for the selected user {readAccountResult.Error}");
+                        string errorMessage = $"{readAccountResult.Error} (error code : {readAccountResult.Error.ErrorCode})";
+                        throw new MsalServiceException("wam_no_account_found", errorMessage);
                     }
                     
                     using (NativeInterop.SignOutResult result = await core.SignOutSilentlyAsync(
