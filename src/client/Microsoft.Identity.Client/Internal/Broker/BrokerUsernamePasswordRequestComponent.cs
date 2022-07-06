@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
     {
         internal IBroker Broker { get; }
         private readonly AcquireTokenByUsernamePasswordParameters _usernamePasswordParameters;
-        private readonly string _optionalBrokerInstallUrl; // can be null
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
         private readonly ILoggerAdapter _logger;

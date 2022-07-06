@@ -64,12 +64,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
             return Task.FromResult<MsalTokenResponse>(null);
         }
 
-        public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
-        {
-            _logger.Info("NullBroker - returning null on silent request.");
-            return Task.FromResult<MsalTokenResponse>(null);
-        }
-
         public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientID, 
             string redirectUri,             
@@ -83,7 +77,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
-            throw new PlatformNotSupportedException();
+            _logger.Info("NullBroker - returning null on ROPC request.");
+            return Task.FromResult<MsalTokenResponse>(null);
         }
     }
 }
