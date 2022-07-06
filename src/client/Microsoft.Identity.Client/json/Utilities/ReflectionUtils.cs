@@ -41,7 +41,7 @@ using Microsoft.Identity.Json.Serialization;
 
 namespace Microsoft.Identity.Json.Utilities
 {
-#if (DOTNET || PORTABLE || PORTABLE40) && !ANDROID && !NET_CORE && !WIN_UI
+#if (DOTNET || PORTABLE || PORTABLE40) && !ANDROID && !NET_CORE
     [Flags]
     internal enum MemberTypes
     {
