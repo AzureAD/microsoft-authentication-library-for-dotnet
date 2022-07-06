@@ -42,25 +42,6 @@ steps:
   inputs:
     restoreSolution: LibsMacOS.sln
 
-# https://docs.microsoft.com/en-us/dotnet/maui/macos/deployment/overview
-- task: Bash@3
-  displayName: Build the Lib for MAUI
-  inputs:
-    targetType: 'inline'
-    script: |
-      cd src/client/Microsoft.Identity.Client
-      dotnet pack -c Release -o ./artifacts Microsoft.Identity.Client.Maui.csproj
-
-- task: Bash@3
-  displayName: Build the Basic App
-  inputs:
-    targetType: 'inline'
-    script: |
-      pwd
-      cd tests/devapps/MauiApps/MauiAppBasic
-      dotnet build -f net6.0-maccatalyst -c Release -o ./artifacts
-      dotnet publish -f net6.0-maccatalyst -c Release -p:BuildIpa=True -o ./artifacts
-
 - task: XamariniOS@1
   displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
   inputs:
