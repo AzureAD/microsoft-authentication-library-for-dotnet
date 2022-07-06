@@ -33,6 +33,14 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
+  <!-- net6.0 (MAUI) -->
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net6.0-'))">
+    <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)'">14.2</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">14.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">21.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
     <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.7.1</MsalClientSemVer>
