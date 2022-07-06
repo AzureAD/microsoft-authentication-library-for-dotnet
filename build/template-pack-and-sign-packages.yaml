@@ -22,6 +22,15 @@ steps:
     version: 6.x
     includePreviewVersions: true
 
+- task: Bash@3
+  displayName: Install MAUI
+  inputs:
+    targetType: 'inline'
+    script: |
+      dotnet nuget locals all --clear 
+      dotnet workload install maui --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
+      dotnet workload install android ios maccatalyst tvos macos maui wasm-tools --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
+
 - task: VSBuild@1
   displayName: 'NuGet restore'
   inputs:
