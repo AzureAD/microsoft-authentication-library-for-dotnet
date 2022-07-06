@@ -29,20 +29,20 @@ jobs: #Build and stage projects
   # Bootstrap the build
   - template: template-build-and-prep-automation.yaml
 
-#   # BUILD IOS APPCENTER APP PHASE
-- job: 'BuildiOSAppCenterApp'
-  dependsOn:
-    - 'PreBuildCheck'
-  pool:
-      name: Azure Pipelines
-      vmImage: 'macOS-12'
-      demands:
-      - MSBuild
-  variables:
-      runCodesignValidationInjection: false
+# #   # BUILD IOS APPCENTER APP PHASE
+# - job: 'BuildiOSAppCenterApp'
+#   dependsOn:
+#     - 'PreBuildCheck'
+#   pool:
+#       name: Azure Pipelines
+#       vmImage: 'macOS-12'
+#       demands:
+#       - MSBuild
+#   variables:
+#       runCodesignValidationInjection: false
 
-  steps:
-  - template: template-build-ios-automation.yaml
+#   steps:
+#   - template: template-build-ios-automation.yaml
 
   # BUILD ANDROID APPCENTER APP PHASE
 - job: 'BuildAndroidAppCenterApp'
