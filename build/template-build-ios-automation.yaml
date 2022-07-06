@@ -49,7 +49,7 @@ steps:
     targetType: 'inline'
     script: |
       cd src/client/Microsoft.Identity.Client
-      dotnet build -f net6.0-maccatalyst -c Release -o ./artifacts
+      dotnet pack -c Release -o ./artifacts Microsoft.Identity.Client.Maui.csproj
 
 - task: Bash@3
   displayName: Build the Basic App
@@ -61,18 +61,18 @@ steps:
       dotnet build -f net6.0-maccatalyst -c Release -o ./artifacts
       dotnet publish -f net6.0-maccatalyst -c Release -p:BuildIpa=True -o ./artifacts
 
-# - task: XamariniOS@1
-#   displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
-#   inputs:
-#     solutionFile: LibsMacOS.sln
-#     configuration: Debug
-#     clean: true
-#     runNugetRestore: false
-#     args: '/p:APPCENTER_BUILD=1 /p:RunCodeAnalysis=false'
-#     buildToolOption: msbuild
-#     signingP12File: '$(Agent.TempDirectory)/AppCenteriOSBuildCert.p12'
-#     signingP12Password: '$(AppCenterDotNetiOSTestCertPassword)'
-#     signingProvisioningProfileFile: '$(Agent.TempDirectory)/TestFile.mobileprovision'
+- task: XamariniOS@1
+  displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
+  inputs:
+    solutionFile: LibsMacOS.sln
+    configuration: Debug
+    clean: true
+    runNugetRestore: false
+    args: '/p:APPCENTER_BUILD=1 /p:RunCodeAnalysis=false'
+    buildToolOption: msbuild
+    signingP12File: '$(Agent.TempDirectory)/AppCenteriOSBuildCert.p12'
+    signingP12Password: '$(AppCenterDotNetiOSTestCertPassword)'
+    signingProvisioningProfileFile: '$(Agent.TempDirectory)/TestFile.mobileprovision'
 
 - task: CopyFiles@2
   displayName: 'Copy artifacts to staging directory'
