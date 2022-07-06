@@ -76,26 +76,58 @@ namespace Microsoft.Identity.Client.Broker
             {
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
-
                 _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + string.IsNullOrEmpty(loginHint));
 
-                using (var result = await core.SignInInteractivelyAsync(
-                    _parentHandle,
-                    authParams,
-                    authenticationRequestParameters.CorrelationId.ToString("D"),
-                    loginHint,
-                    cancellationToken).ConfigureAwait(false))
+                //if login hint is not provided or if account is null
+                if (string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
                 {
-                    if (result.IsSuccess)
+                    using (var result = await core.SignInInteractivelyAsync(
+                        _parentHandle,
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        loginHint,
+                        cancellationToken).ConfigureAwait(false))
                     {
-                        msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
-                        _logger.Verbose("[WamBroker] Successfully retrieved token.");
+                        if (result.IsSuccess)
+                        {
+                            msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
+                            _logger.Verbose("[WamBroker] Successfully retrieved token.");
+                        }
+                        else
+                        {
+                            _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
+                            WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
+                        }
                     }
-                    else
+                }
+                //if an account is already signed in
+                else
+                {
+                    using (var wamAccount = await core.ReadAccountByIdAsync(
+                    authenticationRequestParameters.Account.HomeAccountId.ObjectId,
+                    authenticationRequestParameters.CorrelationId.ToString("D")).ConfigureAwait(false))
                     {
-                        _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
-                        WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
+                        using (var result = await core.AcquireTokenInteractivelyAsync(
+                        _parentHandle,
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        wamAccount,
+                        cancellationToken).ConfigureAwait(false))
+                        {
+                            if (result.IsSuccess)
+                            {
+                                msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
+                                _logger.Verbose("[WamBroker] Successfully retrieved token.");
+                            }
+                            else
+                            {
+                                _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
+                                WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
+                            }
+                        }
                     }
+
+
                 }
             }
             
