@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Broker
 {
@@ -241,7 +242,7 @@ namespace Microsoft.Identity.Client.Broker
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
-                authParams.Properties["MSALRuntime_Password"] = new System.Net.NetworkCredential(string.Empty, acquireTokenByUsernamePasswordParameters.Password).Password;
+                authParams.Properties["MSALRuntime_Password"] = new string(acquireTokenByUsernamePasswordParameters.Password.PasswordToCharArray());
 
                 using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
                         authParams,

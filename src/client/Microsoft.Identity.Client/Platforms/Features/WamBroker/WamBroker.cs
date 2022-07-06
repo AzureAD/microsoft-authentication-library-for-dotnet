@@ -981,7 +981,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
-            throw new PlatformNotSupportedException("ROPC flow is available on the new broker preview. For details see https://aka.ms/msal-net-wam.");
+            return Task.FromResult<MsalTokenResponse>(null); // nop
         }
     }
 }
