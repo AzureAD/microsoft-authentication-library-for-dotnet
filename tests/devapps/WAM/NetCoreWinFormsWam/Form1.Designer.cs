@@ -66,12 +66,12 @@
             // 
             // resultTbx
             // 
-            this.resultTbx.Location = new System.Drawing.Point(12, 299);
+            this.resultTbx.Location = new System.Drawing.Point(12, 316);
             this.resultTbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.resultTbx.Multiline = true;
             this.resultTbx.Name = "resultTbx";
             this.resultTbx.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.resultTbx.Size = new System.Drawing.Size(709, 407);
+            this.resultTbx.Size = new System.Drawing.Size(709, 390);
             this.resultTbx.TabIndex = 0;
             // 
             // label1
@@ -163,7 +163,7 @@
             // 
             // atsBtn
             // 
-            this.atsBtn.Location = new System.Drawing.Point(13, 255);
+            this.atsBtn.Location = new System.Drawing.Point(10, 241);
             this.atsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atsBtn.Name = "atsBtn";
             this.atsBtn.Size = new System.Drawing.Size(126, 27);
@@ -174,7 +174,7 @@
             // 
             // atiBtn
             // 
-            this.atiBtn.Location = new System.Drawing.Point(155, 205);
+            this.atiBtn.Location = new System.Drawing.Point(144, 241);
             this.atiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atiBtn.Name = "atiBtn";
             this.atiBtn.Size = new System.Drawing.Size(126, 27);
@@ -185,7 +185,7 @@
             // 
             // atsAtiBtn
             // 
-            this.atsAtiBtn.Location = new System.Drawing.Point(296, 205);
+            this.atsAtiBtn.Location = new System.Drawing.Point(278, 241);
             this.atsAtiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atsAtiBtn.Name = "atsAtiBtn";
             this.atsAtiBtn.Size = new System.Drawing.Size(126, 27);
@@ -196,7 +196,7 @@
             // 
             // accBtn
             // 
-            this.accBtn.Location = new System.Drawing.Point(297, 250);
+            this.accBtn.Location = new System.Drawing.Point(228, 274);
             this.accBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.accBtn.Name = "accBtn";
             this.accBtn.Size = new System.Drawing.Size(126, 27);
@@ -218,7 +218,7 @@
             // 
             // btnClearCache
             // 
-            this.btnClearCache.Location = new System.Drawing.Point(594, 250);
+            this.btnClearCache.Location = new System.Drawing.Point(551, 241);
             this.btnClearCache.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnClearCache.Name = "btnClearCache";
             this.btnClearCache.Size = new System.Drawing.Size(126, 27);
@@ -298,7 +298,7 @@
             // 
             // btnExpire
             // 
-            this.btnExpire.Location = new System.Drawing.Point(595, 205);
+            this.btnExpire.Location = new System.Drawing.Point(551, 208);
             this.btnExpire.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnExpire.Name = "btnExpire";
             this.btnExpire.Size = new System.Drawing.Size(126, 27);
@@ -309,7 +309,7 @@
             // 
             // btnRemoveAccount
             // 
-            this.btnRemoveAccount.Location = new System.Drawing.Point(447, 250);
+            this.btnRemoveAccount.Location = new System.Drawing.Point(362, 274);
             this.btnRemoveAccount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnRemoveAccount.Name = "btnRemoveAccount";
             this.btnRemoveAccount.Size = new System.Drawing.Size(126, 27);
@@ -343,7 +343,7 @@
             // cbxUseWam
             // 
             this.cbxUseWam.FormattingEnabled = true;
-            this.cbxUseWam.Location = new System.Drawing.Point(12, 202);
+            this.cbxUseWam.Location = new System.Drawing.Point(10, 193);
             this.cbxUseWam.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.cbxUseWam.Name = "cbxUseWam";
             this.cbxUseWam.Size = new System.Drawing.Size(188, 23);
@@ -399,7 +399,7 @@
             // 
             // atUsernamePwdBtn
             // 
-            this.atUsernamePwdBtn.Location = new System.Drawing.Point(271, 255);
+            this.atUsernamePwdBtn.Location = new System.Drawing.Point(144, 274);
             this.atUsernamePwdBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atUsernamePwdBtn.Name = "atUsernamePwdBtn";
             this.atUsernamePwdBtn.Size = new System.Drawing.Size(76, 27);
@@ -410,7 +410,7 @@
             // 
             // btnATSperf
             // 
-            this.btnATSperf.Location = new System.Drawing.Point(14, 250);
+            this.btnATSperf.Location = new System.Drawing.Point(10, 274);
             this.btnATSperf.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnATSperf.Name = "btnATSperf";
             this.btnATSperf.Size = new System.Drawing.Size(126, 27);
@@ -423,13 +423,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(735, 740);
+            this.ClientSize = new System.Drawing.Size(738, 794);
             this.Controls.Add(this.atUsernamePwdBtn);
             this.Controls.Add(this.PasswordTxt);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.UsernameTxt);
-            this.ClientSize = new System.Drawing.Size(735, 794);
             this.Controls.Add(this.btnATSperf);
             this.Controls.Add(this.cbxPOP);
             this.Controls.Add(this.cbxUseWam);
