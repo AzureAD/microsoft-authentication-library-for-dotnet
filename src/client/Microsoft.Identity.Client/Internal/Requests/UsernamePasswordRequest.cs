@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     }
                 }
 
-                _logger.Info("Broker attempt did not complete.");
+                _logger.Info("Broker request not attempted because the broker is not available.");
 
                 cancellationToken.ThrowIfCancellationRequested();
             }

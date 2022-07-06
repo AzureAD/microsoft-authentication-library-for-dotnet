@@ -541,7 +541,7 @@ namespace NetDesktopWinForms
         private async void atUsernamePwdBtn_Click(object sender, EventArgs e)
         {
 
-            var pca = CreatePca();
+            var pca = CreatePca(GetAuthMethod());
 
             try
             {
