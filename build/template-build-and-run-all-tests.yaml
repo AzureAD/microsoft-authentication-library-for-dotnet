@@ -29,6 +29,8 @@ jobs: #Build and stage projects
   # Bootstrap the build
   - template: template-build-and-prep-automation.yaml
 
+# iOS test and run is disabled as Azure CI/CD task has issues supporting it
+# the testing will be done manually for now.
 # #   # BUILD IOS APPCENTER APP PHASE
 # - job: 'BuildiOSAppCenterApp'
 #   dependsOn:
