@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.Broker
 
                 if (string.IsNullOrWhiteSpace(correlationId))
                 {
-                    logger.Warning("No correlation ID in response");
+                    logger.Warning("[WamBroker] No correlation ID in response");
                     correlationId = null;
                 }
                 
@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Client.Broker
                     TokenSource = TokenSource.Broker
                 };
 
-                logger.Info("WAM response status success");
+                logger.Info("[WamBroker] WAM response status success");
 
                 return msalTokenResponse;
             }

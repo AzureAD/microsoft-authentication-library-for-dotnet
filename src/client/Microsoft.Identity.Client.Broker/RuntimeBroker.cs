@@ -23,7 +23,6 @@ namespace Microsoft.Identity.Client.Broker
         private readonly IntPtr _parentHandle = IntPtr.Zero;
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
-        private const string WamErrorPrefix = "WAM Error ";
 
         public bool IsPopSupported => true;
 
@@ -167,8 +166,8 @@ namespace Microsoft.Identity.Client.Broker
                     if (!readAccountResult.IsSuccess)
                     {
                         _logger.WarningPii(
-                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
-                            $"Could not find a WAM account for the selected user {readAccountResult.Error}");
+                            $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
+                            $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
 
                         throw new MsalUiRequiredException(
                             "wam_no_account_for_id",
@@ -254,8 +253,8 @@ namespace Microsoft.Identity.Client.Broker
                     else
                     {
                         _logger.WarningPii(
-                            $"Could not find a WAM account for the selected user {account.Username}",
-                            $"Could not find a WAM account for the selected user {readAccountResult.Error}");
+                            $"[WamBroker] Could not find a WAM account for the selected user {account.Username}",
+                            $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
 
                         string errorMessage = $"{readAccountResult.Error} (error code : {readAccountResult.Error.ErrorCode})";
                         throw new MsalServiceException("wam_no_account_found", errorMessage);
