@@ -182,7 +182,8 @@ namespace Microsoft.Identity.Client.Broker
             }
         }
 
-        public static MsalTokenResponse AcquireTokenFromBroker(NativeInterop.AuthResult authResult,
+        public static MsalTokenResponse HandleResponse(
+                NativeInterop.AuthResult authResult,
                 AuthenticationRequestParameters authenticationRequestParameters,
                 ILoggerAdapter logger, string errorMessage = null)
         {
