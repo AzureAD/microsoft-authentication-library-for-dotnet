@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Client.Broker
             if (PublicClientApplication.IsOperatingSystemAccount(account))
             {
                 _logger.Verbose("[WamBroker] Default OS Account cannot be removed. ");
-                throw new MsalClientException("wam_remove_account_failed", "Default os account cannot be removed.");
+                throw new MsalClientException("wam_remove_account_failed", "Default Operating System account cannot be removed.");
             }
 
             _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
