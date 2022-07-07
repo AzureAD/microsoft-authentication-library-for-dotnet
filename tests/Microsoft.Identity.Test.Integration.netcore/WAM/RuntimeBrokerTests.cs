@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword).ExecuteAsync().ConfigureAwait(false);
 
-            AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
 
             // Get Accounts
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-            AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId);
+            MsalAssert.AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId);
 
             // Remove Account
             await pca.RemoveAsync(account).ConfigureAwait(false);
@@ -173,21 +173,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Assert.IsNotNull(accounts);
             Assert.AreEqual(0, accounts.Count());
-        }
-
-        private void AssertAuthResult(AuthenticationResult result, TokenSource tokenSource, string tenantId)
-        {
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.AccessToken);
-            Assert.IsNotNull(result.IdToken);
-            Assert.IsNotNull(result.Account);
-            Assert.IsNotNull(result.Account.Username);
-
-            Assert.AreEqual(tokenSource, result.AuthenticationResultMetadata.TokenSource);
-
-            Assert.IsTrue(result.ExpiresOn > DateTimeOffset.UtcNow + TimeSpan.FromHours(1));
-
-            Assert.AreEqual(tenantId, result.TenantId);
         }
     }
 }

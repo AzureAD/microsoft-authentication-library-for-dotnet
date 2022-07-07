@@ -7,6 +7,7 @@ using Microsoft.Identity.Client;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Globalization;
+using System;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -41,6 +42,21 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         result.Account.Username, 
                         System.StringComparison.InvariantCultureIgnoreCase));
             }
+        }
+
+        public static void AssertAuthResult(AuthenticationResult result, TokenSource tokenSource, string tenantId)
+        {
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.AccessToken);
+            Assert.IsNotNull(result.IdToken);
+            Assert.IsNotNull(result.Account);
+            Assert.IsNotNull(result.Account.Username);
+
+            Assert.AreEqual(tokenSource, result.AuthenticationResultMetadata.TokenSource);
+
+            Assert.IsTrue(result.ExpiresOn > DateTimeOffset.UtcNow + TimeSpan.FromHours(1));
+
+            Assert.AreEqual(tenantId, result.TenantId);
         }
     }
 }
