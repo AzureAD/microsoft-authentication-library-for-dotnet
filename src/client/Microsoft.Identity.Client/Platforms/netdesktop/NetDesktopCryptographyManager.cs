@@ -19,11 +19,15 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
+#if NET45
     internal class NetDesktopCryptographyManager : ICryptographyManager
+#else
+    internal class NetDesktopCryptographyManager : CommonCryptographyManager
+#endif
     {
         private static readonly ConcurrentDictionary<string, RSACryptoServiceProvider> s_certificateToRsaCspMap = new ConcurrentDictionary<string, RSACryptoServiceProvider>();
         private static readonly int s_maximumMapSize = 1000;
-
+#if NET45
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             return string.IsNullOrEmpty(input) ? null : Base64UrlHelpers.Encode(CreateSha256HashBytes(input));
@@ -52,8 +56,13 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 return sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             }
         }
-      
+#endif
+
+#if NET45
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+#else
+        public override byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+#endif
         {
 #if NET45
             var rsaCryptoProvider = GetCryptoProviderForSha256_Net45(certificate);
@@ -65,7 +74,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 return signedData;
             }
 #else
-            return CryptographyManager.SignWithCertificate(message, certificate);
+            return base.SignWithCertificate(message, certificate);
 #endif
         }
 
