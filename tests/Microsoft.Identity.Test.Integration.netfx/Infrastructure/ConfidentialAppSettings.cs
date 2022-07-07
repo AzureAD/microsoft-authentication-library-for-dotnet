@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.PeerToPeer;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 
@@ -58,7 +53,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string GetSecret()
             {
-                return GetSecretLazy(TestConstants.MsalCCAKeyVaultUri).Value;
+                return GetSecretLazy(KeyVaultInstance.MsalTeam, TestConstants.MsalCCAKeyVaultSecretName).Value;
             }
         }
 
@@ -77,7 +72,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public X509Certificate2 GetCertificate()
             {
                 return s_certLazy.Value;
-
             }
 
             private static Lazy<X509Certificate2> s_certLazy => new Lazy<X509Certificate2>(() =>
@@ -88,7 +82,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string GetSecret()
             {                
-                return GetSecretLazy(Adfs2019LabConstants.ADFS2019ClientSecretURL).Value;
+                return GetSecretLazy(KeyVaultInstance.MsalTeam, Adfs2019LabConstants.ADFS2019ClientSecretName).Value;
             }
 
             public string Authority => $@"https://{Environment}";
@@ -141,7 +135,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string GetSecret()
             {
-                return GetSecretLazy(TestConstants.MsalArlingtonCCAKeyVaultUri).Value;
+                return GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalArlingtonCCAKeyVaultSecretName).Value;
             }
 
             public string Authority => $@"https://{Environment}/{TenantId}";
@@ -177,10 +171,10 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             }
         }
 
-        private static Lazy<string> GetSecretLazy(string secretName) => new Lazy<string>(() =>
+        private static Lazy<string> GetSecretLazy(string keyVaultInstance, string secretName) => new Lazy<string>(() =>
         {
-            var keyVault = new KeyVaultSecretsProvider();
-            var secret = keyVault.GetSecret(secretName).Value;
+            var keyVault = new KeyVaultSecretsProvider(keyVaultInstance);
+            var secret = keyVault.GetSecretByName(secretName).Value;
             return secret;
         });
 
