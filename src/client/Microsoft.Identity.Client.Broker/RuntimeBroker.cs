@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Client.Broker
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             MsalTokenResponse msalTokenResponse = null;
+            string errorMessage = "Could not login interactively.";
 
             //need to provide a handle
             if (_parentHandle == IntPtr.Zero)
@@ -89,16 +90,8 @@ namespace Microsoft.Identity.Client.Broker
                         loginHint,
                         cancellationToken).ConfigureAwait(false))
                     {
-                        if (result.IsSuccess)
-                        {
-                            msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
-                            _logger.Verbose("[WamBroker] Successfully retrieved token.");
-                        }
-                        else
-                        {
-                            _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
-                            WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
-                        }
+                        msalTokenResponse = WamAdapters.AcquireTokenFromBroker(result, authenticationRequestParameters, _logger, errorMessage);
+
                     }
                 }
                 //if an account is already signed in
@@ -115,20 +108,9 @@ namespace Microsoft.Identity.Client.Broker
                         wamAccount,
                         cancellationToken).ConfigureAwait(false))
                         {
-                            if (result.IsSuccess)
-                            {
-                                msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
-                                _logger.Verbose("[WamBroker] Successfully retrieved token.");
-                            }
-                            else
-                            {
-                                _logger.Error($"[WamBroker] Could not login interactively. {result.Error}");
-                                WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
-                            }
+                            msalTokenResponse = WamAdapters.AcquireTokenFromBroker(result, authenticationRequestParameters, _logger, errorMessage);
                         }
                     }
-
-
                 }
             }
             
@@ -140,6 +122,7 @@ namespace Microsoft.Identity.Client.Broker
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             MsalTokenResponse msalTokenResponse = null;
+            string errorMessage = "Could not login interactively with the Default OS Account.";
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
@@ -154,15 +137,7 @@ namespace Microsoft.Identity.Client.Broker
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
                 {
-                    if (result.IsSuccess)
-                    {
-                        msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
-                    }
-                    else
-                    {
-                        _logger.Error($"[WamBroker] Could not login interactively with the Default OS Account. {result.Error}");
-                        WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
-                    }
+                    msalTokenResponse = WamAdapters.AcquireTokenFromBroker(result, authenticationRequestParameters, _logger, errorMessage);
                 }
             }
 
@@ -185,6 +160,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
+            string errorMessage = "Could not acquire token silently.";
 
             _logger.Verbose("[WamBroker] Acquiring token silently.");
 
@@ -213,14 +189,7 @@ namespace Microsoft.Identity.Client.Broker
                         account,
                         cancellationToken).ConfigureAwait(false))
                     {
-                        if (result.IsSuccess)
-                        {
-                            msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
-                        }
-                        else
-                        {
-                            WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
-                        }
+                        msalTokenResponse = WamAdapters.AcquireTokenFromBroker(result, authenticationRequestParameters, _logger, errorMessage);
                     }
                 }
             }
@@ -234,6 +203,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
+            string errorMessage = "Could not acquire token silently for the default user.";
 
             _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
 
@@ -245,14 +215,7 @@ namespace Microsoft.Identity.Client.Broker
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
                 {
-                    if (result.IsSuccess)
-                    {
-                        msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
-                    }
-                    else
-                    {
-                        WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
-                    }
+                    msalTokenResponse = WamAdapters.AcquireTokenFromBroker(result, authenticationRequestParameters, _logger, errorMessage);
                 }
             }
 
