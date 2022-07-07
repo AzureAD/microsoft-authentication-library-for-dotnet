@@ -233,7 +233,7 @@ namespace Microsoft.Identity.Client.Broker
             //if OperatingSystemAccount is passed then we use the user signed -in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(account))
             {
-                _logger.Verbose("[WamBroker] Default OS Account cannot be removed. ");
+                _logger.Verbose("[WamBroker] Default Operating System Account cannot be removed. ");
                 throw new MsalClientException("wam_remove_account_failed", "Default Operating System account cannot be removed.");
             }
 
