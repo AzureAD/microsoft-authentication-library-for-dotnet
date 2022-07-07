@@ -79,22 +79,7 @@ namespace Microsoft.Identity.Client.Broker
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
                 _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + string.IsNullOrEmpty(loginHint));
 
-                //if login hint is not provided or if account is null
-                if (string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
-                {
-                    using (var result = await core.SignInInteractivelyAsync(
-                        _parentHandle,
-                        authParams,
-                        authenticationRequestParameters.CorrelationId.ToString("D"),
-                        loginHint,
-                        cancellationToken).ConfigureAwait(false))
-                    {
-                        msalTokenResponse = WamAdapters.AcquireTokenFromBroker(result, authenticationRequestParameters, _logger, errorMessage);
-
-                    }
-                }
-                //if an account is already signed in
-                else
+                if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
                 {
                     using (var wamAccount = await core.ReadAccountByIdAsync(
                     authenticationRequestParameters.Account.HomeAccountId.ObjectId,
@@ -107,8 +92,21 @@ namespace Microsoft.Identity.Client.Broker
                         wamAccount,
                         cancellationToken).ConfigureAwait(false))
                         {
-                            msalTokenResponse = WamAdapters.AcquireTokenFromBroker(result, authenticationRequestParameters, _logger, errorMessage);
+                            msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                         }
+                    }
+                }
+                else
+                {
+                    using (var result = await core.SignInInteractivelyAsync(
+                        _parentHandle,
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        loginHint,
+                        cancellationToken).ConfigureAwait(false))
+                    {
+                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+
                     }
                 }
             }
@@ -136,7 +134,7 @@ namespace Microsoft.Identity.Client.Broker
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
                 {
-                    msalTokenResponse = WamAdapters.AcquireTokenFromBroker(result, authenticationRequestParameters, _logger, errorMessage);
+                    msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                 }
             }
 
@@ -188,7 +186,7 @@ namespace Microsoft.Identity.Client.Broker
                         readAccountResult.Account,
                         cancellationToken).ConfigureAwait(false))
                     {
-                        msalTokenResponse = WamAdapters.AcquireTokenFromBroker(result, authenticationRequestParameters, _logger, errorMessage);
+                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                     }
                 }
             }
@@ -214,7 +212,7 @@ namespace Microsoft.Identity.Client.Broker
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
                 {
-                    msalTokenResponse = WamAdapters.AcquireTokenFromBroker(result, authenticationRequestParameters, _logger, errorMessage);
+                    msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                 }
             }
 
