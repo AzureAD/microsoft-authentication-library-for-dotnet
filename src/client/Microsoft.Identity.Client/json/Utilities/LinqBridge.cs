@@ -3030,29 +3030,6 @@ namespace Microsoft.Identity.Json.Utilities.LinqBridge
   }
 }
 
-namespace Microsoft.Identity.Json.Serialization
-{
-#pragma warning disable 1591
-  internal delegate TResult Func<TResult>();
-
-  internal delegate TResult Func<T, TResult>(T a);
-
-  internal delegate TResult Func<T1, T2, TResult>(T1 arg1, T2 arg2);
-
-  internal delegate TResult Func<T1, T2, T3, TResult>(T1 arg1, T2 arg2, T3 arg3);
-
-  internal delegate TResult Func<T1, T2, T3, T4, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
-
-  internal delegate void Action();
-
-  internal delegate void Action<T1, T2>(T1 arg1, T2 arg2);
-
-  internal delegate void Action<T1, T2, T3>(T1 arg1, T2 arg2, T3 arg3);
-
-  internal delegate void Action<T1, T2, T3, T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
-#pragma warning restore 1591
-}
-
 namespace System.Runtime.CompilerServices
 {
   /// <remarks>

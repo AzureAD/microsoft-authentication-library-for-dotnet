@@ -25,7 +25,6 @@ namespace Microsoft.Identity.Client.Broker
         private readonly IntPtr _parentHandle = IntPtr.Zero;
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
-        private const string WamErrorPrefix = "WAM Error ";
 
         public bool IsPopSupported => true;
 
@@ -161,26 +160,26 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-                using (var account = await core.ReadAccountByIdAsync(
+                using (var readAccountResult = await core.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
                     authenticationRequestParameters.CorrelationId.ToString("D"),
                     cancellationToken).ConfigureAwait(false))
                 {
-                    if (account == null)
+                    if (!readAccountResult.IsSuccess)
                     {
                         _logger.WarningPii(
-                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
-                            "Could not find a WAM account for the selected user");
+                            $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
+                            $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
 
                         throw new MsalUiRequiredException(
                             "wam_no_account_for_id",
-                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}");
+                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}. {readAccountResult.Error}");
                     }
 
                     using (NativeInterop.AuthResult result = await core.AcquireTokenSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
-                        account,
+                        readAccountResult.Account,
                         cancellationToken).ConfigureAwait(false))
                     {
                         if (result.IsSuccess)
@@ -267,33 +266,40 @@ namespace Microsoft.Identity.Client.Broker
         {
             string correlationId = Guid.NewGuid().ToString();
 
-            //if OperatingSystemAccount is passed then we use the user signed-in on the machine
+            //if OperatingSystemAccount is passed then we use the user signed -in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(account))
             {
-                throw new MsalException("wam_remove_account_failed", "Could not remove the default os account");
+                _logger.Verbose("[WamBroker] Default Operating System Account cannot be removed. ");
+                throw new MsalClientException("wam_remove_account_failed", "Default Operating System account cannot be removed.");
             }
 
             _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
 
             using (var core = new NativeInterop.Core())
             {
-                using (var wamAccount = await core.ReadAccountByIdAsync(
+                using (var readAccountResult = await core.ReadAccountByIdAsync(
                     account.HomeAccountId.ObjectId,
                     correlationId).ConfigureAwait(false))
                 {
-                    if (wamAccount == null)
+                    if (readAccountResult.IsSuccess)
+                    {
+                        _logger.Verbose("[WamBroker] WAM Account exist and can be removed.");
+
+                    }
+                    else
                     {
                         _logger.WarningPii(
-                            $"Could not find a WAM account for the selected user {account.Username}",
-                            "Could not find a WAM account for the selected user");
+                            $"[WamBroker] Could not find a WAM account for the selected user {account.Username}",
+                            $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
 
-                        throw new MsalException("wam_no_account_found", "Could not find a WAM account for the selected user");
+                        string errorMessage = $"{readAccountResult.Error} (error code : {readAccountResult.Error.ErrorCode})";
+                        throw new MsalServiceException("wam_no_account_found", errorMessage);
                     }
                     
                     using (NativeInterop.SignOutResult result = await core.SignOutSilentlyAsync(
                         appConfig.ClientId,
                         correlationId,
-                        wamAccount).ConfigureAwait(false))
+                        readAccountResult.Account).ConfigureAwait(false))
                     {
                         if (result.IsSuccess)
                         {

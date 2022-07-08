@@ -23,7 +23,11 @@ using AndroidUri = Android.Net.Uri;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
+#if MAUI
+    [Preserve(AllMembers = true)]
+#else
     [AndroidNative.Runtime.Preserve(AllMembers = true)]
+#endif
     internal class AndroidContentProviderBroker : IBroker
     {
         private readonly AndroidBrokerHelper _brokerHelper;
