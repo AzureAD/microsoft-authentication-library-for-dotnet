@@ -4,7 +4,7 @@
 **If you want to build Maui apps, please refer to MauiStatus.md file
 
 ### New Features
-**Maui is provided for iOS and Android as preview. This is a preview and not a release version.
+**MAUI is provided for iOS and Android as preview. This is a preview and not a release version.
 
 ### Known issues
 **Xamarin forms samples fail to compile UWP project. It can be unloaded.
