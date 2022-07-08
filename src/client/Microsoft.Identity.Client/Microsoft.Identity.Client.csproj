@@ -21,12 +21,7 @@
     <TargetFrameworkNet6Ios>net6.0-ios</TargetFrameworkNet6Ios>
     <TargetFrameworkNet6Mac>net6.0-maccatalyst</TargetFrameworkNet6Mac>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <Reference Include="netstandard" />
-  </ItemGroup>
-
-
+    
   <!-- net6.0 (MAUI) -->
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('net6.0-'))">
     <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
@@ -274,6 +269,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Xamarin.Mac" />
+    <Reference Include="netstandard" />
   </ItemGroup>
   <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid'))">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
