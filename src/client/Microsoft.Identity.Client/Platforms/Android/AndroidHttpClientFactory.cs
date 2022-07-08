@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             var httpClient = new HttpClient(
                 // As per Xamarin guidance https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/http-stack?tabs=windows
-                new Xamarin.Android.Net.AndroidClientHandler());
+                new Xamarin.Android.Net.AndroidMessageHandler());
 
             HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
             return httpClient;

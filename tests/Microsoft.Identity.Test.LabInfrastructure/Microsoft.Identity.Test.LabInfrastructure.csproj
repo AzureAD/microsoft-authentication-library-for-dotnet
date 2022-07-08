@@ -5,9 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.3" />
+    <PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
+    <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.3.0" />    
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>

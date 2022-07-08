@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// <summary>
         /// Go to a URL using the OS default browser. 
         /// </summary>
-        Task StartDefaultOsBrowserAsync(string url, bool IsBrokerConfigured);
+        Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured);
 
         IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent);
 

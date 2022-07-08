@@ -8,6 +8,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -80,7 +81,14 @@ namespace NetDesktopWinForms
         private AuthMethod GetAuthMethod()
         {
             AuthMethod status;
-            if (Enum.TryParse<AuthMethod>(cbxUseWam.SelectedValue.ToString(), out status))
+            string result = string.Empty;
+
+            cbxUseWam.Invoke((MethodInvoker)delegate
+            {
+                result = cbxUseWam.Text;
+            });
+
+            if (Enum.TryParse<AuthMethod>(result, out status))
             {
                 return status;
             }
@@ -193,7 +201,9 @@ namespace NetDesktopWinForms
         {
             string reqAuthority = pca.Authority;
             string loginHint = GetLoginHint();
-            if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
+            IAccount acc = GetAccount();
+
+            if (!string.IsNullOrEmpty(loginHint) && (acc != null))
             {
                 throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account");
             }
@@ -218,11 +228,8 @@ namespace NetDesktopWinForms
                 return await builder.ExecuteAsync().ConfigureAwait(false);
             }
 
-            if (cbxAccount.SelectedItem != null &&
-                (cbxAccount.SelectedItem as AccountModel).Account != s_nullAccount)
+            if (acc != null)
             {
-                var acc = GetAccount();
-
                 var builder = pca.AcquireTokenSilent(GetScopes(), acc);
                 if (IsMsaPassthroughConfigured() && (GetAuthMethod() == AuthMethod.SystemBrowser || GetAuthMethod() == AuthMethod.EmbeddedBrowser))
                 {
@@ -314,9 +321,9 @@ namespace NetDesktopWinForms
             Log(message);
 
             await _syncContext;
-            
+
             Log("Refreshing accounts");
-            
+
             if(refresAccounts)
                 await RefreshAccountsAsync().ConfigureAwait(true);
         }
@@ -417,8 +424,11 @@ namespace NetDesktopWinForms
         private IAccount GetAccount()
         {
             IAccount acc = null;
-            loginHintTxt.Invoke((MethodInvoker)delegate
+            cbxAccount.Invoke((MethodInvoker)delegate
             {
+                if (cbxAccount.SelectedIndex <= 0)
+                    return;
+
                 acc = (cbxAccount.SelectedItem as AccountModel).Account;
             });
 
@@ -537,6 +547,67 @@ namespace NetDesktopWinForms
             }
         }
 
+        private async void atUsernamePwdBtn_Click(object sender, EventArgs e)
+        {
+
+            var pca = CreatePca(GetAuthMethod());
+
+            try
+            {
+                var result = await RunAtUsernamePwdAsync(pca).ConfigureAwait(false);
+
+                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+
+            }
+            catch (Exception ex2)
+            {
+                Log("Exception: " + ex2);
+            }
+        }
+
+        private async Task<AuthenticationResult> RunAtUsernamePwdAsync(IPublicClientApplication pca)
+        {
+            Tuple<string, string> credentials = GetUsernamePassword();
+            string username = credentials.Item1;
+            string password = credentials.Item2;
+
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                throw new InvalidOperationException("[TEST APP FAILURE] Username or password is missing.");
+            }
+
+            AuthenticationResult result = null;
+            var scopes = GetScopes();
+            var guid = Guid.NewGuid();
+            var builder = pca.AcquireTokenByUsernamePassword(scopes, username, new NetworkCredential("", password).SecurePassword);
+
+            if (cbxBackgroundThread.Checked)
+            {
+                await Task.Delay(500).ConfigureAwait(false);
+            }
+            result = await builder.ExecuteAsync().ConfigureAwait(false);
+
+            return result;
+        }
+
+        private Tuple<string, string> GetUsernamePassword()
+        {
+            string username = null;
+            string password = null;
+
+            UsernameTxt.Invoke((MethodInvoker)delegate
+            {
+                username = UsernameTxt.Text;
+            });
+
+            PasswordTxt.Invoke((MethodInvoker)delegate
+            {
+                password = PasswordTxt.Text;
+            });
+
+            return Tuple.Create(username, password);
+        }
+
         private void clearBtn_Click(object sender, EventArgs e)
         {
             resultTbx.Text = "";
@@ -640,6 +711,7 @@ namespace NetDesktopWinForms
             try
             {
                 //Old Broker
+                btnExpire_Click(sender, e);
                 var pca = CreatePca(AuthMethod.WAM);
                 brokerTimer.Start();
                 AuthenticationResult result1 = await RunAtsAsync(pca).ConfigureAwait(false);
@@ -651,6 +723,7 @@ namespace NetDesktopWinForms
                 Log("---------------------------------------- ");
 
                 //New Broker
+                btnExpire_Click(sender, e);
                 pca = CreatePca(AuthMethod.WAMRuntime);
                 brokerTimer.Reset();
                 brokerTimer.Start();
