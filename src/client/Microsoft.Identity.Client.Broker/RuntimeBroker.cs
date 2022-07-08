@@ -77,10 +77,6 @@ namespace Microsoft.Identity.Client.Broker
                 using (var core = new NativeInterop.Core())
                 using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
                 {
-                    //Login Hint
-                    string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
-                    _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + string.IsNullOrEmpty(loginHint));
-
                     using (var readAccountResult = await core.ReadAccountByIdAsync(
                     authenticationRequestParameters.Account.HomeAccountId.ObjectId,
                     authenticationRequestParameters.CorrelationId.ToString("D")).ConfigureAwait(false))
