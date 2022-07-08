@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
@@ -14,6 +15,7 @@ using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Broker
 {
@@ -207,6 +209,40 @@ namespace Microsoft.Identity.Client.Broker
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
+                using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        cancellationToken).ConfigureAwait(false))
+                {
+                    if (result.IsSuccess)
+                    {
+                        msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
+                    }
+                    else
+                    {
+                        WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
+                    }
+                }
+            }
+
+            return msalTokenResponse;
+        }
+
+        public async Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
+        {
+            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+            MsalTokenResponse msalTokenResponse = null;
+
+            _logger.Verbose("[WamBroker] Acquiring token with Username Password flow.");
+
+            using (var core = new NativeInterop.Core())
+            using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            {
+                authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
+                authParams.Properties["MSALRuntime_Password"] = new string(acquireTokenByUsernamePasswordParameters.Password.PasswordToCharArray());
+
                 using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
