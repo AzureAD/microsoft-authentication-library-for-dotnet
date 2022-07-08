@@ -72,45 +72,83 @@ namespace Microsoft.Identity.Client.Broker
                 
             _logger.Verbose("[WamBroker] Using Windows account picker.");
 
+            if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
+            {
+                using (var core = new NativeInterop.Core())
+                using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+                {
+                    //Login Hint
+                    string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
+                    _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + string.IsNullOrEmpty(loginHint));
+
+                    using (var readAccountResult = await core.ReadAccountByIdAsync(
+                    authenticationRequestParameters.Account.HomeAccountId.ObjectId,
+                    authenticationRequestParameters.CorrelationId.ToString("D")).ConfigureAwait(false))
+                    {
+                        if (readAccountResult.IsSuccess)
+                        {
+                            using (var result = await core.AcquireTokenInteractivelyAsync(
+                            _parentHandle,
+                            authParams,
+                            authenticationRequestParameters.CorrelationId.ToString("D"),
+                            readAccountResult.Account,
+                            cancellationToken).ConfigureAwait(false))
+                            {
+                                msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                            }
+                        }
+                        else
+                        {
+                            _logger.Warning(
+                                $"[WamBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}");
+                            _logger.Info(
+                                $"[WamBroker] Calling SignInInteractivelyAsync this will show the account picker.");
+
+                           msalTokenResponse = await SignInInteractivelyAsync(
+                               authenticationRequestParameters, acquireTokenInteractiveParameters)
+                                .ConfigureAwait(false);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                msalTokenResponse = await SignInInteractivelyAsync(
+                    authenticationRequestParameters, acquireTokenInteractiveParameters)
+                    .ConfigureAwait(false);
+            }
+
+            return msalTokenResponse;
+        }
+
+        public async Task<MsalTokenResponse> SignInInteractivelyAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
+        {
+            MsalTokenResponse msalTokenResponse = null;
+            string errorMessage = "Could not login interactively.";
+
+            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
+
             using (var core = new NativeInterop.Core())
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
                 _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + string.IsNullOrEmpty(loginHint));
-
-                if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
+                
+                using (var result = await core.SignInInteractivelyAsync(
+                    _parentHandle,
+                    authParams,
+                    authenticationRequestParameters.CorrelationId.ToString("D"),
+                    loginHint,
+                    cancellationToken).ConfigureAwait(false))
                 {
-                    using (var wamAccount = await core.ReadAccountByIdAsync(
-                    authenticationRequestParameters.Account.HomeAccountId.ObjectId,
-                    authenticationRequestParameters.CorrelationId.ToString("D")).ConfigureAwait(false))
-                    {
-                        using (var result = await core.AcquireTokenInteractivelyAsync(
-                        _parentHandle,
-                        authParams,
-                        authenticationRequestParameters.CorrelationId.ToString("D"),
-                        wamAccount,
-                        cancellationToken).ConfigureAwait(false))
-                        {
-                            msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
-                        }
-                    }
-                }
-                else
-                {
-                    using (var result = await core.SignInInteractivelyAsync(
-                        _parentHandle,
-                        authParams,
-                        authenticationRequestParameters.CorrelationId.ToString("D"),
-                        loginHint,
-                        cancellationToken).ConfigureAwait(false))
-                    {
-                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
 
-                    }
                 }
             }
-            
+
             return msalTokenResponse;
         }
 
