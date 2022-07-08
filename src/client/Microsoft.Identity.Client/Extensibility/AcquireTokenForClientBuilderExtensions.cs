@@ -17,10 +17,12 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="keyId">A key id to which the access token is associated. The token will not be retrieved from the cache unless the same key id is presented. Can be null.</param>
+        /// <param name="tokenType">Bearer or pop</param>
         /// <returns>the builder</returns>
         public static AcquireTokenForClientParameterBuilder WithProofOfPosessionKeyId(
             this AcquireTokenForClientParameterBuilder builder,
-            string keyId)
+            string keyId, 
+            string tokenType = "Bearer")
         {
             if (string.IsNullOrEmpty(keyId))
             {
@@ -28,7 +30,7 @@ namespace Microsoft.Identity.Client.Extensibility
             }
 
             builder.ValidateUseOfExperimentalFeature();
-            builder.CommonParameters.AuthenticationScheme = new ExternalBoundTokenScheme(keyId);
+            builder.CommonParameters.AuthenticationScheme = new ExternalBoundTokenScheme(keyId, tokenType);
 
             return builder;
         }
