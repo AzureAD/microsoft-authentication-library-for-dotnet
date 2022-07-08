@@ -1,3 +1,16 @@
+4.46.0-Preview2
+==========
+### Important changes in the dev environment
+**If you want to build Maui apps, please refer to MauiStatus.md file
+
+### New Features
+**Maui is provided for iOS and Android as preview. This is a preview and not a release version.
+
+### Known issues
+**Xamarin forms samples fail to compile UWP project. It can be unloaded.
+
+
+
 4.45.0
 ==========
 ### Important Changes that developer should make in their UWP apps.

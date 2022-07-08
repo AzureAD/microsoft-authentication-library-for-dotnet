@@ -1,6 +1,10 @@
 # Maui Status
-This file tracks the progress of MAUI. This branch has MSAL.NET code that is ported to MAUI. It has two dev apps used to for testing. **It currently supports only iOS and Android platforms.**  
-Work is in progress to build a package using CI/CD pipeline. In the meantime, you can build and run the source code locally.
+This file tracks the progress of MAUI. Main branch has MSAL.NET code that is ported to MAUI. **It currently supports only iOS and Android platforms.** The branch has [two dev apps](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/tree/main/tests/devapps/MauiApps) used to for testing.   
+A preview package has been published on Nuget. [Microsoft.Identity.Client 4.46.0-preview2]( https://www.nuget.org/packages/Microsoft.Identity.Client/4.46.0-preview2)  
+**Note:** This is a preview package and not meant for production.
+
+## Known issue with the package
+- There can be compilation issue for UWP project with the NuGet package. [Issue #3460](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3460).
 
 ## Prerequisites
 To build and run the branch, it will require:
@@ -10,8 +14,6 @@ To build and run the branch, it will require:
 # Getting started
 - Clone this repository  
 `git clone https://github.com/AzureAD/microsoft-authentication-library-for-dotnet`  
-- Checkout the brnach for MAUI  
-`git checkout -b sameerk/MauiCI origin/sameerk/Maui_CI`  
 - Open Visual Studio 2022 **Preview** version
 - Open the solution  
 `/tests/devapps/MauiApps/MauiApps.sln`
@@ -21,7 +23,7 @@ To build and run the branch, it will require:
     - MauiAppWithBroker  
     This shows how to perform authentication with broker. It has the common pattern of ATS+ATI.
     - Microsoft.Identity.client  
-    This is the MAUI branch of the main branch. As of this writing, it is not up to date with the main branch. This is work in progress.
+    This refers to the source code. If you want to use the package, you cna remove references to this project and the project from the solution and add the Nuget package.
 
 ## MSAL.NET
 The branch compiles using Visual Studio 2022 Preview and the release version.
@@ -49,6 +51,7 @@ The results are as follows:
 | iOS (Embedded) | **Works** |
 | Android (System) | **Works** |
 | Android (Embedded) | **NA** |
+| Forms UWP | Does not compile |
 | WinUI3 | - |
 | MacOS | - |
 </div>
@@ -71,6 +74,7 @@ The results are as follows:
 | ----------- | ----------- |
 | iOS | **Works** |
 | Android | **Works** |
+| Forms UWP | Does not compile |
 | WinUI3 | - |
 | MacOS | - |
 </div>
