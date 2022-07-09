@@ -2,7 +2,7 @@
   
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
-    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+    <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
   </PropertyGroup>
