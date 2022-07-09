@@ -175,11 +175,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
 
-            // Acquire token interactively WithLoginHint
-            result = await pca.AcquireTokenInteractive(scopes).WithLoginHint(account.Username).ExecuteAsync().ConfigureAwait(false);
-
-            MsalAssert.AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId);
-
             // Remove Account
             await pca.RemoveAsync(account).ConfigureAwait(false);
 
