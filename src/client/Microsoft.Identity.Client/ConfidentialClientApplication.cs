@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client
 
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
             Certificate = configuration.ClientCredentialCertificate;
-            
+
             this.ServiceBundle.ApplicationLogger.Verbose($"ConfidentialClientApplication {configuration.GetHashCode()} created");
         }
 
@@ -93,15 +93,6 @@ namespace Microsoft.Identity.Client
             return AcquireTokenForClientParameterBuilder.Create(
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes);
-        }
-
-        /// <summary>
-        /// Please use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
-        /// </summary>
-        [Obsolete("Use AcquireTokenSilent(scopes, account)", true)]
-        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
-        {
-            return base.AcquireTokenSilent(scopes, loginHint);
         }
 
         /// <summary>

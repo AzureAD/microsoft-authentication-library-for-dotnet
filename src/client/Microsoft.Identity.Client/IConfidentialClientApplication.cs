@@ -76,12 +76,6 @@ namespace Microsoft.Identity.Client
         AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(IEnumerable<string> scopes, UserAssertion userAssertion);
 
         /// <summary>
-        /// Please use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
-        /// </summary>
-        [Obsolete("Use AcquireTokenSilent(scopes, account)", true)]
-        AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint);
-
-        /// <summary>
         /// [V3 API] Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
         /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
         /// This override enables you to specify a login hint and extra query parameter.
@@ -97,8 +91,17 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
 
-        /// <inheritdoc/>
-        [Obsolete("Use GetAccountAsync in web apps and web APIs, and use a token cache serializer for better security and performance. See https://aka.ms/msal-net-cca-token-cache-serialization.")]
+        /// <summary>
+        /// In confidential client apps use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> instead.
+        /// </summary>
+        [Obsolete("In confidential client apps use AcquireTokenSilent(scopes, account) instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        new AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint);
+
+        /// <summary>
+        /// Use <see cref="IClientApplicationBase.GetAccountAsync(string)"/> in web apps and web APIs, and use a token cache serializer for better security and performance. See https://aka.ms/msal-net-cca-token-cache-serialization.
+        /// </summary>
+        [Obsolete("Use GetAccountAsync(identifier) in web apps and web APIs, and use a token cache serializer for better security and performance. See https://aka.ms/msal-net-cca-token-cache-serialization.")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         new Task<IEnumerable<IAccount>> GetAccountsAsync();
     }
