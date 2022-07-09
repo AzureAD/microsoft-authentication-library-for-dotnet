@@ -197,7 +197,7 @@ namespace NetDesktopWpf
                    });
         }
 
-        private async void ClearCache(object sender, RoutedEventArgs e)
+        private void ClearCache(object sender, RoutedEventArgs e)
         {
 
         }
