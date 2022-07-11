@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client.Broker
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             MsalTokenResponse msalTokenResponse = null;
-            string errorMessage = "Could not login interactively.";
 
             //need to provide a handle
             if (_parentHandle == IntPtr.Zero)
@@ -92,6 +91,7 @@ namespace Microsoft.Identity.Client.Broker
                             readAccountResult.Account,
                             cancellationToken).ConfigureAwait(false))
                             {
+                                var errorMessage = "Could not login interactively.";
                                 msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                             }
                         }
@@ -124,8 +124,6 @@ namespace Microsoft.Identity.Client.Broker
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             MsalTokenResponse msalTokenResponse = null;
-            string errorMessage = "Could not login interactively.";
-
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
             using (var core = new NativeInterop.Core())
@@ -142,8 +140,8 @@ namespace Microsoft.Identity.Client.Broker
                     loginHint,
                     cancellationToken).ConfigureAwait(false))
                 {
+                    var errorMessage = "Could not login interactively.";
                     msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
-
                 }
             }
 
@@ -155,8 +153,6 @@ namespace Microsoft.Identity.Client.Broker
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             MsalTokenResponse msalTokenResponse = null;
-            string errorMessage = "Could not login interactively with the Default OS Account.";
-
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
             _logger.Verbose("[WamBroker] Signing in with the default user account.");
@@ -170,6 +166,7 @@ namespace Microsoft.Identity.Client.Broker
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
                 {
+                    var errorMessage = "Could not login interactively with the Default OS Account.";
                     msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                 }
             }
@@ -193,7 +190,6 @@ namespace Microsoft.Identity.Client.Broker
         {
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
-            string errorMessage = "Could not acquire token silently.";
 
             _logger.Verbose("[WamBroker] Acquiring token silently.");
 
@@ -222,6 +218,7 @@ namespace Microsoft.Identity.Client.Broker
                         readAccountResult.Account,
                         cancellationToken).ConfigureAwait(false))
                     {
+                        var errorMessage = "Could not acquire token silently.";
                         msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                     }
                 }
@@ -236,7 +233,6 @@ namespace Microsoft.Identity.Client.Broker
         {
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
-            string errorMessage = "Could not acquire token silently for the default user.";
 
             _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
 
@@ -248,6 +244,7 @@ namespace Microsoft.Identity.Client.Broker
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
                 {
+                    var errorMessage = "Could not acquire token silently for the default user.";
                     msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                 }
             }
