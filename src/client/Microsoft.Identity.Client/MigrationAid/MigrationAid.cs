@@ -2190,7 +2190,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public UIParent(Activity activity)
+        public UIParent(Android.App.Activity activity)
         {
             throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
@@ -2202,7 +2202,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public UIParent(Activity activity, bool useEmbeddedWebview) : this(activity)
+        public UIParent(Android.App.Activity activity, bool useEmbeddedWebview) : this(activity)
         {
             throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
