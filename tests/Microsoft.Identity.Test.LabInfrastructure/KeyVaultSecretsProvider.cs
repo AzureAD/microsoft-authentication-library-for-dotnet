@@ -4,8 +4,9 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using Microsoft.Azure.KeyVault;
-using Microsoft.Azure.KeyVault.Models;
+using Azure.Core;
+using Azure.Security.KeyVault.Certificates;
+using Azure.Security.KeyVault.Secrets;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -25,7 +26,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
     public class KeyVaultSecretsProvider : IDisposable
     {
-        private KeyVaultClient _keyVaultClient;
+        private CertificateClient _certificateClient;
+        private SecretClient _secretClient;
 
         /// <summary>Initialize the secrets provider with the "keyVault" configuration section.</summary>
         /// <remarks>
@@ -54,49 +56,45 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         ///         "clientId": [client ID]
         /// </para>
         /// </remarks>
-        public KeyVaultSecretsProvider()
+        public KeyVaultSecretsProvider(string keyVaultAddress = KeyVaultInstance.MSIDLab)
         {
-            _keyVaultClient = new KeyVaultClient(AuthenticationCallbackAsync);
+            var credentials = GetKeyVaultCredentialAsync().GetAwaiter().GetResult();
+            var keyVaultAddressUri = new Uri(keyVaultAddress);
+            _certificateClient = new CertificateClient(keyVaultAddressUri, credentials);
+            _secretClient = new SecretClient(keyVaultAddressUri, credentials);
         }
 
         ~KeyVaultSecretsProvider()
         {
             Dispose();
         }
-
-        public SecretBundle GetSecret(string secretUrl)
+      
+        public KeyVaultSecret GetSecretByName(string secretName)
         {
-            return _keyVaultClient.GetSecretAsync(secretUrl).GetAwaiter().GetResult();
+            return _secretClient.GetSecret(secretName).Value;
         }
 
-        public SecretBundle GetSecretByName(
-            string secretName, 
-            string keyVaultAddress = KeyVaultInstance.MSIDLab)
+        public KeyVaultSecret GetSecretByName(string secretName, string secretVersion)
         {
-            return _keyVaultClient.GetSecretAsync(
-                keyVaultAddress, 
-                secretName).GetAwaiter().GetResult();
+            return _secretClient.GetSecret(secretName, secretVersion).Value;
         }
 
-        public async Task<X509Certificate2> GetCertificateWithPrivateMaterialAsync(
-            string certName, 
-            string keyVaultAddress = KeyVaultInstance.MSIDLab)
+        public async Task<X509Certificate2> GetCertificateWithPrivateMaterialAsync(string certName)
         {
-            SecretBundle secret = await _keyVaultClient.GetSecretAsync(keyVaultAddress, certName).ConfigureAwait(false);
-            X509Certificate2 certificate = new X509Certificate2(Convert.FromBase64String(secret.Value));
-            return certificate;
+            return await _certificateClient.DownloadCertificateAsync(certName).ConfigureAwait(false);
         }
 
-        private async Task<string> AuthenticationCallbackAsync(string authority, string resource, string scope)
+        private async Task<TokenCredential> GetKeyVaultCredentialAsync()
         {
-            return await LabAuthenticationHelper.GetLabAccessTokenAsync(authority, new[] { resource + "/.default" }).ConfigureAwait(false);
+            var accessToken = await LabAuthenticationHelper.GetLabAccessTokenAsync(
+                "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/",
+                new[] { "https://vault.azure.net/.default" }).ConfigureAwait(false);
+            return DelegatedTokenCredential.Create((_, __) => accessToken);
         }
 
         public void Dispose()
         {
-            _keyVaultClient?.Dispose();
             GC.SuppressFinalize(this);
         }
     }
-
 }

@@ -61,16 +61,17 @@
             this.label8 = new System.Windows.Forms.Label();
             this.PasswordTxt = new System.Windows.Forms.TextBox();
             this.atUsernamePwdBtn = new System.Windows.Forms.Button();
+            this.btnATSperf = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // resultTbx
             // 
-            this.resultTbx.Location = new System.Drawing.Point(12, 288);
+            this.resultTbx.Location = new System.Drawing.Point(12, 316);
             this.resultTbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.resultTbx.Multiline = true;
             this.resultTbx.Name = "resultTbx";
             this.resultTbx.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.resultTbx.Size = new System.Drawing.Size(709, 407);
+            this.resultTbx.Size = new System.Drawing.Size(709, 390);
             this.resultTbx.TabIndex = 0;
             // 
             // label1
@@ -162,10 +163,10 @@
             // 
             // atsBtn
             // 
-            this.atsBtn.Location = new System.Drawing.Point(13, 255);
+            this.atsBtn.Location = new System.Drawing.Point(10, 241);
             this.atsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atsBtn.Name = "atsBtn";
-            this.atsBtn.Size = new System.Drawing.Size(76, 27);
+            this.atsBtn.Size = new System.Drawing.Size(126, 27);
             this.atsBtn.TabIndex = 11;
             this.atsBtn.Text = "ATS";
             this.atsBtn.UseVisualStyleBackColor = true;
@@ -173,10 +174,10 @@
             // 
             // atiBtn
             // 
-            this.atiBtn.Location = new System.Drawing.Point(97, 255);
+            this.atiBtn.Location = new System.Drawing.Point(144, 241);
             this.atiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atiBtn.Name = "atiBtn";
-            this.atiBtn.Size = new System.Drawing.Size(80, 27);
+            this.atiBtn.Size = new System.Drawing.Size(126, 27);
             this.atiBtn.TabIndex = 12;
             this.atiBtn.Text = "ATI";
             this.atiBtn.UseVisualStyleBackColor = true;
@@ -184,10 +185,10 @@
             // 
             // atsAtiBtn
             // 
-            this.atsAtiBtn.Location = new System.Drawing.Point(185, 255);
+            this.atsAtiBtn.Location = new System.Drawing.Point(278, 241);
             this.atsAtiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atsAtiBtn.Name = "atsAtiBtn";
-            this.atsAtiBtn.Size = new System.Drawing.Size(78, 27);
+            this.atsAtiBtn.Size = new System.Drawing.Size(126, 27);
             this.atsAtiBtn.TabIndex = 13;
             this.atsAtiBtn.Text = "ATS + ATI";
             this.atsAtiBtn.UseVisualStyleBackColor = true;
@@ -195,10 +196,10 @@
             // 
             // accBtn
             // 
-            this.accBtn.Location = new System.Drawing.Point(381, 255);
+            this.accBtn.Location = new System.Drawing.Point(228, 274);
             this.accBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.accBtn.Name = "accBtn";
-            this.accBtn.Size = new System.Drawing.Size(93, 27);
+            this.accBtn.Size = new System.Drawing.Size(126, 27);
             this.accBtn.TabIndex = 15;
             this.accBtn.Text = "Get Accounts";
             this.accBtn.UseVisualStyleBackColor = true;
@@ -206,7 +207,7 @@
             // 
             // clearBtn
             // 
-            this.clearBtn.Location = new System.Drawing.Point(642, 703);
+            this.clearBtn.Location = new System.Drawing.Point(642, 754);
             this.clearBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.clearBtn.Name = "clearBtn";
             this.clearBtn.Size = new System.Drawing.Size(79, 27);
@@ -217,7 +218,7 @@
             // 
             // btnClearCache
             // 
-            this.btnClearCache.Location = new System.Drawing.Point(594, 255);
+            this.btnClearCache.Location = new System.Drawing.Point(551, 241);
             this.btnClearCache.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnClearCache.Name = "btnClearCache";
             this.btnClearCache.Size = new System.Drawing.Size(126, 27);
@@ -297,7 +298,7 @@
             // 
             // btnExpire
             // 
-            this.btnExpire.Location = new System.Drawing.Point(596, 222);
+            this.btnExpire.Location = new System.Drawing.Point(551, 208);
             this.btnExpire.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnExpire.Name = "btnExpire";
             this.btnExpire.Size = new System.Drawing.Size(126, 27);
@@ -308,10 +309,10 @@
             // 
             // btnRemoveAccount
             // 
-            this.btnRemoveAccount.Location = new System.Drawing.Point(482, 255);
+            this.btnRemoveAccount.Location = new System.Drawing.Point(362, 274);
             this.btnRemoveAccount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnRemoveAccount.Name = "btnRemoveAccount";
-            this.btnRemoveAccount.Size = new System.Drawing.Size(104, 27);
+            this.btnRemoveAccount.Size = new System.Drawing.Size(126, 27);
             this.btnRemoveAccount.TabIndex = 25;
             this.btnRemoveAccount.Text = "Remove Acc";
             this.btnRemoveAccount.UseVisualStyleBackColor = true;
@@ -342,7 +343,7 @@
             // cbxUseWam
             // 
             this.cbxUseWam.FormattingEnabled = true;
-            this.cbxUseWam.Location = new System.Drawing.Point(12, 202);
+            this.cbxUseWam.Location = new System.Drawing.Point(10, 193);
             this.cbxUseWam.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.cbxUseWam.Name = "cbxUseWam";
             this.cbxUseWam.Size = new System.Drawing.Size(188, 23);
@@ -398,7 +399,7 @@
             // 
             // atUsernamePwdBtn
             // 
-            this.atUsernamePwdBtn.Location = new System.Drawing.Point(271, 255);
+            this.atUsernamePwdBtn.Location = new System.Drawing.Point(144, 274);
             this.atUsernamePwdBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.atUsernamePwdBtn.Name = "atUsernamePwdBtn";
             this.atUsernamePwdBtn.Size = new System.Drawing.Size(76, 27);
@@ -407,16 +408,28 @@
             this.atUsernamePwdBtn.UseVisualStyleBackColor = true;
             this.atUsernamePwdBtn.Click += new System.EventHandler(this.atUsernamePwdBtn_Click);
             // 
+            // btnATSperf
+            // 
+            this.btnATSperf.Location = new System.Drawing.Point(10, 274);
+            this.btnATSperf.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnATSperf.Name = "btnATSperf";
+            this.btnATSperf.Size = new System.Drawing.Size(126, 27);
+            this.btnATSperf.TabIndex = 30;
+            this.btnATSperf.Text = "ATS Perf";
+            this.btnATSperf.UseVisualStyleBackColor = true;
+            this.btnATSperf.Click += new System.EventHandler(this.btnATSperf_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(735, 740);
+            this.ClientSize = new System.Drawing.Size(738, 794);
             this.Controls.Add(this.atUsernamePwdBtn);
             this.Controls.Add(this.PasswordTxt);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.UsernameTxt);
+            this.Controls.Add(this.btnATSperf);
             this.Controls.Add(this.cbxPOP);
             this.Controls.Add(this.cbxUseWam);
             this.Controls.Add(this.cbxListOsAccounts);
@@ -485,6 +498,7 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox PasswordTxt;
         private System.Windows.Forms.Button atUsernamePwdBtn;
+        private System.Windows.Forms.Button btnATSperf;
     }
 }
 

@@ -83,7 +83,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
-            throw new PlatformNotSupportedException();
+            _logger.Info("NullBroker - returning null on ROPC request.");
+            return Task.FromResult<MsalTokenResponse>(null);
         }
     }
 }

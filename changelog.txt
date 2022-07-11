@@ -1,3 +1,41 @@
+4.46.0-Preview2
+==========
+### Important changes in the dev environment
+**If you want to build Maui apps, please refer to MauiStatus.md file
+
+### New Features
+**MAUI is provided for iOS and Android as preview. This is a preview and not a release version.
+
+### Known issues
+**Xamarin forms samples fail to compile UWP project. It can be unloaded.
+
+
+
+4.45.0
+==========
+### Important Changes that developer should make in their UWP apps.
+**Upgrade the minimum target platform version to 10.0.17763.0**
+**Upgrade Microsoft.NETCore.UniversalWindowsPlatform version to minimum 6.1.9**
+**Add a reference to Microsoft.IdentityModel.Abstractions, if you are still using package.json**
+
+### New Features
+**Logs are now consistent when you use several .NET authentication libraires from Microsoft** [3028](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3028).
+**Expose resource (scopes) in TokenCacheNotificationArgs** [3389](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3389).
+**New `WithClientAssertion` API** that exposes the token endpoint. (3352)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3352].
+**Add more information to error logs** (3278)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3278].
+
+
+### Bug Fixes
+**Tenant profiles was not returned in `GetAccounts`** for broker tokens (3349)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3349].
+**Auth result from runtime broker** was not parsed correctly (3354)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3354].
+**DSTS - Fixed the endpoints**
+**Privacy and TOU links weren't visible** in embedded picker UI for smaller screen (3153)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3153]
+**Broker POP token appeared as "Bearer"** when calling `GetAuthorizationHeader()` (3353)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3353]
+**Ensure MSAL didn't check local cache for tokens** when using POP with the runtime broker (3363)[https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3363]
+
+### Fundamentals
+**Upgraded to .net standard 2.0**
+
 4.44.0
 ==========
 ### New Features

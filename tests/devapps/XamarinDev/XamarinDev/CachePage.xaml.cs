@@ -20,7 +20,7 @@ namespace XamarinDev
             InitializeComponent();
         }
 
-        private async Task RefreshCacheViewAsync()
+        private Task RefreshCacheViewAsync()
         {
             var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
 
@@ -51,6 +51,7 @@ namespace XamarinDev
                 accounts.Add(accountItem.GetKey().ToString(), accountItem);
             }
             accountsCacheItems.ItemsSource = accounts;
+            return Task.CompletedTask;
         }
 
         protected override async void OnAppearing()

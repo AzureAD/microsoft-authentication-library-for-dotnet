@@ -23,7 +23,11 @@ using AndroidUri = Android.Net.Uri;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
+#if MAUI
+    [Preserve(AllMembers = true)]
+#else
     [AndroidNative.Runtime.Preserve(AllMembers = true)]
+#endif
     internal class AndroidContentProviderBroker : IBroker
     {
         private readonly AndroidBrokerHelper _brokerHelper;
@@ -392,7 +396,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
-            throw new PlatformNotSupportedException();
+            return Task.FromResult<MsalTokenResponse>(null); // nop
         }
     }
 }

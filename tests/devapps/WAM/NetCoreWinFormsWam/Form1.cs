@@ -81,7 +81,14 @@ namespace NetDesktopWinForms
         private AuthMethod GetAuthMethod()
         {
             AuthMethod status;
-            if (Enum.TryParse<AuthMethod>(cbxUseWam.SelectedValue.ToString(), out status))
+            string result = string.Empty;
+
+            cbxUseWam.Invoke((MethodInvoker)delegate
+            {
+                result = cbxUseWam.Text;
+            });
+
+            if (Enum.TryParse<AuthMethod>(result, out status))
             {
                 return status;
             }
@@ -91,17 +98,20 @@ namespace NetDesktopWinForms
         public static readonly string UserCacheFile =
             System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.user.json";
 
-        private IPublicClientApplication CreatePca()
+        private IPublicClientApplication CreatePca(AuthMethod? authMethod)
         {
             string clientId = GetClientId();
+            string authority = GetAuthority();
+
             bool msaPt = IsMsaPassthroughConfigured();
 
             var builder = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithExperimentalFeatures()
-                .WithAuthority(this.authorityCbx.Text);
+                .WithAuthority(authority);
 
-            var authMethod = GetAuthMethod();
+            if (authMethod == null)
+                authMethod = GetAuthMethod();
 
             switch (authMethod)
             {
@@ -175,7 +185,7 @@ namespace NetDesktopWinForms
         {
             try
             {
-                var pca = CreatePca();
+                var pca = CreatePca(GetAuthMethod());
                 AuthenticationResult result = await RunAtsAsync(pca).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
@@ -191,7 +201,9 @@ namespace NetDesktopWinForms
         {
             string reqAuthority = pca.Authority;
             string loginHint = GetLoginHint();
-            if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
+            IAccount acc = GetAccount();
+
+            if (!string.IsNullOrEmpty(loginHint) && (acc != null))
             {
                 throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account");
             }
@@ -216,11 +228,8 @@ namespace NetDesktopWinForms
                 return await builder.ExecuteAsync().ConfigureAwait(false);
             }
 
-            if (cbxAccount.SelectedItem != null &&
-                (cbxAccount.SelectedItem as AccountModel).Account != s_nullAccount)
+            if (acc != null)
             {
-                var acc = (cbxAccount.SelectedItem as AccountModel).Account;
-
                 var builder = pca.AcquireTokenSilent(GetScopes(), acc);
                 if (IsMsaPassthroughConfigured() && (GetAuthMethod() == AuthMethod.SystemBrowser || GetAuthMethod() == AuthMethod.EmbeddedBrowser))
                 {
@@ -284,7 +293,18 @@ namespace NetDesktopWinForms
             return clientId;
         }
 
-        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar)
+        private string GetAuthority()
+        {
+            string result = null;
+            authorityCbx.Invoke((MethodInvoker)delegate
+            {
+                result = authorityCbx.Text;
+            });
+
+            return result;
+        }
+
+        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar, bool refresAccounts = true)
         {
             string message =
 
@@ -303,7 +323,9 @@ namespace NetDesktopWinForms
             await _syncContext;
 
             Log("Refreshing accounts");
-            await RefreshAccountsAsync().ConfigureAwait(true);
+
+            if(refresAccounts)
+                await RefreshAccountsAsync().ConfigureAwait(true);
         }
 
         private void Log(string message)
@@ -318,7 +340,7 @@ namespace NetDesktopWinForms
         {
             try
             {
-                var pca = CreatePca();
+                var pca = CreatePca(GetAuthMethod());
                 AuthenticationResult result = await RunAtiAsync(pca).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
@@ -399,6 +421,20 @@ namespace NetDesktopWinForms
             return loginHint;
         }
 
+        private IAccount GetAccount()
+        {
+            IAccount acc = null;
+            cbxAccount.Invoke((MethodInvoker)delegate
+            {
+                if (cbxAccount.SelectedIndex <= 0)
+                    return;
+
+                acc = (cbxAccount.SelectedItem as AccountModel).Account;
+            });
+
+            return acc;
+        }
+
         /// <summary>
         /// It should be possible to omit this if the Account Picker is never invoked, e.g. Office, 
         /// by using a special auth flow based on a transfer token 
@@ -453,7 +489,7 @@ namespace NetDesktopWinForms
         {
             try
             {
-                var pca = CreatePca();
+                var pca = CreatePca(GetAuthMethod());
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
 
                 s_accounts.Clear();
@@ -480,7 +516,7 @@ namespace NetDesktopWinForms
         private async void atsAtiBtn_Click(object sender, EventArgs e)
         {
 
-            var pca = CreatePca();
+            var pca = CreatePca(GetAuthMethod());
 
             try
             {
@@ -513,8 +549,7 @@ namespace NetDesktopWinForms
 
         private async void atUsernamePwdBtn_Click(object sender, EventArgs e)
         {
-
-            var pca = CreatePca();
+            var pca = CreatePca(GetAuthMethod());
 
             try
             {
@@ -585,7 +620,7 @@ namespace NetDesktopWinForms
         private async void btnClearCache_Click(object sender, EventArgs e)
         {
             Log("Clearing the cache ...");
-            var pca = CreatePca();
+            var pca = CreatePca(GetAuthMethod());
             foreach (var acc in (await pca.GetAccountsAsync().ConfigureAwait(false)))
             {
                 await pca.RemoveAsync(acc).ConfigureAwait(false);
@@ -633,7 +668,7 @@ namespace NetDesktopWinForms
         {
             Log("Expiring tokens.");
 
-            var pca = CreatePca();
+            var pca = CreatePca(GetAuthMethod());
 
             // do something that loads the cache first
             await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -659,7 +694,7 @@ namespace NetDesktopWinForms
                     throw new InvalidOperationException("[TEST APP FAILURE] Please select an account");
                 }
 
-                var pca = CreatePca();
+                var pca = CreatePca(GetAuthMethod());
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 await pca.RemoveAsync(acc).ConfigureAwait(false);
@@ -668,10 +703,52 @@ namespace NetDesktopWinForms
             }
             catch (Exception ex)
             {
+                await _syncContext;
                 Log("Exception: " + ex);
             }
         }
 
+        private async void btnATSperf_Click(object sender, EventArgs e)
+        {
+            var brokerTimer = new Stopwatch();
+
+            try
+            {
+                //Old Broker
+                btnExpire_Click(sender, e);
+                var pca = CreatePca(AuthMethod.WAM);
+                brokerTimer.Start();
+                AuthenticationResult result1 = await RunAtsAsync(pca).ConfigureAwait(false);
+                brokerTimer.Stop();
+
+                var elapsedMilliseconds = brokerTimer.ElapsedMilliseconds;
+                await LogResultAndRefreshAccountsAsync(result1, false).ConfigureAwait(false);
+                Log($"Execution Time: {elapsedMilliseconds} ms");
+                Log("---------------------------------------- ");
+
+                //New Broker
+                btnExpire_Click(sender, e);
+                pca = CreatePca(AuthMethod.WAMRuntime);
+                brokerTimer.Reset();
+                brokerTimer.Start();
+                AuthenticationResult result2 = await RunAtsAsync(pca).ConfigureAwait(false);
+                brokerTimer.Stop();
+
+                await LogResultAndRefreshAccountsAsync(result2).ConfigureAwait(false);
+                Log($"Execution Time: {brokerTimer.ElapsedMilliseconds} ms");
+                Log("------------------------------------------------------------------------------");
+                Log($"\t Perf Results Comparing Old and New WAM. ");
+                Log("------------------------------------------------------------------------------");
+                Log($"\t \t Old Broker \t New Broker \t");
+                Log($"Time Taken : \t {elapsedMilliseconds} ms. \t\t {brokerTimer.ElapsedMilliseconds} ms");
+                Log($"Source : \t\t {result1.AuthenticationResultMetadata.TokenSource} \t\t {result2.AuthenticationResultMetadata.TokenSource}");
+                Log("------------------------------------------------------------------------------");
+            }
+            catch (Exception ex)
+            {
+                Log("Exception: " + ex);
+            }
+        }
     }
 
     public class ClientEntry

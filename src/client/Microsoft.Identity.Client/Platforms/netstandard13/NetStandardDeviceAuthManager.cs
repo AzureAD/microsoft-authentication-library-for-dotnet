@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 
         protected override byte[] SignWithCertificate(DeviceAuthJWTResponse responseJwt, X509Certificate2 certificate)
         {
-            return new NetStandard13CryptographyManager().SignWithCertificate(responseJwt.GetResponseToSign(), certificate);
+            return new CommonCryptographyManager().SignWithCertificate(responseJwt.GetResponseToSign(), certificate);
         }
     }
 }

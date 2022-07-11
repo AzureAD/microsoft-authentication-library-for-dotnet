@@ -9,6 +9,7 @@ steps:
   displayName: 'Use .Net Core SDK 5.x'
   inputs:
     version: 5.x
+    includePreviewVersions: true
 
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Drop'

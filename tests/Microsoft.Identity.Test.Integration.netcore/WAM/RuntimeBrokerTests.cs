@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword).ExecuteAsync().ConfigureAwait(false);
 
-            AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
 
             // Get Accounts
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-            AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId);
+            MsalAssert.AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId);
 
             // Remove Account
             await pca.RemoveAsync(account).ConfigureAwait(false);
@@ -174,95 +174,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Assert.IsNotNull(accounts);
             Assert.AreEqual(0, accounts.Count());
-        }
-
-        [TestMethod]
-        public async Task WamUsernamePasswordRequestMsaPassthroughAsync()
-        {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            string[] scopes = { "User.Read" };
-
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithWindowsBrokerOptions(new WindowsBrokerOptions()
-               {
-                   MsaPassthrough = true
-               })
-               .WithBrokerPreview().Build();
-
-            // Acquire token using username password
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword).ExecuteAsync().ConfigureAwait(false);
-
-            AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
-
-            // Get Accounts
-            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-            Assert.IsNotNull(accounts);
-
-            var account = accounts.FirstOrDefault();
-            Assert.IsNotNull(account);
-
-            // Acquire token silently
-            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
-
-            AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId);
-
-            // Remove Account
-            await pca.RemoveAsync(account).ConfigureAwait(false);
-
-            // Assert the account is removed
-            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-
-            Assert.IsNotNull(accounts);
-            Assert.AreEqual(0, accounts.Count());
-        }
-
-        [TestMethod]
-        public async Task WamUsernamePasswordRequestWithPOPAsync()
-        {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            string[] scopes = { "User.Read" };
-
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithExperimentalFeatures()
-               .WithBrokerPreview().Build();
-
-            var result = await pca
-                .AcquireTokenByUsernamePassword(
-                    scopes, 
-                    labResponse.User.Upn, 
-                    new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
-                .WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(labResponse.Lab.Authority))
-                .ExecuteAsync().ConfigureAwait(false);
-
-            AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, true);
-        }
-
-        private void AssertAuthResult(AuthenticationResult result, TokenSource tokenSource, string tenantId, bool isPop = false)
-        {
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.AccessToken);
-            Assert.IsNotNull(result.IdToken);
-            Assert.IsNotNull(result.Account);
-            Assert.IsNotNull(result.Account.Username);
-
-            if (isPop)
-            {
-                Assert.AreEqual("PoP", result.TokenType);
-            }
-            else
-            {
-                Assert.AreEqual("Bearer", result.TokenType);
-            } 
-
-            Assert.AreEqual(tokenSource, result.AuthenticationResultMetadata.TokenSource);
-
-            Assert.IsTrue(result.ExpiresOn > DateTimeOffset.UtcNow + TimeSpan.FromHours(1));
-
-            Assert.AreEqual(tenantId, result.TenantId);
         }
     }
 }
