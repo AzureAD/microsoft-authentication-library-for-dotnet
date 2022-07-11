@@ -175,5 +175,28 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsNotNull(accounts);
             Assert.AreEqual(0, accounts.Count());
         }
+
+        [TestMethod]
+        public async Task WamUsernamePasswordRequestWithPOPAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithExperimentalFeatures()
+               .WithBrokerPreview().Build();
+
+            var result = await pca
+                .AcquireTokenByUsernamePassword(
+                    scopes,
+                    labResponse.User.Upn,
+                    new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                .WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(labResponse.Lab.Authority))
+                .ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, true);
+        }
     }
 }
