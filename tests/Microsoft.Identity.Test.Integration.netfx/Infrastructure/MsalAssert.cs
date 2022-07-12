@@ -44,13 +44,15 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
         }
 
-        public static void AssertAuthResult(AuthenticationResult result, TokenSource tokenSource, string tenantId)
+        public static void AssertAuthResult(AuthenticationResult result, TokenSource tokenSource, string tenantId, string[] scopes)
         {
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
             Assert.IsNotNull(result.IdToken);
             Assert.IsNotNull(result.Account);
             Assert.IsNotNull(result.Account.Username);
+            Assert.IsNotNull(result.Scopes);
+            Assert.IsTrue(result.Scopes.Any(scopes.Contains));
 
             Assert.AreEqual(tokenSource, result.AuthenticationResultMetadata.TokenSource);
 

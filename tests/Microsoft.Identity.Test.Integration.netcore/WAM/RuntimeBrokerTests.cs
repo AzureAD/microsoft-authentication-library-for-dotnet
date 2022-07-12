@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
 
             // Get Accounts
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -168,12 +168,12 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId);
+            MsalAssert.AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId, scopes);
 
             // Acquire token interactively WithAccount
             result = await pca.AcquireTokenInteractive(scopes).WithAccount(account).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
 
             // Remove Account
             await pca.RemoveAsync(account).ConfigureAwait(false);
