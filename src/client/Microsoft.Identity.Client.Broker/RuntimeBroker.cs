@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Client.Broker
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
-                authParams.Properties["MSALRuntime_Password"] = new string(acquireTokenByUsernamePasswordParameters.Password.PasswordToCharArray());
+                authParams.Properties["MSALRuntime_Password"] = acquireTokenByUsernamePasswordParameters.Password;
 
                 using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
                         authParams,

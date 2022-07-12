@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
 
                 // Act
-                var result = await app.AcquireTokenByUsernamePassword(new[] { "User.Read" }, "username", new NetworkCredential("", "password").SecurePassword)
+                var result = await app.AcquireTokenByUsernamePassword(new[] { "User.Read" }, "username", "password")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

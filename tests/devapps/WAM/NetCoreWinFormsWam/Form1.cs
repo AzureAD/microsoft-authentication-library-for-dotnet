@@ -579,7 +579,7 @@ namespace NetDesktopWinForms
             AuthenticationResult result = null;
             var scopes = GetScopes();
             var guid = Guid.NewGuid();
-            var builder = pca.AcquireTokenByUsernamePassword(scopes, username, new NetworkCredential("", password).SecurePassword);
+            var builder = pca.AcquireTokenByUsernamePassword(scopes, username, password);
 
             if (cbxBackgroundThread.Checked)
             {
