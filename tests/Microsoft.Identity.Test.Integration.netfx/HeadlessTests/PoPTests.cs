@@ -2,13 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -18,10 +15,8 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Integration.net461;
 using Microsoft.Identity.Test.Integration.net461.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -57,14 +52,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
             if (_popValidationEndpointSecret == null)
             {
-                _popValidationEndpointSecret = LabUserHelper.KeyVaultSecretsProvider.GetSecret(
-                    "https://buildautomation.vault.azure.net/secrets/automation-pop-validation-endpoint/841fc7c2ccdd48d7a9ef727e4ae84325").Value;
+                _popValidationEndpointSecret = LabUserHelper.KeyVaultSecretsProviderMsal.GetSecretByName("automation-pop-validation-endpoint", "841fc7c2ccdd48d7a9ef727e4ae84325").Value;
             }
 
             if (_keyVault == null)
             {
-                _keyVault = new KeyVaultSecretsProvider();
-                s_publicCloudCcaSecret = _keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
+                _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
+                s_publicCloudCcaSecret = _keyVault.GetSecretByName(TestConstants.MsalCCAKeyVaultSecretName).Value;
             }
         }
 

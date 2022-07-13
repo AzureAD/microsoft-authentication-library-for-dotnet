@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
+#if NET_CORE
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+#endif
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -190,7 +193,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static string GetSignedClientAssertionUsingMsalInternal(string clientId, IDictionary<string, string> claims)
         {
 #if NET_CORE
-            var manager = new Client.Platforms.netcore.NetCoreCryptographyManager();
+            var manager = new CommonCryptographyManager();
 #else
             var manager = new Client.Platforms.net461.NetDesktopCryptographyManager();
 #endif

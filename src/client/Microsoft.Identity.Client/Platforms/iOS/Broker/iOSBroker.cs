@@ -424,6 +424,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return Task.FromResult<MsalTokenResponse>(null); // nop
         }
 
+        public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
+        {
+            return Task.FromResult<MsalTokenResponse>(null); // nop
+        }
+
         #endregion
     }
 }

@@ -19,42 +19,8 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.Platforms.net461
 {
-    internal class NetDesktopCryptographyManager : ICryptographyManager
+    internal class NetDesktopCryptographyManager : CommonCryptographyManager
     {
-        public string CreateBase64UrlEncodedSha256Hash(string input)
-        {
-            return string.IsNullOrEmpty(input) ? null : Base64UrlHelpers.Encode(CreateSha256HashBytes(input));
-        }
-
-        public string GenerateCodeVerifier()
-        {
-            byte[] buffer = new byte[Constants.CodeVerifierByteSize];
-            using (var randomSource = RandomNumberGenerator.Create())
-            {
-                randomSource.GetBytes(buffer);
-            }
-
-            return Base64UrlHelpers.Encode(buffer);
-        }
-
-        public string CreateSha256Hash(string input)
-        {
-            return string.IsNullOrEmpty(input) ? null : Convert.ToBase64String(CreateSha256HashBytes(input));
-        }
-
-        public byte[] CreateSha256HashBytes(string input)
-        {
-            using (var sha = SHA256.Create())
-            {
-                return sha.ComputeHash(Encoding.UTF8.GetBytes(input));
-            }
-        }
-      
-        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
-        {
-            return CryptographyManager.SignWithCertificate(message, certificate);
-        }
-
         /// <summary>
         ///     <para>
         ///         The GetCngPrivateKey method will return a <see cref="CngKey" /> representing the private

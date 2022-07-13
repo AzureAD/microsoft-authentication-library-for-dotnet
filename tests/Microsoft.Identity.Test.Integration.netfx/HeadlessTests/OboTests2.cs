@@ -4,23 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
-using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -29,8 +18,6 @@ using Microsoft.Identity.Test.Integration.net461.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -57,16 +44,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string PublicCloudHost = "https://login.microsoftonline.com/";
         private const string ArlingtonCloudHost = "https://login.microsoftonline.us/";
 
-        private KeyVaultSecretsProvider _keyVault;
+        private KeyVaultSecretsProvider _keyVaultMsidLab;
+        private KeyVaultSecretsProvider _keyVaultMsalTeam;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
 
-            if (_keyVault == null)
+            if (_keyVaultMsidLab == null)
             {
-                _keyVault = new KeyVaultSecretsProvider();
+                _keyVaultMsidLab = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
+            }
+
+            if (_keyVaultMsalTeam == null)
+            {
+                _keyVaultMsalTeam = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
             }
         }
         
@@ -257,7 +250,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string[] oboScope;
 
             oboHost = PublicCloudHost;
-            secret = _keyVault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
+            secret = _keyVaultMsalTeam.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
             authority = TestConstants.AuthorityOrganizationsTenant;
             publicClientID = PublicCloudPublicClientIDOBO;
             confidentialClientID = PublicCloudConfidentialClientIDOBO;
@@ -394,7 +387,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 case AzureEnvironment.azureusgovernment:
                     oboHost = ArlingtonCloudHost;
-                    secret = _keyVault.GetSecret(TestConstants.MsalArlingtonOBOKeyVaultUri).Value;
+                    secret = _keyVaultMsidLab.GetSecretByName(TestConstants.MsalArlingtonOBOKeyVaultSecretName).Value;
                     authority = labResponse.Lab.Authority + "organizations";
                     publicClientID = ArlingtonPublicClientIDOBO;
                     confidentialClientID = ArlingtonConfidentialClientIDOBO;
@@ -402,7 +395,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     break;
                 default:
                     oboHost = PublicCloudHost;
-                    secret = _keyVault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
+                    secret = _keyVaultMsalTeam.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
                     authority = TestConstants.AuthorityOrganizationsTenant;
                     publicClientID = PublicCloudPublicClientIDOBO;
                     confidentialClientID = PublicCloudConfidentialClientIDOBO;

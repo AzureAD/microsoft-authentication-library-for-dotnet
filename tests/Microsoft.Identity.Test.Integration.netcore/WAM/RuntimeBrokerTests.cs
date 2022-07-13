@@ -20,6 +20,7 @@ using Microsoft.Identity.Client.OAuth2;
 using System.Runtime.InteropServices;
 using System;
 using NSubstitute;
+using System.Linq;
 
 namespace Microsoft.Identity.Test.Integration.Broker
 {
@@ -134,6 +135,54 @@ namespace Microsoft.Identity.Test.Integration.Broker
                     "Console applications can use GetConsoleWindow Windows API for this"));
             }
 
+        }
+
+        [TestMethod]
+        public async Task WamUsernamePasswordRequestAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+
+            IntPtr intPtr = GetForegroundWindow();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBrokerPreview().Build();
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
+
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            var account = accounts.FirstOrDefault();
+            Assert.IsNotNull(account);
+
+            // Acquire token silently
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId);
+
+            // Acquire token interactively WithAccount
+            result = await pca.AcquireTokenInteractive(scopes).WithAccount(account).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId);
+
+            // Remove Account
+            await pca.RemoveAsync(account).ConfigureAwait(false);
+
+            // Assert the account is removed
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(accounts);
+            Assert.AreEqual(0, accounts.Count());
         }
     }
 }

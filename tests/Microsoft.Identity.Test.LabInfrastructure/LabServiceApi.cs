@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Azure.Core;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -19,7 +20,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     {
         private string _labAccessAppId;
         private string _labAccessClientSecret;
-        private string _labApiAccessToken;
+        private AccessToken? _labApiAccessToken;
 
         public LabServiceApi()
         {
@@ -154,12 +155,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         internal async Task<string> GetLabResponseAsync(string address)
         {
-            if (string.IsNullOrWhiteSpace(_labApiAccessToken))
+            if (_labApiAccessToken == null)
                 _labApiAccessToken = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(_labAccessAppId, _labAccessClientSecret).ConfigureAwait(false);
 
             using (HttpClient httpClient = new HttpClient())
             {
-                httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", _labApiAccessToken));
+                httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", _labApiAccessToken.Value.Token));
                 return await httpClient.GetStringAsync(address).ConfigureAwait(false);
             }
         }

@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static InMemoryTokenCache s_inMemoryTokenCache = new InMemoryTokenCache();
         private string _confidentialClientSecret;
 
-        private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider();
+        private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
 
         #region Test Hooks
         [ClassInitialize]
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
             if (string.IsNullOrEmpty(_confidentialClientSecret))
             {
-                _confidentialClientSecret = _keyVault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
+                _confidentialClientSecret = _keyVault.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
             }
         }
 

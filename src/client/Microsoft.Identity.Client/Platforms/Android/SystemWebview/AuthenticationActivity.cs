@@ -24,7 +24,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
     /// <summary>
     /// </summary>
     [Activity(Name = "microsoft.identity.client.AuthenticationActivity")]
+#if MAUI
+    [Preserve(AllMembers = true)]
+#else
     [global::Android.Runtime.Preserve(AllMembers = true)]
+#endif
     internal class AuthenticationActivity : Activity
     {
         internal static RequestContext RequestContext { get; set; }
