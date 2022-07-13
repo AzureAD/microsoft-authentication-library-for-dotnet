@@ -185,17 +185,5 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsNotNull(accounts);
             Assert.AreEqual(0, accounts.Count());
         }
-
-        [TestMethod]
-        public async Task WamUsernamePasswordRequest1Async()
-        {
-            //var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            string[] scopes = { "User.Read", "email" };
-            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
-
-            Assert.IsTrue(expectedScopes.Any(scopes.Contains));
-
-
-        }
     }
 }

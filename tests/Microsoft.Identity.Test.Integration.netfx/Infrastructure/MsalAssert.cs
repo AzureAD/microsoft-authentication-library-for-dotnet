@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Assert.IsNotNull(result.IdToken);
             Assert.IsNotNull(result.Account);
             Assert.IsNotNull(result.Account.Username);
-            Assert.IsTrue(result.Scopes.Any(scopes.Contains));
+            Assert.IsTrue(scopes.All(result.Scopes.Contains));
 
             Assert.AreEqual(tokenSource, result.AuthenticationResultMetadata.TokenSource);
 
