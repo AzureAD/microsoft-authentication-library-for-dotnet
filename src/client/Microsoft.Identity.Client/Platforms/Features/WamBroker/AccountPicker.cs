@@ -17,7 +17,6 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 
 #if NET5_WIN
 using Microsoft.Identity.Client.Platforms.net5win;
-using AccountsSettingsPaneInterop = Microsoft.Identity.Client.Platforms.net5win.AccountsSettingsPaneInterop;
 #elif DESKTOP || NET_CORE
 using Microsoft.Identity.Client.Platforms;
 #endif

@@ -13,7 +13,6 @@ using System.Diagnostics.Tracing;
 
 #if NET5_WIN
 using Microsoft.Identity.Client.Platforms.net5win;
-using WebAuthenticationCoreManagerInterop = Microsoft.Identity.Client.Platforms.net5win.WebAuthenticationCoreManagerInterop;
 #elif DESKTOP || NET_CORE
 using Microsoft.Identity.Client.Platforms;
 #endif
