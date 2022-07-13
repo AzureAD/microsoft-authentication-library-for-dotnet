@@ -68,7 +68,7 @@ namespace CommonCache.Test.MsalV2
                         var result = await app.AcquireTokenByUsernamePasswordAsync(
                             scopes,
                             labUserData.Upn,
-                            labUserData.Password.ToSecureString()).ConfigureAwait(false);
+                            labUserData.Password).ConfigureAwait(false);
 
                         if (string.IsNullOrWhiteSpace(result.AccessToken))
                         {

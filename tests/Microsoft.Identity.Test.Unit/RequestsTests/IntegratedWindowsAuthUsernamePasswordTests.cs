@@ -413,7 +413,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         [DeploymentItem(@"Resources\TestMex.xml")]
         [DeploymentItem(@"Resources\WsTrustResponse.xml")]
-        public async Task FederatedUsernamePasswordWithSecureStringAcquireTokenTestAsync()
+        public async Task FederatedUsernamePasswordAcquireTokenTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -685,7 +685,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         [TestMethod]
 
-        public async Task ManagedUsernameSecureStringPasswordAcquireTokenTestAsync()
+        public async Task ManagedUsernamePasswordAcquireTokenTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -757,9 +757,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddInstanceDiscoveryMockHandler();
                 AddMockResponseforManagedAccounts(httpManager);
 
-                var str = new SecureString();
-                str.AppendChar('y');
-                str.MakeReadOnly();
+                string str = "y";
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler

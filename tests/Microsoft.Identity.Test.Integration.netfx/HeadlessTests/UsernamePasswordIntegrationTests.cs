@@ -289,7 +289,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
-            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
+            // 1) Add in code to pull the user's password, and put a breakpoint there.
             // string password = ((LabUser)user).GetPassword();
             // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
@@ -300,8 +300,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var factory = new HttpSnifferClientFactory();
             var user = labResponse.User;
-
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
@@ -325,7 +323,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following: 
-            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
+            // 1) Add in code to pull the user's password, and put a breakpoint there.
             // string password = ((LabUser)user).GetPassword();
             // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
