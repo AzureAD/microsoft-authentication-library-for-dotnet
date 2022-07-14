@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         private static string CreateSimpleNonce()
         {
             // Guid with no hyphens
-#if NETSTANDARD || WINDOWS_APP
+#if WINDOWS_APP
             return Guid.NewGuid().ToString("N");
 #else
             return Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);

@@ -1,0 +1,5 @@
+﻿<RunConfiguration>
+    <TargetFrameworkVersion>net6.0</TargetFrameworkVersion>
+    <TreatNoTestsAsError>true</TreatNoTestsAsError>
+    <TreatTestAdapterErrorsAsWarnings>true</TreatTestAdapterErrorsAsWarnings>
+</RunConfiguration>

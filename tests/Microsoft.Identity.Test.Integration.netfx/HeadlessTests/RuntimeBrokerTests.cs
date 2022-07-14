@@ -24,32 +24,14 @@ using System.Linq;
 
 namespace Microsoft.Identity.Test.Integration.Broker
 {
-    
+
     [TestClass]
     public class RuntimeBrokerTests
     {
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
 
-        /// <summary>
-        /// Initialized by MSTest (do not make private or readonly)
-        /// </summary>
-        //public TestContext TestContext { get; set; }
-        private CoreUIParent _coreUIParent;
-        private ILoggerAdapter _logger;
-        private RuntimeBroker _wamBroker;
-        IntPtr _parentHandle = GetForegroundWindow();
-
-        [TestInitialize]
-        public void Init()
-        {
-            _coreUIParent = new CoreUIParent() { OwnerWindow = _parentHandle };
-            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
-            _logger = Substitute.For<ILoggerAdapter>();
-            _wamBroker = new RuntimeBroker(_coreUIParent, applicationConfiguration, _logger);
-        }
-
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamSilentAuthUserInteractionRequiredAsync()
         {
             string[] scopes = new[]
@@ -76,7 +58,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         }
 
-        [TestMethod]
+        [RunOn( TargetFrameworks.NetCore)]
         public async Task WamSilentAuthLoginHintNoAccontInCacheAsync()
         {
             string[] scopes = new[]
@@ -101,43 +83,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 Assert.IsTrue(ex.Message.Contains("You are trying to acquire a token silently using a login hint. " +
                     "No account was found in the token cache having this login hint"));
             }
+        }      
 
-        }
-
-        [TestMethod]
-        public async Task WamInteractiveAuthNoWindowHandleAsync()
-        {
-            string[] scopes = new[]
-                {
-                    "https://management.core.windows.net//.default"
-                };
-
-            IAccount accountToLogin = PublicClientApplication.OperatingSystemAccount;
-
-            PublicClientApplicationBuilder pcaBuilder = PublicClientApplicationBuilder
-               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
-               .WithAuthority("https://login.microsoftonline.com/organizations");
-
-            IPublicClientApplication pca = pcaBuilder.WithBrokerPreview().Build();
-
-            // Act
-            try
-            {
-                var result = await pca.AcquireTokenInteractive(scopes)
-                    .WithAccount(accountToLogin)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-            }
-            catch (MsalClientException ex)
-            {
-                Assert.IsTrue(ex.Message.Contains("Public Client applications wanting to use WAM need to provide their window handle. " +
-                    "Console applications can use GetConsoleWindow Windows API for this"));
-            }
-
-        }
-
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
         public async Task WamUsernamePasswordRequestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
