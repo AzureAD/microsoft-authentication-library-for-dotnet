@@ -182,6 +182,27 @@ namespace Microsoft.Identity.Client.Broker
             }
         }
 
+        public static MsalTokenResponse HandleResponse(
+                NativeInterop.AuthResult authResult,
+                AuthenticationRequestParameters authenticationRequestParameters,
+                ILoggerAdapter logger, string errorMessage = null)
+        {
+            MsalTokenResponse msalTokenResponse = null;
+
+            if (authResult.IsSuccess)
+            {
+                msalTokenResponse = WamAdapters.ParseRuntimeResponse(authResult, authenticationRequestParameters, logger);
+                logger.Verbose("[WamBroker] Successfully retrieved token.");
+            }
+            else
+            {
+                logger.Error($"[WamBroker] {errorMessage} {authResult.Error}");
+                WamAdapters.ThrowExceptionFromWamError(authResult, authenticationRequestParameters, logger);
+            }
+
+            return msalTokenResponse;
+        }
+
         /// <summary>
         /// Parse Native Interop AuthResult Response to MSAL Token Response
         /// </summary>
