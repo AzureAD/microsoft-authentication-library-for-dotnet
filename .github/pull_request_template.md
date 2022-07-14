@@ -14,4 +14,4 @@ Fixes #
 <!-- Describe any applicable performance impact or performance testing done. -->
 
 **Documentation**
-<!-- Is all the relevant documentation updated? -->
+- [ ] All relevant documentation is updated.
