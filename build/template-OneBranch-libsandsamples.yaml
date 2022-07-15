@@ -24,10 +24,17 @@ steps:
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
+- template: /SharedComponents/OneBranch/Steps/Prepare.MSBuild.yml@templates
+  parameters:
+    msBuildVersion: 17.0
+    msbuildInstallationPath: c:\.vs
+    includeReferenceAssemblies: 'true'
+
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
+    vsVersion: 17.2.6
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}

@@ -15,10 +15,7 @@
     <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
-  </PropertyGroup>
-
     <!-- MAUI -->
-  <PropertyGroup Condition="'$(MAUI_SUPPORT)' != ''">
     <TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
     <TargetFrameworkNet6Ios>net6.0-ios</TargetFrameworkNet6Ios>
     <TargetFrameworkNet6Mac>net6.0-maccatalyst</TargetFrameworkNet6Mac>
@@ -306,13 +303,13 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Android)' And '$(MAUI_SUPPORT)' != ''">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
     <PackageReference Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
   </ItemGroup>
-  <ItemGroup Condition=" ('$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)') And '$(MAUI_SUPPORT)' != ''">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\Apple\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
