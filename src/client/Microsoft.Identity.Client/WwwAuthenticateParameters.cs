@@ -22,13 +22,12 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class WwwAuthenticateParameters
     {
-        private static readonly ISet<string> s_knownAuthenticationSchemes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        static WwwAuthenticateParameters()
-        {
-            s_knownAuthenticationSchemes.Add(Constants.BearerAuthHeaderPrefix);
-            s_knownAuthenticationSchemes.Add(Constants.PoPAuthHeaderPrefix);
-        }
+        private static readonly ISet<string> s_knownAuthenticationSchemes = new HashSet<string>(
+                                                                              new[] {
+                                                                                       Constants.BearerAuthHeaderPrefix,
+                                                                                       Constants.PoPAuthHeaderPrefix
+                                                                              }, 
+                                                                              StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Resource for which to request scopes.
@@ -98,6 +97,28 @@ namespace Microsoft.Identity.Client
                                                .CreateAuthority(Authority, validateAuthority: true)
                                                .TenantId;
 
+        ///// <summary>
+        ///// Create list of WWW-Authenticate parameters from known HttpResponseHeaders.
+        ///// </summary>
+        ///// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
+        ///// <returns>The parameters requested by the web API.</returns>
+        ///// <remarks>Currently it only supports the Bearer scheme</remarks>
+        //public static IEnumerable<WwwAuthenticateParameters> CreateFromKnownResponseHeaders(HttpResponseHeaders httpResponseHeaders)
+        //{
+        //    List<WwwAuthenticateParameters> parameterList = new List<WwwAuthenticateParameters>();
+
+        //    foreach (string scheme in s_knownAuthenticationSchemes)
+        //    {
+        //        WwwAuthenticateParameters parameters = CreateFromResponseHeaders(httpResponseHeaders, scheme);
+        //        if (string.IsNullOrEmpty(parameters.Scheme))
+        //        {
+        //            parameterList.Add(parameters);
+        //        }
+        //    }
+
+        //    return parameterList;
+        //}
+
         /// <summary>
         /// Create WWW-Authenticate parameters from the HttpResponseHeaders.
         /// </summary>
@@ -109,21 +130,6 @@ namespace Microsoft.Identity.Client
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
         {
-            if (scheme == Constants.BearerAuthHeaderPrefix)
-            {
-                return ParseBearerParameters(httpResponseHeaders);
-            }
-
-            if (scheme == Constants.PoPAuthHeaderPrefix)
-            {
-                return ParsePopParameters(httpResponseHeaders);
-            }
-
-            return CreateWwwAuthenticateParameters(new Dictionary<string, string>());
-        }
-
-        private static WwwAuthenticateParameters ParseBearerParameters(HttpResponseHeaders httpResponseHeaders)
-        {
             if (httpResponseHeaders.WwwAuthenticate.Any())
             {
                 AuthenticationHeaderValue bearer = httpResponseHeaders.WwwAuthenticate.First(v => string.Equals(v.Scheme, Constants.BearerAuthHeaderPrefix, StringComparison.OrdinalIgnoreCase));
@@ -133,22 +139,32 @@ namespace Microsoft.Identity.Client
                 return parameters;
             }
 
-            return null;
+            return CreateWwwAuthenticateParameters(new Dictionary<string, string>());
         }
 
-        private static WwwAuthenticateParameters ParsePopParameters(HttpResponseHeaders httpResponseHeaders)
+        /// <summary>
+        /// Create WWW-Authenticate parameters from the HttpResponseHeaders for each auth scheme.
+        /// </summary>
+        /// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
+        /// <returns>The parameters requested by the web API.</returns>
+        /// <remarks>Currently it only supports the Bearer scheme</remarks>
+        public static IEnumerable<WwwAuthenticateParameters> CreateAllFromResponseHeaders(
+            HttpResponseHeaders httpResponseHeaders)
         {
-            if (httpResponseHeaders.WwwAuthenticate != null)
+            List<WwwAuthenticateParameters> parameterList = new List<WwwAuthenticateParameters>();
+
+            foreach (var wwwAuthenticateHeaderValue in httpResponseHeaders.WwwAuthenticate)
             {
-                string wwwAuthenticateValue = httpResponseHeaders.WwwAuthenticate.ToString();
-                var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
+                if (s_knownAuthenticationSchemes.Contains(wwwAuthenticateHeaderValue.Scheme))
+                {
+                    var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateHeaderValue.Parameter);
+                    parameters.Scheme = Constants.BearerAuthHeaderPrefix;
 
-                parameters.Scheme = Constants.PoPAuthHeaderPrefix;
-
-                return parameters;
+                    parameterList.Add(parameters);
+                }
             }
 
-            return null;
+            return parameterList;
         }
 
         /// <summary>
@@ -162,10 +178,22 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(wwwAuthenticateValue));
             }
+            IDictionary<string, string> parameters;
 
-            IDictionary<string, string> parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
-                .Select(v => ExtractKeyValuePair(v.Trim()))
-                .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+            var AuthValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
+
+            if (s_knownAuthenticationSchemes.Contains(AuthValuesSplit[0]))
+            {
+                parameters = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
+                    .Select(v => ExtractKeyValuePair(v.Trim()))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+
+            } else
+            {
+                parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
+                    .Select(v => ExtractKeyValuePair(v.Trim()))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+            }
 
             return CreateWwwAuthenticateParameters(parameters);
         }
@@ -175,10 +203,21 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
+        [Obsolete]
         public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri)
         {
             return CreateFromResourceResponseAsync(resourceUri, default);
         }
+
+        /// <summary>
+        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
+        /// </summary>
+        /// <param name="resourceUri">URI of the resource.</param>
+        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
+        //public static Task<IEnumerable<WwwAuthenticateParameters>> CreateAllFromResourceResponseAsync(string resourceUri)
+        //{
+        //    return CreateFromResourceResponseAsync(resourceUri, default);
+        //}
 
         /// <summary>
         /// Create a list of the known authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
@@ -186,21 +225,33 @@ namespace Microsoft.Identity.Client
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>a list of WWW-Authenticate Parameters extracted from a response to the unauthenticated call.</returns>
-        public static async Task<IEnumerable<WwwAuthenticateParameters>> CreateKnownParametersFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
+        //public static async Task<IEnumerable<WwwAuthenticateParameters>> CreateAllParametersFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
+        //{
+        //    List<WwwAuthenticateParameters> parameterList = new List<WwwAuthenticateParameters>();
+
+        //    foreach (string scheme in s_knownAuthenticationSchemes)
+        //    {
+        //        var parameter = await CreateFromResourceResponseAsync(resourceUri, cancellationToken, scheme).ConfigureAwait(false);
+
+        //        if (parameter != null && string.IsNullOrEmpty(parameter.Scheme))
+        //        {
+        //            parameterList.Add(parameter);
+        //        }
+        //    }
+
+        //    return parameterList;
+        //}
+
+        /// <summary>
+        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
+        /// </summary>
+        /// <param name="resourceUri">URI of the resource.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
+        [Obsolete]
+        public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
-            List<WwwAuthenticateParameters> parameterList = new List<WwwAuthenticateParameters>();
-
-            foreach (string scheme in s_knownAuthenticationSchemes)
-            {
-                var parameter = await CreateFromResourceResponseAsync(resourceUri, cancellationToken, scheme).ConfigureAwait(false);
-
-                if (parameter != null && string.IsNullOrEmpty(parameter.Scheme))
-                {
-                    parameterList.Add(parameter);
-                }
-            }
-
-            return parameterList;
+            return CreateFromResourceResponseAsync(GetHttpClient(), resourceUri, cancellationToken);
         }
 
         /// <summary>
@@ -208,13 +259,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
-        /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default, string scheme = "Bearer")
+        public static Task<IEnumerable<WwwAuthenticateParameters>> CreateAllFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
+        {
+            return CreateAllFromResourceResponseAsync(GetHttpClient(), resourceUri, cancellationToken);
+        }
+
+        private static HttpClient GetHttpClient()
         {
             var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
-            var httpClient = httpClientFactory.GetHttpClient();
-            return CreateFromResourceResponseAsync(httpClient, resourceUri, cancellationToken, scheme);
+            return httpClientFactory.GetHttpClient();
         }
 
         /// <summary>
@@ -223,9 +277,9 @@ namespace Microsoft.Identity.Client
         /// <param name="httpClient">Instance of <see cref="HttpClient"/> to make the request with.</param>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
-        /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default, string scheme = "Bearer")
+        [Obsolete]
+        public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
         {
             if (httpClient is null)
             {
@@ -238,8 +292,33 @@ namespace Microsoft.Identity.Client
 
             // call this endpoint and see what the header says and return that
             HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);
-            var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers, scheme);
+            var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers);
             return wwwAuthParam;
+        }
+
+        /// <summary>
+        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
+        /// </summary>
+        /// <param name="httpClient">Instance of <see cref="HttpClient"/> to make the request with.</param>
+        /// <param name="resourceUri">URI of the resource.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
+        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
+        public static async Task<IEnumerable<WwwAuthenticateParameters>> CreateAllFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default, string scheme = "Bearer")
+        {
+            if (httpClient is null)
+            {
+                throw new ArgumentNullException(nameof(httpClient));
+            }
+            if (string.IsNullOrWhiteSpace(resourceUri))
+            {
+                throw new ArgumentNullException(nameof(resourceUri));
+            }
+
+            // call this endpoint and see what the header says and return that
+            HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);
+            var wwwAuthParams = CreateAllFromResponseHeaders(httpResponseMessage.Headers);
+            return wwwAuthParams;
         }
 
         /// <summary>
@@ -306,7 +385,7 @@ namespace Microsoft.Identity.Client
                 wwwAuthenticateParameters.Error = value;
             }
 
-            if (values.TryGetValue("WWWAuthenticate: PoP nonce", out value))
+            if (values.TryGetValue("nonce", out value))
             {
                 wwwAuthenticateParameters.ServerNonce = value.Replace("\"", string.Empty);
             }

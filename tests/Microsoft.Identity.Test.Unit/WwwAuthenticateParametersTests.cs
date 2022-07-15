@@ -213,6 +213,9 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("")]
         public async Task CreateFromResourceResponseAsync_Incorrect_ResourceUri_Async(string resourceUri)
         {
+
+            await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://manage.office.com/api/v1.0/fbb86d84-7975-4300-a5cb-87b448d6f13d/activity/feed/subscriptions/content?contentType={ContentType}&amp;startTime={0}&amp;endTime={1}").ConfigureAwait(false);
+
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
@@ -259,24 +262,39 @@ namespace Microsoft.Identity.Test.Unit
         {
             //Arrange & Act
             WwwAuthenticateParameters parameters = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(
-                                                         "https://testingsts.azurewebsites.net/servernonce/expired",
-                                                         default,
-                                                         Constants.PoPAuthHeaderPrefix).ConfigureAwait(false);
+                                                         "https://testingsts.azurewebsites.net/servernonce/invalidsignature",
+                                                         //"https://manage.office.com/api/v1.0/fbb86d84-7975-4300-a5cb-87b448d6f13d/activity/feed/subscriptions/content?contentType={ContentType}&amp;startTime={0}&amp;endTime={1}",
+                                                         //"https://management.core.windows.net/<subscription-id>/services/hostedservices/<cloudservice-name>",
+                                                         //"https://management.azure.com/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/iddp/providers/Microsoft.KeyVault/vaults/iddp?api-version=2021-10-01",
+                                                         //"https://mkttest0127tipsg908org3.crm10.dynamics.com/api/data/v9.1/",
+                                                         default).ConfigureAwait(false);
 
             //Assert
             Assert.IsTrue(parameters.Scheme == Constants.PoPAuthHeaderPrefix);
             Assert.IsNotNull(parameters.ServerNonce);
         }
 
-        //[TestMethod]
-        //public void ExtractAllParametersFromResponse()
-        //{
-        //    // Arrange
-        //    HttpResponseMessage httpResponse = CreateBearerAndPopHttpResponse();
+        [TestMethod]
+        public void ExtractAllParametersFromResponse()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = CreateBearerAndPopHttpResponse();
 
-        //    // Act & Assert
-        //    Assert.IsNull(WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(httpResponse.Headers));
-        //}
+            // Act & Assert
+            Assert.IsNull(WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(httpResponse.Headers));
+        }
+
+        [TestMethod]
+        //Test for fix https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3026
+        public void ExtractParametersFromResponseWithScheme()
+        {
+            //arrange
+            var header = WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue("Bearer authorization_uri=https://login.microsoftonline.com/TenantId/oauth2/authorize, resource_id=https://endpoint/");
+
+            // Act & Assert
+            Assert.IsNotNull(header);
+            Assert.AreEqual("https://login.microsoftonline.com/TenantId", header.Authority);
+        }
 
         private static HttpResponseMessage CreateClaimsHttpResponse(string claims)
         {
@@ -318,16 +336,16 @@ namespace Microsoft.Identity.Test.Unit
             };
         }
 
-        //private static HttpResponseMessage CreateBearerAndPopHttpResponse()
-        //{
-        //    return new HttpResponseMessage(HttpStatusCode.Unauthorized)
-        //    {
-        //        Headers =
-        //        {
-        //            { WwwAuthenticateHeaderName, $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"some_error\", claims=\"{DecodedClaimsHeader}\"" },
-        //            { WwwAuthenticateHeaderName, $"WWWAuthenticate: PoP nonce=\"\", someNonce"}
-        //        }
-        //    };
-        //}
+        private static HttpResponseMessage CreateBearerAndPopHttpResponse()
+        {
+            return new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            {
+                Headers =
+                {
+                    { WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"https://login.microsoftonline.com/TenantId/oauth2/authorize\", resource_id=\"https://endpoint/\"" },
+                    { WwwAuthenticateHeaderName, $"PoP nonce=\"someNonce\""}
+                }
+            };
+        }
     }
 }
