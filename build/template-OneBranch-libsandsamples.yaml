@@ -26,7 +26,7 @@ steps:
 
 - template: /SharedComponents/OneBranch/Steps/Prepare.MSBuild.yml@templates
   parameters:
-    msBuildVersion: 17.0
+    msBuildVersion: 17.2.1
     msbuildInstallationPath: c:\.vs
     includeReferenceAssemblies: 'true'
 
