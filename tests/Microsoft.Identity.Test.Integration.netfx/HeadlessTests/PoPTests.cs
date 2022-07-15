@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
@@ -14,8 +15,12 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+#if NET_CORE
+using Microsoft.Identity.Client.Broker;
+#endif
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -360,6 +365,38 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 HttpMethod.Post,
                 result).ConfigureAwait(false);
         }
+
+#if NET_CORE
+        [TestMethod]
+        public async Task WamUsernamePasswordRequestWithPOPAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithExperimentalFeatures()
+               .WithBrokerPreview().Build();
+
+            var result = await pca
+                .AcquireTokenByUsernamePassword(
+                    scopes,
+                    labResponse.User.Upn,
+                    new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                .WithProofOfPossession("nonce", HttpMethod.Get, new Uri(ProtectedUrl))
+                .ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
+
+            await VerifyPoPTokenAsync(
+                labResponse.App.AppId,
+                ProtectedUrl,
+                HttpMethod.Get,
+                result).ConfigureAwait(false);
+        }
+#endif
 
         private static X509Certificate2 GetCertificate()
         {
