@@ -20,22 +20,22 @@ steps:
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    vsVersion: 17.2.6
+    vsVersion: 17.0
     msbuildArgs: '/t:restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
 - template: /SharedComponents/OneBranch/Steps/Prepare.MSBuild.yml@templates
   parameters:
-    msBuildVersion: 17.2.1
+    msBuildVersion: 17.0
     msbuildInstallationPath: c:\.vs
     includeReferenceAssemblies: 'true'
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
-    solution: ${{ parameters.Solution }}
-    vsVersion: 17.2.6
+    solution: ${{ param2.6eters.Solution }}
+    vsVersion: 17.0
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
