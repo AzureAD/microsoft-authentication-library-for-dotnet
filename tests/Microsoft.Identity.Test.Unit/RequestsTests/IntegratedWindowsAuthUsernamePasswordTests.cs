@@ -562,6 +562,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [DeploymentItem(@"Resources\WsTrustResponse.xml")]
         public async Task FederatedUsernameNullPasswordTestAsync()
         {
+            string password = null;
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -582,7 +583,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     async () => await app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.s_user.Username,
-                        null).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
+                        password).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check inner exception
                 Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, result.ErrorCode);
@@ -724,6 +725,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task ManagedUsernameNoPasswordAcquireTokenTestAsync()
         {
+            string password = null;
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -739,7 +741,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     async () => await app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.s_user.Username,
-                        null).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
+                        password).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check error code
                 Assert.AreEqual(MsalError.PasswordRequiredForManagedUserError, result.ErrorCode);
