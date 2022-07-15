@@ -8,7 +8,7 @@ namespace Microsoft.Identity.ServiceEssentials
     /// <summary>
     /// Represents an object that can be serialized and deserialized. 
     /// </summary>
-    public interface ICacheObject : IEquatable<ICacheObject>
+    public interface ICacheObject
     {
         /// <summary>
         /// Serializes an object into a string.

@@ -18,19 +18,19 @@ namespace Microsoft.Identity.Client.Cache.Prototype
             _memoryCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = cacheOptions?.SizeLimit ?? 1000 });
         }
 
-        public Task<ICacheEntry<T>> GetAsync<T>(string category, string key, CancellationToken cancellationToken = default)
+        public Task<CacheEntry<T>> GetAsync<T>(string category, string key, CancellationToken cancellationToken = default) where T : ICacheObject
         {
-            ICacheEntry<T> result = null;
+            CacheEntry<T> result = null;
             _memoryCache?.TryGetValue(key, out result);
             return Task.FromResult(result);
         }
 
-        public Task SetAsync<T>(string category, string key, T value, CacheEntryOptions cacheEntryOptions, CancellationToken cancellationToken = default)
+        public Task SetAsync<T>(string category, string key, T value, CacheEntryOptions cacheEntryOptions, CancellationToken cancellationToken = default) where T : ICacheObject
         {
-            var cacheEntry = new CacheEntry<T>(value, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+            var cacheEntry = new CacheEntry<T>(value, cacheEntryOptions.ExpirationTimeUTC, cacheEntryOptions.RefreshTimeUTC);
             var memoryCacheOptions = new MemoryCacheEntryOptions()
             {
-                AbsoluteExpiration = DateTimeOffset.UtcNow.Add(cacheEntryOptions.TimeToExpire),
+                AbsoluteExpiration = cacheEntryOptions.ExpirationTimeUTC,
                 Size = 1
             };
             _memoryCache.Set(key, cacheEntry, memoryCacheOptions);
@@ -38,21 +38,11 @@ namespace Microsoft.Identity.Client.Cache.Prototype
         }
 
         #region Not Implemented
-        public Task<ICacheEntry<string>> GetAsync(string category, string key, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ICacheEntry<T>> GetWithRefreshFunctionAsync<T>(string category, string key, CacheEntryOptions cacheEntryOptions, Func<string, string, CacheEntryOptions, CancellationToken, Task<T>> refreshFunction, CancellationToken cancellationToken = default) where T : ICacheObject, new()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ICacheEntry<string>> GetWithRefreshFunctionAsync(string category, string key, CacheEntryOptions cacheEntryOptions, Func<string, string, CacheEntryOptions, CancellationToken, Task<string>> refreshFunction, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
         public Task RemoveAsync(string category, string key, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<CacheEntry<string>> GetAsync(string category, string key, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

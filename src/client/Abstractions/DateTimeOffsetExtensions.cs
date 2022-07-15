@@ -12,17 +12,18 @@ namespace Microsoft.Identity.ServiceEssentials
     /// </summary>
     public static class DateTimeOffsetExtensions
     {
+        private static readonly Random _random = new Random();
+
         /// <summary>
-        /// Adds <paramref name="timeSpan"/> to <paramref name="dateTime"/>.
-        /// If sum of <paramref name="dateTime"/> and <paramref name="timeSpan"/>
-        /// exeeds <see cref="DateTimeOffset.MaxValue"/>, the resulting <see cref="DateTimeOffset"/>,
-        /// result will be set to to <see cref="DateTimeOffset.MaxValue"/>.
         /// </summary>
-        public static DateTimeOffset AddOrCap(this DateTimeOffset dateTime, TimeSpan timeSpan)
+        public static DateTimeOffset AddOrCap(this DateTimeOffset dateTime, int seconds)
         {
-            if (dateTime == DateTimeOffset.MaxValue || timeSpan == TimeSpan.MaxValue)
+            var timeSpan = GetRandomSpan(seconds);
+
+            if (dateTime == DateTimeOffset.MaxValue)
                 return DateTimeOffset.MaxValue;
 
+            // safeguard
             // checking only if timeSpan == TimeSpan.MaxValue is unsufficient
             // as jitter might be applied to the timeSpan.
             // based on: https://referencesource.microsoft.com/#mscorlib/system/timespan.cs,92
@@ -31,6 +32,16 @@ namespace Microsoft.Identity.ServiceEssentials
                 return DateTimeOffset.MaxValue;
             else
                 return dateTime.Add(timeSpan);
+        }
+
+        private static TimeSpan GetRandomSpan(int jitterSpanInSeconds)
+        {
+            if (jitterSpanInSeconds == 0)
+                return TimeSpan.Zero;
+            else if (jitterSpanInSeconds < 0)
+                return TimeSpan.FromSeconds((long)((_random.NextDouble()) * jitterSpanInSeconds));
+            else
+                return TimeSpan.FromSeconds((long)((_random.NextDouble() * 2.0 - 1.0) * jitterSpanInSeconds));
         }
     }
 }

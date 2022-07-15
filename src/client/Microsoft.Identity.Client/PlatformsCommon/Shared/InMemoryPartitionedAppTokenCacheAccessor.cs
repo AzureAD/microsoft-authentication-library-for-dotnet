@@ -228,5 +228,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
         }
+
+        public string Serialize()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Deserialize(string serializedValue)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

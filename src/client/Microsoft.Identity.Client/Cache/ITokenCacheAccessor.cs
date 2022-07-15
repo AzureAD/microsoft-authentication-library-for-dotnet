@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.ServiceEssentials;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal interface ITokenCacheAccessor
+    internal interface ITokenCacheAccessor : ICacheObject
     {
         void SaveAccessToken(MsalAccessTokenCacheItem item);
 

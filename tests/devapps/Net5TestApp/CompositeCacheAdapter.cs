@@ -11,38 +11,32 @@ namespace Net5TestApp
 {
     public class CompositeCacheAdapter : IIdentityCache
     {
-        private MemCacheProvider<object> _cache = new();
+        private readonly MemCacheProvider<object> _cache = new();
 
-        public async Task<ICacheEntry<T>> GetAsync<T>(string category, string key, CancellationToken cancellationToken = default)
+        public async Task<Microsoft.Identity.ServiceEssentials.CacheEntry<T>> GetAsync<T>(string category, string key, CancellationToken cancellationToken = default) where T : ICacheObject
         {
-            var cachedResult = await _cache.GetAsync(key).ConfigureAwait(false);
-            return cachedResult != null ? new MsalCacheEntry<T>((T)cachedResult.Value) : null;
+            var compositeCacheEntry = await _cache.GetAsync(key).ConfigureAwait(false);
+            return compositeCacheEntry != null ?
+                new Microsoft.Identity.ServiceEssentials.CacheEntry<T>(
+                    (T)compositeCacheEntry.Value,
+                    compositeCacheEntry.Expiration,
+                    compositeCacheEntry.Refresh) :
+                null;
         }
 
-        public async Task SetAsync<T>(string category, string key, T value, CacheEntryOptions cacheEntryOptions, CancellationToken cancellationToken = default)
+        public async Task SetAsync<T>(string category, string key, T value, CacheEntryOptions cacheEntryOptions, CancellationToken cancellationToken = default) where T : ICacheObject
         {
-            var expirationDate = DateTimeOffset.UtcNow.Add(cacheEntryOptions.TimeToExpire);
-            var cacheEntry = new CacheEntry<object>(key, value, expirationDate, expirationDate, false);
+            var cacheEntry = new CompositeCache.CacheEntry<object>(key, value, cacheEntryOptions.ExpirationTimeUTC, cacheEntryOptions.ExpirationTimeUTC, false);
             await _cache.SetAsync(cacheEntry).ConfigureAwait(false);
+
         }
 
         #region Not Implemented
-        public Task<ICacheEntry<string>> GetAsync(string category, string key, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ICacheEntry<T>> GetWithRefreshFunctionAsync<T>(string category, string key, CacheEntryOptions cacheEntryOptions, Func<string, string, CacheEntryOptions, CancellationToken, Task<T>> refreshFunction, CancellationToken cancellationToken = default) where T : ICacheObject, new()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ICacheEntry<string>> GetWithRefreshFunctionAsync(string category, string key, CacheEntryOptions cacheEntryOptions, Func<string, string, CacheEntryOptions, CancellationToken, Task<string>> refreshFunction, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task RemoveAsync(string category, string key, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<Microsoft.Identity.ServiceEssentials.CacheEntry<string>> GetAsync(string category, string key, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -52,25 +46,5 @@ namespace Net5TestApp
             throw new NotImplementedException();
         }
         #endregion
-    }
-
-    public class MsalCacheEntry<T> : ICacheEntry<T>
-    {
-        public MsalCacheEntry(T value)
-        {
-            Value = value;
-        }
-
-        public T Value { get; }
-
-        public bool IsValid()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsValidAsLastKnownGood()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

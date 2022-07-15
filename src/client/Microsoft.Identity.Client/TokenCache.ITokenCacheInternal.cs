@@ -1288,6 +1288,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        // Cache setup is validated to be mutually exclusive - 
+        // Token cache serialization is allowed only when WithCacheOptions is not used.
         private async Task<ITokenCacheAccessor> GetOrCreateAccessorAsync(string partitionKey)
         {
             // If user set up legacy cache serialization, then use old accessor instance (it would have been populated with tokens)
