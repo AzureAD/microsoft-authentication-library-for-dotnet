@@ -384,7 +384,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .AcquireTokenByUsernamePassword(
                     scopes,
                     labResponse.User.Upn,
-                    new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                    labResponse.User.GetOrFetchPassword())
                 .WithProofOfPossession("nonce", HttpMethod.Get, new Uri(ProtectedUrl))
                 .ExecuteAsync().ConfigureAwait(false);
 
