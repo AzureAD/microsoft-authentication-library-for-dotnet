@@ -131,8 +131,9 @@ namespace Microsoft.Identity.Client
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
+        /// .NET no longer recommends using SecureString and MSAL puts the plaintext value of the password on the wire, as required by the OAuth protocol. See <see href="https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring?view=net-6.0#remarks">SecureString documentation</see>.
         /// </remarks>
-        [Obsolete("This method is deprecated. Please use AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password) instead.", false)]
+        [Obsolete("Using SecureString is not recommended. Use AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password) instead.", false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
