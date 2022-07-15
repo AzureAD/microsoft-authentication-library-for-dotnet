@@ -46,13 +46,14 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
         }
 
-        public static void AssertAuthResult(AuthenticationResult result, TokenSource tokenSource, string tenantId, bool isPop = false)
+        public static void AssertAuthResult(AuthenticationResult result, TokenSource tokenSource, string tenantId, string[] scopes, bool isPop = false)
         {
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
             Assert.IsNotNull(result.IdToken);
             Assert.IsNotNull(result.Account);
             Assert.IsNotNull(result.Account.Username);
+            Assert.IsTrue(scopes.All(result.Scopes.Contains));
 
             if (isPop)
             {
