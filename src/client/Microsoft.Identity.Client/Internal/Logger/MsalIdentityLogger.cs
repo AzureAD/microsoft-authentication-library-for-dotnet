@@ -7,31 +7,22 @@ using Microsoft.IdentityModel.Abstractions;
 namespace Microsoft.Identity.Client.Internal.Logger
 {
 #if !XAMARINMAC20
-    //This class is used to wrap the functionality of the configured IIdentityLogger to add additional MSAL cleint information when logging messages.
-    internal class MsalCacheLoggerWrapper : IIdentityLogger
+    //This class is used to wrap the functionality of the configured IIdentityLogger to add additional MSAL client information when logging messages.
+    internal class MsalIdentityLogger : IIdentityLogger
     {
         private readonly IIdentityLogger _identityLogger;
         private readonly string _correlationId;
         private readonly string _clientInformation;
+        private readonly bool _piiLoggingEnabled;
 
-        internal MsalCacheLoggerWrapper(IIdentityLogger identityLogger, Guid correlationId, string clientName, string clientVersion)
+        internal MsalIdentityLogger(IIdentityLogger identityLogger, Guid correlationId, string clientName, string clientVersion, bool enablePiiLogging)
         {
             _identityLogger = identityLogger;
             _correlationId = correlationId.Equals(Guid.Empty)
                 ? string.Empty
                 : " - " + correlationId;
             _clientInformation = LoggerHelper.GetClientInfo(clientName, clientVersion);
-        }
-
-        public static IIdentityLogger Create(
-            Guid correlationId,
-            ApplicationConfiguration config)
-        {
-            return new MsalCacheLoggerWrapper(
-                config?.IdentityLogger,
-                correlationId,
-                config?.ClientName ?? string.Empty,
-                config?.ClientVersion ?? string.Empty);
+            _piiLoggingEnabled = enablePiiLogging;
         }
 
         public bool IsEnabled(EventLogLevel eventLevel)
@@ -41,7 +32,11 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogEntry entry)
         {
-            entry.Message = LoggerHelper.FormatLogMessage(string.Empty, entry.Message, false, _correlationId, _clientInformation);
+            entry.Message = LoggerHelper.FormatLogMessage(
+                                            entry.Message, 
+                                            _piiLoggingEnabled, 
+                                            string.IsNullOrEmpty(entry.CorrelationId) ? entry.CorrelationId : _correlationId, 
+                                            _clientInformation);
 
             _identityLogger.Log(entry);
         }

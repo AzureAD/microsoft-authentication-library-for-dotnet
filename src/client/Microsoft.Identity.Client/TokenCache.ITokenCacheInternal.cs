@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client
                             correlationId: requestParams.RequestContext.CorrelationId, 
                             requestScopes: requestParams.Scope,
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
-                            msalIdentityLogger: requestParams.RequestContext.ExternalCacheLogger,
+                            msalIdentityLogger: requestParams.RequestContext.Logger.MsalIdentityLogger,
                             piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
                         Stopwatch sw = Stopwatch.StartNew();
@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Client
                             correlationId: requestParams.RequestContext.CorrelationId, 
                             requestScopes: requestParams.Scope,
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
-                            msalIdentityLogger: requestParams.RequestContext.ExternalCacheLogger,
+                            msalIdentityLogger: requestParams.RequestContext.Logger.MsalIdentityLogger,
                             piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
                         Stopwatch sw = Stopwatch.StartNew();
@@ -1153,7 +1153,7 @@ namespace Microsoft.Identity.Client
                             correlationId: requestParameters.RequestContext.CorrelationId,
                             requestScopes: requestParameters.Scope,
                             requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
-                            msalIdentityLogger: requestParameters.RequestContext.ExternalCacheLogger,
+                            msalIdentityLogger: requestParameters.RequestContext.Logger.MsalIdentityLogger,
                             piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
                             
 
@@ -1189,7 +1189,7 @@ namespace Microsoft.Identity.Client
                            correlationId: requestParameters.RequestContext.CorrelationId,
                            requestScopes: requestParameters.Scope,
                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
-                           msalIdentityLogger: requestParameters.RequestContext.ExternalCacheLogger,
+                           msalIdentityLogger: requestParameters.RequestContext.Logger.MsalIdentityLogger,
                             piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
 
 

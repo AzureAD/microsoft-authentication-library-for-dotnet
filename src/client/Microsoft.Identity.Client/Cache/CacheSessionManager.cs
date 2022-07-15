@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Cache
                                   correlationId: _requestParams.RequestContext.CorrelationId, 
                                   requestScopes: _requestParams.Scope, 
                                   requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
-                                  msalIdentityLogger: _requestParams.RequestContext.ExternalCacheLogger,
+                                  msalIdentityLogger: _requestParams.RequestContext.Logger.MsalIdentityLogger,
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
                                 stopwatch.Start();
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client.Cache
                                   correlationId: _requestParams.RequestContext.CorrelationId,
                                   requestScopes: _requestParams.Scope,
                                   requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
-                                  msalIdentityLogger: _requestParams.RequestContext.ExternalCacheLogger,
+                                  msalIdentityLogger: _requestParams.RequestContext.Logger.MsalIdentityLogger,
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
                                 await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
