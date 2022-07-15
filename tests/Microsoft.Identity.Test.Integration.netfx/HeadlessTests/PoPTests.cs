@@ -364,11 +364,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result).ConfigureAwait(false);
         }
 
+#if NET_CORE
         [TestMethod]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
+            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
@@ -384,7 +386,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithProofOfPossession("nonce", HttpMethod.Get, new Uri(ProtectedUrl))
                 .ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, true);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
 
             await VerifyPoPTokenAsync(
                 labResponse.App.AppId,
@@ -392,6 +394,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 HttpMethod.Get,
                 result).ConfigureAwait(false);
         }
+#endif
 
         private static X509Certificate2 GetCertificate()
         {
