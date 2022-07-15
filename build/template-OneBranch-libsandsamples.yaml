@@ -34,7 +34,7 @@ steps:
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
-    solution: ${{ param2.6eters.Solution }}
+    solution: ${{ parameters.Solution }}
     vsVersion: 17.0
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
