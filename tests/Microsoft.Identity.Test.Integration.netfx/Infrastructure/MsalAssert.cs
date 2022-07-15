@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Globalization;
 using System;
+using Microsoft.VisualStudio.TestPlatform.Common;
+using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -54,16 +56,14 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             if (isPop)
             {
-                Assert.AreEqual("PoP", result.TokenType);
+                Assert.AreEqual(TestConstants.Pop, result.TokenType);
             }
             else
             {
-                Assert.AreEqual("Bearer", result.TokenType);
+                Assert.AreEqual(TestConstants.Bearer, result.TokenType);
             }
 
             Assert.AreEqual(tokenSource, result.AuthenticationResultMetadata.TokenSource);
-
-            Assert.IsTrue(result.ExpiresOn > DateTimeOffset.UtcNow + TimeSpan.FromHours(1));
 
             Assert.AreEqual(tenantId, result.TenantId);
         }

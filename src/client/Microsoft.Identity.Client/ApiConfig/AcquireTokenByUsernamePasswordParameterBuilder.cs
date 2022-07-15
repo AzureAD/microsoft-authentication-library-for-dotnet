@@ -91,12 +91,12 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
             }
 
-            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri);
-
             if (string.IsNullOrEmpty(nonce))
             {
                 throw new ArgumentNullException(nameof(nonce));
             }
+
+            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri);
 
             popConfig.Nonce = nonce;
             popConfig.HttpMethod = httpMethod;

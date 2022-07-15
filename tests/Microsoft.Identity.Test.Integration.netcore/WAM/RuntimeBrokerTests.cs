@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         private ILoggerAdapter _logger;
         private RuntimeBroker _wamBroker;
         IntPtr _parentHandle = GetForegroundWindow();
-        private readonly string _popNonce = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6bnVsbH0.eyJ0cyI6MTY1MjI4NTAzNH0.Nh-mAJwRphv57IdpdIrYzmYp6vP_BmmYy4UrNKj5A2x4XKLbp_H3aH4J5_s9hP5MzoiHE2SgVaDG8YUbP4xOjFYmpNG884pWqI-z9RjFNKJgBTXUhwv8HsUnxUHq1KTvpLmd1K1gJZORdeUI2LDr07EEH3-aT0PkRt-wT1YNNh5gU_RHV5KvlsyDWCvCJpEbZmGUf8JX9tHO2ux7XAKD77lVb5m6lFq_8Wr5nhJDyREHrXKWQq-X4rTxnBCZ4KBAufImSVHAeVi7ihlGbcobU2CuyJscTZkyELWMG8rBD6QK57AzrM77mua9-QClKIHArL8_d2fgyksLLS89wxy25A";
 
         [TestInitialize]
         public void Init()
@@ -184,29 +183,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Assert.IsNotNull(accounts);
             Assert.AreEqual(0, accounts.Count());
-        }
-
-        [TestMethod]
-        public async Task WamUsernamePasswordRequestWithPOPAsync()
-        {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            string[] scopes = { "User.Read" };
-
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithExperimentalFeatures()
-               .WithBrokerPreview().Build();
-
-            var result = await pca
-                .AcquireTokenByUsernamePassword(
-                    scopes,
-                    labResponse.User.Upn,
-                    new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
-                .WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(labResponse.Lab.Authority))
-                .ExecuteAsync().ConfigureAwait(false);
-
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, true);
         }
     }
 }
