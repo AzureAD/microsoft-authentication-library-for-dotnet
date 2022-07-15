@@ -241,7 +241,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             try
             {
                 var result = await msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, userName, "x")
+                    .AcquireTokenByUsernamePassword(s_scopes, userName, "incorrectPass")
+
                     .WithCorrelationId(CorrelationId)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
