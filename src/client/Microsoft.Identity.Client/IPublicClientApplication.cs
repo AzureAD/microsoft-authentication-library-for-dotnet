@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
-        [Obsolete("This method is deprecated. Please use AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password) instead.", true)]
+        [Obsolete("This method is deprecated. Please use AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password) instead.", false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
