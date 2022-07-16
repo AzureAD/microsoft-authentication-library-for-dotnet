@@ -19,11 +19,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// MSAL will pass in its authentication parameters to the callback and it is expected that the callback
         /// will construct a <see cref="AppTokenProviderResult"/> and return it to MSAL.
         /// MSAL will cache the token response the same way it does for other authentication results.
-        /// Note: 
         /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="appTokenProvider">Authentication callback which returns an access token.</param>
-        /// <returns>The builder to chain the .With methods</returns>
         /// <remarks>This is part of an extensibility mechanism designed to be used only by Azure SDK in order to 
         /// enchance managed identity support. Only client_credential flow is supported.</remarks>
         public static ConfidentialClientApplicationBuilder WithAppTokenProvider(
