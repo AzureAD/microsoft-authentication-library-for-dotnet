@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Accessing WS Metadata Exchange Failed.
         /// <para>What happens?</para>
-        /// You tried to use <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// You tried to use <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>
         /// and the account is a federated account.
         /// <para>Mitigation</para>
         /// None. The WS metadata was not found or does not correspond to what was expected.
@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Client
         public const string WsTrustEndpointNotFoundInMetadataDocument = "wstrust_endpoint_not_found";
 
         /// <summary>
-        /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>
         /// In the case of a Federated user (that is owned by a federated IdP, as opposed to a managed user owned in an Azure AD tenant)
         /// ID3242: The security token could not be authenticated or authorized.
         /// The user does not exist or has entered the wrong password
@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens</para>
-        /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>
         /// The user is not recognized as a managed user, or a federated user. Azure AD was not
         /// able to identify the IdP that needs to process the user
         /// <para>Mitigation</para>
@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens</para>
-        /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>
         /// The user is not known by the IdP
         /// <para>Mitigation</para>
         /// Inform the user. The login that the user provided might be incorrect (for instance empty)
@@ -360,7 +360,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Password is required for managed user.
         /// <para>What happens?</para>
-        /// If can got this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// If can got this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>
         /// and you (or the user) did not provide a password.
         /// </summary>
         public const string PasswordRequiredForManagedUserError = "password_required_for_managed_user";
@@ -369,10 +369,10 @@ namespace Microsoft.Identity.Client
         /// Request is invalid.
         /// <para>What happens?</para>
         /// This can happen because you are using a token acquisition method which is not compatible with the authority. For instance:
-        /// you called <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// you called <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>
         /// but you used an authority ending with '/common' or '/consumers' as this requires a tenanted authority or '/organizations'.
         /// <para>Mitigation</para>
-        /// Adjust the authority to the AcquireTokenXX method you use (don't use 'common' or 'consumers' with <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// Adjust the authority to the AcquireTokenXX method you use (don't use 'common' or 'consumers' with <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>
         /// <see cref="IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable{string})"/>
         /// </summary>
         public const string InvalidRequest = "invalid_request";
