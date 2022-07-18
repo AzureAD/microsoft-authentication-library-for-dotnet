@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET5_WIN || NET_CORE
+#if DESKTOP || NET5_WIN || NET_CORE || NETSTANDARD         
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
