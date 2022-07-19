@@ -18,9 +18,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     public class DstsAuthorityTests : TestBase
 
     {
-        private const string TenantlessDstsAuthority = "https://foo.bar.test.core.azure-test.net/dstsv2/";
-        private const string TenantedDstsAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/tenantid";
-        private const string CommonAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/common";
+        private const string TenantlessDstsAuthority = "https://some.url.dsts.core.azure-test.net/dstsv2/";
+        
+        private const string TenantedDstsAuthority = "https://some.url.dsts.core.azure-test.net/dstsv2/tenantid";
+        private const string CommonAuthority = "https://some.url.dsts.core.azure-test.net/dstsv2/common";
 
         [TestInitialize]
         public override void TestInitialize()
@@ -85,14 +86,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
-        [TestMethod]
-        public void DstsEndpointsTest()
+        [DataTestMethod]
+        [DataRow(CommonAuthority)]
+        [DataRow(TenantedDstsAuthority)]
+        public void DstsEndpointsTest(string authority)
         {
-            var instance = Authority.CreateAuthority(TenantedDstsAuthority);
+            var instance = Authority.CreateAuthority(authority);
 
-            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/token", instance.GetTokenEndpoint());
-            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
-            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpoint());
+            Assert.AreEqual($"{authority}/oauth2/v2.0/token", instance.GetTokenEndpoint());
+            Assert.AreEqual($"{authority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
+            Assert.AreEqual($"{authority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpoint());
+            Assert.AreEqual($"https://some.url.dsts.core.azure-test.net/dstsv2/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
         }
 
         [TestMethod]
