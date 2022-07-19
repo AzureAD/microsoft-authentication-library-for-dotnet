@@ -572,17 +572,18 @@ namespace NetDesktopWinForms
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                throw new InvalidOperationException("[TEST APP FAILURE] Username or password is missing.");
+                Log("[TEST APP FAILURE] Username or password is missing.");
+                return null;
             }
 
             AuthenticationResult result = null;
             var scopes = GetScopes();
-            var guid = Guid.NewGuid();
+            
             var builder = pca.AcquireTokenByUsernamePassword(scopes, username, password);
 
             if (cbxPOP.Checked)
             {
-                builder = builder.WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
+                builder = builder.WithProofOfPossession("nonce", System.Net.Http.HttpMethod.Get, s_downstreamApi);
             }
 
             if (cbxBackgroundThread.Checked)
