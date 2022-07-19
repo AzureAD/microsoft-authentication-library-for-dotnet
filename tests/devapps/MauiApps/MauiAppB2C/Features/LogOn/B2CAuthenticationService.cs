@@ -73,35 +73,6 @@ namespace UserDetailsClient.Core.Features.LogOn
             return newContext;
         }
 
-        public async Task<UserContext> ResetPasswordAsync()
-        {
-            AuthenticationResult authResult = await _pca.AcquireTokenInteractive(B2CConstants.Scopes)
-                .WithPrompt(Prompt.NoPrompt)
-                .WithAuthority(B2CConstants.AuthorityPasswordReset)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            var userContext = UpdateUserInfo(authResult);
-
-            return userContext;
-        }
-
-        public async Task<UserContext> EditProfileAsync()
-        {
-            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
-
-            AuthenticationResult authResult = await _pca.AcquireTokenInteractive(B2CConstants.Scopes)
-                                                        .WithAccount(GetAccountByPolicy(accounts, B2CConstants.PolicyEditProfile))
-                                                        .WithPrompt(Prompt.NoPrompt)
-                                                        .WithAuthority(B2CConstants.AuthorityEditProfile)
-                                                        .ExecuteAsync()
-                                                        .ConfigureAwait(false);
-
-            var userContext = UpdateUserInfo(authResult);
-
-            return userContext;
-        }
-
         private async Task<UserContext> SignInInteractively()
         {
             // Hide the privacy prompt
