@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.Tracing;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -34,7 +35,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             if (legacyLogger)
             {
-                return new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback);
+                return new CallbackIdentityLogger(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback);
             }
 
             return new IdentityLoggerAdapter(new TestIdentityLogger(LoggerHelper.GetEventLogLevel(logLevel)), Guid.Empty, null, null, enablePiiLogging);
@@ -56,12 +57,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod()]
         public void LegacyLoggerConstructorComponentTest()
         {
-            ILoggerAdapter logger = new LegacyIdentityLoggerAdapter(Guid.Empty, "", "", LogLevel.Always, false, false, null);
+            ILoggerAdapter logger = new CallbackIdentityLogger(Guid.Empty, "", "", LogLevel.Always, false, false, null);
             Assert.AreEqual(string.Empty, logger.ClientName);
             Assert.AreEqual(string.Empty, logger.ClientVersion);
-            logger = new LegacyIdentityLoggerAdapter(Guid.Empty, "comp1", null, LogLevel.Always, false, false, null);
+            logger = new CallbackIdentityLogger(Guid.Empty, "comp1", null, LogLevel.Always, false, false, null);
             Assert.AreEqual("comp1", logger.ClientName);
-            logger = new LegacyIdentityLoggerAdapter(Guid.Empty, "comp1", "version1", LogLevel.Always, false, false, null);
+            logger = new CallbackIdentityLogger(Guid.Empty, "comp1", "version1", LogLevel.Always, false, false, null);
             Assert.AreEqual("comp1", logger.ClientName);
             Assert.AreEqual("version1", logger.ClientVersion);
         }
@@ -174,14 +175,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void IsEnabled()
         {
-            var infoLoggerWithCallback = new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, LogLevel.Info, true, true, _callback);
+            var infoLoggerWithCallback = new CallbackIdentityLogger(Guid.Empty, null, null, LogLevel.Info, true, true, _callback);
             Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Info));
             Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Always));
             Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Error));
             Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Warning));
             Assert.IsFalse(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Verbose));
 
-            var loggerNoCallback = new LegacyIdentityLoggerAdapter(Guid.Empty, null, null, LogLevel.Warning, true, true, null);
+            var loggerNoCallback = new CallbackIdentityLogger(Guid.Empty, null, null, LogLevel.Warning, true, true, null);
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Info));
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Always));
             Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Error));
@@ -242,20 +243,32 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task ExternalMsalLoggerTestAsync(bool piiLogging)
+        public async Task ExternalMsalLoggerTestAsync(bool piiLogging, bool useCallback)
         {
             using (var httpManager = new MockHttpManager())
             {
                 TestIdentityLogger testLogger = new TestIdentityLogger();
+                StringBuilder stringBuilder;
 
-                var app = ConfidentialClientApplicationBuilder
+                var appBuilder = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithClientSecret("secret")
-                    .WithExperimentalFeatures()
-                    .WithLogging(testLogger, piiLogging)
-                    .WithHttpManager(httpManager)
-                    .BuildConcrete();
+                    .WithHttpManager(httpManager);
 
+                if (useCallback)
+                {
+                    stringBuilder = new StringBuilder();
+                    appBuilder.WithLogging(
+                        (LogLevel level, string message, bool containsPii) => { stringBuilder.AppendLine(message); }, LogLevel.Verbose, piiLogging);
+                }
+                else
+                {
+                    stringBuilder = testLogger.StringBuilder;
+                    appBuilder.WithExperimentalFeatures()
+                    .WithLogging(testLogger, piiLogging);
+                }
+
+                var app = appBuilder.BuildConcrete();
                 app.UserTokenCache.SetBeforeAccess(BeforeCacheAccessWithLogging);
                 app.UserTokenCache.SetAfterAccess(AfterCacheAccessWithLogging);
 
@@ -280,6 +293,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.DeserializeLogMessage));
                 }
             }
+        }
+
+        void MyLoggingMethod(LogLevel level, string message, bool containsPii)
+        {
+            Console.WriteLine($"MSAL {level} {containsPii} {message}");
         }
 
         private void BeforeCacheAccessWithLogging(TokenCacheNotificationArgs args)

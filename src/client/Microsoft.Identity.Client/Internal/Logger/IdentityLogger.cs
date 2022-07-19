@@ -8,14 +8,14 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
 #if !XAMARINMAC20
     //This class is used to wrap the functionality of the configured IIdentityLogger to add additional MSAL client information when logging messages.
-    internal class MsalIdentityLogger : IIdentityLogger
+    internal class IdentityLogger : IIdentityLogger
     {
         private readonly IIdentityLogger _identityLogger;
         private readonly string _correlationId;
         private readonly string _clientInformation;
         private readonly bool _piiLoggingEnabled;
 
-        internal MsalIdentityLogger(IIdentityLogger identityLogger, Guid correlationId, string clientName, string clientVersion, bool enablePiiLogging)
+        internal IdentityLogger(IIdentityLogger identityLogger, Guid correlationId, string clientName, string clientVersion, bool enablePiiLogging)
         {
             _identityLogger = identityLogger;
             _correlationId = correlationId.Equals(Guid.Empty)
@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             entry.Message = LoggerHelper.FormatLogMessage(
                                             entry.Message, 
                                             _piiLoggingEnabled, 
-                                            string.IsNullOrEmpty(entry.CorrelationId) ? entry.CorrelationId : _correlationId, 
+                                            !string.IsNullOrEmpty(entry.CorrelationId) ? entry.CorrelationId : _correlationId, 
                                             _clientInformation);
 
             _identityLogger.Log(entry);

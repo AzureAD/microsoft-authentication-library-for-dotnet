@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;
         public string ClientName { get; }
         public string ClientVersion { get; }
-        public IIdentityLogger MsalIdentityLogger { get; }
+        public IIdentityLogger IdentityLogger { get; }
 
         internal IdentityLoggerAdapter(
             IIdentityLogger identityLogger,
@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         {
             ClientName = clientName;
             ClientVersion = clientVersion;
-            MsalIdentityLogger = new MsalIdentityLogger(identityLogger, correlationId, clientName, clientVersion, enablePiiLogging);
+            IdentityLogger = new IdentityLogger(identityLogger, correlationId, clientName, clientVersion, enablePiiLogging);
             _correlationId = correlationId.Equals(Guid.Empty)
                     ? string.Empty
                     : " - " + correlationId;
@@ -59,13 +59,13 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 entry.EventLogLevel = LoggerHelper.GetEventLogLevel(logLevel);
                 entry.CorrelationId = _correlationId;
                 entry.Message = messageToLog;
-                MsalIdentityLogger.Log(entry);
+                IdentityLogger.Log(entry);
             }
         }
 
         public bool IsLoggingEnabled(LogLevel logLevel)
         {
-            return MsalIdentityLogger.IsEnabled(LoggerHelper.GetEventLogLevel(logLevel));
+            return IdentityLogger.IsEnabled(LoggerHelper.GetEventLogLevel(logLevel));
         }
 
         public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)

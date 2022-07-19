@@ -9,25 +9,22 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-    internal class LegacyIdentityLoggerAdapter : ILoggerAdapter
+    internal class CallbackIdentityLoggerAdapter : ILoggerAdapter
     {
-        LogLevel _minLogLevel = LogLevel.Always;
         private string _correlationId;
 
         public bool PiiLoggingEnabled { get; }
         public bool IsDefaultPlatformLoggingEnabled { get; }
-
         public string ClientName { get; }
         public string ClientVersion { get; }
-
-        public IIdentityLogger MsalIdentityLogger { get; }
+        public IIdentityLogger IdentityLogger { get; }
 
         public bool IsLoggingEnabled(LogLevel logLevel)
         {
-            return MsalIdentityLogger.IsEnabled(LoggerHelper.GetEventLogLevel(logLevel));
+            return IdentityLogger.IsEnabled(LoggerHelper.GetEventLogLevel(logLevel));
         }
 
-        internal LegacyIdentityLoggerAdapter(
+        internal CallbackIdentityLoggerAdapter(
             Guid correlationId,
             string clientName,
             string clientVersion,
@@ -43,9 +40,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     : " - " + correlationId;
 
             PiiLoggingEnabled = enablePiiLogging;
-            _minLogLevel = logLevel;
             IsDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
-            MsalIdentityLogger = new MsalLegacyIdentityLogger(loggingCallback, correlationId, clientName, clientVersion, enablePiiLogging, logLevel);
+            IdentityLogger = new CallbackIdentityLogger(loggingCallback, correlationId, clientName, clientVersion, enablePiiLogging, logLevel);
         }
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
@@ -58,9 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 entry.EventLogLevel = LoggerHelper.GetEventLogLevel(logLevel);
                 entry.CorrelationId = _correlationId;
                 entry.Message = messageToLog;
-                MsalIdentityLogger.Log(entry);
-                //string message = LoggerHelper.FormatLogMessage(messageToLog, PiiLoggingEnabled, _correlationId, _clientInfo);
-                //_logCallback.Invoke(logLevel, message, !string.IsNullOrEmpty(messageWithPii) ? true : false);
+                IdentityLogger.Log(entry);
             }
         }
 
@@ -69,7 +63,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             ApplicationConfiguration config,
             bool isDefaultPlatformLoggingEnabled = false)
         {
-            return new LegacyIdentityLoggerAdapter(
+            return new CallbackIdentityLoggerAdapter(
                 correlationId,
                 config?.ClientName ?? string.Empty,
                 config?.ClientVersion ?? string.Empty,

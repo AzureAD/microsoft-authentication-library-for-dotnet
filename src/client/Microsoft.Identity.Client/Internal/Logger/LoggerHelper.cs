@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     return s_nullLogger.Value;
                 }
 
-                return LegacyIdentityLoggerAdapter.Create(correlationId, config);
+                return CallbackIdentityLogger.Create(correlationId, config);
             }
 
 #if XAMARINMAC20
@@ -80,11 +80,6 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static string FormatLogMessage(string message, bool piiEnabled, string correlationId, string clientInformation)
         {
-            //bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
-            //// If we have a message with PII, and PII logging is enabled, use the PII message, else use the scrubbed message.
-            //bool isLoggingPii = messageWithPiiExists && piiEnabled;
-            //string messageToLog = isLoggingPii ? messageWithPii : messageScrubbed;
-
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "{0} MSAL {1} {2} {3} {4} [{5}{6}]{7} {8}",

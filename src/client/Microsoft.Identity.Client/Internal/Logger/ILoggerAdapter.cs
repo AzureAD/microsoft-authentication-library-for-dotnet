@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Core
         bool IsDefaultPlatformLoggingEnabled { get; }
         string ClientName { get; }
         string ClientVersion { get; }
-        IIdentityLogger MsalIdentityLogger { get; }
+        IIdentityLogger IdentityLogger { get; }
 
         /// <summary>
         /// For expensive logging messages (e.g. when the log message evaluates a variable), 

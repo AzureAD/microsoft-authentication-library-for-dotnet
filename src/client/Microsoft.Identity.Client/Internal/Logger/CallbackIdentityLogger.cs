@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-    internal class MsalLegacyIdentityLogger : IIdentityLogger
+    internal class CallbackIdentityLogger : IIdentityLogger
     {
         private LogCallback _logCallback;
         private readonly string _correlationId;
@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         private readonly bool _piiLoggingEnabled;
         private readonly LogLevel _minLogLevel;
 
-        public MsalLegacyIdentityLogger(
+        public CallbackIdentityLogger(
             LogCallback logCallback,
             Guid correlationId,
             string clientName,
