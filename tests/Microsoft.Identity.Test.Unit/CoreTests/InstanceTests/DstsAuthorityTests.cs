@@ -16,7 +16,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
     [TestClass]
     public class DstsAuthorityTests : TestBase
-
     {
         private const string TenantlessDstsAuthority = "https://some.url.dsts.core.azure-test.net/dstsv2/";
         
@@ -125,7 +124,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(tenantedAuth, updatedAuthority, "Not changed, original authority already has tenant id");
 
             string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
-            Assert.AreEqual("https://foo.bar.test.core.azure-test.net/other_tenant_id/", updatedAuthority2, "Not changed with forced flag");
+            Assert.AreEqual("https://some.url.dsts.azure-test.net/other_tenant_id/", updatedAuthority2, "Not changed with forced flag");
         }
 
         [TestMethod]
