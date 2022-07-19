@@ -130,11 +130,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             brokerRequest.Add(BrokerParameter.CorrelationId, authenticationRequestParameters.RequestContext.CorrelationId.ToString());
             brokerRequest.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
 
+            // EnrollmentId and MamResource values will be present in the keychain after the device is registered and enrolled.
             var realEnrollmentId = IntuneEnrollmentIdHelper.GetRawEnrollmentId();
             brokerRequest.Add(BrokerParameter.IntuneEnrollmentIds, realEnrollmentId ?? string.Empty);
 
-            var intuneMAMResource = IntuneEnrollmentIdHelper.GetRawMAMResources();
-            brokerRequest.Add(BrokerParameter.IntuneMamResource, intuneMAMResource ?? string.Empty);
+            var intuneMamResource = IntuneEnrollmentIdHelper.GetRawMamResources();
+            brokerRequest.Add(BrokerParameter.IntuneMamResource, intuneMamResource ?? string.Empty);
 
             // this needs to be case sensitive because the AppBundle is case sensitive
             brokerRequest.Add(

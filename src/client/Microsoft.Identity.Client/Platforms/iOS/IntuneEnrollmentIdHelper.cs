@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     internal class IntuneEnrollmentIdHelper
     {
         const string EnrollmentIdKey = "intune_app_protection_enrollment_id_V1";
-        const string Intune_MAMResourceKey = "intune_mam_resource_V 1";
+        const string Intune_MamResourceKey = "intune_mam_resource_V 1";
 
         internal static string GetEnrollmentId(ILoggerAdapter logger)
         {
@@ -53,14 +53,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 #endif
         }
 
-        internal static string GetRawMAMResources()
+        internal static string GetRawMamResources()
         {
-#if iOS
-            var keychainData = NSUserDefaults.StandardUserDefaults.StringForKey(Intune_MAMResourceKey);
+            var keychainData = NSUserDefaults.StandardUserDefaults.StringForKey(Intune_MamResourceKey);
             return keychainData;
-#else
-            return string.Empty;
-#endif
         }
 
         /// <summary>
