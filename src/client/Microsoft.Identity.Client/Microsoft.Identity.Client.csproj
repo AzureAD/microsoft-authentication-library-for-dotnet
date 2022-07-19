@@ -1,4 +1,11 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
+
+  <!--Uncomment the following property group when you compile .\tests\devapps\MauiApps\MauiApps.sln-->
+  <!--<PropertyGroup>
+    <MAUI_SUPPORT>
+      Yes
+    </MAUI_SUPPORT>
+  </PropertyGroup>-->
   
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
