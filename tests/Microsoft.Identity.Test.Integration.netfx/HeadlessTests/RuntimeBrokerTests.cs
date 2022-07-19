@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !NET45_OR_GREATER
+#if NET_CORE
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
