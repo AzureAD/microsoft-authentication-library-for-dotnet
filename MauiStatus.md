@@ -106,7 +106,7 @@ The results are as follows:
 | Platform | Status |
 | ----------- | ----------- |
 | iOS | **Works** |
-| Android | **Note tested** |
+| Android | **Works** |
 | Forms UWP | n/a |
 | WinUI3 | n/a |
 | MacOS | n/a |
