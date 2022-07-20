@@ -241,8 +241,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [DataRow(false)]
-        [DataRow(true)]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(true, true)]
         public async Task ExternalMsalLoggerTestAsync(bool piiLogging, bool useCallback)
         {
             using (var httpManager = new MockHttpManager())
@@ -259,7 +261,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     stringBuilder = new StringBuilder();
                     appBuilder.WithLogging(
-                        (LogLevel level, string message, bool containsPii) => { stringBuilder.AppendLine(message); }, LogLevel.Verbose, piiLogging);
+                         (level, message, containsPii) => { stringBuilder.AppendLine(message); }, LogLevel.Verbose, piiLogging);
                 }
                 else
                 {
@@ -284,13 +286,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 if (piiLogging)
                 {
-                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.PiiSerializeLogMessage));
-                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.PiiDeserializeLogMessage));
+                    Assert.IsTrue(stringBuilder.ToString().Contains(TestConstants.PiiSerializeLogMessage));
+                    Assert.IsTrue(stringBuilder.ToString().Contains(TestConstants.PiiDeserializeLogMessage));
                 }
                 else
                 {
-                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.SerializeLogMessage));
-                    Assert.IsTrue(testLogger.StringBuilder.ToString().Contains(TestConstants.DeserializeLogMessage));
+                    Assert.IsTrue(stringBuilder.ToString().Contains(TestConstants.SerializeLogMessage));
+                    Assert.IsTrue(stringBuilder.ToString().Contains(TestConstants.DeserializeLogMessage));
                 }
             }
         }
