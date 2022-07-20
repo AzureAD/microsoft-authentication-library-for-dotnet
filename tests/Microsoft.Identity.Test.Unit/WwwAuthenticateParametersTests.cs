@@ -157,6 +157,10 @@ namespace Microsoft.Identity.Test.Unit
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
+
+            var authParamList = await WwwAuthenticateParameters.CreateAllFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+
+            Assert.AreEqual(authParamList.FirstOrDefault().GetTenantId(), tenantId);
         }
 
         [TestMethod]
@@ -175,6 +179,10 @@ namespace Microsoft.Identity.Test.Unit
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
+
+            var authParamList = await WwwAuthenticateParameters.CreateAllFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+
+            Assert.AreEqual(authParamList.FirstOrDefault().GetTenantId(), tenantId);
         }
 
         [TestMethod]
@@ -195,6 +203,10 @@ namespace Microsoft.Identity.Test.Unit
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
             Assert.IsNull(authParams.GetTenantId());
+
+            var authParamList = await WwwAuthenticateParameters.CreateAllFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+
+            Assert.IsNull(authParamList.FirstOrDefault().GetTenantId());
         }
 
         [DataRow(null)]
@@ -206,6 +218,10 @@ namespace Microsoft.Identity.Test.Unit
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri);
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+
+            Func<Task> action2 = () => WwwAuthenticateParameters.CreateAllFromResourceResponseAsync(httpClient, resourceUri);
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action2).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -261,7 +277,7 @@ namespace Microsoft.Identity.Test.Unit
         public async Task ExtractNonceFromHeaderAsync()
         {
             //Arrange & Act
-            WwwAuthenticateParameters parameters = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(
+            var parameterList = await WwwAuthenticateParameters.CreateAllFromResourceResponseAsync(
                                                          "https://testingsts.azurewebsites.net/servernonce/invalidsignature",
                                                          //"https://manage.office.com/api/v1.0/fbb86d84-7975-4300-a5cb-87b448d6f13d/activity/feed/subscriptions/content?contentType={ContentType}&amp;startTime={0}&amp;endTime={1}",
                                                          //"https://management.core.windows.net/<subscription-id>/services/hostedservices/<cloudservice-name>",
@@ -270,8 +286,32 @@ namespace Microsoft.Identity.Test.Unit
                                                          default).ConfigureAwait(false);
 
             //Assert
-            Assert.IsTrue(parameters.Scheme == Constants.PoPAuthHeaderPrefix);
-            Assert.IsNotNull(parameters.ServerNonce);
+            Assert.IsTrue(parameterList.FirstOrDefault().Scheme == Constants.PoPAuthHeaderPrefix);
+            Assert.IsNotNull(parameterList.FirstOrDefault().ServerNonce);
+        }
+
+        [TestMethod]
+        public async Task CreateAllFromResourceResponseAsync_HttpClient_Bearer_Pop_Async()
+        {
+            const string resourceUri = "https://example.com/";
+            string tenantId = Guid.NewGuid().ToString();
+
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedUrl = resourceUri,
+                ResponseMessage = CreateBearerAndPopHttpResponse()
+            };
+            var httpClient = new HttpClient(handler);
+            var headers = await WwwAuthenticateParameters.CreateAllFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+
+            var bearerHeader = headers.Where(header => header.Scheme == "Bearer").FirstOrDefault();
+            var popHeader = headers.Where(header => header.Scheme == "PoP").FirstOrDefault();
+
+            Assert.IsNotNull(bearerHeader);
+            Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
+            Assert.IsNotNull(popHeader);
+            Assert.AreEqual("someNonce", popHeader.ServerNonce);
         }
 
         [TestMethod]
@@ -281,7 +321,14 @@ namespace Microsoft.Identity.Test.Unit
             HttpResponseMessage httpResponse = CreateBearerAndPopHttpResponse();
 
             // Act & Assert
-            Assert.IsNull(WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(httpResponse.Headers));
+            var headers = WwwAuthenticateParameters.CreateAllFromResponseHeaders(httpResponse.Headers);
+            var bearerHeader = headers.Where(header => header.Scheme == "Bearer").FirstOrDefault();
+            var popHeader = headers.Where(header => header.Scheme == "PoP").FirstOrDefault();
+
+            Assert.IsNotNull(bearerHeader);
+            Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
+            Assert.IsNotNull(popHeader);
+            Assert.AreEqual("someNonce", popHeader.ServerNonce);
         }
 
         [TestMethod]
