@@ -81,8 +81,17 @@ namespace UserDetailsClient.Core.Features.LogOn
                 iOSHidePrivacyPrompt = true,
             };
 
-            AuthenticationResult authResult = await _pca.AcquireTokenInteractive(B2CConstants.Scopes)
+            AuthenticationResult authResult = null;
+            // Android implementation is based on https://github.com/jamesmontemagno/CurrentActivityPlugin
+            // iOS implementation would require to expose the current ViewControler - not currently implemented as it is not required
+            // UWP does not require this
+            var windowLocatorService = DependencyService.Get<IParentWindowLocatorService>();
+
+            var parentWindow = windowLocatorService?.GetCurrentParentWindow();
+
+            authResult = await _pca.AcquireTokenInteractive(B2CConstants.Scopes)
                                                         .WithSystemWebViewOptions(systemWebViewOptions)
+                                                        .WithParentActivityOrWindow(parentWindow)
                                                         .ExecuteAsync()
                                                         .ConfigureAwait(false);
 
