@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     return s_nullLogger.Value;
                 }
 
-                return CallbackIdentityLogger.Create(correlationId, config);
+                return CallbackIdentityLoggerAdapter.Create(correlationId, config);
             }
 
 #if XAMARINMAC20
