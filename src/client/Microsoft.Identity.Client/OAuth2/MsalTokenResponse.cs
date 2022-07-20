@@ -14,6 +14,7 @@ using System.Diagnostics.Tracing;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.Identity.Client.Extensibility;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -158,7 +159,7 @@ namespace Microsoft.Identity.Client.OAuth2
             return response;
         }
 
-        internal static MsalTokenResponse CreateFromAppProviderResponse(TokenProviderResult tokenProviderResponse)
+        internal static MsalTokenResponse CreateFromAppProviderResponse(AppTokenProviderResult tokenProviderResponse)
         {
             ValidateTokenProviderResult(tokenProviderResponse);
 
@@ -179,7 +180,7 @@ namespace Microsoft.Identity.Client.OAuth2
             return response;
         }
 
-        private static void ValidateTokenProviderResult(TokenProviderResult TokenProviderResult)
+        private static void ValidateTokenProviderResult(AppTokenProviderResult TokenProviderResult)
         {
             if (string.IsNullOrEmpty(TokenProviderResult.AccessToken))
             {
@@ -189,11 +190,6 @@ namespace Microsoft.Identity.Client.OAuth2
             if (TokenProviderResult.ExpiresInSeconds == 0 || TokenProviderResult.ExpiresInSeconds < 0)
             {
                 HandleInvalidExternalValueError(nameof(TokenProviderResult.ExpiresInSeconds));
-            }
-
-            if (string.IsNullOrEmpty(TokenProviderResult.TenantId))
-            {
-                HandleInvalidExternalValueError(nameof(TokenProviderResult.TenantId));
             }
         }
 

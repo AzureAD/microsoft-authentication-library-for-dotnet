@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Parameter builder for the <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(IEnumerable{string}, string, SecureString)"/>
+    /// Parameter builder for the <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(IEnumerable{string}, string, string)"/>
     /// operation. See https://aka.ms/msal-net-up
     /// </summary>
     public sealed class AcquireTokenByUsernamePasswordParameterBuilder :
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
             IPublicClientApplicationExecutor publicClientApplicationExecutor,
             IEnumerable<string> scopes,
             string username,
-            SecureString password)
+            string password)
         {
             return new AcquireTokenByUsernamePasswordParameterBuilder(publicClientApplicationExecutor)
                    .WithScopes(scopes).WithUsername(username).WithPassword(password);
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        private AcquireTokenByUsernamePasswordParameterBuilder WithPassword(SecureString password)
+        private AcquireTokenByUsernamePasswordParameterBuilder WithPassword(string password)
         {
             Parameters.Password = password;
             return this;

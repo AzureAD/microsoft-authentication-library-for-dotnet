@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
                 CancellationToken.None).ConfigureAwait(false);
         }
 
-        public void ValidateInteractiveParameters(string expectedUsername = null, SecureString expectedPassword = null)
+        public void ValidateInteractiveParameters(string expectedUsername = null, string expectedPassword = null)
         {
             Assert.IsNotNull(UsernamePasswordParametersReceived);
             Assert.AreEqual(expectedUsername, UsernamePasswordParametersReceived.Username);

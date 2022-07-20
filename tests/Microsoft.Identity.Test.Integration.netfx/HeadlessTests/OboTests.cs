@@ -76,12 +76,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             var user1AuthResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, new NetworkCredential("", user1.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
             var user2AuthResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user2.Upn, new NetworkCredential("", user2.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user2.Upn, user2.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .Build();
 
             var userResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             var userAuthResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, new NetworkCredential("", user1.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             var userAuthResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, new NetworkCredential("", user1.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -367,7 +367,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             var userAuthResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, new NetworkCredential("", user1.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -436,7 +436,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             var userAuthResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, new NetworkCredential("", user1.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -492,7 +492,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             var userAuthResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, new NetworkCredential("", user1.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -551,7 +551,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             bool silentCallShouldSucceed,
             bool forceRefresh = false)
         {
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             AuthenticationResult authResult;
 
             var pca = PublicClientApplicationBuilder
@@ -572,7 +571,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 Assert.IsFalse(silentCallShouldSucceed, "ATS should have found a token, but it didn't");
                 authResult = await pca
-                    .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, securePassword)
+                    .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, user.GetOrFetchPassword())
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
                 Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);

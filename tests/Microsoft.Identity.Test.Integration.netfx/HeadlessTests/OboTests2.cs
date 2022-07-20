@@ -257,8 +257,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             oboScope = s_publicCloudOBOServiceScope;
 
             //TODO: acquire scenario specific client ids from the lab response
-
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             var factory = new HttpSnifferClientFactory();
 
             var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID)
@@ -268,7 +266,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                                  .WithHttpClientFactory(factory)
                                                                  .Build();
 
-            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword)
+            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -405,15 +403,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             //TODO: acquire scenario specific client ids from the lab response
 
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
-
             var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID)
                                                                  .WithAuthority(authority)
                                                                  .WithRedirectUri(TestConstants.RedirectUri)                                                                 
                                                                  .WithTestLogging()
                                                                  .Build();
 
-            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword)
+            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

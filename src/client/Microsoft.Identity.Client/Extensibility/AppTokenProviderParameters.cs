@@ -1,14 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Extensibility
 {
     /// <summary>
     /// The authentication parameters provided to the app token provider callback.

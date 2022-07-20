@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Security;
 using System.Threading.Tasks;
 
@@ -130,10 +131,33 @@ namespace Microsoft.Identity.Client
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
+        /// .NET no longer recommends using SecureString and MSAL puts the plaintext value of the password on the wire, as required by the OAuth protocol. See <see href="https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring?view=net-6.0#remarks">SecureString documentation</see>.
         /// </remarks>
+        [Obsolete("Using SecureString is not recommended. Use AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password) instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
             string username,
             SecureString password);
+
+        /// <summary>
+        /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
+        /// Available only on .NET desktop and .NET core. See https://aka.ms/msal-net-up for details.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="username">Identifier of the user application requests token on behalf.
+        /// Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
+        /// <param name="password">User password as a string.</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
+        /// <remarks>You can also pass optional parameters by chaining the builder with:
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
+        /// additional query parameters to the Azure AD, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
+        /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
+        /// of the known authorities added to the application construction.
+        /// </remarks>
+        AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
+            IEnumerable<string> scopes,
+            string username,
+            string password);
     }
 }
