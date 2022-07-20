@@ -117,14 +117,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void CreateAuthorityFromTenantedWithTenantTest()
         {
-            string tenantedAuth = TenantlessDstsAuthority + Guid.NewGuid().ToString() + "/";
-            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(tenantedAuth);
+            
+            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(TenantedDstsAuthority);
+            Assert.AreEqual("tenantid", authority.TenantId);
+            
+            string updatedAuthority = authority.GetTenantedAuthority("tenant2");            
 
-            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
-            Assert.AreEqual(tenantedAuth, updatedAuthority, "Not changed, original authority already has tenant id");
+            Assert.AreEqual(
+                TenantedDstsAuthority,
+                updatedAuthority.TrimEnd('/'),
+                "Not changed, original authority already has tenant id");
 
-            string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
-            Assert.AreEqual("https://some.url.dsts.azure-test.net/other_tenant_id/", updatedAuthority2, "Not changed with forced flag");
+            string updatedAuthority2 = authority.GetTenantedAuthority("tenant2", true);
+            Assert.AreEqual(
+                "https://some.url.dsts.core.azure-test.net/dstsv2/tenant2/",
+                updatedAuthority2);
         }
 
         [TestMethod]
