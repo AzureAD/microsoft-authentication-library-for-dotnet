@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Test.Unit
                                                          default).ConfigureAwait(false);
 
             //Assert
-            Assert.IsTrue(parameterList.FirstOrDefault().Scheme == Constants.PoPAuthHeaderPrefix);
+            Assert.IsTrue(parameterList.FirstOrDefault().AuthScheme == Constants.PoPAuthHeaderPrefix);
             Assert.IsNotNull(parameterList.FirstOrDefault().ServerNonce);
         }
 
@@ -305,8 +305,8 @@ namespace Microsoft.Identity.Test.Unit
             var httpClient = new HttpClient(handler);
             var headers = await WwwAuthenticateParameters.CreateAllFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            var bearerHeader = headers.Where(header => header.Scheme == "Bearer").FirstOrDefault();
-            var popHeader = headers.Where(header => header.Scheme == "PoP").FirstOrDefault();
+            var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").FirstOrDefault();
+            var popHeader = headers.Where(header => header.AuthScheme == "PoP").FirstOrDefault();
 
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
@@ -322,8 +322,8 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act & Assert
             var headers = WwwAuthenticateParameters.CreateAllFromResponseHeaders(httpResponse.Headers);
-            var bearerHeader = headers.Where(header => header.Scheme == "Bearer").FirstOrDefault();
-            var popHeader = headers.Where(header => header.Scheme == "PoP").FirstOrDefault();
+            var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").FirstOrDefault();
+            var popHeader = headers.Where(header => header.AuthScheme == "PoP").FirstOrDefault();
 
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);

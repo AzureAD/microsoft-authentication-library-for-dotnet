@@ -59,9 +59,10 @@ namespace Microsoft.Identity.Client
         public string Error { get; set; }
 
         /// <summary>
-        /// Scheme.
+        /// AuthScheme.
+        /// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate#syntax for more details
         /// </summary>
-        public string Scheme { get; set; } 
+        public string AuthScheme { get; set; } 
 
         /// <summary>
         /// Server Nonce.
@@ -113,7 +114,7 @@ namespace Microsoft.Identity.Client
                 AuthenticationHeaderValue bearer = httpResponseHeaders.WwwAuthenticate.First(v => string.Equals(v.Scheme, Constants.BearerAuthHeaderPrefix, StringComparison.OrdinalIgnoreCase));
                 string wwwAuthenticateValue = bearer.Parameter;
                 var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
-                parameters.Scheme = Constants.BearerAuthHeaderPrefix;
+                parameters.AuthScheme = Constants.BearerAuthHeaderPrefix;
                 return parameters;
             }
 
@@ -136,7 +137,7 @@ namespace Microsoft.Identity.Client
                 if (s_knownAuthenticationSchemes.Contains(wwwAuthenticateHeaderValue.Scheme))
                 {
                     var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateHeaderValue.Parameter);
-                    parameters.Scheme = wwwAuthenticateHeaderValue.Scheme;
+                    parameters.AuthScheme = wwwAuthenticateHeaderValue.Scheme;
 
                     parameterList.Add(parameters);
                 }
