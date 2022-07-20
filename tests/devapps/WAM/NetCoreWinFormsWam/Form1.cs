@@ -175,7 +175,7 @@ namespace NetDesktopWinForms
             try
             {
                 var pca = CreatePca();
-                AuthenticationResult result = await RunAtsAsync(pca, GetAutocancelToken()).ConfigureAwait(false);
+                AuthenticationResult result = await RunAtsAsync(pca).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
             }
@@ -186,7 +186,7 @@ namespace NetDesktopWinForms
 
         }
 
-        private async Task<AuthenticationResult> RunAtsAsync(IPublicClientApplication pca, CancellationToken cancellationToken)
+        private async Task<AuthenticationResult> RunAtsAsync(IPublicClientApplication pca)
         {
             string reqAuthority = pca.Authority;
             string loginHint = GetLoginHint();
@@ -212,7 +212,7 @@ namespace NetDesktopWinForms
                     builder = builder.WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
                 }
 
-                return await builder.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                return await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
             }
 
             if (cbxAccount.SelectedItem != null &&
@@ -318,7 +318,7 @@ namespace NetDesktopWinForms
             try
             {
                 var pca = CreatePca();
-                AuthenticationResult result = await RunAtiAsync(pca, GetAutocancelToken()).ConfigureAwait(false);
+                AuthenticationResult result = await RunAtiAsync(pca).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
@@ -329,7 +329,7 @@ namespace NetDesktopWinForms
             }
         }
 
-        private async Task<AuthenticationResult> RunAtiAsync(IPublicClientApplication pca, CancellationToken cancellationToken)
+        private async Task<AuthenticationResult> RunAtiAsync(IPublicClientApplication pca)
         {
             string loginHint = GetLoginHint();
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
@@ -382,7 +382,8 @@ namespace NetDesktopWinForms
             {
                 await Task.Delay(500).ConfigureAwait(false);
             }
-            result = await builder.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+
+            result = await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
 
             return result;
         }
