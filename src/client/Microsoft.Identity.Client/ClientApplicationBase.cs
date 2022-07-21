@@ -426,6 +426,18 @@ namespace Microsoft.Identity.Client
                 loginHint);
         }
 
+        /// <summary>
+        /// Retrieve the TenantId for an Authority URL.
+        /// </summary>
+        /// <param name="authorityUri">The Authority URL to parse.</param>
+        /// <returns></returns>
+        public static string GetTenantId(Uri authorityUri)
+        {
+            var authorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), false);
+            var authority = authorityInfo.CreateAuthority();
+            return authority.TenantId;
+        }
+
         internal static void GuardMobileFrameworks()
         {
 #if ANDROID || iOS || WINDOWS_APP || MAC
