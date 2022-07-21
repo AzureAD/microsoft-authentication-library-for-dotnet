@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -97,7 +98,7 @@ namespace Microsoft.Identity.Client
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
         public bool MultiCloudSupportEnabled { get; set; } = false;
 
-        public Func<AppTokenProviderParameters, Task<TokenProviderResult>> AppTokenProvider;
+        public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
 #region ClientCredentials
 

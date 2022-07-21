@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Extensibility
@@ -29,5 +30,5 @@ namespace Microsoft.Identity.Client.Extensibility
 
             return builder;
         }
-    }
+    }   
 }

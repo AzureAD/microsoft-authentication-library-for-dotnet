@@ -816,28 +816,6 @@ namespace Microsoft.Identity.Client
         public bool UseCorporateNetwork { get; set; }
 #endif
 
-#if DESKTOP || NET_CORE
-#pragma warning disable 1998
-        /// <summary>
-        /// In ADAL.NET, acquires security token from the authority, using the username/password authentication,
-        /// with the password sent in clear.
-        /// In MSAL 2.x, only the method that accepts a SecureString parameter is supported.
-        ///
-        /// See https://aka.ms/msal-net-up for more details.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user application requests token on behalf.</param>
-        /// <param name="password">User password.</param>
-        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use overload with SecureString instead (See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-up)", true)]
-        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, string password)
-        {
-            { throw new NotImplementedException(); }
-        }
-#pragma warning restore 1998
-#endif
-
 #if iOS
         /// <summary>
         /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group.
@@ -2212,7 +2190,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public UIParent(Activity activity)
+        public UIParent(Android.App.Activity activity)
         {
             throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
@@ -2224,7 +2202,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public UIParent(Activity activity, bool useEmbeddedWebview) : this(activity)
+        public UIParent(Android.App.Activity activity, bool useEmbeddedWebview) : this(activity)
         {
             throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }

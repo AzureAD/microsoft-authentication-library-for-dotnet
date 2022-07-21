@@ -217,13 +217,12 @@ namespace DesktopTestApp
                 userPasswordTextBox.PasswordChar = '*';
 
                 string username = loginHintTextBox.Text; //Can be blank for U/P
-                SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
 
                 AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication
                     .AcquireTokenByUsernamePassword(
                         SplitScopeString(scopes.Text),
                         username,
-                        securePassword)
+                        userPasswordTextBox.Text)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(true);
 
@@ -234,18 +233,6 @@ namespace DesktopTestApp
             {
                 CreateException(exc);
             }
-        }
-
-        private SecureString ConvertToSecureString(TextBox textBox)
-        {
-            if (userPasswordTextBox.Text.Length > 0)
-            {
-                SecureString securePassword = new SecureString();
-                userPasswordTextBox.Text.ToCharArray().ToList().ForEach(p => securePassword.AppendChar(p));
-                securePassword.MakeReadOnly();
-                return securePassword;
-            }
-            return null;
         }
 
         private async void acquireTokenSilent_Click(object sender, EventArgs e)

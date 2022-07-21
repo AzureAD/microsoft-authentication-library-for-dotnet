@@ -179,6 +179,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         }
 
         public const string Bearer = "Bearer";
+        public const string Pop = "PoP";
 
         public static IDictionary<string, string> ExtraQueryParameters
         {
@@ -194,11 +195,17 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         }
 
         public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
+        public const string MsalCCAKeyVaultSecretName = "AzureADIdentityDivisionTestAgentSecret";
         public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
+        public const string MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret";
         public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
+        public const string MsalArlingtonOBOKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string FociApp1 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app1/";
+        public const string FociApp1KeyVaultSecretName = "automation-foci-app1";
         public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/";
+        public const string FociApp2KeyVaultSecretName = "automation-foci-app2";
         public const string MsalArlingtonCCAKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
+        public const string MsalArlingtonCCAKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
 
         public enum AuthorityType { B2C };
         public static string[] s_prodEnvAliases = new[] {
@@ -427,5 +434,6 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string ClientRedirectUri = "http://localhost:8080";
         public static readonly SortedSet<string> s_supportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" }, StringComparer.OrdinalIgnoreCase);
         public const string ADFS2019ClientSecretURL = "https://buildautomation.vault.azure.net/secrets/ADFS2019ClientCredSecret/";
+        public const string ADFS2019ClientSecretName = "ADFS2019ClientCredSecret";
     }
 }

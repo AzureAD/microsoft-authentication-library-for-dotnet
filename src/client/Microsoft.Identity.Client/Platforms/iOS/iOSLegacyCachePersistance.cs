@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 var s = new SecRecord(SecKind.GenericPassword)
                 {
                     Generic = NSData.FromString(LocalSettingsContainerName),
-                    Accessible = SecAccessible.Always,
+                    Accessible = SecAccessible.Always,            
                     Service = NAME + " Service",
                     Account = NAME + " cache",
                     Label = NAME + " Label",
