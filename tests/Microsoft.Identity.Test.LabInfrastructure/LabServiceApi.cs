@@ -8,7 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Azure.Core;
-using Newtonsoft.Json;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
