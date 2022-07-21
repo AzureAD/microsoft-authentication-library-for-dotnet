@@ -31,9 +31,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.1</Version>
-    </PackageReference>
     <PackageReference Include="StrongNamer">
       <Version>0.2.5</Version>
     </PackageReference>
