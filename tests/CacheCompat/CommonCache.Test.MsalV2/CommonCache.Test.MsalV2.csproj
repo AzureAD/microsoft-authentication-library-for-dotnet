@@ -7,7 +7,6 @@
   <ItemGroup>
     <ProjectReference Include="..\CommonCache.Test.Common\CommonCache.Test.Common.csproj" />
     <PackageReference Include="CommandLineParser" version="2.4.3" />
-    <PackageReference Include="Newtonsoft.Json" version="13.0.1" />
     <PackageReference Include="Microsoft.Identity.Client" Version="2.7.1" />
   </ItemGroup>
 </Project>
