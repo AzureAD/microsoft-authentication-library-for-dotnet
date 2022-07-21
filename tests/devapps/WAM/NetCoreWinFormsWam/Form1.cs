@@ -259,14 +259,14 @@ namespace NetDesktopWinForms
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 return await builder
-                    .ExecuteAsync(cancellationToken)
+                    .ExecuteAsync(GetAutocancelToken())
                     .ConfigureAwait(false);
             }
 
             Log($"ATS with no account or login hint ... will fail with UiRequiredEx");
             return await pca.AcquireTokenSilent(GetScopes(), (IAccount)null)
 
-                .ExecuteAsync(cancellationToken)
+                .ExecuteAsync(GetAutocancelToken())
                 .ConfigureAwait(false);
         }
 
@@ -521,7 +521,7 @@ namespace NetDesktopWinForms
 
             try
             {
-                var result = await RunAtsAsync(pca, GetAutocancelToken()).ConfigureAwait(false);
+                var result = await RunAtsAsync(pca).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
@@ -533,7 +533,7 @@ namespace NetDesktopWinForms
                 Log("UI required Exception! " + ex.ErrorCode + " " + ex.Message);
                 try
                 {
-                    var result = await RunAtiAsync(pca, GetAutocancelToken()).ConfigureAwait(false);
+                    var result = await RunAtiAsync(pca).ConfigureAwait(false);
                     await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                 }
                 catch (Exception ex3)
