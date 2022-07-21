@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class DstsAuthority : Authority
     {
-        public const string DstsCanonicalAuthorityTemplate = "https://{0}/{1}/";
+        public const string DstsCanonicalAuthorityTemplate = "https://{0}/dstsv2/{1}/";
 
         // updating token endpoints to include v2.0 so DSTS can troubleshoot the scopes issue
         private const string TokenEndpointTemplate = "{0}oauth2/v2.0/token";
