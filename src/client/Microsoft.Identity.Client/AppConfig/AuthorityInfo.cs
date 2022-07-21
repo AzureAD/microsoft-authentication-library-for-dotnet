@@ -268,7 +268,7 @@ namespace Microsoft.Identity.Client
                 uri = uri + "/";
             }
 
-            return uri.ToLowerInvariant();
+            return uri?.ToLowerInvariant() ?? string.Empty;
         }
 
         internal bool IsDefaultAuthority
@@ -442,7 +442,7 @@ namespace Microsoft.Identity.Client
 
                 if (configAuthorityInfo == null)
                 {
-                    throw new ArgumentNullException(nameof(configAuthorityInfo));
+                    throw new ArgumentNullException(nameof(requestContext.ServiceBundle.Config.Authority.AuthorityInfo));
                 }
 
                 ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
