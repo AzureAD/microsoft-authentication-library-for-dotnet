@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+extern alias LatestIdentityVersion;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
-using Newtonsoft.Json;
+using LatestIdentityVersion::Microsoft.Identity.Json;
 
 namespace CommonCache.Test.Common
 {
