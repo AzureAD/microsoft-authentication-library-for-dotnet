@@ -65,6 +65,8 @@
             this.nudAutocancelSeconds = new System.Windows.Forms.NumericUpDown();
             this.label9 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudAutocancelSeconds)).BeginInit();
+            this.cbxMultiCloud2 = new System.Windows.Forms.CheckBox();
+
             this.SuspendLayout();
             // 
             // resultTbx
@@ -221,7 +223,7 @@
             // 
             // btnClearCache
             // 
-            this.btnClearCache.Location = new System.Drawing.Point(551, 241);
+            this.btnClearCache.Location = new System.Drawing.Point(508, 754);
             this.btnClearCache.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnClearCache.Name = "btnClearCache";
             this.btnClearCache.Size = new System.Drawing.Size(126, 27);
@@ -301,7 +303,7 @@
             // 
             // btnExpire
             // 
-            this.btnExpire.Location = new System.Drawing.Point(551, 208);
+            this.btnExpire.Location = new System.Drawing.Point(374, 755);
             this.btnExpire.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnExpire.Name = "btnExpire";
             this.btnExpire.Size = new System.Drawing.Size(126, 27);
@@ -442,12 +444,28 @@
             this.label9.Size = new System.Drawing.Size(114, 15);
             this.label9.TabIndex = 31;
             this.label9.Text = "Autocancel Seconds";
+
+            // cbxMultiCloud2
+            // 
+            this.cbxMultiCloud2.AutoSize = true;
+            this.cbxMultiCloud2.Location = new System.Drawing.Point(516, 199);
+            this.cbxMultiCloud2.Name = "cbxMultiCloud2";
+            this.cbxMultiCloud2.Size = new System.Drawing.Size(134, 19);
+            this.cbxMultiCloud2.TabIndex = 35;
+            this.cbxMultiCloud2.Text = "Multi Cloud Support";
+            this.cbxMultiCloud2.UseVisualStyleBackColor = true;
+
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+
             this.ClientSize = new System.Drawing.Size(735, 740);
+
+            this.ClientSize = new System.Drawing.Size(738, 794);
+            this.Controls.Add(this.cbxMultiCloud2);
+
             this.Controls.Add(this.atUsernamePwdBtn);
             this.Controls.Add(this.PasswordTxt);
             this.Controls.Add(this.label8);
@@ -528,6 +546,9 @@
         private System.Windows.Forms.Button btnATSperf;
         private System.Windows.Forms.NumericUpDown nudAutocancelSeconds;
         private System.Windows.Forms.Label label9;
+
+        private System.Windows.Forms.CheckBox cbxMultiCloud2;
+
     }
 }
 
