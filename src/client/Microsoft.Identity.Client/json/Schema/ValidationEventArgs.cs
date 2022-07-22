@@ -26,6 +26,8 @@
 using System;
 using Microsoft.Identity.Json.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Schema
 {
     /// <summary>
@@ -37,7 +39,7 @@ namespace Microsoft.Identity.Json.Schema
     /// </note>
     /// </summary>
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    internal class ValidationEventArgs : EventArgs
+    public class ValidationEventArgs : EventArgs
     {
         private readonly JsonSchemaException _ex;
 

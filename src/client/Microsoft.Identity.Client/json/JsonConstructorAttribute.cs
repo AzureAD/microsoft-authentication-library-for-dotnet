@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Json
     /// Instructs the <see cref="JsonSerializer"/> to use the specified constructor when deserializing that object.
     /// </summary>
     [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = false)]
-    internal sealed class JsonConstructorAttribute : Attribute
+    public sealed class JsonConstructorAttribute : Attribute
     {
     }
 }

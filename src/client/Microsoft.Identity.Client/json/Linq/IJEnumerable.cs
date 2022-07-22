@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Json.Linq
     /// Represents a collection of <see cref="JToken"/> objects.
     /// </summary>
     /// <typeparam name="T">The type of token.</typeparam>
-    internal interface IJEnumerable<
+    public interface IJEnumerable<
 #if HAVE_VARIANT_TYPE_PARAMETERS
         out
 #endif

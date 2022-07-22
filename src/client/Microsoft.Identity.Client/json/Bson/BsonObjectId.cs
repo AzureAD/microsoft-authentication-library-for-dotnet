@@ -26,13 +26,15 @@
 using System;
 using Microsoft.Identity.Json.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Bson
 {
     /// <summary>
     /// Represents a BSON Oid (object id).
     /// </summary>
-    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.Identity.Json.Bson for more details.")]
-    internal class BsonObjectId
+    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Newtonsoft.Json.Bson for more details.")]
+    public class BsonObjectId
     {
         /// <summary>
         /// Gets or sets the value of the Oid.

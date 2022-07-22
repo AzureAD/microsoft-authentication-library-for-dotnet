@@ -7,7 +7,7 @@ namespace System.Runtime.Serialization.Formatters
     /// Indicates the method that will be used during deserialization for locating and loading assemblies.
     /// </summary>
     [Obsolete("FormatterAssemblyStyle is obsolete. Use TypeNameAssemblyFormatHandling instead.")]
-    internal enum FormatterAssemblyStyle
+    public enum FormatterAssemblyStyle
     {
         /// <summary>
         /// In simple mode, the assembly used during deserialization need not match exactly the assembly used during serialization. Specifically, the version numbers need not match as the <see cref="M:System.Reflection.Assembly.LoadWithPartialName(String)"/> method is used to load the assembly.

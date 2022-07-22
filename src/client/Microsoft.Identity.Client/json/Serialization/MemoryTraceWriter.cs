@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// Represents a trace writer that writes to memory. When the trace message limit is
     /// reached then old trace messages will be removed as new messages are added.
     /// </summary>
-    internal class MemoryTraceWriter : ITraceWriter
+    public class MemoryTraceWriter : ITraceWriter
     {
         private readonly Queue<string> _traceMessages;
         private readonly object _lock;
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Json.Serialization
         /// <param name="level">The <see cref="TraceLevel"/> at which to write this trace.</param>
         /// <param name="message">The trace message.</param>
         /// <param name="ex">The trace exception. This parameter is optional.</param>
-        public void Trace(TraceLevel level, string message, Exception ex)
+        public void Trace(TraceLevel level, string message, Exception? ex)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff", CultureInfo.InvariantCulture));
@@ -73,10 +73,10 @@ namespace Microsoft.Identity.Json.Serialization
         }
 
         /// <summary>
-        /// Returns a <see cref="string"/> of the most recent trace messages.
+        /// Returns a <see cref="String"/> of the most recent trace messages.
         /// </summary>
         /// <returns>
-        /// A <see cref="string"/> of the most recent trace messages.
+        /// A <see cref="String"/> of the most recent trace messages.
         /// </returns>
         public override string ToString()
         {

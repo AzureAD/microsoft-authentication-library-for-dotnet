@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Json
     /// <summary>
     /// Specifies how object creation is handled by the <see cref="JsonSerializer"/>.
     /// </summary>
-    internal enum ObjectCreationHandling
+    public enum ObjectCreationHandling
     {
         /// <summary>
         /// Reuse existing objects, create new objects when needed.

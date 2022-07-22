@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Used to resolve references when serializing and deserializing JSON by the <see cref="JsonSerializer"/>.
     /// </summary>
-    internal interface IReferenceResolver
+    public interface IReferenceResolver
     {
         /// <summary>
         /// Resolves a reference to its object.

@@ -30,13 +30,13 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Provides data for the Error event.
     /// </summary>
-    internal class ErrorEventArgs : EventArgs
+    public class ErrorEventArgs : EventArgs
     {
         /// <summary>
         /// Gets the current object the error event is being raised against.
         /// </summary>
         /// <value>The current object the error event is being raised against.</value>
-        public object CurrentObject { get; }
+        public object? CurrentObject { get; }
 
         /// <summary>
         /// Gets the error context.
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Json.Serialization
         /// </summary>
         /// <param name="currentObject">The current object.</param>
         /// <param name="errorContext">The error context.</param>
-        public ErrorEventArgs(object currentObject, ErrorContext errorContext)
+        public ErrorEventArgs(object? currentObject, ErrorContext errorContext)
         {
             CurrentObject = currentObject;
             ErrorContext = errorContext;

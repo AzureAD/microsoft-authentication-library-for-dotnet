@@ -25,6 +25,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Schema
 {
     /// <summary>
@@ -37,7 +39,7 @@ namespace Microsoft.Identity.Json.Schema
     /// </summary>
     [Flags]
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    internal enum JsonSchemaType
+    public enum JsonSchemaType
     {
         /// <summary>
         /// No type specified.

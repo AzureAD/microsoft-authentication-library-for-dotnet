@@ -30,9 +30,9 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Provides information surrounding an error.
     /// </summary>
-    internal class ErrorContext
+    public class ErrorContext
     {
-        internal ErrorContext(object originalObject, object member, string path, Exception error)
+        internal ErrorContext(object? originalObject, object? member, string path, Exception error)
         {
             OriginalObject = originalObject;
             Member = member;
@@ -52,13 +52,13 @@ namespace Microsoft.Identity.Json.Serialization
         /// Gets the original object that caused the error.
         /// </summary>
         /// <value>The original object that caused the error.</value>
-        public object OriginalObject { get; }
+        public object? OriginalObject { get; }
 
         /// <summary>
         /// Gets the member that caused the error.
         /// </summary>
         /// <value>The member that caused the error.</value>
-        public object Member { get; }
+        public object? Member { get; }
 
         /// <summary>
         /// Gets the path of the JSON location where the error occurred.

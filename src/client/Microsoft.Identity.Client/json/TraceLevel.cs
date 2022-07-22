@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Json
     /// <summary>
     /// Specifies what messages to output for the <see cref="ITraceWriter"/> class.
     /// </summary>
-    internal enum TraceLevel
+    public enum TraceLevel
     {
         /// <summary>
         /// Output no tracing and debugging messages.

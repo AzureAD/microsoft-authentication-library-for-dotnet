@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Json.Linq
     /// Represents a collection of <see cref="JToken"/> objects.
     /// </summary>
     /// <typeparam name="T">The type of token.</typeparam>
-    internal readonly struct JEnumerable<T> : IJEnumerable<T>, IEquatable<JEnumerable<T>> where T : JToken
+    public readonly struct JEnumerable<T> : IJEnumerable<T>, IEquatable<JEnumerable<T>> where T : JToken
     {
         /// <summary>
         /// An empty collection of <see cref="JToken"/> objects.
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Json.Linq
                     return JEnumerable<JToken>.Empty;
                 }
 
-                return new JEnumerable<JToken>(_enumerable.Values<T, JToken>(key));
+                return new JEnumerable<JToken>(_enumerable.Values<T, JToken>(key)!);
             }
         }
 
@@ -105,11 +105,11 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="object"/> is equal to this instance.
+        /// Determines whether the specified <see cref="Object"/> is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
+        /// <param name="obj">The <see cref="Object"/> to compare with this instance.</param>
         /// <returns>
-        /// 	<c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.
+        /// 	<c>true</c> if the specified <see cref="Object"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
         public override int GetHashCode()
         {

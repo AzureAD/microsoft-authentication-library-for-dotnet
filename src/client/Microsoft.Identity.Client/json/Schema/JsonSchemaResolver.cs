@@ -32,6 +32,8 @@ using System.Linq;
 
 #endif
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Schema
 {
     /// <summary>
@@ -43,7 +45,7 @@ namespace Microsoft.Identity.Json.Schema
     /// </note>
     /// </summary>
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    internal class JsonSchemaResolver
+    public class JsonSchemaResolver
     {
         /// <summary>
         /// Gets or sets the loaded schemas.

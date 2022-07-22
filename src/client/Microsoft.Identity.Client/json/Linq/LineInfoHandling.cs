@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Specifies how line information is handled when loading JSON.
     /// </summary>
-    internal enum LineInfoHandling
+    public enum LineInfoHandling
     {
         /// <summary>
         /// Ignore line information.
