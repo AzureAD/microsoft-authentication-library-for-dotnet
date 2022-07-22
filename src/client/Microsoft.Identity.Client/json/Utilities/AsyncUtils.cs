@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Json.Utilities
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "<Pending>")]
     internal static class AsyncUtils
     {
         // Pre-allocate to avoid wasted allocations.
@@ -49,6 +50,7 @@ namespace Microsoft.Identity.Json.Utilities
         {
             return cancellationToken.IsCancellationRequested ? FromCanceled<T>(cancellationToken) : null;
         }
+
 
         // From 4.6 on we could use Task.FromCanceled(), but we need an equivalent for
         // previous frameworks.
