@@ -225,7 +225,7 @@ namespace NetDesktopWinForms
                         System.Net.Http.HttpMethod.Get, s_downstreamApi);
                 }
 
-                return await builder.ExecuteAsync().ConfigureAwait(false);
+                return await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
             }
 
             if (acc != null)
@@ -259,14 +259,14 @@ namespace NetDesktopWinForms
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 return await builder
-                    .ExecuteAsync()
+                    .ExecuteAsync(GetAutocancelToken())
                     .ConfigureAwait(false);
             }
 
             Log($"ATS with no account or login hint ... will fail with UiRequiredEx");
             return await pca.AcquireTokenSilent(GetScopes(), (IAccount)null)
 
-                .ExecuteAsync()
+                .ExecuteAsync(GetAutocancelToken())
                 .ConfigureAwait(false);
         }
 
@@ -405,7 +405,8 @@ namespace NetDesktopWinForms
             {
                 await Task.Delay(500).ConfigureAwait(false);
             }
-            result = await builder.ExecuteAsync().ConfigureAwait(false);
+
+            result = await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
 
             return result;
         }
@@ -707,6 +708,18 @@ namespace NetDesktopWinForms
                 await _syncContext;
                 Log("Exception: " + ex);
             }
+        }
+
+        private CancellationToken GetAutocancelToken()
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+            if (nudAutocancelSeconds.Value > 0)
+            {
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds((int)nudAutocancelSeconds.Value));
+                cancellationToken = cts.Token;
+            }
+
+            return cancellationToken;
         }
 
         private async void btnATSperf_Click(object sender, EventArgs e)
