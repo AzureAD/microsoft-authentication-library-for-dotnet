@@ -149,7 +149,6 @@ namespace CommonCache.Test.Unit
             await executor.ExecuteAsync(interactiveType, silentType, CancellationToken.None).ConfigureAwait(false);
         }
 
-        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2272
         [DataTestMethod]
         [DataRow(CacheProgramType.MsalNode, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalNode->MsalV3 msal v3 cache")]
         [DataRow(CacheProgramType.MsalNode, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalNode->AdalV5 msal v3 cache")]
