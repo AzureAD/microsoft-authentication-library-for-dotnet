@@ -14,9 +14,9 @@ public partial class MainPage : ContentPage
 	{
         try
         {
-            var userContext = await B2CAuthenticationService.Instance.SignInAsync().ConfigureAwait(false);
+            var authResult = await B2CAuthenticationService.Instance.SignInAsync().ConfigureAwait(false);
 
-            await ShowMessage("SignIn call", $"{userContext.Name} \r\nyour AccessToken is \r\n{userContext.AccessToken}").ConfigureAwait(false);
+            await ShowMessage("SignIn call", $"{authResult.AccessToken}").ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -24,7 +24,7 @@ public partial class MainPage : ContentPage
             // should ONLY be done for B2C
             // reset and not any other error.
             if (ex.Message.Contains("AADB2C90118"))
-                System.Console.WriteLine("Pwd reset");
+                System.Console.WriteLine("Password reset");
             // Alert if any exception excluding user canceling sign-in dialog
             else
                 await ShowMessage("Exception", ex.ToString()).ConfigureAwait(false);

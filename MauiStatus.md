@@ -1,5 +1,5 @@
 # MAUI Status
-This file tracks the progress of MAUI. Main branch has MSAL.NET code that is ported to MAUI. **It currently supports only iOS and Android platforms.** The branch has [tthreewo dev apps](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/tree/main/tests/devapps/MauiApps) used to for testing.   
+This file tracks the progress of MAUI. Main branch has MSAL.NET code that is ported to MAUI. **It currently supports only iOS and Android platforms.** The branch has [dev apps](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/tree/main/tests/devapps/MauiApps) used to for testing.   
 A preview package has been published on NuGet. [Microsoft.Identity.Client 4.46.0-preview2]( https://www.nuget.org/packages/Microsoft.Identity.Client/4.46.0-preview2)  
 **Note:** This is a preview package and not meant for production.
 
@@ -19,7 +19,7 @@ To build and run the branch, it will require:
 `/tests/devapps/MauiApps/MauiApps.sln`
 - There are following projects in it
     - MauiAppBasic  
-    This shows how to perform authentication with no broker. It has the common pattern of ATS+ATI. Note: Android does not support embedded browser.
+    This shows how to perform authentication with no broker. It has the common pattern of (Acquire Token Silent) ATS + (Acquire Token Interactive)ATI. Note: Android does not support embedded browser.
     - MauiAppWithBroker  
     This shows how to perform authentication with broker. It has the common pattern of ATS+ATI.
     - MauiAppB2C  
@@ -90,7 +90,7 @@ The results are as follows:
 </div>
 
 ### MauiAppB2C
-This performs basic authentication using ATS + ATI flow using external identity provider.  
+This performs basic authentication using ATS + ATI flow using external identity providers.  
 The test steps used are:
 1. ATS + ATI
 2. ATS

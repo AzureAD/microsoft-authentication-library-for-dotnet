@@ -22,46 +22,35 @@ namespace UserDetailsClient.Core.Features.LogOn
 
         public static B2CAuthenticationService Instance { get { return lazy.Value; } }
 
-
         private B2CAuthenticationService()
         {
-
             // default redirectURI; each platform specific project will have to override it with its own
-            var builder = PublicClientApplicationBuilder.Create(B2CConstants.ClientID)
-                .WithB2CAuthority(B2CConstants.AuthoritySignInSignUp)
-                .WithIosKeychainSecurityGroup(B2CConstants.IOSKeyChainGroup)
-                .WithRedirectUri($"msal{B2CConstants.ClientID}://auth");
-
-            // Android implementation is based on https://github.com/jamesmontemagno/CurrentActivityPlugin
-            // iOS implementation would require to expose the current ViewControler - not currently implemented as it is not required
-            // UWP does not require this
-            var windowLocatorService = DependencyService.Get<IParentWindowLocatorService>();
-
-            if (windowLocatorService != null)
-            {
-                builder = builder.WithParentActivityOrWindow(() => windowLocatorService?.GetCurrentParentWindow());
-            }
+            var builder = PublicClientApplicationBuilder
+                                                .Create(B2CConstants.ClientID)
+                                                .WithB2CAuthority(B2CConstants.AuthoritySignInSignUp)
+                                                .WithIosKeychainSecurityGroup(B2CConstants.IOSKeyChainGroup)
+                                                .WithRedirectUri($"msal{B2CConstants.ClientID}://auth");
 
             _pca = builder.Build();
         }
 
-        public async Task<UserContext> SignInAsync()
+        public async Task<AuthenticationResult> SignInAsync()
         {
-            UserContext newContext;
+            AuthenticationResult authResult;
             try
             {
                 // acquire token silent
-                newContext = await AcquireTokenSilent().ConfigureAwait(false);
+                authResult = await AcquireTokenSilent().ConfigureAwait(false);
             }
             catch (MsalUiRequiredException)
             {
                 // acquire token interactive
-                newContext = await SignInInteractively().ConfigureAwait(false);
+                authResult = await SignInInteractively().ConfigureAwait(false);
             }
-            return newContext;
+            return authResult;
         }
 
-        private async Task<UserContext> AcquireTokenSilent()
+        private async Task<AuthenticationResult> AcquireTokenSilent()
         {
             IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
             AuthenticationResult authResult = await _pca.AcquireTokenSilent(B2CConstants.Scopes, GetAccountByPolicy(accounts, B2CConstants.PolicySignUpSignIn))
@@ -69,11 +58,10 @@ namespace UserDetailsClient.Core.Features.LogOn
                .ExecuteAsync()
                .ConfigureAwait(false);
 
-            var newContext = UpdateUserInfo(authResult);
-            return newContext;
+            return authResult;
         }
 
-        private async Task<UserContext> SignInInteractively()
+        private async Task<AuthenticationResult> SignInInteractively()
         {
             // Hide the privacy prompt
             SystemWebViewOptions systemWebViewOptions = new SystemWebViewOptions()
@@ -85,9 +73,7 @@ namespace UserDetailsClient.Core.Features.LogOn
             // Android implementation is based on https://github.com/jamesmontemagno/CurrentActivityPlugin
             // iOS implementation would require to expose the current ViewControler - not currently implemented as it is not required
             // UWP does not require this
-            var windowLocatorService = DependencyService.Get<IParentWindowLocatorService>();
-
-            var parentWindow = windowLocatorService?.GetCurrentParentWindow();
+            var parentWindow = DependencyService.Get<IParentWindowLocatorService>()?.GetCurrentParentWindow();
 
             authResult = await _pca.AcquireTokenInteractive(B2CConstants.Scopes)
                                                         .WithSystemWebViewOptions(systemWebViewOptions)
@@ -95,11 +81,10 @@ namespace UserDetailsClient.Core.Features.LogOn
                                                         .ExecuteAsync()
                                                         .ConfigureAwait(false);
 
-            var newContext = UpdateUserInfo(authResult);
-            return newContext;
+            return authResult;
         }
 
-        public async Task<UserContext> SignOutAsync()
+        public async Task SignOutAsync()
         {
 
             IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
@@ -108,9 +93,6 @@ namespace UserDetailsClient.Core.Features.LogOn
                 await _pca.RemoveAsync(accounts.FirstOrDefault()).ConfigureAwait(false);
                 accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
             }
-            var signedOutContext = new UserContext();
-            signedOutContext.IsLoggedOn = false;
-            return signedOutContext;
         }
 
         private IAccount GetAccountByPolicy(IEnumerable<IAccount> accounts, string policy)
@@ -122,54 +104,6 @@ namespace UserDetailsClient.Core.Features.LogOn
             }
 
             return null;
-        }
-
-        private string Base64UrlDecode(string s)
-        {
-            s = s.Replace('-', '+').Replace('_', '/');
-            s = s.PadRight(s.Length + (4 - s.Length % 4) % 4, '=');
-            var byteArray = Convert.FromBase64String(s);
-            var decoded = Encoding.UTF8.GetString(byteArray, 0, byteArray.Count());
-            return decoded;
-        }
-
-        public UserContext UpdateUserInfo(AuthenticationResult ar)
-        {
-            var newContext = new UserContext();
-            newContext.IsLoggedOn = false;
-            JObject user = ParseIdToken(ar.IdToken);
-
-            newContext.AccessToken = ar.AccessToken;
-            newContext.Name = user["name"]?.ToString();
-            newContext.UserIdentifier = user["oid"]?.ToString();
-
-            newContext.GivenName = user["given_name"]?.ToString();
-            newContext.FamilyName = user["family_name"]?.ToString();
-
-            newContext.StreetAddress = user["streetAddress"]?.ToString();
-            newContext.City = user["city"]?.ToString();
-            newContext.Province = user["state"]?.ToString();
-            newContext.PostalCode = user["postalCode"]?.ToString();
-            newContext.Country = user["country"]?.ToString();
-
-            newContext.JobTitle = user["jobTitle"]?.ToString();
-
-            var emails = user["emails"] as JArray;
-            if (emails != null)
-            {
-                newContext.EmailAddress = emails[0].ToString();
-            }
-            newContext.IsLoggedOn = true;
-
-            return newContext;
-        }
-
-        JObject ParseIdToken(string idToken)
-        {
-            // Get the piece with actual user info
-            idToken = idToken.Split('.')[1];
-            idToken = Base64UrlDecode(idToken);
-            return JObject.Parse(idToken);
         }
     }
 }
