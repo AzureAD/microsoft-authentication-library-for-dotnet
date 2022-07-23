@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
                         _threadInitializedEvent.Set();
 
-                        _dialog.AuthenticateAAD(RequestUri, CallbackUri);
+                        _dialog.AuthenticateAAD(RequestUri, CallbackUri, CancellationToken.None);
 
                         // Start and turn control over to the message loop.
                         Application.Run();
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         /// UI thread completes.
         /// </summary>
         /// <returns></returns>
-        protected override AuthorizationResult OnAuthenticate()
+        protected override AuthorizationResult OnAuthenticate(CancellationToken cancellationToken)
         {
             if (null == CallbackUri)
             {

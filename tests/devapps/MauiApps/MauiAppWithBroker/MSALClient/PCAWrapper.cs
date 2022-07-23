@@ -39,7 +39,6 @@ namespace MauiAppWithBroker.MSALClient
         private PCAWrapper()
         {
             // Create PCA once. Make sure that all the config parameters below are passed
-            // ClientCapabilities - must have ProtApp
             PCA = PublicClientApplicationBuilder
                                         .Create(ClientId)
                                         .WithBroker()
