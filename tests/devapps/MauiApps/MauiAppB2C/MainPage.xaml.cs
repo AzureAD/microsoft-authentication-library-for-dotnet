@@ -1,4 +1,6 @@
-﻿using Microsoft.Identity.Client;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+using Microsoft.Identity.Client;
 using UserDetailsClient.Core.Features.LogOn;
 
 namespace MauiB2C;

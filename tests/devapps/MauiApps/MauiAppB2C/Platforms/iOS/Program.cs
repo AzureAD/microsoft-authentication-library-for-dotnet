@@ -1,4 +1,6 @@
-﻿using ObjCRuntime;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+using ObjCRuntime;
 using UIKit;
 
 namespace MauiB2C;
