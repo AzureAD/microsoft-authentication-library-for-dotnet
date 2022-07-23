@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         args, 
                         addOrgAccounts: true, 
                         addMsaAccounts: _isMsaPassthrough, 
-                        tenantId: _authority.AuthorityInfo.CanonicalAuthority).ConfigureAwait(true);
+                        tenantId: _authority.AuthorityInfo.CanonicalAuthority.ToString()).ConfigureAwait(true);
                 }
             }
             finally

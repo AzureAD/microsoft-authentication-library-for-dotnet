@@ -341,7 +341,7 @@ namespace Microsoft.Identity.Client
                     LegacyCachePersistence,
                     msalRefreshTokenCacheItem,
                     msalIdTokenCacheItem,
-                    authorityWithPreferredCache.AuthorityInfo.CanonicalAuthority,
+                    authorityWithPreferredCache.AuthorityInfo.CanonicalAuthority.ToString(),
                     msalIdTokenCacheItem.IdToken.ObjectId,
                     response.Scope);
             }

@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             var authParams = new NativeInterop.AuthParameters
                 (authenticationRequestParameters.AppConfig.ClientId,
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
+                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
 
             //scopes
             authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
