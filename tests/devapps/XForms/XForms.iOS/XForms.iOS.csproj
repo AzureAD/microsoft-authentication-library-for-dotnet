@@ -70,10 +70,6 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <AppExtensionDebugBundleId />
   </PropertyGroup>
-  <!-- Set this env variable locally to enable Telemetry on developer applications-->
-  <PropertyGroup Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''">
-    <DefineConstants>$(DefineConstants);ARIA_TELEMETRY_ENABLED</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <Compile Include="AcquirePageRenderer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
