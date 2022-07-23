@@ -637,18 +637,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             // Assert that MSAL acquires an account from the broker cache
             Assert.AreSame(expectedAccount, actualAccount.Single());
-        }
-
-        [TestMethod]
-        public void PCAWithBrokerAndWithMultiCloudSupportThrowsTest()
-        {
-            var ex = Assert.ThrowsException<NotSupportedException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
-                .WithBroker(true)
-                .WithMultiCloudSupport(true)
-                .Build());
-            Assert.AreEqual(MsalErrorMessage.MultiCloudSupportUnavailable, ex.Message);
-        }
+        }       
 #endif
 
         [TestMethod]

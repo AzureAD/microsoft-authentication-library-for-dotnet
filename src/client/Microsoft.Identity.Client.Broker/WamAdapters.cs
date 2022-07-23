@@ -152,6 +152,11 @@ namespace Microsoft.Identity.Client.Broker
                 authParams.DecodedClaims = authenticationRequestParameters.ClaimsAndClientCapabilities;
             }
 
+            if (authenticationRequestParameters.AppConfig.MultiCloudSupportEnabled)
+            {
+                authParams.Properties["discover"] = "home";
+            }
+
             //pass extra query parameters if there are any
             if (authenticationRequestParameters.ExtraQueryParameters != null)
             {

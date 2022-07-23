@@ -31,8 +31,6 @@ namespace Microsoft.Identity.Client
             // TODO: can we simplify this and/or move validation/configuration logic to AbstractApplicationBuilder
             // so that all authority mangling/management is in one place?
 
-            UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", Host), authorityBuilder.Port);
-
             switch (AuthorityType)
             {
                 case AuthorityType.B2C:
@@ -67,13 +65,34 @@ namespace Microsoft.Identity.Client
                         authorityUri.Authority,
                         pathSegments[0],
                         pathSegments[1]);
+
+                    UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "https://{0}/{1}/common/userrealm/",                           
+                            authorityUri.Authority,
+                            pathSegments[0]), 
+                        authorityBuilder.Port);
+
+                    
                     break;
                 default:
-                    CanonicalAuthority = UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(
-                    CultureInfo.InvariantCulture,
-                    "https://{0}/{1}/",
-                    authorityBuilder.Uri.Authority,
-                    GetFirstPathSegment(authority)), authorityBuilder.Port);
+                    CanonicalAuthority = 
+                        UriBuilderExtensions.GetHttpsUriWithOptionalPort(
+                            string.Format(                    
+                                CultureInfo.InvariantCulture,                    
+                                "https://{0}/{1}/",
+                                authorityBuilder.Uri.Authority,
+                                GetFirstPathSegment(authority)),
+                            authorityBuilder.Port);
+
+                    UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
+                        string.Format(
+                            CultureInfo.InvariantCulture, 
+                            "https://{0}/common/userrealm/",
+                            Host), 
+                        authorityBuilder.Port);
+                    
                     break;
             }
         }
