@@ -4,6 +4,8 @@
     <RootNamespace>Microsoft.Identity.Test.Core.UIAutomation</RootNamespace>
     <AssemblyName>Microsoft.Identity.Test.Core.UIAutomation</AssemblyName>
     <TargetFramework>net48</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>

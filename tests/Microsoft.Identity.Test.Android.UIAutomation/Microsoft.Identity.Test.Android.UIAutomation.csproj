@@ -5,6 +5,8 @@
     <AssemblyName>Microsoft.Identity.Test.UIAutomation</AssemblyName>
     <TargetFramework>net48</TargetFramework>
     <AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>

@@ -4,6 +4,8 @@
     <RootNamespace>Test.Microsoft.Identity.iOS.Msal.UIAutomation</RootNamespace>
     <AssemblyName>Test.Microsoft.Identity.iOS.Msal.UIAutomation</AssemblyName>
     <TargetFramework>net48</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
