@@ -111,7 +111,7 @@
     <AndroidResource Include="Resources\layout\Toolbar.axml" />
     <AndroidResource Include="Resources\values\styles.xml" />
   </ItemGroup>
-  <ItemGroup>   
+  <ItemGroup>
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -130,7 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StrongNamer">
-      <Version>0.0.8</Version>
+      <Version>0.2.5</Version>
     </PackageReference>
     <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
