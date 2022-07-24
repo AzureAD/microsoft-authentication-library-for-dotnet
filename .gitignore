@@ -256,3 +256,4 @@ msal/tests/dev apps/XForms/XForms.UWP/BundleArtifacts/x86.txt
 /tests/CacheCompat/CommonCache.Test.MsalPython/Properties/launchSettings.json
 /tests/CacheCompat/CommonCache.Test.MsalNode/**/package-lock.json
 **/package-lock.json
+/DeleteObjBin.cmd
