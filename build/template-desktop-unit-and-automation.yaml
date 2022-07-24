@@ -11,11 +11,11 @@ steps:
     version: 5.x
     includePreviewVersions: true
 
-- task: DownloadBuildArtifacts@0
+- task: DownloadPipelineArtifact@0
   displayName: 'Download Drop'
   inputs:
-    artifactName: drop
-    itemPattern: '**/*'
+    artifact: drop
+    patterns: '**\*'
 
 - task: CopyFiles@2
   displayName: 'Get MSAL tests'

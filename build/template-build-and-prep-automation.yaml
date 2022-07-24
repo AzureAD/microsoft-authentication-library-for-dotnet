@@ -57,6 +57,8 @@ steps:
     Contents: 'Microsoft.Identity**\bin\**\**'
     TargetFolder: '$(build.artifactstagingdirectory)/msalTests'
 
-- task: PublishBuildArtifacts@1
+- task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: drop'
-  parallel: true
+  inputs:
+    targetPath: $(Build.artifactstagingdirectory)
+    artifactName: drop

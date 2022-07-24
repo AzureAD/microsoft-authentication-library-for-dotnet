@@ -51,6 +51,8 @@ steps:
     Contents: '**/*'
     TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
 
-- task: PublishBuildArtifacts@1
+- task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: DeviceAuth'
-  parallel: true
+  inputs:
+    targetPath: $(Build.artifactstagingdirectory)
+    artifactName: DeviceAuth

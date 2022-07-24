@@ -10,11 +10,11 @@ parameters:
   PublishArtifacts: 'false'
 
 steps:
-- task: PublishBuildArtifacts@1
+- task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: packages'
   inputs:
-    PathtoPublish: '${{ parameters.ArtifactPublishPath }}'
-    ArtifactName: '${{ parameters.DropArtifactName }}'
+    targetPath: '${{ parameters.ArtifactPublishPath }}'
+    artifactName: '${{ parameters.DropArtifactName }}'
   condition: eq(${{ parameters.PublishArtifacts }}, 'true')
 
 - task: NuGetCommand@2
