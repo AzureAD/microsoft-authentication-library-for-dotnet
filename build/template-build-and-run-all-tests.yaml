@@ -29,6 +29,40 @@ jobs: #Build and stage projects
   # Bootstrap the build
   - template: template-build-and-prep-automation.yaml
 
+  #Desktop Unit + Integration Tests
+- job: 'RunDesktopTests'
+  dependsOn:
+  - 'BuildAndStageProjects'
+  pool:
+      vmImage: 'windows-2022'
+      demands:
+      - msbuild
+      - visualstudio
+  variables:
+      runCodesignValidationInjection: false
+
+  steps:
+  - template: template-desktop-unit-and-automation.yaml
+    
+# BUILD AND RUN CACHE COMPAT TESTS
+- job: 'BuildAndRunCacheCompatTests'
+  dependsOn:
+    - 'PreBuildCheck'
+  pool:
+      vmImage: 'windows-2022'
+      demands:
+      - msbuild
+      - visualstudio
+  variables:
+      runCodesignValidationInjection: false
+
+  steps:
+  - template: template-build-and-run-cachecompat-tests.yaml
+    parameters:
+      BuildPlatform: '$(BuildPlatform)'
+      BuildConfiguration: '$(BuildConfiguration)'
+      BuildSolution: 'LibsAndSamples.sln'
+
 # iOS test and run is disabled as Azure CI/CD task has issues supporting it
 # the testing will be done manually for now.
 # #   # BUILD IOS APPCENTER APP PHASE
@@ -60,40 +94,6 @@ jobs: #Build and stage projects
 
   steps:
   - template: template-build-android-automation.yaml
-
-# BUILD AND RUN CACHE COMPAT TESTS
-- job: 'BuildAndRunCacheCompatTests'
-  dependsOn:
-    - 'PreBuildCheck'
-  pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      runCodesignValidationInjection: false
-
-  steps:
-  - template: template-build-and-run-cachecompat-tests.yaml
-    parameters:
-      BuildPlatform: '$(BuildPlatform)'
-      BuildConfiguration: '$(BuildConfiguration)'
-      BuildSolution: 'LibsAndSamples.sln'
-
-  #Desktop Unit + Integration Tests
-- job: 'RunDesktopTests'
-  dependsOn:
-  - 'BuildAndStageProjects'
-  pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      runCodesignValidationInjection: false
-
-  steps:
-  - template: template-desktop-unit-and-automation.yaml
 
 # APP CENTER ANDROID MSAL TESTS PHASE
 - job: 'RunAppCenterAndroidMsalTests'
