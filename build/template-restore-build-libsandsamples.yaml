@@ -42,6 +42,7 @@ steps:
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
+    maximumCpuCount: true
 
 - task: CopyFiles@2
   displayName: 'Stage Device Authentication Tests'
@@ -52,3 +53,4 @@ steps:
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: DeviceAuth'
+  parallel: true
