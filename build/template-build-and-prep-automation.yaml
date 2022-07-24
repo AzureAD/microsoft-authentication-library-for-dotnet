@@ -15,7 +15,6 @@ steps:
     version: 6.x
     includePreviewVersions: true
 
-
 # Nuget Restore and Build 
 - template: template-restore-build-libsandsamples.yaml
   parameters:

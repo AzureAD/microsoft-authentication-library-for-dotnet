@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32428.217
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9B0B5396-4D95-4C15-82ED-DC22B5A3123F}"
 EndProject
@@ -112,6 +112,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-build-and-run-cachecompat-tests.yaml = build\template-build-and-run-cachecompat-tests.yaml
 		build\template-build-android-automation.yaml = build\template-build-android-automation.yaml
 		build\template-build-ios-automation.yaml = build\template-build-ios-automation.yaml
+		template-cachecompat-automation.yaml = template-cachecompat-automation.yaml
 		build\template-desktop-unit-and-automation.yaml = build\template-desktop-unit-and-automation.yaml
 		build\template-install-dotnet-core.yaml = build\template-install-dotnet-core.yaml
 		build\template-install-keyvault-secrets.yaml = build\template-install-keyvault-secrets.yaml
@@ -128,6 +129,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-python-config.yaml = build\template-python-config.yaml
 		build\template-restore-build-libsandsamples.yaml = build\template-restore-build-libsandsamples.yaml
 		build\template-run-all-tests.yaml = build\template-run-all-tests.yaml
+		template-run-cachecompat-tests.yaml = template-run-cachecompat-tests.yaml
 		build\template-run-device-auth-tests.yaml = build\template-run-device-auth-tests.yaml
 		build\template-run-integration-tests.yaml = build\template-run-integration-tests.yaml
 		build\template-run-unit-tests.yaml = build\template-run-unit-tests.yaml

@@ -17,8 +17,6 @@ jobs: #Build and stage projects
   - template: template-prebuild-code-analysis.yaml
 
 - job: 'BuildAndStageProjects'
-  dependsOn:
-    - 'PreBuildCheck'
   pool:
       vmImage: 'windows-2022'
       demands:
@@ -64,7 +62,7 @@ jobs: #Build and stage projects
 # BUILD AND RUN CACHE COMPAT TESTS
 - job: 'BuildAndRunCacheCompatTests'
   dependsOn:
-    - 'PreBuildCheck'
+    - 'BuildAndStageProjects'
   pool:
       vmImage: 'windows-2022'
       demands:
@@ -74,7 +72,7 @@ jobs: #Build and stage projects
       runCodesignValidationInjection: false
 
   steps:
-  - template: template-build-and-run-cachecompat-tests.yaml
+  - template: template-cachecompat-automation.yaml
     parameters:
       BuildPlatform: '$(BuildPlatform)'
       BuildConfiguration: '$(BuildConfiguration)'
