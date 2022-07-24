@@ -14,9 +14,7 @@
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.15.0" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols.SignedHttpRequest" Version="6.15.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.1.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
+    <PackageReference Include="MSTest" Version="2.2.10" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.4.0" />
