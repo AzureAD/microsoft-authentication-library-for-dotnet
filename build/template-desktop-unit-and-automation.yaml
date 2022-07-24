@@ -15,7 +15,8 @@ steps:
   displayName: 'Download Drop'
   inputs:
     artifact: drop
-    patterns: '**\*'
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
 
 - task: CopyFiles@2
   displayName: 'Get MSAL tests'

@@ -11,11 +11,12 @@ steps:
     version: 5.x
     includePreviewVersions: true
 
-- task: DownloadBuildArtifacts@0
+- task: DownloadPipelineArtifact@0
   displayName: 'Download Drop'
   inputs:
-    artifactName: drop
-    itemPattern: '**/*'
+    artifact: drop
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
 
 - task: CopyFiles@2
   displayName: 'Get MSAL tests'
@@ -25,17 +26,7 @@ steps:
     TargetFolder: $(Build.SourcesDirectory)\tests\
 
 # install python for cache tests
-- task: stevedower.python.PythonScript.PythonScript@1
-  displayName: 'Update PIP'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
-  inputs:
-    arguments: '-m pip install --upgrade pip'
-
-- task: stevedower.python.PythonScript.PythonScript@1
-  displayName: 'Install MSAL.Python PIP'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
-  inputs:
-    arguments: '-m pip install msal'
+- template: template-python-config.yaml
 
   # Run All CacheCompat Tests
 - template: template-run-cachecompat-tests.yaml

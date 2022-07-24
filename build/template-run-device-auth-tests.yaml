@@ -10,7 +10,8 @@ steps:
   displayName: 'Download Build Artifacts'
   inputs:
     artifact: DeviceAuth
-    patterns: '**\*'
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
 
 - task: VSTest@2
   displayName: 'DeviceAuthTests'

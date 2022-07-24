@@ -7,13 +7,15 @@ steps:
   displayName: 'Download Xamarin.Android'
   inputs:
     artifact: Xamarin.Android
-    patterns: '**\*'
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
 
 - task: DownloadPipelineArtifact@0
   displayName: 'Download Drop'
   inputs:
     artifact: drop
-    patterns: '**\*'
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
 
 - powershell: '$Import = $(ConsolidateAppCenterTests)'
   errorActionPreference: silentlyContinue
