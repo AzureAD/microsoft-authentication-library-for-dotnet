@@ -560,9 +560,12 @@ namespace Microsoft.Identity.Client
         {
             if (Config.Authority?.AuthorityInfo != null)
             {
+                var isB2C = Config.Authority is B2CAuthority;
+                
                 AadAuthority aadAuthority = Config.Authority as AadAuthority;
-                if (!string.IsNullOrEmpty(Config.TenantId) &&
-                    aadAuthority != null)
+                if (!string.IsNullOrEmpty(Config.TenantId) 
+                    && !isB2C
+                    && aadAuthority != null )
                 {
                     if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() &&
                         !string.Equals(aadAuthority.TenantId, Config.TenantId))

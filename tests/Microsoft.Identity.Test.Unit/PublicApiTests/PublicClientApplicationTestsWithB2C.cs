@@ -133,6 +133,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("B2C")]
+        public void B2CIgnoreWithTenantId_Success()
+        {
+            using (var harness = base.CreateTestHarness())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(new Uri(TestConstants.B2CCustomDomain), true)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCachePartitioningAsserts(harness.ServiceBundle.PlatformProxy)
+                    .WithTenantId(Guid.NewGuid().ToString("D"))
+                    .BuildConcrete();
+                
+                Assert.IsTrue(true);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("B2C")]
         public void B2CAcquireTokenAuthorityHostMisMatchErrorTest()
         {
             using (var httpManager = new MockHttpManager())
