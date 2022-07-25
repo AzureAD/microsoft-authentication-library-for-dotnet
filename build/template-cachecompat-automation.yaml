@@ -15,14 +15,14 @@ steps:
   inputs:
     artifact: drop
     patterns: '**/*'
-    path: $(Build.artifactstagingdirectory)/drop/CacheCompat
+    path: $(Build.artifactstagingdirectory)/drop
 
 - task: CopyFiles@2
   displayName: 'Get MSAL tests'
   inputs:
     SourceFolder: '$(build.artifactstagingdirectory)\drop\cacheCompatTests' 
     Contents: '**\*'
-    TargetFolder: $(Build.SourcesDirectory)\tests\
+    TargetFolder: $(Build.SourcesDirectory)\tests\CacheCompat
 
 # install python for cache tests
 - template: template-python-config.yaml
