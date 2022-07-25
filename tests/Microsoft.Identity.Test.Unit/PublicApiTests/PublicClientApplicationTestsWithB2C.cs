@@ -133,6 +133,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("B2C")]
+        [Description("Test against https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3471")]
         public void B2CIgnoreWithTenantId_Success()
         {
             PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -140,7 +141,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithTenantId(Guid.NewGuid().ToString("D"))
                 .BuildConcrete();
             
-            Assert.IsTrue(true);
+            Assert.AreEqual(TestConstants.B2CCustomDomain, app.Authority);
+
+            app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(new Uri(TestConstants.B2CAuthority), true)
+                .WithTenantId(Guid.NewGuid().ToString("D"))
+                .BuildConcrete();
+
+            Assert.AreEqual(TestConstants.B2CAuthority, app.Authority);
         }
 
         [TestMethod]
