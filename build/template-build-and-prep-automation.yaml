@@ -57,6 +57,13 @@ steps:
     TargetFolder: '$(build.artifactstagingdirectory)/msalTests'
 
 - task: CopyFiles@2
+  displayName: 'Stage CacheCompat tests'
+  inputs:
+    SourceFolder: tests\CacheCompat
+    Contents: '**\bin\**\**'
+    TargetFolder: '$(build.artifactstagingdirectory)/cacheCompatTests'
+
+- task: CopyFiles@2
   displayName: 'Stage Device Authentication Tests'
   inputs:
     SourceFolder: tests/Microsoft.Identity.Test.Integration.Win8

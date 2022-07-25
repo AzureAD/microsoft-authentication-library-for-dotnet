@@ -20,8 +20,8 @@ steps:
 - task: CopyFiles@2
   displayName: 'Get MSAL tests'
   inputs:
-    SourceFolder: '$(build.artifactstagingdirectory)\drop\msalTests' 
-    Contents: 'CacheCompat\**\*'
+    SourceFolder: '$(build.artifactstagingdirectory)\drop\cacheCompatTests' 
+    Contents: '**\*'
     TargetFolder: $(Build.SourcesDirectory)\tests\
 
 # install python for cache tests
