@@ -109,7 +109,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-bootstrap-build.yaml = build\template-bootstrap-build.yaml
 		build\template-build-and-prep-automation.yaml = build\template-build-and-prep-automation.yaml
 		build\template-build-and-run-all-tests.yaml = build\template-build-and-run-all-tests.yaml
-		build\template-build-and-run-cachecompat-tests.yaml = build\template-build-and-run-cachecompat-tests.yaml
 		build\template-build-android-automation.yaml = build\template-build-android-automation.yaml
 		build\template-build-ios-automation.yaml = build\template-build-ios-automation.yaml
 		build\template-cachecompat-automation.yaml = build\template-cachecompat-automation.yaml
