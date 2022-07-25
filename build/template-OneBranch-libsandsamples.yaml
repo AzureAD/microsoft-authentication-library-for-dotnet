@@ -8,10 +8,10 @@ parameters:
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
 
 steps:
-- task: CmdLine@2
-  displayName: 'Clear local NuGet cache'
-  inputs:
-    script: 'nuget locals all -clear'
+# - task: CmdLine@2
+#   displayName: 'Clear local NuGet cache'
+#   inputs:
+#     script: 'nuget locals all -clear'
 
 - powershell: 'powershell.exe -File "$(MsalSourceDir)build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
   displayName: 'Install Android'
