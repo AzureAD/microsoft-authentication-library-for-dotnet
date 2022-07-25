@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client
             Guid correlationId,
             IEnumerable<string> requestScopes,
             string requestTenantId,
-            IIdentityLogger msalIdentityLogger,
+            IIdentityLogger identityLogger,
             bool piiLoggingEnabled)
 
         {
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client
             RequestScopes = requestScopes;
             RequestTenantId = requestTenantId;
             SuggestedCacheExpiry = suggestedCacheExpiry;
-            IdentityLogger = msalIdentityLogger;
+            IdentityLogger = identityLogger;
             PiiLoggingEnabled = piiLoggingEnabled;
         }
 
