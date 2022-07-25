@@ -20,7 +20,7 @@ steps:
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    msbuildArgs: '/t:restore'
+    msbuildArgs: '-restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
