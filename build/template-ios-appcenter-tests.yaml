@@ -3,14 +3,14 @@ parameters:
 
 steps:
 
-- task: DownloadPipelineArtifact@0
+- task: DownloadPipelineArtifact@2
   displayName: 'Download Xamarin.iOS'
   inputs:
     artifact: Xamarin.iOS
     patterns: '**/*'
     path: $(Build.artifactstagingdirectory)/drop
 
-- task: DownloadPipelineArtifact@0
+- task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
   inputs:
     artifact: drop

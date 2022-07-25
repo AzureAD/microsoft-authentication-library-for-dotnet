@@ -11,7 +11,7 @@ steps:
     version: 5.x
     includePreviewVersions: true
 
-- task: DownloadPipelineArtifact@0
+- task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
   inputs:
     artifact: drop

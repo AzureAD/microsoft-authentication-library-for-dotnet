@@ -10,7 +10,7 @@ steps:
   inputs:
     version: 5.x
 
-- task: DownloadPipelineArtifact@0
+- task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
   inputs:
     artifact: drop

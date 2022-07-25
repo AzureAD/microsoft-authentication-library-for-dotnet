@@ -2,7 +2,7 @@ parameters:
   PublishArtifacts: 'false'
 
 steps:
-- task: DownloadPipelineArtifact@0
+- task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
   inputs:
     artifact: drop
