@@ -15,7 +15,7 @@ steps:
   inputs:
     artifact: drop
     patterns: '**/*'
-    path: $(Build.artifactstagingdirectory)/drop
+    path: $(Build.artifactstagingdirectory)/drop/CacheCompat
 
 - task: CopyFiles@2
   displayName: 'Get MSAL tests'
