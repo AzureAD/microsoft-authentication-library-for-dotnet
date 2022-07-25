@@ -100,7 +100,6 @@ jobs: #Build and stage projects
 # APP CENTER ANDROID MSAL TESTS PHASE
 - job: 'RunAppCenterAndroidMsalTests'
   dependsOn: 
-  - 'BuildAndStageProjects'
   - 'BuildAndroidAppCenterApp'
   pool:
     vmImage: 'windows-2022'
