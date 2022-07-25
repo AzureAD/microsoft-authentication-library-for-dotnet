@@ -487,7 +487,7 @@ namespace Microsoft.Identity.Json.Linq
 
         #region Cast from operators
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Newtonsoft.Json.Linq.JToken"/> to <see cref="System.Boolean"/>.
+        /// Performs an explicit conversion from <see cref="Linq.JToken"/> to <see cref="System.Boolean"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -511,7 +511,7 @@ namespace Microsoft.Identity.Json.Linq
 
 #if HAVE_DATE_TIME_OFFSET
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Newtonsoft.Json.Linq.JToken"/> to <see cref="System.DateTimeOffset"/>.
+        /// Performs an explicit conversion from <see cref="Linq.JToken"/> to <see cref="System.DateTimeOffset"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -855,7 +855,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Newtonsoft.Json.Linq.JToken"/> to <see cref="System.SByte"/>.
+        /// Performs an explicit conversion from <see cref="Linq.JToken"/> to <see cref="System.SByte"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1289,7 +1289,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Newtonsoft.Json.Linq.JToken"/> to <see cref="System.UInt64"/>.
+        /// Performs an explicit conversion from <see cref="Linq.JToken"/> to <see cref="System.UInt64"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
