@@ -1,4 +1,7 @@
-﻿using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 
 namespace Microsoft.Identity.Client.Desktop
 {

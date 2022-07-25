@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 dict[OAuth2Parameter.GrantType] = OAuth2GrantType.Password;
                 dict[OAuth2Parameter.Username] = _usernamePasswordParameters.Username;
-                dict[OAuth2Parameter.Password] = new string(_usernamePasswordParameters.Password.PasswordToCharArray());
+                dict[OAuth2Parameter.Password] = _usernamePasswordParameters.Password;
             }
 
             ISet<string> unionScope = new HashSet<string>()

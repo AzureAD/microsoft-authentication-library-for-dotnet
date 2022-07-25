@@ -3,7 +3,10 @@
 
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
@@ -46,22 +49,27 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
         /// <summary>
         /// </summary>
-        protected override void OnAuthenticate()
+        protected override void OnAuthenticate(CancellationToken cancellationToken)
         {
             _zoomed = false;
             _statusCode = 0;
-            ShowBrowser();
+            ShowBrowser(cancellationToken);
 
-            base.OnAuthenticate();
+            base.OnAuthenticate(cancellationToken);
         }
 
         /// <summary>
         /// </summary>
-        public void ShowBrowser()
+        public void ShowBrowser(CancellationToken cancellationToken)
         {
             DialogResult uiResult = DialogResult.None;
-            InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(ownerWindow));
 
+            using (cancellationToken.Register(CloseIfOpen))
+            {
+                InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(ownerWindow));
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+            
             switch (uiResult)
             {
                 case DialogResult.OK:
@@ -71,6 +79,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                     break;
                 default:
                     throw CreateExceptionForAuthenticationUiFailed(_statusCode);
+            }
+        }
+
+        private void CloseIfOpen()
+        {
+            if (Application.OpenForms.OfType<WindowsFormsWebAuthenticationDialog>().Any())
+            {
+                InvokeOnly(Close);
             }
         }
 

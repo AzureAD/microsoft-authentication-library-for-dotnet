@@ -24,8 +24,8 @@ namespace NetDesktopWinForms
 {
     public partial class Form1 : Form
     {
+        private static readonly Uri s_downstreamApi = new Uri("https://www.contoso.com/path1/path2");
         private readonly SynchronizationContext _syncContext;
-        private readonly string _popNonce = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6bnVsbH0.eyJ0cyI6MTY1MjI4NTAzNH0.Nh-mAJwRphv57IdpdIrYzmYp6vP_BmmYy4UrNKj5A2x4XKLbp_H3aH4J5_s9hP5MzoiHE2SgVaDG8YUbP4xOjFYmpNG884pWqI-z9RjFNKJgBTXUhwv8HsUnxUHq1KTvpLmd1K1gJZORdeUI2LDr07EEH3-aT0PkRt-wT1YNNh5gU_RHV5KvlsyDWCvCJpEbZmGUf8JX9tHO2ux7XAKD77lVb5m6lFq_8Wr5nhJDyREHrXKWQq-X4rTxnBCZ4KBAufImSVHAeVi7ihlGbcobU2CuyJscTZkyELWMG8rBD6QK57AzrM77mua9-QClKIHArL8_d2fgyksLLS89wxy25A";
 
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
@@ -106,8 +106,9 @@ namespace NetDesktopWinForms
             bool msaPt = IsMsaPassthroughConfigured();
 
             var builder = PublicClientApplicationBuilder
-                .Create(clientId)
-                .WithExperimentalFeatures()
+                .Create(clientId)                
+                .WithRedirectUri("http://localhost")
+                .WithMultiCloudSupport(cbxMultiCloud2.Checked)
                 .WithAuthority(authority);
 
             if (authMethod == null)
@@ -124,11 +125,8 @@ namespace NetDesktopWinForms
                 case AuthMethod.SystemBrowser:
                     builder = builder.WithBrokerPreview(false);
                     builder = ToggleOldBroker(builder, false);
-
-                    builder = builder.WithRedirectUri("http://localhost");
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
                     builder = builder.WithBrokerPreview(false);
                     builder = ToggleOldBroker(builder, false);
 
@@ -222,10 +220,12 @@ namespace NetDesktopWinForms
 
                 if (cbxPOP.Checked)
                 {
-                    builder = builder.WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
+                    builder = builder.WithProofOfPossession(
+                        "some_nonce", 
+                        System.Net.Http.HttpMethod.Get, s_downstreamApi);
                 }
 
-                return await builder.ExecuteAsync().ConfigureAwait(false);
+                return await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
             }
 
             if (acc != null)
@@ -254,19 +254,19 @@ namespace NetDesktopWinForms
 
                 if (cbxPOP.Checked)
                 {
-                    builder = builder.WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
+                    builder = builder.WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
                 }
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 return await builder
-                    .ExecuteAsync()
+                    .ExecuteAsync(GetAutocancelToken())
                     .ConfigureAwait(false);
             }
 
             Log($"ATS with no account or login hint ... will fail with UiRequiredEx");
             return await pca.AcquireTokenSilent(GetScopes(), (IAccount)null)
 
-                .ExecuteAsync()
+                .ExecuteAsync(GetAutocancelToken())
                 .ConfigureAwait(false);
         }
 
@@ -376,7 +376,7 @@ namespace NetDesktopWinForms
 
             if (cbxPOP.Checked)
             {
-                builder = builder.WithProofOfPossession(_popNonce, System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
+                builder = builder.WithProofOfPossession("nonce", System.Net.Http.HttpMethod.Get, s_downstreamApi);
             }
 
             Prompt? prompt = GetPrompt();
@@ -405,7 +405,8 @@ namespace NetDesktopWinForms
             {
                 await Task.Delay(500).ConfigureAwait(false);
             }
-            result = await builder.ExecuteAsync().ConfigureAwait(false);
+
+            result = await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
 
             return result;
         }
@@ -549,7 +550,6 @@ namespace NetDesktopWinForms
 
         private async void atUsernamePwdBtn_Click(object sender, EventArgs e)
         {
-
             var pca = CreatePca(GetAuthMethod());
 
             try
@@ -573,13 +573,19 @@ namespace NetDesktopWinForms
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                throw new InvalidOperationException("[TEST APP FAILURE] Username or password is missing.");
+                Log("[TEST APP FAILURE] Username or password is missing.");
+                return null;
             }
 
             AuthenticationResult result = null;
             var scopes = GetScopes();
-            var guid = Guid.NewGuid();
-            var builder = pca.AcquireTokenByUsernamePassword(scopes, username, new NetworkCredential("", password).SecurePassword);
+            
+            var builder = pca.AcquireTokenByUsernamePassword(scopes, username, password);
+
+            if (cbxPOP.Checked)
+            {
+                builder = builder.WithProofOfPossession("nonce", System.Net.Http.HttpMethod.Get, s_downstreamApi);
+            }
 
             if (cbxBackgroundThread.Checked)
             {
@@ -702,6 +708,18 @@ namespace NetDesktopWinForms
                 await _syncContext;
                 Log("Exception: " + ex);
             }
+        }
+
+        private CancellationToken GetAutocancelToken()
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+            if (nudAutocancelSeconds.Value > 0)
+            {
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds((int)nudAutocancelSeconds.Value));
+                cancellationToken = cts.Token;
+            }
+
+            return cancellationToken;
         }
 
         private async void btnATSperf_Click(object sender, EventArgs e)

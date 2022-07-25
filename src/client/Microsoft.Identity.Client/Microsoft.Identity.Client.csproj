@@ -1,4 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
+
+  <!--Add MAUI_SUPPORT variable to environment when you compile MAUI. esp for.\tests\devapps\MauiApps\MauiApps.sln-->
   
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
@@ -149,7 +151,6 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
-    <Compile Remove="GlobalSuppressions3.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
 

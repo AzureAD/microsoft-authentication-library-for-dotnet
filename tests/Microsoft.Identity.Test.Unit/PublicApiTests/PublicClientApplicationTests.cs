@@ -1212,7 +1212,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                .WithUsername("upn@live.com");
             CheckBuilderCommonMethods(iwaBuilder);
 
-            var usernamePasswordBuilder = app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "upn@live.com", new SecureString());
+            var usernamePasswordBuilder = app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "upn@live.com", "");
             CheckBuilderCommonMethods(usernamePasswordBuilder);
 
             var deviceCodeBuilder = app.AcquireTokenWithDeviceCode(TestConstants.s_scope, result => Task.FromResult(0))
