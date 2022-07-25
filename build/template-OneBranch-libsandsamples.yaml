@@ -16,6 +16,12 @@ steps:
 - powershell: 'powershell.exe -File "$(MsalSourceDir)build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
   displayName: 'Install Android'
 
+- template: /SharedComponents/OneBranch/Steps/Prepare.MSBuild.yml@templates
+  parameters:
+    msBuildVersion: 17.0
+    msbuildInstallationPath: c:\.vs
+    includeReferenceAssemblies: 'true'
+
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
@@ -23,12 +29,6 @@ steps:
     msbuildArgs: '-restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
-
-- template: /SharedComponents/OneBranch/Steps/Prepare.MSBuild.yml@templates
-  parameters:
-    msBuildVersion: 17.0
-    msbuildInstallationPath: c:\.vs
-    includeReferenceAssemblies: 'true'
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
