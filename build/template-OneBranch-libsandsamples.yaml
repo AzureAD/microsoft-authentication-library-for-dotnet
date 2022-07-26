@@ -22,6 +22,20 @@ steps:
     msbuildInstallationPath: c:\.vs
     includeReferenceAssemblies: 'true'
 
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore for Identity.Client'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+
 - task: MSBuild@1
   displayName: 'Restore using MSBuild'
   inputs:
