@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauiAppWithBroker", "MauiAppWithBroker\MauiAppWithBroker.csproj", "{B2CDEFCB-CE8D-4527-8F68-23B1BE6FB3D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauiAppBasic", "MauiAppBasic\MauiAppBasic.csproj", "{D790B117-3C9A-4F69-BF62-8E29EEE3632D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauiAppBasic", "MauiAppBasic\MauiAppBasic.csproj", "{D790B117-3C9A-4F69-BF62-8E29EEE3632D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauiB2C", "MauiAppB2C\MauiB2C.csproj", "{9726A8E6-9C63-429F-B8F3-6277A528CBBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,12 @@ Global
 		{D790B117-3C9A-4F69-BF62-8E29EEE3632D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D790B117-3C9A-4F69-BF62-8E29EEE3632D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D790B117-3C9A-4F69-BF62-8E29EEE3632D}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{9726A8E6-9C63-429F-B8F3-6277A528CBBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9726A8E6-9C63-429F-B8F3-6277A528CBBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9726A8E6-9C63-429F-B8F3-6277A528CBBF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{9726A8E6-9C63-429F-B8F3-6277A528CBBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9726A8E6-9C63-429F-B8F3-6277A528CBBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9726A8E6-9C63-429F-B8F3-6277A528CBBF}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -86,8 +86,7 @@ namespace MauiAppBasic.MSALClient
             var accts = await PCA.GetAccountsAsync().ConfigureAwait(false);
             var acct = accts.FirstOrDefault();
 
-            var silentParamBuilder = PCA.AcquireTokenSilent(scopes, acct);
-            var authResult = await silentParamBuilder
+            var authResult = await PCA.AcquireTokenSilent(scopes, acct)
                                         .ExecuteAsync().ConfigureAwait(false);
             return authResult;
 
