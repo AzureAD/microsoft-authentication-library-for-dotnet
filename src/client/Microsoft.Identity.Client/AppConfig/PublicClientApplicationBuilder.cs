@@ -375,12 +375,13 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
+#if IS_XAMARIN_OR_UWP
             if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
             {
                 // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139
                 throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
             }
-
+#endif            
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)
