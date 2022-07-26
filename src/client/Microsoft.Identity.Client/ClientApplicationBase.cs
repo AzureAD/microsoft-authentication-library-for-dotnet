@@ -430,7 +430,10 @@ namespace Microsoft.Identity.Client
         /// Retrieve the TenantId for an Authority URL.
         /// </summary>
         /// <param name="authorityUri">The Authority URL to parse.</param>
-        /// <returns></returns>
+        /// <returns>The Tenant Id</returns>
+        /// <remarks>
+        /// The Tenant Id can be NULL if the Authority Type is ADFS
+        /// </remarks>
         public static string GetTenantId(Uri authorityUri)
         {
             var authorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), false);
