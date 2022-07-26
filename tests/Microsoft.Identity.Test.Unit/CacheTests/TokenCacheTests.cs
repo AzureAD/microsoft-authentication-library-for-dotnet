@@ -599,7 +599,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
                 var rtItem = new MsalRefreshTokenCacheItem(
-                    TestConstants.SovereignNetworkEnvironment,
+                    TestConstants.SovereignNetworkEnvironmentDE,
                     TestConstants.ClientId,
                     "someRT",
                     _clientInfo,

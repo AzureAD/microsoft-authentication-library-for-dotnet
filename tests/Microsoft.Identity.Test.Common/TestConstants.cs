@@ -58,13 +58,14 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefRegionalEnvironment = "centralus.r.login.microsoftonline.com";
         public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.r.login.microsoftonline.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
+        public const string SovereignNetworkEnvironmentDE = "login.microsoftonline.de";
+        public const string SovereignNetworkEnvironmentCN = "login.partner.microsoftonline.cn";
         public const string PpeEnvironment = "login.windows-ppe.net";
         public const string PpeOrgEnvironment = "login.windows-ppe.org"; //This environment is not known to MSAL or AAD
 
         public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
         public const string AuthorityNotKnownTenanted = "https://sts.access.edu/" + Utid + "/";
 
-        public const string SovereignNetworkEnvironment = "login.microsoftonline.de";
         public const string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/home/";
         public const string AuthorityUtidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public const string AuthorityUtid2Tenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid2 + "/";
@@ -75,7 +76,11 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantId + "/";
         public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";
         public const string AuthorityCommonPpeAuthority = "https://" + PpeEnvironment + "/common/";
-
+        public const string AuthoritySovereignDETenant = "https://" + SovereignNetworkEnvironmentDE + "/" + TenantId + "/";
+        public const string AuthoritySovereignCNTenant = "https://" + SovereignNetworkEnvironmentCN + "/" + TenantId + "/";
+        public const string AuthoritySovereignDECommon = "https://" + SovereignNetworkEnvironmentDE + "/commnon/";
+        public const string AuthoritySovereignCNCommon = "https://" + SovereignNetworkEnvironmentDE + "/commnon/";
+        
         public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
         public const string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/organizations/";
         public const string AuthorityConsumersTenant = "https://" + ProductionPrefNetworkEnvironment + "/consumers/";
@@ -86,23 +91,27 @@ namespace Microsoft.Identity.Test.Unit
         public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
         public const string ADFSAuthority2 = "https://someAdfs.com/adfs/";
 
+        public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
+        public const string DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/tenantid";
+        public const string DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/common";
+
         public const string B2CSignUpSignIn = "b2c_1_susi";
         public const string B2CProfileWithDot = "b2c.someprofile";
         public const string B2CEditProfile = "b2c_1_editprofile";
         public const string B2CEnvironment = "sometenantid.b2clogin.com";
-        public static readonly string B2CAuthority = $"https://login.microsoftonline.in/tfp/tenant/{B2CSignUpSignIn}/";
-        public static readonly string B2CLoginAuthority = $"https://sometenantid.b2clogin.com/tfp/sometenantid/{B2CSignUpSignIn}/";
-        public static readonly string B2CLoginAuthorityWrongHost = $"https://anothertenantid.b2clogin.com/tfp/sometenantid/{B2CSignUpSignIn}/";
-        public static readonly string B2CCustomDomain = $"https://catsareamazing.com/tfp/catsareamazing/{B2CSignUpSignIn}/";
-        public static readonly string B2CLoginAuthorityUsGov = $"https://sometenantid.b2clogin.us/tfp/sometenantid/{B2CSignUpSignIn}/";
-        public static readonly string B2CLoginAuthorityMoonCake = $"https://sometenantid.b2clogin.cn/tfp/sometenantid/{B2CSignUpSignIn}/";
-        public static readonly string B2CLoginAuthorityBlackforest = $"https://sometenantid.b2clogin.de/tfp/sometenantid/{B2CSignUpSignIn}/";
-        public static readonly string B2CSuSiHomeAccountIdentifer = $"{Uid}-{B2CSignUpSignIn}.{Utid}";
-        public static readonly string B2CSuSiHomeAccountObjectId = $"{Uid}-{B2CSignUpSignIn}";
-        public static readonly string B2CProfileWithDotHomeAccountIdentifer = $"{Uid}-{B2CProfileWithDot}.{Utid}";
-        public static readonly string B2CProfileWithDotHomeAccountObjectId = $"{Uid}-{B2CProfileWithDot}";
-        public static readonly string B2CEditProfileHomeAccountIdentifer = $"{Uid}-{B2CEditProfile}.{Utid}";
-        public static readonly string B2CEditProfileHomeAccountObjectId = $"{Uid}-{B2CEditProfile}";
+        public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthorityWrongHost = "https://anothertenantid.b2clogin.com/tfp/sometenantid/" + B2CSignUpSignIn + "/";
+        public const string B2CCustomDomain = "https://catsareamazing.com/tfp/catsareamazing/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthorityUsGov = "https://sometenantid.b2clogin.us/tfp/sometenantid/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthorityMoonCake = "https://sometenantid.b2clogin.cn/tfp/sometenantid/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthorityBlackforest = "https://sometenantid.b2clogin.de/tfp/sometenantid/" + B2CSignUpSignIn + "/";
+        public const string B2CSuSiHomeAccountIdentifer = Uid + "-" + B2CSignUpSignIn + "." + Utid;
+        public const string B2CSuSiHomeAccountObjectId = Uid + "-" + B2CSignUpSignIn;
+        public const string B2CProfileWithDotHomeAccountIdentifer = Uid + "-" + B2CProfileWithDot + "." + Utid;
+        public const string B2CProfileWithDotHomeAccountObjectId = Uid + "-" + B2CProfileWithDot;
+        public const string B2CEditProfileHomeAccountIdentifer = Uid + "-" + B2CEditProfile + "." + Utid;
+        public const string B2CEditProfileHomeAccountObjectId = Uid + "-" + B2CEditProfile;
 
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
         public const string ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";

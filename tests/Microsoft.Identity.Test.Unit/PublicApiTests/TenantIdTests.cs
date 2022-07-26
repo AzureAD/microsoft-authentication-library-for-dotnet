@@ -25,10 +25,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(TestConstants.AuthorityOrganizationsTenant, "organizations", DisplayName = "Organizations endpoint")]
         [DataRow(TestConstants.AadAuthorityWithTestTenantId, TestConstants.AadTenantId, DisplayName = "Tenant Id")]
         [DataRow(TestConstants.AuthorityConsumersTenant, "consumers", DisplayName = "Consumers Endpoint")]
-        [DataRow(TestConstants.AuthorityConsumerTidTenant, TestConstants.MsaTenantId, DisplayName = "Tenant Id")]
+        [DataRow(TestConstants.AuthorityConsumerTidTenant, TestConstants.MsaTenantId, DisplayName = "Consumer Tenant Id")]
         [DataRow(TestConstants.AuthorityNotKnownTenanted, TestConstants.Utid, DisplayName = "Tenant Id")]
         [DataRow(TestConstants.AuthorityUtidTenant, TestConstants.Utid, DisplayName = "Tenant Id")]
         [DataRow(TestConstants.AuthorityUtid2Tenant, TestConstants.Utid2, DisplayName = "Tenant Id")]
+        [DataRow(TestConstants.B2CCustomDomain, TestConstants.B2CCustomDomain, DisplayName = "B2C Custom Domain Tenant Id")]
+        [DataRow(TestConstants.B2CLoginAuthority, TestConstants.B2CLoginAuthority, DisplayName = "B2C Tenant Id")]
+        [DataRow(TestConstants.B2CLoginAuthorityUsGov, TestConstants.B2CLoginAuthorityUsGov, DisplayName = "B2C US GOV Tenant Id")]
+        [DataRow(TestConstants.B2CCustomDomain, TestConstants.B2CCustomDomain, DisplayName = "B2C Custom Domain Tenant Id")]
+        [DataRow(TestConstants.B2CLoginAuthorityBlackforest, TestConstants.B2CLoginAuthorityBlackforest, DisplayName = "B2C Blackforest Tenant Id")]
+        [DataRow(TestConstants.B2CLoginAuthorityMoonCake, TestConstants.B2CLoginAuthorityMoonCake, DisplayName = "B2C MoonCake Tenant Id")]
+        [DataRow(TestConstants.AuthoritySovereignCNTenant, TestConstants.TenantId, DisplayName = "Sovereign Tenant Id")]
+        [DataRow(TestConstants.AuthoritySovereignDETenant, TestConstants.TenantId, DisplayName = "Sovereign Tenant Id")]
+        [DataRow(TestConstants.DstsAuthorityTenanted, "tenantid", DisplayName = "DSTS Tenant Id")]
+        [DataRow(TestConstants.DstsAuthorityTenantless, "tenantid", DisplayName = "DSTS Tenantless Tenant Id")]
+        [DataRow(TestConstants.DstsAuthorityCommon, "common", DisplayName = "DSTS Common Tenant Id")]
         public void ParseTest_Success(string authorityUrl, string expectedTenantId)
         {
             var tenantId = ClientApplicationBase.GetTenantId(new Uri(authorityUrl));
