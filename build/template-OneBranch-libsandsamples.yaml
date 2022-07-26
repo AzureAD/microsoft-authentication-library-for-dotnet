@@ -29,7 +29,7 @@ steps:
     msbuildVersion: 17.0
     msbuildLocationMethod: 'location'
     msbuildLocation: '$(MSBuildPath)'
-    msbuildArguments: '-t: restore'
+    msbuildArguments: '-restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
     maximumCpuCount: true
