@@ -1,5 +1,7 @@
 steps:
 
+- template: template-install-keyvault-secrets.yaml
+
 - task: VSTest@2
   displayName: 'Run cache compat tests'
   condition: and(succeeded(), eq(variables['RunTests'], 'true'))
