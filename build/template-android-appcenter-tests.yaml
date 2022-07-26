@@ -8,7 +8,7 @@ steps:
   inputs:
     artifact: Xamarin.Android
     patterns: '**/*'
-    path: $(Build.artifactstagingdirectory)/drop
+    path: $(Build.artifactstagingdirectory)/Xamarin.Android
 
 - task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
