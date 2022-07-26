@@ -61,8 +61,6 @@ jobs: #Build and stage projects
 
 # BUILD AND RUN CACHE COMPAT TESTS
 - job: 'BuildAndRunCacheCompatTests'
-  strategy:
-    parallel: 5
   dependsOn:
     - 'BuildAndStageProjects'
   pool:
