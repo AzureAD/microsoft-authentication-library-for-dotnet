@@ -374,13 +374,7 @@ namespace KerberosConsole
                 // 2. Acquire the authentication token.
                 // Kerberos Ticket will be contained in Id Token or Access Token
                 // according to specified ticket container parameter.
-                SecureString password = new SecureString();
-                foreach (var c in _UserPassword.ToCharArray())
-                {
-                    password.AppendChar(c);
-                }
-
-                AuthenticationResult result = app.AcquireTokenByUsernamePassword(_publicAppScopes, _Username, password)
+                AuthenticationResult result = app.AcquireTokenByUsernamePassword(_publicAppScopes, _Username, _UserPassword)
                         .ExecuteAsync()
                         .GetAwaiter()
                         .GetResult();

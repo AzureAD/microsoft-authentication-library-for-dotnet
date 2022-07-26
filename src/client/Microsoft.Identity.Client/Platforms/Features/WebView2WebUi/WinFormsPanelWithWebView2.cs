@@ -3,6 +3,9 @@
 
 using System;
 using System.Drawing;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
@@ -65,23 +68,28 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             };
         }
 
-        public AuthorizationResult DisplayDialogAndInterceptUri()
+        public AuthorizationResult DisplayDialogAndInterceptUri(CancellationToken cancellationToken)
         {
             _webView2.CoreWebView2InitializationCompleted += WebView2Control_CoreWebView2InitializationCompleted;
             _webView2.NavigationStarting += WebView2Control_NavigationStarting;
 
             // Starts the navigation
             _webView2.Source = _startUri;
-            DisplayDialog();
+            DisplayDialog(cancellationToken);
 
             return _result;
         }
 
-        private void DisplayDialog()
+        private void DisplayDialog(CancellationToken cancellationToken)
         {
             DialogResult uiResult = DialogResult.None;
-            InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(_ownerWindow));
 
+            using (cancellationToken.Register(CloseIfOpen))
+            {
+                InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(_ownerWindow));
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+             
             switch (uiResult)
             {
                 case DialogResult.OK:
@@ -93,6 +101,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                     throw new MsalClientException(
                         "webview2_unexpectedResult",
                         "WebView2 returned an unexpected result: " + uiResult);
+            }
+        }
+
+        private void CloseIfOpen()
+        {
+            if (Application.OpenForms.OfType<WinFormsPanelWithWebView2>().Any())
+            {
+                InvokeOnly(Close);
             }
         }
 
@@ -117,6 +133,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             if (_ownerWindow != null && _ownerWindow is Control winFormsControl)
             {
                 winFormsControl.Invoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+
+        /// <summary>
+        /// Some calls need to be made on the UI thread and this is the central place to do so and if so, ensure we invoke on that proper thread.
+        /// </summary>
+        /// <param name="action"></param>
+        private void InvokeOnly(Action action)
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(action);
             }
             else
             {

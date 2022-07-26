@@ -6,7 +6,8 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Client;
 using System.Threading.Tasks;
 using System.Linq;
-using System.Globalization;
+using System;
+using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -41,6 +42,29 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         result.Account.Username, 
                         System.StringComparison.InvariantCultureIgnoreCase));
             }
+        }
+
+        public static void AssertAuthResult(AuthenticationResult result, TokenSource tokenSource, string tenantId, string[] scopes, bool isPop = false)
+        {
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.AccessToken);
+            Assert.IsNotNull(result.IdToken);
+            Assert.IsNotNull(result.Account);
+            Assert.IsNotNull(result.Account.Username);
+            Assert.IsTrue(scopes.All(result.Scopes.Contains));
+
+            if (isPop)
+            {
+                Assert.AreEqual(TestConstants.Pop, result.TokenType);
+            }
+            else
+            {
+                Assert.AreEqual(TestConstants.Bearer, result.TokenType);
+            }
+
+            Assert.AreEqual(tokenSource, result.AuthenticationResultMetadata.TokenSource);
+
+            Assert.AreEqual(tenantId, result.TenantId);
         }
     }
 }

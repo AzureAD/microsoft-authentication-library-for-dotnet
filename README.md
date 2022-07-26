@@ -58,7 +58,7 @@ Operating system:
 Platform of choice:
 * .NET 4.5 or greater
 * .NET Core 2.1 or greater
-* .NET Standard 1.3
+* .NET Standard 2.0
 * Mono Android 9.0
 * UAP 10.0
 * Xamarin.iOS 10

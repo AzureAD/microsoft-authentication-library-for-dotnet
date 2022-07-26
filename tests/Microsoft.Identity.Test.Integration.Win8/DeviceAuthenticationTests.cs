@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Integration.Win8
             var authResult = msalPublicClient.AcquireTokenByUsernamePassword(
                  new[] { "user.read" },
                  labResponse.User.Upn,
-                 new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                 labResponse.User.GetOrFetchPassword())
              .WithClaims(JObject.Parse(_claims).ToString())
              .ExecuteAsync(CancellationToken.None).Result;
 

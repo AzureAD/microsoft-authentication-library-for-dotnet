@@ -36,14 +36,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
             var sendAuthorizeRequest = new Action(() =>
             {
-                authorizationResult = Authenticate(authorizationUri, redirectUri);
+                authorizationResult = Authenticate(authorizationUri, redirectUri, cancellationToken);
             });
 
             var sendAuthorizeRequestWithTcs = new Action<object>((tcs) =>
             {
                 try
                 {
-                    authorizationResult = Authenticate(authorizationUri, redirectUri);
+                    authorizationResult = Authenticate(authorizationUri, redirectUri, cancellationToken);
                     ((TaskCompletionSource<object>)tcs).TrySetResult(null);
                 }
                 catch (Exception e)
@@ -102,15 +102,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             return await Task.Factory.StartNew(() => authorizationResult).ConfigureAwait(false);
         }
 
-        internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri)
+        internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri, CancellationToken cancellationToken)
         {
             RequestUri = requestUri;
             CallbackUri = callbackUri;
 
-            return OnAuthenticate();
+            return OnAuthenticate(cancellationToken);
         }
 
-        protected abstract AuthorizationResult OnAuthenticate();
+        protected abstract AuthorizationResult OnAuthenticate(CancellationToken cancellationToken);
 
         public Uri UpdateRedirectUri(Uri redirectUri)
         {
