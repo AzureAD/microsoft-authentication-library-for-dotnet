@@ -22,21 +22,46 @@ steps:
     msbuildInstallationPath: c:\.vs
     includeReferenceAssemblies: 'true'
 
-- task: VSBuild@1
-  displayName: 'NuGet restore ${{ parameters.Solution }}'
+- task: MSBuild@1
+  displayName: 'Restore using MSBuild'
   inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '-restore'
+    solution: '${{ parameters.Solution }}'
+    msbuildVersion: 17.0
+    msbuildLocationMethod: 'location'
+    msbuildLocation: '$(MSBuildPath)'
+    msbuildArguments: '-t: restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
+    maximumCpuCount: true
 
-- task: VSBuild@1
-  displayName: 'Build solution ${{ parameters.Solution }}'
+
+- task: MSBuild@1
+  displayName: 'Build using MSBuild'
   inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    solution: '${{ parameters.Solution }}'
+    msbuildVersion: 17.0
+    msbuildLocationMethod: 'location'
+    msbuildLocation: '$(MSBuildPath)'
+    msbuildArguments: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
+    maximumCpuCount: true
+
+# - task: VSBuild@1
+#   displayName: 'NuGet restore ${{ parameters.Solution }}'
+#   inputs:
+#     solution: ${{ parameters.Solution }}
+#     msbuildArgs: '-restore'
+#     platform: ${{ parameters.BuildPlatform }}
+#     configuration: ${{ parameters.BuildConfiguration }}
+
+# - task: VSBuild@1
+#   displayName: 'Build solution ${{ parameters.Solution }}'
+#   inputs:
+#     solution: ${{ parameters.Solution }}
+#     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+#     platform: ${{ parameters.BuildPlatform }}
+#     configuration: ${{ parameters.BuildConfiguration }}
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml
