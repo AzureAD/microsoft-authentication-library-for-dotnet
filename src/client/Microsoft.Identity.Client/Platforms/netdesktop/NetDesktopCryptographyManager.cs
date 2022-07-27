@@ -56,15 +56,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 return sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             }
         }
-#endif
 
-#if NET45
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
-#else
-        public override byte[] SignWithCertificate(string message, X509Certificate2 certificate)
-#endif
         {
-#if NET45
             var rsaCryptoProvider = GetCryptoProviderForSha256_Net45(certificate);
             using (var sha = new SHA256Cng())
             {
@@ -73,10 +67,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 s_certificateToRsaCspMap[certificate.Thumbprint] = rsaCryptoProvider;
                 return signedData;
             }
-#else
-            return base.SignWithCertificate(message, certificate);
-#endif
         }
+#endif
 
         /// <summary>
         /// Create a <see cref="RSACryptoServiceProvider"/> using the private key from the given <see cref="X509Certificate2"/>.
