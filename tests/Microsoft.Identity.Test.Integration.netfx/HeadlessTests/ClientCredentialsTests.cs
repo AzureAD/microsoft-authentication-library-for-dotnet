@@ -56,92 +56,91 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, RunOn.NetFx | RunOn.NetCore)]
-        [DataRow(Cloud.Adfs, RunOn.NetCore)]
-        [DataRow(Cloud.PPE, RunOn.NetFx)]
-        [DataRow(Cloud.PPE, new object[] { RunOn.NetFx, true })]
-        [DataRow(Cloud.Public, new object[] { RunOn.NetFx | RunOn.NetCore, true })]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore | TargetFrameworks.NetStandard )]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
+        [DataRow(Cloud.PPE, TargetFrameworks.NetFx)]        
+        [DataRow(Cloud.Public, new object[] { TargetFrameworks.NetCore, true })]
         //[DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithCertificate_TestAsync(Cloud cloud, RunOn runOn, bool useAppIdUri = false)
+        public async Task WithCertificate_TestAsync(Cloud cloud, TargetFrameworks runOn, bool useAppIdUri = false)
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.Cert, useAppIdUri).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, RunOn.NetFx | RunOn.NetCore)]
-        [DataRow(Cloud.Adfs, RunOn.NetFx)]
-        [DataRow(Cloud.Arlington, RunOn.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
+        [DataRow(Cloud.Arlington, TargetFrameworks.NetCore)]
         //[DataRow(Cloud.PPE)] - secret not setup
-        public async Task WithSecret_TestAsync(Cloud cloud, RunOn runOn)
+        public async Task WithSecret_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.Secret).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, RunOn.NetFx | RunOn.NetCore)]
-        [DataRow(Cloud.Adfs, RunOn.NetFx)]
-        [DataRow(Cloud.PPE, RunOn.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
+        [DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, RunOn runOn)
+        public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.ClientAssertion_Manual).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, RunOn.NetFx | RunOn.NetCore)]
-        [DataRow(Cloud.Adfs, RunOn.NetFx)]
-        [DataRow(Cloud.PPE, RunOn.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore | TargetFrameworks.NetStandard)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
+        [DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientAssertion_Wilson_TestAsync(Cloud cloud, RunOn runOn)
+        public async Task WithClientAssertion_Wilson_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.ClientAssertion_Wilson).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, RunOn.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientClaims_ExtraClaims_TestAsync(Cloud cloud, RunOn runOn)
+        public async Task WithClientClaims_ExtraClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, RunOn.NetFx)]
-        [DataRow(Cloud.Adfs, RunOn.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientClaims_OverrideClaims_TestAsync(Cloud cloud, RunOn runOn)
+        public async Task WithClientClaims_OverrideClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, RunOn.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientClaims_SendX5C_ExtraClaims_TestAsync(Cloud cloud, RunOn runOn)
+        public async Task WithClientClaims_SendX5C_ExtraClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims, sendX5C: true).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, RunOn.NetFx)]
-        [DataRow(Cloud.Adfs, RunOn.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientClaims_SendX5C_OverrideClaims_TestAsync(Cloud cloud, RunOn runOn)
+        public async Task WithClientClaims_SendX5C_OverrideClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims, sendX5C: true).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, RunOn.NetCore)]                
-        public async Task WithOnBeforeTokenRequest_TestAsync(Cloud cloud, RunOn runOn)
+        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]                
+        public async Task WithOnBeforeTokenRequest_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
 

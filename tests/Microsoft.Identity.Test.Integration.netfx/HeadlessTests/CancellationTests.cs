@@ -1,4 +1,7 @@
-﻿#if NET_CORE // run these only on .net core as they do not hit any platform specific part
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. 
+// Licensed under the MIT License.
+
+#if NET_CORE // run these only on .net core as they do not hit any platform specific part
 
 using System;
 using System.Collections.Generic;

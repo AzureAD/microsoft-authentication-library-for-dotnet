@@ -22,6 +22,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;
 
+        public IIdentityLogger IdentityLogger { get; } = null;
+
         public bool IsLoggingEnabled(LogLevel logLevel)
         {
             return false;

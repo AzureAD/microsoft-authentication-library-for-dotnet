@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Reuse the same CCA with regional for OBO and for client calls in different orders.
         /// Client calls should go to regional, OBO calls should go to global
         /// </summary>
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore | TargetFrameworks.NetFx)]
         public async Task OboAndClient_WithRegional_TestAsync()
         {
             // Setup: Get lab user, create PCA and get user tokens
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Should be different partitions: by user-provided and by assertion hash 
         /// (if the user-provided key is not assertion hash)
         /// </summary>
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task AcquireTokenByObo_LongRunningAndNormalObo_WithDifferentKeys_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
@@ -282,7 +282,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Both methods should return the same tokens, since the cache key is the same.
         /// Should be the same partition: by assertion hash.
         /// </summary>
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task AcquireTokenByObo_LongRunningThenNormalObo_WithTheSameKey_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
@@ -357,7 +357,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Both methods should return the same tokens, since the cache key is the same.
         /// Should be the same partition: by assertion hash.
         /// </summary>
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task AcquireTokenByObo_NormalOboThenLongRunningAcquire_WithTheSameKey_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
@@ -426,7 +426,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Both methods should return the same tokens, since the cache key is the same.
         /// Should be the same partition: by assertion hash.
         /// </summary>
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task AcquireTokenByObo_NormalOboThenLongRunningInitiate_WithTheSameKey_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
@@ -480,7 +480,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task AcquireTokenByObo_LongRunning_WithDifferentScopes_TestAsync()
         {
             string[] scopes2 = { "api://eec635da-5760-452d-940a-448220db047c/access_as_user" };
@@ -516,7 +516,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, result.AuthenticationResultMetadata.CacheRefreshReason);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task AcquireTokenByObo_LongRunning_WithNoTokensFound_TestAsync()
         {
             var cca = BuildCCA(Guid.NewGuid().ToString());
@@ -530,7 +530,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(MsalError.OboCacheKeyNotInCacheError, ex.ErrorCode);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task OBO_WithCache_MultipleUsers_Async()
         {
             var aadUser1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
