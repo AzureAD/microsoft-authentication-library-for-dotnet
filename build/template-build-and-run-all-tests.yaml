@@ -80,8 +80,8 @@ jobs: #Build and stage projects
 
   #Desktop Unit + Integration Tests
 - job: 'RunDesktopTests'
-  strategy:
-    parallel: 5
+  #strategy:
+  #  parallel: 5
   dependsOn:
   - 'BuildAndStageProjects'
   pool:
