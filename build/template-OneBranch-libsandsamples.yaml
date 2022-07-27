@@ -42,6 +42,14 @@ steps:
   inputs:
     version: 3.x
 
+
+# Use the latest .NET SDK
+- task: UseDotNet@2
+  displayName: 'Install .NET 5 SDK'
+  inputs:
+    version: 5.x
+    performMultiLevelLookup: true
+
 # Use the latest .NET SDK
 - task: UseDotNet@2
   displayName: 'Install .NET 6 SDK'
