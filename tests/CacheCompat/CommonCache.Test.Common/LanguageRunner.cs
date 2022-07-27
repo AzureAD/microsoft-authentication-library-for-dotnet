@@ -30,7 +30,7 @@ namespace CommonCache.Test.Common
                     CommonCacheTestUtils.MsalV3CacheFilePath);
 
                 var inputDataJson = JsonConvert.SerializeObject(languageTestInputData);
-                string inputFilePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+                string inputFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
                 File.WriteAllText(inputFilePath, inputDataJson);
 
                 var sb = new StringBuilder();
