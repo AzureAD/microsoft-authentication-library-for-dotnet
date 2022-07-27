@@ -18,7 +18,7 @@
     <PackageReference Include="System.Linq.Expressions" version="4.1.0" />
     <PackageReference Include="System.Reflection" version="4.1.0" />
     <PackageReference Include="System.Reflection.Extensions" version="4.0.1" />
-    <PackageReference Include="System.Reflection.TypeExtensions" version="4.1.0" />
+    <PackageReference Include="System.Reflection.TypeExtensions" version="4.7.0" />
     <PackageReference Include="System.Resources.ResourceManager" version="4.0.1" />
     <PackageReference Include="System.Runtime" version="4.1.0" />
     <PackageReference Include="System.Runtime.Extensions" version="4.1.0" />
