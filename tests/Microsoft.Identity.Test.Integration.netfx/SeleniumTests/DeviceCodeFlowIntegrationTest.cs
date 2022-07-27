@@ -51,9 +51,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
-// same code path between .net fwk and .net core, so run only once
-#if DESKTOP
-        [TestMethod]
+
+        [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonDeviceCodeFlowTestAsync()
@@ -62,7 +61,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.ADFS)]
         public async Task DeviceCodeFlowAdfsTestAsync()
@@ -72,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
@@ -81,7 +80,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.MSA)]
         [Ignore] // Failing sporadically https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1045664 
@@ -91,7 +90,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user").ConfigureAwait(false);
         }
-#endif
 
         private async Task AcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType)
         {
@@ -127,7 +125,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         #region Azure AD Kerberos Feature Tests
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task KerberosDeviceCodeFlowTestAsync()
         {
