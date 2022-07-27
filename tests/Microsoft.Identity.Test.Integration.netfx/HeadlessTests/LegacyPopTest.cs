@@ -7,10 +7,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -20,7 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
+namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
     public class LegacyPopTests

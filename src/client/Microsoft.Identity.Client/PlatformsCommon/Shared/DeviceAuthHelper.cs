@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             //For PKeyAuth, challenge headers returned from the STS will be case sensitive so a case sensitive check is used to determine
             //if the response is a PKeyAuth challenge.
             return responseHeaders != null
-                   && responseHeaders != null
                    && responseHeaders.Contains(PKeyAuthConstants.WwwAuthenticateHeader)
                    && responseHeaders.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).First()
                        .StartsWith(PKeyAuthConstants.PKeyAuthName, StringComparison.OrdinalIgnoreCase);

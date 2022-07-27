@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -28,7 +29,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_B2C_Async()
         {
             var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);

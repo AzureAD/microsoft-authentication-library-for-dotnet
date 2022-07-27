@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client
         /// <param name="options">Data object with options</param>
         /// <returns>The builder to chain the .With methods</returns>
 #if WINDOWS_APP
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] // hide everywhere but NetStandard and iOS
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] 
 #endif
         public AcquireTokenInteractiveParameterBuilder WithSystemWebViewOptions(SystemWebViewOptions options)
         {
