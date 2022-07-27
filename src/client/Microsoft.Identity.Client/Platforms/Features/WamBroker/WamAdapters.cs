@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             AddExtraParamsToRequest(webTokenRequest, authenticationRequestParameters.ExtraQueryParameters);
             string authority = overriddenAuthority ??
-                 authenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority;
+                 authenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority.ToString();
             bool validate = authenticationRequestParameters.AuthorityInfo.ValidateAuthority;
             AddAuthorityParamToRequest(authority, validate, webTokenRequest);
 

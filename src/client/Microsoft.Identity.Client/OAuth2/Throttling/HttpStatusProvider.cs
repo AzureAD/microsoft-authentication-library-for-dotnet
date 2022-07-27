@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                     $"throttling for {s_throttleDuration.TotalSeconds} seconds. ");
 
                 var thumbprint = ThrottleCommon.GetRequestStrictThumbprint(bodyParams,
-                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    requestParams.AuthorityInfo.CanonicalAuthority.ToString(),
                     requestParams.Account?.HomeAccountId?.Identifier);
                 var entry = new ThrottlingCacheEntry(ex, s_throttleDuration);
                 ThrottlingCache.AddAndCleanup(thumbprint, entry, logger);
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
                 string strictThumbprint = ThrottleCommon.GetRequestStrictThumbprint(
                     bodyParams,
-                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    requestParams.AuthorityInfo.CanonicalAuthority.ToString(),
                     requestParams.Account?.HomeAccountId?.Identifier);
 
                 ThrottleCommon.TryThrowServiceException(strictThumbprint, ThrottlingCache, logger, nameof(HttpStatusProvider));
