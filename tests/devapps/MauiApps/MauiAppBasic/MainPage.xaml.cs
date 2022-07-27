@@ -21,22 +21,51 @@ namespace MauiAppBasic
             {
                 PCAWrapper.Instance.UseEmbedded = this.useEmbedded.IsChecked;
                 // attempt silent login.
-                // If this is very first time and the device is not enrolled, it will throw MsalUiRequiredException
-                // If the device is enrolled, this will succeed.
                 result = await PCAWrapper.Instance.AcquireTokenSilentAsync(PCAWrapper.Scopes).ConfigureAwait(false);
 
-                await ShowMessage("First AcquireTokenTokenSilent call", result.AccessToken).ConfigureAwait(false);
+                await ShowMessage("First AcquireTokenTokenSilent call", result.AccessToken)
+                                .ContinueWith(async (_) =>
+                                {
+                                    string data = await CallWebAPIWithToken(result).ConfigureAwait(false);
+
+                                    await ShowMessage("Data after passing token", data).ConfigureAwait(false);
+                                }).ConfigureAwait(false);
+
             }
             catch (MsalUiRequiredException)
             {
                 // This executes UI interaction ot obtain token
                 result = await PCAWrapper.Instance.AcquireTokenInteractiveAsync(PCAWrapper.Scopes).ConfigureAwait(false);
 
-                await ShowMessage("First AcquireTokenInteractive call", result.AccessToken).ConfigureAwait(false);
+                await ShowMessage("First AcquireTokenInteractive call", result.AccessToken)
+                                .ContinueWith(async (_) =>
+                                {
+                                    string data = await CallWebAPIWithToken(result).ConfigureAwait(false);
+
+                                    await ShowMessage("Data after passing token", data).ConfigureAwait(false);
+                                }).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 await ShowMessage("Exception in AcquireTokenTokenSilent", ex.Message).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<string> CallWebAPIWithToken(AuthenticationResult authResult)
+        {
+            try
+            {
+                //get data from API
+                HttpClient client = new HttpClient();
+                HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, "https://graph.microsoft.com/v1.0/me");
+                message.Headers.Add("Authorization", authResult.CreateAuthorizationHeader());
+                HttpResponseMessage response = await client.SendAsync(message).ConfigureAwait(false);
+                string responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                return responseString;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
             }
         }
 

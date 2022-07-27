@@ -25,7 +25,7 @@ namespace MauiAppBasic
         }
 
         /// <summary>
-        /// This is a callback to continue with the broker base authentication
+        /// This is a callback to continue with the authentication
         /// Info abour redirect URI: https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-client-application-configuration#redirect-uri
         /// </summary>
         /// <param name="requestCode">request code </param>
