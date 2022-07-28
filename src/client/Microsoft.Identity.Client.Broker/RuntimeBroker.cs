@@ -21,12 +21,40 @@ namespace Microsoft.Identity.Client.Broker
 {
     internal class RuntimeBroker : IBroker
     {
+
+       
+
         private readonly ILoggerAdapter _logger;
         private readonly IntPtr _parentHandle = IntPtr.Zero;
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
 
         public bool IsPopSupported => true;
+
+
+        private static Lazy<NativeInterop.Core> s_lazyCore = new Lazy<NativeInterop.Core>(() =>
+        {
+            try
+            {                
+                AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+
+                return new NativeInterop.Core();
+            }
+            catch
+            {
+                // ignored
+                return null;
+            }
+
+        });
+        
+        private static void OnProcessExit(object sender, EventArgs e)
+        {
+            if (s_lazyCore.IsValueCreated )
+            {
+                s_lazyCore.Value?.Dispose();
+            }
+        }
 
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
