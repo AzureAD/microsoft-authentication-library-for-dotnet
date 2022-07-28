@@ -102,17 +102,16 @@ namespace Microsoft.Identity.Client.Broker
             _logger.Verbose("[WamBroker] Using Windows account picker.");
 
             if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
-            {
-                using (var core = new NativeInterop.Core())
+            {                
                 using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
                 {
-                    using (var readAccountResult = await core.ReadAccountByIdAsync(
+                    using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
                     authenticationRequestParameters.Account.HomeAccountId.ObjectId,
                     authenticationRequestParameters.CorrelationId.ToString("D")).ConfigureAwait(false))
                     {
                         if (readAccountResult.IsSuccess)
                         {
-                            using (var result = await core.AcquireTokenInteractivelyAsync(
+                            using (var result = await s_lazyCore.Value.AcquireTokenInteractivelyAsync(
                             _parentHandle,
                             authParams,
                             authenticationRequestParameters.CorrelationId.ToString("D"),
@@ -153,15 +152,14 @@ namespace Microsoft.Identity.Client.Broker
         {
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
-
-            using (var core = new NativeInterop.Core())
+            
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
                 _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + string.IsNullOrEmpty(loginHint));
                 
-                using (var result = await core.SignInInteractivelyAsync(
+                using (var result = await s_lazyCore.Value.SignInInteractivelyAsync(
                     _parentHandle,
                     authParams,
                     authenticationRequestParameters.CorrelationId.ToString("D"),
@@ -185,10 +183,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Signing in with the default user account.");
 
-            using (var core = new NativeInterop.Core())
+            
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-                using (NativeInterop.AuthResult result = await core.SignInAsync(
+                using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInAsync(
                         _parentHandle,
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
@@ -221,10 +219,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token silently.");
 
-            using (var core = new NativeInterop.Core())
+            
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-                using (var readAccountResult = await core.ReadAccountByIdAsync(
+                using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
                     authenticationRequestParameters.CorrelationId.ToString("D"),
                     cancellationToken).ConfigureAwait(false))
@@ -240,7 +238,7 @@ namespace Microsoft.Identity.Client.Broker
                             $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}. {readAccountResult.Error}");
                     }
 
-                    using (NativeInterop.AuthResult result = await core.AcquireTokenSilentlyAsync(
+                    using (NativeInterop.AuthResult result = await s_lazyCore.Value.AcquireTokenSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         readAccountResult.Account,
@@ -264,10 +262,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
 
-            using (var core = new NativeInterop.Core())
+            
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
-                using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
+                using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
@@ -289,13 +287,13 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token with Username Password flow.");
 
-            using (var core = new NativeInterop.Core())
+            
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
                 authParams.Properties["MSALRuntime_Password"] = acquireTokenByUsernamePasswordParameters.Password;
 
-                using (NativeInterop.AuthResult result = await core.SignInSilentlyAsync(
+                using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
@@ -327,9 +325,9 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
 
-            using (var core = new NativeInterop.Core())
+            
             {
-                using (var readAccountResult = await core.ReadAccountByIdAsync(
+                using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
                     account.HomeAccountId.ObjectId,
                     correlationId).ConfigureAwait(false))
                 {
@@ -348,7 +346,7 @@ namespace Microsoft.Identity.Client.Broker
                         throw new MsalServiceException("wam_no_account_found", errorMessage);
                     }
                     
-                    using (NativeInterop.SignOutResult result = await core.SignOutSilentlyAsync(
+                    using (NativeInterop.SignOutResult result = await s_lazyCore.Value.SignOutSilentlyAsync(
                         appConfig.ClientId,
                         correlationId,
                         readAccountResult.Account).ConfigureAwait(false))
@@ -398,8 +396,8 @@ namespace Microsoft.Identity.Client.Broker
                 return false;
             }
 
-            _logger.Verbose("[WAM Broker] IsBrokerInstalledAndInvokable true");
-            return true;
+            _logger.Verbose($"[WAM Broker] IsBrokerInstalledAndInvokable {s_lazyCore.Value != null}");
+            return s_lazyCore.Value != null;
         }
     }
 }
