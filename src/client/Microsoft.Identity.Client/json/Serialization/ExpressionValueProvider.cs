@@ -24,7 +24,7 @@
 #endregion
 
 // UNITY flag based on https://github.com/jilleJr/Newtonsoft.Json-for-Unity
-#if !(NET20 || NET35 || UNITY)
+#if !(NET20 || NET35)
 
 using System;
 using System.Collections.Generic;
