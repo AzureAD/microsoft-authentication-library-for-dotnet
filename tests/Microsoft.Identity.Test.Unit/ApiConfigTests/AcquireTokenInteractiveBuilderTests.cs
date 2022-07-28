@@ -213,5 +213,19 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 expectedEmbeddedWebView: WebViewPreference.System, // If system webview options are set, force usage of system webview
                 browserOptions: options);
         }
+
+        [TestMethod]
+        public async Task BlahAsync()
+        {
+            var result = await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
+                .WithTenantId("test")
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive, "authorty");
+
+            Assert.AreEqual("test", result.TenantId);
+            Assert.AreEqual("test", _harness.CommonParametersReceived.AuthorityOverride);
+        }
     }
 }

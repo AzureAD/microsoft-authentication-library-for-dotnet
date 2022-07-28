@@ -10,6 +10,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute.ReceivedExtensions;
 
 namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 {
@@ -82,6 +83,61 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(ex1.ErrorCode, MsalError.TenantOverrideNonAad);
             Assert.AreEqual(ex2.ErrorCode, MsalError.TenantOverrideNonAad);
 
+        }
+
+        [DataTestMethod]
+        [DataRow(TestConstants.AuthorityCommonTenant)]
+        [DataRow(TestConstants.AuthorityCommonPpeAuthority)]
+        [DataRow(TestConstants.AuthorityCommonTenantNotPrefAlias)]
+        [DataRow(TestConstants.AuthorityConsumerTidTenant)]
+        public void WithTenantIdFromAuthority_NoException_Success(string authorityValue)
+        {
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithClientSecret("secret")
+                .Build();
+
+            var parameterBuilder = app
+                .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                .WithTenantIdFromAuthority(authorityValue);
+
+            Assert.IsNotNull(parameterBuilder);
+        }
+
+        [DataTestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        public void WithTenantIdFromAuthority_NullOrEmptyStringAuthority_Failure(string authorityValue)
+        {
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithClientSecret("secret")
+                .Build();
+
+
+            AssertException.Throws<ArgumentNullException>(() =>
+                app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                    .WithTenantIdFromAuthority(authorityValue));
+        }
+
+        [DataTestMethod]
+        [DataRow(null)]
+        public void WithTenantIdFromAuthority_NullUriAuthority_Failure(Uri authorityValue)
+        {
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithClientSecret("secret")
+                .Build();
+
+           
+            AssertException.Throws<ArgumentNullException>(() =>
+                app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                    .WithTenantIdFromAuthority(authorityValue));
         }
 
         [TestMethod]
@@ -183,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public async Task DifferentHostsWithAliasedAuthorityAsync()
         {
-            //Checking for aliased authority. Should not throw exception whan a developer configures an authority on the application
+            //Checking for aliased authority. Should not throw exception when a developer configures an authority on the application
             //but uses a different authority that is a known alias of the previously configured one.
             //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2736
             _harness.HttpManager.AddInstanceDiscoveryMockHandler(TestConstants.PrefCacheAuthorityCommonTenant);

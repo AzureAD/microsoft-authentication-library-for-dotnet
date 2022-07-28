@@ -300,6 +300,59 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Overrides the tenant ID specified in the authority at the application level. This operation preserves the authority host (environment).
+        /// 
+        /// If an authority was not specified at the application level, the default used is https://login.microsoftonline.com/common.
+        /// </summary>
+        /// <param name="authority">Uri for the authority that includes the TenantId</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="authority"/> is null or an empty string</exception>
+        /// <exception cref="MsalClientException">Thrown if the application was configured with an authority that is not AAD specific (e.g. ADFS or B2C).</exception>
+        /// <remarks>
+        /// The tenant should be more restrictive than the one configured at the application level, e.g. don't use "common".
+        /// Does not affect authority validation, which is specified at the application level.</remarks>
+        public T WithTenantIdFromAuthority(string authority)
+        {
+            if (string.IsNullOrEmpty(authority))
+            {
+                throw new ArgumentNullException(nameof(authority));
+            }
+
+            return WithTenantIdFromAuthority(new Uri(authority));
+        }
+
+        /// <summary>
+        /// Overrides the tenant ID specified in the authority at the application level. This operation preserves the authority host (environment).
+        /// 
+        /// If an authority was not specified at the application level, the default used is https://login.microsoftonline.com/common.
+        /// </summary>
+        /// <param name="authorityUri">Uri for the authority that includes the TenantId</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="authorityUri"/> is null or an empty string</exception>
+        /// <exception cref="MsalClientException">Thrown if the application was configured with an authority that is not AAD specific (e.g. ADFS or B2C).</exception>
+        /// <remarks>
+        /// The tenant should be more restrictive than the one configured at the application level, e.g. don't use "common".
+        /// Does not affect authority validation, which is specified at the application level.</remarks>
+        public T WithTenantIdFromAuthority(Uri authorityUri)
+        {
+            if (authorityUri == null)
+            {
+                throw new ArgumentNullException(nameof(authorityUri));
+            }
+
+            if (!ServiceBundle.Config.Authority.AuthorityInfo.IsTenantOverrideSupported)
+            {
+                throw new MsalClientException(
+                    MsalError.TenantOverrideNonAad,
+                    MsalErrorMessage.TenantOverrideNonAad);
+            }
+
+            var authorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), false);
+            var authority = authorityInfo.CreateAuthority();
+            return WithTenantId(authority.TenantId);
+        }
+
+        /// <summary>
         /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs.
         /// </summary>
         /// <param name="authorityUri">Authority URL for an ADFS server.</param>
