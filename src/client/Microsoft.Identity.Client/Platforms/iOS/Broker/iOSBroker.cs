@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             var brokerRequest = new Dictionary<string, string>(16);
 
-            brokerRequest.Add(BrokerParameter.Authority, authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
+            brokerRequest.Add(BrokerParameter.Authority, authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
             string scopes = EnumerableExtensions.AsSingleString(authenticationRequestParameters.Scope);
             brokerRequest.Add(BrokerParameter.Scope, scopes);
             brokerRequest.Add(BrokerParameter.ClientId, authenticationRequestParameters.AppConfig.ClientId);

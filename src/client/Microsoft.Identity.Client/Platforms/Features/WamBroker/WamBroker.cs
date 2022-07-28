@@ -410,7 +410,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     // For MSA-PT, the MSA provider will issue v1 token, which cannot be used.
                     // Only the AAD provider can issue a v2 token
                     accountProvider = await _webAccountProviderFactory.GetAccountProviderAsync(
-                            authenticationRequestParameters.AuthorityInfo.CanonicalAuthority)
+                            authenticationRequestParameters.AuthorityInfo.CanonicalAuthority.ToString())
                         .ConfigureAwait(false);
                 }
 
@@ -521,7 +521,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 else
                 {
                     provider = await GetProviderAsync(
-                        authenticationRequestParameters.AuthorityInfo.CanonicalAuthority,
+                        authenticationRequestParameters.AuthorityInfo.CanonicalAuthority.ToString(),
                         isMsa).ConfigureAwait(false);
                 }
 
@@ -684,7 +684,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
                 WebAccountProvider provider = await GetProviderAsync(
-                    authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority,
+                    authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString(),
                     isMsa).ConfigureAwait(false);
 
                 WebTokenRequest webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(

@@ -376,7 +376,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (result.AuthenticationResultMetadata.TokenSource != TokenSource.Cache)
                 {
-                    Uri canonicalAuthority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
+                    Uri canonicalAuthority = AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority;
 
                     AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
                         $"Fetched access token from host {canonicalAuthority.Host}. Endpoint: {canonicalAuthority}. ",
