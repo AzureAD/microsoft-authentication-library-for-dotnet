@@ -20,7 +20,7 @@ Quick links:
 
 ## Build Status
  
-[![Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20(YAML)?branchName=master)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=922&branchName=master)
+[![Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20(YAML)?branchName=main)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=922&branchName=main)
 
 ## Release notes, roadmap and SLA
 
