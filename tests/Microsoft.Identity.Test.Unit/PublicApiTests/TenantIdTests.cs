@@ -47,6 +47,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [DataTestMethod]
+        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
+        public void ParseTestDynamic_Success(Uri authorityUrl, string expectedTenantId)
+        {
+            ParseTest_Success(authorityUrl.ToString(), expectedTenantId);
+        }
+
+        [DataTestMethod]
         [DataRow(TestConstants.ADFSAuthority, DisplayName = "ADFS Authority")]
         [DataRow(TestConstants.ADFSAuthority2, DisplayName = "ADFS Authority")]
         public void ParseTest_NoTenantId(string authorityUrl)
