@@ -3,7 +3,7 @@
     /// <summary>
     /// Base class for a table of atomized string objects.
     /// </summary>
-    public abstract class JsonNameTable
+    internal abstract class JsonNameTable
     {
         /// <summary>
         /// Gets a string containing the same characters as the specified range of characters in the given array.

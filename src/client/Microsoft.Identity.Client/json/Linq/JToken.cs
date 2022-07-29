@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Represents an abstract JSON token.
     /// </summary>
-    public abstract partial class JToken : IJEnumerable<JToken>, IJsonLineInfo
+    internal abstract partial class JToken : IJEnumerable<JToken>, IJsonLineInfo
 #if HAVE_ICLONEABLE
         , ICloneable
 #endif

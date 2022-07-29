@@ -33,7 +33,7 @@ using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json.Linq
 {
-    public abstract partial class JToken
+    internal abstract partial class JToken
     {
         /// <summary>
         /// Writes this token to a <see cref="JsonWriter"/> asynchronously.
