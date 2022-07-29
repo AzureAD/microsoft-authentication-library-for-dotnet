@@ -6,5 +6,5 @@
 # IDE0073: File header
 dotnet_diagnostic.IDE0073.severity = none
 
-# nullable annotation
+# CS8632: Nullable Annotation
 dotnet_diagnostic.CS8632.severity = none
