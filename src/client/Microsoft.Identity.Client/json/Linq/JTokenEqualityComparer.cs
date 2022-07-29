@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Compares tokens to determine whether they are equal.
     /// </summary>
-    public class JTokenEqualityComparer : IEqualityComparer<JToken>
+    internal class JTokenEqualityComparer : IEqualityComparer<JToken>
     {
         /// <summary>
         /// Determines whether the specified objects are equal.

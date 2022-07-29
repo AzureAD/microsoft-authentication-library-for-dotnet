@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Json
     /// <summary>
     /// The default JSON name table implementation.
     /// </summary>
-    public class DefaultJsonNameTable : JsonNameTable
+    internal class DefaultJsonNameTable : JsonNameTable
     {
         // used to defeat hashtable DoS attack where someone passes in lots of strings that hash to the same hash code
         private static readonly int HashCodeRandomizer;

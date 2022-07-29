@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts a binary value to and from a base 64 string value.
     /// </summary>
-    public class BinaryConverter : JsonConverter
+    internal class BinaryConverter : JsonConverter
     {
 #if HAVE_LINQ
         private const string BinaryTypeName = "System.Data.Linq.Binary";
