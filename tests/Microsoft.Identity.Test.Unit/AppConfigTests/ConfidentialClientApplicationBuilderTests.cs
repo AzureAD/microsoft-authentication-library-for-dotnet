@@ -16,7 +16,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
     [TestClass]
-    [TestCategory("BuilderTests")]
+    [TestCategory(TestCategories.BuilderTests)]
     public class ConfidentialClientApplicationBuilderTests
     {
         [TestInitialize]

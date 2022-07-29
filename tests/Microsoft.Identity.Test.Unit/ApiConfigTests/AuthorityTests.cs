@@ -17,22 +17,15 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
     [TestClass]
     public class AuthorityTests : TestBase
     {
-        private static readonly Authority s_commonAuthority =
-            Authority.CreateAuthority(TestConstants.AuthorityCommonTenant, true);
+        private static readonly Authority s_commonAuthority = Authority.CreateAuthority(TestConstants.AuthorityCommonTenant, true);
         private static readonly string s_ppeCommonUri = $@"https://{TestConstants.PpeEnvironment}/{TestConstants.TenantId}";
-        private static readonly Authority s_ppeAuthority =
-          Authority.CreateAuthority(s_ppeCommonUri, true);
+        private static readonly Authority s_ppeAuthority = Authority.CreateAuthority(s_ppeCommonUri, true);
         private static readonly string s_ppeOrgCommonUri = $@"https://{TestConstants.PpeOrgEnvironment}/{TestConstants.TenantId}";
-        private static readonly Authority s_ppeOrgAuthority =
-          Authority.CreateAuthority(s_ppeOrgCommonUri, true);
-        private static readonly Authority s_utidAuthority =
-            Authority.CreateAuthority(TestConstants.AuthorityUtidTenant, true);
-        private static readonly Authority s_utid2Authority =
-            Authority.CreateAuthority(TestConstants.AuthorityUtid2Tenant, true);
-        private static readonly Authority s_b2cAuthority =
-            Authority.CreateAuthority(TestConstants.B2CAuthority, true);
-        private static readonly Authority s_commonNetAuthority =
-            Authority.CreateAuthority(TestConstants.PrefCacheAuthorityCommonTenant, true);
+        private static readonly Authority s_ppeOrgAuthority = Authority.CreateAuthority(s_ppeOrgCommonUri, true);
+        private static readonly Authority s_utidAuthority = Authority.CreateAuthority(TestConstants.AuthorityUtidTenant, true);
+        private static readonly Authority s_utid2Authority = Authority.CreateAuthority(TestConstants.AuthorityUtid2Tenant, true);
+        private static readonly Authority s_b2cAuthority = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
+        private static readonly Authority s_commonNetAuthority = Authority.CreateAuthority(TestConstants.PrefCacheAuthorityCommonTenant, true);
 
         private MockHttpAndServiceBundle _harness;
         private RequestContext _testRequestContext;
@@ -82,15 +75,34 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
             Assert.AreEqual(ex1.ErrorCode, MsalError.TenantOverrideNonAad);
             Assert.AreEqual(ex2.ErrorCode, MsalError.TenantOverrideNonAad);
-
         }
 
         [DataTestMethod]
-        [DataRow(TestConstants.AuthorityCommonTenant)]
-        [DataRow(TestConstants.AuthorityCommonPpeAuthority)]
-        [DataRow(TestConstants.AuthorityCommonTenantNotPrefAlias)]
-        [DataRow(TestConstants.AuthorityConsumerTidTenant)]
-        public void WithTenantIdFromAuthority_NoException_Success(string authorityValue)
+        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
+        public void WithTenantId_Success(Uri authorityValue, string tenantId)
+        {
+            // Ignore authorityValue, it's just that we don't need to create another TestData method
+
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithClientSecret("secret")
+                .Build();
+
+            var parameterBuilder = app
+                .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                .WithTenantId(tenantId);
+
+            // Verify Host still matches the original Authority
+            Assert.AreEqual(new Uri(TestConstants.AuthorityCommonTenant).Host, parameterBuilder.CommonParameters.AuthorityOverride.Host);
+
+            // Verify the Tenant Id matches
+            Assert.AreEqual(tenantId, ClientApplicationBase.GetTenantId(new Uri(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority)));
+        }
+
+        [DataTestMethod]
+        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
+        public void WithTenantIdFromAuthority_Success(Uri authorityValue, string expectedTenantId)
         {
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
@@ -102,7 +114,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                 .WithTenantIdFromAuthority(authorityValue);
 
-            Assert.IsNotNull(parameterBuilder);
+            // Verify Host still matches the original Authority
+            Assert.AreEqual(new Uri(TestConstants.AuthorityCommonTenant).Host, parameterBuilder.CommonParameters.AuthorityOverride.Host);
+
+            // Verify the Tenant Id matches
+            Assert.AreEqual(expectedTenantId, ClientApplicationBase.GetTenantId(new Uri(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority)));
         }
 
         [DataTestMethod]
