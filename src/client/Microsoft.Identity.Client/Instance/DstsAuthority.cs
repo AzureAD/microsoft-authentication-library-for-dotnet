@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Instance
             if (!string.IsNullOrEmpty(tenantId) &&
                 (forceSpecifiedTenant || AadAuthority.IsCommonOrganizationsOrConsumersTenant(TenantId)))
             {
-                var authorityUri = new Uri(AuthorityInfo.CanonicalAuthority);
+                var authorityUri = AuthorityInfo.CanonicalAuthority;
 
                 return string.Format(
                     CultureInfo.InvariantCulture,
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Instance
                     tenantId);
             }
 
-            return AuthorityInfo.CanonicalAuthority;
+            return AuthorityInfo.CanonicalAuthority.ToString();
         }
 
         internal override string GetTokenEndpoint()

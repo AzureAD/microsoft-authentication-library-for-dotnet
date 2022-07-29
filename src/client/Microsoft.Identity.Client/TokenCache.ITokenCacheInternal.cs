@@ -167,7 +167,9 @@ namespace Microsoft.Identity.Client
                             cancellationToken: requestParams.RequestContext.UserCancellationToken,
                             correlationId: requestParams.RequestContext.CorrelationId, 
                             requestScopes: requestParams.Scope,
-                            requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId);
+                            requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
+                            identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
+                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
                         Stopwatch sw = Stopwatch.StartNew();
 
@@ -237,8 +239,9 @@ namespace Microsoft.Identity.Client
                             cancellationToken: requestParams.RequestContext.UserCancellationToken,
                             correlationId: requestParams.RequestContext.CorrelationId, 
                             requestScopes: requestParams.Scope,
-                            requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId);
-
+                            requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
+                            identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
+                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -341,7 +344,7 @@ namespace Microsoft.Identity.Client
                     LegacyCachePersistence,
                     msalRefreshTokenCacheItem,
                     msalIdTokenCacheItem,
-                    authorityWithPreferredCache.AuthorityInfo.CanonicalAuthority,
+                    authorityWithPreferredCache.AuthorityInfo.CanonicalAuthority.ToString(),
                     msalIdTokenCacheItem.IdToken.ObjectId,
                     response.Scope);
             }
@@ -728,7 +731,9 @@ namespace Microsoft.Identity.Client
                             cancellationToken: default,
                             correlationId: default,
                             requestScopes: null,
-                            requestTenantId: null);
+                            requestTenantId: null,
+                            identityLogger: null,
+                            piiLoggingEnabled: false);
 
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
@@ -1147,7 +1152,9 @@ namespace Microsoft.Identity.Client
                             cancellationToken: requestParameters.RequestContext.UserCancellationToken,
                             correlationId: requestParameters.RequestContext.CorrelationId,
                             requestScopes: requestParameters.Scope,
-                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId);
+                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
+                            identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
+                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
                             
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -1181,7 +1188,9 @@ namespace Microsoft.Identity.Client
                            cancellationToken: requestParameters.RequestContext.UserCancellationToken,
                            correlationId: requestParameters.RequestContext.CorrelationId,
                            requestScopes: requestParameters.Scope,
-                           requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId);
+                           requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
+                           identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
+                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
 
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
