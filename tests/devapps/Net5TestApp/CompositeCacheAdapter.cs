@@ -4,7 +4,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CompositeCache;
 using Microsoft.Identity.ServiceEssentials;
 
 namespace Net5TestApp
@@ -24,11 +23,17 @@ namespace Net5TestApp
                 null;
         }
 
-        public async Task SetAsync<T>(string category, string key, T value, CacheEntryOptions cacheEntryOptions, CancellationToken cancellationToken = default) where T : ICacheObject
+        public async Task<CacheEntry<T>> SetAsync<T>(string category, string key, T value, CacheEntryOptions cacheEntryOptions, CancellationToken cancellationToken = default) where T : ICacheObject
         {
-            var cacheEntry = new CompositeCache.CacheEntry<object>(key, value, cacheEntryOptions.ExpirationTimeUTC, cacheEntryOptions.ExpirationTimeUTC, false);
+            var cacheEntry = new CompositeCache.CacheEntry<object>(
+                key,
+                value,
+                DateTimeOffset.UtcNow.Add(cacheEntryOptions.ExpirationTimeRelativeToNow),
+                DateTimeOffset.UtcNow.Add(cacheEntryOptions.ExpirationTimeRelativeToNow),
+                false);
             await _cache.SetAsync(cacheEntry).ConfigureAwait(false);
 
+            return new CacheEntry<T>(value, DateTimeOffset.UtcNow.Add(cacheEntryOptions.ExpirationTimeRelativeToNow), DateTimeOffset.UtcNow.Add(cacheEntryOptions.RefreshTimeRelativeToNow));
         }
 
         #region Not Implemented

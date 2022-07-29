@@ -296,12 +296,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                     AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
         }
 
-        public string Serialize()
+        public byte[] Serialize()
         {
             throw new NotImplementedException();
         }
 
-        public void Deserialize(string serializedValue)
+        public void Deserialize(byte[] serializedValue)
         {
             throw new NotImplementedException();
         }

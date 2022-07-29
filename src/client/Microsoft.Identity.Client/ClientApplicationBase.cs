@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
             ICacheSerializationProvider defaultCacheSerialization = ServiceBundle.PlatformProxy.CreateTokenCacheBlobStorage();
 
             // For this prototype, legacy cache serialization is disregarded, use user-provided or default IIdentityCacheImplementation.
-            IdentityCacheWrapper = new IdentityCacheWrapper(config.AccessorOptions ?? new CacheOptions());
+            IdentityCacheWrapper = new IdentityCacheWrapper(config.AccessorOptions ?? new CacheOptions(), ServiceBundle.Config.IdentityLogger);
 
             if (config.UserTokenLegacyCachePersistenceForTest != null)
             {

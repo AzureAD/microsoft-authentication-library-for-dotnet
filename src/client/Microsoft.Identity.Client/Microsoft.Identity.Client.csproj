@@ -294,10 +294,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.18.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.21.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Abstractions\Microsoft.Identity.ServiceEssentials.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\..\MISE\src\Abstractions\Microsoft.Identity.ServiceEssentials.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\..\MISE\src\IdentityCache\Microsoft.Identity.ServiceEssentials.IdentityCache.csproj" />
   </ItemGroup>
 </Project>
