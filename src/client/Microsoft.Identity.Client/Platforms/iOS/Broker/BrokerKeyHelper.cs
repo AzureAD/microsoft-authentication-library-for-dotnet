@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             byte[] brokerKey;
             byte[] rawBytes;
-            using (AesManaged algo = CreateSymmetricAlgorithm(null))
+            using (Aes algo = CreateSymmetricAlgorithm(null))
             {
                 algo.GenerateKey();
                 rawBytes = algo.Key;
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (TryGetBrokerKey(out byte[] key))
             {
-                AesManaged algo = null;
+                Aes algo = null;
                 CryptoStream cryptoStream = null;
                 MemoryStream memoryStream = null;
                 try
@@ -141,24 +141,21 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 MsalErrorMessage.iOSBrokerKeyFetchFailed);
         }
 
-       private static AesManaged CreateSymmetricAlgorithm(byte[] key)
+       private static Aes CreateSymmetricAlgorithm(byte[] key)
         {
-            AesManaged algorithm = new AesManaged
-            {
-                //set the mode, padding and block size
-                Padding = PaddingMode.PKCS7,
-                Mode = CipherMode.CBC,
-                KeySize = 256,
-                BlockSize = 128
-            };
+            var aes = Aes.Create();
+            aes.Padding = PaddingMode.PKCS7;
+            aes.Mode = CipherMode.CBC;
+            aes.KeySize = 256;
+            aes.BlockSize = 128;
 
             if (key != null)
             {
-                algorithm.Key = key;
+                aes.Key = key;
             }
 
-            algorithm.IV = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            return algorithm;
+            aes.IV = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            return aes;
         }
     }
 }

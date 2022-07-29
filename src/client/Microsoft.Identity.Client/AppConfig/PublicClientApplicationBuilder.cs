@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET5_WIN || NET_CORE
+#if DESKTOP || NET5_WIN || NET_CORE || NETSTANDARD         
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
@@ -375,12 +375,13 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
+#if IS_XAMARIN_OR_UWP
             if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
             {
                 // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139
                 throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
             }
-
+#endif            
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)

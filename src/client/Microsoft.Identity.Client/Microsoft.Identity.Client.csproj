@@ -1,4 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
+
+  <!--Add MAUI_SUPPORT variable to environment when you compile MAUI. esp for.\tests\devapps\MauiApps\MauiApps.sln-->
   
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
@@ -16,21 +18,32 @@
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>-->
   </PropertyGroup>
-  
-  <ItemGroup>
-    <Reference Include="netstandard" />
-  </ItemGroup>
 
+    <!-- MAUI -->
+  <PropertyGroup Condition="'$(MAUI_SUPPORT)' != ''">
+    <TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
+    <TargetFrameworkNet6Ios>net6.0-ios</TargetFrameworkNet6Ios>
+    <TargetFrameworkNet6Mac>net6.0-maccatalyst</TargetFrameworkNet6Mac>
+  </PropertyGroup>
+    
+  <!-- net6.0 (MAUI) -->
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net6.0-'))">
+    <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)'">14.2</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">14.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">21.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+  
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNet5Win)</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNet5Win);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
-    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.7.1</MsalClientSemVer>
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.45.0</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(MsalClientSemVer)</Version>
     <XamarinAndroidSupportSkipVerifyVersions>true</XamarinAndroidSupportSkipVerifyVersions>
@@ -140,28 +153,14 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
-    <Compile Remove="GlobalSuppressions3.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
+    <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
+    <Compile Include="$(PathToMsalSources)\Platforms\netstandard\**\*.cs" LinkBase="Platforms\netstandard" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
-
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
-    <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" />
-    <PackageReference Include="System.Security.Claims" Version="4.3.0" />
-    <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
-    <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
-    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
-    <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
-    <!-- 4.3.0 has CVE-2019-0657 -->
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
@@ -186,7 +185,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' ">
-    <Compile Remove="$(PathToMsalSources)\PlatformsCommon\Shared\CryptographyManager.cs" />
+    <Compile Remove="$(PathToMsalSources)\PlatformsCommon\Shared\CommonCryptographyManager.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
@@ -227,7 +226,7 @@
     <PackageReference Include="System.ServiceModel.Security" Version="4.5.3" />
 
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkIos)' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkIos)'">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\Apple\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
@@ -259,8 +258,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Xamarin.Mac" />
+    <Reference Include="netstandard" />
   </ItemGroup>
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid'))">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Reference Include="System" />
@@ -276,12 +276,12 @@
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid9)' ">
     <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="28.0.0.3" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid10)' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid10)'">
     <PackageReference Include="Xamarin.AndroidX.Browser" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.0.0" PrivateAssets="All" />
   </ItemGroup>
 
@@ -291,6 +291,19 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Splash.resx</DependentUpon>
     </None>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Android)' And '$(MAUI_SUPPORT)' != ''">
+    <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+    <PackageReference Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup Condition=" ('$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)') And '$(MAUI_SUPPORT)' != ''">
+    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\Apple\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

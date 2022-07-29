@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
+using System;
 using System.Globalization;
 
 namespace Microsoft.Identity.Client.Instance
@@ -19,7 +21,7 @@ namespace Microsoft.Identity.Client.Instance
 
         internal override string GetTenantedAuthority(string tenantId, bool forceTenantless = false)
         {
-            return AuthorityInfo.CanonicalAuthority;
+            return AuthorityInfo.CanonicalAuthority.ToString();
         }
 
         internal override string GetTokenEndpoint()

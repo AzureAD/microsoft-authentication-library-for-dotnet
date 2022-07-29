@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Threading;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
@@ -20,13 +21,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
         public EmbeddedWebViewOptions EmbeddedWebViewOptions { get; }
 
-        protected override AuthorizationResult OnAuthenticate()
+        protected override AuthorizationResult OnAuthenticate(CancellationToken cancellationToken)
         {
             AuthorizationResult result;
 
             using (_dialog = new WindowsFormsWebAuthenticationDialog(OwnerWindow, EmbeddedWebViewOptions) { RequestContext = RequestContext })
             {
-                result = _dialog.AuthenticateAAD(RequestUri, CallbackUri);
+                result = _dialog.AuthenticateAAD(RequestUri, CallbackUri, cancellationToken);
             }
 
             return result;

@@ -2,13 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -17,18 +15,18 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
-using Microsoft.Identity.Client.PlatformsCommon;
+#if NET_CORE
+using Microsoft.Identity.Client.Broker;
+#endif
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Integration.net45;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -57,14 +55,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
             if (_popValidationEndpointSecret == null)
             {
-                _popValidationEndpointSecret = LabUserHelper.KeyVaultSecretsProvider.GetSecret(
-                    "https://buildautomation.vault.azure.net/secrets/automation-pop-validation-endpoint/841fc7c2ccdd48d7a9ef727e4ae84325").Value;
+                _popValidationEndpointSecret = LabUserHelper.KeyVaultSecretsProviderMsal.GetSecretByName("automation-pop-validation-endpoint", "841fc7c2ccdd48d7a9ef727e4ae84325").Value;
             }
 
             if (_keyVault == null)
             {
-                _keyVault = new KeyVaultSecretsProvider();
-                s_publicCloudCcaSecret = _keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
+                _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
+                s_publicCloudCcaSecret = _keyVault.GetSecretByName(TestConstants.MsalCCAKeyVaultSecretName).Value;
             }
         }
 
@@ -368,6 +365,38 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 HttpMethod.Post,
                 result).ConfigureAwait(false);
         }
+
+#if NET_CORE
+        [TestMethod]
+        public async Task WamUsernamePasswordRequestWithPOPAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithExperimentalFeatures()
+               .WithBrokerPreview().Build();
+
+            var result = await pca
+                .AcquireTokenByUsernamePassword(
+                    scopes,
+                    labResponse.User.Upn,
+                    labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession("nonce", HttpMethod.Get, new Uri(ProtectedUrl))
+                .ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
+
+            await VerifyPoPTokenAsync(
+                labResponse.App.AppId,
+                ProtectedUrl,
+                HttpMethod.Get,
+                result).ConfigureAwait(false);
+        }
+#endif
 
         private static X509Certificate2 GetCertificate()
         {

@@ -21,39 +21,41 @@ namespace Microsoft.Identity.Client
             AuthorityType authorityType,
             string authority,
             bool validateAuthority)
+            : this(authorityType, new Uri(authority), validateAuthority)
+        {
+
+        }
+
+        public AuthorityInfo(
+            AuthorityType authorityType,
+            Uri authorityUri,
+            bool validateAuthority)
         {
             AuthorityType = authorityType;
             ValidateAuthority = validateAuthority;
 
-            var authorityBuilder = new UriBuilder(authority);
-            Host = authorityBuilder.Host;
-
             // TODO: can we simplify this and/or move validation/configuration logic to AbstractApplicationBuilder
             // so that all authority mangling/management is in one place?
-
-            UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", Host), authorityBuilder.Port);
 
             switch (AuthorityType)
             {
                 case AuthorityType.B2C:
-                    var authorityUri = new Uri(authority);
-                    string[] pathSegments = GetPathSegments(authorityUri.AbsolutePath);
+                    string[] pathSegments = AuthorityInfo.GetPathSegments(authorityUri.AbsolutePath);
 
                     if (pathSegments.Length < 3)
                     {
                         throw new ArgumentException(MsalErrorMessage.B2cAuthorityUriInvalidPath);
                     }
 
-                    CanonicalAuthority = string.Format(
+                    CanonicalAuthority = new Uri(string.Format(
                         CultureInfo.InvariantCulture,
                         "https://{0}/{1}/{2}/{3}/",
                         authorityUri.Authority,
                         pathSegments[0],
                         pathSegments[1],
-                        pathSegments[2]);
+                        pathSegments[2]));
                     break;
                 case AuthorityType.Dsts:
-                    authorityUri = new Uri(authority);
                     pathSegments = GetPathSegments(authorityUri.AbsolutePath);
 
                     if (pathSegments.Length < 2)
@@ -61,52 +63,44 @@ namespace Microsoft.Identity.Client
                         throw new ArgumentException(MsalErrorMessage.DstsAuthorityUriInvalidPath);
                     }
 
-                    CanonicalAuthority = string.Format(
+                    CanonicalAuthority = new Uri(string.Format(
                         CultureInfo.InvariantCulture,
                         "https://{0}/{1}/{2}/",
                         authorityUri.Authority,
                         pathSegments[0],
-                        pathSegments[1]);
+                        pathSegments[1]));
+
+                    UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "https://{0}/{1}/common/userrealm/",
+                            authorityUri.Authority,
+                            pathSegments[0]),
+                        authorityUri.Port);
                     break;
                 default:
-                    CanonicalAuthority = UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(
-                    CultureInfo.InvariantCulture,
-                    "https://{0}/{1}/",
-                    authorityBuilder.Uri.Authority,
-                    GetFirstPathSegment(authority)), authorityBuilder.Port);
+                    CanonicalAuthority = new Uri(
+                        UriBuilderExtensions.GetHttpsUriWithOptionalPort(
+                            string.Format(
+                                CultureInfo.InvariantCulture,
+                                "https://{0}/{1}/",
+                                authorityUri.Authority,
+                                GetFirstPathSegment(authorityUri)),
+                            authorityUri.Port));
+
+                    UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "https://{0}/common/userrealm/",
+                            Host),
+                        authorityUri.Port);
+
                     break;
             }
         }
 
-        private string[] GetPathSegments(string absolutePath)
-        {
-            string[] pathSegments = absolutePath.Substring(1).Split(
-                        new[]
-                        {
-                        '/'
-                        },
-                        StringSplitOptions.RemoveEmptyEntries);
-
-            return pathSegments;
-        }
-
-        private AuthorityInfo(
-            string host,
-            string canonicalAuthority,
-            AuthorityType authorityType,
-            string userRealmUriPrefix,
-            bool validateAuthority)
-        {
-            Host = host;
-            CanonicalAuthority = canonicalAuthority;
-            AuthorityType = authorityType;
-            UserRealmUriPrefix = userRealmUriPrefix;
-            ValidateAuthority = validateAuthority;
-        }
-
         public AuthorityInfo(AuthorityInfo other) :
             this(
-                other.Host,
                 other.CanonicalAuthority,
                 other.AuthorityType,
                 other.UserRealmUriPrefix,
@@ -114,8 +108,20 @@ namespace Microsoft.Identity.Client
         {
         }
 
-        public string Host { get; }
-        public string CanonicalAuthority { get; }
+        private AuthorityInfo(
+            Uri canonicalAuthority,
+            AuthorityType authorityType,
+            string userRealmUriPrefix,
+            bool validateAuthority)
+        {
+            CanonicalAuthority = canonicalAuthority;
+            AuthorityType = authorityType;
+            UserRealmUriPrefix = userRealmUriPrefix;
+            ValidateAuthority = validateAuthority;
+        }
+
+        public string Host => CanonicalAuthority.Host;
+        public Uri CanonicalAuthority { get; }
 
         // Please avoid the direct use of this property.
         // Ideally, this property should be removed. But due to
@@ -147,7 +153,7 @@ namespace Microsoft.Identity.Client
 
             return new AuthorityInfo(authorityType, canonicalUri, validateAuthority);
         }
-
+        
         internal static AuthorityInfo FromAadAuthority(Uri cloudInstanceUri, Guid tenantId, bool validateAuthority)
         {
 #pragma warning disable CA1305 // Specify IFormatProvider
@@ -268,7 +274,7 @@ namespace Microsoft.Identity.Client
                 uri = uri + "/";
             }
 
-            return uri.ToLowerInvariant();
+            return uri?.ToLowerInvariant() ?? string.Empty;
         }
 
         internal bool IsDefaultAuthority
@@ -276,7 +282,7 @@ namespace Microsoft.Identity.Client
             get
             {
                 return string.Equals(
-                    CanonicalAuthority,
+                    CanonicalAuthority.ToString(),
                     ClientApplicationBase.DefaultAuthority,
                     StringComparison.OrdinalIgnoreCase);
             }
@@ -352,10 +358,15 @@ namespace Microsoft.Identity.Client
         internal static string GetFirstPathSegment(string authority)
         {
             var uri = new Uri(authority);
-            if (uri.Segments.Length >= 2)
+            return GetFirstPathSegment(uri);
+        }
+
+        internal static string GetFirstPathSegment(Uri authority)
+        {
+            if (authority.Segments.Length >= 2)
             {
-                return new Uri(authority).Segments[1]
-                                         .TrimEnd('/');
+                return authority.Segments[1]
+                    .TrimEnd('/');
             }
 
             throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments);
@@ -364,10 +375,15 @@ namespace Microsoft.Identity.Client
         internal static string GetSecondPathSegment(string authority)
         {
             var uri = new Uri(authority);
-            if (uri.Segments.Length >= 3)
+            return GetSecondPathSegment(uri);
+        }
+
+        internal static string GetSecondPathSegment(Uri authority)
+        {
+            if (authority.Segments.Length >= 3)
             {
-                return new Uri(authority).Segments[2]
-                                         .TrimEnd('/');
+                return authority.Segments[2]
+                    .TrimEnd('/');
             }
 
             throw new InvalidOperationException(MsalErrorMessage.DstsAuthorityDoesNotHaveThreeSegments);
@@ -393,6 +409,18 @@ namespace Microsoft.Identity.Client
             }
 
             return AuthorityType.Aad;
+        }
+        
+        private static string[] GetPathSegments(string absolutePath)
+        {
+            string[] pathSegments = absolutePath.Substring(1).Split(
+                new[]
+                {
+                    '/'
+                },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            return pathSegments;
         }
 
         /// <summary>
@@ -442,7 +470,7 @@ namespace Microsoft.Identity.Client
 
                 if (configAuthorityInfo == null)
                 {
-                    throw new ArgumentNullException(nameof(configAuthorityInfo));
+                    throw new ArgumentNullException(nameof(requestContext.ServiceBundle.Config.Authority.AuthorityInfo));
                 }
 
                 ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);

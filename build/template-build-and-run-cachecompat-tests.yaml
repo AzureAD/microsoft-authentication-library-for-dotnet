@@ -7,21 +7,30 @@ steps:
 
 # Bootstrap the build
 - template: template-bootstrap-build.yaml
-
-# Unit tests require .NET 3.x
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 3.x'
-  inputs:
-    version: 3.x
-    
+   
 # Use the latest .NET SDK
 - task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 5.x'
+  displayName: 'Use .Net Core sdk 6.x'
   inputs:
-    version: 5.x
+    version: 6.x
+    includePreviewVersions: true
 
 # Install keyvault secrets
 - template: template-install-keyvault-secrets.yaml
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore for Identity.Client'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
 
 #Build and restore test packages
 - task: CmdLine@2

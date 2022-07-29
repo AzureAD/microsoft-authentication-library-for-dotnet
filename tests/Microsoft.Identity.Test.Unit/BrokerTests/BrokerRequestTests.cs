@@ -230,6 +230,33 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public async Task NullBrokerUsernamePasswordRequestTest_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                var builder = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(harness.HttpManager);
+
+                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new NullBroker(logger); };
+
+                var app = builder.WithBroker(true).BuildConcrete();
+
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                harness.HttpManager.AddWsTrustMockHandler();
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                // Act
+                var result = await app.AcquireTokenByUsernamePassword(new[] { "User.Read" }, "username", "password")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+            }
+        }
+
+        [TestMethod]
         public void BrokerGetAccountsAsyncOnUnsupportedPlatformTest()
         {
             using (var harness = CreateTestHarness())
@@ -610,18 +637,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             // Assert that MSAL acquires an account from the broker cache
             Assert.AreSame(expectedAccount, actualAccount.Single());
-        }
-
-        [TestMethod]
-        public void PCAWithBrokerAndWithMultiCloudSupportThrowsTest()
-        {
-            var ex = Assert.ThrowsException<NotSupportedException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
-                .WithBroker(true)
-                .WithMultiCloudSupport(true)
-                .Build());
-            Assert.AreEqual(MsalErrorMessage.MultiCloudSupportUnavailable, ex.Message);
-        }
+        }       
 #endif
 
         [TestMethod]

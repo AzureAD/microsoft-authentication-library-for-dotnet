@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Broker
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
 
         //MSAL Runtime Error Response 
-        private enum ResponseStatus : int
+        private enum ResponseStatus
         {
             Unexpected = 0,
             Reserved = 1,
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             MsalServiceException serviceException = null;
             string internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
-            int errorCode = authResult.Error.ErrorCode;
+            long errorCode = authResult.Error.ErrorCode;
             string errorMessage;
 
             switch ((ResponseStatus)authResult.Error.Status)
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             var authParams = new NativeInterop.AuthParameters
                 (authenticationRequestParameters.AppConfig.ClientId,
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
+                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
 
             //scopes
             authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
@@ -150,6 +150,11 @@ namespace Microsoft.Identity.Client.Broker
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ClaimsAndClientCapabilities))
             {
                 authParams.DecodedClaims = authenticationRequestParameters.ClaimsAndClientCapabilities;
+            }
+
+            if (authenticationRequestParameters.AppConfig.MultiCloudSupportEnabled)
+            {
+                authParams.Properties["discover"] = "home";
             }
 
             //pass extra query parameters if there are any
@@ -182,6 +187,27 @@ namespace Microsoft.Identity.Client.Broker
             }
         }
 
+        public static MsalTokenResponse HandleResponse(
+                NativeInterop.AuthResult authResult,
+                AuthenticationRequestParameters authenticationRequestParameters,
+                ILoggerAdapter logger, string errorMessage = null)
+        {
+            MsalTokenResponse msalTokenResponse = null;
+
+            if (authResult.IsSuccess)
+            {
+                msalTokenResponse = WamAdapters.ParseRuntimeResponse(authResult, authenticationRequestParameters, logger);
+                logger.Verbose("[WamBroker] Successfully retrieved token.");
+            }
+            else
+            {
+                logger.Error($"[WamBroker] {errorMessage} {authResult.Error}");
+                WamAdapters.ThrowExceptionFromWamError(authResult, authenticationRequestParameters, logger);
+            }
+
+            return msalTokenResponse;
+        }
+
         /// <summary>
         /// Parse Native Interop AuthResult Response to MSAL Token Response
         /// </summary>
@@ -200,7 +226,7 @@ namespace Microsoft.Identity.Client.Broker
 
                 if (string.IsNullOrWhiteSpace(correlationId))
                 {
-                    logger.Warning("No correlation ID in response");
+                    logger.Warning("[WamBroker] No correlation ID in response");
                     correlationId = null;
                 }
                 
@@ -220,7 +246,7 @@ namespace Microsoft.Identity.Client.Broker
                     TokenSource = TokenSource.Broker
                 };
 
-                logger.Info("WAM response status success");
+                logger.Info("[WamBroker] WAM response status success");
 
                 return msalTokenResponse;
             }
