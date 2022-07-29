@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts an Entity Framework <see cref="T:System.Data.EntityKeyMember"/> to and from JSON.
     /// </summary>
-    public class EntityKeyMemberConverter : JsonConverter
+    internal class EntityKeyMemberConverter : JsonConverter
     {
         private const string EntityKeyMemberFullTypeName = "System.Data.EntityKeyMember";
 

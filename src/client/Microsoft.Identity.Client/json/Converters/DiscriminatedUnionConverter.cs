@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts a F# discriminated union type to and from JSON.
     /// </summary>
-    public class DiscriminatedUnionConverter : JsonConverter
+    internal class DiscriminatedUnionConverter : JsonConverter
     {
         #region UnionDefinition
         internal class Union
