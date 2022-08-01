@@ -14,7 +14,7 @@ public class AppDelegate : MauiUIApplicationDelegate
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
         // configure platform specific params
-        PlatformConfigImpl.Instance.RedirectUri = $"msal{B2CConstants.ClientID}://auth";
+        PlatformConfig.Instance.RedirectUri = $"msal{B2CConstants.ClientID}://auth";
         
         return base.FinishedLaunching(application, launchOptions);
     }

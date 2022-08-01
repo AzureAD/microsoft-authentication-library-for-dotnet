@@ -20,13 +20,13 @@ namespace MauiAppBasic
         {
             base.OnCreate(savedInstanceState);
             // configure platform specific params
-            PlatformConfigImpl.Instance.RedirectUri = AndroidRedirectURI;
-            PlatformConfigImpl.Instance.ParentWindow = this;
+            PlatformConfig.Instance.RedirectUri = AndroidRedirectURI;
+            PlatformConfig.Instance.ParentWindow = this;
         }
 
         /// <summary>
         /// This is a callback to continue with the authentication
-        /// Info abour redirect URI: https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-client-application-configuration#redirect-uri
+        /// Info about redirect URI: https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-client-application-configuration#redirect-uri
         /// </summary>
         /// <param name="requestCode">request code </param>
         /// <param name="resultCode">result code</param>

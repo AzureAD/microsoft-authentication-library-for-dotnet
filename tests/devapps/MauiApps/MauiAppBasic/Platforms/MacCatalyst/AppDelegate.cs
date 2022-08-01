@@ -18,7 +18,7 @@ namespace MauiAppBasic
         public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
         {
             // configure platform specific params
-            PlatformConfigImpl.Instance.RedirectUri = iOSRedirectURI;
+            PlatformConfig.Instance.RedirectUri = iOSRedirectURI;
 
             return base.FinishedLaunching(application, launchOptions);
         }

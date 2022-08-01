@@ -12,12 +12,12 @@ namespace MauiB2C.MSALClient
     /// <summary>
     /// Platform specific configuration.
     /// </summary>
-    public class PlatformConfigImpl
+    public class PlatformConfig
     {
         /// <summary>
         /// Instance to store data
         /// </summary>
-        public static PlatformConfigImpl Instance { get; } = new PlatformConfigImpl();
+        public static PlatformConfig Instance { get; } = new PlatformConfig();
 
         /// <summary>
         /// Platform specific Redirect URI
@@ -30,7 +30,7 @@ namespace MauiB2C.MSALClient
         public object ParentWindow { get; set; }
 
         // private constructor to ensure singleton
-        private PlatformConfigImpl()
+        private PlatformConfig()
         {
         }
     }

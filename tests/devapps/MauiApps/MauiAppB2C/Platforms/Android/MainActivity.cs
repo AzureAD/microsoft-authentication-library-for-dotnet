@@ -16,8 +16,8 @@ public class MainActivity : MauiAppCompatActivity
     {
         base.OnCreate(savedInstanceState);
         // configure platform specific params
-        PlatformConfigImpl.Instance.RedirectUri = $"msal{B2CConstants.ClientID}://auth";
-        PlatformConfigImpl.Instance.ParentWindow = this;
+        PlatformConfig.Instance.RedirectUri = $"msal{B2CConstants.ClientID}://auth";
+        PlatformConfig.Instance.ParentWindow = this;
     }
 
     protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)

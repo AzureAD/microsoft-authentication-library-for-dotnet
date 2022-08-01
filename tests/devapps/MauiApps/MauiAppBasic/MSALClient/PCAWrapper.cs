@@ -39,7 +39,7 @@ namespace MauiAppBasic.MSALClient
             // Create PCA once. Make sure that all the config parameters below are passed
             PCA = PublicClientApplicationBuilder
                                         .Create(ClientId)
-                                        .WithRedirectUri(PlatformConfigImpl.Instance.RedirectUri)
+                                        .WithRedirectUri(PlatformConfig.Instance.RedirectUri)
                                         .WithIosKeychainSecurityGroup("com.microsoft.adalcache")
                                         .Build();
         }
@@ -48,7 +48,7 @@ namespace MauiAppBasic.MSALClient
         /// Acquire the token silently
         /// </summary>
         /// <param name="scopes">desired scopes</param>
-        /// <returns>Authenticaiton result</returns>
+        /// <returns>Authentication result</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scopes)
         {
             var accts = await PCA.GetAccountsAsync().ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace MauiAppBasic.MSALClient
         }
 
         /// <summary>
-        /// Perform the intractive acquistion of the token for the given scope
+        /// Perform the interactive acquisition of the token for the given scope
         /// </summary>
         /// <param name="scopes">desired scopes</param>
         /// <returns></returns>
@@ -75,7 +75,7 @@ namespace MauiAppBasic.MSALClient
 
                 return await PCA.AcquireTokenInteractive(scopes)
                                         .WithUseEmbeddedWebView(true)
-                                        .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
+                                        .WithParentActivityOrWindow(PlatformConfig.Instance.ParentWindow)
                                         .ExecuteAsync()
                                         .ConfigureAwait(false);
             }
@@ -86,7 +86,7 @@ namespace MauiAppBasic.MSALClient
 
             return await PCA.AcquireTokenInteractive(scopes)
                                     .WithSystemWebViewOptions(systemWebViewOptions)
-                                    .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
+                                    .WithParentActivityOrWindow(PlatformConfig.Instance.ParentWindow)
                                     .ExecuteAsync()
                                     .ConfigureAwait(false);
         }
