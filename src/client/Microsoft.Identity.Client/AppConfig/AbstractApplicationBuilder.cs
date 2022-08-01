@@ -517,6 +517,23 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+        /// <summary>
+        /// Sets telemetry client for the application.
+        /// </summary>
+        /// <param name="telemetryClients">List of telemetry clients to add telemetry logs.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithTelemetryClient(params ITelemetryClient[] telemetryClients)
+        {
+            ValidateUseOfExperimentalFeature("ITelemetryClient");
+
+            if ((telemetryClients != null) && telemetryClients.Any())
+            {
+                Config.TelemetryClients = telemetryClients;
+            }
+            
+            return (T)this;
+        }
+
         internal virtual void Validate()
         {
             if (string.IsNullOrWhiteSpace(Config.ClientId))
