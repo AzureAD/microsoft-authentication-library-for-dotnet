@@ -17,7 +17,7 @@ namespace MauiAppBasic.MSALClient
         /// <summary>
         /// This is the singleton used by consumers
         /// </summary>
-        static public PCAWrapper Instance { get; } = new PCAWrapper();
+        public static PCAWrapper Instance { get; private set; } = new PCAWrapper();
 
         internal IPublicClientApplication PCA { get; }
 
@@ -45,38 +45,6 @@ namespace MauiAppBasic.MSALClient
         }
 
         /// <summary>
-        /// Perform the intractive acquistion of the token for the given scope
-        /// </summary>
-        /// <param name="scopes">desired scopes</param>
-        /// <returns></returns>
-        internal async Task<AuthenticationResult> AcquireTokenInteractiveAsync(string[] scopes)
-        {
-#if IOS
-            // embedded view is not supported on Android
-            if (UseEmbedded)
-            {
-
-                return await PCA.AcquireTokenInteractive(scopes)
-                                        .WithUseEmbeddedWebView(true)
-                                        .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
-                                        .ExecuteAsync()
-                                        .ConfigureAwait(false);
-            }
-#endif
-            // Hide the privacy prompt
-            SystemWebViewOptions systemWebViewOptions = new SystemWebViewOptions()
-            {
-                iOSHidePrivacyPrompt = true,
-            };
-
-            return await PCA.AcquireTokenInteractive(scopes)
-                                    .WithSystemWebViewOptions(systemWebViewOptions)
-                                    .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
-                                    .ExecuteAsync()
-                                    .ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// Acquire the token silently
         /// </summary>
         /// <param name="scopes">desired scopes</param>
@@ -93,11 +61,42 @@ namespace MauiAppBasic.MSALClient
         }
 
         /// <summary>
+        /// Perform the intractive acquistion of the token for the given scope
+        /// </summary>
+        /// <param name="scopes">desired scopes</param>
+        /// <returns></returns>
+        internal async Task<AuthenticationResult> AcquireTokenInteractiveAsync(string[] scopes)
+        {
+            SystemWebViewOptions systemWebViewOptions = new SystemWebViewOptions();
+#if IOS
+            // embedded view is not supported on Android
+            if (UseEmbedded)
+            {
+
+                return await PCA.AcquireTokenInteractive(scopes)
+                                        .WithUseEmbeddedWebView(true)
+                                        .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
+                                        .ExecuteAsync()
+                                        .ConfigureAwait(false);
+            }
+
+            // Hide the privacy prompt in iOS
+            systemWebViewOptions.iOSHidePrivacyPrompt = true;
+#endif
+
+            return await PCA.AcquireTokenInteractive(scopes)
+                                    .WithSystemWebViewOptions(systemWebViewOptions)
+                                    .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
+                                    .ExecuteAsync()
+                                    .ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Signout may not perform the complete signout as company portal may hold
         /// the token.
         /// </summary>
         /// <returns></returns>
-        internal async Task SignOut()
+        internal async Task SignOutAsync()
         {
             var accounts = await PCA.GetAccountsAsync().ConfigureAwait(false);
             foreach (var acct in accounts)
