@@ -127,7 +127,9 @@ namespace Microsoft.Identity.Client.Cache
                                   suggestedCacheExpiry: null,
                                   correlationId: _requestParams.RequestContext.CorrelationId, 
                                   requestScopes: _requestParams.Scope, 
-                                  requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId);
+                                  requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
+                                  identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
+                                  piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
                                 stopwatch.Start();
                                 await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -151,7 +153,9 @@ namespace Microsoft.Identity.Client.Cache
                                   suggestedCacheExpiry: null,
                                   correlationId: _requestParams.RequestContext.CorrelationId,
                                   requestScopes: _requestParams.Scope,
-                                  requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId);
+                                  requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
+                                  identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
+                                  piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
                                 await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
