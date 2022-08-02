@@ -53,7 +53,7 @@
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)'">
+  <ItemGroup>
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   
