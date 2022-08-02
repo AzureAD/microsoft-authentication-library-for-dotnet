@@ -347,7 +347,9 @@ namespace Microsoft.Identity.Client.Broker
         {
             // runtime does not yet support account discovery
 
-            return Task.FromResult<IReadOnlyList<IAccount>>(Array.Empty<IAccount>());
+            var iAccount = new List<IAccount>();
+
+            return Task.FromResult<IReadOnlyList<IAccount>>(iAccount);
         }
 
         public void HandleInstallUrl(string appLink)
