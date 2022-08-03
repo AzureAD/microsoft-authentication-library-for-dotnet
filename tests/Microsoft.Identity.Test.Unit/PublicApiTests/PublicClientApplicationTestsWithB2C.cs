@@ -130,6 +130,25 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [Description("Test against https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3471")]
+        public void B2CIgnoreWithTenantId_Success()
+        {
+            PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(new Uri(TestConstants.B2CCustomDomain), true)
+                .WithTenantId(Guid.NewGuid().ToString("D"))
+                .BuildConcrete();
+            
+            Assert.AreEqual(TestConstants.B2CCustomDomain, app.Authority);
+
+            app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(new Uri(TestConstants.B2CAuthority), true)
+                .WithTenantId(Guid.NewGuid().ToString("D"))
+                .BuildConcrete();
+
+            Assert.AreEqual(TestConstants.B2CAuthority, app.Authority);
+        }
+
+        [TestMethod]
         public void B2CAcquireTokenAuthorityHostMisMatchErrorTest()
         {
             using (var httpManager = new MockHttpManager())
