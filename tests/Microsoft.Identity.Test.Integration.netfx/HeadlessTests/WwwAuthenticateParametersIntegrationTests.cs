@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -59,6 +60,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
             Assert.AreEqual("invalid_token", authParams.Error);
+        }
+
+        [TestMethod]
+        public async Task ExtractNonceFromHeaderAsync()
+        {
+            //Arrange & Act
+            var parameterList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
+                                                         "https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
+
+            //Assert
+            Assert.IsTrue(parameterList.FirstOrDefault().AuthScheme == Constants.PoPAuthHeaderPrefix);
+            Assert.IsNotNull(parameterList.FirstOrDefault().ServerNonce);
         }
     }
 }

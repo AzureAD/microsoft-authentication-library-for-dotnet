@@ -170,6 +170,38 @@ namespace Microsoft.Identity.Client
 
             return CreateWwwAuthenticateParameters(new Dictionary<string, string>());
         }
+
+        /// <summary>
+        /// Creates parameters from the WWW-Authenticate string.
+        /// </summary>
+        /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
+        /// <returns>The parameters requested by the web API.</returns>
+        public static WwwAuthenticateParameters CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
+        {
+            if (string.IsNullOrWhiteSpace(wwwAuthenticateValue))
+            {
+                throw new ArgumentNullException(nameof(wwwAuthenticateValue));
+            }
+            IDictionary<string, string> parameters;
+
+            var AuthValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
+
+            if (s_knownAuthenticationSchemes.Contains(AuthValuesSplit[0]))
+            {
+                parameters = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
+                    .Select(v => ExtractKeyValuePair(v.Trim()))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+
+            }
+            else
+            {
+                parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
+                    .Select(v => ExtractKeyValuePair(v.Trim()))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+            }
+
+            return CreateWwwAuthenticateParameters(parameters);
+        }
         #endregion Obsolete Api
 
         #region Single Scheme Api
@@ -340,42 +372,6 @@ namespace Microsoft.Identity.Client
             return parameterList;
         }
         #endregion Multi Scheme Api
-
-        /// <summary>
-        /// Creates parameters from the WWW-Authenticate string.
-        /// </summary>
-        /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
-        /// <returns>The parameters requested by the web API.</returns>
-        public static WwwAuthenticateParameters CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
-        {
-            if (string.IsNullOrWhiteSpace(wwwAuthenticateValue))
-            {
-                throw new ArgumentNullException(nameof(wwwAuthenticateValue));
-            }
-            IDictionary<string, string> parameters;
-
-            var AuthValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
-
-            if (s_knownAuthenticationSchemes.Contains(AuthValuesSplit[0]))
-            {
-                parameters = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
-                    .Select(v => ExtractKeyValuePair(v.Trim()))
-                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-
-            } 
-            //else if (s_knownAuthenticationSchemes.Contains(AuthValuesSplit[1]))
-            //{
-
-            //}
-            else 
-            {
-                parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
-                    .Select(v => ExtractKeyValuePair(v.Trim()))
-                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-            }
-
-            return CreateWwwAuthenticateParameters(parameters);
-        }
 
         private static HttpClient GetHttpClient()
         {

@@ -127,34 +127,18 @@ namespace Microsoft.Identity.Test.Unit
         {
             // Arrange
             HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer {clientId}, {authorizationUri}");
             httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer realm=\"\", {clientId}, {authorizationUri}");
-            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer realm=\"\" token68 {clientId}, {authorizationUri}");
 
-            var wwwAuthenticateResponse1 = httpResponse.Headers.WwwAuthenticate.First().Parameter;
-            var wwwAuthenticateResponse2 = httpResponse.Headers.WwwAuthenticate.ToList()[1].Parameter;
-            var wwwAuthenticateResponse3 = httpResponse.Headers.WwwAuthenticate.Last().Parameter;
+            var wwwAuthenticateResponse = httpResponse.Headers.WwwAuthenticate.First().Parameter;
 
             // Act
-            var authParams = WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateResponse1);
-            var authParams2 = WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateResponse2);
-            var authParams3 = WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateResponse3);
+            var authParams = WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateResponse);
 
             // Assert
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
-
-            Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams2.Authority);
-            Assert.AreEqual(3, authParams2.RawParameters.Count);
-            Assert.IsNull(authParams2.Claims);
-            Assert.IsNull(authParams2.Error);
-
-            Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams3.Authority);
-            Assert.AreEqual(3, authParams3.RawParameters.Count);
-            Assert.IsNull(authParams3.Claims);
-            Assert.IsNull(authParams3.Error);
         }
 
         [TestMethod]
@@ -171,6 +155,10 @@ namespace Microsoft.Identity.Test.Unit
             };
             var httpClient = new HttpClient(handler);
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+
+            Assert.AreEqual(authParams.GetTenantId(), tenantId);
+
+            authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri, "Bearer").ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
 
@@ -193,6 +181,10 @@ namespace Microsoft.Identity.Test.Unit
             };
             var httpClient = new HttpClient(handler);
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+
+            Assert.AreEqual(authParams.GetTenantId(), tenantId);
+
+            authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri, "Bearer").ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
 
@@ -220,6 +212,10 @@ namespace Microsoft.Identity.Test.Unit
 
             Assert.IsNull(authParams.GetTenantId());
 
+            authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri, "Bearer").ConfigureAwait(false);
+
+            Assert.IsNull(authParams.GetTenantId());
+
             var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
             Assert.IsNull(authParamList.FirstOrDefault().GetTenantId());
@@ -235,9 +231,13 @@ namespace Microsoft.Identity.Test.Unit
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
 
-            Func<Task> action2 = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri);
+            action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri, "Bearer");
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action2).ConfigureAwait(false);
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+
+            action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri);
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -245,7 +245,6 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("")]
         public async Task CreateFromResourceResponseAsync_Incorrect_ResourceUri_Async(string resourceUri)
         {
-
             await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://manage.office.com/api/v1.0/fbb86d84-7975-4300-a5cb-87b448d6f13d/activity/feed/subscriptions/content?contentType={ContentType}&amp;startTime={0}&amp;endTime={1}").ConfigureAwait(false);
 
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
@@ -287,18 +286,6 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act & Assert
             Assert.IsNull(WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(httpResponse.Headers));
-        }
-
-        [TestMethod]
-        public async Task ExtractNonceFromHeaderAsync()
-        {
-            //Arrange & Act
-            var parameterList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
-                                                         "https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
-
-            //Assert
-            Assert.IsTrue(parameterList.FirstOrDefault().AuthScheme == Constants.PoPAuthHeaderPrefix);
-            Assert.IsNotNull(parameterList.FirstOrDefault().ServerNonce);
         }
 
         [TestMethod]
