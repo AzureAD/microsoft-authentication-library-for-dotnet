@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Specifies how duplicate property names are handled when loading JSON.
     /// </summary>
-    public enum DuplicatePropertyNameHandling
+    internal enum DuplicatePropertyNameHandling
     {
         /// <summary>
         /// Replace the existing value when there is a duplicate property. The value of the last property in the JSON object will be used.

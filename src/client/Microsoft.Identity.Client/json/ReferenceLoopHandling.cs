@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Json
     /// <summary>
     /// Specifies reference loop handling options for the <see cref="JsonSerializer"/>.
     /// </summary>
-    public enum ReferenceLoopHandling
+    internal enum ReferenceLoopHandling
     {
         /// <summary>
         /// Throw a <see cref="JsonSerializationException"/> when a loop is encountered.

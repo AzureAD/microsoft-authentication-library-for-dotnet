@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Json
     /// Specifies float format handling options when writing special floating point numbers, e.g. <see cref="Double.NaN"/>,
     /// <see cref="Double.PositiveInfinity"/> and <see cref="Double.NegativeInfinity"/> with <see cref="JsonWriter"/>.
     /// </summary>
-    public enum FloatFormatHandling
+    internal enum FloatFormatHandling
     {
         /// <summary>
         /// Write special floating point values as strings in JSON, e.g. <c>"NaN"</c>, <c>"Infinity"</c>, <c>"-Infinity"</c>.
