@@ -123,24 +123,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
         [DataTestMethod]
         [DataRow(null)]
-        [DataRow("")]
-        public void WithTenantIdFromAuthority_NullOrEmptyStringAuthority_Failure(string authorityValue)
-        {
-            var app = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithAuthority(TestConstants.AuthorityCommonTenant)
-                .WithClientSecret("secret")
-                .Build();
-
-
-            AssertException.Throws<ArgumentNullException>(() =>
-                app
-                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
-                    .WithTenantIdFromAuthority(authorityValue));
-        }
-
-        [DataTestMethod]
-        [DataRow(null)]
         public void WithTenantIdFromAuthority_NullUriAuthority_Failure(Uri authorityValue)
         {
             var app = ConfidentialClientApplicationBuilder
