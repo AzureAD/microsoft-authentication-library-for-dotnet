@@ -300,11 +300,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Overrides the tenant ID specified in the authority at the application level. This operation preserves the authority host (environment).
+        /// Extracts the tenant ID from the provided authority URI and overrides the tenant ID specified in the authority at the application level. This operation preserves the authority host (environment) provided to the application builder.
         /// 
-        /// If an authority was not specified at the application level, the default used is https://login.microsoftonline.com/common.
+        /// If an authority was not provided to the application builder, this method will replace the tenant ID in the default authority - https://login.microsoftonline.com/common.
         /// </summary>
-        /// <param name="authorityUri">Uri for the authority that includes the TenantId</param>
+        /// <param name="authorityUri">URI from which to extract the tenant ID</param>
+
         /// <returns>The builder to chain the .With methods.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="authorityUri"/> is null or an empty string</exception>
         /// <exception cref="MsalClientException">Thrown if the application was configured with an authority that is not AAD specific (e.g. ADFS or B2C).</exception>
