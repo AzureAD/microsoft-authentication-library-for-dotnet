@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.Identity.Test.Common
 {
-    public struct AuthorityWithExpectedTenantId
+    public class AuthorityWithExpectedTenantId
     {
         public Uri Authority { get; set; }
         public string ExpectedTenantId { get; set; }
