@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private static BrokerRequest FromAuthenticationParameters(AuthenticationRequestParameters authenticationRequestParameters)
         {
             BrokerRequest br = new BrokerRequest();
-            br.Authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+            br.Authority = authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString();
             br.Scopes = EnumerableExtensions.AsSingleString(authenticationRequestParameters.Scope);
             br.ClientId = authenticationRequestParameters.AppConfig.ClientId;
             br.CorrelationId = authenticationRequestParameters.RequestContext.CorrelationId.ToString();

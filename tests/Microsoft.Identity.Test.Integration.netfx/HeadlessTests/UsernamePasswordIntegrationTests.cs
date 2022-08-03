@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -67,7 +68,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
         public async Task ARLINGTON_ROPC_AAD_Async()
         {
@@ -75,7 +76,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
         public async Task ARLINGTON_ROPC_ADFS_Async()
         {
@@ -83,14 +84,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_ADFSv4Federated_WithMetadata_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -98,14 +99,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_ADFSv3Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
@@ -136,7 +137,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// ROPC does not support MSA accounts
         /// </summary>
         /// <returns></returns>
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.MSA)]
         public async Task ROPC_MSA_Async()
         {
@@ -158,7 +159,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_B2C_Async()
         {
             var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);

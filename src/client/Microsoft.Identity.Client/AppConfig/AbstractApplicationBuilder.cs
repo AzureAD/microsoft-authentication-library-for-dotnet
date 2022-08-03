@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
@@ -560,9 +561,12 @@ namespace Microsoft.Identity.Client
         {
             if (Config.Authority?.AuthorityInfo != null)
             {
+                var isB2C = Config.Authority is B2CAuthority;
+                
                 AadAuthority aadAuthority = Config.Authority as AadAuthority;
-                if (!string.IsNullOrEmpty(Config.TenantId) &&
-                    aadAuthority != null)
+                if (!string.IsNullOrEmpty(Config.TenantId) 
+                    && !isB2C
+                    && aadAuthority != null )
                 {
                     if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() &&
                         !string.Equals(aadAuthority.TenantId, Config.TenantId))
@@ -695,10 +699,7 @@ namespace Microsoft.Identity.Client
             Guid tenantId,
             bool validateAuthority = true)
         {
-#pragma warning disable CA1305 // Specify IFormatProvider (this overload is missing on netstandard 1.3)
-            WithAuthority(cloudInstanceUri, tenantId.ToString("D"), validateAuthority);
-#pragma warning restore CA1305 // Specify IFormatProvider
-
+            WithAuthority(cloudInstanceUri, tenantId.ToString("D", CultureInfo.InvariantCulture), validateAuthority);
             return (T)this;
         }
 
@@ -755,10 +756,7 @@ namespace Microsoft.Identity.Client
             Guid tenantId,
             bool validateAuthority = true)
         {
-#pragma warning disable CA1305 // Specify IFormatProvider - this overload is missing on netstandard
-            WithAuthority(azureCloudInstance, tenantId.ToString("D"), validateAuthority);
-#pragma warning restore CA1305 // Specify IFormatProvider
-
+            WithAuthority(azureCloudInstance, tenantId.ToString("D", CultureInfo.InvariantCulture), validateAuthority);
             return (T)this;
         }
 

@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Broker
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
 
         //MSAL Runtime Error Response 
-        private enum ResponseStatus : int
+        private enum ResponseStatus
         {
             Unexpected = 0,
             Reserved = 1,
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             var authParams = new NativeInterop.AuthParameters
                 (authenticationRequestParameters.AppConfig.ClientId,
-                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
+                authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
 
             //scopes
             authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
@@ -150,6 +150,11 @@ namespace Microsoft.Identity.Client.Broker
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ClaimsAndClientCapabilities))
             {
                 authParams.DecodedClaims = authenticationRequestParameters.ClaimsAndClientCapabilities;
+            }
+
+            if (authenticationRequestParameters.AppConfig.MultiCloudSupportEnabled)
+            {
+                authParams.Properties["discover"] = "home";
             }
 
             //pass extra query parameters if there are any

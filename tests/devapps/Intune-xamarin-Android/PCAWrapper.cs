@@ -62,7 +62,7 @@ namespace Intune_xamarin_Android
         }
 
         /// <summary>
-        /// Perform the intractive acquistion of the token for the given scope
+        /// Perform the interactive acquisition of the token for the given scope
         /// </summary>
         /// <param name="scopes">Scope</param>
         /// <param name="parentWindow">Parent window</param>
@@ -80,7 +80,7 @@ namespace Intune_xamarin_Android
         /// Acquire the token silently
         /// </summary>
         /// <param name="scopes">scopes</param>
-        /// <returns>Authenticaiton result</returns>
+        /// <returns>Authentication result</returns>
         internal async Task<AuthenticationResult> DoSilentAsync(string[] scopes)
         {
             if (PCA == null)

@@ -17,7 +17,7 @@ namespace MauiAppBasic.MSALClient
         /// <summary>
         /// This is the singleton used by consumers
         /// </summary>
-        static public PCAWrapper Instance { get; } = new PCAWrapper();
+        public static PCAWrapper Instance { get; private set; } = new PCAWrapper();
 
         internal IPublicClientApplication PCA { get; }
 
@@ -39,18 +39,35 @@ namespace MauiAppBasic.MSALClient
             // Create PCA once. Make sure that all the config parameters below are passed
             PCA = PublicClientApplicationBuilder
                                         .Create(ClientId)
-                                        .WithRedirectUri(PlatformConfigImpl.Instance.RedirectUri)
+                                        .WithRedirectUri(PlatformConfig.Instance.RedirectUri)
                                         .WithIosKeychainSecurityGroup("com.microsoft.adalcache")
                                         .Build();
         }
 
         /// <summary>
-        /// Perform the intractive acquistion of the token for the given scope
+        /// Acquire the token silently
+        /// </summary>
+        /// <param name="scopes">desired scopes</param>
+        /// <returns>Authentication result</returns>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scopes)
+        {
+            var accts = await PCA.GetAccountsAsync().ConfigureAwait(false);
+            var acct = accts.FirstOrDefault();
+
+            var authResult = await PCA.AcquireTokenSilent(scopes, acct)
+                                        .ExecuteAsync().ConfigureAwait(false);
+            return authResult;
+
+        }
+
+        /// <summary>
+        /// Perform the interactive acquisition of the token for the given scope
         /// </summary>
         /// <param name="scopes">desired scopes</param>
         /// <returns></returns>
         internal async Task<AuthenticationResult> AcquireTokenInteractiveAsync(string[] scopes)
         {
+            SystemWebViewOptions systemWebViewOptions = new SystemWebViewOptions();
 #if IOS
             // embedded view is not supported on Android
             if (UseEmbedded)
@@ -58,39 +75,20 @@ namespace MauiAppBasic.MSALClient
 
                 return await PCA.AcquireTokenInteractive(scopes)
                                         .WithUseEmbeddedWebView(true)
-                                        .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
+                                        .WithParentActivityOrWindow(PlatformConfig.Instance.ParentWindow)
                                         .ExecuteAsync()
                                         .ConfigureAwait(false);
             }
+
+            // Hide the privacy prompt in iOS
+            systemWebViewOptions.iOSHidePrivacyPrompt = true;
 #endif
-            // Hide the privacy prompt
-            SystemWebViewOptions systemWebViewOptions = new SystemWebViewOptions()
-            {
-                iOSHidePrivacyPrompt = true,
-            };
 
             return await PCA.AcquireTokenInteractive(scopes)
                                     .WithSystemWebViewOptions(systemWebViewOptions)
-                                    .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
+                                    .WithParentActivityOrWindow(PlatformConfig.Instance.ParentWindow)
                                     .ExecuteAsync()
                                     .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquire the token silently
-        /// </summary>
-        /// <param name="scopes">desired scopes</param>
-        /// <returns>Authenticaiton result</returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scopes)
-        {
-            var accts = await PCA.GetAccountsAsync().ConfigureAwait(false);
-            var acct = accts.FirstOrDefault();
-
-            var silentParamBuilder = PCA.AcquireTokenSilent(scopes, acct);
-            var authResult = await silentParamBuilder
-                                        .ExecuteAsync().ConfigureAwait(false);
-            return authResult;
-
         }
 
         /// <summary>
@@ -98,7 +96,7 @@ namespace MauiAppBasic.MSALClient
         /// the token.
         /// </summary>
         /// <returns></returns>
-        internal async Task SignOut()
+        internal async Task SignOutAsync()
         {
             var accounts = await PCA.GetAccountsAsync().ConfigureAwait(false);
             foreach (var acct in accounts)

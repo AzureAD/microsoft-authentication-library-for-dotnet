@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Native
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
                 m_encryptionHashAlgorithm = value;
             }
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Native
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
                 m_signatureHashAlgorithm = value;
             }

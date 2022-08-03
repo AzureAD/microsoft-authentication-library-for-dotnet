@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -18,7 +19,7 @@ using OpenQA.Selenium;
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
     [TestClass]
-    public class SeleniumInfrastructureTests
+    public class InfrastructureTests
     {
         private static readonly string[] s_scopes = new[] { "user.read" };
 
@@ -42,7 +43,38 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion
 
-        [TestMethod]
+        // This test checks that MSAL.netcore / MSAL.netfx / MSAL.netstandard DLLs are actually used
+        [DataTestMethod()]
+        [DataRow(TargetFrameworks.NetStandard)]
+        [DataRow(TargetFrameworks.NetCore)]
+        [DataRow(TargetFrameworks.NetFx)]
+        public void AssertTfm(TargetFrameworks targetFwk)
+        {
+            targetFwk.AssertFramework();
+
+            
+            var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
+            string sku = proxy.GetProductName(); // MSAL has a different "name" on each sku
+
+            Trace.Write($"Asserting that test on TFM {targetFwk} targets the correct MSAL dll");
+
+            switch (targetFwk)
+            {
+                case TargetFrameworks.NetFx:
+                    Assert.AreEqual("MSAL.Desktop", sku);
+                    break;
+                case TargetFrameworks.NetCore:
+                    Assert.AreEqual("MSAL.NetCore", sku);
+                    break;
+                case TargetFrameworks.NetStandard:
+                    Assert.AreEqual("MSAL.CoreCLR", sku);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task FailingTest_SeleniumFailureAsync()
         {
             var pca = PublicClientApplicationBuilder
@@ -67,7 +99,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                  .ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task FailingTest_ListenerTimesOut_Async()
         {
             var pca = PublicClientApplicationBuilder
