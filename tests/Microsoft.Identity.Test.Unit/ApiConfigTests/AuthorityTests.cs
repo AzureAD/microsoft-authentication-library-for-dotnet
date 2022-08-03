@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -97,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(new Uri(TestConstants.AuthorityCommonTenant).Host, parameterBuilder.CommonParameters.AuthorityOverride.Host);
 
             // Verify the Tenant Id matches
-            Assert.AreEqual(tenantId, ClientApplicationBase.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
+            Assert.AreEqual(tenantId, AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
         }
 
         [DataTestMethod]
@@ -118,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(new Uri(TestConstants.AuthorityCommonTenant).Host, parameterBuilder.CommonParameters.AuthorityOverride.Host);
 
             // Verify the Tenant Id matches
-            Assert.AreEqual(expectedTenantId, ClientApplicationBase.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
+            Assert.AreEqual(expectedTenantId, AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
         }
 
         [DataTestMethod]

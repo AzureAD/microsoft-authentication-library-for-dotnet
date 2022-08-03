@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(TestConstants.DstsAuthorityCommon, TestConstants.Common, DisplayName = "DSTS Common Tenant Id")]
         public void ParseTest_Success(string authorityUrl, string expectedTenantId)
         {
-            var tenantId = ClientApplicationBase.GetTenantId(new Uri(authorityUrl));
+            var tenantId = AuthorityHelpers.GetTenantId(new Uri(authorityUrl));
 
             Assert.AreEqual(expectedTenantId, tenantId);
         }
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(TestConstants.ADFSAuthority2, DisplayName = "ADFS Authority")]
         public void ParseTest_NoTenantId(string authorityUrl)
         {
-            var tenantId = ClientApplicationBase.GetTenantId(new Uri(authorityUrl));
+            var tenantId = AuthorityHelpers.GetTenantId(new Uri(authorityUrl));
 
             Assert.IsNull(tenantId);
         }
