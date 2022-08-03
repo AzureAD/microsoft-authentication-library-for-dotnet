@@ -582,7 +582,7 @@ namespace Microsoft.Identity.Json.Serialization
         {
             private readonly IEnumerable<KeyValuePair<TEnumeratorKey, TEnumeratorValue>> _e;
 
-            internal enumerableDictionaryWrapper(IEnumerable<KeyValuePair<TEnumeratorKey, TEnumeratorValue>> e)
+            internal EnumerableDictionaryWrapper(IEnumerable<KeyValuePair<TEnumeratorKey, TEnumeratorValue>> e)
             {
                 ValidationUtils.ArgumentNotNull(e, nameof(e));
                 _e = e;

@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Allows users to control class loading and mandate what class to load.
     /// </summary>
-    public interface ISerializationBinder
+    internal interface ISerializationBinder
     {
         /// <summary>
         /// When implemented, controls the binding of a serialized object to a type.
