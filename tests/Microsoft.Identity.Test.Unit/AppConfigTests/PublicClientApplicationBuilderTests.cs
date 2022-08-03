@@ -11,13 +11,14 @@ using Microsoft.Identity.Client.Desktop;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
     [TestClass]
-    [TestCategory("BuilderTests")]
+    [TestCategory(TestCategories.BuilderTests)]
     public class PublicClientApplicationBuilderTests
     {
         [TestMethod]
@@ -462,7 +463,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(1320)]
         public void TestAuthorityWithTenant()
         {

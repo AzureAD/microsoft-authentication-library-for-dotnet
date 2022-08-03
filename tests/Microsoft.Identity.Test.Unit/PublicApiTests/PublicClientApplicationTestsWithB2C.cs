@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -14,6 +15,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
+    [TestCategory(TestCategories.B2C)]
     public class PublicClientApplicationTestsWithB2C : TestBase
     {
         [TestInitialize]
@@ -23,7 +25,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("B2C")]
         public void B2CLoginAcquireTokenTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -48,7 +49,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("B2C")]
         public void B2CAcquireTokenTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -75,7 +75,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("B2C")]
         public void B2CAcquireTokenWithValidateAuthorityTrueTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -102,7 +101,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("B2C")]
         public async Task B2CAcquireTokenWithValidateAuthorityTrueAndRandomAuthorityTest_Async()
         {
             using (var harness = base.CreateTestHarness())
@@ -132,7 +130,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("B2C")]
         [Description("Test against https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3471")]
         public void B2CIgnoreWithTenantId_Success()
         {
@@ -152,7 +149,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("B2C")]
         public void B2CAcquireTokenAuthorityHostMisMatchErrorTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -221,7 +217,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("B2C")]
         public void B2CAcquireTokenWithB2CLoginAuthorityTest()
         {
             using (var harness = CreateTestHarness())
@@ -241,7 +236,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         /// This behavior has been seen on B2C, as AAD will return an access token for the implicit scopes.
         /// </summary>
         [TestMethod]
-        [TestCategory("B2C")]
         public async Task B2C_NoScopes_NoAccessToken_Async()
         {
 
