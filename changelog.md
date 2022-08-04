@@ -6,7 +6,7 @@
 **Added support for Proof-of-Possession tokens to `AcquireTokenByUsernamePassword` flow in WAM broker preview**. See [3308](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3308).  
 **Added `WithTenantIdFromAuthority` API to request builder**. See [3429](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3429).  
 **Exposed new Identity Logger in the `TokenCacheNotificationArgs`**. See [3404](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3404).  
-**Increased security of PKCE**. See [1777](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1777).  
+**[Security] Increased size of PKCE verifier**. See [1777](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1777).  
 **Enabled multi-cloud support in WAM**. See [3477](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3477).  
 
 ### Bug Fixes
