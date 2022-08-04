@@ -2,27 +2,27 @@
 ==========
 
 ### New Features
-**Added `AcquireTokenByUsernamePassword` flow in WAM broker preview**. See [3308](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3308).  
-**Added support for Proof-of-Possession tokens to `AcquireTokenByUsernamePassword` flow in WAM broker preview**. See [3308](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3308).  
-**Added `WithTenantIdFromAuthority` API to request builder**. See [3429](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3429).  
-**Exposed new Identity Logger in the `TokenCacheNotificationArgs`**. See [3404](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3404).  
-**[Security] Increased size of PKCE verifier**. See [1777](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1777).  
-**Enabled multi-cloud support in WAM**. See [3477](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3477).  
+- Added `AcquireTokenByUsernamePassword` flow in WAM broker preview. See [3308](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3308).  
+- Added support for Proof-of-Possession tokens to `AcquireTokenByUsernamePassword` flow in WAM broker preview. See [3308](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3308).  
+- Added `WithTenantIdFromAuthority` API to request builder. See [3429](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3429).  
+- Exposed new Identity Logger in the `TokenCacheNotificationArgs`. See [3404](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3404).  
+- [Security] Increased size of PKCE verifier. See [1777](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1777).  
+- Enabled multi-cloud support in WAM. See [3477](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3477).  
 
 ### Bug Fixes
-**Deprecated and replaced `SecureString` usage with strings**. See [2437](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2437).  
-**Refactored authority related code to use URI class instead of strings**. See [3487](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3487).  
-**Fixed authority resolution for B2C authorities**. See [3471](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3471).  
-**Improved WAM broker preview behavior for remembered accounts**. See [3437](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3437).  
-**Obsoleted with a warning `AcquireTokenSilent(scopes, login_hint)` for confidential client applications** as it's not applicable in those scenarios. See [3403](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3403).  
-**Now passing `intune_mam_resource` to the mobile broker**. See [3490](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3490).  
-**Fixed DSTS endpoints**. See [3492](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3492).  
-**Cancellation tokens are now correctly passed to Windows broker and embedded web views**. See [3225](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3225).  
-**Move app token provider feature to extensibility namespace and clarified its use**. See [3475](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3475).  
+- Deprecated and replaced `SecureString` usage with strings. See [2437](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2437).  
+- Refactored authority related code to use URI class instead of strings. See [3487](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3487).  
+- Fixed authority resolution for B2C authorities. See [3471](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3471).  
+- Improved WAM broker preview behavior for remembered accounts. See [3437](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3437).  
+- Obsoleted with a warning `AcquireTokenSilent(scopes, login_hint)` for confidential client applications as it's not applicable in those scenarios. See [3403](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3403).  
+- Now passing `intune_mam_resource` to the mobile broker. See [3490](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3490).  
+- Fixed DSTS endpoints. See [3492](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3492).  
+- Cancellation tokens are now correctly passed to Windows broker and embedded web views. See [3225](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3225).  
+- Move app token provider feature to extensibility namespace and clarified its use. See [3475](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3475).  
 
 ### Fundamentals
-**Improved and simplified .NET Standard platform specific code**. See [3451](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3451).  
-**Fix line endings in unit test files to enable running on Linux**. See [3425](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3425).  
+- Improved and simplified .NET Standard platform specific code. See [3451](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3451).  
+- Fix line endings in unit test files to enable running on Linux. See [3425](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3425).  
 
 4.46.0-Preview2
 ==========
