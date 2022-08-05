@@ -34,12 +34,12 @@ This preview package adds support for.NET MAUI. It adds .NET 6 iOS and Android t
 ==========
 
 ### Important changes for UWP apps
-**Upgrade the minimum target platform to 10.0.17763.0**.  
-**Upgrade Microsoft.NETCore.UniversalWindowsPlatform to 6.1.9 or above**.  
-**Add a reference to Microsoft.IdentityModel.Abstractions, for projects that use package.json**.  
+Upgrade the minimum target platform to 10.0.17763.0
+Upgrade Microsoft.NETCore.UniversalWindowsPlatform to 6.1.9 or above
+Add a reference to Microsoft.IdentityModel.Abstractions, for projects that use package.json
 
 ### New Features
-**Logs are now consistent when you use several .NET authentication libraries from Microsoft**. See [3028](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3028).  
+Logs are now consistent when you use several .NET authentication libraries from Microsoft**. See [3028](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3028).  
 **Exposed tenant ID and scopes in `TokenCacheNotificationArgs`**. See [3389](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3389).  
 **Added new `WithClientAssertion` API** that exposes the token endpoint. See [3352](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3352).  
 **Added additional descriptive information to error logs**. See [3278](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3278).  
@@ -64,7 +64,7 @@ This preview package adds support for.NET MAUI. It adds .NET 6 iOS and Android t
 **MSAL.NET now has a new WAM preview which is an abstraction layer based on MSAL C++ with support for Proof-of-Possession access tokens**. This fixes some issues with current WAM implementation. See [3192](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3192) and [wiki](http://aka.ms/msal-net-wam).  
 
 ### Bug Fixes
-**Improved exception handling in case of an Operation Cancelled Exception** See [3283](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3283).  
+[IMPORTANT][RELIABILITY] **In case of cancellation or timeout via CancellationToken, MSAL now throws the correct TaskCancelledException instead of MsalServiceException with error code request_tiomeout** See [3283](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3283).  
 **Fixed `AcquireTokenSilent` to not display a login prompt unnecessarily for operating system accounts in WAM**. See [3294](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3294).  
 **Fixed NullReferenceException in IsBrokerAvailable()** See [3261](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3261).  
 **Fixed a race condition to improve stability of region autodiscovery**. See [3277](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3277).  
