@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Test.Unit
 
             var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            Assert.AreEqual(authParamList.FirstOrDefault().GetTenantId(), tenantId);
+            Assert.AreEqual(authParamList.FirstOrDefault().Value.GetTenantId(), tenantId);
         }
 
         [TestMethod]
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Unit
 
             var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            Assert.AreEqual(authParamList.FirstOrDefault().GetTenantId(), tenantId);
+            Assert.AreEqual(authParamList.FirstOrDefault().Value.GetTenantId(), tenantId);
         }
 
         [TestMethod]
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit
 
             var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            Assert.IsNull(authParamList.FirstOrDefault().GetTenantId());
+            Assert.IsNull(authParamList.FirstOrDefault().Value.GetTenantId());
         }
 
         [DataRow(null)]
@@ -245,8 +245,6 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("")]
         public async Task CreateFromResourceResponseAsync_Incorrect_ResourceUri_Async(string resourceUri)
         {
-            await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://manage.office.com/api/v1.0/fbb86d84-7975-4300-a5cb-87b448d6f13d/activity/feed/subscriptions/content?contentType={ContentType}&amp;startTime={0}&amp;endTime={1}").ConfigureAwait(false);
-
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
@@ -304,8 +302,8 @@ namespace Microsoft.Identity.Test.Unit
             var httpClient = new HttpClient(handler);
             var headers = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").FirstOrDefault();
-            var popHeader = headers.Where(header => header.AuthScheme == "PoP").FirstOrDefault();
+            var bearerHeader = headers["Bearer"];
+            var popHeader = headers["PoP"];
 
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
@@ -321,8 +319,8 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act & Assert
             var headers = WwwAuthenticateParameters.CreateFromAuthenticateHeaders(httpResponse.Headers);
-            var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").FirstOrDefault();
-            var popHeader = headers.Where(header => header.AuthScheme == "PoP").FirstOrDefault();
+            var bearerHeader = headers["Bearer"];
+            var popHeader = headers["PoP"];
 
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);

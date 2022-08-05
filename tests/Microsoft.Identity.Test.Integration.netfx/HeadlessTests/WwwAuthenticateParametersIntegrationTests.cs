@@ -70,8 +70,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                          "https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
 
             //Assert
-            Assert.IsTrue(parameterList.FirstOrDefault().AuthScheme == Constants.PoPAuthHeaderPrefix);
-            Assert.IsNotNull(parameterList.FirstOrDefault().ServerNonce);
+            Assert.IsTrue(parameterList[Constants.PoPAuthHeaderPrefix].AuthScheme == Constants.PoPAuthHeaderPrefix);
+            Assert.IsNotNull(parameterList[Constants.PoPAuthHeaderPrefix].ServerNonce);
         }
     }
 }
