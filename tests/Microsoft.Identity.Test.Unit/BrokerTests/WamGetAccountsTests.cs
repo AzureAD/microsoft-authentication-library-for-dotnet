@@ -8,6 +8,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,7 +17,7 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
     [TestClass]
-    [TestCategory("Broker")]
+    [TestCategory(TestCategories.Broker)]
     public class WamGetAccountsTests : TestBase
     {
 #if SUPPORTS_BROKER

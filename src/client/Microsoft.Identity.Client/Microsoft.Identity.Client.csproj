@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
 
   <!--Add MAUI_SUPPORT variable to environment when you compile MAUI. esp for.\tests\devapps\MauiApps\MauiApps.sln-->
-  
+
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
@@ -19,13 +19,13 @@
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
   </PropertyGroup>
 
-    <!-- MAUI -->
+  <!-- MAUI -->
   <PropertyGroup Condition="'$(MAUI_SUPPORT)' != ''">
     <TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
     <TargetFrameworkNet6Ios>net6.0-ios</TargetFrameworkNet6Ios>
     <TargetFrameworkNet6Mac>net6.0-maccatalyst</TargetFrameworkNet6Mac>
   </PropertyGroup>
-    
+
   <!-- net6.0 (MAUI) -->
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('net6.0-'))">
     <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
@@ -33,7 +33,7 @@
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">14.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">21.0</SupportedOSPlatformVersion>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNet5Win);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac)</TargetFrameworks>
@@ -56,12 +56,11 @@
     <Authors>Microsoft</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
-    <PackageReleaseNotes>The changelog is available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/changelog.txt. The roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap. To provide feedback, fill-in the survey at https://ncv.microsoft.com/JrXkdySi0m</PackageReleaseNotes>
+    <PackageReleaseNotes>The release notes are available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap. To provide feedback, fill-in the survey at https://ncv.microsoft.com/JrXkdySi0m. </PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>
       This package contains the binaries of the Microsoft Authentication Library for .NET (MSAL.NET).
-      MSAL.NET makes it easy to obtain tokens from the Microsoft identity platform for developers (formally Azure AD v2.0) signing-in users with work &amp; school accounts, Microsoft personal accounts and social identities Azure AD B2C. These tokens gain access to Microsoft Cloud API and any other API secured by the Microsoft identity platform. This version supports adding authentication functionality to your .NET based client on Windows desktop (.NET 4.5+), UWP, .NET Core, Xamarin iOS and Xamarin Android.
-      The release notes are available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases.
+      MSAL.NET makes it easy to obtain tokens from the Microsoft identity platform for developers (formally Azure AD v2.0) signing-in users with work &amp; school accounts, Microsoft personal accounts, and social identities via Azure AD B2C. These tokens provide access to Microsoft Cloud API and any other API secured by the Microsoft identity platform. This version supports adding authentication functionality to your .NET based client on Windows desktop (.NET 4.5+), UWP, .NET Core, Xamarin iOS, and Xamarin Android.
     </Description>
     <PackageTags>Microsoft Authentication Library MSA MSAL B2C Azure Active Directory AAD Identity Authentication .NET Windows Store Xamarin iOS Android</PackageTags>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
@@ -212,7 +211,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" Exclude="$(PathToMsalSources)\Platforms\Features\WamBroker\win32\**\*.cs" />
-    
+
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />

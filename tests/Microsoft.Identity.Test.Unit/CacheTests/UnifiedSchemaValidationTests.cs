@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
@@ -17,7 +18,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     // This is for tests laid out here:  https://identitydivision.visualstudio.com/DevEx/_git/AuthLibrariesApiReview?path=%2FUnifiedSchema%2Ftestcases&version=GBdev
 
     [TestClass]
-    [TestCategory("UnifiedSchema_Validation")]
+    [TestCategory(TestCategories.UnifiedSchemaValidation)]
     public class UnifiedSchemaValidationTests : TestBase
     {
         private const string ClientId = "b6c69a37-df96-4db0-9088-2ab96e1d8215";
