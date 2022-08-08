@@ -33,7 +33,7 @@ using NSubstitute.ExceptionExtensions;
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
     [TestClass]
-    [TestCategory("Broker")]
+    [TestCategory(TestCategories.Broker)]
     public class BrokerTests : TestBase
     {
         private BrokerInteractiveRequestComponent _brokerInteractiveRequest;

@@ -46,15 +46,13 @@ namespace Microsoft.Identity.Json.Serialization
             // prefix the message in the stringwriter to avoid concat with a potentially large JSON string
             _sw.Write("Serialized JSON: " + Environment.NewLine);
 
-            _textWriter = new JsonTextWriter(_sw)
-            {
-                Formatting = Formatting.Indented,
-                Culture = innerWriter.Culture,
-                DateFormatHandling = innerWriter.DateFormatHandling,
-                DateFormatString = innerWriter.DateFormatString,
-                DateTimeZoneHandling = innerWriter.DateTimeZoneHandling,
-                FloatFormatHandling = innerWriter.FloatFormatHandling
-            };
+            _textWriter = new JsonTextWriter(_sw);
+            _textWriter.Formatting = Formatting.Indented;
+            _textWriter.Culture = innerWriter.Culture;
+            _textWriter.DateFormatHandling = innerWriter.DateFormatHandling;
+            _textWriter.DateFormatString = innerWriter.DateFormatString;
+            _textWriter.DateTimeZoneHandling = innerWriter.DateTimeZoneHandling;
+            _textWriter.FloatFormatHandling = innerWriter.FloatFormatHandling;
         }
 
         public string GetSerializedJsonMessage()
@@ -146,7 +144,7 @@ namespace Microsoft.Identity.Json.Serialization
             }
         }
 
-        public override void WriteValue(byte[] value)
+        public override void WriteValue(byte[]? value)
         {
             _textWriter.WriteValue(value);
             _innerWriter.WriteValue(value);
@@ -323,7 +321,7 @@ namespace Microsoft.Identity.Json.Serialization
             }
         }
 
-        public override void WriteValue(object value)
+        public override void WriteValue(object? value)
         {
 #if HAVE_BIG_INTEGER
             if (value is BigInteger)
@@ -391,7 +389,7 @@ namespace Microsoft.Identity.Json.Serialization
             }
         }
 
-        public override void WriteValue(string value)
+        public override void WriteValue(string? value)
         {
             _textWriter.WriteValue(value);
             _innerWriter.WriteValue(value);
@@ -461,7 +459,7 @@ namespace Microsoft.Identity.Json.Serialization
             }
         }
 
-        public override void WriteValue(Uri value)
+        public override void WriteValue(Uri? value)
         {
             _textWriter.WriteValue(value);
             _innerWriter.WriteValue(value);
@@ -503,7 +501,7 @@ namespace Microsoft.Identity.Json.Serialization
             base.WriteWhitespace(ws);
         }
 
-        public override void WriteComment(string text)
+        public override void WriteComment(string? text)
         {
             _textWriter.WriteComment(text);
             _innerWriter.WriteComment(text);
@@ -568,7 +566,7 @@ namespace Microsoft.Identity.Json.Serialization
             base.WriteEndObject();
         }
 
-        public override void WriteRawValue(string json)
+        public override void WriteRawValue(string? json)
         {
             _textWriter.WriteRawValue(json);
             _innerWriter.WriteRawValue(json);
@@ -577,7 +575,7 @@ namespace Microsoft.Identity.Json.Serialization
             InternalWriteValue(JsonToken.Undefined);
         }
 
-        public override void WriteRaw(string json)
+        public override void WriteRaw(string? json)
         {
             _textWriter.WriteRaw(json);
             _innerWriter.WriteRaw(json);

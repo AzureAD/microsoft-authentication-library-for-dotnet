@@ -37,6 +37,8 @@ using System.Linq;
 
 #endif
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Schema
 {
     /// <summary>
@@ -173,7 +175,7 @@ namespace Microsoft.Identity.Json.Schema
         {
             JsonContainerAttribute containerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(type);
 
-            if (!string.IsNullOrEmpty(containerAttribute?.Title))
+            if (!StringUtils.IsNullOrEmpty(containerAttribute?.Title))
             {
                 return containerAttribute.Title;
             }
@@ -185,7 +187,7 @@ namespace Microsoft.Identity.Json.Schema
         {
             JsonContainerAttribute containerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(type);
 
-            if (!string.IsNullOrEmpty(containerAttribute?.Description))
+            if (!StringUtils.IsNullOrEmpty(containerAttribute?.Description))
             {
                 return containerAttribute.Description;
             }
@@ -202,7 +204,7 @@ namespace Microsoft.Identity.Json.Schema
         {
             JsonContainerAttribute containerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(type);
 
-            if (!string.IsNullOrEmpty(containerAttribute?.Id))
+            if (!StringUtils.IsNullOrEmpty(containerAttribute?.Id))
             {
                 return containerAttribute.Id;
             }
@@ -230,7 +232,7 @@ namespace Microsoft.Identity.Json.Schema
             string resolvedId = GetTypeId(type, false);
             string explicitId = GetTypeId(type, true);
 
-            if (!string.IsNullOrEmpty(resolvedId))
+            if (!StringUtils.IsNullOrEmpty(resolvedId))
             {
                 JsonSchema resolvedSchema = _resolver.GetSchema(resolvedId);
                 if (resolvedSchema != null)
@@ -293,16 +295,14 @@ namespace Microsoft.Identity.Json.Schema
                         CurrentSchema.Id = GetTypeId(type, false);
 
                         JsonArrayAttribute arrayAttribute = JsonTypeReflector.GetCachedAttribute<JsonArrayAttribute>(type);
-                        bool allowNullItem = arrayAttribute == null || arrayAttribute.AllowNullItems;
+                        bool allowNullItem = (arrayAttribute == null || arrayAttribute.AllowNullItems);
 
                         Type collectionItemType = ReflectionUtils.GetCollectionItemType(type);
                         if (collectionItemType != null)
                         {
-                        CurrentSchema.Items = new List<JsonSchema>
-                        {
-                            GenerateInternal(collectionItemType, (!allowNullItem) ? Required.Always : Required.Default, false)
-                        };
-                    }
+                            CurrentSchema.Items = new List<JsonSchema>();
+                            CurrentSchema.Items.Add(GenerateInternal(collectionItemType, (!allowNullItem) ? Required.Always : Required.Default, false));
+                        }
                         break;
                     case JsonContractType.Primitive:
                         CurrentSchema.Type = GetJsonSchemaType(type, valueRequired);
@@ -379,7 +379,7 @@ namespace Microsoft.Identity.Json.Schema
 
         private bool HasFlag(DefaultValueHandling value, DefaultValueHandling flag)
         {
-            return (value & flag) == flag;
+            return ((value & flag) == flag);
         }
 
         private void GenerateObjectSchema(Type type, JsonObjectContract contract)
@@ -426,7 +426,7 @@ namespace Microsoft.Identity.Json.Schema
                 return true;
             }
 
-            bool match = (value & flag) == flag;
+            bool match = ((value & flag) == flag);
             if (match)
             {
                 return true;

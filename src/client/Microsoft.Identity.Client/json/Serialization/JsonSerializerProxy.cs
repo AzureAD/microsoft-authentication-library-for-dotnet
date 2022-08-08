@@ -34,29 +34,29 @@ namespace Microsoft.Identity.Json.Serialization
 {
     internal class JsonSerializerProxy : JsonSerializer
     {
-        private readonly JsonSerializerInternalReader _serializerReader;
-        private readonly JsonSerializerInternalWriter _serializerWriter;
+        private readonly JsonSerializerInternalReader? _serializerReader;
+        private readonly JsonSerializerInternalWriter? _serializerWriter;
         private readonly JsonSerializer _serializer;
 
-        public override event EventHandler<ErrorEventArgs> Error
+        public override event EventHandler<ErrorEventArgs>? Error
         {
             add => _serializer.Error += value;
             remove => _serializer.Error -= value;
         }
 
-        public override IReferenceResolver ReferenceResolver
+        public override IReferenceResolver? ReferenceResolver
         {
             get => _serializer.ReferenceResolver;
             set => _serializer.ReferenceResolver = value;
         }
 
-        public override ITraceWriter TraceWriter
+        public override ITraceWriter? TraceWriter
         {
             get => _serializer.TraceWriter;
             set => _serializer.TraceWriter = value;
         }
 
-        public override IEqualityComparer EqualityComparer
+        public override IEqualityComparer? EqualityComparer
         {
             get => _serializer.EqualityComparer;
             set => _serializer.EqualityComparer = value;
@@ -137,12 +137,12 @@ namespace Microsoft.Identity.Json.Serialization
             set => _serializer.ConstructorHandling = value;
         }
 
-        //[Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
-        //public override SerializationBinder Binder
-        //{
-        //    get => _serializer.Binder;
-        //    set => _serializer.Binder = value;
-        //}
+        [Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
+        public override SerializationBinder Binder
+        {
+            get => _serializer.Binder;
+            set => _serializer.Binder = value;
+        }
 
         public override ISerializationBinder SerializationBinder
         {
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Json.Serialization
             }
             else
             {
-                return _serializerWriter;
+                return _serializerWriter!;
             }
         }
 
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Json.Serialization
             _serializer = serializerWriter.Serializer;
         }
 
-        internal override object DeserializeInternal(JsonReader reader, Type objectType)
+        internal override object? DeserializeInternal(JsonReader reader, Type? objectType)
         {
             if (_serializerReader != null)
             {
@@ -274,7 +274,7 @@ namespace Microsoft.Identity.Json.Serialization
             }
         }
 
-        internal override void SerializeInternal(JsonWriter jsonWriter, object value, Type rootType)
+        internal override void SerializeInternal(JsonWriter jsonWriter, object? value, Type? rootType)
         {
             if (_serializerWriter != null)
             {
