@@ -1,14 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    
+
+
   <PropertyGroup>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNetDesktop461 Condition="$([MSBuild]::IsOsPlatform('Windows')) and '$(MSAL_DESKTOP_ONLY_DEV)' == ''">net461</TargetFrameworkNetDesktop461>
 
-    <PlatformTarget>AnyCPU</PlatformTarget>    
-    <TargetFramework Condition="'$(TargetFrameworkNetDesktop461)' == ''">$(TargetFrameworkNetStandard)</TargetFramework>    
-    <TargetFrameworks Condition="'$(TargetFrameworkNetDesktop461)' != ''">$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop461)</TargetFrameworks>    
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <TargetFramework Condition="'$(TargetFrameworkNetDesktop461)' == ''">$(TargetFrameworkNetStandard)</TargetFramework>
+    <TargetFrameworks Condition="'$(TargetFrameworkNetDesktop461)' != ''">$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop461)</TargetFrameworks>
   </PropertyGroup>
-  
+
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
     <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.7.1-preview</MsalClientSemVer>
@@ -45,6 +46,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.11.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 
@@ -52,4 +56,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
 </Project>
