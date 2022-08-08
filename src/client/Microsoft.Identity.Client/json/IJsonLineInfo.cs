@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Json
     /// <summary>
     /// Provides an interface to enable a class to return line and position information.
     /// </summary>
-    public interface IJsonLineInfo
+    internal interface IJsonLineInfo
     {
         /// <summary>
         /// Gets a value indicating whether the class can return line information.

@@ -4,7 +4,7 @@
     /// Provides an interface for using pooled arrays.
     /// </summary>
     /// <typeparam name="T">The array type content.</typeparam>
-    public interface IArrayPool<T>
+    internal interface IArrayPool<T>
     {
         /// <summary>
         /// Rent an array from the pool. This array must be returned when it is no longer needed.
