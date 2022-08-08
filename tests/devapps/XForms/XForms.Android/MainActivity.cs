@@ -24,12 +24,6 @@ namespace XForms.Droid
             LoadApplication(new App());
 
             App.RootViewController = this;
-
-#if ARIA_TELEMETRY_ENABLED
-            Telemetry.GetInstance().RegisterReceiver(
-                (new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler()).OnEvents);
-#endif
-
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)

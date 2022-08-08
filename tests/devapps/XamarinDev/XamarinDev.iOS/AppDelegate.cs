@@ -28,11 +28,6 @@ namespace XamarinDev.iOS
         {
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
-
-#if ARIA_TELEMETRY_ENABLED
-            Telemetry.GetInstance().RegisterReceiver(
-                (new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler()).OnEvents);
-#endif
             App.RootViewController = new UIViewController();
 
             return base.FinishedLaunching(app, options);

@@ -23,11 +23,10 @@
     <Authors>Microsoft</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
-    <PackageReleaseNotes>The changelog is available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/changelog.txt and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap </PackageReleaseNotes>
+    <PackageReleaseNotes>The release notes are available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap. To provide feedback, fill-in the survey at https://ncv.microsoft.com/JrXkdySi0m. </PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>
-      This package contains binaries needed to use the Windows broker and other features with MSAL on older platforms such as .NET Framework and .NET Core 3.x
-      The release notes are available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases.
+      This package contains binaries needed to use the Windows broker and other features with MSAL on older platforms such as .NET Framework and .NET Core 3.x.
     </Description>
     <PackageTags>Microsoft Authentication Library Desktop MSAL WAM broker Windows Authentication Manager</PackageTags>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
@@ -69,11 +68,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>  
 
 </Project>

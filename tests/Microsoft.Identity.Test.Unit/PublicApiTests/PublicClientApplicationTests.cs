@@ -20,6 +20,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -811,7 +812,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .BuildConcrete();
 
             var authority = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.Authority.AuthorityInfo, null);
-            Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authority.AuthorityInfo.CanonicalAuthority);
+            Assert.AreEqual(new Uri(ClientApplicationBase.DefaultAuthority), authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]
@@ -826,7 +827,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.ServiceBundle.Config.Authority.AuthorityInfo,
                 TestConstants.Utid);
 
-            Assert.AreEqual(TestConstants.AuthorityTestTenant, authority.AuthorityInfo.CanonicalAuthority);
+            Assert.AreEqual(new Uri(TestConstants.AuthorityTestTenant), authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]
@@ -1042,7 +1043,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(1365)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1365
         public async Task PCAAuthority_DirtiedByATS_Async()
         {
@@ -1061,12 +1062,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 await app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
+                Assert.AreEqual(new Uri(ClientApplicationBase.DefaultAuthority), app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
 
                 // ATS must not update the PCA authority
                 var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
+                Assert.AreEqual(new Uri(ClientApplicationBase.DefaultAuthority), app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
@@ -1074,7 +1075,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 await app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
+                Assert.AreEqual(new Uri(ClientApplicationBase.DefaultAuthority), app.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
             }
         }
 

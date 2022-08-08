@@ -80,7 +80,8 @@ namespace Microsoft.Identity.Client.Broker
                 {
                     using (var readAccountResult = await core.ReadAccountByIdAsync(
                     authenticationRequestParameters.Account.HomeAccountId.ObjectId,
-                    authenticationRequestParameters.CorrelationId.ToString("D")).ConfigureAwait(false))
+                    authenticationRequestParameters.CorrelationId.ToString("D"),
+                    cancellationToken).ConfigureAwait(false))
                     {
                         if (readAccountResult.IsSuccess)
                         {
@@ -303,7 +304,8 @@ namespace Microsoft.Identity.Client.Broker
             {
                 using (var readAccountResult = await core.ReadAccountByIdAsync(
                     account.HomeAccountId.ObjectId,
-                    correlationId).ConfigureAwait(false))
+                    correlationId,
+                    default).ConfigureAwait(false))
                 {
                     if (readAccountResult.IsSuccess)
                     {

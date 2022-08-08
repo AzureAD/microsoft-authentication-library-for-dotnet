@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 _keyVaultMsalTeam = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
             }
         }
-        
+
         /// <summary>
         /// Client -> Middletier -> RP
         /// This is OBO for SP without RT support.
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// For details see https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO, which explains
         /// the structure of the access token received from OBO.
         /// </remarks>
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore | TargetFrameworks.NetFx | TargetFrameworks.NetStandard)]
         public async Task ServicePrincipal_OBO_PPE_Async()
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
@@ -135,8 +135,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 "The cache expiry is not set because the node did not change");
         }
 
-
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ServicePrincipal_OBO_LongRunningProcess_PPE_Async()
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
@@ -212,13 +211,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 "The cache expiry is not set because there is an RT in the cache");
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
             await RunOnBehalfOfTestAsync(await LabUserHelper.GetSpecificUserAsync("IDLAB@msidlab4.onmicrosoft.com").ConfigureAwait(false)).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonWebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
@@ -226,13 +225,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunOnBehalfOfTestAsync(labResponse).ConfigureAwait(false);
         }
 
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
         public async Task WebAPIAccessingGraphOnBehalfOfADFS2019UserTestAsync()
         {
             await RunOnBehalfOfTestAsync(await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WebAPIAccessingGraphOnBehalfOfUserWithCacheTestAsync()
         {
             await RunOnBehalfOfTestWithTokenCacheAsync(await LabUserHelper.GetSpecificUserAsync("IDLAB@msidlab4.onmicrosoft.com").ConfigureAwait(false)).ConfigureAwait(false);

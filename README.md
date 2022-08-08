@@ -20,7 +20,7 @@ Quick links:
 
 ## Build Status
  
-[![Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20(YAML)?branchName=master)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=922&branchName=master)
+[![Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20(YAML)?branchName=main)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=922&branchName=main)
 
 ## Release notes, roadmap and SLA
 
@@ -58,7 +58,7 @@ Operating system:
 Platform of choice:
 * .NET 4.5 or greater
 * .NET Core 2.1 or greater
-* .NET Standard 1.3
+* .NET Standard 2.0
 * Mono Android 9.0
 * UAP 10.0
 * Xamarin.iOS 10

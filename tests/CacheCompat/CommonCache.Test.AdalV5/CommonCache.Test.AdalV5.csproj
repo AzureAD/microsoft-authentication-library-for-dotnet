@@ -8,6 +8,6 @@
     <ProjectReference Include="..\CommonCache.Test.Common\CommonCache.Test.Common.csproj" />
     <PackageReference Include="CommandLineParser" version="2.4.3" />
     <PackageReference Include="Newtonsoft.Json" version="13.0.1" />    
-    <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="5.2.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="5.2.9" />
   </ItemGroup>
 </Project>

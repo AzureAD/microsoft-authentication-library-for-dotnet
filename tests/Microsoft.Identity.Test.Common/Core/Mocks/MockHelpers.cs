@@ -105,27 +105,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static HttpResponseMessage CreateResiliencyMessage(HttpStatusCode statusCode)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
-            HttpContent content = new StringContent("Server Error 500-599");
-            if (responseMessage != null)
-            {
-                responseMessage.Content = content;
-            }
+            responseMessage.Content = new StringContent("Server Error 500-599");
             return responseMessage;
         }
 
         public static HttpResponseMessage CreateRequestTimeoutResponseMessage()
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.RequestTimeout);
-            HttpContent content = new StringContent("Request Timed Out.");
-            responseMessage.Content = content;
+            responseMessage.Content = new StringContent("Request Timed Out.");
             return responseMessage;
         }
 
         internal static HttpResponseMessage CreateFailureMessage(HttpStatusCode code, string message)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(code);
-            HttpContent content = new StringContent(message);
-            responseMessage.Content = content;
+            responseMessage.Content = new StringContent(message);
             return responseMessage;
         }
 
