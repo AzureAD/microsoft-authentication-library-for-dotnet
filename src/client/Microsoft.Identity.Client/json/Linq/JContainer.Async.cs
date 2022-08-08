@@ -26,6 +26,7 @@
 #if HAVE_ASYNC
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace Microsoft.Identity.Json.Linq
 {
     internal abstract partial class JContainer
     {
-        internal async Task ReadTokenFromAsync(JsonReader reader, JsonLoadSettings options, CancellationToken cancellationToken = default)
+        internal async Task ReadTokenFromAsync(JsonReader reader, JsonLoadSettings? options, CancellationToken cancellationToken = default)
         {
             ValidationUtils.ArgumentNotNull(reader, nameof(reader));
             int startDepth = reader.Depth;
@@ -53,11 +54,11 @@ namespace Microsoft.Identity.Json.Linq
             }
         }
 
-        private async Task ReadContentFromAsync(JsonReader reader, JsonLoadSettings settings, CancellationToken cancellationToken = default)
+        private async Task ReadContentFromAsync(JsonReader reader, JsonLoadSettings? settings, CancellationToken cancellationToken = default)
         {
-            IJsonLineInfo lineInfo = reader as IJsonLineInfo;
+            IJsonLineInfo? lineInfo = reader as IJsonLineInfo;
 
-            JContainer parent = this;
+            JContainer? parent = this;
 
             do
             {
@@ -70,6 +71,8 @@ namespace Microsoft.Identity.Json.Linq
 
                     parent = parent.Parent;
                 }
+
+                MiscellaneousUtils.Assert(parent != null);
 
                 switch (reader.TokenType)
                 {
@@ -106,7 +109,7 @@ namespace Microsoft.Identity.Json.Linq
                         parent = parent.Parent;
                         break;
                     case JsonToken.StartConstructor:
-                        JConstructor constructor = new JConstructor(reader.Value.ToString());
+                        JConstructor constructor = new JConstructor(reader.Value!.ToString());
                         constructor.SetLineInfo(lineInfo, settings);
                         parent.Add(constructor);
                         parent = constructor;
@@ -132,7 +135,7 @@ namespace Microsoft.Identity.Json.Linq
                     case JsonToken.Comment:
                         if (settings != null && settings.CommentHandling == CommentHandling.Load)
                         {
-                            v = JValue.CreateComment(reader.Value.ToString());
+                            v = JValue.CreateComment(reader.Value!.ToString());
                             v.SetLineInfo(lineInfo, settings);
                             parent.Add(v);
                         }
@@ -148,21 +151,15 @@ namespace Microsoft.Identity.Json.Linq
                         parent.Add(v);
                         break;
                     case JsonToken.PropertyName:
-                        string propertyName = reader.Value.ToString();
-                        JProperty property = new JProperty(propertyName);
-                        property.SetLineInfo(lineInfo, settings);
-                        JObject parentObject = (JObject)parent;
-                        // handle multiple properties with the same name in JSON
-                        JProperty existingPropertyWithName = parentObject.Property(propertyName, StringComparison.OrdinalIgnoreCase);
-                        if (existingPropertyWithName == null)
+                        JProperty? property = ReadProperty(reader, settings, lineInfo, parent);
+                        if (property != null)
                         {
-                            parent.Add(property);
+                            parent = property;
                         }
                         else
                         {
-                            existingPropertyWithName.Replace(property);
+                            await reader.SkipAsync().ConfigureAwait(false);
                         }
-                        parent = property;
                         break;
                     default:
                         throw new InvalidOperationException("The JsonReader should not be on a token of type {0}.".FormatWith(CultureInfo.InvariantCulture, reader.TokenType));

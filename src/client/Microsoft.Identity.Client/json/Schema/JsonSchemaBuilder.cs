@@ -35,6 +35,8 @@ using System.Globalization;
 using Microsoft.Identity.Json.Utilities;
 using Microsoft.Identity.Json.Linq;
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Schema
 {
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
@@ -96,7 +98,7 @@ namespace Microsoft.Identity.Json.Schema
             {
                 string reference = schema.DeferredReference;
 
-                bool locationReference = reference.StartsWith("#", StringComparison.Ordinal);
+                bool locationReference = (reference.StartsWith("#", StringComparison.Ordinal));
                 if (locationReference)
                 {
                     reference = UnescapeReference(reference);
@@ -212,16 +214,14 @@ namespace Microsoft.Identity.Json.Schema
 
             if (schemaObject.TryGetValue(JsonTypeReflector.RefPropertyName, out JToken referenceToken))
             {
-                JsonSchema deferredSchema = new JsonSchema
-                {
-                    DeferredReference = (string)referenceToken
-                };
+                JsonSchema deferredSchema = new JsonSchema();
+                deferredSchema.DeferredReference = (string)referenceToken;
 
                 return deferredSchema;
             }
 
             string location = token.Path.Replace(".", "/").Replace("[", "/").Replace("]", string.Empty);
-            if (!string.IsNullOrEmpty(location))
+            if (!StringUtils.IsNullOrEmpty(location))
             {
                 location = "/" + location;
             }

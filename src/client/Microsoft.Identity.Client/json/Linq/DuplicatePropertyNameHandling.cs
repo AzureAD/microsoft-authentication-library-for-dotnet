@@ -23,25 +23,24 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-namespace Microsoft.Identity.Json
+namespace Microsoft.Identity.Json.Linq
 {
     /// <summary>
-    /// Specifies null value handling options for the <see cref="JsonSerializer"/>.
+    /// Specifies how duplicate property names are handled when loading JSON.
     /// </summary>
-    /// <example>
-    ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeNullValueHandlingObject" title="NullValueHandling Class" />
-    ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeNullValueHandlingExample" title="NullValueHandling Ignore Example" />
-    /// </example>
-    internal enum NullValueHandling
+    internal enum DuplicatePropertyNameHandling
     {
         /// <summary>
-        /// Include null values when serializing and deserializing objects.
+        /// Replace the existing value when there is a duplicate property. The value of the last property in the JSON object will be used.
         /// </summary>
-        Include = 0,
-
+        Replace = 0,
         /// <summary>
-        /// Ignore null values when serializing and deserializing objects.
+        /// Ignore the new value when there is a duplicate property. The value of the first property in the JSON object will be used.
         /// </summary>
-        Ignore = 1
+        Ignore = 1,
+        /// <summary>
+        /// Throw a <see cref="JsonReaderException"/> when a duplicate property is encountered.
+        /// </summary>
+        Error = 2
     }
 }

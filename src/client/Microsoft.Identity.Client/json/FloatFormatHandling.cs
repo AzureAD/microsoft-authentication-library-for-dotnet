@@ -28,8 +28,8 @@ using System;
 namespace Microsoft.Identity.Json
 {
     /// <summary>
-    /// Specifies float format handling options when writing special floating point numbers, e.g. <see cref="double.NaN"/>,
-    /// <see cref="double.PositiveInfinity"/> and <see cref="double.NegativeInfinity"/> with <see cref="JsonWriter"/>.
+    /// Specifies float format handling options when writing special floating point numbers, e.g. <see cref="Double.NaN"/>,
+    /// <see cref="Double.PositiveInfinity"/> and <see cref="Double.NegativeInfinity"/> with <see cref="JsonWriter"/>.
     /// </summary>
     internal enum FloatFormatHandling
     {
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Json
         Symbol = 1,
 
         /// <summary>
-        /// Write special floating point values as the property's default value in JSON, e.g. 0.0 for a <see cref="double"/> property, <c>null</c> for a <see cref="Nullable{T}"/> of <see cref="double"/> property.
+        /// Write special floating point values as the property's default value in JSON, e.g. 0.0 for a <see cref="Double"/> property, <c>null</c> for a <see cref="Nullable{T}"/> of <see cref="Double"/> property.
         /// </summary>
         DefaultValue = 2
     }
