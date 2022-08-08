@@ -1,7 +1,10 @@
-﻿# Code files
+# Code files
 [*.{cs,vb}]
 
 #### Diagnostic configuration ####
 
 # IDE0073: File header
 dotnet_diagnostic.IDE0073.severity = none
+
+# CS8632: Nullable Annotation
+dotnet_diagnostic.CS8632.severity = none

@@ -19,8 +19,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
             string jwk = provider.CannonicalPublicKeyJwk;
             JObject jwkObj = JObject.Parse(jwk);
 
-            Assert.IsNotNull(jwkObj["E"]);
-            Assert.IsNotNull(jwkObj["N"]);
+            Assert.IsNotNull(jwkObj["e"]);
+            Assert.IsNotNull(jwkObj["n"]);
             Assert.AreEqual("RSA", jwkObj["kty"].ToString());
         }
     }
