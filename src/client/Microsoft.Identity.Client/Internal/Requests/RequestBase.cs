@@ -18,6 +18,8 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -78,6 +80,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
+            MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails();
 
             using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
             {
@@ -88,15 +91,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     LogReturnedToken(authenticationResult);
-
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
+                    LogSuccessfulTelemetry(authenticationResult, telemetryEventDetails);
+
                     return authenticationResult;
                 }
                 catch (MsalException ex)
                 {
                     apiEvent.ApiErrorCode = ex.ErrorCode;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, ex.ErrorCode);
                     throw;
                 }
                 catch (Exception ex)
@@ -104,7 +109,33 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     throw;
                 }
+                finally
+                {
+                    TrackTelemetryIfNecessary(
+                        AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients, 
+                        telemetryEventDetails);
+                }
             }
+        }
+
+        private void TrackTelemetryIfNecessary(
+            IEnumerable<ITelemetryClient> telemetryClients, MsalTelemetryEventDetails telemetryEventDetails)
+        {
+            var relevantClients = telemetryClients.GetEnabledClients(TelemetryConstants.AcquireTokenEventName);
+            if (relevantClients.Any())
+                relevantClients.TrackEvent(telemetryEventDetails);
+        }
+
+        private void LogSuccessfulTelemetry(AuthenticationResult authenticationResult, MsalTelemetryEventDetails telemetryEventDetails)
+        {
+            telemetryEventDetails.SetProperty(TelemetryConstants.CacheInfoTelemetry, authenticationResult.AuthenticationResultMetadata.CacheRefreshReason.ToString());
+            telemetryEventDetails.SetProperty(TelemetryConstants.TokenSource, authenticationResult.AuthenticationResultMetadata.TokenSource.ToString());
+            telemetryEventDetails.SetProperty(TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
+            telemetryEventDetails.SetProperty(TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs);
+            telemetryEventDetails.SetProperty(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
+            telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, true);
+            telemetryEventDetails.SetProperty(TelemetryConstants.PopToken, authenticationResult.TokenType.Equals(Constants.PoPTokenType));
+            telemetryEventDetails.SetProperty(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
         }
 
         private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
