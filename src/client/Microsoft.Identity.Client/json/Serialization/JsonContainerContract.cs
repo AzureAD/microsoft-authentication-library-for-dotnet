@@ -42,11 +42,11 @@ namespace Microsoft.Identity.Json.Serialization
     /// </summary>
     internal class JsonContainerContract : JsonContract
     {
-        private JsonContract _itemContract;
-        private JsonContract _finalItemContract;
+        private JsonContract? _itemContract;
+        private JsonContract? _finalItemContract;
 
         // will be null for containers that don't have an item type (e.g. IList) or for complex objects
-        internal JsonContract ItemContract
+        internal JsonContract? ItemContract
         {
             get => _itemContract;
             set
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Json.Serialization
                 _itemContract = value;
                 if (_itemContract != null)
                 {
-                    _finalItemContract = _itemContract.UnderlyingType.IsSealed() ? _itemContract : null;
+                    _finalItemContract = (_itemContract.UnderlyingType.IsSealed()) ? _itemContract : null;
                 }
                 else
                 {
@@ -64,13 +64,13 @@ namespace Microsoft.Identity.Json.Serialization
         }
 
         // the final (i.e. can't be inherited from like a sealed class or valuetype) item contract
-        internal JsonContract FinalItemContract => _finalItemContract;
+        internal JsonContract? FinalItemContract => _finalItemContract;
 
         /// <summary>
         /// Gets or sets the default collection items <see cref="JsonConverter" />.
         /// </summary>
         /// <value>The converter.</value>
-        public JsonConverter ItemConverter { get; set; }
+        public JsonConverter? ItemConverter { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the collection items preserve object references.
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Json.Serialization
         internal JsonContainerContract(Type underlyingType)
             : base(underlyingType)
         {
-            JsonContainerAttribute jsonContainerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(underlyingType);
+            JsonContainerAttribute? jsonContainerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(underlyingType);
 
             if (jsonContainerAttribute != null)
             {

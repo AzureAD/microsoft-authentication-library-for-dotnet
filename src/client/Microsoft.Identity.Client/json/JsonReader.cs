@@ -113,18 +113,18 @@ namespace Microsoft.Identity.Json
 
         // current Token data
         private JsonToken _tokenType;
-        private object _value;
+        private object? _value;
         internal char _quoteChar;
         internal State _currentState;
         private JsonPosition _currentPosition;
-        private CultureInfo _culture;
+        private CultureInfo? _culture;
         private DateTimeZoneHandling _dateTimeZoneHandling;
         private int? _maxDepth;
         private bool _hasExceededMaxDepth;
         internal DateParseHandling _dateParseHandling;
         internal FloatParseHandling _floatParseHandling;
-        private string _dateFormatString;
-        private List<JsonPosition> _stack;
+        private string? _dateFormatString;
+        private List<JsonPosition>? _stack;
 
         /// <summary>
         /// Gets the current reader state.
@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Json
         /// <summary>
         /// Gets or sets how custom date formatted strings are parsed when reading JSON.
         /// </summary>
-        public string DateFormatString
+        public string? DateFormatString
         {
             get => _dateFormatString;
             set => _dateFormatString = value;
@@ -227,6 +227,8 @@ namespace Microsoft.Identity.Json
 
         /// <summary>
         /// Gets or sets the maximum depth allowed when reading JSON. Reading past this depth will throw a <see cref="JsonReaderException"/>.
+        /// A null value means there is no maximum. 
+        /// The default value is <c>128</c>.
         /// </summary>
         public int? MaxDepth
         {
@@ -243,19 +245,19 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Gets the type of the current JSON token.
+        /// Gets the type of the current JSON token. 
         /// </summary>
         public virtual JsonToken TokenType => _tokenType;
 
         /// <summary>
         /// Gets the text value of the current JSON token.
         /// </summary>
-        public virtual object Value => _value;
+        public virtual object? Value => _value;
 
         /// <summary>
         /// Gets the .NET type for the current JSON token.
         /// </summary>
-        public virtual Type ValueType => _value?.GetType();
+        public virtual Type? ValueType => _value?.GetType();
 
         /// <summary>
         /// Gets the depth of the current token in the JSON document.
@@ -278,7 +280,7 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Gets the path of the current JSON token.
+        /// Gets the path of the current JSON token. 
         /// </summary>
         public virtual string Path
         {
@@ -289,13 +291,13 @@ namespace Microsoft.Identity.Json
                     return string.Empty;
                 }
 
-                bool insideContainer = _currentState != State.ArrayStart
+                bool insideContainer = (_currentState != State.ArrayStart
                                         && _currentState != State.ConstructorStart
-                                        && _currentState != State.ObjectStart;
+                                        && _currentState != State.ObjectStart);
 
                 JsonPosition? current = insideContainer ? (JsonPosition?)_currentPosition : null;
 
-                return JsonPosition.BuildPath(_stack, current);
+                return JsonPosition.BuildPath(_stack!, current);
             }
         }
 
@@ -327,6 +329,7 @@ namespace Microsoft.Identity.Json
             _dateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind;
             _dateParseHandling = DateParseHandling.DateTime;
             _floatParseHandling = FloatParseHandling.Double;
+            _maxDepth = 64;
 
             CloseInput = true;
         }
@@ -393,9 +396,9 @@ namespace Microsoft.Identity.Json
         public abstract bool Read();
 
         /// <summary>
-        /// Reads the next JSON token from the source as a <see cref="Nullable{T}"/> of <see cref="int"/>.
+        /// Reads the next JSON token from the source as a <see cref="Nullable{T}"/> of <see cref="Int32"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="int"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Int32"/>. This method will return <c>null</c> at the end of an array.</returns>
         public virtual int? ReadAsInt32()
         {
             JsonToken t = GetContentToken();
@@ -408,7 +411,7 @@ namespace Microsoft.Identity.Json
                     return null;
                 case JsonToken.Integer:
                 case JsonToken.Float:
-                    object v = Value;
+                    object v = Value!;
                     if (v is int i)
                     {
                         return i;
@@ -436,16 +439,16 @@ namespace Microsoft.Identity.Json
                     SetToken(JsonToken.Integer, i, false);
                     return i;
                 case JsonToken.String:
-                    string s = (string)Value;
+                    string? s = (string?)Value;
                     return ReadInt32String(s);
             }
 
             throw JsonReaderException.Create(this, "Error reading integer. Unexpected token: {0}.".FormatWith(CultureInfo.InvariantCulture, t));
         }
 
-        internal int? ReadInt32String(string s)
+        internal int? ReadInt32String(string? s)
         {
-            if (string.IsNullOrEmpty(s))
+            if (StringUtils.IsNullOrEmpty(s))
             {
                 SetToken(JsonToken.Null, null, false);
                 return null;
@@ -464,10 +467,10 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the source as a <see cref="string"/>.
+        /// Reads the next JSON token from the source as a <see cref="String"/>.
         /// </summary>
-        /// <returns>A <see cref="string"/>. This method will return <c>null</c> at the end of an array.</returns>
-        public virtual string ReadAsString()
+        /// <returns>A <see cref="String"/>. This method will return <c>null</c> at the end of an array.</returns>
+        public virtual string? ReadAsString()
         {
             JsonToken t = GetContentToken();
 
@@ -478,12 +481,12 @@ namespace Microsoft.Identity.Json
                 case JsonToken.EndArray:
                     return null;
                 case JsonToken.String:
-                    return (string)Value;
+                    return (string?)Value;
             }
 
             if (JsonTokenUtils.IsPrimitiveToken(t))
             {
-                object v = Value;
+                object? v = Value;
                 if (v != null)
                 {
                     string s;
@@ -505,10 +508,10 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the source as a <see cref="byte"/>[].
+        /// Reads the next JSON token from the source as a <see cref="Byte"/>[].
         /// </summary>
-        /// <returns>A <see cref="byte"/>[] or <c>null</c> if the next JSON token is null. This method will return <c>null</c> at the end of an array.</returns>
-        public virtual byte[] ReadAsBytes()
+        /// <returns>A <see cref="Byte"/>[] or <c>null</c> if the next JSON token is null. This method will return <c>null</c> at the end of an array.</returns>
+        public virtual byte[]? ReadAsBytes()
         {
             JsonToken t = GetContentToken();
 
@@ -518,7 +521,7 @@ namespace Microsoft.Identity.Json
                 {
                     ReadIntoWrappedTypeObject();
 
-                    byte[] data = ReadAsBytes();
+                    byte[]? data = ReadAsBytes();
                     ReaderReadAndAssert();
 
                     if (TokenType != JsonToken.EndObject)
@@ -533,7 +536,7 @@ namespace Microsoft.Identity.Json
                 {
                     // attempt to convert possible base 64 or GUID string to bytes
                     // GUID has to have format 00000000-0000-0000-0000-000000000000
-                    string s = (string)Value;
+                    string s = (string)Value!;
 
                     byte[] data;
 
@@ -565,7 +568,7 @@ namespace Microsoft.Identity.Json
                         return data;
                     }
 
-                    return (byte[])Value;
+                    return (byte[]?)Value;
                 case JsonToken.StartArray:
                     return ReadArrayIntoByteArray();
             }
@@ -612,9 +615,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the source as a <see cref="Nullable{T}"/> of <see cref="double"/>.
+        /// Reads the next JSON token from the source as a <see cref="Nullable{T}"/> of <see cref="Double"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="double"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Double"/>. This method will return <c>null</c> at the end of an array.</returns>
         public virtual double? ReadAsDouble()
         {
             JsonToken t = GetContentToken();
@@ -627,7 +630,7 @@ namespace Microsoft.Identity.Json
                     return null;
                 case JsonToken.Integer:
                 case JsonToken.Float:
-                    object v = Value;
+                    object v = Value!;
                     if (v is double d)
                     {
                         return d;
@@ -648,15 +651,15 @@ namespace Microsoft.Identity.Json
 
                     return (double)d;
                 case JsonToken.String:
-                    return ReadDoubleString((string)Value);
+                    return ReadDoubleString((string?)Value);
             }
 
             throw JsonReaderException.Create(this, "Error reading double. Unexpected token: {0}.".FormatWith(CultureInfo.InvariantCulture, t));
         }
 
-        internal double? ReadDoubleString(string s)
+        internal double? ReadDoubleString(string? s)
         {
-            if (string.IsNullOrEmpty(s))
+            if (StringUtils.IsNullOrEmpty(s))
             {
                 SetToken(JsonToken.Null, null, false);
                 return null;
@@ -675,9 +678,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the source as a <see cref="Nullable{T}"/> of <see cref="bool"/>.
+        /// Reads the next JSON token from the source as a <see cref="Nullable{T}"/> of <see cref="Boolean"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="bool"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Boolean"/>. This method will return <c>null</c> at the end of an array.</returns>
         public virtual bool? ReadAsBoolean()
         {
             JsonToken t = GetContentToken();
@@ -705,17 +708,17 @@ namespace Microsoft.Identity.Json
                     SetToken(JsonToken.Boolean, b, false);
                     return b;
                 case JsonToken.String:
-                    return ReadBooleanString((string)Value);
+                    return ReadBooleanString((string?)Value);
                 case JsonToken.Boolean:
-                    return (bool)Value;
+                    return (bool)Value!;
             }
 
             throw JsonReaderException.Create(this, "Error reading boolean. Unexpected token: {0}.".FormatWith(CultureInfo.InvariantCulture, t));
         }
 
-        internal bool? ReadBooleanString(string s)
+        internal bool? ReadBooleanString(string? s)
         {
-            if (string.IsNullOrEmpty(s))
+            if (StringUtils.IsNullOrEmpty(s))
             {
                 SetToken(JsonToken.Null, null, false);
                 return null;
@@ -734,9 +737,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the source as a <see cref="Nullable{T}"/> of <see cref="decimal"/>.
+        /// Reads the next JSON token from the source as a <see cref="Nullable{T}"/> of <see cref="Decimal"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="decimal"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Decimal"/>. This method will return <c>null</c> at the end of an array.</returns>
         public virtual decimal? ReadAsDecimal()
         {
             JsonToken t = GetContentToken();
@@ -749,8 +752,8 @@ namespace Microsoft.Identity.Json
                     return null;
                 case JsonToken.Integer:
                 case JsonToken.Float:
-                    object v = Value;
-
+                    object v = Value!;
+                    
                     if (v is decimal d)
                     {
                         return d;
@@ -778,15 +781,15 @@ namespace Microsoft.Identity.Json
                     SetToken(JsonToken.Float, d, false);
                     return d;
                 case JsonToken.String:
-                    return ReadDecimalString((string)Value);
+                    return ReadDecimalString((string?)Value);
             }
 
             throw JsonReaderException.Create(this, "Error reading decimal. Unexpected token: {0}.".FormatWith(CultureInfo.InvariantCulture, t));
         }
 
-        internal decimal? ReadDecimalString(string s)
+        internal decimal? ReadDecimalString(string? s)
         {
-            if (string.IsNullOrEmpty(s))
+            if (StringUtils.IsNullOrEmpty(s))
             {
                 SetToken(JsonToken.Null, null, false);
                 return null;
@@ -830,18 +833,17 @@ namespace Microsoft.Identity.Json
                     }
 #endif
 
-                    return (DateTime)Value;
+                    return (DateTime)Value!;
                 case JsonToken.String:
-                    string s = (string)Value;
-                    return ReadDateTimeString(s);
+                    return ReadDateTimeString((string?)Value);
             }
 
             throw JsonReaderException.Create(this, "Error reading date. Unexpected token: {0}.".FormatWith(CultureInfo.InvariantCulture, TokenType));
         }
 
-        internal DateTime? ReadDateTimeString(string s)
+        internal DateTime? ReadDateTimeString(string? s)
         {
-            if (string.IsNullOrEmpty(s))
+            if (StringUtils.IsNullOrEmpty(s))
             {
                 SetToken(JsonToken.Null, null, false);
                 return null;
@@ -885,18 +887,18 @@ namespace Microsoft.Identity.Json
                         SetToken(JsonToken.Date, new DateTimeOffset(time), false);
                     }
 
-                    return (DateTimeOffset)Value;
+                    return (DateTimeOffset)Value!;
                 case JsonToken.String:
-                    string s = (string)Value;
+                    string? s = (string?)Value;
                     return ReadDateTimeOffsetString(s);
                 default:
                     throw JsonReaderException.Create(this, "Error reading date. Unexpected token: {0}.".FormatWith(CultureInfo.InvariantCulture, t));
             }
         }
 
-        internal DateTimeOffset? ReadDateTimeOffsetString(string s)
+        internal DateTimeOffset? ReadDateTimeOffsetString(string? s)
         {
-            if (string.IsNullOrEmpty(s))
+            if (StringUtils.IsNullOrEmpty(s))
             {
                 SetToken(JsonToken.Null, null, false);
                 return null;
@@ -985,7 +987,7 @@ namespace Microsoft.Identity.Json
         /// </summary>
         /// <param name="newToken">The new token.</param>
         /// <param name="value">The value.</param>
-        protected void SetToken(JsonToken newToken, object value)
+        protected void SetToken(JsonToken newToken, object? value)
         {
             SetToken(newToken, value, true);
         }
@@ -996,7 +998,7 @@ namespace Microsoft.Identity.Json
         /// <param name="newToken">The new token.</param>
         /// <param name="value">The value.</param>
         /// <param name="updateIndex">A flag indicating whether the position index inside an array should be updated.</param>
-        protected void SetToken(JsonToken newToken, object value, bool updateIndex)
+        protected void SetToken(JsonToken newToken, object? value, bool updateIndex)
         {
             _tokenType = newToken;
             _value = value;
@@ -1027,7 +1029,7 @@ namespace Microsoft.Identity.Json
                 case JsonToken.PropertyName:
                     _currentState = State.Property;
 
-                    _currentPosition.PropertyName = (string)value;
+                    _currentPosition.PropertyName = (string)value!;
                     break;
                 case JsonToken.Undefined:
                 case JsonToken.Integer:
@@ -1170,7 +1172,7 @@ namespace Microsoft.Identity.Json
             }
         }
 
-        internal void ReadForTypeAndAssert(JsonContract contract, bool hasConverter)
+        internal void ReadForTypeAndAssert(JsonContract? contract, bool hasConverter)
         {
             if (!ReadForType(contract, hasConverter))
             {
@@ -1178,7 +1180,7 @@ namespace Microsoft.Identity.Json
             }
         }
 
-        internal bool ReadForType(JsonContract contract, bool hasConverter)
+        internal bool ReadForType(JsonContract? contract, bool hasConverter)
         {
             // don't read properties with converters as a specific value
             // the value might be a string which will then get converted which will error if read as date for example
@@ -1230,7 +1232,7 @@ namespace Microsoft.Identity.Json
                     throw new ArgumentOutOfRangeException();
             }
 
-            return TokenType != JsonToken.None;
+            return (TokenType != JsonToken.None);
         }
 
         internal bool ReadAndMoveToContent()

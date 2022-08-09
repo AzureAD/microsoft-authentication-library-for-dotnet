@@ -35,6 +35,8 @@ using Microsoft.Identity.Json.Serialization;
 using Microsoft.Identity.Json.Utilities;
 using System.Runtime.Serialization;
 using ErrorEventArgs = Microsoft.Identity.Json.Serialization.ErrorEventArgs;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Identity.Json
 {
@@ -54,13 +56,13 @@ namespace Microsoft.Identity.Json
         internal DefaultValueHandling _defaultValueHandling;
         internal ConstructorHandling _constructorHandling;
         internal MetadataPropertyHandling _metadataPropertyHandling;
-        internal JsonConverterCollection _converters;
+        internal JsonConverterCollection? _converters;
         internal IContractResolver _contractResolver;
-        internal ITraceWriter _traceWriter;
-        internal IEqualityComparer _equalityComparer;
+        internal ITraceWriter? _traceWriter;
+        internal IEqualityComparer? _equalityComparer;
         internal ISerializationBinder _serializationBinder;
         internal StreamingContext _context;
-        private IReferenceResolver _referenceResolver;
+        private IReferenceResolver? _referenceResolver;
 
         private Formatting? _formatting;
         private DateFormatHandling? _dateFormatHandling;
@@ -73,61 +75,61 @@ namespace Microsoft.Identity.Json
         private int? _maxDepth;
         private bool _maxDepthSet;
         private bool? _checkAdditionalContent;
-        private string _dateFormatString;
+        private string? _dateFormatString;
         private bool _dateFormatStringSet;
 
         /// <summary>
         /// Occurs when the <see cref="JsonSerializer"/> errors during serialization and deserialization.
         /// </summary>
-        public virtual event EventHandler<ErrorEventArgs> Error;
+        public virtual event EventHandler<ErrorEventArgs>? Error;
 
         /// <summary>
         /// Gets or sets the <see cref="IReferenceResolver"/> used by the serializer when resolving references.
         /// </summary>
-        public virtual IReferenceResolver ReferenceResolver
+        public virtual IReferenceResolver? ReferenceResolver
         {
             get => GetReferenceResolver();
             set
             {
-                _referenceResolver = value ?? throw new ArgumentNullException(nameof(value), "Reference resolver cannot be null.");
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value), "Reference resolver cannot be null.");
+                }
+
+                _referenceResolver = value;
             }
         }
 
-        ///// <summary>
-        ///// Gets or sets the <see cref="SerializationBinder"/> used by the serializer when resolving type names.
-        ///// </summary>
-        //[Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
-        //public virtual SerializationBinder Binder
-        //{
-        //    get
-        //    {
-        //        if (_serializationBinder == null)
-        //        {
-        //            return null;
-        //        }
+        /// <summary>
+        /// Gets or sets the <see cref="SerializationBinder"/> used by the serializer when resolving type names.
+        /// </summary>
+        [Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
+        public virtual SerializationBinder Binder
+        {
+            get
+            {
+                if (_serializationBinder is SerializationBinder legacySerializationBinder)
+                {
+                    return legacySerializationBinder;
+                }
 
-        //        if (_serializationBinder is SerializationBinder legacySerializationBinder)
-        //        {
-        //            return legacySerializationBinder;
-        //        }
+                if (_serializationBinder is SerializationBinderAdapter adapter)
+                {
+                    return adapter.SerializationBinder;
+                }
 
-        //        if (_serializationBinder is SerializationBinderAdapter adapter)
-        //        {
-        //            return adapter.SerializationBinder;
-        //        }
+                throw new InvalidOperationException("Cannot get SerializationBinder because an ISerializationBinder was previously set.");
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value), "Serialization binder cannot be null.");
+                }
 
-        //        throw new InvalidOperationException("Cannot get SerializationBinder because an ISerializationBinder was previously set.");
-        //    }
-        //    set
-        //    {
-        //        if (value == null)
-        //        {
-        //            throw new ArgumentNullException(nameof(value), "Serialization binder cannot be null.");
-        //        }
-
-        //        _serializationBinder = value as ISerializationBinder ?? new SerializationBinderAdapter(value);
-        //    }
-        //}
+                _serializationBinder = value as ISerializationBinder ?? new SerializationBinderAdapter(value);
+            }
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="ISerializationBinder"/> used by the serializer when resolving type names.
@@ -137,7 +139,12 @@ namespace Microsoft.Identity.Json
             get => _serializationBinder;
             set
             {
-                _serializationBinder = value ?? throw new ArgumentNullException(nameof(value), "Serialization binder cannot be null.");
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value), "Serialization binder cannot be null.");
+                }
+
+                _serializationBinder = value;
             }
         }
 
@@ -145,7 +152,7 @@ namespace Microsoft.Identity.Json
         /// Gets or sets the <see cref="ITraceWriter"/> used by the serializer when writing trace messages.
         /// </summary>
         /// <value>The trace writer.</value>
-        public virtual ITraceWriter TraceWriter
+        public virtual ITraceWriter? TraceWriter
         {
             get => _traceWriter;
             set => _traceWriter = value;
@@ -155,7 +162,7 @@ namespace Microsoft.Identity.Json
         /// Gets or sets the equality comparer used by the serializer when comparing references.
         /// </summary>
         /// <value>The equality comparer.</value>
-        public virtual IEqualityComparer EqualityComparer
+        public virtual IEqualityComparer? EqualityComparer
         {
             get => _equalityComparer;
             set => _equalityComparer = value;
@@ -458,8 +465,8 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Gets or sets how special floating point numbers, e.g. <see cref="double.NaN"/>,
-        /// <see cref="double.PositiveInfinity"/> and <see cref="double.NegativeInfinity"/>,
+        /// Gets or sets how special floating point numbers, e.g. <see cref="Double.NaN"/>,
+        /// <see cref="Double.PositiveInfinity"/> and <see cref="Double.NegativeInfinity"/>,
         /// are written as JSON text.
         /// The default value is <see cref="Json.FloatFormatHandling.String" />.
         /// </summary>
@@ -507,7 +514,7 @@ namespace Microsoft.Identity.Json
         /// <summary>
         /// Gets or sets the maximum depth allowed when reading JSON. Reading past this depth will throw a <see cref="JsonReaderException"/>.
         /// A null value means there is no maximum.
-        /// The default value is <c>null</c>.
+        /// The default value is <c>128</c>.
         /// </summary>
         public virtual int? MaxDepth
         {
@@ -539,7 +546,7 @@ namespace Microsoft.Identity.Json
 
         internal bool IsCheckAdditionalContentSet()
         {
-            return _checkAdditionalContent != null;
+            return (_checkAdditionalContent != null);
         }
 
         /// <summary>
@@ -565,12 +572,12 @@ namespace Microsoft.Identity.Json
 
         /// <summary>
         /// Creates a new <see cref="JsonSerializer"/> instance.
-        /// The <see cref="JsonSerializer"/> will not use default settings
+        /// The <see cref="JsonSerializer"/> will not use default settings 
         /// from <see cref="JsonConvert.DefaultSettings"/>.
         /// </summary>
         /// <returns>
         /// A new <see cref="JsonSerializer"/> instance.
-        /// The <see cref="JsonSerializer"/> will not use default settings
+        /// The <see cref="JsonSerializer"/> will not use default settings 
         /// from <see cref="JsonConvert.DefaultSettings"/>.
         /// </returns>
         public static JsonSerializer Create()
@@ -580,16 +587,16 @@ namespace Microsoft.Identity.Json
 
         /// <summary>
         /// Creates a new <see cref="JsonSerializer"/> instance using the specified <see cref="JsonSerializerSettings"/>.
-        /// The <see cref="JsonSerializer"/> will not use default settings
+        /// The <see cref="JsonSerializer"/> will not use default settings 
         /// from <see cref="JsonConvert.DefaultSettings"/>.
         /// </summary>
         /// <param name="settings">The settings to be applied to the <see cref="JsonSerializer"/>.</param>
         /// <returns>
         /// A new <see cref="JsonSerializer"/> instance using the specified <see cref="JsonSerializerSettings"/>.
-        /// The <see cref="JsonSerializer"/> will not use default settings
+        /// The <see cref="JsonSerializer"/> will not use default settings 
         /// from <see cref="JsonConvert.DefaultSettings"/>.
         /// </returns>
-        public static JsonSerializer Create(JsonSerializerSettings settings)
+        public static JsonSerializer Create(JsonSerializerSettings? settings)
         {
             JsonSerializer serializer = Create();
 
@@ -603,34 +610,34 @@ namespace Microsoft.Identity.Json
 
         /// <summary>
         /// Creates a new <see cref="JsonSerializer"/> instance.
-        /// The <see cref="JsonSerializer"/> will use default settings
+        /// The <see cref="JsonSerializer"/> will use default settings 
         /// from <see cref="JsonConvert.DefaultSettings"/>.
         /// </summary>
         /// <returns>
         /// A new <see cref="JsonSerializer"/> instance.
-        /// The <see cref="JsonSerializer"/> will use default settings
+        /// The <see cref="JsonSerializer"/> will use default settings 
         /// from <see cref="JsonConvert.DefaultSettings"/>.
         /// </returns>
         public static JsonSerializer CreateDefault()
         {
             // copy static to local variable to avoid concurrency issues
-            JsonSerializerSettings defaultSettings = JsonConvert.DefaultSettings?.Invoke();
+            JsonSerializerSettings? defaultSettings = JsonConvert.DefaultSettings?.Invoke();
 
             return Create(defaultSettings);
         }
 
         /// <summary>
         /// Creates a new <see cref="JsonSerializer"/> instance using the specified <see cref="JsonSerializerSettings"/>.
-        /// The <see cref="JsonSerializer"/> will use default settings
+        /// The <see cref="JsonSerializer"/> will use default settings 
         /// from <see cref="JsonConvert.DefaultSettings"/> as well as the specified <see cref="JsonSerializerSettings"/>.
         /// </summary>
         /// <param name="settings">The settings to be applied to the <see cref="JsonSerializer"/>.</param>
         /// <returns>
         /// A new <see cref="JsonSerializer"/> instance using the specified <see cref="JsonSerializerSettings"/>.
-        /// The <see cref="JsonSerializer"/> will use default settings
+        /// The <see cref="JsonSerializer"/> will use default settings 
         /// from <see cref="JsonConvert.DefaultSettings"/> as well as the specified <see cref="JsonSerializerSettings"/>.
         /// </returns>
-        public static JsonSerializer CreateDefault(JsonSerializerSettings settings)
+        public static JsonSerializer CreateDefault(JsonSerializerSettings? settings)
         {
             JsonSerializer serializer = CreateDefault();
             if (settings != null)
@@ -804,14 +811,14 @@ namespace Microsoft.Identity.Json
 
             SetupReader(
                 reader,
-                out CultureInfo previousCulture,
+                out CultureInfo? previousCulture,
                 out DateTimeZoneHandling? previousDateTimeZoneHandling,
                 out DateParseHandling? previousDateParseHandling,
                 out FloatParseHandling? previousFloatParseHandling,
                 out int? previousMaxDepth,
-                out string previousDateFormatString);
+                out string? previousDateFormatString);
 
-            TraceJsonReader traceJsonReader = (TraceWriter != null && TraceWriter.LevelFilter >= TraceLevel.Verbose)
+            TraceJsonReader? traceJsonReader = (TraceWriter != null && TraceWriter.LevelFilter >= TraceLevel.Verbose)
                 ? CreateTraceJsonReader(reader)
                 : null;
 
@@ -820,7 +827,7 @@ namespace Microsoft.Identity.Json
 
             if (traceJsonReader != null)
             {
-                TraceWriter.Trace(TraceLevel.Verbose, traceJsonReader.GetDeserializedJsonMessage(), null);
+                TraceWriter!.Trace(TraceLevel.Verbose, traceJsonReader.GetDeserializedJsonMessage(), null);
             }
 
             ResetReader(reader, previousCulture, previousDateTimeZoneHandling, previousDateParseHandling, previousFloatParseHandling, previousMaxDepth, previousDateFormatString);
@@ -830,22 +837,22 @@ namespace Microsoft.Identity.Json
         /// Deserializes the JSON structure contained by the specified <see cref="JsonReader"/>.
         /// </summary>
         /// <param name="reader">The <see cref="JsonReader"/> that contains the JSON structure to deserialize.</param>
-        /// <returns>The <see cref="object"/> being deserialized.</returns>
+        /// <returns>The <see cref="Object"/> being deserialized.</returns>
         [DebuggerStepThrough]
-        public object Deserialize(JsonReader reader)
+        public object? Deserialize(JsonReader reader)
         {
             return Deserialize(reader, null);
         }
 
         /// <summary>
-        /// Deserializes the JSON structure contained by the specified <see cref="StringReader"/>
+        /// Deserializes the JSON structure contained by the specified <see cref="TextReader"/>
         /// into an instance of the specified type.
         /// </summary>
         /// <param name="reader">The <see cref="TextReader"/> containing the object.</param>
         /// <param name="objectType">The <see cref="Type"/> of object being deserialized.</param>
         /// <returns>The instance of <paramref name="objectType"/> being deserialized.</returns>
         [DebuggerStepThrough]
-        public object Deserialize(TextReader reader, Type objectType)
+        public object? Deserialize(TextReader reader, Type objectType)
         {
             return Deserialize(new JsonTextReader(reader), objectType);
         }
@@ -858,9 +865,9 @@ namespace Microsoft.Identity.Json
         /// <typeparam name="T">The type of the object to deserialize.</typeparam>
         /// <returns>The instance of <typeparamref name="T"/> being deserialized.</returns>
         [DebuggerStepThrough]
-        public T Deserialize<T>(JsonReader reader)
+        public T? Deserialize<T>(JsonReader reader)
         {
-            return (T)Deserialize(reader, typeof(T));
+            return (T?)Deserialize(reader, typeof(T));
         }
 
         /// <summary>
@@ -871,34 +878,34 @@ namespace Microsoft.Identity.Json
         /// <param name="objectType">The <see cref="Type"/> of object being deserialized.</param>
         /// <returns>The instance of <paramref name="objectType"/> being deserialized.</returns>
         [DebuggerStepThrough]
-        public object Deserialize(JsonReader reader, Type objectType)
+        public object? Deserialize(JsonReader reader, Type? objectType)
         {
             return DeserializeInternal(reader, objectType);
         }
 
-        internal virtual object DeserializeInternal(JsonReader reader, Type objectType)
+        internal virtual object? DeserializeInternal(JsonReader reader, Type? objectType)
         {
             ValidationUtils.ArgumentNotNull(reader, nameof(reader));
 
             SetupReader(
                 reader,
-                out CultureInfo previousCulture,
+                out CultureInfo? previousCulture,
                 out DateTimeZoneHandling? previousDateTimeZoneHandling,
                 out DateParseHandling? previousDateParseHandling,
                 out FloatParseHandling? previousFloatParseHandling,
                 out int? previousMaxDepth,
-                out string previousDateFormatString);
+                out string? previousDateFormatString);
 
-            TraceJsonReader traceJsonReader = (TraceWriter != null && TraceWriter.LevelFilter >= TraceLevel.Verbose)
+            TraceJsonReader? traceJsonReader = (TraceWriter != null && TraceWriter.LevelFilter >= TraceLevel.Verbose)
                 ? CreateTraceJsonReader(reader)
                 : null;
 
             JsonSerializerInternalReader serializerReader = new JsonSerializerInternalReader(this);
-            object value = serializerReader.Deserialize(traceJsonReader ?? reader, objectType, CheckAdditionalContent);
+            object? value = serializerReader.Deserialize(traceJsonReader ?? reader, objectType, CheckAdditionalContent);
 
             if (traceJsonReader != null)
             {
-                TraceWriter.Trace(TraceLevel.Verbose, traceJsonReader.GetDeserializedJsonMessage(), null);
+                TraceWriter!.Trace(TraceLevel.Verbose, traceJsonReader.GetDeserializedJsonMessage(), null);
             }
 
             ResetReader(reader, previousCulture, previousDateTimeZoneHandling, previousDateParseHandling, previousFloatParseHandling, previousMaxDepth, previousDateFormatString);
@@ -906,7 +913,7 @@ namespace Microsoft.Identity.Json
             return value;
         }
 
-        private void SetupReader(JsonReader reader, out CultureInfo previousCulture, out DateTimeZoneHandling? previousDateTimeZoneHandling, out DateParseHandling? previousDateParseHandling, out FloatParseHandling? previousFloatParseHandling, out int? previousMaxDepth, out string previousDateFormatString)
+        private void SetupReader(JsonReader reader, out CultureInfo? previousCulture, out DateTimeZoneHandling? previousDateTimeZoneHandling, out DateParseHandling? previousDateParseHandling, out FloatParseHandling? previousFloatParseHandling, out int? previousMaxDepth, out string? previousDateFormatString)
         {
             if (_culture != null && !_culture.Equals(reader.Culture))
             {
@@ -977,7 +984,7 @@ namespace Microsoft.Identity.Json
             }
         }
 
-        private void ResetReader(JsonReader reader, CultureInfo previousCulture, DateTimeZoneHandling? previousDateTimeZoneHandling, DateParseHandling? previousDateParseHandling, FloatParseHandling? previousFloatParseHandling, int? previousMaxDepth, string previousDateFormatString)
+        private void ResetReader(JsonReader reader, CultureInfo? previousCulture, DateTimeZoneHandling? previousDateTimeZoneHandling, DateParseHandling? previousDateParseHandling, FloatParseHandling? previousFloatParseHandling, int? previousMaxDepth, string? previousDateFormatString)
         {
             // reset reader back to previous options
             if (previousCulture != null)
@@ -1013,55 +1020,55 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Serializes the specified <see cref="object"/> and writes the JSON structure
+        /// Serializes the specified <see cref="Object"/> and writes the JSON structure
         /// using the specified <see cref="TextWriter"/>.
         /// </summary>
         /// <param name="textWriter">The <see cref="TextWriter"/> used to write the JSON structure.</param>
-        /// <param name="value">The <see cref="object"/> to serialize.</param>
-        public void Serialize(TextWriter textWriter, object value)
+        /// <param name="value">The <see cref="Object"/> to serialize.</param>
+        public void Serialize(TextWriter textWriter, object? value)
         {
             Serialize(new JsonTextWriter(textWriter), value);
         }
 
         /// <summary>
-        /// Serializes the specified <see cref="object"/> and writes the JSON structure
+        /// Serializes the specified <see cref="Object"/> and writes the JSON structure
         /// using the specified <see cref="JsonWriter"/>.
         /// </summary>
         /// <param name="jsonWriter">The <see cref="JsonWriter"/> used to write the JSON structure.</param>
-        /// <param name="value">The <see cref="object"/> to serialize.</param>
+        /// <param name="value">The <see cref="Object"/> to serialize.</param>
         /// <param name="objectType">
         /// The type of the value being serialized.
         /// This parameter is used when <see cref="JsonSerializer.TypeNameHandling"/> is <see cref="Json.TypeNameHandling.Auto"/> to write out the type name if the type of the value does not match.
         /// Specifying the type is optional.
         /// </param>
-        public void Serialize(JsonWriter jsonWriter, object value, Type objectType)
+        public void Serialize(JsonWriter jsonWriter, object? value, Type? objectType)
         {
             SerializeInternal(jsonWriter, value, objectType);
         }
 
         /// <summary>
-        /// Serializes the specified <see cref="object"/> and writes the JSON structure
+        /// Serializes the specified <see cref="Object"/> and writes the JSON structure
         /// using the specified <see cref="TextWriter"/>.
         /// </summary>
         /// <param name="textWriter">The <see cref="TextWriter"/> used to write the JSON structure.</param>
-        /// <param name="value">The <see cref="object"/> to serialize.</param>
+        /// <param name="value">The <see cref="Object"/> to serialize.</param>
         /// <param name="objectType">
         /// The type of the value being serialized.
         /// This parameter is used when <see cref="TypeNameHandling"/> is Auto to write out the type name if the type of the value does not match.
         /// Specifying the type is optional.
         /// </param>
-        public void Serialize(TextWriter textWriter, object value, Type objectType)
+        public void Serialize(TextWriter textWriter, object? value, Type objectType)
         {
             Serialize(new JsonTextWriter(textWriter), value, objectType);
         }
 
         /// <summary>
-        /// Serializes the specified <see cref="object"/> and writes the JSON structure
+        /// Serializes the specified <see cref="Object"/> and writes the JSON structure
         /// using the specified <see cref="JsonWriter"/>.
         /// </summary>
         /// <param name="jsonWriter">The <see cref="JsonWriter"/> used to write the JSON structure.</param>
-        /// <param name="value">The <see cref="object"/> to serialize.</param>
-        public void Serialize(JsonWriter jsonWriter, object value)
+        /// <param name="value">The <see cref="Object"/> to serialize.</param>
+        public void Serialize(JsonWriter jsonWriter, object? value)
         {
             SerializeInternal(jsonWriter, value, null);
         }
@@ -1077,7 +1084,7 @@ namespace Microsoft.Identity.Json
             return traceReader;
         }
 
-        internal virtual void SerializeInternal(JsonWriter jsonWriter, object value, Type objectType)
+        internal virtual void SerializeInternal(JsonWriter jsonWriter, object? value, Type? objectType)
         {
             ValidationUtils.ArgumentNotNull(jsonWriter, nameof(jsonWriter));
 
@@ -1117,21 +1124,21 @@ namespace Microsoft.Identity.Json
                 jsonWriter.StringEscapeHandling = _stringEscapeHandling.GetValueOrDefault();
             }
 
-            CultureInfo previousCulture = null;
+            CultureInfo? previousCulture = null;
             if (_culture != null && !_culture.Equals(jsonWriter.Culture))
             {
                 previousCulture = jsonWriter.Culture;
                 jsonWriter.Culture = _culture;
             }
 
-            string previousDateFormatString = null;
+            string? previousDateFormatString = null;
             if (_dateFormatStringSet && jsonWriter.DateFormatString != _dateFormatString)
             {
                 previousDateFormatString = jsonWriter.DateFormatString;
                 jsonWriter.DateFormatString = _dateFormatString;
             }
 
-            TraceJsonWriter traceJsonWriter = (TraceWriter != null && TraceWriter.LevelFilter >= TraceLevel.Verbose)
+            TraceJsonWriter? traceJsonWriter = (TraceWriter != null && TraceWriter.LevelFilter >= TraceLevel.Verbose)
                 ? new TraceJsonWriter(jsonWriter)
                 : null;
 
@@ -1140,7 +1147,7 @@ namespace Microsoft.Identity.Json
 
             if (traceJsonWriter != null)
             {
-                TraceWriter.Trace(TraceLevel.Verbose, traceJsonWriter.GetSerializedJsonMessage(), null);
+                TraceWriter!.Trace(TraceLevel.Verbose, traceJsonWriter.GetSerializedJsonMessage(), null);
             }
 
             // reset writer back to previous options
@@ -1184,12 +1191,12 @@ namespace Microsoft.Identity.Json
             return _referenceResolver;
         }
 
-        internal JsonConverter GetMatchingConverter(Type type)
+        internal JsonConverter? GetMatchingConverter(Type type)
         {
             return GetMatchingConverter(_converters, type);
         }
 
-        internal static JsonConverter GetMatchingConverter(IList<JsonConverter> converters, Type objectType)
+        internal static JsonConverter? GetMatchingConverter(IList<JsonConverter>? converters, Type objectType)
         {
 #if DEBUG
             ValidationUtils.ArgumentNotNull(objectType, nameof(objectType));
