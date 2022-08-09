@@ -1270,12 +1270,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void CheckRuntimeBrokerSupportTest()
         {
+            //Broker enabled
             IPublicClientApplication app = PublicClientApplicationBuilder
                                             .Create(TestConstants.ClientId)
                                             .WithBrokerPreview()
                                             .Build();
 
             Assert.IsTrue(app.IsProofOfPosessionSupportedByClient());
+
+            //Broker disabled
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .WithBrokerPreview(false)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
+
+            //Broker not configured
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
         }
 #endif
 
