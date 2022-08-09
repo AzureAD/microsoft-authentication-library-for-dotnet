@@ -15,6 +15,9 @@ using Microsoft.Identity.Client.Advanced;
 #if !NET5_0_OR_GREATER
 using Microsoft.Identity.Client.Desktop;
 #endif
+#if NET_CORE
+using Microsoft.Identity.Client.Broker;
+#endif
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
@@ -1262,6 +1265,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result.AccessToken);
             }
         }
+
+#if NET_CORE
+        [TestMethod]
+        public void CheckRuntimeBrokerSupportTest()
+        {
+            IPublicClientApplication app = PublicClientApplicationBuilder
+                                            .Create(TestConstants.ClientId)
+                                            .WithBrokerPreview()
+                                            .Build();
+
+            Assert.IsTrue(app.IsProofOfPosessionSupportedByClient());
+        }
+#endif
 
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {

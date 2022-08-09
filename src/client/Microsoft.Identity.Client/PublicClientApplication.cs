@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client
@@ -270,6 +271,27 @@ namespace Microsoft.Identity.Client
                 scopes,
                 username,
                 password);
+        }
+
+        /// <summary>
+        /// Used to determine if the currently available broker is able to perform Proof-of-Possesion.
+        /// </summary>
+        /// <returns>Boolean indicating Proof-of-Possesion is supported</returns>
+        /// <exception cref="MsalClientException"></exception>
+        public bool IsProofOfPosessionSupportedByClient()
+        {
+            if (DesktopOsHelper.IsWin10OrServerEquivalent())
+            {
+                if (!ServiceBundle.Config.IsBrokerEnabled)
+                {
+                    return false;
+                }
+
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+                return broker.IsPopSupported;
+            }
+
+            return false;
         }
     }
 }
