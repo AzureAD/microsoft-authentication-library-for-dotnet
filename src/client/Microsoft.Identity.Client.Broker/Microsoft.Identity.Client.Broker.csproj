@@ -2,11 +2,11 @@
   
   <PropertyGroup>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNetDesktop45 Condition="$([MSBuild]::IsOsPlatform('Windows')) and '$(MSAL_DESKTOP_ONLY_DEV)' == ''">net461</TargetFrameworkNetDesktop45>
+    <TargetFrameworkNetDesktop461 Condition="$([MSBuild]::IsOsPlatform('Windows')) and '$(MSAL_DESKTOP_ONLY_DEV)' == ''">net461</TargetFrameworkNetDesktop461>
 
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <TargetFramework Condition="'$(TargetFrameworkNetDesktop45)' == ''">$(TargetFrameworkNetStandard)</TargetFramework>
-    <TargetFrameworks Condition="'$(TargetFrameworkNetDesktop45)' != ''">$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop45)</TargetFrameworks>
+    <TargetFramework Condition="'$(TargetFrameworkNetDesktop461)' == ''">$(TargetFrameworkNetStandard)</TargetFramework>
+    <TargetFrameworks Condition="'$(TargetFrameworkNetDesktop461)' != ''">$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop461)</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
