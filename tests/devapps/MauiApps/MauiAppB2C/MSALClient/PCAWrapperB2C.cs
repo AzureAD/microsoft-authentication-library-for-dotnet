@@ -34,10 +34,10 @@ namespace MauiB2C.MSALClient
         /// <returns>Authentication result</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scopes)
         {
-            var accts = await PCA.GetAccountsAsync().ConfigureAwait(false);
-            IEnumerable<IAccount> accounts = await PCA.GetAccountsAsync().ConfigureAwait(false);
+            // Get accounts by policy
+            IEnumerable<IAccount> accounts = await PCA.GetAccountsAsync(B2CConstants.PolicySignUpSignIn).ConfigureAwait(false);
 
-            AuthenticationResult authResult = await PCA.AcquireTokenSilent(scopes, GetAccountByPolicy(accounts, B2CConstants.PolicySignUpSignIn))
+            AuthenticationResult authResult = await PCA.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
                .WithB2CAuthority(B2CConstants.AuthoritySignInSignUp)
                .ExecuteAsync()
                .ConfigureAwait(false);
@@ -77,18 +77,6 @@ namespace MauiB2C.MSALClient
             {
                 await PCA.RemoveAsync(acct).ConfigureAwait(false);
             }
-        }
-
-        private IAccount GetAccountByPolicy(IEnumerable<IAccount> accounts, string policy)
-        {
-            foreach (var account in accounts)
-            {
-                string userIdentifier = account.HomeAccountId.ObjectId.Split('.')[0];
-                if (userIdentifier.EndsWith(policy.ToLower()))
-                    return account;
-            }
-
-            return null;
         }
     }
 }

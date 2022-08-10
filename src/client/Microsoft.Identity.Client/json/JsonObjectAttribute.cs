@@ -34,6 +34,7 @@ namespace Microsoft.Identity.Json
     internal sealed class JsonObjectAttribute : JsonContainerAttribute
     {
         private MemberSerialization _memberSerialization = MemberSerialization.OptOut;
+        internal MissingMemberHandling? _missingMemberHandling;
 
         // yuck. can't set nullable properties on an attribute in C#
         // have to use this approach to get an unset default state
@@ -48,6 +49,16 @@ namespace Microsoft.Identity.Json
         {
             get => _memberSerialization;
             set => _memberSerialization = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the missing member handling used when deserializing this object.
+        /// </summary>
+        /// <value>The missing member handling.</value>
+        public MissingMemberHandling MissingMemberHandling
+        {
+            get => _missingMemberHandling ?? default;
+            set => _missingMemberHandling = value;
         }
 
         /// <summary>

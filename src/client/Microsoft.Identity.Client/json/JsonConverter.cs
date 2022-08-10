@@ -26,7 +26,8 @@
 using System;
 using Microsoft.Identity.Json.Utilities;
 using System.Globalization;
-using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Identity.Json
 {
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Json
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public abstract void WriteJson(JsonWriter writer, object value, JsonSerializer serializer);
+        public abstract void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer);
 
         /// <summary>
         /// Reads the JSON representation of the object.
@@ -51,7 +52,7 @@ namespace Microsoft.Identity.Json
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public abstract object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer);
+        public abstract object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer);
 
         /// <summary>
         /// Determines whether this instance can convert the specified object type.
@@ -87,13 +88,13 @@ namespace Microsoft.Identity.Json
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public sealed override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public sealed override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             if (!(value != null ? value is T : ReflectionUtils.IsNullable(typeof(T))))
             {
                 throw new JsonSerializationException("Converter cannot write specified value to JSON. {0} is required.".FormatWith(CultureInfo.InvariantCulture, typeof(T)));
             }
-            WriteJson(writer, (T)value, serializer);
+            WriteJson(writer, (T?)value, serializer);
         }
 
         /// <summary>
@@ -102,7 +103,7 @@ namespace Microsoft.Identity.Json
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public abstract void WriteJson(JsonWriter writer, T value, JsonSerializer serializer);
+        public abstract void WriteJson(JsonWriter writer, T? value, JsonSerializer serializer);
 
         /// <summary>
         /// Reads the JSON representation of the object.
@@ -112,14 +113,14 @@ namespace Microsoft.Identity.Json
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public sealed override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public sealed override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             bool existingIsNull = existingValue == null;
             if (!(existingIsNull || existingValue is T))
             {
                 throw new JsonSerializationException("Converter cannot read JSON with the specified existing value. {0} is required.".FormatWith(CultureInfo.InvariantCulture, typeof(T)));
             }
-            return ReadJson(reader, objectType, existingIsNull ? default : (T)existingValue, !existingIsNull, serializer);
+            return ReadJson(reader, objectType, existingIsNull ? default : (T?)existingValue, !existingIsNull, serializer);
         }
 
         /// <summary>
@@ -131,7 +132,7 @@ namespace Microsoft.Identity.Json
         /// <param name="hasExistingValue">The existing value has a value.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public abstract T ReadJson(JsonReader reader, Type objectType, T existingValue, bool hasExistingValue, JsonSerializer serializer);
+        public abstract T? ReadJson(JsonReader reader, Type objectType, T? existingValue, bool hasExistingValue, JsonSerializer serializer);
 
         /// <summary>
         /// Determines whether this instance can convert the specified object type.

@@ -24,6 +24,7 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Test.Common;
 
 #if !NET5_WIN
 using Microsoft.Identity.Client.Desktop;
@@ -32,7 +33,7 @@ using Microsoft.Identity.Client.Desktop;
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
     [TestClass]
-    [TestCategory("Broker")]
+    [TestCategory(TestCategories.Broker)]
     public class WamTests : TestBase
     {
         private CoreUIParent _coreUIParent;
