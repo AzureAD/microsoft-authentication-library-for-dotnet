@@ -4,10 +4,12 @@
 steps:
 - task: stevedower.python.PythonScript.PythonScript@1
   displayName: 'Update PIP'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     arguments: '-m pip install --upgrade pip'
 
 - task: stevedower.python.PythonScript.PythonScript@1
   displayName: 'Install MSAL.Python PIP'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     arguments: '-m pip install msal'
