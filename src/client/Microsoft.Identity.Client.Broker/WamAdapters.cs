@@ -65,6 +65,9 @@ namespace Microsoft.Identity.Client.Broker
             long errorCode = authResult.Error.ErrorCode;
             string errorMessage;
 
+            logger.Info("[WamBroker] Processing WAM exception");
+            logger.Verbose($"[WamBroker] TelemetryData: {authResult.TelemetryData}");
+
             switch ((ResponseStatus)authResult.Error.Status)
             {
                 case ResponseStatus.UserCanceled:
