@@ -6,10 +6,12 @@ parameters:
   TestFilter: '$(System.ArtifactsDirectory)\drop\DeviceAuth\**\**'
 
 steps:
-- task: DownloadBuildArtifacts@0
+- task: DownloadPipelineArtifact@2
   displayName: 'Download Build Artifacts'
   inputs:
-    artifactName: drop
+    artifact: DeviceAuth
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
 
 - task: VSTest@2
   displayName: 'DeviceAuthTests'
