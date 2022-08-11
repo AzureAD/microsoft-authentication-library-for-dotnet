@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Internal.Requests.Silent
 {
@@ -138,10 +139,31 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             if (!string.IsNullOrEmpty(loginHint))
             {
-                IReadOnlyList<IAccount> accounts = (await CacheManager.GetAccountsAsync().ConfigureAwait(false))
+                IList<IAccount> accounts = (await CacheManager.GetAccountsAsync().ConfigureAwait(false))
                     .Where(a => !string.IsNullOrWhiteSpace(a.Username) &&
                            a.Username.Equals(loginHint, StringComparison.OrdinalIgnoreCase))
                     .ToList();
+
+                if (accounts.Count == 0 && DesktopOsHelper.IsWindows())
+                {
+                    string currentUpn;
+                    
+                    try
+                    {
+                        currentUpn = await ServiceBundle.PlatformProxy.GetUserPrincipalNameAsync();
+                    }
+                    catch
+                    {
+                        // NetDesktopPlatformProxy throws instead of returning string.Empty.
+                        currentUpn = null;
+                    }
+
+
+                    if (currentUpn == loginHint)
+                    {
+                        accounts.Add(PublicClientApplication.OperatingSystemAccount);
+                    }
+                }
 
                 if (accounts.Count == 0)
                 {
