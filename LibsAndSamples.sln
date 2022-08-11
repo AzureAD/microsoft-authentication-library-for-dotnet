@@ -31,9 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreTestApp", "tests\dev
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopTestApp", "tests\devapps\DesktopTestApp\DesktopTestApp.csproj", "{3A8EC886-C71D-4384-BFE4-73378CC7293D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.UIAutomation.Infrastructure", "tests\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.UIAutomation.Infrastructure.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Android.UIAutomation", "tests\Microsoft.Identity.Test.Android.UIAutomation\Microsoft.Identity.Test.Android.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Android.UIAutomation", "tests\Microsoft.Identity.Test.Android.UIAutomation\Microsoft.Identity.Test.Android.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.LabInfrastructure", "tests\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj", "{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}"
 EndProject
@@ -109,9 +107,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-bootstrap-build.yaml = build\template-bootstrap-build.yaml
 		build\template-build-and-prep-automation.yaml = build\template-build-and-prep-automation.yaml
 		build\template-build-and-run-all-tests.yaml = build\template-build-and-run-all-tests.yaml
-		build\template-build-and-run-cachecompat-tests.yaml = build\template-build-and-run-cachecompat-tests.yaml
 		build\template-build-android-automation.yaml = build\template-build-android-automation.yaml
 		build\template-build-ios-automation.yaml = build\template-build-ios-automation.yaml
+		build\template-cachecompat-automation.yaml = build\template-cachecompat-automation.yaml
 		build\template-desktop-unit-and-automation.yaml = build\template-desktop-unit-and-automation.yaml
 		build\template-install-keyvault-secrets.yaml = build\template-install-keyvault-secrets.yaml
 		build\template-install-nuget.yaml = build\template-install-nuget.yaml
@@ -127,6 +125,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-python-config.yaml = build\template-python-config.yaml
 		build\template-restore-build-libsandsamples.yaml = build\template-restore-build-libsandsamples.yaml
 		build\template-run-all-tests.yaml = build\template-run-all-tests.yaml
+		build\template-run-cachecompat-tests.yaml = build\template-run-cachecompat-tests.yaml
 		build\template-run-device-auth-tests.yaml = build\template-run-device-auth-tests.yaml
 		build\template-run-integration-tests.yaml = build\template-run-integration-tests.yaml
 		build\template-run-unit-tests.yaml = build\template-run-unit-tests.yaml
@@ -187,6 +186,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.NetStandard", "tests\Microsoft.Identity.Test.Integration.netstandard\Microsoft.Identity.Test.Integration.NetStandard.csproj", "{69CE42A2-44DD-4740-856B-607C3BB5A92E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntuneMAMSampleiOS", "tests\devapps\Intune-xamarin-ios\IntuneMAMSampleiOS.csproj", "{034A5B86-A8AE-449D-B561-46F811329E6D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TrueMam", "TrueMam", "{660867D0-956C-4AF2-8627-03AADF4FCEAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -407,34 +408,6 @@ Global
 		{3A8EC886-C71D-4384-BFE4-73378CC7293D}.Release|x64.Build.0 = Release|Any CPU
 		{3A8EC886-C71D-4384-BFE4-73378CC7293D}.Release|x86.ActiveCfg = Release|Any CPU
 		{3A8EC886-C71D-4384-BFE4-73378CC7293D}.Release|x86.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|ARM.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|iPhone.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|x64.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|x86.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|ARM.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|ARM.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|ARM64.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|iPhone.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x64.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x64.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x86.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x86.Build.0 = Release|Any CPU
 		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|ARM.ActiveCfg = Debug|Any CPU
@@ -1656,7 +1629,6 @@ Global
 		{0B22271B-163F-429B-A472-4C7BF531CEE9} = {3761DEF3-458C-4CE2-BE94-4FC9D12217CC}
 		{72F0ADCA-3A0B-44AA-8129-21A1B27CD841} = {384BA371-F17F-4A70-9423-D54F71BB3FCB}
 		{3A8EC886-C71D-4384-BFE4-73378CC7293D} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4} = {45EBC624-6277-4EA2-A89C-A730A3214503}
 		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE} = {45EBC624-6277-4EA2-A89C-A730A3214503}
 		{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{18559D36-C735-4933-AA86-398C8222D4F6} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
@@ -1703,9 +1675,10 @@ Global
 		{998D38B3-344C-4F19-833E-6181B0834AF6} = {384BA371-F17F-4A70-9423-D54F71BB3FCB}
 		{CC07F293-91B9-45A3-AA3A-77885BBCB624} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{DD23D8FF-86BA-4E9F-8AF1-0EBE0D86986A} = {CC07F293-91B9-45A3-AA3A-77885BBCB624}
-		{C6CA2F00-E48A-478F-ABC3-1FE3FE20286B} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
+		{C6CA2F00-E48A-478F-ABC3-1FE3FE20286B} = {660867D0-956C-4AF2-8627-03AADF4FCEAA}
 		{69CE42A2-44DD-4740-856B-607C3BB5A92E} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
-		{034A5B86-A8AE-449D-B561-46F811329E6D} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
+		{034A5B86-A8AE-449D-B561-46F811329E6D} = {660867D0-956C-4AF2-8627-03AADF4FCEAA}
+		{660867D0-956C-4AF2-8627-03AADF4FCEAA} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020399A9-DC27-4B82-9CAA-EF488665AC27}
