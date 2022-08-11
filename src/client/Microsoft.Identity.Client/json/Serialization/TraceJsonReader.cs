@@ -45,10 +45,8 @@ namespace Microsoft.Identity.Json.Serialization
             // prefix the message in the stringwriter to avoid concat with a potentially large JSON string
             _sw.Write("Deserialized JSON: " + Environment.NewLine);
 
-            _textWriter = new JsonTextWriter(_sw)
-            {
-                Formatting = Formatting.Indented
-            };
+            _textWriter = new JsonTextWriter(_sw);
+            _textWriter.Formatting = Formatting.Indented;
         }
 
         public string GetDeserializedJsonMessage()
@@ -70,16 +68,16 @@ namespace Microsoft.Identity.Json.Serialization
             return value;
         }
 
-        public override string ReadAsString()
+        public override string? ReadAsString()
         {
-            string value = _innerReader.ReadAsString();
+            string? value = _innerReader.ReadAsString();
             WriteCurrentToken();
             return value;
         }
 
-        public override byte[] ReadAsBytes()
+        public override byte[]? ReadAsBytes()
         {
-            byte[] value = _innerReader.ReadAsBytes();
+            byte[]? value = _innerReader.ReadAsBytes();
             WriteCurrentToken();
             return value;
         }
@@ -138,9 +136,9 @@ namespace Microsoft.Identity.Json.Serialization
 
         public override JsonToken TokenType => _innerReader.TokenType;
 
-        public override object Value => _innerReader.Value;
+        public override object? Value => _innerReader.Value;
 
-        public override Type ValueType => _innerReader.ValueType;
+        public override Type ?ValueType => _innerReader.ValueType;
 
         public override void Close()
         {

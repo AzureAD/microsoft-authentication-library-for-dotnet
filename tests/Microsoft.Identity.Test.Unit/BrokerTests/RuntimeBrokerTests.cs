@@ -27,11 +27,12 @@ using Windows.Security.Credentials;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
     [TestClass]
-    [TestCategory("Broker")]
+    [TestCategory(TestCategories.Broker)]
     public class RuntimeBrokerTests : TestBase
     {
         private CoreUIParent _coreUIParent;

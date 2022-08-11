@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 string homeAccountId3 = ClientInfo.CreateFromJson(clientInfo3).ToAccountIdentifier();
 
                 rtItem = new MsalRefreshTokenCacheItem(
-                    TestConstants.SovereignNetworkEnvironment,
+                    TestConstants.SovereignNetworkEnvironmentDE,
                     TestConstants.ClientId,
                     "someRT",
                     clientInfo3,

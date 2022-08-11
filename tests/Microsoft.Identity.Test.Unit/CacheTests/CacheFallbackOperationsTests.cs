@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 adalUsers,
                 new[] {
                     TestConstants.ProductionPrefNetworkEnvironment,
-                    TestConstants.SovereignNetworkEnvironment },
+                    TestConstants.SovereignNetworkEnvironmentDE },
                 new[]
                 {
                     "user1",
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertByUsername(
               adalUsers,
               new[] {
-                    TestConstants.SovereignNetworkEnvironment },
+                    TestConstants.SovereignNetworkEnvironmentDE },
               new[]
               {
                     "sovereign_user5"
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.SovereignNetworkEnvironment },
+                        TestConstants.SovereignNetworkEnvironmentDE },
                     TestConstants.ClientId,
                     new Account(null, "User1", null));
 
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.SovereignNetworkEnvironment },
+                        TestConstants.SovereignNetworkEnvironmentDE },
                     TestConstants.ClientId,
                     new Account(null, "UserX", null));
 
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.SovereignNetworkEnvironment },
+                        TestConstants.SovereignNetworkEnvironmentDE },
                     TestConstants.ClientId,
                     new Account("uid2.tenant", null, null));
 
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.SovereignNetworkEnvironment },
+                        TestConstants.SovereignNetworkEnvironmentDE },
                     TestConstants.ClientId,
                     new Account("udiX.tenant", null, null));
 
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.SovereignNetworkEnvironment },
+                        TestConstants.SovereignNetworkEnvironmentDE },
                     TestConstants.ClientId,
                     new Account(null, null, null)); // too litle info here, do not return RT
 
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.SovereignNetworkEnvironment },
+                        TestConstants.SovereignNetworkEnvironmentDE },
                     TestConstants.ClientId,
                     new Account("uid1.utid", "User1", null));
 
@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.SovereignNetworkEnvironment },
+                        TestConstants.SovereignNetworkEnvironmentDE },
                     TestConstants.ClientId,
                     new Account("uid1.utid", "UserX", null));
 
@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
-                        TestConstants.SovereignNetworkEnvironment },
+                        TestConstants.SovereignNetworkEnvironmentDE },
                     TestConstants.ClientId,
                     new Account("uidX.utid", "User1", null));
 

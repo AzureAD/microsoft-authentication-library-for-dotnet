@@ -68,7 +68,8 @@ steps:
     TargetFolder: '$(build.artifactstagingdirectory)/brokerTestApp'
 
 #Public drop
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: Xamarin.iOS'
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Artifact: Xamarin.Android'
   inputs:
-    ArtifactName: Xamarin.Android
+    targetPath: $(build.artifactstagingdirectory)
+    artifactName: Xamarin.Android
