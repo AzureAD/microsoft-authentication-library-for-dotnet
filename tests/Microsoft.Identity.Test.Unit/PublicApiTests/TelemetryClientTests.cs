@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCleanup] 
         public override void TestCleanup()
         {
-            _harness?.Dispose();
             base.TestCleanup();
         }
 

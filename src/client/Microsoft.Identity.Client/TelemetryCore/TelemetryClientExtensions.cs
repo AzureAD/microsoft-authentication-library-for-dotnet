@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.TelemetryCore
@@ -19,11 +20,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         /// <returns>The relevant set of <see cref="ITelemetryClient"/>s.</returns>
         internal static IEnumerable<ITelemetryClient> GetEnabledClients(this IEnumerable<ITelemetryClient> clients, string eventName)
         {
-            foreach (var client in clients)
-            {
-                if (client.IsEnabled(eventName))
-                    yield return client;
-            }
+            return clients?.Where(c => c.IsEnabled(eventName));
         }
 
         /// <summary>
@@ -31,9 +28,9 @@ namespace Microsoft.Identity.Client.TelemetryCore
         /// </summary>
         /// <param name="clients">Clients to emit telemetry to.</param>
         /// <param name="eventDetails">Telemetry details to emit.</param>
-        internal static void TrackEvent(this IEnumerable<ITelemetryClient> clients, TelemetryEventDetails eventDetails)
+        internal static void TrackEvent(this IEnumerable<ITelemetryClient> clients, TelemetryEventDetails eventDetails, string eventName)
         {
-            foreach (var client in clients)
+            foreach (var client in clients.GetEnabledClients(eventName))
             {
                 client.TrackEvent(eventDetails);
             }

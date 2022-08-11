@@ -81,6 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
             MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails();
+            IEnumerable<ITelemetryClient> telemetryClients = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients;
 
             using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
             {
@@ -93,7 +94,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogReturnedToken(authenticationResult);
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
-                    LogSuccessfulTelemetry(authenticationResult, telemetryEventDetails);
+
+                    if (telemetryClients != null && telemetryClients.Count() > 0)
+                    {
+                        LogSuccessfulTelemetry(authenticationResult, telemetryEventDetails);
+                    }
 
                     return authenticationResult;
                 }
@@ -110,19 +115,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 finally
                 {
-                    TrackTelemetryIfNecessary(
-                        AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients, 
-                        telemetryEventDetails);
+                    telemetryClients?.TrackEvent(telemetryEventDetails, TelemetryConstants.AcquireTokenEventName);
                 }
             }
-        }
-
-        private void TrackTelemetryIfNecessary(
-            IEnumerable<ITelemetryClient> telemetryClients, MsalTelemetryEventDetails telemetryEventDetails)
-        {
-            var relevantClients = telemetryClients.GetEnabledClients(TelemetryConstants.AcquireTokenEventName);
-            if (relevantClients.Any())
-                relevantClients.TrackEvent(telemetryEventDetails);
         }
 
         private void LogSuccessfulTelemetry(AuthenticationResult authenticationResult, MsalTelemetryEventDetails telemetryEventDetails)
