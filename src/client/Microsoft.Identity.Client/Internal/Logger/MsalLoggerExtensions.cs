@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Core
 
         public static void InfoPii(this ILoggerAdapter logger, Exception exWithPii)
         {
-            logger.Log(LogLevel.Info, exWithPii.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            logger.Log(LogLevel.Info, exWithPii?.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void InfoPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
