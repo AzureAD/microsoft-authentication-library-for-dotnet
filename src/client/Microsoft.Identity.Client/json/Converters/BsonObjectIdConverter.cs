@@ -28,12 +28,14 @@ using Microsoft.Identity.Json.Bson;
 using System.Globalization;
 using Microsoft.Identity.Json.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Converters
 {
     /// <summary>
     /// Converts a <see cref="BsonObjectId"/> to and from JSON and BSON.
     /// </summary>
-    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.Identity.Json.Bson for more details.")]
+    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Newtonsoft.Json.Bson for more details.")]
     internal class BsonObjectIdConverter : JsonConverter
     {
         /// <summary>
@@ -85,7 +87,7 @@ namespace Microsoft.Identity.Json.Converters
         /// </returns>
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(BsonObjectId);
+            return (objectType == typeof(BsonObjectId));
         }
     }
 }

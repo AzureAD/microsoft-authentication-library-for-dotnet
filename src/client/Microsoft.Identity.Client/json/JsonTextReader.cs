@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 // Copyright (c) 2007 James Newton-King
 //
 // Permission is hereby granted, free of charge, to any person
@@ -27,6 +27,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.IO;
 using System.Globalization;
+using System.Diagnostics;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
 #endif
@@ -56,8 +57,9 @@ namespace Microsoft.Identity.Json
     internal partial class JsonTextReader : JsonReader, IJsonLineInfo
     {
         private const char UnicodeReplacementChar = '\uFFFD';
+#if HAVE_BIG_INTEGER
         private const int MaximumJavascriptIntegerCharacterLength = 380;
-
+#endif
 #if DEBUG
         internal int LargeBufferLength { get; set; } = int.MaxValue / 2;
 #else
@@ -65,7 +67,7 @@ namespace Microsoft.Identity.Json
 #endif
 
         private readonly TextReader _reader;
-        private char[] _chars;
+        private char[]? _chars;
         private int _charsUsed;
         private int _charPos;
         private int _lineStartPos;
@@ -73,7 +75,7 @@ namespace Microsoft.Identity.Json
         private bool _isEndOfFile;
         private StringBuffer _stringBuffer;
         private StringReference _stringReference;
-        private IArrayPool<char> _arrayPool;
+        private IArrayPool<char>? _arrayPool;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonTextReader"/> class with the specified <see cref="TextReader"/>.
@@ -81,7 +83,12 @@ namespace Microsoft.Identity.Json
         /// <param name="reader">The <see cref="TextReader"/> containing the JSON data to read.</param>
         public JsonTextReader(TextReader reader)
         {
-            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            _reader = reader;
             _lineNumber = 1;
 
 #if HAVE_ASYNC
@@ -90,7 +97,7 @@ namespace Microsoft.Identity.Json
         }
 
 #if DEBUG
-        internal char[] CharBuffer
+        internal char[]? CharBuffer
         {
             get => _chars;
             set => _chars = value;
@@ -102,17 +109,22 @@ namespace Microsoft.Identity.Json
         /// <summary>
         /// Gets or sets the reader's property name table.
         /// </summary>
-        public JsonNameTable PropertyNameTable { get; set; }
+        public JsonNameTable? PropertyNameTable { get; set; }
 
         /// <summary>
         /// Gets or sets the reader's character buffer pool.
         /// </summary>
-        public IArrayPool<char> ArrayPool
+        public IArrayPool<char>? ArrayPool
         {
             get => _arrayPool;
             set
             {
-                _arrayPool = value ?? throw new ArgumentNullException(nameof(value));
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                _arrayPool = value;
             }
         }
 
@@ -126,6 +138,8 @@ namespace Microsoft.Identity.Json
 
         private void SetNewLine(bool hasNextChar)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (hasNextChar && _chars[_charPos] == StringUtils.LineFeed)
             {
                 _charPos++;
@@ -150,7 +164,7 @@ namespace Microsoft.Identity.Json
         }
 
         private void ParseReadString(char quote, ReadType readType)
-        {
+        { 
             SetPostValueState(true);
 
             switch (readType)
@@ -238,6 +252,8 @@ namespace Microsoft.Identity.Json
 
         private void ShiftBufferIfNeeded()
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             // once in the last 10% of the buffer, or buffer is already very large then
             // shift the remaining content to the start to avoid unnecessarily increasing
             // the buffer size when reading numbers/strings
@@ -264,6 +280,8 @@ namespace Microsoft.Identity.Json
 
         private void PrepareBufferForReadData(bool append, int charsRequired)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             // char buffer is full
             if (_charsUsed + charsRequired >= _chars.Length - 1)
             {
@@ -327,6 +345,7 @@ namespace Microsoft.Identity.Json
             }
 
             PrepareBufferForReadData(append, charsRequired);
+            MiscellaneousUtils.Assert(_chars != null);
 
             int attemptCharReadCount = _chars.Length - _charsUsed - 1;
 
@@ -395,6 +414,7 @@ namespace Microsoft.Identity.Json
         public override bool Read()
         {
             EnsureBuffer();
+            MiscellaneousUtils.Assert(_chars != null);
 
             while (true)
             {
@@ -444,9 +464,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="int"/>.
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="Int32"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="int"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Int32"/>. This method will return <c>null</c> at the end of an array.</returns>
         public override int? ReadAsInt32()
         {
             return (int?)ReadNumberValue(ReadType.ReadAsInt32);
@@ -462,21 +482,23 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="string"/>.
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="String"/>.
         /// </summary>
-        /// <returns>A <see cref="string"/>. This method will return <c>null</c> at the end of an array.</returns>
-        public override string ReadAsString()
+        /// <returns>A <see cref="String"/>. This method will return <c>null</c> at the end of an array.</returns>
+        public override string? ReadAsString()
         {
-            return (string)ReadStringValue(ReadType.ReadAsString);
+            return (string?)ReadStringValue(ReadType.ReadAsString);
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="byte"/>[].
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Byte"/>[].
         /// </summary>
-        /// <returns>A <see cref="byte"/>[] or <c>null</c> if the next JSON token is null. This method will return <c>null</c> at the end of an array.</returns>
-        public override byte[] ReadAsBytes()
+        /// <returns>A <see cref="Byte"/>[] or <c>null</c> if the next JSON token is null. This method will return <c>null</c> at the end of an array.</returns>
+        public override byte[]? ReadAsBytes()
         {
             EnsureBuffer();
+            MiscellaneousUtils.Assert(_chars != null);
+
             bool isWrapped = false;
 
             switch (_currentState)
@@ -509,7 +531,7 @@ namespace Microsoft.Identity.Json
                             case '"':
                             case '\'':
                                 ParseString(currentChar, ReadType.ReadAsBytes);
-                                byte[] data = (byte[])Value;
+                                byte[]? data = (byte[]?)Value;
                                 if (isWrapped)
                                 {
                                     ReaderReadAndAssert();
@@ -578,9 +600,10 @@ namespace Microsoft.Identity.Json
             }
         }
 
-        private object ReadStringValue(ReadType readType)
+        private object? ReadStringValue(ReadType readType)
         {
             EnsureBuffer();
+            MiscellaneousUtils.Assert(_chars != null);
 
             switch (_currentState)
             {
@@ -707,7 +730,7 @@ namespace Microsoft.Identity.Json
             }
         }
 
-        private object FinishReadQuotedStringValue(ReadType readType)
+        private object? FinishReadQuotedStringValue(ReadType readType)
         {
             switch (readType)
             {
@@ -720,7 +743,7 @@ namespace Microsoft.Identity.Json
                         return time;
                     }
 
-                    return ReadDateTimeString((string)Value);
+                    return ReadDateTimeString((string?)Value);
 #if HAVE_DATE_TIME_OFFSET
                 case ReadType.ReadAsDateTimeOffset:
                     if (Value is DateTimeOffset offset)
@@ -728,7 +751,7 @@ namespace Microsoft.Identity.Json
                         return offset;
                     }
 
-                    return ReadDateTimeOffsetString((string)Value);
+                    return ReadDateTimeOffsetString((string?)Value);
 #endif
                 default:
                     throw new ArgumentOutOfRangeException(nameof(readType));
@@ -741,12 +764,13 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="bool"/>.
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="Boolean"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="bool"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Boolean"/>. This method will return <c>null</c> at the end of an array.</returns>
         public override bool? ReadAsBoolean()
         {
             EnsureBuffer();
+            MiscellaneousUtils.Assert(_chars != null);
 
             switch (_currentState)
             {
@@ -881,9 +905,10 @@ namespace Microsoft.Identity.Json
             SetStateBasedOnCurrent();
         }
 
-        private object ReadNumberValue(ReadType readType)
+        private object? ReadNumberValue(ReadType readType)
         {
             EnsureBuffer();
+            MiscellaneousUtils.Assert(_chars != null);
 
             switch (_currentState)
             {
@@ -991,7 +1016,7 @@ namespace Microsoft.Identity.Json
             }
         }
 
-        private object FinishReadQuotedNumber(ReadType readType)
+        private object? FinishReadQuotedNumber(ReadType readType)
         {
             switch (readType)
             {
@@ -1018,18 +1043,18 @@ namespace Microsoft.Identity.Json
 #endif
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="decimal"/>.
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="Decimal"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="decimal"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Decimal"/>. This method will return <c>null</c> at the end of an array.</returns>
         public override decimal? ReadAsDecimal()
         {
             return (decimal?)ReadNumberValue(ReadType.ReadAsDecimal);
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="double"/>.
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="Double"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="double"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Double"/>. This method will return <c>null</c> at the end of an array.</returns>
         public override double? ReadAsDouble()
         {
             return (double?)ReadNumberValue(ReadType.ReadAsDouble);
@@ -1037,6 +1062,8 @@ namespace Microsoft.Identity.Json
 
         private void HandleNull()
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (EnsureChars(1, true))
             {
                 char next = _chars[_charPos + 1];
@@ -1057,6 +1084,8 @@ namespace Microsoft.Identity.Json
 
         private void ReadFinished()
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (EnsureChars(0, false))
             {
                 EatWhitespace();
@@ -1106,6 +1135,8 @@ namespace Microsoft.Identity.Json
 
         private void ReadStringIntoBuffer(char quote)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             int charPos = _charPos;
             int initialPosition = _charPos;
             int lastWritePosition = _charPos;
@@ -1259,6 +1290,8 @@ namespace Microsoft.Identity.Json
 
         private void FinishReadStringIntoBuffer(int charPos, int initialPosition, int lastWritePosition)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (initialPosition == lastWritePosition)
             {
                 _stringReference = new StringReference(_chars, initialPosition, charPos - initialPosition);
@@ -1272,7 +1305,7 @@ namespace Microsoft.Identity.Json
                     _stringBuffer.Append(_arrayPool, _chars, lastWritePosition, charPos - lastWritePosition);
                 }
 
-                _stringReference = new StringReference(_stringBuffer.InternalBuffer, 0, _stringBuffer.Position);
+                _stringReference = new StringReference(_stringBuffer.InternalBuffer!, 0, _stringBuffer.Position);
             }
 
             _charPos = charPos + 1;
@@ -1280,6 +1313,8 @@ namespace Microsoft.Identity.Json
 
         private void WriteCharToBuffer(char writeChar, int lastWritePosition, int writeToPosition)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (writeToPosition > lastWritePosition)
             {
                 _stringBuffer.Append(_arrayPool, _chars, lastWritePosition, writeToPosition - lastWritePosition);
@@ -1290,6 +1325,8 @@ namespace Microsoft.Identity.Json
 
         private char ConvertUnicode(bool enoughChars)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (enoughChars)
             {
                 if (ConvertUtils.TryHexTextToInt(_chars, _charPos, _charPos + 4, out int value))
@@ -1316,6 +1353,8 @@ namespace Microsoft.Identity.Json
 
         private void ReadNumberIntoBuffer()
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             int charPos = _charPos;
 
             while (true)
@@ -1400,6 +1439,8 @@ namespace Microsoft.Identity.Json
 
         private bool ParsePostValue(bool ignoreComments)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             while (true)
             {
                 char currentChar = _chars[_charPos];
@@ -1480,6 +1521,8 @@ namespace Microsoft.Identity.Json
 
         private bool ParseObject()
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             while (true)
             {
                 char currentChar = _chars[_charPos];
@@ -1534,6 +1577,8 @@ namespace Microsoft.Identity.Json
 
         private bool ParseProperty()
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             char firstChar = _chars[_charPos];
             char quoteChar;
 
@@ -1555,7 +1600,7 @@ namespace Microsoft.Identity.Json
                 throw JsonReaderException.Create(this, "Invalid property identifier character: {0}.".FormatWith(CultureInfo.InvariantCulture, _chars[_charPos]));
             }
 
-            string propertyName;
+            string? propertyName;
 
             if (PropertyNameTable != null)
             {
@@ -1590,11 +1635,13 @@ namespace Microsoft.Identity.Json
 
         private bool ValidIdentifierChar(char value)
         {
-            return char.IsLetterOrDigit(value) || value == '_' || value == '$';
+            return (char.IsLetterOrDigit(value) || value == '_' || value == '$');
         }
 
         private void ParseUnquotedProperty()
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             int initialPosition = _charPos;
 
             // parse unquoted property name until whitespace or colon
@@ -1626,6 +1673,8 @@ namespace Microsoft.Identity.Json
 
         private bool ReadUnquotedPropertyReportIfDone(char currentChar, int initialPosition)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (ValidIdentifierChar(currentChar))
             {
                 _charPos++;
@@ -1643,6 +1692,8 @@ namespace Microsoft.Identity.Json
 
         private bool ParseValue()
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             while (true)
             {
                 char currentChar = _chars[_charPos];
@@ -1783,6 +1834,8 @@ namespace Microsoft.Identity.Json
 
         private void EatWhitespace()
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             while (true)
             {
                 char currentChar = _chars[_charPos];
@@ -1824,6 +1877,8 @@ namespace Microsoft.Identity.Json
 
         private void ParseConstructor()
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (MatchValueWithTrailingSeparator("new"))
             {
                 EatWhitespace();
@@ -1908,6 +1963,7 @@ namespace Microsoft.Identity.Json
         private void ParseNumber(ReadType readType)
         {
             ShiftBufferIfNeeded();
+            MiscellaneousUtils.Assert(_chars != null);
 
             char firstChar = _chars[_charPos];
             int initialPosition = _charPos;
@@ -1919,6 +1975,8 @@ namespace Microsoft.Identity.Json
 
         private void ParseReadNumber(ReadType readType, char firstChar, int initialPosition)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             // set state to PostValue now so that if there is an error parsing the number then the reader can continue
             SetPostValueState(true);
 
@@ -1927,8 +1985,8 @@ namespace Microsoft.Identity.Json
             object numberValue;
             JsonToken numberType;
 
-            bool singleDigit = char.IsDigit(firstChar) && _stringReference.Length == 1;
-            bool nonBase10 = firstChar == '0' && _stringReference.Length > 1 && _stringReference.Chars[_stringReference.StartIndex + 1] != '.' && _stringReference.Chars[_stringReference.StartIndex + 1] != 'e' && _stringReference.Chars[_stringReference.StartIndex + 1] != 'E';
+            bool singleDigit = (char.IsDigit(firstChar) && _stringReference.Length == 1);
+            bool nonBase10 = (firstChar == '0' && _stringReference.Length > 1 && _stringReference.Chars[_stringReference.StartIndex + 1] != '.' && _stringReference.Chars[_stringReference.StartIndex + 1] != 'e' && _stringReference.Chars[_stringReference.StartIndex + 1] != 'E');
 
             switch (readType)
             {
@@ -2179,7 +2237,7 @@ namespace Microsoft.Identity.Json
             SetToken(numberType, numberValue, false);
         }
 
-        private JsonReaderException ThrowReaderError(string message, Exception ex = null)
+        private JsonReaderException ThrowReaderError(string message, Exception? ex = null)
         {
             SetToken(JsonToken.Undefined, null, false);
             return JsonReaderException.Create(this, message, ex);
@@ -2187,7 +2245,7 @@ namespace Microsoft.Identity.Json
 
 #if HAVE_BIG_INTEGER
         // By using the BigInteger type in a separate method,
-        // the runtime can execute the ParseNumber even if
+        // the runtime can execute the ParseNumber even if 
         // the System.Numerics.BigInteger.Parse method is
         // missing, which happens in some versions of Mono
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -2199,6 +2257,8 @@ namespace Microsoft.Identity.Json
 
         private void ParseComment(bool setToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             // should have already parsed / character before reaching this method
             _charPos++;
 
@@ -2304,6 +2364,8 @@ namespace Microsoft.Identity.Json
 
         private bool MatchValue(bool enoughChars, string value)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (!enoughChars)
             {
                 _charPos = _charsUsed;
@@ -2326,6 +2388,8 @@ namespace Microsoft.Identity.Json
 
         private bool MatchValueWithTrailingSeparator(string value)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             // will match value and then move to the next character, checking that it is a separator character
             bool match = MatchValue(value);
 
@@ -2344,6 +2408,8 @@ namespace Microsoft.Identity.Json
 
         private bool IsSeparator(char c)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             switch (c)
             {
                 case '}':
@@ -2359,7 +2425,7 @@ namespace Microsoft.Identity.Json
 
                     char nextChart = _chars[_charPos + 1];
 
-                    return nextChart == '*' || nextChart == '/';
+                    return (nextChart == '*' || nextChart == '/');
                 case ')':
                     if (CurrentState == State.Constructor || CurrentState == State.ConstructorStart)
                     {

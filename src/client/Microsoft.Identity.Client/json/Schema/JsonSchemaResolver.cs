@@ -32,6 +32,8 @@ using System.Linq;
 
 #endif
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Schema
 {
     /// <summary>
