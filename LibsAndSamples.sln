@@ -3,6 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.3.32708.82
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9B0B5396-4D95-4C15-82ED-DC22B5A3123F}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}"
 EndProject
@@ -81,9 +84,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9B-427F-AC02-642BDF8D936B}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		changelog.txt = changelog.txt
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		build\CodeCoverage.runsettings = build\CodeCoverage.runsettings
+		build\credscan-exclusion.json = build\credscan-exclusion.json
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
+		build\MSAL.CodeCoverage.runsettings = build\MSAL.CodeCoverage.runsettings
+		NuGet.Config = NuGet.Config
 		build\platform_and_feature_flags.props = build\platform_and_feature_flags.props
 	EndProjectSection
 EndProject
@@ -112,11 +120,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-build-and-run-cachecompat-tests.yaml = build\template-build-and-run-cachecompat-tests.yaml
 		build\template-build-android-automation.yaml = build\template-build-android-automation.yaml
 		build\template-build-ios-automation.yaml = build\template-build-ios-automation.yaml
+		build\template-ci-and-pr.yaml = build\template-ci-and-pr.yaml
 		build\template-desktop-unit-and-automation.yaml = build\template-desktop-unit-and-automation.yaml
+		build\template-install-dotnet-core.yaml = build\template-install-dotnet-core.yaml
 		build\template-install-keyvault-secrets.yaml = build\template-install-keyvault-secrets.yaml
 		build\template-install-nuget.yaml = build\template-install-nuget.yaml
 		build\template-ios-appcenter-tests.yaml = build\template-ios-appcenter-tests.yaml
 		build\template-nuget-pack.yaml = build\template-nuget-pack.yaml
+		build\template-OneBranch-libsandsamples.yaml = build\template-OneBranch-libsandsamples.yaml
 		build\template-pack-and-sign-all-nugets.yaml = build\template-pack-and-sign-all-nugets.yaml
 		build\template-pack-and-sign-nuget.yaml = build\template-pack-and-sign-nuget.yaml
 		build\template-pack-and-sign-packages.yaml = build\template-pack-and-sign-packages.yaml
@@ -187,6 +198,28 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.NetStandard", "tests\Microsoft.Identity.Test.Integration.netstandard\Microsoft.Identity.Test.Integration.NetStandard.csproj", "{69CE42A2-44DD-4740-856B-607C3BB5A92E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntuneMAMSampleiOS", "tests\devapps\Intune-xamarin-ios\IntuneMAMSampleiOS.csproj", "{034A5B86-A8AE-449D-B561-46F811329E6D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{259B5734-1D43-43F7-8107-32F602A99019}"
+	ProjectSection(SolutionItems) = preProject
+		build\install-common.ps1 = build\install-common.ps1
+		build\install-from-msi-sample.ps1 = build\install-from-msi-sample.ps1
+		build\install-from-zip-sample.ps1 = build\install-from-zip-sample.ps1
+		build\InstallAndroid.ps1 = build\InstallAndroid.ps1
+		build\win-installer-helper.psm1 = build\win-installer-helper.psm1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{38B77C31-B57F-463A-8E76-8DD28A197195}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
+		changelog.txt = changelog.txt
+		CONTRIBUTING.md = CONTRIBUTING.md
+		LICENSE = LICENSE
+		MauiStatus.md = MauiStatus.md
+		README.md = README.md
+		RELEASES.md = RELEASES.md
+		SECURITY.md = SECURITY.md
+		ThirdPartyNotice.txt = ThirdPartyNotice.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1706,6 +1739,7 @@ Global
 		{C6CA2F00-E48A-478F-ABC3-1FE3FE20286B} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{69CE42A2-44DD-4740-856B-607C3BB5A92E} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{034A5B86-A8AE-449D-B561-46F811329E6D} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
+		{259B5734-1D43-43F7-8107-32F602A99019} = {EA983957-DC2F-4D9E-A2E3-79ADEB5CEB26}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020399A9-DC27-4B82-9CAA-EF488665AC27}
