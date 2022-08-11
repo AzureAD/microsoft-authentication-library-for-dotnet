@@ -101,7 +101,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     apiEvent.ApiErrorCode = ex.ErrorCode;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
-                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, ex.ErrorCode);
                     throw;
                 }
                 catch (Exception ex)
@@ -128,8 +127,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogSuccessfulTelemetry(AuthenticationResult authenticationResult, MsalTelemetryEventDetails telemetryEventDetails)
         {
-            telemetryEventDetails.SetProperty(TelemetryConstants.CacheInfoTelemetry, authenticationResult.AuthenticationResultMetadata.CacheRefreshReason.ToString());
-            telemetryEventDetails.SetProperty(TelemetryConstants.TokenSource, authenticationResult.AuthenticationResultMetadata.TokenSource.ToString());
+            telemetryEventDetails.SetProperty(TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
+            telemetryEventDetails.SetProperty(TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource));
             telemetryEventDetails.SetProperty(TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
             telemetryEventDetails.SetProperty(TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs);
             telemetryEventDetails.SetProperty(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
