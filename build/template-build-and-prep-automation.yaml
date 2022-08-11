@@ -13,8 +13,6 @@ steps:
   displayName: 'Use .Net Core sdk 6.x'
   inputs:
     version: 6.x
-    includePreviewVersions: true
-
 
 # Nuget Restore and Build 
 - template: template-restore-build-libsandsamples.yaml
@@ -58,5 +56,22 @@ steps:
     Contents: 'Microsoft.Identity**\bin\**\**'
     TargetFolder: '$(build.artifactstagingdirectory)/msalTests'
 
-- task: PublishBuildArtifacts@1
+- task: CopyFiles@2
+  displayName: 'Stage CacheCompat tests'
+  inputs:
+    SourceFolder: tests\CacheCompat
+    Contents: '**\bin\**\**'
+    TargetFolder: '$(build.artifactstagingdirectory)/cacheCompatTests'
+
+- task: CopyFiles@2
+  displayName: 'Stage Device Authentication Tests'
+  inputs:
+    SourceFolder: tests/Microsoft.Identity.Test.Integration.Win8
+    Contents: '**/bin/**/*'
+    TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
+
+- task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: drop'
+  inputs:
+    targetPath: $(Build.artifactstagingdirectory)
+    artifactName: drop

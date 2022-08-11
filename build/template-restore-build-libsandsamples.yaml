@@ -42,13 +42,4 @@ steps:
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
-
-- task: CopyFiles@2
-  displayName: 'Stage Device Authentication Tests'
-  inputs:
-    SourceFolder: tests/Microsoft.Identity.Test.Integration.Win8
-    Contents: '**/*'
-    TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: DeviceAuth'
+    maximumCpuCount: true
