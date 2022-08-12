@@ -1,9 +1,0 @@
-# template-bootstrap-build.yaml
-# Basic bootstraps for any build (nuget, dotnet, secrets)
-
-steps:
-
-# Run Nuget Tool Installer
-- template: template-install-nuget.yaml
-
-

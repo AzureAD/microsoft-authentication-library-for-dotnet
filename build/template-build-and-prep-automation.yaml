@@ -1,6 +1,9 @@
 steps:
-# Bootstrap the build
-- template: template-bootstrap-build.yaml
+# Install NuGet
+- task: NuGetToolInstaller@0
+  displayName: 'Use latest NuGet'
+  inputs:
+    versionSpec: 6.x
 
 # Unit tests require .NET 3.x
 - task: UseDotNet@2

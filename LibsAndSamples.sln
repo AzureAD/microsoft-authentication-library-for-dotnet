@@ -104,7 +104,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\pipeline-pullrequest.yaml = build\pipeline-pullrequest.yaml
 		build\pipeline-releasebuild.yaml = build\pipeline-releasebuild.yaml
 		build\template-android-appcenter-tests.yaml = build\template-android-appcenter-tests.yaml
-		build\template-bootstrap-build.yaml = build\template-bootstrap-build.yaml
 		build\template-build-and-prep-automation.yaml = build\template-build-and-prep-automation.yaml
 		build\template-build-and-run-all-tests.yaml = build\template-build-and-run-all-tests.yaml
 		build\template-build-android-automation.yaml = build\template-build-android-automation.yaml
@@ -112,7 +111,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-cachecompat-automation.yaml = build\template-cachecompat-automation.yaml
 		build\template-desktop-unit-and-automation.yaml = build\template-desktop-unit-and-automation.yaml
 		build\template-install-keyvault-secrets.yaml = build\template-install-keyvault-secrets.yaml
-		build\template-install-nuget.yaml = build\template-install-nuget.yaml
 		build\template-ios-appcenter-tests.yaml = build\template-ios-appcenter-tests.yaml
 		build\template-nuget-pack.yaml = build\template-nuget-pack.yaml
 		build\template-pack-and-sign-all-nugets.yaml = build\template-pack-and-sign-all-nugets.yaml
@@ -284,6 +282,7 @@ Global
 		{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}.Debug|x86.Build.0 = Debug|Any CPU
 		{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}.Release|ARM.ActiveCfg = Release|Any CPU
 		{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}.Release|ARM.Build.0 = Release|Any CPU
 		{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}.Release|ARM64.ActiveCfg = Release|Any CPU
@@ -336,6 +335,8 @@ Global
 		{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}.Debug|x86.Build.0 = Debug|Any CPU
 		{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}.Debug|x86.Deploy.0 = Debug|Any CPU
 		{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}.Release|ARM.ActiveCfg = Release|Any CPU
 		{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}.Release|ARM.Build.0 = Release|Any CPU
 		{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}.Release|ARM.Deploy.0 = Release|Any CPU
@@ -376,6 +377,7 @@ Global
 		{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}.Debug|x64.ActiveCfg = Debug|iPhoneSimulator
 		{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}.Debug|x86.ActiveCfg = Debug|iPhoneSimulator
 		{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}.Release|Any CPU.ActiveCfg = Release|iPhone
+		{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}.Release|Any CPU.Build.0 = Release|iPhone
 		{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}.Release|ARM.ActiveCfg = Release|iPhoneSimulator
 		{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}.Release|ARM64.ActiveCfg = Release|iPhoneSimulator
 		{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}.Release|iPhone.ActiveCfg = Release|iPhone
@@ -527,7 +529,6 @@ Global
 		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug + MobileApps|x86.ActiveCfg = Debug + MobileApps|Any CPU
 		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug + MobileApps|x86.Build.0 = Debug + MobileApps|Any CPU
 		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|ARM.ActiveCfg = Debug|Any CPU
 		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|ARM.Build.0 = Debug|Any CPU
 		{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}.Debug|ARM64.ActiveCfg = Debug|Any CPU
@@ -653,7 +654,6 @@ Global
 		{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5}.Debug + MobileApps|x86.ActiveCfg = Debug + MobileApps|Any CPU
 		{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5}.Debug + MobileApps|x86.Build.0 = Debug + MobileApps|Any CPU
 		{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5}.Debug|ARM.ActiveCfg = Debug|Any CPU
 		{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5}.Debug|ARM.Build.0 = Debug|Any CPU
 		{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5}.Debug|ARM64.ActiveCfg = Debug|Any CPU

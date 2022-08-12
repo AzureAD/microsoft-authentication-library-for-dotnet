@@ -1,7 +1,10 @@
 steps:
 
 # Bootstrap the build
-- template: template-bootstrap-build.yaml
+- task: NuGetToolInstaller@0
+  displayName: 'Use latest NuGet'
+  inputs:
+    versionSpec: 6.x
 
 #Prep Xamarin UI test file
 - task: DownloadSecureFile@1
