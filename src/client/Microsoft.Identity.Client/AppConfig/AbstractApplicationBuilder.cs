@@ -526,7 +526,7 @@ namespace Microsoft.Identity.Client
         {
             ValidateUseOfExperimentalFeature("ITelemetryClient");
 
-            if ((telemetryClients != null) && telemetryClients.Any())
+            if (telemetryClients.Length > 0)
             {
                 foreach (var telemetryClient in telemetryClients)
                 {
