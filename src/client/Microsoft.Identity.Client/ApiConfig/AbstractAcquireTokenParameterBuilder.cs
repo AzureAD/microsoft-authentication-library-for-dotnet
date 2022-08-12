@@ -300,6 +300,38 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Extracts the tenant ID from the provided authority URI and overrides the tenant ID specified in the authority at the application level. This operation preserves the authority host (environment) provided to the application builder.
+        /// 
+        /// If an authority was not provided to the application builder, this method will replace the tenant ID in the default authority - https://login.microsoftonline.com/common.
+        /// </summary>
+        /// <param name="authorityUri">URI from which to extract the tenant ID</param>
+
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="authorityUri"/> is null or an empty string</exception>
+        /// <exception cref="MsalClientException">Thrown if the application was configured with an authority that is not AAD specific (e.g. ADFS or B2C).</exception>
+        /// <remarks>
+        /// The tenant should be more restrictive than the one configured at the application level, e.g. don't use "common".
+        /// Does not affect authority validation, which is specified at the application level.</remarks>
+        public T WithTenantIdFromAuthority(Uri authorityUri)
+        {
+            if (authorityUri == null)
+            {
+                throw new ArgumentNullException(nameof(authorityUri));
+            }
+
+            if (!ServiceBundle.Config.Authority.AuthorityInfo.IsTenantOverrideSupported)
+            {
+                throw new MsalClientException(
+                    MsalError.TenantOverrideNonAad,
+                    MsalErrorMessage.TenantOverrideNonAad);
+            }
+
+            var authorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), false);
+            var authority = authorityInfo.CreateAuthority();
+            return WithTenantId(authority.TenantId);
+        }
+
+        /// <summary>
         /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs.
         /// </summary>
         /// <param name="authorityUri">Authority URL for an ADFS server.</param>

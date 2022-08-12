@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Json
         // array that gives a new state based on the current state an the token being written
         private static readonly State[][] StateArray;
 
-        internal static readonly State[][] StateArrayTempate = new[]
+        internal static readonly State[][] StateArrayTemplate = new[]
         {
             //                                      Start                    PropertyName            ObjectStart         Object            ArrayStart              Array                   ConstructorStart        Constructor             Closed       Error
             //
@@ -78,9 +78,9 @@ namespace Microsoft.Identity.Json
 
         internal static State[][] BuildStateArray()
         {
-            List<State[]> allStates = StateArrayTempate.ToList();
-            State[] errorStates = StateArrayTempate[0];
-            State[] valueStates = StateArrayTempate[7];
+            List<State[]> allStates = StateArrayTemplate.ToList();
+            State[] errorStates = StateArrayTemplate[0];
+            State[] valueStates = StateArrayTemplate[7];
 
             EnumInfo enumValuesAndNames = EnumUtils.GetEnumValuesAndNames(typeof(JsonToken));
 
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Json
             StateArray = BuildStateArray();
         }
 
-        private List<JsonPosition> _stack;
+        private List<JsonPosition>? _stack;
         private JsonPosition _currentPosition;
         private State _currentState;
         private Formatting _formatting;
@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Gets the path of the writer.
+        /// Gets the path of the writer. 
         /// </summary>
         public string Path
         {
@@ -212,13 +212,13 @@ namespace Microsoft.Identity.Json
                     return string.Empty;
                 }
 
-                bool insideContainer = _currentState != State.ArrayStart
+                bool insideContainer = (_currentState != State.ArrayStart
                                         && _currentState != State.ConstructorStart
-                                        && _currentState != State.ObjectStart;
+                                        && _currentState != State.ObjectStart);
 
                 JsonPosition? current = insideContainer ? (JsonPosition?)_currentPosition : null;
 
-                return JsonPosition.BuildPath(_stack, current);
+                return JsonPosition.BuildPath(_stack!, current);
             }
         }
 
@@ -226,8 +226,8 @@ namespace Microsoft.Identity.Json
         private DateTimeZoneHandling _dateTimeZoneHandling;
         private StringEscapeHandling _stringEscapeHandling;
         private FloatFormatHandling _floatFormatHandling;
-        private string _dateFormatString;
-        private CultureInfo _culture;
+        private string? _dateFormatString;
+        private CultureInfo? _culture;
 
         /// <summary>
         /// Gets or sets a value indicating how JSON text output should be formatted.
@@ -304,8 +304,8 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Gets or sets how special floating point numbers, e.g. <see cref="double.NaN"/>,
-        /// <see cref="double.PositiveInfinity"/> and <see cref="double.NegativeInfinity"/>,
+        /// Gets or sets how special floating point numbers, e.g. <see cref="Double.NaN"/>,
+        /// <see cref="Double.PositiveInfinity"/> and <see cref="Double.NegativeInfinity"/>,
         /// are written to JSON text.
         /// </summary>
         public FloatFormatHandling FloatFormatHandling
@@ -325,7 +325,7 @@ namespace Microsoft.Identity.Json
         /// <summary>
         /// Gets or sets how <see cref="DateTime"/> and <see cref="DateTimeOffset"/> values are formatted when writing JSON text.
         /// </summary>
-        public string DateFormatString
+        public string? DateFormatString
         {
             get => _dateFormatString;
             set => _dateFormatString = value;
@@ -519,10 +519,10 @@ namespace Microsoft.Identity.Json
         /// <param name="token">The <see cref="JsonToken"/> to write.</param>
         /// <param name="value">
         /// The value to write.
-        /// A value is only required for tokens that have an associated value, e.g. the <see cref="string"/> property name for <see cref="JsonToken.PropertyName"/>.
+        /// A value is only required for tokens that have an associated value, e.g. the <see cref="String"/> property name for <see cref="JsonToken.PropertyName"/>.
         /// <c>null</c> can be passed to the method for tokens that don't have a value, e.g. <see cref="JsonToken.StartObject"/>.
         /// </param>
-        public void WriteToken(JsonToken token, object value)
+        public void WriteToken(JsonToken token, object? value)
         {
             switch (token)
             {
@@ -579,8 +579,9 @@ namespace Microsoft.Identity.Json
                     }
                     break;
                 case JsonToken.String:
-                    ValidationUtils.ArgumentNotNull(value, nameof(value));
-                    WriteValue(value.ToString());
+                    // Allow for a null string. This matches JTokenReader behavior which can read
+                    // a JsonToken.String with a null value.
+                    WriteValue(value?.ToString());
                     break;
                 case JsonToken.Boolean:
                     ValidationUtils.ArgumentNotNull(value, nameof(value));
@@ -625,7 +626,7 @@ namespace Microsoft.Identity.Json
                     }
                     else
                     {
-                        WriteValue((byte[])value);
+                        WriteValue((byte[])value!);
                     }
                     break;
                 default:
@@ -649,7 +650,7 @@ namespace Microsoft.Identity.Json
             do
             {
                 // write a JValue date when the constructor is for a date
-                if (writeDateConstructorAsDate && reader.TokenType == JsonToken.StartConstructor && string.Equals(reader.Value.ToString(), "Date", StringComparison.Ordinal))
+                if (writeDateConstructorAsDate && reader.TokenType == JsonToken.StartConstructor && string.Equals(reader.Value?.ToString(), "Date", StringComparison.Ordinal))
                 {
                     WriteConstructorDate(reader);
                 }
@@ -666,10 +667,17 @@ namespace Microsoft.Identity.Json
                 && writeChildren
                 && reader.Read());
 
-            if (initialDepth < CalculateWriteTokenFinalDepth(reader))
+            if (IsWriteTokenIncomplete(reader, writeChildren, initialDepth))
             {
                 throw JsonWriterException.Create(this, "Unexpected end when reading token.", null);
             }
+        }
+
+        private bool IsWriteTokenIncomplete(JsonReader reader, bool writeChildren, int initialDepth)
+        {
+            int finalDepth = CalculateWriteTokenFinalDepth(reader);
+            return initialDepth < finalDepth ||
+                (writeChildren && initialDepth == finalDepth && JsonTokenUtils.IsStartToken(reader.TokenType));
         }
 
         private int CalculateWriteTokenInitialDepth(JsonReader reader)
@@ -696,7 +704,7 @@ namespace Microsoft.Identity.Json
 
         private void WriteConstructorDate(JsonReader reader)
         {
-            if (!JavaScriptUtils.TryGetDateFromConstructorJson(reader, out DateTime dateTime, out string errorMessage))
+            if (!JavaScriptUtils.TryGetDateFromConstructorJson(reader, out DateTime dateTime, out string? errorMessage))
             {
                 throw JsonWriterException.Create(this, errorMessage, null);
             }
@@ -787,7 +795,7 @@ namespace Microsoft.Identity.Json
                 {
                     int currentLevel = top - i;
 
-                    if (_stack[currentLevel].Type == type)
+                    if (_stack![currentLevel].Type == type)
                     {
                         levelsToComplete = i + 2;
                         break;
@@ -878,7 +886,7 @@ namespace Microsoft.Identity.Json
                 }
 
                 // don't indent a property when it is the first token to be written (i.e. at the start)
-                if (_currentState == State.Array || _currentState == State.ArrayStart || _currentState == State.Constructor || _currentState == State.ConstructorStart
+                if ((_currentState == State.Array || _currentState == State.ArrayStart || _currentState == State.Constructor || _currentState == State.ConstructorStart)
                     || (tokenBeingWritten == JsonToken.PropertyName && _currentState != State.Start))
                 {
                     WriteIndent();
@@ -909,7 +917,7 @@ namespace Microsoft.Identity.Json
         /// Writes raw JSON without changing the writer's state.
         /// </summary>
         /// <param name="json">The raw JSON to write.</param>
-        public virtual void WriteRaw(string json)
+        public virtual void WriteRaw(string? json)
         {
             InternalWriteRaw();
         }
@@ -918,7 +926,7 @@ namespace Microsoft.Identity.Json
         /// Writes raw JSON where a value is expected and updates the writer's state.
         /// </summary>
         /// <param name="json">The raw JSON to write.</param>
-        public virtual void WriteRawValue(string json)
+        public virtual void WriteRawValue(string? json)
         {
             // hack. want writer to change state as if a value had been written
             UpdateScopeWithFinishedValue();
@@ -927,130 +935,130 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="string"/> value.
+        /// Writes a <see cref="String"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="string"/> value to write.</param>
-        public virtual void WriteValue(string value)
+        /// <param name="value">The <see cref="String"/> value to write.</param>
+        public virtual void WriteValue(string? value)
         {
             InternalWriteValue(JsonToken.String);
         }
 
         /// <summary>
-        /// Writes a <see cref="int"/> value.
+        /// Writes a <see cref="Int32"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="int"/> value to write.</param>
+        /// <param name="value">The <see cref="Int32"/> value to write.</param>
         public virtual void WriteValue(int value)
         {
             InternalWriteValue(JsonToken.Integer);
         }
 
         /// <summary>
-        /// Writes a <see cref="uint"/> value.
+        /// Writes a <see cref="UInt32"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="uint"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="UInt32"/> value to write.</param>
+        [CLSCompliant(false)]
         public virtual void WriteValue(uint value)
         {
             InternalWriteValue(JsonToken.Integer);
         }
 
         /// <summary>
-        /// Writes a <see cref="long"/> value.
+        /// Writes a <see cref="Int64"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="long"/> value to write.</param>
+        /// <param name="value">The <see cref="Int64"/> value to write.</param>
         public virtual void WriteValue(long value)
         {
             InternalWriteValue(JsonToken.Integer);
         }
 
         /// <summary>
-        /// Writes a <see cref="ulong"/> value.
+        /// Writes a <see cref="UInt64"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="ulong"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="UInt64"/> value to write.</param>
+        [CLSCompliant(false)]
         public virtual void WriteValue(ulong value)
         {
             InternalWriteValue(JsonToken.Integer);
         }
 
         /// <summary>
-        /// Writes a <see cref="float"/> value.
+        /// Writes a <see cref="Single"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="float"/> value to write.</param>
+        /// <param name="value">The <see cref="Single"/> value to write.</param>
         public virtual void WriteValue(float value)
         {
             InternalWriteValue(JsonToken.Float);
         }
 
         /// <summary>
-        /// Writes a <see cref="double"/> value.
+        /// Writes a <see cref="Double"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="double"/> value to write.</param>
+        /// <param name="value">The <see cref="Double"/> value to write.</param>
         public virtual void WriteValue(double value)
         {
             InternalWriteValue(JsonToken.Float);
         }
 
         /// <summary>
-        /// Writes a <see cref="bool"/> value.
+        /// Writes a <see cref="Boolean"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="bool"/> value to write.</param>
+        /// <param name="value">The <see cref="Boolean"/> value to write.</param>
         public virtual void WriteValue(bool value)
         {
             InternalWriteValue(JsonToken.Boolean);
         }
 
         /// <summary>
-        /// Writes a <see cref="short"/> value.
+        /// Writes a <see cref="Int16"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="short"/> value to write.</param>
+        /// <param name="value">The <see cref="Int16"/> value to write.</param>
         public virtual void WriteValue(short value)
         {
             InternalWriteValue(JsonToken.Integer);
         }
 
         /// <summary>
-        /// Writes a <see cref="ushort"/> value.
+        /// Writes a <see cref="UInt16"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="ushort"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="UInt16"/> value to write.</param>
+        [CLSCompliant(false)]
         public virtual void WriteValue(ushort value)
         {
             InternalWriteValue(JsonToken.Integer);
         }
 
         /// <summary>
-        /// Writes a <see cref="char"/> value.
+        /// Writes a <see cref="Char"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="char"/> value to write.</param>
+        /// <param name="value">The <see cref="Char"/> value to write.</param>
         public virtual void WriteValue(char value)
         {
             InternalWriteValue(JsonToken.String);
         }
 
         /// <summary>
-        /// Writes a <see cref="byte"/> value.
+        /// Writes a <see cref="Byte"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="byte"/> value to write.</param>
+        /// <param name="value">The <see cref="Byte"/> value to write.</param>
         public virtual void WriteValue(byte value)
         {
             InternalWriteValue(JsonToken.Integer);
         }
 
         /// <summary>
-        /// Writes a <see cref="sbyte"/> value.
+        /// Writes a <see cref="SByte"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="sbyte"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="SByte"/> value to write.</param>
+        [CLSCompliant(false)]
         public virtual void WriteValue(sbyte value)
         {
             InternalWriteValue(JsonToken.Integer);
         }
 
         /// <summary>
-        /// Writes a <see cref="decimal"/> value.
+        /// Writes a <see cref="Decimal"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="decimal"/> value to write.</param>
+        /// <param name="value">The <see cref="Decimal"/> value to write.</param>
         public virtual void WriteValue(decimal value)
         {
             InternalWriteValue(JsonToken.Float);
@@ -1095,9 +1103,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="int"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Int32"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="int"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Int32"/> value to write.</param>
         public virtual void WriteValue(int? value)
         {
             if (value == null)
@@ -1111,10 +1119,10 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="uint"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="UInt32"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="uint"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="UInt32"/> value to write.</param>
+        [CLSCompliant(false)]
         public virtual void WriteValue(uint? value)
         {
             if (value == null)
@@ -1128,9 +1136,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="long"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Int64"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="long"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Int64"/> value to write.</param>
         public virtual void WriteValue(long? value)
         {
             if (value == null)
@@ -1144,10 +1152,10 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="ulong"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="UInt64"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="ulong"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="UInt64"/> value to write.</param>
+        [CLSCompliant(false)]
         public virtual void WriteValue(ulong? value)
         {
             if (value == null)
@@ -1161,9 +1169,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="float"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Single"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="float"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Single"/> value to write.</param>
         public virtual void WriteValue(float? value)
         {
             if (value == null)
@@ -1177,9 +1185,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="double"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Double"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="double"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Double"/> value to write.</param>
         public virtual void WriteValue(double? value)
         {
             if (value == null)
@@ -1193,9 +1201,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="bool"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Boolean"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="bool"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Boolean"/> value to write.</param>
         public virtual void WriteValue(bool? value)
         {
             if (value == null)
@@ -1209,9 +1217,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="short"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Int16"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="short"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Int16"/> value to write.</param>
         public virtual void WriteValue(short? value)
         {
             if (value == null)
@@ -1225,10 +1233,10 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="ushort"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="UInt16"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="ushort"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="UInt16"/> value to write.</param>
+        [CLSCompliant(false)]
         public virtual void WriteValue(ushort? value)
         {
             if (value == null)
@@ -1242,9 +1250,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="char"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Char"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="char"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Char"/> value to write.</param>
         public virtual void WriteValue(char? value)
         {
             if (value == null)
@@ -1258,9 +1266,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="byte"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Byte"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="byte"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Byte"/> value to write.</param>
         public virtual void WriteValue(byte? value)
         {
             if (value == null)
@@ -1274,10 +1282,10 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="sbyte"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="SByte"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="sbyte"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="SByte"/> value to write.</param>
+        [CLSCompliant(false)]
         public virtual void WriteValue(sbyte? value)
         {
             if (value == null)
@@ -1291,9 +1299,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="decimal"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Decimal"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="decimal"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Decimal"/> value to write.</param>
         public virtual void WriteValue(decimal? value)
         {
             if (value == null)
@@ -1373,10 +1381,10 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="byte"/>[] value.
+        /// Writes a <see cref="Byte"/>[] value.
         /// </summary>
-        /// <param name="value">The <see cref="byte"/>[] value to write.</param>
-        public virtual void WriteValue(byte[] value)
+        /// <param name="value">The <see cref="Byte"/>[] value to write.</param>
+        public virtual void WriteValue(byte[]? value)
         {
             if (value == null)
             {
@@ -1392,7 +1400,7 @@ namespace Microsoft.Identity.Json
         /// Writes a <see cref="Uri"/> value.
         /// </summary>
         /// <param name="value">The <see cref="Uri"/> value to write.</param>
-        public virtual void WriteValue(Uri value)
+        public virtual void WriteValue(Uri? value)
         {
             if (value == null)
             {
@@ -1405,11 +1413,11 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="object"/> value.
+        /// Writes a <see cref="Object"/> value.
         /// An error will raised if the value cannot be written as a single JSON token.
         /// </summary>
-        /// <param name="value">The <see cref="object"/> value to write.</param>
-        public virtual void WriteValue(object value)
+        /// <param name="value">The <see cref="Object"/> value to write.</param>
+        public virtual void WriteValue(object? value)
         {
             if (value == null)
             {
@@ -1435,7 +1443,7 @@ namespace Microsoft.Identity.Json
         /// Writes a comment <c>/*...*/</c> containing the specified text.
         /// </summary>
         /// <param name="text">Text to place inside the comment.</param>
-        public virtual void WriteComment(string text)
+        public virtual void WriteComment(string? text)
         {
             InternalWriteComment();
         }
@@ -1647,7 +1655,7 @@ namespace Microsoft.Identity.Json
                         }
 #endif
 
-                        // write an unknown null value, fix https://github.com/JamesNK/Microsoft.Identity.Json/issues/1460
+                        // write an unknown null value, fix https://github.com/JamesNK/Newtonsoft.Json/issues/1460
                         if (value == null)
                         {
                             writer.WriteNull();
