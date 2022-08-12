@@ -492,7 +492,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 MockHttpMessageHandler handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithProofOfPosessionKeyId("key1")
+                    .WithProofOfPossessionKeyId("key1")
                     .OnBeforeTokenRequest(ModifyRequestAsync)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -508,7 +508,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("key1", (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithProofOfPosessionKeyId("key1")
+                    .WithProofOfPossessionKeyId("key1")
                     .OnBeforeTokenRequest(ModifyRequestAsync)
                     .ExecuteAsync()
                     .ConfigureAwait(false);

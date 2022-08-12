@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Extensibility
     /// <summary>
     /// Extensions for <see cref="AcquireTokenForClientParameterBuilder"/>
     /// </summary>
-    public static partial class AbstractConfidentialClientAcquireTokenParameterBuilderExtension
+    public static partial class AbstractAcquireTokenParameterBuilderExtension
     {
         /// <summary>
         /// Intervenes in the request pipeline, by executing a user provided delegate before MSAL makes the token request. 
@@ -27,6 +27,29 @@ namespace Microsoft.Identity.Client.Extensibility
         {
             builder.ValidateUseOfExperimentalFeature();
             builder.CommonParameters.OnBeforeTokenRequestHandler = onBeforeTokenRequestHandler;
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Binds the token to a key in the cache. L2 cache keys contain the key id.
+        /// No cryptographic operations are performed on the token.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="keyId">A key id to which the access token is associated. The token will not be retrieved from the cache unless the same key id is presented. Can be null.</param>
+        /// <returns>the builder</returns>
+        public static AbstractAcquireTokenParameterBuilder<T> WithProofOfPossessionKeyId<T>(
+            this AbstractAcquireTokenParameterBuilder<T> builder,
+            string keyId)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (string.IsNullOrEmpty(keyId))
+            {
+                throw new ArgumentNullException(nameof(keyId));
+            }
+
+            builder.ValidateUseOfExperimentalFeature();
+            builder.CommonParameters.AuthenticationScheme = new ExternalBoundTokenScheme(keyId);
 
             return builder;
         }

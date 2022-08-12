@@ -15,7 +15,6 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
-using static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
