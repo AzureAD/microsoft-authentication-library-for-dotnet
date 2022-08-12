@@ -28,9 +28,9 @@ namespace Microsoft.Identity.Client.TelemetryCore
         /// </summary>
         /// <param name="clients">Clients to emit telemetry to.</param>
         /// <param name="eventDetails">Telemetry details to emit.</param>
-        internal static void TrackEvent(this IEnumerable<ITelemetryClient> clients, TelemetryEventDetails eventDetails, string eventName)
+        internal static void TrackEvent(this IEnumerable<ITelemetryClient> clients, TelemetryEventDetails eventDetails)
         {
-            foreach (var client in clients.GetEnabledClients(eventName))
+            foreach (var client in clients.GetEnabledClients(eventDetails.Name))
             {
                 client.TrackEvent(eventDetails);
             }

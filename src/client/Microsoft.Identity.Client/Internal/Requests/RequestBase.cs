@@ -95,10 +95,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
 
-                    if (telemetryClients.GetEnabledClients(TelemetryConstants.AcquireTokenEventName).Count() > 0)
-                    {
-                        LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails);
-                    }
+                    LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
 
                     return authenticationResult;
                 }
@@ -115,21 +112,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 finally
                 {
-                    telemetryClients.TrackEvent(telemetryEventDetails, TelemetryConstants.AcquireTokenEventName);
+                    telemetryClients.TrackEvent(telemetryEventDetails);
                 }
             }
         }
 
-        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, MsalTelemetryEventDetails telemetryEventDetails)
+        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, MsalTelemetryEventDetails telemetryEventDetails, IEnumerable<ITelemetryClient> telemetryClients)
         {
-            telemetryEventDetails.SetProperty(TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
-            telemetryEventDetails.SetProperty(TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource));
-            telemetryEventDetails.SetProperty(TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
-            telemetryEventDetails.SetProperty(TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs);
-            telemetryEventDetails.SetProperty(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
-            telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, true);
-            telemetryEventDetails.SetProperty(TelemetryConstants.PopToken, authenticationResult.TokenType.Equals(Constants.PoPTokenType));
-            telemetryEventDetails.SetProperty(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
+            if (telemetryClients.GetEnabledClients(TelemetryConstants.AcquireTokenEventName).Count() > 0)
+            {
+                telemetryEventDetails.SetProperty(TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
+                telemetryEventDetails.SetProperty(TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource));
+                telemetryEventDetails.SetProperty(TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
+                telemetryEventDetails.SetProperty(TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs);
+                telemetryEventDetails.SetProperty(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
+                telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, true);
+                telemetryEventDetails.SetProperty(TelemetryConstants.PopToken, authenticationResult.TokenType.Equals(Constants.PoPTokenType));
+                telemetryEventDetails.SetProperty(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
+            }
         }
 
         private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
