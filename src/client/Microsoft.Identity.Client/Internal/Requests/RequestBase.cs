@@ -95,9 +95,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
 
-                    if (telemetryClients != null && telemetryClients.Count() > 0)
+                    if (telemetryClients.GetEnabledClients(TelemetryConstants.AcquireTokenEventName).Count() > 0)
                     {
-                        LogSuccessfulTelemetry(authenticationResult, telemetryEventDetails);
+                        LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails);
                     }
 
                     return authenticationResult;
@@ -115,12 +115,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 finally
                 {
-                    telemetryClients?.TrackEvent(telemetryEventDetails, TelemetryConstants.AcquireTokenEventName);
+                    telemetryClients.TrackEvent(telemetryEventDetails, TelemetryConstants.AcquireTokenEventName);
                 }
             }
         }
 
-        private void LogSuccessfulTelemetry(AuthenticationResult authenticationResult, MsalTelemetryEventDetails telemetryEventDetails)
+        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, MsalTelemetryEventDetails telemetryEventDetails)
         {
             telemetryEventDetails.SetProperty(TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
             telemetryEventDetails.SetProperty(TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource));

@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         public bool IsEnabled(string eventName)
         {
-            return TelemetryConstants.AcquireTokenEventName.Equals(eventName) ? true : false;
+            return TelemetryConstants.AcquireTokenEventName.Equals(eventName);
         }
 
         public void TrackEvent(TelemetryEventDetails eventDetails)

@@ -528,6 +528,11 @@ namespace Microsoft.Identity.Client
 
             if ((telemetryClients != null) && telemetryClients.Any())
             {
+                foreach (var telemetryClient in telemetryClients)
+                {
+                    telemetryClient.Initialize();
+                }
+
                 Config.TelemetryClients = telemetryClients;
             }
             
