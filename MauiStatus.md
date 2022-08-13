@@ -17,7 +17,8 @@ To build and run the branch, it will require:
 - Open Visual Studio 2022 **Preview** version
 - Open the solution  
 `/tests/devapps/MauiApps/MauiApps.sln`
-- The following projects in it
+- It contains the following projects:
+
     - MauiAppBasic  
     This shows how to perform authentication with no broker. It has the common pattern of Acquire Token Silent (ATS) + Acquire Token Interactive (ATI). Note: Android does not support the embedded browser.
     - MauiAppWithBroker  
