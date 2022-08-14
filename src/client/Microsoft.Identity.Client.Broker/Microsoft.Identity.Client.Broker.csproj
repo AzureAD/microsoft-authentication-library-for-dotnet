@@ -7,6 +7,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <TargetFramework Condition="'$(TargetFrameworkNetDesktop)' == ''">$(TargetFrameworkNetStandard)</TargetFramework>
     <TargetFrameworks Condition="'$(TargetFrameworkNetDesktop)' != ''">$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop)</TargetFrameworks>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">

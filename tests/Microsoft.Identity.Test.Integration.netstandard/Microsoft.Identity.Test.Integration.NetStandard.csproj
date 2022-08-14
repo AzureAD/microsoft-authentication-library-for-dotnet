@@ -4,6 +4,7 @@
     <TargetFramework>net5</TargetFramework>
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
