@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -344,23 +345,33 @@ namespace Microsoft.Identity.Client.Broker
         {
             if (!_wamOptions.ListWindowsWorkAndSchoolAccounts)
             {
-                _logger.Info("[WamBroker] Returning no accounts due to configuration option");
+                _logger.Info("[WamBroker] Returning no accounts due to configuration option.");
                 return Array.Empty<IAccount>();
             }
 
             string correlationId = Guid.NewGuid().ToString();
-            List<IAccount> accounts = null;
+            List<IAccount> accounts = new List<IAccount>();
+            var requestContext = cacheSessionManager.RequestContext;
+            var instanceMetadata = await instanceDiscoveryManager.GetMetadataEntryAsync(authorityInfo, requestContext, false).ConfigureAwait(false);
 
             using (var core = new NativeInterop.Core())
             using (var discoverAccountsResult = await core.DiscoverAccountsAsync(clientID, correlationId).ConfigureAwait(false))
             {
                 if (discoverAccountsResult.IsSuccess)
                 {
-                    accounts = WamAdapters.ConvertToMsalAccount(discoverAccountsResult.Accounts, clientID);
+                    foreach (var acc in discoverAccountsResult.Accounts)
+                    {
+                        string environment = acc.Environment; 
+                        bool matches = instanceMetadata.Aliases.Any(alias => string.Equals(alias, environment, StringComparison.OrdinalIgnoreCase));
+                        
+                        if(matches)
+                            accounts.Add(WamAdapters.ConvertToMsalAccount(acc, clientID));
+                    }
                 }
                 else
                 {
-
+                    _logger.Info("[WamBroker] No accounts returned from WAM.");
+                    return Array.Empty<IAccount>();
                 }
             }
 

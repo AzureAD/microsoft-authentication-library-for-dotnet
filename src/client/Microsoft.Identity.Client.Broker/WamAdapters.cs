@@ -8,7 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -272,32 +274,31 @@ namespace Microsoft.Identity.Client.Broker
         /// <summary>
         /// Converts to MSAL Account Id or Null
         /// </summary>
-        /// <param name="wamAccounts"></param>
+        /// <param name="wamAccount"></param>
         /// <param name="clientID"></param>
-        /// <returns></returns>
-        public static List<IAccount> ConvertToMsalAccount(List<NativeInterop.Account> wamAccounts, string clientID)
+        public static IAccount ConvertToMsalAccount(
+                NativeInterop.Account wamAccount, 
+                string clientID)
         {
-            List<IAccount> accounts = new List<IAccount>();
+            IAccount runtimeAccount;
 
             try
             {
-                foreach (NativeInterop.Account wamAccount in wamAccounts)
-                {
-                    string homeAccountId = GetHomeAccountId(wamAccount);
+                string homeAccountId = GetHomeAccountId(wamAccount);
 
-                    accounts.Add(new Account(
-                        wamAccount.AccountId,
-                        wamAccount.UserName,
-                        wamAccount.Environment,
-                        new Dictionary<string, string>() { { clientID, wamAccount.AccountId } }));
-                }
+                runtimeAccount = new Account(
+                    wamAccount.AccountId,
+                    wamAccount.UserName,
+                    wamAccount.Environment,
+                    new Dictionary<string, string>() { { clientID, wamAccount.AccountId } });
+
             }
             catch (Exception ex)
             {
                 throw new MsalServiceException("wam_failed", $"Could not convert into MSAL Account. {ex.Message}");
             }
 
-            return accounts;
+            return runtimeAccount;
         }
 
         /// <summary>
