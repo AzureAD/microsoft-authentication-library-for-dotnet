@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Client.Broker
                     ExpiresIn = (long)(DateTime.SpecifyKind(authResult.ExpiresOn, DateTimeKind.Utc) - DateTimeOffset.UtcNow).TotalSeconds,
                     ClientInfo = authResult.Account.ClientInfo.ToString(),
                     TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : BrokerResponseConst.Bearer,
-                    WamAccountId = authResult.Account.Id,
+                    WamAccountId = authResult.Account.AccountId,
                     TokenSource = TokenSource.Broker
                 };
 
@@ -267,6 +267,47 @@ namespace Microsoft.Identity.Client.Broker
         private static string GetExpectedRedirectUri(string clientId)
         {
             return $"ms-appx-web://microsoft.aad.brokerplugin/{clientId}";
+        }
+
+        /// <summary>
+        /// Converts to MSAL Account Id or Null
+        /// </summary>
+        /// <param name="wamAccounts"></param>
+        /// <param name="clientID"></param>
+        /// <returns></returns>
+        public static List<IAccount> ConvertToMsalAccount(List<NativeInterop.Account> wamAccounts, string clientID)
+        {
+            List<IAccount> accounts = new List<IAccount>();
+
+            try
+            {
+                foreach (NativeInterop.Account wamAccount in wamAccounts)
+                {
+                    string homeAccountId = GetHomeAccountId(wamAccount);
+
+                    accounts.Add(new Account(
+                        wamAccount.AccountId,
+                        wamAccount.UserName,
+                        wamAccount.Environment,
+                        new Dictionary<string, string>() { { clientID, wamAccount.AccountId } }));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new MsalServiceException("wam_failed", $"Could not convert into MSAL Account. {ex.Message}");
+            }
+
+            return accounts;
+        }
+
+        /// <summary>
+        /// Gets the home account id from client info
+        /// </summary>
+        /// <returns></returns>
+        public static string GetHomeAccountId(NativeInterop.Account account)
+        {
+            string homeAccId = ClientInfo.CreateFromJson(account.ClientInfo).ToAccountIdentifier();
+            return homeAccId;
         }
     }
 }

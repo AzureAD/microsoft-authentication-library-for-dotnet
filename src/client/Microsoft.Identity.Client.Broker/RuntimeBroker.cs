@@ -42,11 +42,6 @@ namespace Microsoft.Identity.Client.Broker
 
             _wamOptions = appConfig.WindowsBrokerOptions ??
                 WindowsBrokerOptions.CreateDefault();
-
-            if (_wamOptions.ListWindowsWorkAndSchoolAccounts)
-            {
-                throw new NotImplementedException("The new broker implementation does not yet support Windows account discovery (ListWindowsWorkAndSchoolAccounts option)");
-            }
         }
 
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
@@ -340,16 +335,36 @@ namespace Microsoft.Identity.Client.Broker
             }
         }
 
-        public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientID,
             string redirectUri,
             AuthorityInfo authorityInfo,
             ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            // runtime does not yet support account discovery
+            if (!_wamOptions.ListWindowsWorkAndSchoolAccounts)
+            {
+                _logger.Info("[WamBroker] Returning no accounts due to configuration option");
+                return Array.Empty<IAccount>();
+            }
 
-            return Task.FromResult<IReadOnlyList<IAccount>>(Array.Empty<IAccount>());
+            string correlationId = Guid.NewGuid().ToString();
+            List<IAccount> accounts = null;
+
+            using (var core = new NativeInterop.Core())
+            using (var discoverAccountsResult = await core.DiscoverAccountsAsync(clientID, correlationId).ConfigureAwait(false))
+            {
+                if (discoverAccountsResult.IsSuccess)
+                {
+                    accounts = WamAdapters.ConvertToMsalAccount(discoverAccountsResult.Accounts, clientID);
+                }
+                else
+                {
+
+                }
+            }
+
+            return accounts;
         }
 
         public void HandleInstallUrl(string appLink)
