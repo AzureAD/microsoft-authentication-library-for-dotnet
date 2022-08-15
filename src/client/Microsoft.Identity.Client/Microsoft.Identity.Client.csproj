@@ -166,10 +166,19 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
+    <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
+    <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
+
+    <PackageReference Include="System.Text.Json" Version="6.0.5" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
